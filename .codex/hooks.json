@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "name": "log-prompt",
+            "command": "AI_TOOL_NAME=codex python3 scripts/log_hook.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "name": "log-stop",
+            "command": "AI_TOOL_NAME=codex python3 scripts/log_hook.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

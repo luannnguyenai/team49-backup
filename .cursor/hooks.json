@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "AI_TOOL_NAME=cursor python3 scripts/log_hook.py"
+      }
+    ],
+    "stop": [
+      {
+        "command": "AI_TOOL_NAME=cursor python3 scripts/log_hook.py"
+      }
+    ]
+  }
+}
