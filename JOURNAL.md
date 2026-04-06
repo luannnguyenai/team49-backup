@@ -2,106 +2,31 @@
 
 Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đã làm, học được gì, AI giúp như thế nào.
 
-> **Cập nhật mỗi cuối tuần** (trước khi tạo PR). Không cần dài, chỉ cần thật.
-
 ---
 
-## Template
+## Tuần 1 — 06/04/2026
 
-```markdown
-## Tuần N — DD/MM/YYYY
+**Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
--
+- Chuyển đổi kiến trúc backend API tĩnh sang **Real-time Streaming** bằng `StreamingResponse` (Server-Sent Events).
+- Triển khai **Visual Context (Multi-modal)** lấy frame trực tiếp qua Canvas HTML5 gửi thẳng cho Gemini API.
+- Tích hợp thư viện xử lý **Markdown** (`marked.js`) và **LaTeX/Math** (`KaTeX`) vào giao diện chat thời gian thực.
+- Xây dựng hệ thống ghi log song song: lưu `app.db` (SQLite) cho truy xuất dữ liệu & ghi file `logs/qa_history.log` dạng JSON cho developer dễ theo dõi trực tiếp.
 
 ### Khó nhất tuần này
--
+- **Streaming & The Thinking Component**: Quản lý state của luồng stream khi `gemini-3-flash-preview` trả về các chunks. Giải quyết vấn đề block luồng khi gặp lỗi (Timeout/API error) từ phía server mà UI không bị treo cứng.
+- **CORS vs Multi-modal**: Ý định dùng YouTube Player IFrame bị chính sách CORS của trình duyệt cản trở quyết liệt, không cho phép thẻ `<canvas>` trích xuất dữ liệu ảnh pixel để gửi cho LLM. Do đây là khả năng cốt lõi của tính năng "Gia sư đọc slide", mọi hướng đi phụ thuộc nền tảng thứ ba đành bị loại bỏ.
 
 ### AI tool đã dùng
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
-| Claude Code | | |
+| Antigravity (Gemini 3.1 Pro) | Lên cấu trúc logic Streaming Generator, sửa bug ghép Yield Chunk, thiết kế Javascript bắt sự kiện SSE ở Frontend | Xây dựng thành công tính năng AI Chat streaming kết hợp LaTeX toán học cực kỳ ổn định ngay trong 1 session code |
 
 ### Học được
--
+- Các mô hình Gemini thiết kế cho task Streaming có tốc độ trả token rất nhạy. Tuy nhiên các thuộc tính JSON sinh ra (như block Tư duy) có thể thay đổi cấu trúc mảng khiến Client khó render mượt nếu không bắt lỗi Try/Catch chặt chẽ trên Stream decoder.
+- Khi xây dựng hệ thống GenAI có cơ chế "Thị giác máy tính / Phân tích nội dung tĩnh", việc giữ file Media nằm độc quyền trong tầm kiểm soát (ổ cứng nội bộ hoặc Cloud Storage có Config mở CORS) mang lại uy quyền tuyệt đối cho việc lập trình Frontend AI mà không e ngại "Security Policy" đánh chặn oan ức từ các nền tảng video (như YouTube).
 
 ### Nếu làm lại, sẽ làm khác
--
+- Thiết lập hệ thống log ghi file `logs/*.log` song song với SQLite DB ngay từ đầu. Stream trả về từng phần nên nếu đứt ở phân đoạn nào, file vật lý sẽ phơi bày rõ ràng nhất thay vì việc Debug Console Browser khó khăn.
 
-### Kế hoạch tuần tới
--
-```
-
----
-
-## Ví dụ
-
-### Tuần 1 — 31/03/2026
-
-**Thành viên:** Nguyễn Văn A, Trần Thị B, Lê Văn C
-
-#### Đã làm
-- Setup project TypeScript + cấu hình `.env`
-- Xây dựng agent loop cơ bản: nhận input → gọi Claude API → in output
-- Thêm tool `search_web` đầu tiên (dùng Brave Search API)
-- Viết README cho repo nhóm
-
-#### Khó nhất tuần này
-- Tool call response của Claude trả về sai format — mất 2 tiếng debug mới phát hiện ra thiếu `"type": "tool_result"` trong message history.
-- Lần đầu dùng TypeScript nên type error khá nhiều, phải học cách dùng `as` và generic.
-
-#### AI tool đã dùng
-| Tool | Dùng để làm gì | Kết quả |
-|---|---|---|
-| Claude Code | Giải thích Anthropic tool use API, debug message format | Giải quyết được bug trong 15 phút |
-| Cursor | Autocomplete TypeScript types | Tiết kiệm khoảng 30% thời gian gõ |
-
-#### Học được
-- Tool use trong Claude hoạt động theo vòng lặp: model gọi tool → app trả kết quả → model tiếp tục. Cần giữ đúng message history.
-- `zod` rất hữu ích để validate tool input schema.
-- Nên đặt timeout cho API call ngay từ đầu, không để sau mới thêm.
-
-#### Nếu làm lại, sẽ làm khác
-- Setup TypeScript strict mode ngay từ đầu thay vì thêm sau (refactor mệt hơn).
-- Viết unit test cho `parseToolCall()` trước khi tích hợp vào agent loop.
-
-#### Kế hoạch tuần tới
-- Thêm tool `read_file` và `write_file`
-- Implement memory: lưu conversation history vào file JSON
-- Thử chạy agent giải 1 bài tập thực tế
-
----
-
-### Tuần 2 — 07/04/2026
-
-**Thành viên:** Nguyễn Văn A, Trần Thị B, Lê Văn C
-
-#### Đã làm
-- Thêm tool `read_file`, `write_file`, `list_dir`
-- Agent có thể tự đọc file trong repo và đề xuất refactor
-- Implement conversation memory: lưu 20 message gần nhất
-- Thử nghiệm: cho agent tự fix 3 bug đơn giản → thành công 2/3
-
-#### Khó nhất tuần này
-- Memory bị lỗi khi conversation quá dài (vượt context window). Phải implement sliding window: chỉ giữ system prompt + 20 message gần nhất.
-- Agent đôi khi loop vô hạn khi tool trả lỗi — chưa có stop condition tốt.
-
-#### AI tool đã dùng
-| Tool | Dùng để làm gì | Kết quả |
-|---|---|---|
-| Claude Code | Thiết kế sliding window memory, review code agent loop | Phát hiện thêm edge case khi tool throw exception |
-| Gemini CLI | So sánh approach lưu memory: file JSON vs SQLite | Tư vấn dùng JSON cho prototype, SQLite khi cần query |
-
-#### Học được
-- Context window là resource có hạn — cần thiết kế memory strategy từ sớm.
-- Stop condition quan trọng không kém gì agent logic: `max_iterations`, `no_new_tool_calls`, `explicit_done`.
-- AI agent review code của mình rất có ích: Claude Code tìm ra 2 potential null pointer mà mình bỏ sót.
-
-#### Nếu làm lại, sẽ làm khác
-- Viết interface `Memory` trước, rồi implement sau — thay vì hard-code array từ đầu.
-- Log tất cả tool call ra file ngay từ đầu để debug dễ hơn.
-
-#### Kế hoạch tuần tới
-- Fix vòng lặp vô hạn: thêm `max_iterations = 10`
-- Thêm tool `run_tests` để agent tự kiểm tra code sau khi sửa
-- Demo cho instructor cuối tuần

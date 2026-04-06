@@ -2,140 +2,34 @@
 
 Ghi lại các quyết định kỹ thuật, phân công, và brainstorming của nhóm.
 
-> Cập nhật **bất cứ khi nào** nhóm ra quyết định kỹ thuật quan trọng hoặc thay đổi hướng đi.
-
 ---
 
-## Template
+## Các Quyết Định Kỹ Thuật (ADR)
 
-### Quyết định kỹ thuật
+### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
-```markdown
-### [ADR-N] Tiêu đề quyết định — DD/MM/YYYY
-
-**Bối cảnh:** Vấn đề cần giải quyết là gì?
+**Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
 
 **Các lựa chọn đã xem xét:**
-- Option A: ...
-- Option B: ...
+- **In-memory cache**: Không giải quyết được đặc điểm trễ bẩm sinh của quá trình Inference AI.
+- **WebSockets**: Overhead backend server khá cao, cần thiết kế lại cơ chế Backend Socket và Frontend Event quá lằng nhằng.
+- **Server-Sent Events (SSE) với StreamingResponse**: Tích hợp luồng Python Generator native từ thư viện FastAPI, cực kỳ nhẹ bén rễ với chuẩn HTTP và tiện lợi bắt bằng hàm `fetch` cơ bản ở JS.
 
-**Quyết định:** Chọn option nào và tại sao.
+**Quyết định:** Khai tử toàn bộ API tĩnh. Sử dụng **FastAPI StreamingResponse (SSE)** gửi chunk dữ liệu liên tục về giao diện. Xây dựng UX "Gõ máy chữ" có kèm Animation trạng thái suy nghĩ (*🧠 Thinking...*).
 
-**Hệ quả:** Những gì bị ảnh hưởng / trade-off.
-```
-
-### Phân công
-
-```markdown
-### Sprint N — DD/MM → DD/MM/YYYY
-
-| Task | Người làm | Deadline | Trạng thái |
-|---|---|---|---|
-| | | | |
-```
-
-### Brainstorming
-
-```markdown
-### Brainstorm: [Chủ đề] — DD/MM/YYYY
-
-**Câu hỏi:** ...
-
-**Các ý tưởng:**
-- Ý tưởng 1: ...
-- Ý tưởng 2: ...
-
-**Kết luận:** ...
-```
+**Hệ quả:** Giao diện AI phản hồi trực quan siêu nhanh ngay từ Token đầu tiên. Đổi lại, code Frontend phải gánh vác việc tự merge mảng bytes liên tục, sử dụng `TextDecoder` thủ công ròng rã và tự ghép luồng chữ chạy qua Markdown/Mã CSS LaTeX thay vì Backend làm hộ gói gọn 1 lần.
 
 ---
 
-## Ví dụ
+### [ADR-2] Giữ Local Video Player thay vì dùng YouTube Embed cho tính năng Visual Context — 06/04/2026
 
-### [ADR-1] Dùng TypeScript thay vì Python — 30/03/2026
-
-**Bối cảnh:** Cả nhóm cần chọn 1 ngôn ngữ chính để xây dựng agent. Có 2 thành viên quen Python, 1 thành viên quen TypeScript.
+**Bối cảnh:** Mong muốn cao trong việc tiết kiệm dung lượng lưu trữ file của toàn server. Các file Local `.mp4` bài giảng thường ở dung lượng siêu khổng lồ (Nửa GB đến cả vài GB mỗi video). Nhúng (Embed) video YouTube thẳng lên giao diện là idea hoàn hảo lúc đó.
 
 **Các lựa chọn đã xem xét:**
-- **Python**: Ecosystem ML tốt hơn, syntax đơn giản, thành viên quen hơn.
-- **TypeScript**: Type safety, dễ refactor khi project lớn, nhiều library AI mới ra bản TS trước.
+- **Local HTML5 `<video>`**: Tốn disk space trầm trọng. Nhưng thiết kế chuẩn cho phép gọi Javascript API `<canvas>` API chép ảnh nét căng từ hệ thống pixel trên Player để gửi lên Gemini phân tích. Mọi thứ xử lý cục bộ 100%.
+- **YouTube Embed IFrame Client-side**: Nhẹ server. Nhưng chính Browser (Chrome/Edge/Safari) tuân thủ chặt chuẩn bảo mật CORS sẽ chặn quyền sử dụng `<canvas>` lấy dữ liệu điểm ảnh hình nêm từ bên trong lõi IFrame gốc thứ 3 lạ hoắc. Trở tay không kịp. Mất trắng tính năng nhận diện thị giác máy tính.
+- **YouTube Embed + Server Side `yt-dlp`**: Hiển thị youtube client-side ảo, backend tự động cào ngầm link stream bằng tool `yt-dlp` dán qua `ffmpeg` chép lại 1 mảnh JPEG tĩnh rồi đẩy gộp chung prompt. Cách này quá nặng nề vì đè băng thông backend (tự tải tự phát video để chụp ảnh), sinh ra latency (độ trễ) tận 3-5 giây mới ra lệnh API đầu tiên.
 
-**Quyết định:** Chọn TypeScript vì project này focus vào agent architecture, không cần ML library nặng. Type safety sẽ giúp bắt lỗi sớm hơn khi codebase phình ra.
+**Quyết định:** Tính năng "Tiền đạo" quan trọng hàng đầu của "Gia sư AI" là nhìn rõ mồn một các Slide toán học/mã code mà học viên đang xem. Trải nghiệm bắt buộc là siêu mượt và không độ trễ. Lựa chọn nghiến răng **Giữ nguyên sử dụng Local HTML5 `<video>` nguyên gốc**, loại thẳng tay các ý tưởng ngông cạn của YouTube.
 
-**Hệ quả:** 2 thành viên Python cần học TypeScript cơ bản (ước tính 1 tuần). Sẽ không dùng được `langchain` Python trực tiếp.
-
----
-
-### [ADR-2] Lưu conversation history bằng file JSON — 03/04/2026
-
-**Bối cảnh:** Agent cần nhớ context giữa các lần chạy. Cần chọn storage.
-
-**Các lựa chọn đã xem xét:**
-- **In-memory array**: Đơn giản nhất nhưng mất khi restart.
-- **File JSON**: Persistent, không cần setup, dễ inspect bằng tay.
-- **SQLite**: Có thể query, tốt cho production nhưng overkill cho prototype.
-- **Redis**: Fast nhưng cần chạy thêm service.
-
-**Quyết định:** File JSON cho giai đoạn prototype. Thiết kế interface `MemoryStore` để sau này swap sang SQLite không cần sửa logic agent.
-
-**Hệ quả:** Không query được theo thời gian hay user. Chấp nhận được ở giai đoạn này.
-
----
-
-### Sprint 1 — 31/03 → 06/04/2026
-
-| Task | Người làm | Deadline | Trạng thái |
-|---|---|---|---|
-| Setup TypeScript project + CI | Văn A | 01/04 | ✅ Xong |
-| Implement agent loop cơ bản | Thị B | 02/04 | ✅ Xong |
-| Tool: `search_web` (Brave API) | Văn C | 03/04 | ✅ Xong |
-| Tool: `read_file`, `write_file` | Thị B | 05/04 | ✅ Xong |
-| Conversation memory (JSON) | Văn A | 06/04 | ✅ Xong |
-| README + setup docs | Văn C | 06/04 | ✅ Xong |
-
----
-
-### Sprint 2 — 07/04 → 13/04/2026
-
-| Task | Người làm | Deadline | Trạng thái |
-|---|---|---|---|
-| Fix infinite loop: thêm `max_iterations` | Thị B | 08/04 | 🔄 Đang làm |
-| Tool: `run_tests` (chạy pytest) | Văn C | 10/04 | ⏳ Chờ |
-| Sliding window memory | Văn A | 09/04 | ⏳ Chờ |
-| Demo prep + slides | Cả nhóm | 13/04 | ⏳ Chờ |
-
----
-
-### Brainstorm: Tính năng cho demo — 05/04/2026
-
-**Câu hỏi:** Demo tuần tới nên show gì để ấn tượng nhất trong 5 phút?
-
-**Các ý tưởng:**
-- **Ý tưởng 1 (Văn A):** Cho agent đọc 1 file Python có bug, tự fix, rồi chạy test để verify. Trực quan, dễ hiểu.
-- **Ý tưởng 2 (Thị B):** Agent tự build 1 tính năng nhỏ từ mô tả bằng tiếng Việt. Show khả năng hiểu ngôn ngữ tự nhiên.
-- **Ý tưởng 3 (Văn C):** Agent review PR, comment vào từng dòng code có vấn đề. Gần với use case thực tế nhất.
-
-**Pros/Cons:**
-| Ý tưởng | Pros | Cons |
-|---|---|---|
-| Fix bug | Dễ làm, chắc chắn chạy được | Ít "wow" hơn |
-| Build từ mô tả | Ấn tượng nhất | Có thể fail nếu prompt phức tạp |
-| Review PR | Thực tế, liên quan trực tiếp đến khóa học | Cần setup GitHub webhook |
-
-**Kết luận:** Chọn ý tưởng 1 (fix bug) cho demo chính vì đảm bảo. Nếu còn thời gian sẽ show thêm ý tưởng 2 như bonus.
-
----
-
-### Bug quan trọng: Tool call loop vô hạn — 04/04/2026
-
-**Triệu chứng:** Agent gọi `search_web` liên tục không dừng khi tool trả về lỗi network.
-
-**Root cause:** Không có stop condition khi tool raise exception. Agent nhận `"error": "timeout"` nhưng interpret là cần thử lại.
-
-**Fix:** Thêm 2 điều kiện dừng:
-1. `max_iterations = 10` — hard stop sau 10 vòng
-2. Nếu tool trả về lỗi 3 lần liên tiếp → dừng và báo user
-
-**Code thay đổi:** `src/agent.ts` lines 45-67
-
-**Học được:** Luôn thiết kế stop condition trước khi implement retry logic.
+**Hệ quả:** Lập trình viên phải chấp nhận tốn không gian ổ cứng khổng lồ. Tuy nhiên rủi ro này bị triệt tiêu dễ dàng nếu Scale Architecture sau này host video tải thẳng cho UI qua S3 / Cloudflare Store kèm cấu hình Open Direct CORS cho client thoải mái chụp màn hình mà không vi phạm Rules như YT.
