@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Tutor - Lecture Q&A</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <style>
         :root {
             --bg: #0f172a;
@@ -35,9 +38,22 @@
 
         .chat-section { display: flex; flex-direction: column; background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
         .chat-history { flex: 1; padding: 0.75rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
-        .msg { padding: 0.6rem 0.8rem; border-radius: 10px; max-width: 92%; line-height: 1.5; font-size: 0.9rem; white-space: pre-wrap; }
-        .msg-user { align-self: flex-end; background: var(--accent); color: #0f172a; font-weight: 500; }
+        .msg { padding: 0.6rem 0.8rem; border-radius: 10px; max-width: 92%; line-height: 1.6; font-size: 0.9rem; }
+        .msg-user { align-self: flex-end; background: var(--accent); color: #0f172a; font-weight: 500; white-space: pre-wrap; }
         .msg-ai { align-self: flex-start; background: #334155; width: 95%; }
+        /* Markdown inside AI messages */
+        .msg-ai h1,.msg-ai h2,.msg-ai h3,.msg-ai h4 { margin: 0.5em 0 0.3em; color: var(--accent); }
+        .msg-ai h3 { font-size: 1rem; }
+        .msg-ai p { margin: 0.3em 0; }
+        .msg-ai ul,.msg-ai ol { margin: 0.3em 0 0.3em 1.2em; }
+        .msg-ai li { margin: 0.15em 0; }
+        .msg-ai code { background: rgba(0,0,0,0.3); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; }
+        .msg-ai pre { background: rgba(0,0,0,0.3); padding: 0.6em; border-radius: 6px; overflow-x: auto; margin: 0.4em 0; }
+        .msg-ai pre code { background: none; padding: 0; }
+        .msg-ai blockquote { border-left: 3px solid var(--accent); padding-left: 0.6em; margin: 0.4em 0; color: var(--dim); }
+        .msg-ai strong { color: var(--accent); }
+        .msg-ai .katex { font-size: 1em; }
+        .msg-ai .katex-display { margin: 0.5em 0; overflow-x: auto; }
 
         .thinking-indicator { color: var(--accent); font-style: italic; font-size: 0.85rem; }
         .thinking-indicator::after {
@@ -168,10 +184,10 @@
                     body: JSON.stringify({ lecture_id: lid, current_timestamp: ts, question: q, image_base64: img })
                 });
 
-                // Remove thinking indicator once stream starts
                 const reader = resp.body.getReader();
                 const decoder = new TextDecoder();
-                let started = false;
+                let rawText = '';
+                let hasError = false;
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -183,26 +199,61 @@
                         try {
                             const data = JSON.parse(line.trim());
                             if (data.e) {
-                                if (!started) { aiMsg.innerHTML = ''; started = true; }
-                                aiMsg.innerHTML += `<span class="error">⚠️ ${data.e}</span>`;
+                                aiMsg.innerHTML = `<span class="error">⚠️ ${data.e}</span>`;
+                                hasError = true;
                                 break;
                             }
                             if (data.a) {
-                                if (!started) { aiMsg.innerHTML = ''; started = true; }
-                                aiMsg.innerText += data.a;
+                                rawText += data.a;
+                                // Live preview: show raw text while streaming
+                                aiMsg.innerText = rawText;
                             }
                         } catch {}
                     }
                     chatHistory.scrollTop = chatHistory.scrollHeight;
+                    if (hasError) break;
                 }
 
-                if (!started) aiMsg.innerText = 'Không nhận được phản hồi từ AI.';
+                // Render Markdown + LaTeX after stream completes
+                if (!hasError && rawText) {
+                    aiMsg.innerHTML = renderMarkdownLatex(rawText);
+                } else if (!hasError) {
+                    aiMsg.innerText = 'Không nhận được phản hồi từ AI.';
+                }
 
             } catch (err) {
                 aiMsg.innerHTML = `<span class="error">⚠️ Lỗi kết nối: ${err.message}</span>`;
             }
             sendBtn.disabled = false;
+            chatHistory.scrollTop = chatHistory.scrollHeight;
         });
+
+        // Markdown + LaTeX renderer
+        function renderMarkdownLatex(text) {
+            // 1. Protect display math $$...$$ 
+            let i = 0;
+            const blocks = {};
+            text = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
+                const key = `%%BLOCK${i++}%%`;
+                try { blocks[key] = katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+                catch { blocks[key] = `<code>${math}</code>`; }
+                return key;
+            });
+            // 2. Protect inline math $...$
+            const inlines = {};
+            text = text.replace(/\$([^$\n]+?)\$/g, (_, math) => {
+                const key = `%%INLINE${i++}%%`;
+                try { inlines[key] = katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+                catch { inlines[key] = `<code>${math}</code>`; }
+                return key;
+            });
+            // 3. Render Markdown
+            let html = marked.parse(text);
+            // 4. Restore math
+            for (const [k, v] of Object.entries(blocks)) html = html.replace(k, `<div class="katex-display">${v}</div>`);
+            for (const [k, v] of Object.entries(inlines)) html = html.replace(k, v);
+            return html;
+        }
     </script>
 </body>
 </html>
