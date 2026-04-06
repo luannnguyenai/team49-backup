@@ -20,3 +20,8 @@ build/
 
 #data
 data/*
+
+# Project local files
+app.db
+*.log
+logs/

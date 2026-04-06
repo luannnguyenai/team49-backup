@@ -5,5 +5,6 @@ load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "claude-sonnet-4-20250514")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemini-3-flash-preview")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

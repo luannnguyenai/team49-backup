@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor - Lecture Q&A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --dim: #94a3b8;
+            --border: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }
+        header {
+            padding: 0.75rem 1.5rem; background: rgba(15,23,42,0.95);
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        header h2 { color: var(--accent); font-size: 1.1rem; }
+        select { background: var(--card); color: white; border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 6px; }
+
+        .container { display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem; padding: 0.75rem; flex: 1; overflow: hidden; }
+        .video-section { background: var(--card); border-radius: 12px; padding: 0.75rem; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem; }
+        video { width: 100%; border-radius: 8px; }
+        .video-info { display: flex; justify-content: space-between; color: var(--dim); font-size: 0.85rem; }
+
+        .chat-section { display: flex; flex-direction: column; background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+        .chat-history { flex: 1; padding: 0.75rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+        .msg { padding: 0.6rem 0.8rem; border-radius: 10px; max-width: 92%; line-height: 1.5; font-size: 0.9rem; white-space: pre-wrap; }
+        .msg-user { align-self: flex-end; background: var(--accent); color: #0f172a; font-weight: 500; }
+        .msg-ai { align-self: flex-start; background: #334155; width: 95%; }
+
+        .thinking-indicator { color: var(--accent); font-style: italic; font-size: 0.85rem; }
+        .thinking-indicator::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%   { content: ''; }
+            25%  { content: '.'; }
+            50%  { content: '..'; }
+            75%  { content: '...'; }
+            100% { content: ''; }
+        }
+
+        .chat-input { padding: 0.75rem; border-top: 1px solid var(--border); }
+        textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: white; padding: 0.6rem; border-radius: 8px; resize: none; outline: none; font-family: inherit; font-size: 0.9rem; }
+        textarea:focus { border-color: var(--accent); }
+        button {
+            margin-top: 0.5rem; width: 100%; background: var(--accent); color: #0f172a;
+            border: none; padding: 0.6rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.85; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>🎓 AI Tutor</h2>
+        <select id="lectureSelect"></select>
+    </header>
+
+    <div class="container">
+        <div class="video-section">
+            <video id="mainVideo" controls></video>
+            <div class="video-info">
+                <span id="videoTitle">Chọn bài giảng...</span>
+                <span id="currentTime">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="chat-section">
+            <div class="chat-history" id="chatHistory">
+                <div class="msg msg-ai">Chào bạn! Hãy đặt câu hỏi bất cứ lúc nào trong khi xem video. Tôi sẽ tự động biết bạn đang thắc mắc tại giây thứ bao nhiêu.</div>
+            </div>
+            <div class="chat-input">
+                <textarea id="userInput" placeholder="Hỏi Gia sư..." rows="2"></textarea>
+                <button id="sendBtn">Hỏi Gia sư</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('mainVideo');
+        const lectureSelect = document.getElementById('lectureSelect');
+        const chatHistory = document.getElementById('chatHistory');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const timeDisplay = document.getElementById('currentTime');
+        let lectures = [];
+
+        // Load lectures
+        fetch('/api/lectures').then(r => r.json()).then(data => {
+            lectures = data;
+            lectureSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+            if (data.length) selectLecture(data[0].id);
+        });
+
+        function selectLecture(id) {
+            const lec = lectures.find(l => l.id === id);
+            if (lec) {
+                video.src = `/${lec.video_url}`;
+                document.getElementById('videoTitle').innerText = lec.title;
+                video.load();
+            }
+        }
+        lectureSelect.addEventListener('change', e => selectLecture(e.target.value));
+        video.addEventListener('timeupdate', () => {
+            timeDisplay.innerText = new Date(video.currentTime * 1000).toISOString().substr(11, 8);
+        });
+
+        function captureFrame() {
+            try {
+                const c = document.createElement('canvas');
+                c.width = video.videoWidth; c.height = video.videoHeight;
+                c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+                return c.toDataURL('image/jpeg', 0.7).split(',')[1];
+            } catch { return null; }
+        }
+
+        // Enter key sends
+        userInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); }
+        });
+
+        sendBtn.addEventListener('click', async () => {
+            const q = userInput.value.trim();
+            if (!q) return;
+
+            const ts = video.currentTime;
+            const lid = lectureSelect.value;
+            const img = captureFrame();
+
+            // User message
+            const uMsg = document.createElement('div');
+            uMsg.className = 'msg msg-user';
+            uMsg.innerText = q;
+            chatHistory.appendChild(uMsg);
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            // AI message with thinking animation
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'msg msg-ai';
+            const thinkSpan = document.createElement('span');
+            thinkSpan.className = 'thinking-indicator';
+            thinkSpan.innerText = '🧠 Thinking';
+            aiMsg.appendChild(thinkSpan);
+            chatHistory.appendChild(aiMsg);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            try {
+                const resp = await fetch('/api/lectures/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lecture_id: lid, current_timestamp: ts, question: q, image_base64: img })
+                });
+
+                // Remove thinking indicator once stream starts
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let started = false;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const text = decoder.decode(value);
+                    for (const line of text.split('\n')) {
+                        if (!line.trim()) continue;
+                        try {
+                            const data = JSON.parse(line.trim());
+                            if (data.e) {
+                                if (!started) { aiMsg.innerHTML = ''; started = true; }
+                                aiMsg.innerHTML += `<span class="error">⚠️ ${data.e}</span>`;
+                                break;
+                            }
+                            if (data.a) {
+                                if (!started) { aiMsg.innerHTML = ''; started = true; }
+                                aiMsg.innerText += data.a;
+                            }
+                        } catch {}
+                    }
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                }
+
+                if (!started) aiMsg.innerText = 'Không nhận được phản hồi từ AI.';
+
+            } catch (err) {
+                aiMsg.innerHTML = `<span class="error">⚠️ Lỗi kết nối: ${err.message}</span>`;
+            }
+            sendBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
