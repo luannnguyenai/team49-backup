@@ -77,7 +77,7 @@ def normalize(data: dict, tool: str) -> dict | None:
             "tool_response": str(data.get("tool_response", ""))[:500],
         })
 
-    elif tool == "gemini":
+    elif tool in ("gemini", "antigravity"):
         if event == "BeforeAgent":
             prompt = data.get("prompt", "")[:1000]
             base.update({"prompt": prompt})
