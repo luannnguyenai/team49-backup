@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /d/VSCODE/VINAI/A20-App-049 log --oneline)"
+    ]
+  }
+}
