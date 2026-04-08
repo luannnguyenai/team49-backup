@@ -69,12 +69,16 @@ def main():
         print(f"  Transcript: {transcript_path}")
         print(f"  Video: {video_path}")
         
-        ingest_lecture(
-            lecture_id=lecture_id,
-            toc_path=toc_path,
-            transcript_paths=transcript_paths,
-            video_rel_path=video_rel_path
-        )
+        try:
+            ingest_lecture(
+                lecture_id=lecture_id,
+                toc_path=toc_path,
+                transcript_paths=transcript_paths,
+                video_rel_path=video_rel_path
+            )
+        except Exception as e:
+            print(f"FAILED to ingest {lecture_id}: {e}")
+            continue
 
 if __name__ == "__main__":
     main()
