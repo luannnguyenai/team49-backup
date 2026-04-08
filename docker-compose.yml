@@ -1,0 +1,32 @@
+services:
+  api:
+    build: .
+    container_name: ai_tutor_api
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gemini-3-flash-preview}
+      - PYTHONPATH=/app
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./app.db:/app/app.db
+    restart: unless-stopped
+
+  # Optional Streamlit UI
+  streamlit:
+    build: .
+    container_name: ai_tutor_streamlit
+    ports:
+      - "8501:8501"
+    command: ["uv", "run", "streamlit", "run", "src/ui/app.py"]
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gemini-3-flash-preview}
+      - PYTHONPATH=/app
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./app.db:/app/app.db
+    restart: unless-stopped

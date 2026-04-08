@@ -32,4 +32,21 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 **Quyết định:** Tính năng "Tiền đạo" quan trọng hàng đầu của "Gia sư AI" là nhìn rõ mồn một các Slide toán học/mã code mà học viên đang xem. Trải nghiệm bắt buộc là siêu mượt và không độ trễ. Lựa chọn nghiến răng **Giữ nguyên sử dụng Local HTML5 `<video>` nguyên gốc**, loại thẳng tay các ý tưởng ngông cạn của YouTube.
 
-**Hệ quả:** Lập trình viên phải chấp nhận tốn không gian ổ cứng khổng lồ. Tuy nhiên rủi ro này bị triệt tiêu dễ dàng nếu Scale Architecture sau này host video tải thẳng cho UI qua S3 / Cloudflare Store kèm cấu hình Open Direct CORS cho client thoải mái chụp màn hình mà không vi phạm Rules như YT.
+---
+
+### [ADR-3] Dockerize Project for Distribution & Persistence — 08/04/2026
+
+**Bối cảnh:** Dự án đang ngày một lớn mạnh với nhiều thành phần (FastAPI, Streamlit, SQLite). Việc chia sẻ dự án cho các thành viên khác gặp khó khăn do yêu cầu cài đặt `uv`, cấu hình môi trường Python 3.12 và quản lý 4.5GB dữ liệu video. Ngoài ra, việc duy trì trạng thái Database và Logs cần sự ổn định cao.
+
+**Các lựa chọn đã xem xét:**
+- **Manual Setup Guide**: Như đã làm ở README. Ưu điểm là nhẹ nhàng cho máy chủ, nhưng nhược điểm là mệt mỏi cho người mới bắt đầu (cần cài đặt nhiều công cụ).
+- **Docker & Docker Compose**: Tạo ra một cấu trúc đóng gói sẵn. 
+    - **Thách thức:** Xử lý 4.5GB video. Nếu copy vào image sẽ làm image quá nặng.
+    - **Giải pháp:** Sử dụng **Google Drive** để lưu trữ và chia sẻ video, sau đó mount vào container qua cơ chế **Host Volume**.
+
+**Quyết định:** Triển khai **Dockerization** toàn diện kết hợp lưu trữ file nặng trên **Google Drive**.
+1. Sử dụng `Dockerfile` đa giai đoạn, cài đặt `uv` để tăng tốc build image.
+2. Sử dụng `docker-compose.yml` để chạy song song API và Streamlit.
+3. Sử dụng **Host Volumes** cho `data/`, `logs/`, và `app.db`. Người dùng tải thư mục `data/` từ Google Drive về máy trước khi chạy Docker.
+
+**Hệ quả:** Bất kỳ ai cũng có thể chạy dự án chỉ bằng 1 lệnh `docker compose up -d` sau khi đã tải dữ liệu. Dữ liệu video khổng lồ vẫn nằm ở ngoài container nên việc cập nhật code cực kỳ nhanh chóng và không làm phình Image.

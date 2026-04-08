@@ -1,82 +1,65 @@
 # 🎓 AI Tutor: Real-time Multi-modal Learning Platform
 
-Hệ thống hỗ trợ học tập cá nhân hóa sử dụng AI để giải đáp thắc mắc của học viên trực tiếp dựa trên ngữ cảnh bài giảng đa phương thức (Video Frame + Transcript + ToC). Đã được nâng cấp để mang lại trải nghiệm thời gian thực tuyệt đối.
+Hệ thống hỗ trợ học tập cá nhân hóa sử dụng AI để giải đáp thắc mắc của học viên trực tiếp dựa trên ngữ cảnh bài giảng đa phương thức (Video Frame + Transcript + ToC).
 
-## 🚀 Tính năng nổi bật (High-Tech Features)
+## 🚀 Tính năng nổi bật
 
-- **⚡ Real-time Streaming Response**: Trải nghiệm UI theo thời gian thực. AI suy nghĩ đến đâu, chữ hiện ra ngay đến đó (gõ máy chữ), tích hợp animation *“🧠 Thinking...”* cho cảm giác chân thực, thay vì phải chờ đợi xoay vòng tròn.
-- **📸 Multi-modal Visual Context**: Tự động chụp ảnh màn hình từ Video Player tĩnh của bạn tại thời điểm hỏi. Giúp phân tích chính xác slide bài giảng, code hay bản vẽ bảng trắng mà không cần gửi video lớn lên Cloud.
-- **📐 Markdown & LaTeX Rendering**: Hỗ trợ hiển thị Markdown chuẩn xác. Tích hợp thư viện KaTeX để hiển thị toàn bộ các công thức toán học/deep learning phức tạp nhất cực kỳ đẹp mắt.
-- **🗂️ 10-min Context Window & RAG-Free**: Tự động trích xuất +/- 5 phút Transcript kết hợp cùng ToC tổng quát (Global Context) giúp AI trả lời cực sát ngữ cảnh mà không cần setup Vector Database nặng nề.
-- **📝 Dual-layer Track & Logs**: 
-  - Lưu vào **Database (SQLite - `app.db`)** để dễ dàng kết nối phân tích App.
-  - Ghi log siêu tốc ra file **`logs/qa_history.log`** dưới định dạng chuẩn JSON để kỹ sư dễ theo dõi trực tiếp, bắt lỗi mà không cần query Database.
-- **🛡️ Robust Error Handling**: Cơ chế theo dõi dòng stream thông minh, nếu AI / API báo lỗi quá hạn mức hoặc ngắt quãng, giao diện sẽ bắt tức thì và báo lỗi đỏ mà không bao giờ bị kẹt (hang).
+- **⚡ Real-time Streaming**: Phản hồi tức thì từng chữ, tích hợp hiệu ứng "🧠 Thinking" chân thực.
+- **📸 Multi-modal Context**: Tự động chụp ảnh slide bài giảng tại thời điểm hỏi để AI phân tích trực quan.
+- **🕒 HH:MM:SS Precision**: Mọi mốc thời gian trong ngữ cảnh và câu trả lời đều được chuẩn hóa dạng `Giờ:Phút:Giây`.
+- **🗂️ Auto-Sanitized ToC**: Hệ thống tự động làm sạch tiêu đề bài giảng (ví dụ: `Lecture 1: Introduction`) giúp danh sách chọn lựa luôn gọn gàng.
+- **📐 Math & LaTeX**: Hiển thị công thức toán học/Deep Learning sắc nét qua KaTeX.
 
-## ⚙️ Cơ chế hoạt động (How it works)
+## 🐳 Khởi chạy nhanh với Docker (Khuyên dùng)
 
-Khi bạn bấm nút **"Hỏi Gia sư"** (hoặc nhấn phím `Enter`):
-1. **Frontend** lấy mốc thời gian hiện tại (`currentTime`) và tự động trích xuất 1 ảnh (Frame) từ thẻ `<video>` HTML5 thông qua thẻ `<canvas>`.
-2. Trình duyệt gửi request (kèm Frame, Timestamp và nội dung câu hỏi) xuống FastApi Backend.
-3. **Backend RAG** đối chiếu mốc Timestamp vào DB SQLite, trích xuất:
-   - Hệ thống Mục lục chung (ToC summary).
-   - Đoạn hội thoại xung quanh lúc bạn xem (+/- 5 phút).
-4. **Gemini Engine** (`gemini-3-flash-preview`) kích hoạt streaming. Frontend đọc trực tiếp stream raw text qua kỹ thuật `ReadableStream`.
-5. Sau khi stream xong xuôi, Frontend tự động kích hoạt `marked.js` và `KaTeX` phủ cấu trúc định dạng lên đoạn text tĩnh để cho ra câu trả lời gọn mượt & khoa học.
-6. Khi hoàn tất, sự kiện được lưu song song vào `app.db` và ghi JSON chuẩn xác vào ổ cứng `logs/`.
+Dự án đã được Docker hóa hoàn chỉnh, giúp bạn bỏ qua bước cài đặt môi trường phức tạp.
 
-## 📂 Cấu trúc dự án
+1.  **Thiết lập môi trường**: Tạo file `.env` và điền `GEMINI_API_KEY`.
+2.  **Tải dữ liệu bài giảng**: Tải thư mục `data/` (Video, Transcript, ToC) từ Google Drive của nhóm tại đây: [Link Google Drive của bạn] và giải nén vào thư mục gốc của dự án.
+3.  **Khởi chạy**:
+    ```bash
+    docker compose up -d
+    ```
+3.  **Truy cập**:
+    - **Giao diện chính (HTML/JS)**: `http://localhost:8000`
+    - **Giao diện Lab (Streamlit)**: `http://localhost:8501`
 
-```text
-├── data/               # Chứa Local Video (.mp4), ToC (.txt) và Transcript (.txt)
-├── logs/               # Nơi lưu vết Log câu hỏi & câu trả lời theo phiên (QA History)
-├── src/
-│   ├── api/            # FastAPI Backend & Server-sent Events (Streaming)
-│   │   └── static/     # Giao diện Web UI (UI Styling, Markdown, LaTeX)
-│   ├── models/         # SQLAlchemy Models (SQLite)
-│   ├── services/       # Core Logic: Ingestion, Streaming LLM (Gemini)
-│   └── config.py       # Cấu hình API Key & Model
-├── app.db              # Database SQLite lưu mục lục, transcript, lịch sử (Bảo mật)
-├── test_stream.py      # Script chạy debug độc lập cho luồng Stream Gemini
-└── pyproject.toml      # Quản lý dependency tự động bằng uv
-```
+---
 
-## 🛠️ Cài đặt & Khởi chạy
+## 🛠️ Cài đặt & Khởi chạy thủ công
 
-### 1. Yêu cầu hệ thống
-- Tải và cài đặt [uv](https://github.com/astral-sh/uv).
-- Python 3.10+. Khuyên dùng Linux / macOS.
-
-### 2. Thiết lập môi trường
+### 1. Thiết lập môi trường
 ```bash
-# Khởi tạo môi trường ảo và cài đặt thư viện nhanh qua UV
 uv venv .venv
-source .venv/bin/activate.fish  # Hoặc .bash tùy shell
+source .venv/bin/activate  # Hoặc activate.fish / activate.ps1
 uv sync
 ```
 
-### 3. Cấu hình API Key
-Tạo file `.env` từ `.env.example` và điền:
+### 2. Cấu hình .env
 ```env
 GEMINI_API_KEY=AIza...
-DEFAULT_MODEL=gemini-3-flash-preview  # Model sử dụng
+DEFAULT_MODEL=gemini-3-flash-preview
 ```
 
-### 4. Nạp dữ liệu (Ingestion)
-Đảm bảo đã có mp4/transcript ở `/data`.
+### 3. nạp dữ liệu (Ingestion)
+Để nạp dữ liệu bài giảng CS231N vào hệ thống:
 ```bash
-uv run python -m src.services.ingestion
+PYTHONPATH=. uv run python scripts/ingest_cs231n.py
 ```
 
-### 5. Khởi chạy Server
+### 4. Khởi chạy Backend
 ```bash
-uv run python -m src.api.app
+PYTHONPATH=. uv run python src/api/app.py
 ```
-Truy cập giao diện tại: **`http://localhost:8000`**
 
 ---
-## 🧪 Trải nghiệm & Phân tích
-1. Vào `http://localhost:8000`. Chọn bài giảng NLP có nhiều công thức tự đánh giá.
-2. Tại đoạn trình bày công thức Word Vectors, hãy gõ công thức hoặc hỏi logic "Toán học của phần này có ý nghĩa gì?"
-3. AI sẽ phân tích hình vẽ công thức trên Slide và phản hồi với chuẩn LaTeX tuyệt đẹp theo quá trình Typing Real-time.
-4. Mở thêm 1 cửa sổ terminal: `tail -f logs/qa_history.log` để xem hệ thống đang tự động theo dõi bạn thế nào.
+
+## 📂 Cấu trúc thư mục quan trọng
+- `src/`: Mã nguồn chính (API, Models, Services).
+- `data/cs231n/`: Chứa Video, Transcript và ToC JSON.
+- `prompts/`: Chứa các mẫu prompt tối ưu để trích xuất dữ liệu bài giảng.
+- `app.db`: Database SQLite (Tự động khởi tạo khi chạy Docker/API).
+- `logs/`: Lịch sử câu hỏi dưới dạng JSON.
+
+## 🧪 Tài liệu bổ sung
+- Sử dụng prompt trong `prompts/lecture_extraction_prompt.txt` để trích xuất summary bài giảng mới đạt độ chính xác cao nhất.

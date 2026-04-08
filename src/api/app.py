@@ -3,8 +3,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory
+from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory, init_db
 from src.services.llm_service import get_context_and_stream_gemini
+
+# Initialize database tables on startup
+init_db()
 
 app = FastAPI(title="Lecture Q&A Platform API")
 
