@@ -79,6 +79,22 @@ def parse_transcript_text(file_path):
         
     return lines_data
 
+def sanitize_title(title, lecture_id):
+    """Standardizes titles to 'Lecture N: Topic' format."""
+    # Extract lecture number from ID (lecture-1 -> 1)
+    match_id = re.search(r'lecture-(\d+)', lecture_id)
+    n = match_id.group(1) if match_id else "?"
+    
+    # Remove redundant prefixes
+    title = re.sub(r'Stanford\s+CS231N?|Deep\s+Learning\s+for\s+Computer\s+Vision|Spring\s+2025', '', title, flags=re.I)
+    # Remove "Lecture X:" if already in title to avoid duplication
+    title = re.sub(rf'Lecture\s+{n}[:\-]?', '', title, flags=re.I)
+    # Clean up symbols and extra spaces
+    title = re.sub(r'^[|:\-\s]+', '', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    
+    return f"Lecture {n}: {title}"
+
 def ingest_lecture(lecture_id, toc_path, transcript_paths, video_rel_path=None):
     """Ingests a lecture using the new JSON ToC and Transcript format."""
     db = SessionLocal()
@@ -90,18 +106,22 @@ def ingest_lecture(lecture_id, toc_path, transcript_paths, video_rel_path=None):
         print(f"Error: ToC file not found at {toc_path}")
         return
 
+    # Standardize Title
+    raw_title = toc_data.get("lecture_title", lecture_id)
+    clean_title = sanitize_title(raw_title, lecture_id)
+
     # Create or update Lecture
     lecture = db.query(Lecture).filter(Lecture.id == lecture_id).first()
     
     if not lecture:
         lecture = Lecture(
             id=lecture_id, 
-            title=toc_data.get("lecture_title", lecture_id),
+            title=clean_title,
             video_url=video_rel_path
         )
         db.add(lecture)
     else:
-        lecture.title = toc_data.get("lecture_title", lecture_id)
+        lecture.title = clean_title
         lecture.video_url = video_rel_path
     
     # Clear existing chapters/lines for re-ingestion
