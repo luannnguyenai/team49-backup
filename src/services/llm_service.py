@@ -2,7 +2,7 @@ import os
 import base64
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from google import genai
 from google.genai import types
 from src.config import GEMINI_API_KEY, DEFAULT_MODEL
@@ -17,6 +17,11 @@ file_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.log"), enco
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
 qa_logger.addHandler(file_handler)
 
+def format_timestamp(seconds):
+    """Converts seconds to HH:MM:SS string."""
+    td = timedelta(seconds=int(seconds))
+    return str(td).zfill(8)
+
 def get_context_and_stream_gemini(lecture_id, current_timestamp, user_question, image_base64=None):
     db = SessionLocal()
     
@@ -24,7 +29,9 @@ def get_context_and_stream_gemini(lecture_id, current_timestamp, user_question, 
     chapters = db.query(Chapter).filter(Chapter.lecture_id == lecture_id).all()
     toc_context = "TABLE OF CONTENTS:\n"
     for chap in chapters:
-        toc_context += f"- [{chap.start_time:.0f}s - {chap.end_time:.0f}s] {chap.title}: {chap.summary}\n"
+        start_ts = format_timestamp(chap.start_time)
+        end_ts = format_timestamp(chap.end_time)
+        toc_context += f"- [{start_ts} - {end_ts}] {chap.title}: {chap.summary}\n"
         
     # 2. Get Transcript Window (+/- 5 mins = 600s total)
     start_window = max(0, current_timestamp - 300)
@@ -38,21 +45,24 @@ def get_context_and_stream_gemini(lecture_id, current_timestamp, user_question, 
     
     transcript_context = "TRANSCRIPT WINDOW:\n"
     for line in lines:
-        transcript_context += f"[{line.start_time:.0f}s] {line.content}\n"
+        ts = format_timestamp(line.start_time)
+        transcript_context += f"[{ts}] {line.content}\n"
         
     # 3. System Prompt
     system_instruction = """Bạn là một Gia sư trực tuyến (AI Tutor) thông minh.
 Nhiệm vụ: Giải đáp thắc mắc dựa trên bài giảng (Transcript + Hình ảnh).
 
-QUY TẮC:
-1. Quan sát hình ảnh đính kèm (nếu có).
-2. Câu hỏi trong Window/Hình ảnh: Trả lời chi tiết.
-3. Nội dung ĐÃ HỌC: Tóm tắt lại.
-4. Nội dung CHƯA HỌC: Nhắc user đợi.
-5. LẠC ĐỀ: Nhắc tập trung bài giảng.
+QUY TẮC PHẢN HỒI:
+1. Khi nhắc đến các đoạn trong bài giảng, LUÔN LUÔN sử dụng định dạng thời gian HH:MM:SS (ví dụ: 00:55:36) thay vì giây thô (ví dụ: 3336s).
+2. Quan sát hình ảnh đính kèm (nếu có).
+3. Câu hỏi trong Window/Hình ảnh: Trả lời chi tiết.
+4. Nội dung ĐÃ HỌC: Tóm tắt lại.
+5. Nội dung CHƯA HỌC: Nhắc user đợi.
+6. LẠC ĐỀ: Nhắc tập trung bài giảng.
 """
 
-    user_prompt = f"Bài học:\n{toc_context}\n\nHiện tại (giây {current_timestamp}):\n{transcript_context}\n\nCâu hỏi: \"{user_question}\""
+    curr_ts_str = format_timestamp(current_timestamp)
+    user_prompt = f"Bài học:\n{toc_context}\n\nThời điểm hiện tại ({curr_ts_str}):\n{transcript_context}\n\nCâu hỏi: \"{user_question}\""
 
     # 4. Prepare Content
     content_list = [user_prompt]
