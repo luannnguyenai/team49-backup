@@ -22,21 +22,25 @@ st.title("🎓 AI Tutor: Gia sư Bài giảng Thông minh")
 
 # Sidebar - chọn Bài giảng
 st.sidebar.header("📚 Khóa học của bạn")
+lecture_id = None
+video_url = ""
+
 try:
-    resp = requests.get(f"{API_BASE_URL}/api/lectures")
+    resp = requests.get(f"{API_BASE_URL}/api/lectures", timeout=5)
     if resp.status_code == 200:
         lectures = {l["title"]: l for l in resp.json()}
-        selected_title = st.sidebar.selectbox("Chọn bài giảng:", list(lectures.keys()))
-        selected_data = lectures[selected_title]
-        lecture_id = selected_data["id"]
-        # Convert path to URL served by API static mount
-        video_url = f"{API_BASE_URL}/{selected_data.get('video_url')}"
+        if lectures:
+            selected_title = st.sidebar.selectbox("Chọn bài giảng:", list(lectures.keys()))
+            selected_data = lectures[selected_title]
+            lecture_id = selected_data["id"]
+            # Convert path to URL served by API static mount
+            video_url = f"{API_BASE_URL}/{selected_data.get('video_url')}"
+        else:
+            st.sidebar.warning("Chưa có bài giảng nào trong hệ thống.")
     else:
         st.sidebar.error("Không thể kết nối API")
-        st.stop()
-except:
-    st.sidebar.error("API chưa chạy. Đang đợi...")
-    st.stop()
+except Exception as e:
+    st.sidebar.error(f"API chưa chạy: {e}")
 
 # Layout
 col_video, col_qa = st.columns([2, 1])
