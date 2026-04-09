@@ -1,0 +1,300 @@
+"""
+models/learning.py
+------------------
+Learning activity models: Session, Interaction, MasteryScore, LearningPath.
+"""
+
+import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+
+
+# ---------------------------------------------------------------------------
+# Enums
+# ---------------------------------------------------------------------------
+
+class SessionType(str, enum.Enum):
+    assessment = "assessment"
+    quiz = "quiz"
+    module_test = "module_test"
+    practice = "practice"
+
+
+class MasteryLevel(str, enum.Enum):
+    not_started = "not_started"
+    novice = "novice"
+    developing = "developing"
+    proficient = "proficient"
+    mastered = "mastered"
+
+
+class RecentTrend(str, enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+
+
+class PathAction(str, enum.Enum):
+    skip = "skip"
+    quick_review = "quick_review"
+    standard_learn = "standard_learn"
+    deep_practice = "deep_practice"
+    remediate = "remediate"
+
+
+class PathStatus(str, enum.Enum):
+    pending = "pending"
+    in_progress = "in_progress"
+    completed = "completed"
+    skipped = "skipped"
+
+
+class SelectedAnswer(str, enum.Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+
+
+# ---------------------------------------------------------------------------
+# Session
+# ---------------------------------------------------------------------------
+
+class Session(UUIDPrimaryKeyMixin, Base):
+    """A single learning or assessment session."""
+
+    __tablename__ = "sessions"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    session_type: Mapped[SessionType] = mapped_column(
+        Enum(SessionType, name="session_type_enum"), nullable=False
+    )
+    topic_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("topics.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    module_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("modules.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    total_questions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    score_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
+    topic: Mapped["Topic | None"] = relationship("Topic", lazy="select")  # type: ignore[name-defined]
+    module: Mapped["Module | None"] = relationship("Module", lazy="select")  # type: ignore[name-defined]
+    interactions: Mapped[list["Interaction"]] = relationship(
+        "Interaction", back_populates="session", lazy="select"
+    )
+
+    __table_args__ = (
+        Index("ix_sessions_user_id", "user_id"),
+        Index("ix_sessions_user_type", "user_id", "session_type"),
+        Index("ix_sessions_started_at", "started_at"),
+        CheckConstraint("score_percent >= 0 AND score_percent <= 100", name="ck_score_range"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Interaction
+# ---------------------------------------------------------------------------
+
+class Interaction(UUIDPrimaryKeyMixin, Base):
+    """Single question-response event within a session."""
+
+    __tablename__ = "interactions"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("sessions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    question_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("questions.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
+    global_sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    selected_answer: Mapped["SelectedAnswer | None"] = mapped_column(
+        Enum(SelectedAnswer, name="selected_answer_enum"), nullable=True
+    )
+    is_correct: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    changed_answer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    hint_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    explanation_viewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="interactions")  # type: ignore[name-defined]
+    session: Mapped["Session"] = relationship("Session", back_populates="interactions")
+    question: Mapped["Question"] = relationship("Question", back_populates="interactions")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        Index("ix_interactions_user_id", "user_id"),
+        Index("ix_interactions_session_id", "session_id"),
+        Index("ix_interactions_question_id", "question_id"),
+        Index("ix_interactions_user_timestamp", "user_id", "timestamp"),
+        Index("ix_interactions_global_seq", "user_id", "global_sequence_position"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# MasteryScore
+# ---------------------------------------------------------------------------
+
+class MasteryScore(UUIDPrimaryKeyMixin, Base):
+    """Tracks the estimated mastery probability for a user × topic (× optional KC) pair."""
+
+    __tablename__ = "mastery_scores"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    topic_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("topics.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    kc_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("knowledge_components.id", ondelete="SET NULL"),
+        nullable=True,
+        comment="NULL means score is at topic grain, not KC grain",
+    )
+
+    mastery_probability: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0
+    )
+    mastery_level: Mapped[MasteryLevel] = mapped_column(
+        Enum(MasteryLevel, name="mastery_level_enum"),
+        nullable=False,
+        default=MasteryLevel.not_started,
+    )
+    bloom_max_achieved: Mapped[str | None] = mapped_column(
+        String(50), nullable=True,
+        comment="Highest Bloom level demonstrated (remember → analyze)"
+    )
+    evidence_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    recent_trend: Mapped[RecentTrend | None] = mapped_column(
+        Enum(RecentTrend, name="recent_trend_enum"), nullable=True
+    )
+    last_practiced: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="mastery_scores")  # type: ignore[name-defined]
+    topic: Mapped["Topic"] = relationship("Topic", lazy="select")  # type: ignore[name-defined]
+    knowledge_component: Mapped["KnowledgeComponent | None"] = relationship(  # type: ignore[name-defined]
+        "KnowledgeComponent", lazy="select"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "topic_id", "kc_id", name="uq_mastery_user_topic_kc"),
+        Index("ix_mastery_user_id", "user_id"),
+        Index("ix_mastery_user_topic", "user_id", "topic_id"),
+        CheckConstraint(
+            "mastery_probability >= 0 AND mastery_probability <= 1",
+            name="ck_mastery_probability_range",
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# LearningPath
+# ---------------------------------------------------------------------------
+
+class LearningPath(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """AI-generated personalised learning plan entry for a user."""
+
+    __tablename__ = "learning_paths"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    topic_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("topics.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    action: Mapped[PathAction] = mapped_column(
+        Enum(PathAction, name="path_action_enum"), nullable=False
+    )
+    estimated_hours: Mapped[float | None] = mapped_column(Float, nullable=True)
+    order_index: Mapped[int] = mapped_column(
+        Integer, nullable=False, comment="Step order within the full path"
+    )
+    week_number: Mapped[int | None] = mapped_column(
+        Integer, nullable=True, comment="Suggested calendar week (1-based)"
+    )
+    status: Mapped[PathStatus] = mapped_column(
+        Enum(PathStatus, name="path_status_enum"),
+        nullable=False,
+        default=PathStatus.pending,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="learning_paths")  # type: ignore[name-defined]
+    topic: Mapped["Topic"] = relationship("Topic", lazy="select")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        Index("ix_lp_user_id", "user_id"),
+        Index("ix_lp_user_status", "user_id", "status"),
+        Index("ix_lp_user_order", "user_id", "order_index"),
+    )

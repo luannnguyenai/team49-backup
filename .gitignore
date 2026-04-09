@@ -25,3 +25,13 @@ data/*
 app.db
 *.log
 logs/
+
+# Frontend
+node_modules/
+.next/
+out/
+dist/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

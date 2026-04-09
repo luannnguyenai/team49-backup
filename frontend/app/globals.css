@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS design tokens ─────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --bg-page:       #f8fafc;
+    --bg-card:       #ffffff;
+    --bg-sidebar:    #ffffff;
+    --border:        #e2e8f0;
+    --text-primary:  #0f172a;
+    --text-secondary:#475569;
+    --text-muted:    #94a3b8;
+  }
+
+  .dark {
+    --bg-page:       #0f172a;
+    --bg-card:       #1e293b;
+    --bg-sidebar:    #1e293b;
+    --border:        #334155;
+    --text-primary:  #f1f5f9;
+    --text-secondary:#94a3b8;
+    --text-muted:    #475569;
+  }
+
+  * { @apply border-border; }
+
+  body {
+    @apply antialiased font-sans;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background: var(--border);
+  }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
+}
+
+/* ── Reusable component classes ─────────────────────────────────────────────── */
+@layer components {
+  .card {
+    @apply rounded-xl border p-6 shadow-sm;
+    background-color: var(--bg-card);
+    border-color: var(--border);
+  }
+
+  .input-base {
+    @apply w-full rounded-lg border px-3.5 py-2.5 text-sm outline-none
+           transition-all duration-150;
+    background-color: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-primary);
+  }
+  .input-base::placeholder { color: var(--text-muted); }
+  .input-base:focus {
+    @apply border-primary-600 ring-2 ring-primary-600/20;
+  }
+  .input-base.error {
+    @apply border-red-500 ring-2 ring-red-500/20;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+           bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white
+           transition-all duration-150 hover:bg-primary-700
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+           border px-4 py-2.5 text-sm font-semibold
+           transition-all duration-150 hover:bg-slate-50 dark:hover:bg-slate-800
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    border-color: var(--border);
+    color: var(--text-primary);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2
+           text-sm font-medium transition-all duration-150
+           hover:bg-slate-100 dark:hover:bg-slate-800
+           active:scale-[0.98] disabled:opacity-50
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-primary-600;
+    color: var(--text-secondary);
+  }
+
+  .link {
+    @apply text-primary-600 hover:text-primary-700 font-medium
+           underline-offset-2 hover:underline transition-colors;
+  }
+
+  .label {
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--text-primary);
+  }
+
+  .error-msg {
+    @apply text-xs text-red-500 mt-1;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium
+           transition-all duration-150 cursor-pointer;
+    color: var(--text-secondary);
+  }
+  .sidebar-item:hover {
+    @apply bg-slate-100 dark:bg-slate-800;
+    color: var(--text-primary);
+  }
+  .sidebar-item.active {
+    @apply bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400;
+  }
+}
