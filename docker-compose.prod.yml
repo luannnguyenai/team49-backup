@@ -1,0 +1,28 @@
+# =============================================================================
+# docker-compose.prod.yml — Production overrides
+# =============================================================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+
+  backend:
+    restart: always
+    volumes: [] # No source mounts in prod
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 4
+    environment:
+      DEBUG: "false"
+
+  db:
+    restart: always
+    ports: [] # Don't expose DB port in prod
+
+  redis:
+    restart: always
+    ports: [] # Don't expose Redis port in prod
+
+  frontend:
+    restart: always
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
