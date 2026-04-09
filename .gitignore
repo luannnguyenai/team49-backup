@@ -25,3 +25,4 @@ data/*
 app.db
 *.log
 logs/
+MOOCCubeX/
