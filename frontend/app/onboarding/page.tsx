@@ -1,282 +1,407 @@
 "use client";
 // app/onboarding/page.tsx
-// Multi-step onboarding flow after first registration
+// Multi-step onboarding flow (4 steps) for new users.
+// Collects: known topics · desired modules · schedule · learning method
+// On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { Brain, Clock, Calendar, BookOpen, ChevronRight, Check } from "lucide-react";
+import {
+  Brain,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 
 import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import StepKnownTopics from "@/components/onboarding/StepKnownTopics";
+import StepDesiredModules from "@/components/onboarding/StepDesiredModules";
+import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
+import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
+
+import { contentApi } from "@/lib/api";
+import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
+import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
+import type { ModuleDetail } from "@/types";
 
-const schema = z.object({
-  available_hours_per_week: z.coerce
-    .number({ invalid_type_error: "Phải là số" })
-    .min(0.5, "Ít nhất 0.5 giờ/tuần")
-    .max(168, "Không thể vượt quá 168 giờ/tuần"),
-  target_deadline: z
-    .string()
-    .min(1, "Vui lòng chọn ngày")
-    .refine(
-      (d) => new Date(d) > new Date(),
-      "Deadline phải sau ngày hôm nay"
-    ),
-  preferred_method: z.enum(["reading", "video"], {
-    required_error: "Vui lòng chọn phương pháp",
-  }),
-});
+// ---------------------------------------------------------------------------
+// Step metadata
+// ---------------------------------------------------------------------------
 
-type FormData = z.infer<typeof schema>;
+const STEPS = [
+  {
+    title: "Bạn đã biết gì?",
+    subtitle: "Tick những topics bạn đã nắm",
+  },
+  {
+    title: "Bạn muốn học gì?",
+    subtitle: "Chọn module bạn quan tâm",
+  },
+  {
+    title: "Thời gian của bạn",
+    subtitle: "Lên lịch học phù hợp",
+  },
+  {
+    title: "Phương pháp học",
+    subtitle: "Cách bạn học tốt nhất",
+  },
+] as const;
 
-const STEPS = ["Thông tin cá nhân", "Xác nhận"];
+// Fields that must pass validation before advancing from each step
+const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
+  [],                                                // Step 0: optional
+  ["desired_module_ids"],                            // Step 1: required
+  ["available_hours_per_week", "target_deadline"],   // Step 2: required
+  ["preferred_method"],                              // Step 3: required
+];
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user, onboard, isLoading, error, clearError } = useAuthStore();
-  const [step, setStep] = useState(0);
+  const { onboard, isLoading, error, clearError } = useAuthStore();
 
+  // Current step (0-indexed) and transition direction
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const [animKey, setAnimKey] = useState(0);
+
+  // Content data loaded from the API
+  const [modules, setModules] = useState<ModuleDetail[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  // ── React Hook Form ──────────────────────────────────────────────────────
   const {
     register,
     handleSubmit,
     watch,
     trigger,
+    control,
     formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  } = useForm<OnboardingFormData>({
+    resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      available_hours_per_week: user?.available_hours_per_week ?? 5,
-      target_deadline: user?.target_deadline ?? "",
-      preferred_method: user?.preferred_method ?? undefined,
+      known_topic_ids: [],
+      desired_module_ids: [],
+      available_hours_per_week: 5,
+      target_deadline: "",
+      preferred_method: undefined,
     },
   });
 
-  const values = watch();
+  // ── Load all modules + topics on mount ──────────────────────────────────
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const list = await contentApi.modules();
+        // Fetch each module's full detail (with topics) in parallel
+        const details = await Promise.all(
+          list.map((m) => contentApi.moduleDetail(m.id))
+        );
+        setModules(details);
+      } catch {
+        // On API failure: keep modules empty; user can still complete the form
+      } finally {
+        setLoadingData(false);
+      }
+    }
+    loadData();
+  }, []);
 
-  const goNext = async () => {
-    const valid = await trigger();
-    if (valid) setStep(1);
-  };
+  // Derive the selected modules objects (needed for schedule estimate)
+  const selectedModuleIds = watch("desired_module_ids");
+  const selectedModules = modules.filter((m) =>
+    selectedModuleIds.includes(m.id)
+  );
 
-  const onSubmit = async (data: FormData) => {
+  // ── Navigation ───────────────────────────────────────────────────────────
+  const goNext = useCallback(async () => {
+    const fields = STEP_VALIDATION_FIELDS[step];
+    if (fields.length > 0) {
+      const valid = await trigger(fields);
+      if (!valid) return;
+    }
+    clearError();
+    setDirection("forward");
+    setAnimKey((k) => k + 1);
+    setStep((s) => s + 1);
+  }, [step, trigger, clearError]);
+
+  const goBack = useCallback(() => {
+    clearError();
+    setDirection("backward");
+    setAnimKey((k) => k + 1);
+    setStep((s) => s - 1);
+  }, [clearError]);
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  const onSubmit = async (data: OnboardingFormData) => {
     clearError();
     try {
-      await onboard({
-        known_topic_ids: [],
-        desired_module_ids: [],
-        available_hours_per_week: data.available_hours_per_week,
-        target_deadline: data.target_deadline,
-        preferred_method: data.preferred_method,
-      });
-      router.push("/dashboard");
+      await onboard(data);
+      // Persist selected module IDs so the assessment page can resolve topic IDs
+      sessionStorage.setItem("al_pending_module_ids", JSON.stringify(data.desired_module_ids));
+      router.push("/assessment");
     } catch {
-      /* error shown below */
+      /* error message is shown from the store */
     }
   };
 
+  // ── Derived values ────────────────────────────────────────────────────────
+  const isFirstStep = step === 0;
+  const isLastStep = step === STEPS.length - 1;
+  const progressPercent = Math.round(((step + 1) / STEPS.length) * 100);
+  const { title, subtitle } = STEPS[step];
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen py-10 px-4"
       style={{ backgroundColor: "var(--bg-page)" }}
     >
-      {/* Blobs */}
+      {/* Decorative blobs */}
       <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary-600/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary-400/10 blur-3xl" />
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-primary-600/10 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-400/10 blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-lg">
-        {/* Header */}
+      <div className="relative mx-auto w-full max-w-2xl">
+
+        {/* ── Header ── */}
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 shadow-lg shadow-primary-600/30">
             <Brain className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1
+              className="text-xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
               Thiết lập lộ trình học
             </h1>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-              Chỉ mất 1 phút để AI tạo lộ trình phù hợp với bạn.
+              Chỉ mất 2 phút để AI tạo lộ trình cá nhân hóa cho bạn.
             </p>
           </div>
         </div>
 
-        {/* Step indicator */}
-        <div className="mb-6 flex items-center gap-2">
-          {STEPS.map((label, i) => (
-            <div key={label} className="flex flex-1 items-center gap-2">
-              <div
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                  i < step
-                    ? "bg-green-500 text-white"
-                    : i === step
-                    ? "bg-primary-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-400"
-                }`}
-              >
-                {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
-              </div>
+        {/* ── Progress bar ── */}
+        <div className="mb-6">
+          {/* Step label row */}
+          <div className="mb-2 flex items-center justify-between">
+            <div>
               <span
-                className={`text-xs font-medium ${
-                  i === step ? "text-primary-600" : ""
-                }`}
-                style={{ color: i === step ? undefined : "var(--text-muted)" }}
+                className="text-sm font-semibold"
+                style={{ color: "var(--text-primary)" }}
               >
-                {label}
+                {title}
               </span>
-              {i < STEPS.length - 1 && (
-                <div
-                  className="h-px flex-1"
-                  style={{ backgroundColor: "var(--border)" }}
-                />
-              )}
+              <span
+                className="ml-2 text-xs"
+                style={{ color: "var(--text-muted)" }}
+              >
+                · {subtitle}
+              </span>
             </div>
-          ))}
+            <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+              {step + 1} / {STEPS.length}
+            </span>
+          </div>
+
+          {/* Animated progress track */}
+          <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+            <div
+              className="h-full rounded-full bg-primary-600 transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          {/* Step dots row */}
+          <div className="mt-3 flex items-center justify-between">
+            {STEPS.map((s, i) => (
+              <div key={s.title} className="flex flex-1 items-center">
+                {/* Dot */}
+                <div
+                  className={cn(
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+                    "text-xs font-bold transition-all duration-300",
+                    i < step
+                      ? "bg-primary-600 text-white"
+                      : i === step
+                      ? "bg-primary-600 text-white ring-4 ring-primary-600/20"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500"
+                  )}
+                >
+                  {i < step ? (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
+                </div>
+                {/* Connector line (except after last dot) */}
+                {i < STEPS.length - 1 && (
+                  <div
+                    className={cn(
+                      "mx-1 h-0.5 flex-1 rounded-full transition-all duration-500",
+                      i < step
+                        ? "bg-primary-600"
+                        : "bg-slate-200 dark:bg-slate-700"
+                    )}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="card animate-fade-in">
+        {/* ── Card ── */}
+        <div className="card">
+          {/* Error banner */}
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
-          {/* Step 0 — form */}
-          {step === 0 && (
-            <div className="space-y-5">
-              <Input
-                label="Số giờ học mỗi tuần"
-                type="number"
-                step="0.5"
-                min="0.5"
-                max="168"
-                leftElement={<Clock className="h-4 w-4" />}
-                hint="Hãy thực tế nhé — AI sẽ căn chỉnh lịch cho bạn."
-                error={errors.available_hours_per_week?.message}
-                {...register("available_hours_per_week")}
-              />
-              <Input
-                label="Deadline hoàn thành khoá học"
-                type="date"
-                leftElement={<Calendar className="h-4 w-4" />}
-                error={errors.target_deadline?.message}
-                {...register("target_deadline")}
-              />
+          {/* Loading state */}
+          {loadingData ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <LoadingSpinner size="lg" />
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Đang tải nội dung...
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {/* ── Animated step content ── */}
+              <div
+                key={animKey}
+                className={
+                  direction === "forward"
+                    ? "animate-slide-in-right"
+                    : "animate-slide-in"
+                }
+              >
+                {/* Step 0 — Known topics */}
+                {step === 0 && (
+                  <Controller
+                    control={control}
+                    name="known_topic_ids"
+                    render={({ field }) => (
+                      <StepKnownTopics
+                        modules={modules}
+                        selectedIds={field.value}
+                        onToggle={(id) =>
+                          field.onChange(
+                            field.value.includes(id)
+                              ? field.value.filter((x) => x !== id)
+                              : [...field.value, id]
+                          )
+                        }
+                      />
+                    )}
+                  />
+                )}
 
-              <div>
-                <label className="label">Phương pháp học yêu thích</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {(["reading", "video"] as const).map((method) => {
-                    const selected = values.preferred_method === method;
-                    return (
-                      <label
-                        key={method}
-                        className={`flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all ${
-                          selected
-                            ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20"
-                            : "hover:border-slate-300 dark:hover:border-slate-600"
-                        }`}
-                        style={{ borderColor: selected ? undefined : "var(--border)" }}
-                      >
-                        <input
-                          type="radio"
-                          value={method}
-                          className="sr-only"
-                          {...register("preferred_method")}
-                        />
-                        <span className="text-2xl">
-                          {method === "reading" ? "📖" : "🎥"}
-                        </span>
-                        <span
-                          className={`text-sm font-medium ${
-                            selected ? "text-primary-600" : ""
-                          }`}
-                          style={{ color: selected ? undefined : "var(--text-secondary)" }}
-                        >
-                          {method === "reading" ? "Đọc tài liệu" : "Xem video"}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.preferred_method && (
-                  <p className="error-msg mt-2">
-                    {errors.preferred_method.message}
-                  </p>
+                {/* Step 1 — Desired modules */}
+                {step === 1 && (
+                  <Controller
+                    control={control}
+                    name="desired_module_ids"
+                    render={({ field }) => (
+                      <StepDesiredModules
+                        modules={modules}
+                        selectedIds={field.value}
+                        onToggle={(id) =>
+                          field.onChange(
+                            field.value.includes(id)
+                              ? field.value.filter((x) => x !== id)
+                              : [...field.value, id]
+                          )
+                        }
+                        error={errors.desired_module_ids?.message}
+                      />
+                    )}
+                  />
+                )}
+
+                {/* Step 2 — Schedule */}
+                {step === 2 && (
+                  <StepTimeSchedule
+                    register={register}
+                    errors={errors}
+                    watch={watch}
+                    selectedModules={selectedModules}
+                  />
+                )}
+
+                {/* Step 3 — Learning method */}
+                {step === 3 && (
+                  <StepLearningMethod
+                    register={register}
+                    watch={watch}
+                    errors={errors}
+                  />
                 )}
               </div>
 
-              <Button
-                type="button"
-                onClick={goNext}
-                className="w-full"
-                rightIcon={<ChevronRight className="h-4 w-4" />}
-              >
-                Tiếp tục
-              </Button>
-            </div>
-          )}
-
-          {/* Step 1 — confirm */}
-          {step === 1 && (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                Xác nhận thông tin
-              </p>
+              {/* ── Navigation buttons ── */}
               <div
-                className="divide-y rounded-xl border text-sm"
-                style={{ borderColor: "var(--border)" }}
+                className={cn(
+                  "mt-7 flex gap-3",
+                  isFirstStep ? "justify-end" : "justify-between"
+                )}
               >
-                {[
-                  {
-                    label: "Giờ học / tuần",
-                    value: `${values.available_hours_per_week} giờ`,
-                  },
-                  { label: "Deadline", value: values.target_deadline },
-                  {
-                    label: "Phương pháp",
-                    value:
-                      values.preferred_method === "reading"
-                        ? "📖 Đọc tài liệu"
-                        : "🎥 Xem video",
-                  },
-                ].map(({ label, value }) => (
-                  <div
-                    key={label}
-                    className="flex items-center justify-between px-4 py-3"
+                {!isFirstStep && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={goBack}
+                    leftIcon={<ChevronLeft className="h-4 w-4" />}
                   >
-                    <span style={{ color: "var(--text-secondary)" }}>{label}</span>
-                    <span className="font-medium" style={{ color: "var(--text-primary)" }}>
-                      {value}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                    Quay lại
+                  </Button>
+                )}
 
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setStep(0)}
-                  className="flex-1"
-                >
-                  Quay lại
-                </Button>
-                <Button
-                  type="submit"
-                  loading={isLoading}
-                  className="flex-1"
-                  leftIcon={<Brain className="h-4 w-4" />}
-                >
-                  Tạo lộ trình
-                </Button>
+                {!isLastStep ? (
+                  <Button
+                    type="button"
+                    onClick={goNext}
+                    rightIcon={<ChevronRight className="h-4 w-4" />}
+                  >
+                    {isFirstStep ? "Tiếp theo" : "Tiếp tục"}
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    loading={isLoading}
+                    size="lg"
+                    leftIcon={
+                      !isLoading ? (
+                        <Sparkles className="h-4 w-4" />
+                      ) : undefined
+                    }
+                  >
+                    Bắt đầu đánh giá
+                  </Button>
+                )}
               </div>
             </form>
           )}
         </div>
+
+        {/* Skip link */}
+        <p className="mt-4 text-center text-xs" style={{ color: "var(--text-muted)" }}>
+          Bạn có thể cập nhật thông tin này bất cứ lúc nào trong phần Cài đặt.
+        </p>
       </div>
     </div>
   );

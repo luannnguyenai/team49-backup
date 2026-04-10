@@ -124,8 +124,8 @@ class StemMedia(BaseModel):
 
 class QuestionBase(BaseModel):
     item_id: str = Field(
-        pattern=r"^ITEM-\d{3}-\d{5}$",
-        description="Format: ITEM-XXX-XXXXX"
+        pattern=r"^ITEM-[A-Z0-9]{2,8}-\d{5}$",
+        description="Format: ITEM-{MODULE_CODE}-{5_DIGITS}, e.g. ITEM-PYB-00001"
     )
     version: int = Field(default=1, ge=1)
     status: QuestionStatus = QuestionStatus.draft
@@ -218,3 +218,85 @@ class QuestionSummary(BaseModel):
     bloom_level: BloomLevel
     difficulty_bucket: DifficultyBucket
     status: QuestionStatus
+
+
+# ===========================================================================
+# Content API response schemas  (GET /api/modules, /api/topics)
+# ===========================================================================
+
+class TopicSummary(BaseModel):
+    """Lightweight topic row — used inside ModuleDetailResponse."""
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    name: str
+    description: str | None
+    order_index: int
+    estimated_hours_beginner: float | None
+    estimated_hours_intermediate: float | None
+
+
+class ModuleListItem(BaseModel):
+    """One row in GET /api/modules."""
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    name: str
+    description: str | None
+    order_index: int
+    prerequisite_module_ids: list[uuid.UUID] | None
+    topics_count: int
+
+
+class ModuleDetailResponse(BaseModel):
+    """GET /api/modules/{id} — full module with topic list."""
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    name: str
+    description: str | None
+    order_index: int
+    prerequisite_module_ids: list[uuid.UUID] | None
+    topics: list[TopicSummary]
+    created_at: datetime
+    updated_at: datetime
+
+
+class PrerequisiteTopic(BaseModel):
+    """Resolved prerequisite topic node for graph rendering."""
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    name: str
+    order_index: int
+
+
+class TopicDetailResponse(BaseModel):
+    """GET /api/topics/{id} — topic detail + resolved prerequisite graph."""
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    module_id: uuid.UUID
+    name: str
+    description: str | None
+    order_index: int
+    estimated_hours_beginner: float | None
+    estimated_hours_intermediate: float | None
+    estimated_hours_review: float | None
+    # Raw UUID list (for programmatic use)
+    prerequisite_topic_ids: list[uuid.UUID] | None
+    # Resolved nodes (for DAG rendering)
+    prerequisites: list[PrerequisiteTopic]
+    created_at: datetime
+    updated_at: datetime
+
+
+class TopicContentResponse(BaseModel):
+    """GET /api/topics/{id}/content — learning material + video."""
+
+    topic_id: uuid.UUID
+    topic_name: str
+    module_id: uuid.UUID
+    module_name: str
+    content_markdown: str | None
+    video_url: str | None

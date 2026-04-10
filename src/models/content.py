@@ -109,6 +109,12 @@ class Topic(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     estimated_hours_beginner: Mapped[float | None] = mapped_column(Float, nullable=True)
     estimated_hours_intermediate: Mapped[float | None] = mapped_column(Float, nullable=True)
     estimated_hours_review: Mapped[float | None] = mapped_column(Float, nullable=True)
+    content_markdown: Mapped[str | None] = mapped_column(
+        Text, nullable=True, comment="Learning material in Markdown format"
+    )
+    video_url: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, comment="Primary video lecture URL"
+    )
 
     # Relationships
     module: Mapped["Module"] = relationship("Module", back_populates="topics")

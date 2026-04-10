@@ -19,6 +19,8 @@ from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory
 from src.services.llm_service import get_context_and_stream_gemini
 from src.database import engine as async_engine
 from src.routers.auth import auth_router, users_router
+from src.routers.assessment import assessment_router
+from src.routers.content import content_router
 from src.config import settings
 
 
@@ -64,6 +66,8 @@ app.mount("/static", StaticFiles(directory="src/api/static"), name="static")
 # ---------------------------------------------------------------------------
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(content_router)
+app.include_router(assessment_router)
 
 
 # ---------------------------------------------------------------------------

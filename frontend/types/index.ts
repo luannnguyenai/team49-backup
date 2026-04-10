@@ -46,6 +46,80 @@ export interface OnboardingPayload {
   preferred_method: "reading" | "video";
 }
 
+// ---- Content API shapes ----
+
+export interface TopicInModule {
+  id: string;
+  title: string;
+  slug: string;
+  order_index: number;
+  estimated_minutes: number;
+  prerequisites_count: number;
+}
+
+export interface ModuleListItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  order_index: number;
+  topics_count: number;
+}
+
+export interface ModuleDetail extends ModuleListItem {
+  topics: TopicInModule[];
+}
+
+// ---- Assessment API shapes ----
+
+export type BloomLevel = "remember" | "understand" | "apply" | "analyze";
+export type DifficultyBucket = "easy" | "medium" | "hard";
+export type SelectedAnswer = "A" | "B" | "C" | "D";
+export type MasteryLevel = "novice" | "developing" | "proficient" | "mastered";
+
+export interface QuestionForAssessment {
+  id: string;
+  item_id: string;
+  topic_id: string;
+  bloom_level: BloomLevel;
+  difficulty_bucket: DifficultyBucket;
+  stem_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  time_expected_seconds: number | null;
+}
+
+export interface AssessmentStartResponse {
+  session_id: string;
+  total_questions: number;
+  questions: QuestionForAssessment[];
+}
+
+export interface AnswerInput {
+  question_id: string;
+  selected_answer: SelectedAnswer;
+  response_time_ms: number | null;
+}
+
+export interface TopicResult {
+  topic_id: string;
+  topic_name: string;
+  score_percent: number;
+  mastery_level: MasteryLevel;
+  bloom_breakdown: Record<string, string>; // e.g. {"remember": "1/1"}
+  weak_kcs: string[];
+  misconceptions_detected: string[];
+}
+
+export interface AssessmentResultResponse {
+  session_id: string;
+  completed_at: string;
+  overall_score_percent: number;
+  topic_results: TopicResult[];
+}
+
 // ---- API error shape ----
 
 export interface ApiError {

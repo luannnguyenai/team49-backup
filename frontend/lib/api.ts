@@ -147,12 +147,42 @@ api.interceptors.response.use(
 
 import type {
   AccessToken,
+  AnswerInput,
+  AssessmentResultResponse,
+  AssessmentStartResponse,
   LoginPayload,
+  ModuleDetail,
+  ModuleListItem,
   OnboardingPayload,
   RegisterPayload,
   TokenPair,
   User,
 } from "@/types";
+
+export const assessmentApi = {
+  start: (topicIds: string[]) =>
+    api
+      .post<AssessmentStartResponse>("/api/assessment/start", { topic_ids: topicIds })
+      .then((r) => r.data),
+
+  submit: (sessionId: string, answers: AnswerInput[]) =>
+    api
+      .post<AssessmentResultResponse>(`/api/assessment/${sessionId}/submit`, { answers })
+      .then((r) => r.data),
+
+  results: (sessionId: string) =>
+    api
+      .get<AssessmentResultResponse>(`/api/assessment/${sessionId}/results`)
+      .then((r) => r.data),
+};
+
+export const contentApi = {
+  modules: () =>
+    api.get<ModuleListItem[]>("/api/modules").then((r) => r.data),
+
+  moduleDetail: (id: string) =>
+    api.get<ModuleDetail>(`/api/modules/${id}`).then((r) => r.data),
+};
 
 export const authApi = {
   register: (data: RegisterPayload) =>
