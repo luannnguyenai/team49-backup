@@ -19,11 +19,20 @@ from src.models.store import SessionLocal, Lecture, Chapter, TranscriptLine, QAH
 # Configure File Logging
 LOG_DIR = "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
+
+# Human-readable log (for developers to read)
 qa_logger = logging.getLogger("QA_Tutor")
 qa_logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.log"), encoding='utf-8')
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+file_handler.setFormatter(logging.Formatter('%(message)s'))
 qa_logger.addHandler(file_handler)
+
+# Structured JSON Lines log (for automation/parsers)
+jsonl_logger = logging.getLogger("QA_Tutor_JSONL")
+jsonl_logger.setLevel(logging.INFO)
+jsonl_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.jsonl"), encoding='utf-8')
+jsonl_handler.setFormatter(logging.Formatter('%(message)s'))
+jsonl_logger.addHandler(jsonl_handler)
 
 def format_timestamp(seconds):
     td = timedelta(seconds=int(seconds))
@@ -205,7 +214,7 @@ CRITICAL STRICT RULES (Must follow without exception):
         db.add(history)
         db.commit()
 
-        # 6. File Log (Human-Readable Plain Text)
+        # 6a. Human-readable log (for developers)
         tool_section = sandbox_output if sandbox_output else "N/A"
         log_text = (
             f"\n{'='*60}\n"
@@ -218,6 +227,18 @@ CRITICAL STRICT RULES (Must follow without exception):
             f"{'='*60}"
         )
         qa_logger.info(log_text)
+
+        # 6b. Structured JSONL log (for automation/parsers — one JSON object per line)
+        jsonl_logger.info(json.dumps({
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "lecture": lecture_id,
+            "at_seconds": current_timestamp,
+            "at_formatted": curr_ts_str,
+            "question": user_question,
+            "tool_used": sandbox_output != "",
+            "tool_log": sandbox_output[:500] if sandbox_output else None,
+            "answer": full_answer
+        }, ensure_ascii=False))
 
     except Exception as e:
         qa_logger.error(f"Error: {e}")

@@ -10,21 +10,58 @@ logger = logging.getLogger("CodeSandbox")
 
 # Blocklist of dangerous imports/calls that should never run
 BLOCKED_PATTERNS = [
+    # OS command execution
     r"\bos\.system\b",
     r"\bos\.popen\b",
-    r"\bsubprocess\b",
-    r"\bshutil\.rmtree\b",
-    r"\bopen\s*\(.*['\"]w['\"]",   # file writes
+    r"\bos\.execv\b",
+    r"\bos\.execve\b",
+    r"\bos\.execvp\b",
+    r"\bos\.spawn\b",
+    r"\bos\.fork\b",
+    # Filesystem modification
+    r"\bos\.remove\b",
+    r"\bos\.rmdir\b",
+    r"\bos\.rename\b",
+    r"\bos\.replace\b",
+    r"\bos\.chmod\b",
+    r"\bos\.chown\b",
+    r"\bos\.link\b",
+    r"\bos\.symlink\b",
+    r"\bos\.unlink\b",
+    r"\bos\.mkdir\b",
+    r"\bos\.makedirs\b",
+    r"\bshutil\b",
+    r"\bpathlib\.Path.*\.write\b",
+    r"\bopen\s*\(.*['\"][wa+]['\"]",  # file writes and appends
+    # Network access
     r"\bsocket\b",
     r"\burllib\b",
     r"\brequests\b",
     r"\bhttpx\b",
+    r"\baiohttp\b",
+    r"\bftplib\b",
+    r"\bsmtplib\b",
+    r"\bparamiko\b",
+    # Code injection
     r"\beval\s*\(",
     r"\bexec\s*\(",
     r"\b__import__\s*\(",
     r"\bimportlib\b",
-    r"\bctl\b",
+    r"\bcompile\s*\(",
+    # Dangerous modules
+    r"\bsubprocess\b",
     r"\bpickle\b",
+    r"\bctypes\b",
+    r"\bmultiprocessing\b",
+    r"\bthreading\b",
+    r"\bsignal\b",
+    r"\bmarshal\b",
+    r"\bcrypt\b",
+    # Process/system manipulation
+    r"\bos\.environ\b",
+    r"\bos\.putenv\b",
+    r"\bsys\.exit\b",
+    r"\bsys\.modules\b",
 ]
 
 def _is_safe_code(code: str) -> tuple[bool, str]:
