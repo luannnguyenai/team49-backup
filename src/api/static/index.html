@@ -167,13 +167,20 @@
             userInput.value = '';
             sendBtn.disabled = true;
 
-            // AI message with thinking animation
+            // AI message with thinking and content separation
             const aiMsg = document.createElement('div');
             aiMsg.className = 'msg msg-ai';
-            const thinkSpan = document.createElement('span');
-            thinkSpan.className = 'thinking-indicator';
-            thinkSpan.innerText = '🧠 Thinking';
-            aiMsg.appendChild(thinkSpan);
+            
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'thinking-indicator';
+            statusDiv.style.whiteSpace = 'pre-wrap';
+            statusDiv.style.marginBottom = '0.5rem';
+            statusDiv.innerText = '🧠 Thinking...\n';
+            
+            const contentDiv = document.createElement('div');
+            
+            aiMsg.appendChild(statusDiv);
+            aiMsg.appendChild(contentDiv);
             chatHistory.appendChild(aiMsg);
             chatHistory.scrollTop = chatHistory.scrollHeight;
 
@@ -199,14 +206,21 @@
                         try {
                             const data = JSON.parse(line.trim());
                             if (data.e) {
-                                aiMsg.innerHTML = `<span class="error">⚠️ ${data.e}</span>`;
+                                contentDiv.innerHTML = `<span class="error">⚠️ ${data.e}</span>`;
                                 hasError = true;
                                 break;
+                            }
+                            if (data.status) {
+                                statusDiv.innerText += data.status;
                             }
                             if (data.a) {
                                 rawText += data.a;
                                 // Live preview: show raw text while streaming
-                                aiMsg.innerText = rawText;
+                                contentDiv.innerText = rawText;
+                                // Dim status div once actual answer starts flowing
+                                statusDiv.style.opacity = '0.6';
+                                statusDiv.style.fontSize = '0.8rem';
+                                statusDiv.classList.remove('thinking-indicator');
                             }
                         } catch {}
                     }
@@ -216,13 +230,13 @@
 
                 // Render Markdown + LaTeX after stream completes
                 if (!hasError && rawText) {
-                    aiMsg.innerHTML = renderMarkdownLatex(rawText);
+                    contentDiv.innerHTML = renderMarkdownLatex(rawText);
                 } else if (!hasError) {
-                    aiMsg.innerText = 'Không nhận được phản hồi từ AI.';
+                    contentDiv.innerText = 'Không nhận được phản hồi từ AI.';
                 }
 
             } catch (err) {
-                aiMsg.innerHTML = `<span class="error">⚠️ Lỗi kết nối: ${err.message}</span>`;
+                contentDiv.innerHTML = `<span class="error">⚠️ Lỗi kết nối: ${err.message}</span>`;
             }
             sendBtn.disabled = false;
             chatHistory.scrollTop = chatHistory.scrollHeight;
