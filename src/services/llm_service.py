@@ -37,7 +37,7 @@ class AgentState(TypedDict):
 def execute_python(code: str) -> str:
     """Executes Python code in a secure sandbox. Used for solving mathematical or algorithmic questions. Always use print() to output results."""
     result = run_python_code(code)
-    # Append code context so DB logs what code the model wrote
+    # Preserve ExitCode prefix for caller + append source code to help model debug failures
     return f"===== EXECUTED CODE =====\n{code}\n===== END CODE =====\n\n{result}"
 
 tools = [execute_python]
@@ -173,9 +173,11 @@ CRITICAL STRICT RULES (Must follow without exception):
             # Capture tool usage outputs for DB logging and yield Boss Battle Status
             if isinstance(chunk, ToolMessage):
                 in_tool_call = False
-                sandbox_output += str(chunk.content)[:1000]
-                content_str = str(chunk.content)
-                if "Error" in content_str or "Lỗi" in content_str or "Exception" in content_str or "Traceback" in content_str:
+                tool_content = str(chunk.content)
+                sandbox_output += tool_content[:2000]
+                # Robust check: rely on structured ExitCode prefix from sandbox
+                success = "ExitCode:0" in tool_content
+                if not success:
                     yield json.dumps({"status": "❌ Beated... Trying again...\n"}) + "\n"
                 else:
                     yield json.dumps({"status": "🏆 Winning! Generating final answer...\n"}) + "\n"
