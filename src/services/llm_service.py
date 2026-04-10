@@ -137,11 +137,24 @@ CRITICAL STRICT RULES (Must follow without exception):
     sys_msg = SystemMessage(content=system_instruction)
     human_msg = HumanMessage(content=content_list)
 
+    # --- Memory: Load last 5 Q&A from DB for this lecture ---
+    history_messages = []
+    past_qas = db.query(QAHistory).filter(
+        QAHistory.lecture_id == lecture_id
+    ).order_by(QAHistory.created_at.desc()).limit(5).all()
+    # Reverse to chronological order (oldest first)
+    past_qas = list(reversed(past_qas))
+    for qa in past_qas:
+        if qa.question:
+            history_messages.append(HumanMessage(content=qa.question))
+        if qa.answer:
+            history_messages.append(AIMessage(content=qa.answer))
+
     full_answer = ""
     sandbox_output = ""
     
     try:
-        inputs = {"messages": [sys_msg, human_msg]}
+        inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
         attempt_count = 0
         in_tool_call = False
         
@@ -190,16 +203,19 @@ CRITICAL STRICT RULES (Must follow without exception):
         db.add(history)
         db.commit()
 
-        # 6. File Log (Pretty Printed)
-        log_data = {
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "lecture": lecture_id,
-            "at": f"{current_timestamp:.1f}s",
-            "q": user_question,
-            "tool_execution_log": sandbox_output if sandbox_output else "None",
-            "a": full_answer
-        }
-        qa_logger.info("\n" + "="*50 + "\n" + json.dumps(log_data, ensure_ascii=False, indent=4) + "\n" + "="*50)
+        # 6. File Log (Human-Readable Plain Text)
+        tool_section = sandbox_output if sandbox_output else "N/A"
+        log_text = (
+            f"\n{'='*60}\n"
+            f"[Time]    : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"[Lecture] : {lecture_id}\n"
+            f"[At]      : {current_timestamp:.1f}s ({curr_ts_str})\n"
+            f"\n[Question]:\n{user_question}\n"
+            f"\n[Tool / Sandbox Execution]:\n{tool_section}\n"
+            f"\n[Answer]:\n{full_answer}\n"
+            f"{'='*60}"
+        )
+        qa_logger.info(log_text)
 
     except Exception as e:
         qa_logger.error(f"Error: {e}")
