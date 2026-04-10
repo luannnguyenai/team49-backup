@@ -21,6 +21,7 @@ from src.database import engine as async_engine
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router
 from src.routers.content import content_router
+from src.routers.history import history_router
 from src.routers.learning_path import learning_path_router
 from src.routers.module_test import module_test_router
 from src.routers.quiz import quiz_router
@@ -71,7 +72,9 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(content_router)
 app.include_router(assessment_router)
+app.include_router(history_router)
 app.include_router(learning_path_router)
+app.include_router(module_test_router)
 app.include_router(quiz_router)
 
 
@@ -132,8 +135,8 @@ def ask_question(req: AskRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/history", tags=["Lectures"])
-def get_history(db: Session = Depends(get_db)):
+@app.get("/api/lectures/qa-history", tags=["Lectures"])
+def get_qa_history(db: Session = Depends(get_db)):
     return db.query(QAHistory).order_by(QAHistory.created_at.desc()).limit(50).all()
 
 

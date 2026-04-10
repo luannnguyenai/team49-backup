@@ -150,15 +150,21 @@ import type {
   AnswerInput,
   AssessmentResultResponse,
   AssessmentStartResponse,
+  HistoryResponse,
   LoginPayload,
   ModuleDetail,
   ModuleListItem,
+  ModuleTestAnswerInput,
+  ModuleTestResultResponse,
+  ModuleTestStartResponse,
   OnboardingPayload,
   QuizAnswerResponse,
   QuizCompleteResponse,
   QuizStartResponse,
   RegisterPayload,
   SelectedAnswer,
+  SessionDetailResponse,
+  SessionType,
   TokenPair,
   TopicContent,
   User,
@@ -204,6 +210,48 @@ export const quizApi = {
 
   complete: (sessionId: string) =>
     api.post<QuizCompleteResponse>(`/api/quiz/${sessionId}/complete`).then((r) => r.data),
+};
+
+export const historyApi = {
+  list: (params: {
+    session_type?: SessionType;
+    module_id?: string;
+    days?: number;
+    page?: number;
+    page_size?: number;
+  }) => {
+    const q = new URLSearchParams();
+    if (params.session_type) q.set("session_type", params.session_type);
+    if (params.module_id) q.set("module_id", params.module_id);
+    if (params.days != null) q.set("days", String(params.days));
+    if (params.page != null) q.set("page", String(params.page));
+    if (params.page_size != null) q.set("page_size", String(params.page_size));
+    return api
+      .get<HistoryResponse>(`/api/history?${q.toString()}`)
+      .then((r) => r.data);
+  },
+
+  detail: (sessionId: string) =>
+    api
+      .get<SessionDetailResponse>(`/api/history/${sessionId}/detail`)
+      .then((r) => r.data),
+};
+
+export const moduleTestApi = {
+  start: (moduleId: string) =>
+    api
+      .post<ModuleTestStartResponse>("/api/module-test/start", { module_id: moduleId })
+      .then((r) => r.data),
+
+  submit: (sessionId: string, answers: ModuleTestAnswerInput[]) =>
+    api
+      .post<ModuleTestResultResponse>(`/api/module-test/${sessionId}/submit`, { answers })
+      .then((r) => r.data),
+
+  results: (sessionId: string) =>
+    api
+      .get<ModuleTestResultResponse>(`/api/module-test/${sessionId}/results`)
+      .then((r) => r.data),
 };
 
 export const authApi = {

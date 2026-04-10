@@ -104,6 +104,22 @@ class NextModuleInfo(BaseModel):
     module_name: str
 
 
+class WrongAnswerDetail(BaseModel):
+    """Full detail for one incorrectly-answered question — shown in results UI."""
+
+    question_id: uuid.UUID
+    topic_id: uuid.UUID
+    topic_name: str
+    stem_text: str
+    option_a: str
+    option_b: str
+    option_c: str
+    option_d: str
+    selected_answer: SelectedAnswer
+    correct_answer: str             # CorrectAnswer.value  e.g. "B"
+    explanation_text: str | None
+
+
 class ModuleTestResultResponse(BaseModel):
     """
     Returned by both POST /submit and GET /results.
@@ -127,3 +143,6 @@ class ModuleTestResultResponse(BaseModel):
 
     # Progression (non-None only when passed == True)
     next_module: NextModuleInfo | None
+
+    # Per-question wrong-answer details (for review section)
+    wrong_answers: list[WrongAnswerDetail]

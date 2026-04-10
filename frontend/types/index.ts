@@ -50,19 +50,19 @@ export interface OnboardingPayload {
 
 export interface TopicInModule {
   id: string;
-  title: string;
-  slug: string;
+  name: string;
+  description: string | null;
   order_index: number;
-  estimated_minutes: number;
-  prerequisites_count: number;
+  estimated_hours_beginner: number | null;
+  estimated_hours_intermediate: number | null;
 }
 
 export interface ModuleListItem {
   id: string;
   name: string;
-  slug: string;
   description: string | null;
   order_index: number;
+  prerequisite_module_ids: string[] | null;
   topics_count: number;
 }
 
@@ -177,6 +177,159 @@ export interface QuizCompleteResponse {
   time_total_seconds: number;
   avg_time_per_question: number;
   learning_path_updated: boolean;
+}
+
+// ---- Module Test API shapes ----
+
+export interface QuestionForModuleTest {
+  id: string;
+  item_id: string;
+  topic_id: string;
+  bloom_level: BloomLevel;
+  difficulty_bucket: DifficultyBucket;
+  stem_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  time_expected_seconds: number | null;
+}
+
+export interface TopicQuestionsGroup {
+  topic_id: string;
+  topic_name: string;
+  questions: QuestionForModuleTest[];
+}
+
+export interface ModuleTestStartResponse {
+  session_id: string;
+  module_id: string;
+  module_name: string;
+  total_topics: number;
+  total_questions: number;
+  topics: TopicQuestionsGroup[];
+}
+
+export interface ModuleTestAnswerInput {
+  question_id: string;
+  selected_answer: SelectedAnswer;
+  response_time_ms: number | null;
+}
+
+export interface TopicTestResult {
+  topic_id: string;
+  topic_name: string;
+  score: string;
+  score_percent: number;
+  bloom_max: string | null;
+  verdict: "pass" | "fail";
+  weak_kcs: string[];
+}
+
+export interface ReviewTopicSuggestion {
+  topic_id: string;
+  topic_name: string;
+  weak_kcs: string[];
+  misconceptions: string[];
+  estimated_review_hours: number;
+}
+
+export interface NextModuleInfo {
+  module_id: string;
+  module_name: string;
+}
+
+export interface WrongAnswerDetail {
+  question_id: string;
+  topic_id: string;
+  topic_name: string;
+  stem_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  selected_answer: SelectedAnswer;
+  correct_answer: SelectedAnswer;
+  explanation_text: string | null;
+}
+
+export interface ModuleTestResultResponse {
+  session_id: string;
+  module_id: string;
+  module_name: string;
+  total_score_percent: number;
+  passed: boolean;
+  per_topic: TopicTestResult[];
+  recommended_review_topics: ReviewTopicSuggestion[];
+  estimated_review_hours: number;
+  next_module: NextModuleInfo | null;
+  wrong_answers: WrongAnswerDetail[];
+}
+
+// ---- History API shapes ----
+
+export type SessionType = "assessment" | "quiz" | "module_test" | "practice";
+
+export interface HistoryItem {
+  session_id: string;
+  session_type: SessionType;
+  started_at: string;
+  completed_at: string | null;
+  duration_seconds: number | null;
+  subject: string;
+  topic_id: string | null;
+  module_id: string | null;
+  score_percent: number | null;
+  correct_count: number;
+  total_questions: number;
+}
+
+export interface ScoreTrendPoint {
+  started_at: string;
+  score_percent: number;
+}
+
+export interface HistorySummary {
+  total_sessions: number;
+  completed_sessions: number;
+  avg_score: number | null;
+  total_study_seconds: number;
+  score_trend: ScoreTrendPoint[];
+}
+
+export interface HistoryResponse {
+  summary: HistorySummary;
+  total: number;
+  page: number;
+  page_size: number;
+  items: HistoryItem[];
+}
+
+export interface QuestionInteractionDetail {
+  question_id: string;
+  sequence_position: number;
+  topic_name: string;
+  stem_text: string;
+  bloom_level: BloomLevel;
+  difficulty_bucket: DifficultyBucket;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  selected_answer: SelectedAnswer | null;
+  correct_answer: SelectedAnswer;
+  is_correct: boolean;
+  response_time_ms: number | null;
+  explanation_text: string | null;
+}
+
+export interface SessionDetailResponse {
+  session_id: string;
+  session_type: SessionType;
+  bloom_breakdown: Record<string, string>;
+  weak_kcs: string[];
+  misconceptions: string[];
+  questions: QuestionInteractionDetail[];
 }
 
 // ---- API error shape ----

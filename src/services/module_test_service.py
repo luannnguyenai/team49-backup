@@ -87,6 +87,7 @@ from src.schemas.module_test import (
     ReviewTopicSuggestion,
     TopicQuestionsGroup,
     TopicTestResult,
+    WrongAnswerDetail,
 )
 from src.services.mastery_evaluator import (
     classify_mastery,
@@ -510,6 +511,28 @@ async def _build_result(
                 module_name=next_mod.name,
             )
 
+    # ── Wrong-answer details (for review UI) ─────────────────────────────────
+    wrong_answers: list[WrongAnswerDetail] = []
+    for interaction, question in rows:
+        if interaction.is_correct:
+            continue
+        if interaction.selected_answer is None:
+            continue
+        t = topic_by_id.get(question.topic_id)
+        wrong_answers.append(WrongAnswerDetail(
+            question_id=question.id,
+            topic_id=question.topic_id,
+            topic_name=t.name if t else str(question.topic_id),
+            stem_text=question.stem_text,
+            option_a=question.option_a,
+            option_b=question.option_b,
+            option_c=question.option_c,
+            option_d=question.option_d,
+            selected_answer=interaction.selected_answer,
+            correct_answer=question.correct_answer.value,
+            explanation_text=question.explanation_text,
+        ))
+
     return ModuleTestResultResponse(
         session_id=session.id,
         module_id=module.id,
@@ -520,6 +543,7 @@ async def _build_result(
         recommended_review_topics=review_suggestions,
         estimated_review_hours=total_review_hours,
         next_module=next_module_info,
+        wrong_answers=wrong_answers,
     )
 
 
