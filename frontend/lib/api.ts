@@ -154,8 +154,13 @@ import type {
   ModuleDetail,
   ModuleListItem,
   OnboardingPayload,
+  QuizAnswerResponse,
+  QuizCompleteResponse,
+  QuizStartResponse,
   RegisterPayload,
+  SelectedAnswer,
   TokenPair,
+  TopicContent,
   User,
 } from "@/types";
 
@@ -182,6 +187,23 @@ export const contentApi = {
 
   moduleDetail: (id: string) =>
     api.get<ModuleDetail>(`/api/modules/${id}`).then((r) => r.data),
+
+  topicContent: (id: string) =>
+    api.get<TopicContent>(`/api/topics/${id}/content`).then((r) => r.data),
+};
+
+export const quizApi = {
+  start: (topicId: string) =>
+    api.post<QuizStartResponse>("/api/quiz/start", { topic_id: topicId }).then((r) => r.data),
+
+  answer: (
+    sessionId: string,
+    data: { question_id: string; selected_answer: SelectedAnswer; response_time_ms: number | null }
+  ) =>
+    api.post<QuizAnswerResponse>(`/api/quiz/${sessionId}/answer`, data).then((r) => r.data),
+
+  complete: (sessionId: string) =>
+    api.post<QuizCompleteResponse>(`/api/quiz/${sessionId}/complete`).then((r) => r.data),
 };
 
 export const authApi = {

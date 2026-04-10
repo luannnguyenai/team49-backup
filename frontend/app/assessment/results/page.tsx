@@ -2,7 +2,7 @@
 // app/assessment/results/page.tsx
 // Assessment results: overall score · radar chart · per-topic table · misconceptions · CTA
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -73,7 +73,7 @@ function Skeleton({ className }: { className?: string }) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function AssessmentResultsPage() {
+function AssessmentResultsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -472,5 +472,23 @@ export default function AssessmentResultsPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Suspense boundary required by useSearchParams in Next.js 14 App Router
+// ---------------------------------------------------------------------------
+
+export default function AssessmentResultsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
+      <AssessmentResultsInner />
+    </Suspense>
   );
 }

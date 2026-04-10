@@ -21,6 +21,9 @@ from src.database import engine as async_engine
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router
 from src.routers.content import content_router
+from src.routers.learning_path import learning_path_router
+from src.routers.module_test import module_test_router
+from src.routers.quiz import quiz_router
 from src.config import settings
 
 
@@ -68,6 +71,8 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(content_router)
 app.include_router(assessment_router)
+app.include_router(learning_path_router)
+app.include_router(quiz_router)
 
 
 # ---------------------------------------------------------------------------

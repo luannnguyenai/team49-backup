@@ -120,6 +120,65 @@ export interface AssessmentResultResponse {
   topic_results: TopicResult[];
 }
 
+// ---- Topic content ----
+
+export interface TopicContent {
+  topic_id: string;
+  topic_name: string;
+  module_id: string;
+  module_name: string;
+  content_markdown: string | null;
+  video_url: string | null;
+}
+
+// ---- Quiz API shapes ----
+
+export interface QuestionForQuiz {
+  id: string;
+  item_id: string;
+  topic_id: string;
+  bloom_level: BloomLevel;
+  difficulty_bucket: DifficultyBucket;
+  stem_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  time_expected_seconds: number | null;
+}
+
+export interface QuizStartResponse {
+  session_id: string;
+  topic_id: string;
+  total_questions: number;
+  questions: QuestionForQuiz[];
+}
+
+export interface QuizAnswerResponse {
+  is_correct: boolean;
+  correct_answer: SelectedAnswer;
+  explanation_text: string | null;
+  questions_answered: number;
+  questions_correct: number;
+}
+
+export interface QuizCompleteResponse {
+  session_id: string;
+  topic_id: string;
+  topic_name: string;
+  score: string; // e.g. "7/10"
+  percent: number;
+  mastery_before: number;
+  mastery_after: number;
+  mastery_level: MasteryLevel;
+  bloom_breakdown: Record<string, string>;
+  weak_kcs: string[];
+  misconceptions: string[];
+  time_total_seconds: number;
+  avg_time_per_question: number;
+  learning_path_updated: boolean;
+}
+
 // ---- API error shape ----
 
 export interface ApiError {

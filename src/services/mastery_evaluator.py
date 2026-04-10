@@ -4,9 +4,9 @@ services/mastery_evaluator.py
 Pure-computation module: no I/O, no DB calls.
 
 Responsibility:
-  Given a list of QuestionResult objects for one topic, compute the
-  mastery score, mastery level, bloom breakdown, weak KCs, and
-  detected misconceptions.
+  1. Given a list of QuestionResult objects for one topic (assessment or quiz),
+     compute mastery score, level, bloom breakdown, weak KCs, misconceptions.
+  2. EMA-based mastery update for the quiz system.
 
 Point weights (mirrors the assessment design):
   remember  → 1 pt
@@ -19,6 +19,10 @@ Mastery classification:
   26 – 50  → developing
   51 – 75  → proficient
   76 – 100 → mastered
+
+EMA update (quiz):
+  new_mastery = old_mastery × (1 - alpha) + quiz_score × alpha
+  alpha = 0.7  (quiz result weighted heavily as the most recent evidence)
 """
 
 from __future__ import annotations
@@ -181,3 +185,56 @@ def evaluate_topic(results: list[QuestionResult]) -> TopicMasteryResult:
         misconceptions_detected=list(misconceptions),
         bloom_max_achieved=bloom_max_achieved.value if bloom_max_achieved else None,
     )
+
+
+# ---------------------------------------------------------------------------
+# EMA-based mastery update (used by the quiz system)
+# ---------------------------------------------------------------------------
+
+#: Weight given to the latest quiz result in the exponential moving average.
+QUIZ_EMA_ALPHA: float = 0.7
+
+
+def apply_ema_mastery(
+    old_mastery_percent: float,
+    quiz_score_percent: float,
+    alpha: float = QUIZ_EMA_ALPHA,
+) -> float:
+    """
+    Blend the existing mastery estimate with a new quiz score using EMA.
+
+    Formula:
+        new = old × (1 - alpha) + quiz_score × alpha
+
+    Parameters
+    ----------
+    old_mastery_percent : Current mastery score, 0–100.
+    quiz_score_percent  : Raw quiz score for this attempt, 0–100.
+    alpha               : Weight for the latest observation (default 0.7).
+
+    Returns
+    -------
+    float — Updated mastery percentage, clamped to [0, 100], rounded to 1 dp.
+    """
+    new = old_mastery_percent * (1.0 - alpha) + quiz_score_percent * alpha
+    return round(max(0.0, min(100.0, new)), 1)
+
+
+def update_bloom_max(
+    current_bloom_max: str | None,
+    new_bloom_level: BloomLevel,
+) -> str:
+    """
+    Return the higher of current_bloom_max and new_bloom_level (as a string).
+    Used to ratchet up bloom_max_achieved when a correct answer is recorded.
+    """
+    if current_bloom_max is None:
+        return new_bloom_level.value
+
+    try:
+        current_idx = _BLOOM_ORDER.index(BloomLevel(current_bloom_max))
+    except ValueError:
+        current_idx = -1
+
+    new_idx = _BLOOM_ORDER.index(new_bloom_level)
+    return _BLOOM_ORDER[max(current_idx, new_idx)].value
