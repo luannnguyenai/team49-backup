@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory, init_db
-from src.services.llm_service import get_context_and_stream_gemini
+from src.services.llm_service import get_context_and_stream_langgraph
 
 # Initialize database tables on startup
 init_db()
@@ -46,7 +46,7 @@ def ask_question(req: AskRequest, db: Session = Depends(get_db)):
         if not lecture:
             raise HTTPException(status_code=404, detail="Lecture not found")
             
-        generator = get_context_and_stream_gemini(
+        generator = get_context_and_stream_langgraph(
             req.lecture_id, 
             req.current_timestamp, 
             req.question,
