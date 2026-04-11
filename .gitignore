@@ -26,3 +26,5 @@ data/CS231n/
 app.db
 *.log
 logs/
+
+data/cs231n/
