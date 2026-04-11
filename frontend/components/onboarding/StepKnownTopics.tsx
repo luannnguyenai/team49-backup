@@ -101,7 +101,7 @@ export default function StepKnownTopics({ modules, selectedIds, onToggle }: Prop
                       )}
                       style={{ color: isSelected ? undefined : "var(--text-primary)" }}
                     >
-                      {topic.title}
+                      {topic.name}
                     </span>
 
                     {/* Estimated time */}
@@ -110,7 +110,9 @@ export default function StepKnownTopics({ modules, selectedIds, onToggle }: Prop
                       style={{ color: "var(--text-muted)" }}
                     >
                       <Clock className="h-3 w-3" />
-                      {topic.estimated_minutes} phút
+                      {topic.estimated_hours_beginner != null
+                        ? `${Math.round(topic.estimated_hours_beginner * 60)} phút`
+                        : "—"}
                     </span>
                   </button>
                 );

@@ -1,11 +1,10 @@
 # =============================================================================
-# Dockerfile — Multi-stage build for FastAPI backend
+# Dockerfile — FastAPI backend (Python 3.11, multi-stage)
 # =============================================================================
 
-# ── Stage 1: Builder ─────────────────────────────────────────────────────────
-FROM python:3.12-slim-bookworm AS builder
+# ── Stage 1: builder — install deps into /install ────────────────────────────
+FROM python:3.11-slim-bookworm AS builder
 
-# Set build-time env
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=off \
@@ -13,45 +12,50 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /build
 
-# Install build dependencies (needed for asyncpg / psycopg2 / cryptography)
+# Build deps for asyncpg / psycopg2-binary / cryptography
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies into a specific directory
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install --target=/build/deps -r requirements.txt
+    pip install --target=/install -r requirements.txt
 
 
-# ── Stage 2: Runtime ─────────────────────────────────────────────────────────
-FROM python:3.12-slim-bookworm AS runtime
+# ── Stage 2: runtime — minimal image ─────────────────────────────────────────
+FROM python:3.11-slim-bookworm AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH="/app:/app/deps"
+    PYTHONPATH="/app:/app/deps" \
+    PORT=8000
 
 WORKDIR /app
 
-# Install runtime library dependencies (libpq for PostgreSQL)
+# Runtime-only system libs
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy installed deps from builder
-COPY --from=builder /build/deps /app/deps
+# Copy installed packages from builder
+COPY --from=builder /install /app/deps
 
-# Copy application source
+# Copy application source (excluding dev/test artefacts via .dockerignore)
 COPY . .
 
-# Create non-root user for security
+# Non-root user
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
 
-# Default command: run uvicorn
-CMD ["python", "main.py"]
+HEALTHCHECK --interval=20s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Production: uvicorn with 4 workers.
+# Override CMD in docker-compose.yml for dev (--reload).
+CMD ["python", "-m", "uvicorn", "src.api.app:app", \
+     "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

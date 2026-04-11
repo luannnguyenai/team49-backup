@@ -27,10 +27,10 @@ type Phase = "loading" | "active" | "submitting" | "error";
 const OPTIONS: SelectedAnswer[] = ["A", "B", "C", "D"];
 
 const BLOOM_BADGE: Record<string, { label: string; color: string }> = {
-  remember:   { label: "Nhớ",     color: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300" },
-  understand: { label: "Hiểu",    color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" },
-  apply:      { label: "Áp dụng", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
-  analyze:    { label: "Phân tích",color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" },
+  remember: { label: "Nhớ", color: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300" },
+  understand: { label: "Hiểu", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" },
+  apply: { label: "Áp dụng", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
+  analyze: { label: "Phân tích", color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" },
 };
 
 // ---------------------------------------------------------------------------
@@ -95,7 +95,7 @@ export default function AssessmentPage() {
           modules.forEach((m) =>
             m.topics.forEach((t) => {
               topicIds.push(t.id);
-              nameMap[t.id] = t.title;
+              nameMap[t.id] = t.name;
             })
           );
         }
@@ -109,7 +109,7 @@ export default function AssessmentPage() {
           details.forEach((m) =>
             m.topics.forEach((t) => {
               topicIds.push(t.id);
-              nameMap[t.id] = t.title;
+              nameMap[t.id] = t.name;
             })
           );
         }

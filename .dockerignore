@@ -1,26 +1,66 @@
-.venv/
+# =============================================================================
+# .dockerignore — Backend (root context)
+# =============================================================================
+
+# Python artefacts
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
-.db
-.sqlite
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+reports/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+app.db
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+.ai-log/
+
+# Media / large data files
+data/*.mp4
+data/*.pdf
+data/*.zip
+*.tar.gz
+
+# Git & tooling
 .git/
 .github/
+.gitignore
 .vscode/
 .idea/
-.ai-log/
-*.zip
-*.tar.gz
-*.mp4
-*.pdf
-logs/*.log
-app.db
-.env
-Dockerfile
-docker-compose.yml
-README.md
-architecture_review.md
-walkthrough.md
-implementation_plan.md
-task.md
+.DS_Store
+
+# Documentation
+*.md
+architecture_*.png
+*.ipynb
+
+# Frontend (not needed in backend image)
+frontend/
+node_modules/
+
+# Test artefacts
+build.log
+crawl.ipynb
+test_stream.py
+WORKLOG*.md
+JOURNAL*.md
+AGENTS.md

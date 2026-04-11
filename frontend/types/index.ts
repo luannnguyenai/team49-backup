@@ -75,7 +75,7 @@ export interface ModuleDetail extends ModuleListItem {
 export type BloomLevel = "remember" | "understand" | "apply" | "analyze";
 export type DifficultyBucket = "easy" | "medium" | "hard";
 export type SelectedAnswer = "A" | "B" | "C" | "D";
-export type MasteryLevel = "novice" | "developing" | "proficient" | "mastered";
+export type MasteryLevel = "not_started" | "novice" | "developing" | "proficient" | "mastered";
 
 export interface QuestionForAssessment {
   id: string;

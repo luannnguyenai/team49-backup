@@ -32,10 +32,10 @@ function toPoints(pts: { x: number; y: number }[]) {
 // Mastery level → fill color
 // ---------------------------------------------------------------------------
 const LEVEL_COLOR: Record<string, string> = {
-  novice:      "#f87171", // red-400
-  developing:  "#fb923c", // orange-400
-  proficient:  "#60a5fa", // blue-400
-  mastered:    "#34d399", // emerald-400
+  novice: "#f87171", // red-400
+  developing: "#fb923c", // orange-400
+  proficient: "#60a5fa", // blue-400
+  mastered: "#34d399", // emerald-400
 };
 
 const GRID_LEVELS = [20, 40, 60, 80, 100] as const;

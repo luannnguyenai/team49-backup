@@ -33,8 +33,9 @@ from src.config import settings
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create sync tables for lectures (backward compat)
-    init_db()
+    # Startup: skip sync table creation (run migrations instead)
+    # init_db() creates sync tables using psycopg2, which fails in Docker
+    # Use: docker compose exec backend alembic upgrade head
     yield
     # Shutdown: dispose async engine
     await async_engine.dispose()

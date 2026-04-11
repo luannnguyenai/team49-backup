@@ -5,7 +5,6 @@ Unified application settings loaded from environment variables via Pydantic Sett
 Merges original A20-App-049 config (LLM keys) with AI Personalized config (DB, Auth).
 """
 
-import os
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -15,6 +14,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # ---- LLM API Keys (original A20-App-049) ----
