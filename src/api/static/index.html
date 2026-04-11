@@ -136,26 +136,95 @@
         const sendBtn = document.getElementById('sendBtn');
         const timeDisplay = document.getElementById('currentTime');
         let lectures = [];
+        let progressMap = {};  // { lecture_id: last_timestamp }
+        let saveTimer = null;
 
-        // Load lectures
-        fetch('/api/lectures').then(r => r.json()).then(data => {
-            lectures = data;
-            lectureSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
-            if (data.length) selectLecture(data[0].id);
-        });
+        // --- Session ID (persisted in localStorage) ---
+        function getSessionId() {
+            let sid = localStorage.getItem('ai_tutor_session_id');
+            if (!sid) {
+                sid = crypto.randomUUID ? crypto.randomUUID() : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+                localStorage.setItem('ai_tutor_session_id', sid);
+            }
+            return sid;
+        }
+        const SESSION_ID = getSessionId();
+
+        // --- Progress: Save (debounced) ---
+        function saveProgress() {
+            const lid = lectureSelect.value;
+            const ts = video.currentTime;
+            if (!lid || ts < 1) return;
+            fetch('/api/progress', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ session_id: SESSION_ID, lecture_id: lid, last_timestamp: ts })
+            }).catch(() => {});  // fire-and-forget
+        }
+
+        function scheduleSave() {
+            if (saveTimer) return;
+            saveTimer = setInterval(() => {
+                if (!video.paused && video.currentTime > 0) saveProgress();
+            }, 10000);  // every 10 seconds
+        }
+
+        // --- Progress: Restore ---
+        async function loadAllProgress() {
+            try {
+                const resp = await fetch(`/api/progress/${SESSION_ID}`);
+                progressMap = await resp.json();
+            } catch { progressMap = {}; }
+        }
+
+        function restoreProgress(lectureId) {
+            const ts = progressMap[lectureId];
+            if (ts && ts > 1) {
+                video.currentTime = ts;
+            }
+        }
+
+        // --- Init: Load lectures then restore progress ---
+        async function init() {
+            const resp = await fetch('/api/lectures');
+            lectures = await resp.json();
+            lectureSelect.innerHTML = lectures.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+            
+            await loadAllProgress();
+
+            // Check if there's a saved lecture to restore
+            const lastLecture = localStorage.getItem('ai_tutor_last_lecture');
+            if (lastLecture && lectures.some(l => l.id === lastLecture)) {
+                lectureSelect.value = lastLecture;
+                selectLecture(lastLecture);
+            } else if (lectures.length) {
+                selectLecture(lectures[0].id);
+            }
+            
+            scheduleSave();
+        }
+        init();
 
         function selectLecture(id) {
+            // Save current progress before switching
+            if (lectureSelect.value && video.currentTime > 1) saveProgress();
+
             const lec = lectures.find(l => l.id === id);
             if (lec) {
                 video.src = `/${lec.video_url}`;
                 document.getElementById('videoTitle').innerText = lec.title;
+                localStorage.setItem('ai_tutor_last_lecture', id);
                 video.load();
+                // Restore after video metadata is loaded
+                video.addEventListener('loadedmetadata', () => restoreProgress(id), { once: true });
             }
         }
         lectureSelect.addEventListener('change', e => selectLecture(e.target.value));
         video.addEventListener('timeupdate', () => {
             timeDisplay.innerText = new Date(video.currentTime * 1000).toISOString().substr(11, 8);
         });
+        // Save progress when user leaves page
+        window.addEventListener('beforeunload', () => saveProgress());
 
         function captureFrame() {
             try {
