@@ -1,0 +1,9 @@
+[
+  {
+    "slug": "cs224n_nlp",
+    "name": "CS224N: Natural Language Processing with Deep Learning",
+    "description": "Khóa học chuyên sâu về NLP hiện đại: từ word vectors, RNNs, Transformers đến pretraining, post-training (RLHF/DPO), prompting, agents và RAG. Dựa trên CS224N của Stanford.",
+    "order_index": 1,
+    "prerequisite_module_slugs": ["python_basics"]
+  }
+]
