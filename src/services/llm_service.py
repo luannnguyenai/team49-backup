@@ -14,7 +14,7 @@ from langgraph.prebuilt import ToolNode
 
 from src.config import DEFAULT_MODEL, MODEL_PROVIDER
 from src.services.sandbox import run_python_code
-from src.services.guardrails import check_intent
+from src.services.router import route_question
 from src.models.store import SessionLocal, Lecture, Chapter, TranscriptLine, QAHistory
 
 # Configure File Logging
@@ -92,52 +92,117 @@ graph_builder.add_edge("give_up", END)
 
 compiled_graph = graph_builder.compile()
 
+
+# --- Helper: Save QA + Log ---
+def _save_and_log(db, lecture_id, current_timestamp, user_question, full_answer, thoughts="", image_base64=None):
+    """Save QAHistory to DB and write logs. Returns the QAHistory.id."""
+    curr_ts_str = format_timestamp(current_timestamp)
+
+    history = QAHistory(
+        lecture_id=lecture_id,
+        question=user_question,
+        answer=full_answer,
+        thoughts=thoughts,
+        current_timestamp=current_timestamp,
+        image_base64=image_base64[:500] if image_base64 else None
+    )
+    db.add(history)
+    db.commit()
+
+    # Human-readable log
+    qa_logger.info(
+        f"\n{'='*60}\n"
+        f"[Time]    : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"[Lecture] : {lecture_id}\n"
+        f"[At]      : {current_timestamp:.1f}s ({curr_ts_str})\n"
+        f"[Route]   : {thoughts.split(']')[0].replace('[','') if thoughts.startswith('[') else 'COMPLEX'}\n"
+        f"\n[Question]:\n{user_question}\n"
+        f"\n[Answer]:\n{full_answer}\n"
+        f"{'='*60}"
+    )
+
+    # Structured JSONL log
+    jsonl_logger.info(json.dumps({
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "lecture": lecture_id,
+        "at_seconds": current_timestamp,
+        "at_formatted": curr_ts_str,
+        "question": user_question,
+        "route": thoughts.split(']')[0].replace('[','').strip() if thoughts.startswith('[') else "COMPLEX",
+        "tool_used": "[SANDBOX]" in thoughts,
+        "answer": full_answer
+    }, ensure_ascii=False))
+
+    return history.id
+
+
 # --- Main Generator ---
 def get_context_and_stream_langgraph(lecture_id, current_timestamp, user_question, image_base64=None):
     db = SessionLocal()
     
-    # 0. Guardrail: Intent Moderation (check before running the agent)
-    lecture = db.query(Lecture).filter(Lecture.id == lecture_id).first()
-    lecture_title = lecture.title if lecture else lecture_id
-    intent = check_intent(user_question, lecture_title)
-    if not intent.get("allowed"):
-        yield json.dumps({"blocked": True, "message": intent.get("message", "Câu hỏi ngoài phạm vi.")}) + "\n"
-        qa_logger.info(
-            f"\n{'='*60}\n"
-            f"[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-            f"[Lecture] : {lecture_id}\n"
-            f"[Question]: {user_question}\n"
-            f"[Category]: {intent.get('category')} — {intent.get('reason')}\n"
-            f"{'='*60}"
-        )
-        db.close()
-        return
+    try:
+        # 0. Fetch lecture info + ToC (needed for router context)
+        lecture = db.query(Lecture).filter(Lecture.id == lecture_id).first()
+        lecture_title = lecture.title if lecture else lecture_id
 
-    # 1. Get ToC
-    chapters = db.query(Chapter).filter(Chapter.lecture_id == lecture_id).all()
-    toc_context = "TABLE OF CONTENTS:\n"
-    for chap in chapters:
-        start_ts = format_timestamp(chap.start_time)
-        end_ts = format_timestamp(chap.end_time)
-        toc_context += f"- [{start_ts} - {end_ts}] {chap.title}: {chap.summary}\n"
+        chapters = db.query(Chapter).filter(Chapter.lecture_id == lecture_id).all()
+        toc_context = "TABLE OF CONTENTS:\n"
+        context_summary = ""  # Short version for router
+        for chap in chapters:
+            start_ts = format_timestamp(chap.start_time)
+            end_ts = format_timestamp(chap.end_time)
+            toc_context += f"- [{start_ts} - {end_ts}] {chap.title}: {chap.summary}\n"
+            context_summary += f"- {chap.title}: {chap.summary}\n"
+
+        # 1. Smart Router: classify the question
+        routing = route_question(user_question, lecture_title, context_summary)
+        route = routing.get("route", "COMPLEX")
+
+        # --- BLOCKED ---
+        if route == "BLOCKED":
+            yield json.dumps({"blocked": True, "message": routing.get("message", "Câu hỏi ngoài phạm vi.")}) + "\n"
+            qa_logger.info(
+                f"\n{'='*60}\n"
+                f"[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"[Lecture] : {lecture_id}\n"
+                f"[Question]: {user_question}\n"
+                f"[Reason]  : {routing.get('reason')}\n"
+                f"{'='*60}"
+            )
+            return
+
+        # --- SIMPLE (fast path — no LangGraph) ---
+        if route == "SIMPLE":
+            direct_answer = routing.get("direct_answer", "")
+            yield json.dumps({"a": direct_answer}) + "\n"
+
+            qa_id = _save_and_log(
+                db, lecture_id, current_timestamp, user_question,
+                full_answer=direct_answer,
+                thoughts=f"[SIMPLE] {routing.get('reason', '')}",
+                image_base64=image_base64
+            )
+            yield json.dumps({"qa_id": qa_id}) + "\n"
+            return
+
+        # --- COMPLEX (full LangGraph pipeline) ---
+        # 2. Get Transcript Window (+/- 5 mins = 600s total)
+        start_window = max(0, current_timestamp - 300)
+        end_window = current_timestamp + 300
         
-    # 2. Get Transcript Window (+/- 5 mins = 600s total)
-    start_window = max(0, current_timestamp - 300)
-    end_window = current_timestamp + 300
-    
-    lines = db.query(TranscriptLine).filter(
-        TranscriptLine.lecture_id == lecture_id,
-        TranscriptLine.start_time >= start_window,
-        TranscriptLine.start_time <= end_window
-    ).order_by(TranscriptLine.start_time).all()
-    
-    transcript_context = "TRANSCRIPT WINDOW:\n"
-    for line in lines:
-        ts = format_timestamp(line.start_time)
-        transcript_context += f"[{ts}] {line.content}\n"
+        lines = db.query(TranscriptLine).filter(
+            TranscriptLine.lecture_id == lecture_id,
+            TranscriptLine.start_time >= start_window,
+            TranscriptLine.start_time <= end_window
+        ).order_by(TranscriptLine.start_time).all()
         
-    # 3. System Prompt (English + Guardrails)
-    system_instruction = """You are an intelligent AI Tutor.
+        transcript_context = "TRANSCRIPT WINDOW:\n"
+        for line in lines:
+            ts = format_timestamp(line.start_time)
+            transcript_context += f"[{ts}] {line.content}\n"
+            
+        # 3. System Prompt (English + Guardrails)
+        system_instruction = """You are an intelligent AI Tutor.
 Task: Answer student questions STRICTLY based on the provided lecture context (Transcript + Table of Contents).
 
 CRITICAL STRICT RULES (Must follow without exception):
@@ -155,36 +220,35 @@ CRITICAL STRICT RULES (Must follow without exception):
 6. CONCISENESS: Always keep your answers brief, direct, and concise. Avoid long-winded explanations unless specifically asked.
 """
 
-    curr_ts_str = format_timestamp(current_timestamp)
-    user_prompt = f"Lecture Content:\n{toc_context}\n\nCurrent Time Window ({curr_ts_str}):\n{transcript_context}\n\nUser Question: \"{user_question}\""
+        curr_ts_str = format_timestamp(current_timestamp)
+        user_prompt = f"Lecture Content:\n{toc_context}\n\nCurrent Time Window ({curr_ts_str}):\n{transcript_context}\n\nUser Question: \"{user_question}\""
 
-    content_list = [{"type": "text", "text": user_prompt}]
-    if image_base64:
-        content_list.append({
-            "type": "image_url",
-            "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-        })
+        content_list = [{"type": "text", "text": user_prompt}]
+        if image_base64:
+            content_list.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
+            })
 
-    sys_msg = SystemMessage(content=system_instruction)
-    human_msg = HumanMessage(content=content_list)
+        sys_msg = SystemMessage(content=system_instruction)
+        human_msg = HumanMessage(content=content_list)
 
-    # --- Memory: Load last 5 Q&A from DB for this lecture ---
-    history_messages = []
-    past_qas = db.query(QAHistory).filter(
-        QAHistory.lecture_id == lecture_id
-    ).order_by(QAHistory.created_at.desc()).limit(5).all()
-    # Reverse to chronological order (oldest first)
-    past_qas = list(reversed(past_qas))
-    for qa in past_qas:
-        if qa.question:
-            history_messages.append(HumanMessage(content=qa.question))
-        if qa.answer:
-            history_messages.append(AIMessage(content=qa.answer))
+        # --- Memory: Load last 5 Q&A from DB for this lecture ---
+        history_messages = []
+        past_qas = db.query(QAHistory).filter(
+            QAHistory.lecture_id == lecture_id
+        ).order_by(QAHistory.created_at.desc()).limit(5).all()
+        # Reverse to chronological order (oldest first)
+        past_qas = list(reversed(past_qas))
+        for qa in past_qas:
+            if qa.question:
+                history_messages.append(HumanMessage(content=qa.question))
+            if qa.answer:
+                history_messages.append(AIMessage(content=qa.answer))
 
-    full_answer = ""
-    sandbox_output = ""
-    
-    try:
+        full_answer = ""
+        sandbox_output = ""
+        
         inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
         attempt_count = 0
         in_tool_call = False
@@ -224,46 +288,17 @@ CRITICAL STRICT RULES (Must follow without exception):
                 full_answer += chunk.content
                 yield json.dumps({"status": f"💀 {chunk.content}\n"}) + "\n"
                 
-        # 5. Save to DB
-        history = QAHistory(
-            lecture_id=lecture_id,
-            question=user_question,
-            answer=full_answer,
-            thoughts=sandbox_output,
-            current_timestamp=current_timestamp,
-            image_base64=image_base64[:500] if image_base64 else None
+        # 5. Save to DB + Log
+        thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
+        qa_id = _save_and_log(
+            db, lecture_id, current_timestamp, user_question,
+            full_answer=full_answer,
+            thoughts=thoughts,
+            image_base64=image_base64
         )
-        db.add(history)
-        db.commit()
 
         # Emit QA ID so Frontend can rate this response
-        yield json.dumps({"qa_id": history.id}) + "\n"
-
-        # 6a. Human-readable log (for developers)
-        tool_section = sandbox_output if sandbox_output else "N/A"
-        log_text = (
-            f"\n{'='*60}\n"
-            f"[Time]    : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-            f"[Lecture] : {lecture_id}\n"
-            f"[At]      : {current_timestamp:.1f}s ({curr_ts_str})\n"
-            f"\n[Question]:\n{user_question}\n"
-            f"\n[Tool / Sandbox Execution]:\n{tool_section}\n"
-            f"\n[Answer]:\n{full_answer}\n"
-            f"{'='*60}"
-        )
-        qa_logger.info(log_text)
-
-        # 6b. Structured JSONL log (for automation/parsers — one JSON object per line)
-        jsonl_logger.info(json.dumps({
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "lecture": lecture_id,
-            "at_seconds": current_timestamp,
-            "at_formatted": curr_ts_str,
-            "question": user_question,
-            "tool_used": sandbox_output != "",
-            "tool_log": sandbox_output[:500] if sandbox_output else None,
-            "answer": full_answer
-        }, ensure_ascii=False))
+        yield json.dumps({"qa_id": qa_id}) + "\n"
 
     except Exception as e:
         qa_logger.error(f"Error: {e}")
