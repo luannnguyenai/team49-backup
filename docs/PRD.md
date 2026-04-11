@@ -175,20 +175,23 @@ Hiện tại, học sinh gặp các vấn đề:
 ```
 Frontend (HTML5/Vanilla JS)
     │  - Video streaming & Progress auto-save (Local Storage Session UUID)
-    │  - Multi-modal Capture (Canvas Frame)
-    │  - SSE (Server-Sent Events) live streaming response
+    │  - Multi-modal Capture (Canvas Frame — only when paused)
+    │  - SSE (Server-Sent Events) live streaming + Silent Retry (max 3)
     ↓
 Backend API (FastAPI)
     │  - /api/lectures/ask 
     │  - /api/progress & /api/history/.../rate
     ↓
 Services Layer (LangChain / LangGraph):
-    - Intent Classifier (Guardrails)
-    - ReAct Agent (LLM Core)
-          ⇄ ToolNode: Python Sandbox (Subprocess cứng giới hạn memory/cpu)
+    - Smart Router (gpt-5.4-nano — FAST_MODEL)
+          ├─ BLOCKED  → reject immediately
+          ├─ SIMPLE   → Nano answers directly (no LangGraph)
+          └─ COMPLEX  → ReAct Agent (gpt-5.4-mini — DEFAULT_MODEL)
+                            ⇄ ToolNode: Python Sandbox (hardened subprocess)
+    - Provider Abstraction: init_chat_model() (openai | ollama | anthropic)
     ↓
 Database (SQLite)
-    - QAHistory (Logs + User Rating)
+    - QAHistory (Logs + User Rating + Route tag)
     - LearningProgress (Session Restore)
 ```
 

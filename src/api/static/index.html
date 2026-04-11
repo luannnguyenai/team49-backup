@@ -246,7 +246,9 @@
 
             const ts = video.currentTime;
             const lid = lectureSelect.value;
-            const img = captureFrame();
+            // Only capture frame if the user paused the video to ask a question.
+            // When video is playing, the frame is irrelevant and wastes tokens.
+            const img = video.paused ? captureFrame() : null;
 
             // User message
             const uMsg = document.createElement('div');
