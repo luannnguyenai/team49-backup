@@ -56,6 +56,7 @@ class QAHistory(Base):
     thoughts = Column(Text, nullable=True) # Quá trình suy nghĩ sâu
     current_timestamp = Column(Float)
     image_base64 = Column(Text, nullable=True) # Ảnh đã chụp lúc đó
+    rating = Column(Integer, nullable=True)  # 1 = 👍, -1 = 👎, null = chưa đánh giá
     created_at = Column(DateTime, default=datetime.utcnow)
 
 def init_db():

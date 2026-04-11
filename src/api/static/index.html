@@ -80,6 +80,18 @@
         button:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .error { color: #ef4444; }
+
+        /* Rating Buttons */
+        .rating-bar { display: flex; gap: 0.5rem; margin-top: 0.5rem; padding-top: 0.4rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .rating-btn {
+            all: unset; cursor: pointer; font-size: 1.1rem; padding: 0.25rem 0.5rem;
+            border-radius: 6px; transition: all 0.2s; opacity: 0.5;
+        }
+        .rating-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); transform: scale(1.15); }
+        .rating-btn.selected { opacity: 1; transform: scale(1.15); }
+        .rating-btn.selected-up { background: rgba(74,222,128,0.2); }
+        .rating-btn.selected-down { background: rgba(248,113,113,0.2); }
+        .rating-btn:disabled { cursor: default; transform: none; }
     </style>
 </head>
 <body>
@@ -195,6 +207,7 @@
                 const decoder = new TextDecoder();
                 let rawText = '';
                 let hasError = false;
+                let qaId = null;
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -212,6 +225,9 @@
                             }
                             if (data.status) {
                                 statusDiv.innerText += data.status;
+                            }
+                            if (data.qa_id) {
+                                qaId = data.qa_id;
                             }
                             if (data.a) {
                                 rawText += data.a;
@@ -233,6 +249,38 @@
                     contentDiv.innerHTML = renderMarkdownLatex(rawText);
                 } else if (!hasError) {
                     contentDiv.innerText = 'Không nhận được phản hồi từ AI.';
+                }
+
+                // Add rating buttons if we got a qa_id
+                if (qaId) {
+                    const ratingBar = document.createElement('div');
+                    ratingBar.className = 'rating-bar';
+                    ratingBar.innerHTML = `
+                        <button class="rating-btn" data-rating="1" title="Hữu ích">👍</button>
+                        <button class="rating-btn" data-rating="-1" title="Chưa tốt">👎</button>
+                    `;
+                    aiMsg.appendChild(ratingBar);
+
+                    ratingBar.querySelectorAll('.rating-btn').forEach(btn => {
+                        btn.addEventListener('click', async () => {
+                            const rating = parseInt(btn.dataset.rating);
+                            try {
+                                await fetch(`/api/history/${qaId}/rate`, {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({ rating })
+                                });
+                                // Highlight selected, disable all
+                                ratingBar.querySelectorAll('.rating-btn').forEach(b => {
+                                    b.disabled = true;
+                                    b.classList.remove('selected', 'selected-up', 'selected-down');
+                                });
+                                btn.classList.add('selected', rating === 1 ? 'selected-up' : 'selected-down');
+                            } catch (err) {
+                                console.error('Rating failed:', err);
+                            }
+                        });
+                    });
                 }
 
             } catch (err) {

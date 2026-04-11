@@ -214,6 +214,9 @@ CRITICAL STRICT RULES (Must follow without exception):
         db.add(history)
         db.commit()
 
+        # Emit QA ID so Frontend can rate this response
+        yield json.dumps({"qa_id": history.id}) + "\n"
+
         # 6a. Human-readable log (for developers)
         tool_section = sandbox_output if sandbox_output else "N/A"
         log_text = (

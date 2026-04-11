@@ -60,6 +60,20 @@ def ask_question(req: AskRequest, db: Session = Depends(get_db)):
 def get_history(db: Session = Depends(get_db)):
     return db.query(QAHistory).order_by(QAHistory.created_at.desc()).limit(50).all()
 
+class RateRequest(BaseModel):
+    rating: int  # 1 = 👍, -1 = 👎
+
+@app.post("/api/history/{qa_id}/rate")
+def rate_answer(qa_id: int, req: RateRequest, db: Session = Depends(get_db)):
+    if req.rating not in (1, -1):
+        raise HTTPException(status_code=400, detail="Rating must be 1 or -1")
+    qa = db.query(QAHistory).filter(QAHistory.id == qa_id).first()
+    if not qa:
+        raise HTTPException(status_code=404, detail="QA entry not found")
+    qa.rating = req.rating
+    db.commit()
+    return {"status": "ok", "qa_id": qa_id, "rating": req.rating}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
