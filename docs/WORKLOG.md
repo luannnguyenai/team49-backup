@@ -50,3 +50,22 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 3. Sử dụng **Host Volumes** cho `data/`, `logs/`, và `app.db`. Người dùng tải thư mục `data/` từ Google Drive về máy trước khi chạy Docker.
 
 **Hệ quả:** Bất kỳ ai cũng có thể chạy dự án chỉ bằng 1 lệnh `docker compose up -d` sau khi đã tải dữ liệu. Dữ liệu video khổng lồ vẫn nằm ở ngoài container nên việc cập nhật code cực kỳ nhanh chóng và không làm phình Image.
+
+---
+
+### [ADR-4] Chuyển đổi kiến trúc sang LangGraph ReAct Agent & Python Sandbox — 11/04/2026
+
+**Bối cảnh:** Các vấn đề trong khóa CS231N phần lớn đòi hỏi khả năng toán học nâng cao (Ví dụ: tính đạo hàm, vector gradient, tính toán tích cực ma trận Backpropagation). LLLM như Gemini/GPT thường xuyên tính nhẩm sai các bước trung gian dẫn đến kết quả cuối cùng vô dụng đối với việc học kỹ thuật. 
+
+**Các lựa chọn đã xem xét:**
+- **Advanced Prompting** (Chain of Thought): Yêu cầu AI "work step-by-step". Nhanh, không tốn resource nhưng AI vẫn sinh ra các ảo giác tính bù trừ (hallucinate math operations).
+- **Hard-coded Math Modules**: Tự code function đạo hàm vào DB. Rất cứng nhắc, không bao quát được mọi ngóc ngách câu hỏi tự do của học viên.
+- **Agentic AI với Code Interpreter**: Triển khai hệ thống ReAct. Trao cho AI quyền truy cập một môi trường Sandbox thực thi code Python động (với `sympy`, `numpy`) để nó nhận câu hỏi -> sinh code Python giải toán -> Sandbox chạy code và trả kết quả Console -> AI phân tích kết quả -> Trả lời user.
+
+**Quyết định:** Nâng cấp sang kiến trúc truy vấn đa trạm bằng công cụ **LangGraph**. Mọi câu hỏi do user đặt ra giờ được đưa vào một **ReAct Agent**. Nếu Agent nhận thấy có tính toán phức tạp, nó sẽ tự xả mã vào luồng `Execute_Python` tool. 
+Tuy nhiên, để chặn sinh viên (hoặc hacker) đánh lừa Agent sinh ra các mã tàn phá server (Ví dụ: `os.system("rm -rf /")`), một cơ chế **Security Sandbox** khắt khe được triển khai xen kẽ:
+1. Phân tích tĩnh (Static Analysis) bằng regex AST: Chặn mọi thư viện networking (`socket`, `requests`), filesystem (`open`, `os.remove`), bypass/injection (`eval`, `exec`).
+2. Hard limits: Chặn CPU limit ở 12-15s bằng `resource.setrlimit`.
+3. Ràng buộc đa luồng chạy bằng biến môi trường phân luồng nội cục bộ OpenBLAS.
+
+**Hệ quả:** Tính năng "Giải Toán Bằng Python" mang lại chất lượng và độ chuẩn xác giáo án cực cao. Nhưng sự đánh đổi nằm ở việc Token tiêu tốn tăng mạnh vì quá trình *Sinh mã Python -> Nhận lỗi -> Sinh lại* tốn tận 2-3 lượt chain. Luồng Stream SSE từ FastAPI cũng phải phức tạp hóa để yield các thông báo chờ đặc biệt kiểu ("👾 Math Boss appeared... Fighting....") xuống cho Frontend nhằm dập tắt sự lo âu của User bởi sự im lặng dài do Latency.

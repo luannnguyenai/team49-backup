@@ -142,16 +142,19 @@ Hiện tại, học sinh gặp các vấn đề:
 #### 4. Learning Content (basic)
 
 * Text / AI-generated explanation
+* **[NEW]** Lịch sử học phần (Conversational Memory) giúp AI nhớ sát bối cảnh 5 messages.
+* **[NEW]** Tracking Video Progress (Lưu vết theo Session để khôi phục bài đang học dở).
 
-#### 5. Quiz Engine
+#### 5. Quiz / Problem Solving Engine (Agentic AI)
 
-* Multiple choice
-* Chấm điểm ngay
+* **[NEW]** Kiến trúc LangGraph ReAct Agent. AI không chỉ trả lời chay mà có khả năng **Tự viết code & Chạy Sandbox (Python)** để giải lập trình / toán (Linear Algebra trong CS231N).
+* Sandbox an toàn: Static analysis + CPU limits.
 
-#### 6. Instant Feedback
+#### 6. Instant Feedback & Moderation
 
-* Giải thích câu trả lời
-* Highlight sai đúng
+* Giải thích câu trả lời (Markdown + LaTeX).
+* **[NEW]** Intent Guardrail: Module AI phụ kiểm tra tính hợp lệ trước khi cho hỏi, chặn "Jailbreak", "Off-topic".
+* **[NEW]** User Feedback: Hệ thống thu thập đánh giá chất lượng (👍/👎) từ học viên.
 
 ---
 
@@ -170,16 +173,23 @@ Hiện tại, học sinh gặp các vấn đề:
 ### High-level Architecture
 
 ```
-Frontend (Angular)
+Frontend (HTML5/Vanilla JS)
+    │  - Video streaming & Progress auto-save (Local Storage Session UUID)
+    │  - Multi-modal Capture (Canvas Frame)
+    │  - SSE (Server-Sent Events) live streaming response
     ↓
 Backend API (FastAPI)
+    │  - /api/lectures/ask 
+    │  - /api/progress & /api/history/.../rate
     ↓
-Services:
-    - Quiz Engine
-    - Recommendation Engine (rule-based)
-    - AI Explanation Service
+Services Layer (LangChain / LangGraph):
+    - Intent Classifier (Guardrails)
+    - ReAct Agent (LLM Core)
+          ⇄ ToolNode: Python Sandbox (Subprocess cứng giới hạn memory/cpu)
     ↓
-Database (PostgreSQL / MongoDB)
+Database (SQLite)
+    - QAHistory (Logs + User Rating)
+    - LearningProgress (Session Restore)
 ```
 
 ---
@@ -205,55 +215,35 @@ Core APIs:
 
 ---
 
-#### 3. Recommendation Engine (MVP logic)
+#### 3. Recommendation Engine & Progress (MVP logic)
 
-Rule-based đơn giản:
-
-* Nếu sai nhiều skill A → học lại A
-* Nếu đúng > threshold → lên level
-
-👉 Sau này mới upgrade → ML
+* Lưu vị trí (timestamp) video mỗi 10s. Tự tải lại khi user refresh.
+* (Future): Adaptive Quiz – Nếu làm sai tự gợi ý học lại phần ToC đó.
 
 ---
 
-#### 4. AI Service
+#### 4. AI Service (Agentic)
 
-* Generate explanation:
-
-  * Tại sao sai
-  * Cách làm đúng
+* **Generative & Reasoning:** Dùng LangGraph tạo ReAct Agent có Tools (Python Sandbox). Không dùng LLM gọi chay qua API như ban đầu.
+* **Intent Guardrails:** Dùng 1 LLM call siêu nhẹ (<120 tokens) ở cổng vào chặn query ngoài luồng.
+* **Logging:** Xuất dữ liệu Q&A ra JSONL song song DB để phân tích.
 
 ---
 
 #### 5. Database Schema (simple)
 
-**User**
+**QAHistory**
 
-* id
-* current_level
+* id, lecture_id
+* question, answer, thoughts, rating
+* image_base64
+* current_timestamp
 
-**Skill**
+**LearningProgress**
 
-* id
-* name
-
-**UserSkill**
-
-* user_id
-* skill_id
-* score
-
-**Question**
-
-* id
-* skill_id
-* difficulty
-
-**Attempt**
-
-* user_id
-* question_id
-* correct
+* id, session_id (String), lecture_id
+* last_timestamp
+* updated_at
 
 ---
 
