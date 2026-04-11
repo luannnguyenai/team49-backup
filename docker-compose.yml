@@ -6,7 +6,9 @@ services:
       - "8000:8000"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - DEFAULT_MODEL=${DEFAULT_MODEL:-gemini-3-flash-preview}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-5.4-mini}
       - PYTHONPATH=/app
     volumes:
       - ./data:/app/data
@@ -23,7 +25,9 @@ services:
     command: ["uv", "run", "streamlit", "run", "src/ui/app.py"]
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - DEFAULT_MODEL=${DEFAULT_MODEL:-gemini-3-flash-preview}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-5.4-mini}
       - PYTHONPATH=/app
     volumes:
       - ./data:/app/data
