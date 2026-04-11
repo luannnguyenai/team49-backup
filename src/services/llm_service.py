@@ -14,6 +14,7 @@ from langgraph.prebuilt import ToolNode
 
 from src.config import OPENAI_API_KEY, DEFAULT_MODEL
 from src.services.sandbox import run_python_code
+from src.services.guardrails import check_intent
 from src.models.store import SessionLocal, Lecture, Chapter, TranscriptLine, QAHistory
 
 # Configure File Logging
@@ -91,6 +92,23 @@ compiled_graph = graph_builder.compile()
 def get_context_and_stream_langgraph(lecture_id, current_timestamp, user_question, image_base64=None):
     db = SessionLocal()
     
+    # 0. Guardrail: Intent Moderation (check before running the agent)
+    lecture = db.query(Lecture).filter(Lecture.id == lecture_id).first()
+    lecture_title = lecture.title if lecture else lecture_id
+    intent = check_intent(user_question, lecture_title)
+    if not intent.get("allowed"):
+        yield json.dumps({"blocked": True, "message": intent.get("message", "Câu hỏi ngoài phạm vi.")}) + "\n"
+        qa_logger.info(
+            f"\n{'='*60}\n"
+            f"[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"[Lecture] : {lecture_id}\n"
+            f"[Question]: {user_question}\n"
+            f"[Category]: {intent.get('category')} — {intent.get('reason')}\n"
+            f"{'='*60}"
+        )
+        db.close()
+        return
+
     # 1. Get ToC
     chapters = db.query(Chapter).filter(Chapter.lecture_id == lecture_id).all()
     toc_context = "TABLE OF CONTENTS:\n"

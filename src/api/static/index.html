@@ -92,6 +92,14 @@
         .rating-btn.selected-up { background: rgba(74,222,128,0.2); }
         .rating-btn.selected-down { background: rgba(248,113,113,0.2); }
         .rating-btn:disabled { cursor: default; transform: none; }
+
+        /* Moderation / Blocked Message */
+        .msg-blocked {
+            align-self: flex-start; background: rgba(245,158,11,0.12);
+            border: 1px solid rgba(245,158,11,0.3); color: #fbbf24;
+            max-width: 92%; padding: 0.6rem 0.8rem; border-radius: 10px;
+            font-size: 0.9rem; line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -218,6 +226,15 @@
                         if (!line.trim()) continue;
                         try {
                             const data = JSON.parse(line.trim());
+                            if (data.blocked) {
+                                // Guardrail blocked this question
+                                statusDiv.remove();
+                                contentDiv.remove();
+                                aiMsg.className = 'msg msg-blocked';
+                                aiMsg.innerText = data.message || '⛔ Câu hỏi ngoài phạm vi bài giảng.';
+                                hasError = true;
+                                break;
+                            }
                             if (data.e) {
                                 contentDiv.innerHTML = `<span class="error">⚠️ ${data.e}</span>`;
                                 hasError = true;
