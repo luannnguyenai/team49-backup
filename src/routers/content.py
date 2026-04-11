@@ -203,7 +203,7 @@ async def api_seed_data(db: AsyncSession = Depends(get_async_db)):
                 id=uuid.uuid4(),
                 topic_id=topic_id,
                 name=kc["name"],
-                slug=kc.get("slug"),
+                description=kc.get("description"),
             )
             db.add(knowledge_component)
 
