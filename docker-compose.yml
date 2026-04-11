@@ -9,6 +9,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-5.4-mini}
+      - FAST_MODEL=${FAST_MODEL:-gpt-5.4-nano}
+      - MODEL_PROVIDER=${MODEL_PROVIDER:-openai}
       - PYTHONPATH=/app
     volumes:
       - ./data:/app/data
@@ -28,6 +30,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-5.4-mini}
+      - FAST_MODEL=${FAST_MODEL:-gpt-5.4-nano}
+      - MODEL_PROVIDER=${MODEL_PROVIDER:-openai}
       - PYTHONPATH=/app
     volumes:
       - ./data:/app/data
