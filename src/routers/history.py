@@ -28,7 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
-from src.models.learning import SessionType, User
+from src.models.learning import SessionType
 from src.models.user import User
 from src.schemas.history import HistoryResponse, SessionDetailResponse
 from src.services.history_service import get_history, get_session_detail

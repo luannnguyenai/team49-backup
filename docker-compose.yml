@@ -132,14 +132,17 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: runner
+      args:
+        API_INTERNAL_URL: http://backend:8000
     container_name: al_frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
       # In-container API calls go through backend service name
-      NEXT_PUBLIC_API_URL: http://backend:8000
-      NODE_ENV: development
+      API_INTERNAL_URL: http://backend:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NODE_ENV: production
     depends_on:
       backend:
         condition: service_healthy

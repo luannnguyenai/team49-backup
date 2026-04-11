@@ -78,7 +78,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
     const angle = angleStep * i;
     const pos = polar(angle, labelR, cx, cy);
     // Anchor: left-align for right-side labels, right-align for left-side
-    const anchor =
+    const anchor: "middle" | "start" | "end" =
       Math.abs(pos.x - cx) < 4 ? "middle" : pos.x > cx ? "start" : "end";
     return { ...d, ...pos, anchor, angle };
   });

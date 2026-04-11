@@ -1,5 +1,6 @@
 // app/(auth)/login/page.tsx
 
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import LoginForm from "@/components/auth/LoginForm";
 
@@ -16,7 +17,9 @@ export default function LoginPage() {
           Đăng nhập để tiếp tục hành trình học tập của bạn.
         </p>
       </div>
-      <LoginForm />
+      <Suspense>
+        <LoginForm />
+      </Suspense>
     </>
   );
 }
