@@ -186,22 +186,27 @@
 
         // --- Init: Load lectures then restore progress ---
         async function init() {
-            const resp = await fetch('/api/lectures');
-            lectures = await resp.json();
-            lectureSelect.innerHTML = lectures.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
-            
-            await loadAllProgress();
+            try {
+                const resp = await fetch('/api/lectures');
+                lectures = await resp.json();
+                console.log('[init] Loaded lectures:', lectures.length);
+                lectureSelect.innerHTML = lectures.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+                
+                await loadAllProgress();
 
-            // Check if there's a saved lecture to restore
-            const lastLecture = localStorage.getItem('ai_tutor_last_lecture');
-            if (lastLecture && lectures.some(l => l.id === lastLecture)) {
-                lectureSelect.value = lastLecture;
-                selectLecture(lastLecture);
-            } else if (lectures.length) {
-                selectLecture(lectures[0].id);
+                // Check if there's a saved lecture to restore
+                const lastLecture = localStorage.getItem('ai_tutor_last_lecture');
+                if (lastLecture && lectures.some(l => l.id === lastLecture)) {
+                    lectureSelect.value = lastLecture;
+                    selectLecture(lastLecture);
+                } else if (lectures.length) {
+                    selectLecture(lectures[0].id);
+                }
+                
+                scheduleSave();
+            } catch (e) {
+                console.error('[init] FAILED:', e);
             }
-            
-            scheduleSave();
         }
         init();
 
@@ -400,9 +405,6 @@
                     });
                 }
 
-            } catch (err) {
-                contentDiv.innerHTML = `<span class="error">⚠️ Lỗi kết nối: ${err.message}</span>`;
-            }
             sendBtn.disabled = false;
             chatHistory.scrollTop = chatHistory.scrollHeight;
         });
