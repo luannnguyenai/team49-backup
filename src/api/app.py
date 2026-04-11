@@ -5,11 +5,17 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory, LearningProgress, init_db
 from src.services.llm_service import get_context_and_stream_langgraph
+from src.routers import auth as auth_router
+from src.routers import users as users_router
 
 # Initialize database tables on startup
 init_db()
 
 app = FastAPI(title="Lecture Q&A Platform API")
+
+# Auth & user routes
+app.include_router(auth_router.router)
+app.include_router(users_router.router)
 
 # Mount data to serve videos
 app.mount("/data", StaticFiles(directory="data"), name="data")
