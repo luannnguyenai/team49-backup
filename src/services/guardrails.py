@@ -9,10 +9,10 @@ full LangGraph agent.  Costs ~100 tokens per request.
 import json
 import logging
 
-from langchain_openai import ChatOpenAI
+from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from src.config import OPENAI_API_KEY, DEFAULT_MODEL
+from src.config import DEFAULT_MODEL, MODEL_PROVIDER
 
 logger = logging.getLogger("Guardrails")
 
@@ -54,10 +54,10 @@ def check_intent(question: str, lecture_title: str) -> dict:
         {"allowed": False, "category": "...", "reason": "...", "message": "..."} if blocked.
     """
     try:
-        classifier_llm = ChatOpenAI(
+        classifier_llm = init_chat_model(
             model=DEFAULT_MODEL,
+            model_provider=MODEL_PROVIDER,
             temperature=0,
-            api_key=OPENAI_API_KEY,
             max_tokens=120,
         )
 

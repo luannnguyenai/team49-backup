@@ -6,13 +6,13 @@ import operator
 from datetime import datetime, timedelta
 from typing import Annotated, TypedDict
 
-from langchain_openai import ChatOpenAI
+from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessageChunk, ToolMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 
-from src.config import OPENAI_API_KEY, DEFAULT_MODEL
+from src.config import DEFAULT_MODEL, MODEL_PROVIDER
 from src.services.sandbox import run_python_code
 from src.services.guardrails import check_intent
 from src.models.store import SessionLocal, Lecture, Chapter, TranscriptLine, QAHistory
@@ -53,9 +53,13 @@ def execute_python(code: str) -> str:
 tools = [execute_python]
 tool_node = ToolNode(tools)
 
-# Initialize LLM with tools
-llm = ChatOpenAI(model=DEFAULT_MODEL, temperature=0.2, api_key=OPENAI_API_KEY)
-llm_with_tools = llm.bind_tools(tools)
+# Initialize LLM with tools (provider-agnostic)
+llm = init_chat_model(model=DEFAULT_MODEL, model_provider=MODEL_PROVIDER, temperature=0.2)
+try:
+    llm_with_tools = llm.bind_tools(tools)
+except Exception:
+    # Local models may not support tool calling — degrade gracefully (no Sandbox)
+    llm_with_tools = llm
 
 def call_model(state: AgentState):
     response = llm_with_tools.invoke(state["messages"])
