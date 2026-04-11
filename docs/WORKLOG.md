@@ -69,3 +69,21 @@ Tuy nhiên, để chặn sinh viên (hoặc hacker) đánh lừa Agent sinh ra c
 3. Ràng buộc đa luồng chạy bằng biến môi trường phân luồng nội cục bộ OpenBLAS.
 
 **Hệ quả:** Tính năng "Giải Toán Bằng Python" mang lại chất lượng và độ chuẩn xác giáo án cực cao. Nhưng sự đánh đổi nằm ở việc Token tiêu tốn tăng mạnh vì quá trình *Sinh mã Python -> Nhận lỗi -> Sinh lại* tốn tận 2-3 lượt chain. Luồng Stream SSE từ FastAPI cũng phải phức tạp hóa để yield các thông báo chờ đặc biệt kiểu ("👾 Math Boss appeared... Fighting....") xuống cho Frontend nhằm dập tắt sự lo âu của User bởi sự im lặng dài do Latency.
+
+---
+
+### [ADR-5] Smart Router — Dual-Model Routing & Provider Abstraction — 11/04/2026
+
+**Bối cảnh:** Sau khi triển khai LangGraph ReAct Agent (ADR-4), mọi câu hỏi — kể cả "Chào bạn" hay "Bài này nói về gì?" — đều phải đi qua chuỗi xử lý nặng nề: LangGraph graph → model lớn (`gpt-5.4-mini`) → potentially tool calls. Chi phí token cao và latency dài cho những câu hỏi đơn giản. Ngoài ra, `ChatOpenAI` bị hardcode khiến hệ thống không thể chạy trên local model (Ollama).
+
+**Các lựa chọn đã xem xét:**
+- **Giữ nguyên single model:** Đơn giản nhưng lãng phí. Câu "Chào bạn" tốn ~2000 tokens thay vì ~150.
+- **Rule-based keyword router:** Nhanh nhưng dễ phân loại sai. Regex không thể hiểu ngữ nghĩa "Tính gradient" vs "Giải thích gradient là gì".
+- **LLM-based Smart Router:** Dùng model nhẹ (`gpt-5.4-nano`) phân loại BLOCKED/SIMPLE/COMPLEX. SIMPLE được trả lời luôn bởi Nano (skip LangGraph hoàn toàn).
+
+**Quyết định:**
+1. **Dual-Model Architecture:** Thêm `FAST_MODEL` (gpt-5.4-nano) làm router. Câu đơn giản → Nano trả lời luôn. Câu phức tạp → `DEFAULT_MODEL` (gpt-5.4-mini) + LangGraph + Sandbox.
+2. **Provider Abstraction:** Thay toàn bộ `ChatOpenAI` bằng `init_chat_model(model, model_provider=MODEL_PROVIDER)` từ LangChain. Chỉ cần set `.env` để chuyển sang Ollama/Anthropic mà không sửa code.
+3. **Graceful Degradation:** `bind_tools()` được bọc trong `try/except` — local model không support function calling vẫn chạy được (chỉ thiếu Python Sandbox).
+
+**Hệ quả:** Tiết kiệm ~80% tokens cho câu hỏi đơn giản (450 vs 2000-3000). Hệ thống linh hoạt — đổi 3 dòng `.env` là chạy từ GPT cloud xuống Ollama local trên máy yếu. Trade-off: thêm 1 LLM call (~150 tokens) cho mọi request, nhưng chi phí này nhỏ hơn nhiều so với tiết kiệm được.
