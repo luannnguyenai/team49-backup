@@ -10,7 +10,7 @@ with open("src/config.py", "r") as f:
 
 config_add = """    default_model: str = Field(default="gemini-3-flash-preview", description="Default LLM model")
     fast_model: str = Field(default="gemini-2.5-flash", description="Fast model for minor tasks")
-    model_provider: str = Field(default="gemini", description="LLM provider")"""
+    model_provider: str = Field(default="google_genai", description="LLM provider")"""
 text = text.replace('    default_model: str = Field(default="gemini-3-flash-preview", description="Default LLM model")', config_add)
 
 config_alias = """DEFAULT_MODEL = settings.default_model

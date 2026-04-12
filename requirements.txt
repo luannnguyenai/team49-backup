@@ -16,7 +16,7 @@ langchain>=1.2.15
 langchain-openai>=0.1.0
 langchain-core>=0.1.0
 langgraph>=0.1.0
-
+langchain-google-genai
 # ── New: AI Personalized ──
 pydantic-settings>=2.0.0
 pydantic[email]

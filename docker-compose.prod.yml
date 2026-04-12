@@ -12,12 +12,12 @@ services:
   # ── PostgreSQL: no host port exposure ─────────────────────────────────────
   db:
     restart: always
-    ports: []                  # internal only — never expose DB to internet
+    ports: [] # internal only — never expose DB to internet
 
   # ── Redis: no host port exposure ──────────────────────────────────────────
   redis:
     restart: always
-    ports: []                  # internal only
+    ports: [] # internal only
 
   # ── Backend: production Uvicorn (no hot-reload, no source mount) ───────────
   backend:
@@ -30,13 +30,13 @@ services:
         BUILDKIT_INLINE_CACHE: "1"
     # Override dev command — no --reload, 4 workers
     command: >
-      python -m uvicorn src.api.app:app
+      uv run python -m uvicorn src.api.app:app
         --host 0.0.0.0 --port 8000
         --workers 4
         --log-level warning
         --proxy-headers
         --forwarded-allow-ips "*"
-    volumes: []                # no source mounts in prod
+    volumes: [] # no source mounts in prod
     environment:
       DEBUG: "false"
       DB_ECHO: "false"

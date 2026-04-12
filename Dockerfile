@@ -1,5 +1,5 @@
 # Use a lightweight Python base image
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim-bookworm AS runtime
 
 # Install system dependencies and uv
 # uv is a fast Python package manager
