@@ -45,6 +45,7 @@ quiz_router = APIRouter(prefix="/api/quiz", tags=["Quiz"])
 # POST /api/quiz/start
 # ---------------------------------------------------------------------------
 
+
 @quiz_router.post(
     "/start",
     response_model=QuizStartResponse,
@@ -68,6 +69,7 @@ async def api_start_quiz(
 # POST /api/quiz/{session_id}/answer
 # ---------------------------------------------------------------------------
 
+
 @quiz_router.post(
     "/{session_id}/answer",
     response_model=QuizAnswerResponse,
@@ -89,6 +91,7 @@ async def api_answer_question(
 # ---------------------------------------------------------------------------
 # POST /api/quiz/{session_id}/complete
 # ---------------------------------------------------------------------------
+
 
 @quiz_router.post(
     "/{session_id}/complete",
@@ -112,6 +115,7 @@ async def api_complete_quiz(
 # ---------------------------------------------------------------------------
 # GET /api/quiz/history
 # ---------------------------------------------------------------------------
+
 
 @quiz_router.get(
     "/history",

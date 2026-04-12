@@ -37,6 +37,7 @@ assessment_router = APIRouter(prefix="/api/assessment", tags=["Assessment"])
 # POST /api/assessment/start
 # ---------------------------------------------------------------------------
 
+
 @assessment_router.post(
     "/start",
     response_model=AssessmentStartResponse,
@@ -60,6 +61,7 @@ async def api_start_assessment(
 # POST /api/assessment/{session_id}/submit
 # ---------------------------------------------------------------------------
 
+
 @assessment_router.post(
     "/{session_id}/submit",
     response_model=AssessmentResultResponse,
@@ -82,6 +84,7 @@ async def api_submit_assessment(
 # ---------------------------------------------------------------------------
 # GET /api/assessment/{session_id}/results
 # ---------------------------------------------------------------------------
+
 
 @assessment_router.get(
     "/{session_id}/results",

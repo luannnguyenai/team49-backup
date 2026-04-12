@@ -6,8 +6,7 @@ No HTTP concerns here — can be tested independently.
 """
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Any
+from datetime import UTC, datetime, timedelta
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -37,8 +36,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 # JWT helpers
 # ---------------------------------------------------------------------------
 
+
 def _now_utc() -> datetime:
-    return datetime.now(tz=timezone.utc)
+    return datetime.now(tz=UTC)
 
 
 def create_access_token(user_id: uuid.UUID) -> tuple[str, int]:
@@ -78,6 +78,7 @@ def decode_token(token: str) -> TokenPayload:
 # Database operations
 # ---------------------------------------------------------------------------
 
+
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     result = await db.execute(select(User).where(User.email == email.lower()))
     return result.scalar_one_or_none()
@@ -92,6 +93,7 @@ async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
 # Service methods
 # ---------------------------------------------------------------------------
 
+
 async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
     """Create a new user. Raises ValueError if email already exists."""
     existing = await get_user_by_email(db, data.email)
@@ -104,14 +106,12 @@ async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
         hashed_password=hash_password(data.password),
     )
     db.add(user)
-    await db.flush()   # get the generated UUID before commit
+    await db.flush()  # get the generated UUID before commit
     await db.refresh(user)
     return user
 
 
-async def authenticate_user(
-    db: AsyncSession, email: str, password: str
-) -> User:
+async def authenticate_user(db: AsyncSession, email: str, password: str) -> User:
     """Verify credentials. Raises ValueError on invalid email or password."""
     user = await get_user_by_email(db, email.lower())
     if not user or not verify_password(password, user.hashed_password):

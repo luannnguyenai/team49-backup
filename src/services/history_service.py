@@ -23,7 +23,7 @@ get_session_detail
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -37,8 +37,6 @@ from src.models.content import (
 )
 from src.models.learning import (
     Interaction,
-    MasteryScore,
-    SelectedAnswer,
     Session,
     SessionType,
 )
@@ -51,16 +49,15 @@ from src.schemas.history import (
     SessionDetailResponse,
 )
 from src.services.mastery_evaluator import (
-    BLOOM_POINTS,
     BloomLevel,
-    evaluate_topic,
     QuestionResult,
+    evaluate_topic,
 )
-
 
 # ---------------------------------------------------------------------------
 # GET /api/history
 # ---------------------------------------------------------------------------
+
 
 async def get_history(
     db: AsyncSession,
@@ -68,7 +65,7 @@ async def get_history(
     *,
     session_type: SessionType | None = None,
     module_id: uuid.UUID | None = None,
-    days: int | None = None,          # None = all time
+    days: int | None = None,  # None = all time
     page: int = 1,
     page_size: int = 20,
 ) -> HistoryResponse:
@@ -82,23 +79,20 @@ async def get_history(
     if module_id is not None:
         # For quiz / assessment filter by topic.module_id, for module_test by session.module_id
         from sqlalchemy import or_
+
         filters.append(
             or_(
                 Session.module_id == module_id,
-                Session.topic_id.in_(
-                    select(Topic.id).where(Topic.module_id == module_id)
-                ),
+                Session.topic_id.in_(select(Topic.id).where(Topic.module_id == module_id)),
             )
         )
 
     if days is not None:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        cutoff = datetime.now(UTC) - timedelta(days=days)
         filters.append(Session.started_at >= cutoff)
 
     # ── Count total ────────────────────────────────────────────────────────
-    count_result = await db.execute(
-        select(func.count()).select_from(Session).where(*filters)
-    )
+    count_result = await db.execute(select(func.count()).select_from(Session).where(*filters))
     total: int = count_result.scalar() or 0
 
     # ── Fetch page ─────────────────────────────────────────────────────────
@@ -111,8 +105,7 @@ async def get_history(
         .outerjoin(Topic, Session.topic_id == Topic.id)
         .outerjoin(
             Module,
-            (Session.module_id == Module.id)
-            | (Topic.module_id == Module.id),
+            (Session.module_id == Module.id) | (Topic.module_id == Module.id),
         )
         .where(*filters)
         .order_by(Session.started_at.desc())
@@ -176,9 +169,7 @@ async def _compute_summary(
     """Compute stats over ALL rows matching filters (ignores pagination)."""
 
     all_result = await db.execute(
-        select(Session)
-        .where(*filters)
-        .order_by(Session.started_at.asc())
+        select(Session).where(*filters).order_by(Session.started_at.asc())
     )
     sessions: list[Session] = all_result.scalars().all()
 
@@ -193,9 +184,7 @@ async def _compute_summary(
     total_study_seconds = 0
     for s in completed:
         if s.completed_at and s.started_at:
-            total_study_seconds += max(
-                0, int((s.completed_at - s.started_at).total_seconds())
-            )
+            total_study_seconds += max(0, int((s.completed_at - s.started_at).total_seconds()))
 
     # Score trend: last ≤ 20 completed sessions with a score
     trend_sessions = [s for s in completed if s.score_percent is not None][-20:]
@@ -219,6 +208,7 @@ async def _compute_summary(
 # ---------------------------------------------------------------------------
 # GET /api/history/{session_id}/detail
 # ---------------------------------------------------------------------------
+
 
 async def get_session_detail(
     db: AsyncSession,
@@ -266,7 +256,6 @@ async def get_session_detail(
         )
 
     # 3. Build QuestionResult list for the evaluator
-    topic_ids_in_session = list({q.topic_id for _, q, _ in rows})
     qr_list: list[QuestionResult] = [
         QuestionResult(
             question_id=q.id,
@@ -305,9 +294,7 @@ async def get_session_detail(
         all_misconceptions.update(ev.misconceptions_detected)
 
     bloom_breakdown: dict[str, str] = {
-        k: f"{bloom_correct[k]}/{bloom_total[k]}"
-        for k in bloom_correct
-        if bloom_total[k] > 0
+        k: f"{bloom_correct[k]}/{bloom_total[k]}" for k in bloom_correct if bloom_total[k] > 0
     }
 
     # 5. Resolve KC names
@@ -326,9 +313,7 @@ async def get_session_detail(
             option_b=q.option_b,
             option_c=q.option_c,
             option_d=q.option_d,
-            selected_answer=(
-                inter.selected_answer.value if inter.selected_answer else None
-            ),
+            selected_answer=(inter.selected_answer.value if inter.selected_answer else None),
             correct_answer=q.correct_answer.value,
             is_correct=inter.is_correct,
             response_time_ms=inter.response_time_ms,
@@ -351,6 +336,7 @@ async def get_session_detail(
 # Helper
 # ---------------------------------------------------------------------------
 
+
 async def _resolve_kc_names(
     db: AsyncSession,
     kc_id_strs: list[str],
@@ -365,8 +351,6 @@ async def _resolve_kc_names(
             pass
     if not valid:
         return kc_id_strs
-    result = await db.execute(
-        select(KnowledgeComponent).where(KnowledgeComponent.id.in_(valid))
-    )
+    result = await db.execute(select(KnowledgeComponent).where(KnowledgeComponent.id.in_(valid)))
     name_map = {str(kc.id): kc.name for kc in result.scalars().all()}
     return [name_map.get(s, s) for s in kc_id_strs]

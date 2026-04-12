@@ -18,10 +18,10 @@ from pydantic import BaseModel
 
 from src.models.learning import SessionType
 
-
 # ---------------------------------------------------------------------------
 # GET /api/history
 # ---------------------------------------------------------------------------
+
 
 class HistoryItem(BaseModel):
     """One row in the history list."""
@@ -30,7 +30,7 @@ class HistoryItem(BaseModel):
     session_type: SessionType
     started_at: datetime
     completed_at: datetime | None
-    duration_seconds: int | None     # None if session never completed
+    duration_seconds: int | None  # None if session never completed
 
     # Subject: topic name for quiz/assessment rows, module name for module_test
     subject: str
@@ -44,22 +44,24 @@ class HistoryItem(BaseModel):
 
 class ScoreTrendPoint(BaseModel):
     """One point on the score trend mini-chart (ordered oldest → newest)."""
+
     started_at: datetime
     score_percent: float
 
 
 class HistorySummary(BaseModel):
     """Aggregate stats shown above the table."""
+
     total_sessions: int
     completed_sessions: int
-    avg_score: float | None          # None if no completed sessions
-    total_study_seconds: int         # sum of durations for completed sessions
-    score_trend: list[ScoreTrendPoint]   # last ≤ 20 completed sessions
+    avg_score: float | None  # None if no completed sessions
+    total_study_seconds: int  # sum of durations for completed sessions
+    score_trend: list[ScoreTrendPoint]  # last ≤ 20 completed sessions
 
 
 class HistoryResponse(BaseModel):
     summary: HistorySummary
-    total: int                       # total rows matching filters
+    total: int  # total rows matching filters
     page: int
     page_size: int
     items: list[HistoryItem]
@@ -68,6 +70,7 @@ class HistoryResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # GET /api/history/{session_id}/detail
 # ---------------------------------------------------------------------------
+
 
 class QuestionInteractionDetail(BaseModel):
     """One question + user's answer within a session."""
@@ -82,7 +85,7 @@ class QuestionInteractionDetail(BaseModel):
     option_b: str
     option_c: str
     option_d: str
-    selected_answer: str | None      # None if skipped
+    selected_answer: str | None  # None if skipped
     correct_answer: str
     is_correct: bool
     response_time_ms: int | None
@@ -95,6 +98,6 @@ class SessionDetailResponse(BaseModel):
     session_id: uuid.UUID
     session_type: SessionType
     bloom_breakdown: dict[str, str]  # {"remember": "2/3", …}
-    weak_kcs: list[str]              # KC names for wrong answers
-    misconceptions: list[str]        # misconception IDs detected
+    weak_kcs: list[str]  # KC names for wrong answers
+    misconceptions: list[str]  # misconception IDs detected
     questions: list[QuestionInteractionDetail]

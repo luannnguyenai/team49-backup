@@ -18,11 +18,10 @@ Question selection per topic (5 questions):
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import cast, func, select, text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import (
@@ -35,7 +34,6 @@ from src.models.content import (
 from src.models.learning import (
     Interaction,
     MasteryScore,
-    RecentTrend,
     SelectedAnswer,
     Session,
     SessionType,
@@ -53,7 +51,6 @@ from src.services.mastery_evaluator import (
     evaluate_topic,
 )
 
-
 # ---------------------------------------------------------------------------
 # Question selection: bloom slot definition
 # ---------------------------------------------------------------------------
@@ -69,15 +66,14 @@ _BLOOM_SLOTS: list[tuple[list[BloomLevel], int]] = [
 # POST /api/assessment/start
 # ===========================================================================
 
+
 async def start_assessment(
     db: AsyncSession,
     user_id: uuid.UUID,
     topic_ids: list[uuid.UUID],
 ) -> AssessmentStartResponse:
     # 1. Validate all requested topics exist
-    topics_result = await db.execute(
-        select(Topic).where(Topic.id.in_(topic_ids))
-    )
+    topics_result = await db.execute(select(Topic).where(Topic.id.in_(topic_ids)))
     found_ids = {t.id for t in topics_result.scalars().all()}
     missing = [tid for tid in topic_ids if tid not in found_ids]
     if missing:
@@ -88,9 +84,7 @@ async def start_assessment(
 
     # 2. Collect question_ids the user has already answered (dedup across sessions)
     answered_result = await db.execute(
-        select(Interaction.question_id)
-        .where(Interaction.user_id == user_id)
-        .distinct()
+        select(Interaction.question_id).where(Interaction.user_id == user_id).distinct()
     )
     excluded_ids: set[uuid.UUID] = {row[0] for row in answered_result}
 
@@ -167,6 +161,7 @@ async def _select_questions_for_topic(
 # POST /api/assessment/{session_id}/submit
 # ===========================================================================
 
+
 async def submit_assessment(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -190,12 +185,8 @@ async def submit_assessment(
         )
 
     # 3. Batch-load all referenced questions
-    questions_result = await db.execute(
-        select(Question).where(Question.id.in_(question_ids))
-    )
-    questions: dict[uuid.UUID, Question] = {
-        q.id: q for q in questions_result.scalars().all()
-    }
+    questions_result = await db.execute(select(Question).where(Question.id.in_(question_ids)))
+    questions: dict[uuid.UUID, Question] = {q.id: q for q in questions_result.scalars().all()}
     missing = [qid for qid in question_ids if qid not in questions]
     if missing:
         raise HTTPException(
@@ -205,13 +196,12 @@ async def submit_assessment(
 
     # 4. Determine next global_sequence_position for this user
     max_global_result = await db.execute(
-        select(func.max(Interaction.global_sequence_position))
-        .where(Interaction.user_id == user_id)
+        select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
     )
     base_global: int = max_global_result.scalar() or 0
 
     # 5. Grade answers, create Interactions, build QuestionResult list
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     correct_count = 0
     question_results: list[QuestionResult] = []
 
@@ -222,34 +212,38 @@ async def submit_assessment(
         if is_correct:
             correct_count += 1
 
-        db.add(Interaction(
-            user_id=user_id,
-            session_id=session_id,
-            question_id=answer.question_id,
-            sequence_position=seq,
-            global_sequence_position=base_global + seq,
-            selected_answer=SelectedAnswer(answer.selected_answer.value),
-            is_correct=is_correct,
-            response_time_ms=answer.response_time_ms,
-            changed_answer=False,
-            hint_used=False,
-            explanation_viewed=False,
-            timestamp=now,
-        ))
+        db.add(
+            Interaction(
+                user_id=user_id,
+                session_id=session_id,
+                question_id=answer.question_id,
+                sequence_position=seq,
+                global_sequence_position=base_global + seq,
+                selected_answer=SelectedAnswer(answer.selected_answer.value),
+                is_correct=is_correct,
+                response_time_ms=answer.response_time_ms,
+                changed_answer=False,
+                hint_used=False,
+                explanation_viewed=False,
+                timestamp=now,
+            )
+        )
 
-        question_results.append(QuestionResult(
-            question_id=q.id,
-            topic_id=q.topic_id,
-            bloom_level=q.bloom_level,
-            correct_answer=q.correct_answer,
-            selected_answer=answer.selected_answer,
-            is_correct=is_correct,
-            kc_ids=q.kc_ids or [],
-            misconception_a_id=q.misconception_a_id,
-            misconception_b_id=q.misconception_b_id,
-            misconception_c_id=q.misconception_c_id,
-            misconception_d_id=q.misconception_d_id,
-        ))
+        question_results.append(
+            QuestionResult(
+                question_id=q.id,
+                topic_id=q.topic_id,
+                bloom_level=q.bloom_level,
+                correct_answer=q.correct_answer,
+                selected_answer=answer.selected_answer,
+                is_correct=is_correct,
+                kc_ids=q.kc_ids or [],
+                misconception_a_id=q.misconception_a_id,
+                misconception_b_id=q.misconception_b_id,
+                misconception_c_id=q.misconception_c_id,
+                misconception_d_id=q.misconception_d_id,
+            )
+        )
 
     # 6. Complete the session (raw correct rate for session-level score)
     total = len(answers)
@@ -265,8 +259,7 @@ async def submit_assessment(
         grouped.setdefault(qr.topic_id, []).append(qr)
 
     topic_results_map: dict[uuid.UUID, TopicMasteryResult] = {
-        topic_id: evaluate_topic(qrs)
-        for topic_id, qrs in grouped.items()
+        topic_id: evaluate_topic(qrs) for topic_id, qrs in grouped.items()
     }
 
     # 8. Upsert topic-grain MasteryScore records
@@ -279,6 +272,7 @@ async def submit_assessment(
 # ===========================================================================
 # GET /api/assessment/{session_id}/results
 # ===========================================================================
+
 
 async def get_assessment_results(
     db: AsyncSession,
@@ -331,22 +325,18 @@ async def get_assessment_results(
         grouped.setdefault(qr.topic_id, []).append(qr)
 
     topic_results_map: dict[uuid.UUID, TopicMasteryResult] = {
-        topic_id: evaluate_topic(qrs)
-        for topic_id, qrs in grouped.items()
+        topic_id: evaluate_topic(qrs) for topic_id, qrs in grouped.items()
     }
 
-    return await _build_result_response(
-        db, session_id, topic_results_map, session.completed_at
-    )
+    return await _build_result_response(db, session_id, topic_results_map, session.completed_at)
 
 
 # ===========================================================================
 # Helpers
 # ===========================================================================
 
-async def _get_session(
-    db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID
-) -> Session:
+
+async def _get_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID) -> Session:
     result = await db.execute(
         select(Session).where(
             Session.id == session_id,
@@ -408,9 +398,7 @@ async def _build_result_response(
     topic_ids = list(topic_results_map.keys())
 
     # Batch-fetch topic names
-    topics_result = await db.execute(
-        select(Topic).where(Topic.id.in_(topic_ids))
-    )
+    topics_result = await db.execute(select(Topic).where(Topic.id.in_(topic_ids)))
     topics: dict[uuid.UUID, Topic] = {t.id: t for t in topics_result.scalars().all()}
 
     # Batch-fetch KC names for all weak KC UUIDs
@@ -427,9 +415,7 @@ async def _build_result_response(
         kcs_result = await db.execute(
             select(KnowledgeComponent).where(KnowledgeComponent.id.in_(all_weak_kc_uuids))
         )
-        kc_name_by_id = {
-            str(kc.id): kc.name for kc in kcs_result.scalars().all()
-        }
+        kc_name_by_id = {str(kc.id): kc.name for kc in kcs_result.scalars().all()}
 
     # Compute overall weighted score across all topics
     total_earned = sum(r.earned_points for r in topic_results_map.values())
@@ -440,16 +426,18 @@ async def _build_result_response(
     topic_results: list[TopicResult] = []
     for topic_id, r in topic_results_map.items():
         topic = topics.get(topic_id)
-        topic_results.append(TopicResult(
-            topic_id=topic_id,
-            topic_name=topic.name if topic else str(topic_id),
-            score_percent=r.score_percent,
-            mastery_level=r.mastery_level,
-            bloom_breakdown=r.bloom_breakdown,
-            # Resolve UUID → KC name; fall back to raw string if not found
-            weak_kcs=[kc_name_by_id.get(kc_id, kc_id) for kc_id in r.weak_kc_ids],
-            misconceptions_detected=r.misconceptions_detected,
-        ))
+        topic_results.append(
+            TopicResult(
+                topic_id=topic_id,
+                topic_name=topic.name if topic else str(topic_id),
+                score_percent=r.score_percent,
+                mastery_level=r.mastery_level,
+                bloom_breakdown=r.bloom_breakdown,
+                # Resolve UUID → KC name; fall back to raw string if not found
+                weak_kcs=[kc_name_by_id.get(kc_id, kc_id) for kc_id in r.weak_kc_ids],
+                misconceptions_detected=r.misconceptions_detected,
+            )
+        )
 
     return AssessmentResultResponse(
         session_id=session_id,

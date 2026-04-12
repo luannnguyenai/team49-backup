@@ -32,11 +32,10 @@ export default function StepTimeSchedule({
   const hours = watch("available_hours_per_week") ?? 5;
 
   // Compute total content hours from selected modules
-  const totalMinutes = selectedModules.reduce(
-    (sum, m) => sum + m.topics.reduce((s, t) => s + t.estimated_minutes, 0),
+  const totalHours = selectedModules.reduce(
+    (sum, m) => sum + m.topics.reduce((s, t) => s + (t.estimated_hours_beginner ?? 0), 0),
     0
   );
-  const totalHours = totalMinutes / 60;
   const weeksNeeded = hours > 0 ? Math.ceil(totalHours / hours) : null;
 
   return (

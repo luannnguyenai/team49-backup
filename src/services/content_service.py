@@ -20,18 +20,16 @@ from src.schemas.content import (
     TopicSummary,
 )
 
-
 # ---------------------------------------------------------------------------
 # GET /api/modules
 # ---------------------------------------------------------------------------
+
 
 async def list_modules(db: AsyncSession) -> list[ModuleListItem]:
     """Return all modules ordered by order_index with their topic counts."""
 
     # Fetch modules
-    modules_result = await db.execute(
-        select(Module).order_by(Module.order_index)
-    )
+    modules_result = await db.execute(select(Module).order_by(Module.order_index))
     modules = modules_result.scalars().all()
 
     if not modules:
@@ -39,8 +37,7 @@ async def list_modules(db: AsyncSession) -> list[ModuleListItem]:
 
     # Count topics per module in a single query
     counts_result = await db.execute(
-        select(Topic.module_id, func.count(Topic.id).label("cnt"))
-        .group_by(Topic.module_id)
+        select(Topic.module_id, func.count(Topic.id).label("cnt")).group_by(Topic.module_id)
     )
     counts: dict[uuid.UUID, int] = {row.module_id: row.cnt for row in counts_result}
 
@@ -61,22 +58,17 @@ async def list_modules(db: AsyncSession) -> list[ModuleListItem]:
 # GET /api/modules/{module_id}
 # ---------------------------------------------------------------------------
 
-async def get_module_detail(
-    db: AsyncSession, module_id: uuid.UUID
-) -> ModuleDetailResponse | None:
+
+async def get_module_detail(db: AsyncSession, module_id: uuid.UUID) -> ModuleDetailResponse | None:
     """Return module + its ordered topic list. None if module not found."""
 
-    module_result = await db.execute(
-        select(Module).where(Module.id == module_id)
-    )
+    module_result = await db.execute(select(Module).where(Module.id == module_id))
     module = module_result.scalar_one_or_none()
     if module is None:
         return None
 
     topics_result = await db.execute(
-        select(Topic)
-        .where(Topic.module_id == module_id)
-        .order_by(Topic.order_index)
+        select(Topic).where(Topic.module_id == module_id).order_by(Topic.order_index)
     )
     topics = topics_result.scalars().all()
 
@@ -96,14 +88,11 @@ async def get_module_detail(
 # GET /api/topics/{topic_id}
 # ---------------------------------------------------------------------------
 
-async def get_topic_detail(
-    db: AsyncSession, topic_id: uuid.UUID
-) -> TopicDetailResponse | None:
+
+async def get_topic_detail(db: AsyncSession, topic_id: uuid.UUID) -> TopicDetailResponse | None:
     """Return topic detail with resolved prerequisite graph nodes."""
 
-    topic_result = await db.execute(
-        select(Topic).where(Topic.id == topic_id)
-    )
+    topic_result = await db.execute(select(Topic).where(Topic.id == topic_id))
     topic = topic_result.scalar_one_or_none()
     if topic is None:
         return None
@@ -113,14 +102,9 @@ async def get_topic_detail(
 
     if prereq_ids:
         prereq_result = await db.execute(
-            select(Topic)
-            .where(Topic.id.in_(prereq_ids))
-            .order_by(Topic.order_index)
+            select(Topic).where(Topic.id.in_(prereq_ids)).order_by(Topic.order_index)
         )
-        prerequisites = [
-            PrerequisiteTopic.model_validate(p)
-            for p in prereq_result.scalars().all()
-        ]
+        prerequisites = [PrerequisiteTopic.model_validate(p) for p in prereq_result.scalars().all()]
 
     return TopicDetailResponse(
         id=topic.id,
@@ -142,9 +126,8 @@ async def get_topic_detail(
 # GET /api/topics/{topic_id}/content
 # ---------------------------------------------------------------------------
 
-async def get_topic_content(
-    db: AsyncSession, topic_id: uuid.UUID
-) -> TopicContentResponse | None:
+
+async def get_topic_content(db: AsyncSession, topic_id: uuid.UUID) -> TopicContentResponse | None:
     """Return the markdown content and video URL for a topic."""
 
     result = await db.execute(
@@ -171,6 +154,7 @@ async def get_topic_content(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _parse_uuid_list(raw: list | None) -> list[uuid.UUID] | None:
     """Convert a JSON-stored list of UUID strings to list[uuid.UUID]."""

@@ -7,6 +7,7 @@ Learning activity models: Session, Interaction, MasteryScore, LearningPath.
 import enum
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -24,21 +25,25 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+from src.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
+if TYPE_CHECKING:
+    from src.models.content import KnowledgeComponent, Module, Question, Topic
+    from src.models.user import User
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
-class SessionType(str, enum.Enum):
+
+class SessionType(enum.StrEnum):
     assessment = "assessment"
     quiz = "quiz"
     module_test = "module_test"
     practice = "practice"
 
 
-class MasteryLevel(str, enum.Enum):
+class MasteryLevel(enum.StrEnum):
     not_started = "not_started"
     novice = "novice"
     developing = "developing"
@@ -46,13 +51,13 @@ class MasteryLevel(str, enum.Enum):
     mastered = "mastered"
 
 
-class RecentTrend(str, enum.Enum):
+class RecentTrend(enum.StrEnum):
     improving = "improving"
     stable = "stable"
     declining = "declining"
 
 
-class PathAction(str, enum.Enum):
+class PathAction(enum.StrEnum):
     skip = "skip"
     quick_review = "quick_review"
     standard_learn = "standard_learn"
@@ -60,14 +65,14 @@ class PathAction(str, enum.Enum):
     remediate = "remediate"
 
 
-class PathStatus(str, enum.Enum):
+class PathStatus(enum.StrEnum):
     pending = "pending"
     in_progress = "in_progress"
     completed = "completed"
     skipped = "skipped"
 
 
-class SelectedAnswer(str, enum.Enum):
+class SelectedAnswer(enum.StrEnum):
     A = "A"
     B = "B"
     C = "C"
@@ -77,6 +82,7 @@ class SelectedAnswer(str, enum.Enum):
 # ---------------------------------------------------------------------------
 # Session
 # ---------------------------------------------------------------------------
+
 
 class Session(UUIDPrimaryKeyMixin, Base):
     """A single learning or assessment session."""
@@ -105,9 +111,7 @@ class Session(UUIDPrimaryKeyMixin, Base):
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     total_questions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -132,6 +136,7 @@ class Session(UUIDPrimaryKeyMixin, Base):
 # ---------------------------------------------------------------------------
 # Interaction
 # ---------------------------------------------------------------------------
+
 
 class Interaction(UUIDPrimaryKeyMixin, Base):
     """Single question-response event within a session."""
@@ -188,6 +193,7 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
 # MasteryScore
 # ---------------------------------------------------------------------------
 
+
 class MasteryScore(UUIDPrimaryKeyMixin, Base):
     """Tracks the estimated mastery probability for a user × topic (× optional KC) pair."""
 
@@ -210,25 +216,20 @@ class MasteryScore(UUIDPrimaryKeyMixin, Base):
         comment="NULL means score is at topic grain, not KC grain",
     )
 
-    mastery_probability: Mapped[float] = mapped_column(
-        Float, nullable=False, default=0.0
-    )
+    mastery_probability: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     mastery_level: Mapped[MasteryLevel] = mapped_column(
         Enum(MasteryLevel, name="mastery_level_enum"),
         nullable=False,
         default=MasteryLevel.not_started,
     )
     bloom_max_achieved: Mapped[str | None] = mapped_column(
-        String(50), nullable=True,
-        comment="Highest Bloom level demonstrated (remember → analyze)"
+        String(50), nullable=True, comment="Highest Bloom level demonstrated (remember → analyze)"
     )
     evidence_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     recent_trend: Mapped[RecentTrend | None] = mapped_column(
         Enum(RecentTrend, name="recent_trend_enum"), nullable=True
     )
-    last_practiced: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    last_practiced: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -257,6 +258,7 @@ class MasteryScore(UUIDPrimaryKeyMixin, Base):
 # ---------------------------------------------------------------------------
 # LearningPath
 # ---------------------------------------------------------------------------
+
 
 class LearningPath(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """AI-generated personalised learning plan entry for a user."""

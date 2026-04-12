@@ -20,10 +20,10 @@ from pydantic import BaseModel, Field
 
 from src.models.learning import PathAction, PathStatus
 
-
 # ---------------------------------------------------------------------------
 # POST /api/learning-path/generate  — request
 # ---------------------------------------------------------------------------
+
 
 class GeneratePathRequest(BaseModel):
     """
@@ -34,6 +34,7 @@ class GeneratePathRequest(BaseModel):
                         re-generation after additional practice). When absent
                         the engine reads live MasteryScore rows from the DB.
     """
+
     desired_module_ids: list[uuid.UUID] = Field(
         min_length=1,
         description="Modules chosen during onboarding",
@@ -48,14 +49,16 @@ class GeneratePathRequest(BaseModel):
 # Shared path item shape (used in multiple responses)
 # ---------------------------------------------------------------------------
 
+
 class PathItemResponse(BaseModel):
     """One row in the learning path — maps to a LearningPath ORM record."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
     topic_id: uuid.UUID
-    topic_name: str          # resolved by the service layer
-    module_name: str         # resolved by the service layer
+    topic_name: str  # resolved by the service layer
+    module_name: str  # resolved by the service layer
     action: PathAction
     estimated_hours: float | None
     order_index: int
@@ -67,8 +70,10 @@ class PathItemResponse(BaseModel):
 # POST /api/learning-path/generate  — response
 # ---------------------------------------------------------------------------
 
+
 class GeneratePathResponse(BaseModel):
     """Full generated path with metadata and optional warnings."""
+
     generated_at: datetime
     total_topics: int
     total_hours: float
@@ -86,8 +91,10 @@ class GeneratePathResponse(BaseModel):
 # GET /api/learning-path  — response
 # ---------------------------------------------------------------------------
 
+
 class LearningPathResponse(BaseModel):
     """Current user's full learning path."""
+
     total_topics: int
     completed_topics: int
     in_progress_topics: int
@@ -98,8 +105,10 @@ class LearningPathResponse(BaseModel):
 # GET /api/learning-path/timeline  — response
 # ---------------------------------------------------------------------------
 
+
 class WeekEntry(BaseModel):
     """Topics allocated to a single calendar week."""
+
     week: int
     topics: list[PathItemResponse]
     total_hours: float
@@ -107,6 +116,7 @@ class WeekEntry(BaseModel):
 
 class TimelineResponse(BaseModel):
     """Weekly timeline breakdown."""
+
     total_weeks: int
     items: list[WeekEntry]
 
@@ -114,6 +124,7 @@ class TimelineResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # PUT /api/learning-path/{path_id}/status  — request / response
 # ---------------------------------------------------------------------------
+
 
 class UpdateStatusRequest(BaseModel):
     status: PathStatus = Field(description="New status: in_progress | completed | skipped")

@@ -12,6 +12,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
+  "/tutor": "AI Tutor",
   "/learn": "Học tập",
   "/history": "Lịch sử",
   "/profile": "Hồ sơ",

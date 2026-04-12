@@ -50,6 +50,7 @@ learning_path_router = APIRouter(
 # POST /api/learning-path/generate
 # ---------------------------------------------------------------------------
 
+
 @learning_path_router.post(
     "/generate",
     response_model=GeneratePathResponse,
@@ -72,6 +73,7 @@ async def api_generate_learning_path(
 # ---------------------------------------------------------------------------
 # GET /api/learning-path
 # ---------------------------------------------------------------------------
+
 
 @learning_path_router.get(
     "",
@@ -100,6 +102,7 @@ async def api_get_learning_path(
     ]
 
     from src.models.learning import PathStatus
+
     return LearningPathResponse(
         total_topics=len(items),
         completed_topics=sum(1 for i in items if i.status == PathStatus.completed),
@@ -111,6 +114,7 @@ async def api_get_learning_path(
 # ---------------------------------------------------------------------------
 # GET /api/learning-path/timeline
 # ---------------------------------------------------------------------------
+
 
 @learning_path_router.get(
     "/timeline",
@@ -144,14 +148,14 @@ async def api_get_timeline(
             )
             for lp, topic_name, module_name in rows
         ]
-        total_hours = round(
-            sum(i.estimated_hours or 0.0 for i in week_items), 4
+        total_hours = round(sum(i.estimated_hours or 0.0 for i in week_items), 4)
+        week_entries.append(
+            WeekEntry(
+                week=week_num,
+                topics=week_items,
+                total_hours=total_hours,
+            )
         )
-        week_entries.append(WeekEntry(
-            week=week_num,
-            topics=week_items,
-            total_hours=total_hours,
-        ))
 
     return TimelineResponse(
         total_weeks=len(week_entries),
@@ -162,6 +166,7 @@ async def api_get_timeline(
 # ---------------------------------------------------------------------------
 # PUT /api/learning-path/{path_id}/status
 # ---------------------------------------------------------------------------
+
 
 @learning_path_router.put(
     "/{path_id}/status",

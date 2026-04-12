@@ -35,3 +35,17 @@ dependencies = [
     "sympy>=1.14.0",
     "uvicorn>=0.44.0",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]

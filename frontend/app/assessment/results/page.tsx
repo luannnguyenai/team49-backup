@@ -30,6 +30,7 @@ const MASTERY_CONFIG: Record<
   MasteryLevel,
   { label: string; color: string; bg: string }
 > = {
+  not_started: { label: "Chưa bắt đầu", color: "text-slate-500 dark:text-slate-400",  bg: "bg-slate-100 dark:bg-slate-800"   },
   novice:     { label: "Mới bắt đầu",  color: "text-red-600 dark:text-red-400",    bg: "bg-red-50 dark:bg-red-900/20"    },
   developing: { label: "Đang phát triển", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-900/20" },
   proficient: { label: "Thành thạo",   color: "text-blue-600 dark:text-blue-400",   bg: "bg-blue-50 dark:bg-blue-900/20"   },

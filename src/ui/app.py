@@ -1,22 +1,23 @@
-import streamlit as st
 import requests
-import os
+import streamlit as st
 import streamlit.components.v1 as components
-from datetime import timedelta
 
-# Config 
+# Config
 API_BASE_URL = "http://localhost:8000"
 
 st.set_page_config(page_title="AI Tutor - Học tập Cá nhân hóa", layout="wide")
 
 # Theme CSS
-st.markdown("""
+st.markdown(
+    """
 <style>
     .stApp { background-color: #0e1117; }
     .chat-bubble { background-color: #1c1c1c; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
     .stSelectbox label, .stTextArea label { color: #5dade2 !important; font-weight: bold; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 st.title("🎓 AI Tutor: Gia sư Bài giảng Thông minh")
 
@@ -28,7 +29,7 @@ video_url = ""
 try:
     resp = requests.get(f"{API_BASE_URL}/api/lectures", timeout=5)
     if resp.status_code == 200:
-        lectures = {l["title"]: l for l in resp.json()}
+        lectures = {lec["title"]: lec for lec in resp.json()}
         if lectures:
             selected_title = st.sidebar.selectbox("Chọn bài giảng:", list(lectures.keys()))
             selected_data = lectures[selected_title]
@@ -47,7 +48,7 @@ col_video, col_qa = st.columns([2, 1])
 
 with col_video:
     st.header("📺 Trình phát Bài giảng")
-    
+
     # Custom Video Player with Timestamp Capture logic
     # We use a trick to communicate back from JS to Streamlit via a query parameter or similar
     # or just use a simple Javascript component that triggers a secret input.
@@ -89,20 +90,26 @@ with col_video:
     }}
     </script>
     """
-    
+
     # We use st.components to render the player and catch the message
     # In a real setup, we use a Custom Component, here we simulate with a slider + manual trigger
     # But now we use the JS value returned by the component
     res_time = components.html(player_html, height=450)
-    
+
     # Fallback/Manual input if JS fails
     st.markdown("---")
-    current_timestamp = st.number_input("Hoặc nhập giây đang xem:", value=0, min_value=0, max_value=8000)
+    current_timestamp = st.number_input(
+        "Hoặc nhập giây đang xem:", value=0, min_value=0, max_value=8000
+    )
 
 with col_qa:
     st.header("💬 Đặt câu hỏi cho Gia sư")
-    question = st.text_area("Bạn thắc mắc điều gì?", height=150, placeholder="Ví dụ: Giải thích lại phần này giúp tôi...")
-    
+    question = st.text_area(
+        "Bạn thắc mắc điều gì?",
+        height=150,
+        placeholder="Ví dụ: Giải thích lại phần này giúp tôi...",
+    )
+
     if st.button("Gửi Gia sư", use_container_width=True):
         if question:
             with st.spinner("Gia sư đang suy nghĩ..."):
@@ -114,8 +121,8 @@ with col_qa:
                         json={
                             "lecture_id": lecture_id,
                             "current_timestamp": float(current_timestamp),
-                            "question": question
-                        }
+                            "question": question,
+                        },
                     )
                     if resp.status_code == 200:
                         st.markdown("### 🤖 Gia sư trả lời:")

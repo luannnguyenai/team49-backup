@@ -6,10 +6,9 @@ Curriculum content models: Module, Topic, KnowledgeComponent, Question.
 
 import enum
 import uuid
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    DateTime,
     Enum,
     Float,
     ForeignKey,
@@ -17,40 +16,41 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    UniqueConstraint,
-    func,
 )
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+from src.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
+if TYPE_CHECKING:
+    from src.models.learning import Interaction
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
-class BloomLevel(str, enum.Enum):
+
+class BloomLevel(enum.StrEnum):
     remember = "remember"
     understand = "understand"
     apply = "apply"
     analyze = "analyze"
 
 
-class DifficultyBucket(str, enum.Enum):
+class DifficultyBucket(enum.StrEnum):
     easy = "easy"
     medium = "medium"
     hard = "hard"
 
 
-class QuestionStatus(str, enum.Enum):
+class QuestionStatus(enum.StrEnum):
     draft = "draft"
     active = "active"
     calibrated = "calibrated"
     retired = "retired"
 
 
-class CorrectAnswer(str, enum.Enum):
+class CorrectAnswer(enum.StrEnum):
     A = "A"
     B = "B"
     C = "C"
@@ -60,6 +60,7 @@ class CorrectAnswer(str, enum.Enum):
 # ---------------------------------------------------------------------------
 # Module
 # ---------------------------------------------------------------------------
+
 
 class Module(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """Top-level curriculum module (e.g. 'Deep Learning Foundations')."""
@@ -76,21 +77,18 @@ class Module(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    topics: Mapped[list["Topic"]] = relationship(
-        "Topic", back_populates="module", lazy="select"
-    )
+    topics: Mapped[list["Topic"]] = relationship("Topic", back_populates="module", lazy="select")
     questions: Mapped[list["Question"]] = relationship(
         "Question", back_populates="module", lazy="select"
     )
 
-    __table_args__ = (
-        Index("ix_modules_order_index", "order_index"),
-    )
+    __table_args__ = (Index("ix_modules_order_index", "order_index"),)
 
 
 # ---------------------------------------------------------------------------
 # Topic
 # ---------------------------------------------------------------------------
+
 
 class Topic(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """Sub-topic within a Module."""
@@ -135,6 +133,7 @@ class Topic(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 # KnowledgeComponent
 # ---------------------------------------------------------------------------
 
+
 class KnowledgeComponent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """Atomic knowledge component (KC) within a Topic."""
 
@@ -147,18 +146,15 @@ class KnowledgeComponent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
-    topic: Mapped["Topic"] = relationship(
-        "Topic", back_populates="knowledge_components"
-    )
+    topic: Mapped["Topic"] = relationship("Topic", back_populates="knowledge_components")
 
-    __table_args__ = (
-        Index("ix_kc_topic_id", "topic_id"),
-    )
+    __table_args__ = (Index("ix_kc_topic_id", "topic_id"),)
 
 
 # ---------------------------------------------------------------------------
 # Question
 # ---------------------------------------------------------------------------
+
 
 class Question(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """A single multiple-choice question item."""
@@ -167,8 +163,11 @@ class Question(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     # Business key
     item_id: Mapped[str] = mapped_column(
-        String(50), unique=True, nullable=False, index=True,
-        comment="Human-readable unique identifier, e.g. ITEM-001-00001"
+        String(50),
+        unique=True,
+        nullable=False,
+        index=True,
+        comment="Human-readable unique identifier, e.g. ITEM-001-00001",
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     status: Mapped[QuestionStatus] = mapped_column(

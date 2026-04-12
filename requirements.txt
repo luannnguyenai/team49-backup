@@ -11,6 +11,12 @@ sqlalchemy>=2.0.0
 google-genai>=1.70.0
 streamlit>=1.56.0
 
+# ── LangChain / LangGraph ──
+langchain>=1.2.15
+langchain-openai>=0.1.0
+langchain-core>=0.1.0
+langgraph>=0.1.0
+
 # ── New: AI Personalized ──
 pydantic-settings>=2.0.0
 pydantic[email]
@@ -18,6 +24,7 @@ asyncpg>=0.29.0
 psycopg2-binary>=2.9.0
 alembic>=1.13.0
 passlib[bcrypt]>=1.7.0
+bcrypt==4.0.1
 python-jose[cryptography]>=3.0.0
 python-multipart>=0.0.6
 

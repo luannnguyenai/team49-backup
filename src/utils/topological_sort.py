@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import uuid
 from collections import deque
-from typing import Iterable
+from collections.abc import Iterable
 
 
 class CycleDetectedError(Exception):
@@ -42,8 +42,7 @@ class CycleDetectedError(Exception):
     def __init__(self, remaining: list[uuid.UUID]) -> None:
         ids = [str(i) for i in remaining[:5]]
         super().__init__(
-            f"Cycle detected in prerequisite graph. "
-            f"Unresolvable nodes (first 5): {ids}"
+            f"Cycle detected in prerequisite graph. Unresolvable nodes (first 5): {ids}"
         )
         self.remaining = remaining
 
@@ -86,9 +85,7 @@ def topological_sort(
             dependents[prereq].append(tid)
 
     # Initialise queue with zero-in-degree nodes, in original order
-    queue: deque[uuid.UUID] = deque(
-        tid for tid in ordered_input if in_degree[tid] == 0
-    )
+    queue: deque[uuid.UUID] = deque(tid for tid in ordered_input if in_degree[tid] == 0)
 
     result: list[uuid.UUID] = []
     while queue:
@@ -96,7 +93,9 @@ def topological_sort(
         result.append(node)
 
         # Reduce in-degree of each dependent; enqueue those that become zero
-        for dep in sorted(dependents[node], key=lambda x: ordered_input.index(x) if x in ordered_input else 0):
+        for dep in sorted(
+            dependents[node], key=lambda x: ordered_input.index(x) if x in ordered_input else 0
+        ):
             in_degree[dep] -= 1
             if in_degree[dep] == 0:
                 queue.append(dep)

@@ -17,8 +17,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
-from src.services.auth_service import decode_token, get_user_by_id
 from src.models.user import User
+from src.services.auth_service import decode_token, get_user_by_id
 
 # OAuth2 bearer extractor — returns 401 automatically when header is absent
 _bearer = HTTPBearer(auto_error=True)

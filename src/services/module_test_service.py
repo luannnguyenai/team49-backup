@@ -52,7 +52,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select, text
@@ -78,7 +78,6 @@ from src.models.learning import (
     SessionType,
 )
 from src.schemas.module_test import (
-    ModuleTestAnswerInput,
     ModuleTestResultResponse,
     ModuleTestStartResponse,
     ModuleTestSubmitRequest,
@@ -94,25 +93,25 @@ from src.services.mastery_evaluator import (
     update_bloom_max,
 )
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 #: Questions per topic: 2 Easy · 1 Medium · 2 Hard
 _MODULE_TEST_SLOTS: list[tuple[DifficultyBucket, int]] = [
-    (DifficultyBucket.easy,   2),
+    (DifficultyBucket.easy, 2),
     (DifficultyBucket.medium, 1),
-    (DifficultyBucket.hard,   2),
+    (DifficultyBucket.hard, 2),
 ]
 
-PASS_THRESHOLD: float = 70.0   # total_score_percent ≥ 70 → PASS
-WEAK_THRESHOLD: float = 60.0   # topic score_percent  < 60 → weak topic
+PASS_THRESHOLD: float = 70.0  # total_score_percent ≥ 70 → PASS
+WEAK_THRESHOLD: float = 60.0  # topic score_percent  < 60 → weak topic
 
 
 # ===========================================================================
 # POST /api/module-test/start
 # ===========================================================================
+
 
 async def start_module_test(
     db: AsyncSession,
@@ -125,9 +124,7 @@ async def start_module_test(
 
     # 2. Load topics (ordered) ────────────────────────────────────────────────
     topics_result = await db.execute(
-        select(Topic)
-        .where(Topic.module_id == module_id)
-        .order_by(Topic.order_index)
+        select(Topic).where(Topic.module_id == module_id).order_by(Topic.order_index)
     )
     topics: list[Topic] = topics_result.scalars().all()
 
@@ -193,7 +190,7 @@ async def start_module_test(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
                     f"Không tìm thấy câu hỏi module_test cho topic '{topic.name}'. "
-                    "Hãy seed question bank với usage_context=[\"module_test\"]."
+                    'Hãy seed question bank với usage_context=["module_test"].'
                 ),
             )
 
@@ -234,6 +231,7 @@ async def start_module_test(
 # POST /api/module-test/{session_id}/submit
 # ===========================================================================
 
+
 async def submit_module_test(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -252,21 +250,15 @@ async def submit_module_test(
     # 2. Load module + topics ──────────────────────────────────────────────────
     module = await _get_module_or_404(db, session.module_id)
     topics_result = await db.execute(
-        select(Topic)
-        .where(Topic.module_id == session.module_id)
-        .order_by(Topic.order_index)
+        select(Topic).where(Topic.module_id == session.module_id).order_by(Topic.order_index)
     )
     topics: list[Topic] = topics_result.scalars().all()
     topic_by_id: dict[uuid.UUID, Topic] = {t.id: t for t in topics}
 
     # 3. Load questions for all submitted answer IDs ───────────────────────────
     answer_ids = list({a.question_id for a in req.answers})
-    questions_result = await db.execute(
-        select(Question).where(Question.id.in_(answer_ids))
-    )
-    question_by_id: dict[uuid.UUID, Question] = {
-        q.id: q for q in questions_result.scalars().all()
-    }
+    questions_result = await db.execute(select(Question).where(Question.id.in_(answer_ids)))
+    question_by_id: dict[uuid.UUID, Question] = {q.id: q for q in questions_result.scalars().all()}
 
     # Validate module ownership of every question
     for q in question_by_id.values():
@@ -278,8 +270,7 @@ async def submit_module_test(
 
     # 4. Guard: no duplicate answers in same session ───────────────────────────
     existing_qs_result = await db.execute(
-        select(Interaction.question_id)
-        .where(Interaction.session_id == session_id)
+        select(Interaction.question_id).where(Interaction.session_id == session_id)
     )
     already_answered: set[uuid.UUID] = {r[0] for r in existing_qs_result}
     if already_answered:
@@ -290,32 +281,33 @@ async def submit_module_test(
 
     # 5. Determine global sequence base ────────────────────────────────────────
     max_global_result = await db.execute(
-        select(func.max(Interaction.global_sequence_position))
-        .where(Interaction.user_id == user_id)
+        select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
     )
     global_base: int = max_global_result.scalar() or 0
 
     # 6. Persist all interactions ──────────────────────────────────────────────
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for i, answer in enumerate(req.answers):
         q = question_by_id.get(answer.question_id)
         if q is None:
-            continue   # skip unknown question IDs silently
+            continue  # skip unknown question IDs silently
         is_correct = q.correct_answer.value == answer.selected_answer.value
-        db.add(Interaction(
-            user_id=user_id,
-            session_id=session_id,
-            question_id=answer.question_id,
-            sequence_position=i + 1,
-            global_sequence_position=global_base + i + 1,
-            selected_answer=SelectedAnswer(answer.selected_answer.value),
-            is_correct=is_correct,
-            response_time_ms=answer.response_time_ms,
-            changed_answer=False,
-            hint_used=False,
-            explanation_viewed=bool(q.explanation_text),
-            timestamp=now,
-        ))
+        db.add(
+            Interaction(
+                user_id=user_id,
+                session_id=session_id,
+                question_id=answer.question_id,
+                sequence_position=i + 1,
+                global_sequence_position=global_base + i + 1,
+                selected_answer=SelectedAnswer(answer.selected_answer.value),
+                is_correct=is_correct,
+                response_time_ms=answer.response_time_ms,
+                changed_answer=False,
+                hint_used=False,
+                explanation_viewed=bool(q.explanation_text),
+                timestamp=now,
+            )
+        )
     await db.flush()
 
     # 7. Reload interactions with joined Question data ─────────────────────────
@@ -340,9 +332,7 @@ async def submit_module_test(
     if result.passed:
         await _update_mastery_on_pass(db, user_id, rows, topic_by_id, now)
     else:
-        await _upsert_remediate_entries(
-            db, user_id, result.recommended_review_topics, topic_by_id, now
-        )
+        await _upsert_remediate_entries(db, user_id, result.recommended_review_topics, now)
 
     # 10. Finalise session ─────────────────────────────────────────────────────
     total_correct = sum(1 for inter, _ in rows if inter.is_correct)
@@ -359,6 +349,7 @@ async def submit_module_test(
 # ===========================================================================
 # GET /api/module-test/{session_id}/results
 # ===========================================================================
+
 
 async def get_module_test_results(
     db: AsyncSession,
@@ -377,13 +368,9 @@ async def get_module_test_results(
     # 2. Load module + topics ──────────────────────────────────────────────────
     module = await _get_module_or_404(db, session.module_id)
     topics_result = await db.execute(
-        select(Topic)
-        .where(Topic.module_id == session.module_id)
-        .order_by(Topic.order_index)
+        select(Topic).where(Topic.module_id == session.module_id).order_by(Topic.order_index)
     )
-    topic_by_id: dict[uuid.UUID, Topic] = {
-        t.id: t for t in topics_result.scalars().all()
-    }
+    topic_by_id: dict[uuid.UUID, Topic] = {t.id: t for t in topics_result.scalars().all()}
 
     # 3. Reload interactions ───────────────────────────────────────────────────
     rows_result = await db.execute(
@@ -402,10 +389,11 @@ async def get_module_test_results(
 # Shared computation kernel
 # ===========================================================================
 
+
 async def _build_result(
     db: AsyncSession,
     session: Session,
-    rows: list,                          # list[(Interaction, Question)]
+    rows: list,  # list[(Interaction, Question)]
     topic_by_id: dict[uuid.UUID, Topic],
     module: Module,
 ) -> ModuleTestResultResponse:
@@ -450,7 +438,7 @@ async def _build_result(
         for inter, q in topic_rows:
             if inter.is_correct:
                 continue
-            for kc_id in (q.kc_ids or []):
+            for kc_id in q.kc_ids or []:
                 if kc_id:
                     weak_kc_ids.add(str(kc_id))
             if inter.selected_answer is not None:
@@ -491,9 +479,7 @@ async def _build_result(
     total_score_pct = round(total_correct / total_qs * 100, 1) if total_qs else 0.0
     passed = total_score_pct >= PASS_THRESHOLD
 
-    total_review_hours = round(
-        sum(s.estimated_review_hours for s in review_suggestions), 1
-    )
+    total_review_hours = round(sum(s.estimated_review_hours for s in review_suggestions), 1)
 
     # ── Next module (only when passed) ───────────────────────────────────────
     next_module_info: NextModuleInfo | None = None
@@ -519,19 +505,21 @@ async def _build_result(
         if interaction.selected_answer is None:
             continue
         t = topic_by_id.get(question.topic_id)
-        wrong_answers.append(WrongAnswerDetail(
-            question_id=question.id,
-            topic_id=question.topic_id,
-            topic_name=t.name if t else str(question.topic_id),
-            stem_text=question.stem_text,
-            option_a=question.option_a,
-            option_b=question.option_b,
-            option_c=question.option_c,
-            option_d=question.option_d,
-            selected_answer=interaction.selected_answer,
-            correct_answer=question.correct_answer.value,
-            explanation_text=question.explanation_text,
-        ))
+        wrong_answers.append(
+            WrongAnswerDetail(
+                question_id=question.id,
+                topic_id=question.topic_id,
+                topic_name=t.name if t else str(question.topic_id),
+                stem_text=question.stem_text,
+                option_a=question.option_a,
+                option_b=question.option_b,
+                option_c=question.option_c,
+                option_d=question.option_d,
+                selected_answer=interaction.selected_answer,
+                correct_answer=question.correct_answer.value,
+                explanation_text=question.explanation_text,
+            )
+        )
 
     return ModuleTestResultResponse(
         session_id=session.id,
@@ -551,10 +539,11 @@ async def _build_result(
 # DB mutation helpers
 # ===========================================================================
 
+
 async def _update_mastery_on_pass(
     db: AsyncSession,
     user_id: uuid.UUID,
-    rows: list,                          # list[(Interaction, Question)]
+    rows: list,  # list[(Interaction, Question)]
     topic_by_id: dict[uuid.UUID, Topic],
     now: datetime,
 ) -> None:
@@ -597,9 +586,7 @@ async def _update_mastery_on_pass(
         existing_bloom = ms.bloom_max_achieved if ms else None
         if bloom_max_this_test is not None:
             try:
-                new_bloom = update_bloom_max(
-                    existing_bloom, BloomLevel(bloom_max_this_test)
-                )
+                new_bloom = update_bloom_max(existing_bloom, BloomLevel(bloom_max_this_test))
             except ValueError:
                 new_bloom = existing_bloom
         else:
@@ -627,7 +614,6 @@ async def _upsert_remediate_entries(
     db: AsyncSession,
     user_id: uuid.UUID,
     review_suggestions: list[ReviewTopicSuggestion],
-    topic_by_id: dict[uuid.UUID, Topic],
     now: datetime,
 ) -> None:
     """
@@ -640,8 +626,7 @@ async def _upsert_remediate_entries(
 
     # Current max order_index for this user
     max_order_result = await db.execute(
-        select(func.max(LearningPath.order_index))
-        .where(LearningPath.user_id == user_id)
+        select(func.max(LearningPath.order_index)).where(LearningPath.user_id == user_id)
     )
     next_order: int = (max_order_result.scalar() or 0) + 1
 
@@ -652,15 +637,12 @@ async def _upsert_remediate_entries(
                 LearningPath.user_id == user_id,
                 LearningPath.topic_id == suggestion.topic_id,
                 LearningPath.action == PathAction.remediate,
-                LearningPath.status.notin_(
-                    [PathStatus.completed, PathStatus.skipped]
-                ),
+                LearningPath.status.notin_([PathStatus.completed, PathStatus.skipped]),
             )
         )
         if existing_result.scalar_one_or_none() is not None:
             continue
 
-        topic = topic_by_id.get(suggestion.topic_id)
         db.add(
             LearningPath(
                 user_id=user_id,
@@ -668,7 +650,7 @@ async def _upsert_remediate_entries(
                 action=PathAction.remediate,
                 estimated_hours=suggestion.estimated_review_hours,
                 order_index=next_order,
-                week_number=None,        # scheduler will assign weeks
+                week_number=None,  # scheduler will assign weeks
                 status=PathStatus.pending,
             )
         )
@@ -680,6 +662,7 @@ async def _upsert_remediate_entries(
 # ===========================================================================
 # Private query helpers
 # ===========================================================================
+
 
 async def _get_module_or_404(db: AsyncSession, module_id: uuid.UUID) -> Module:
     result = await db.execute(select(Module).where(Module.id == module_id))
@@ -798,9 +781,7 @@ async def _resolve_kc_names(
     result = await db.execute(
         select(KnowledgeComponent).where(KnowledgeComponent.id.in_(valid_uuids))
     )
-    name_map: dict[str, str] = {
-        str(kc.id): kc.name for kc in result.scalars().all()
-    }
+    name_map: dict[str, str] = {str(kc.id): kc.name for kc in result.scalars().all()}
     return [name_map.get(s, s) for s in kc_id_strs]
 
 

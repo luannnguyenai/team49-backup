@@ -56,11 +56,9 @@ export default function StepDesiredModules({
         const { gradient, Icon } = MODULE_CONFIGS[idx % MODULE_CONFIGS.length];
 
         // Compute estimated hours from topics
-        const totalMinutes = module.topics.reduce(
-          (sum, t) => sum + t.estimated_minutes,
-          0
-        );
-        const totalHours = (totalMinutes / 60).toFixed(1);
+        const totalHours = module.topics
+          .reduce((sum, t) => sum + (t.estimated_hours_beginner ?? 0), 0)
+          .toFixed(1);
 
         return (
           <button

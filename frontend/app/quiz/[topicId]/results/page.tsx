@@ -23,6 +23,7 @@ import type { MasteryLevel, QuizCompleteResponse } from "@/types";
 // ---------------------------------------------------------------------------
 
 const MASTERY_LABELS: Record<MasteryLevel, string> = {
+  not_started: "Chưa bắt đầu",
   novice: "Mới bắt đầu",
   developing: "Đang phát triển",
   proficient: "Thành thạo",
@@ -30,6 +31,7 @@ const MASTERY_LABELS: Record<MasteryLevel, string> = {
 };
 
 const MASTERY_COLORS: Record<MasteryLevel, string> = {
+  not_started: "#94a3b8",
   novice: "#ef4444",
   developing: "#f97316",
   proficient: "#3b82f6",
@@ -37,6 +39,7 @@ const MASTERY_COLORS: Record<MasteryLevel, string> = {
 };
 
 const MASTERY_BG: Record<MasteryLevel, string> = {
+  not_started: "bg-slate-100 text-slate-600",
   novice: "bg-red-100 text-red-700",
   developing: "bg-orange-100 text-orange-700",
   proficient: "bg-blue-100 text-blue-700",

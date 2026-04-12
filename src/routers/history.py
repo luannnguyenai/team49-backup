@@ -23,12 +23,12 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
-from src.models.learning import SessionType, User
+from src.models.learning import SessionType
 from src.models.user import User
 from src.schemas.history import HistoryResponse, SessionDetailResponse
 from src.services.history_service import get_history, get_session_detail
@@ -39,6 +39,7 @@ history_router = APIRouter(prefix="/api/history", tags=["History"])
 # ---------------------------------------------------------------------------
 # GET /api/history
 # ---------------------------------------------------------------------------
+
 
 @history_router.get(
     "",
@@ -83,6 +84,7 @@ async def api_get_history(
 # ---------------------------------------------------------------------------
 # GET /api/history/{session_id}/detail
 # ---------------------------------------------------------------------------
+
 
 @history_router.get(
     "/{session_id}/detail",

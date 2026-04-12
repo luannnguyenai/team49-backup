@@ -12,10 +12,10 @@ from pydantic import BaseModel, Field
 from src.models.content import BloomLevel, DifficultyBucket
 from src.models.learning import MasteryLevel, SelectedAnswer
 
-
 # ===========================================================================
 # POST /api/assessment/start
 # ===========================================================================
+
 
 class AssessmentStartRequest(BaseModel):
     topic_ids: list[uuid.UUID] = Field(
@@ -53,6 +53,7 @@ class AssessmentStartResponse(BaseModel):
 # POST /api/assessment/{session_id}/submit
 # ===========================================================================
 
+
 class AnswerInput(BaseModel):
     question_id: uuid.UUID
     selected_answer: SelectedAnswer
@@ -67,13 +68,14 @@ class AssessmentSubmitRequest(BaseModel):
 # Shared result schemas
 # ===========================================================================
 
+
 class TopicResult(BaseModel):
     topic_id: uuid.UUID
     topic_name: str
     score_percent: float
     mastery_level: MasteryLevel
     bloom_breakdown: dict[str, str]  # e.g. {"remember": "1/1", "analyze": "1/2"}
-    weak_kcs: list[str]             # KC names where the user made errors
+    weak_kcs: list[str]  # KC names where the user made errors
     misconceptions_detected: list[str]  # misconception IDs from wrong-answer mapping
 
 

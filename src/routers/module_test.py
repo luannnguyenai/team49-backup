@@ -53,6 +53,7 @@ module_test_router = APIRouter(prefix="/api/module-test", tags=["Module Test"])
 # POST /api/module-test/start
 # ---------------------------------------------------------------------------
 
+
 @module_test_router.post(
     "/start",
     response_model=ModuleTestStartResponse,
@@ -76,6 +77,7 @@ async def api_start_module_test(
 # ---------------------------------------------------------------------------
 # POST /api/module-test/{session_id}/submit
 # ---------------------------------------------------------------------------
+
 
 @module_test_router.post(
     "/{session_id}/submit",
@@ -101,6 +103,7 @@ async def api_submit_module_test(
 # ---------------------------------------------------------------------------
 # GET /api/module-test/{session_id}/results
 # ---------------------------------------------------------------------------
+
 
 @module_test_router.get(
     "/{session_id}/results",

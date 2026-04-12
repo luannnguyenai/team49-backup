@@ -18,10 +18,10 @@ from src.models.learning import (
     SessionType,
 )
 
-
 # ===========================================================================
 # Session
 # ===========================================================================
+
 
 class SessionCreate(BaseModel):
     session_type: SessionType
@@ -46,6 +46,7 @@ class SessionResponse(BaseModel):
 
 class SessionComplete(BaseModel):
     """PATCH /sessions/{id}/complete — finalise a session."""
+
     completed_at: datetime
     total_questions: int = Field(ge=0)
     correct_count: int = Field(ge=0)
@@ -63,6 +64,7 @@ class SessionComplete(BaseModel):
 # ===========================================================================
 # Interaction
 # ===========================================================================
+
 
 class InteractionCreate(BaseModel):
     question_id: uuid.UUID
@@ -98,6 +100,7 @@ class InteractionResponse(BaseModel):
 # MasteryScore
 # ===========================================================================
 
+
 class MasteryScoreResponse(BaseModel):
     model_config = {"from_attributes": True}
 
@@ -116,6 +119,7 @@ class MasteryScoreResponse(BaseModel):
 
 class MasteryScoreUpdate(BaseModel):
     """Used internally by the scoring pipeline."""
+
     mastery_probability: float = Field(ge=0, le=1)
     mastery_level: MasteryLevel
     bloom_max_achieved: str | None = None
@@ -126,6 +130,7 @@ class MasteryScoreUpdate(BaseModel):
 # ===========================================================================
 # LearningPath
 # ===========================================================================
+
 
 class LearningPathCreate(BaseModel):
     topic_id: uuid.UUID
@@ -160,4 +165,5 @@ class LearningPathResponse(BaseModel):
 
 class LearningPathBatchCreate(BaseModel):
     """POST /users/{id}/learning-path — replace the entire path."""
+
     items: list[LearningPathCreate] = Field(min_length=1)

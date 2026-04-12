@@ -14,12 +14,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Brain,
+  MessageSquareText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/tutor", label: "AI Tutor", icon: MessageSquareText },
   { href: "/learn", label: "Học", icon: BookOpen },
   { href: "/history", label: "Lịch sử", icon: History },
   { href: "/profile", label: "Hồ sơ", icon: User },

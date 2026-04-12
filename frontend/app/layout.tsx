@@ -2,7 +2,7 @@
 // Root layout — provides ThemeProvider and font
 
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,9 +21,9 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <Providers>
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
