@@ -63,3 +63,4 @@ PYTHONPATH=. uv run python src/api/app.py
 
 ## 🧪 Tài liệu bổ sung
 - Sử dụng prompt trong `prompts/lecture_extraction_prompt.txt` để trích xuất summary bài giảng mới đạt độ chính xác cao nhất.
+
