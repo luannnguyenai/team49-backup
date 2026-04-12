@@ -29,6 +29,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "python-multipart>=0.0.26",
     "scipy>=1.17.1",
+    "langchain-google-genai>=1.0.0",
     "sqlalchemy>=2.0.49",
     "srt>=3.5.3",
     "streamlit>=1.56.0",
