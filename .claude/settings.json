@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "AI_TOOL_NAME=claude python3 /Users/binluan/A20-App-049/scripts/log_hook.py"
+            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "AI_TOOL_NAME=claude python3 /Users/binluan/A20-App-049/scripts/log_hook.py"
+            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py"
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "AI_TOOL_NAME=claude python3 /Users/binluan/A20-App-049/scripts/log_hook.py"
+            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py"
           }
         ]
       }
