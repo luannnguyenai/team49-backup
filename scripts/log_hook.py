@@ -77,7 +77,7 @@ def normalize(data: dict, tool: str) -> dict | None:
             "tool_response": str(data.get("tool_response", ""))[:500],
         })
 
-    elif tool in ("gemini", "antigravity"):
+    elif tool == "gemini":
         if event == "BeforeAgent":
             prompt = data.get("prompt", "")[:1000]
             base.update({"prompt": prompt})
@@ -99,6 +99,13 @@ def normalize(data: dict, tool: str) -> dict | None:
             except Exception:
                 pass
             base.update({"prompt": prompt, "response_summary": answer})
+
+    elif tool == "antigravity":
+        base.update({
+            "prompt": data.get("prompt", "")[:1000],
+            "turn_id": data.get("turn_id", ""),
+            "response_summary": data.get("response_summary", ""),
+        })
 
     elif tool == "codex":
         base.update({
