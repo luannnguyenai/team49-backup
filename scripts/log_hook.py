@@ -100,6 +100,13 @@ def normalize(data: dict, tool: str) -> dict | None:
                 pass
             base.update({"prompt": prompt, "response_summary": answer})
 
+    elif tool == "antigravity":
+        base.update({
+            "prompt": data.get("prompt", "")[:1000],
+            "turn_id": data.get("turn_id", ""),
+            "response_summary": data.get("response_summary", ""),
+        })
+
     elif tool == "codex":
         base.update({
             "prompt": data.get("prompt", "")[:1000],

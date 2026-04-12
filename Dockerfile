@@ -1,57 +1,35 @@
-# =============================================================================
-# Dockerfile — Multi-stage build for FastAPI backend
-# =============================================================================
+# Use a lightweight Python base image
+FROM python:3.12-slim-bookworm
 
-# ── Stage 1: Builder ─────────────────────────────────────────────────────────
-FROM python:3.12-slim-bookworm AS builder
+# Install system dependencies and uv
+# uv is a fast Python package manager
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set build-time env
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on
+RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /build
-
-# Install build dependencies (needed for asyncpg / psycopg2 / cryptography)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install dependencies into a specific directory
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --target=/build/deps -r requirements.txt
-
-
-# ── Stage 2: Runtime ─────────────────────────────────────────────────────────
-FROM python:3.12-slim-bookworm AS runtime
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONPATH="/app:/app/deps"
-
+# Set working directory
 WORKDIR /app
 
-# Install runtime library dependencies (libpq for PostgreSQL)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Enable bytecode compilation
+ENV UV_COMPILE_BYTECODE=1
 
-# Copy installed deps from builder
-COPY --from=builder /build/deps /app/deps
+# Copy project configuration files
+COPY pyproject.toml uv.lock* ./
 
-# Copy application source
+# Install dependencies only (cached if pyproject.toml doesn't change)
+RUN uv sync --frozen --no-install-project --no-dev
+
+# Copy the rest of the application code
 COPY . .
 
-# Create non-root user for security
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
-USER appuser
+# Add /app to PYTHONPATH so src.api.app etc. work
+ENV PYTHONPATH="/app"
 
+# Expose the API port
 EXPOSE 8000
+# Expose Streamlit port
+EXPOSE 8501
 
-# Default command: run uvicorn
-CMD ["python", "main.py"]
+# Command to run the FastAPI backend
+# We use 'uv run' to ensure the environment is correctly set up
+CMD ["uv", "run", "python", "src/api/app.py"]

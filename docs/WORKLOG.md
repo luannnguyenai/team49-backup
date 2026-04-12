@@ -50,3 +50,40 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 3. Sử dụng **Host Volumes** cho `data/`, `logs/`, và `app.db`. Người dùng tải thư mục `data/` từ Google Drive về máy trước khi chạy Docker.
 
 **Hệ quả:** Bất kỳ ai cũng có thể chạy dự án chỉ bằng 1 lệnh `docker compose up -d` sau khi đã tải dữ liệu. Dữ liệu video khổng lồ vẫn nằm ở ngoài container nên việc cập nhật code cực kỳ nhanh chóng và không làm phình Image.
+
+---
+
+### [ADR-4] Chuyển đổi kiến trúc sang LangGraph ReAct Agent & Python Sandbox — 11/04/2026
+
+**Bối cảnh:** Các vấn đề trong khóa CS231N phần lớn đòi hỏi khả năng toán học nâng cao (Ví dụ: tính đạo hàm, vector gradient, tính toán tích cực ma trận Backpropagation). LLLM như Gemini/GPT thường xuyên tính nhẩm sai các bước trung gian dẫn đến kết quả cuối cùng vô dụng đối với việc học kỹ thuật. 
+
+**Các lựa chọn đã xem xét:**
+- **Advanced Prompting** (Chain of Thought): Yêu cầu AI "work step-by-step". Nhanh, không tốn resource nhưng AI vẫn sinh ra các ảo giác tính bù trừ (hallucinate math operations).
+- **Hard-coded Math Modules**: Tự code function đạo hàm vào DB. Rất cứng nhắc, không bao quát được mọi ngóc ngách câu hỏi tự do của học viên.
+- **Agentic AI với Code Interpreter**: Triển khai hệ thống ReAct. Trao cho AI quyền truy cập một môi trường Sandbox thực thi code Python động (với `sympy`, `numpy`) để nó nhận câu hỏi -> sinh code Python giải toán -> Sandbox chạy code và trả kết quả Console -> AI phân tích kết quả -> Trả lời user.
+
+**Quyết định:** Nâng cấp sang kiến trúc truy vấn đa trạm bằng công cụ **LangGraph**. Mọi câu hỏi do user đặt ra giờ được đưa vào một **ReAct Agent**. Nếu Agent nhận thấy có tính toán phức tạp, nó sẽ tự xả mã vào luồng `Execute_Python` tool. 
+Tuy nhiên, để chặn sinh viên (hoặc hacker) đánh lừa Agent sinh ra các mã tàn phá server (Ví dụ: `os.system("rm -rf /")`), một cơ chế **Security Sandbox** khắt khe được triển khai xen kẽ:
+1. Phân tích tĩnh (Static Analysis) bằng regex AST: Chặn mọi thư viện networking (`socket`, `requests`), filesystem (`open`, `os.remove`), bypass/injection (`eval`, `exec`).
+2. Hard limits: Chặn CPU limit ở 12-15s bằng `resource.setrlimit`.
+3. Ràng buộc đa luồng chạy bằng biến môi trường phân luồng nội cục bộ OpenBLAS.
+
+**Hệ quả:** Tính năng "Giải Toán Bằng Python" mang lại chất lượng và độ chuẩn xác giáo án cực cao. Nhưng sự đánh đổi nằm ở việc Token tiêu tốn tăng mạnh vì quá trình *Sinh mã Python -> Nhận lỗi -> Sinh lại* tốn tận 2-3 lượt chain. Luồng Stream SSE từ FastAPI cũng phải phức tạp hóa để yield các thông báo chờ đặc biệt kiểu ("👾 Math Boss appeared... Fighting....") xuống cho Frontend nhằm dập tắt sự lo âu của User bởi sự im lặng dài do Latency.
+
+---
+
+### [ADR-5] Smart Router — Dual-Model Routing & Provider Abstraction — 11/04/2026
+
+**Bối cảnh:** Sau khi triển khai LangGraph ReAct Agent (ADR-4), mọi câu hỏi — kể cả "Chào bạn" hay "Bài này nói về gì?" — đều phải đi qua chuỗi xử lý nặng nề: LangGraph graph → model lớn (`gpt-5.4-mini`) → potentially tool calls. Chi phí token cao và latency dài cho những câu hỏi đơn giản. Ngoài ra, `ChatOpenAI` bị hardcode khiến hệ thống không thể chạy trên local model (Ollama).
+
+**Các lựa chọn đã xem xét:**
+- **Giữ nguyên single model:** Đơn giản nhưng lãng phí. Câu "Chào bạn" tốn ~2000 tokens thay vì ~150.
+- **Rule-based keyword router:** Nhanh nhưng dễ phân loại sai. Regex không thể hiểu ngữ nghĩa "Tính gradient" vs "Giải thích gradient là gì".
+- **LLM-based Smart Router:** Dùng model nhẹ (`gpt-5.4-nano`) phân loại BLOCKED/SIMPLE/COMPLEX. SIMPLE được trả lời luôn bởi Nano (skip LangGraph hoàn toàn).
+
+**Quyết định:**
+1. **Dual-Model Architecture:** Thêm `FAST_MODEL` (gpt-5.4-nano) làm router. Câu đơn giản → Nano trả lời luôn. Câu phức tạp → `DEFAULT_MODEL` (gpt-5.4-mini) + LangGraph + Sandbox.
+2. **Provider Abstraction:** Thay toàn bộ `ChatOpenAI` bằng `init_chat_model(model, model_provider=MODEL_PROVIDER)` từ LangChain. Chỉ cần set `.env` để chuyển sang Ollama/Anthropic mà không sửa code.
+3. **Graceful Degradation:** `bind_tools()` được bọc trong `try/except` — local model không support function calling vẫn chạy được (chỉ thiếu Python Sandbox).
+
+**Hệ quả:** Tiết kiệm ~80% tokens cho câu hỏi đơn giản (450 vs 2000-3000). Hệ thống linh hoạt — đổi 3 dòng `.env` là chạy từ GPT cloud xuống Ollama local trên máy yếu. Trade-off: thêm 1 LLM call (~150 tokens) cho mọi request, nhưng chi phí này nhỏ hơn nhiều so với tiết kiệm được.

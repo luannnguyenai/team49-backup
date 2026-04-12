@@ -1,0 +1,11 @@
+graph LR
+    A["🖥️ Frontend<br/>(HTML5 + Vanilla JS)"] -->|POST /api/lectures/ask| B["⚡ FastAPI Backend"]
+    B --> C["🧠 Smart Router<br/>(gpt-5.4-nano)"]
+    C -->|BLOCKED| D["⛔ Reject"]
+    C -->|SIMPLE| E["💬 Nano Direct Answer"]
+    C -->|COMPLEX| F["🤖 LangGraph ReAct Agent<br/>(gpt-5.4-mini)"]
+    F -->|Tool Call| G["🐍 Python Sandbox"]
+    G -->|Result| F
+    E --> H["💾 SQLite DB"]
+    F --> H
+    D --> I["📝 Log Only"]

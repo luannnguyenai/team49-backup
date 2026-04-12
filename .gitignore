@@ -18,8 +18,9 @@ build/
 # AI logs — tracked structure, ignored content
 .ai-log/*.jsonl
 
-#data
-data/*
+
+# Data — ignore large binary/video assets, track JSON configs
+data/CS231n/
 
 # Project local files
 app.db
@@ -35,3 +36,4 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+data/cs231n/

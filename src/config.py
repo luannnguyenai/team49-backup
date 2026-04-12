@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", description="OpenAI API key")
     gemini_api_key: str = Field(default="", description="Google Gemini API key")
     default_model: str = Field(default="gemini-3-flash-preview", description="Default LLM model")
+    fast_model: str = Field(default="gemini-2.5-flash", description="Fast model for minor tasks")
+    model_provider: str = Field(default="gemini", description="LLM provider")
     log_level: str = Field(default="INFO", description="Logging level")
 
     # ---- Database (PostgreSQL async) ----
@@ -52,4 +54,6 @@ ANTHROPIC_API_KEY = settings.anthropic_api_key
 OPENAI_API_KEY = settings.openai_api_key
 GEMINI_API_KEY = settings.gemini_api_key
 DEFAULT_MODEL = settings.default_model
+FAST_MODEL = settings.fast_model
+MODEL_PROVIDER = settings.model_provider
 LOG_LEVEL = settings.log_level
