@@ -27,11 +27,13 @@ def read_root():
     from fastapi.responses import FileResponse
     return FileResponse("src/api/static/index.html")
 
+from typing import Optional
+
 class AskRequest(BaseModel):
     lecture_id: str
     current_timestamp: float
     question: str
-    image_base64: str = None
+    image_base64: Optional[str] = None
 
 @app.get("/api/lectures")
 def list_lectures(db: Session = Depends(get_db)):
