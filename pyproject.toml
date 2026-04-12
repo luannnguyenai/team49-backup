@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiolimiter>=1.2.1",
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "email-validator>=2.3.0",
     "fastapi>=0.135.3",
     "google-genai>=1.70.0",
     "langchain>=1.2.15",
@@ -20,6 +23,7 @@ dependencies = [
     "pillow>=12.2.0",
     "psycopg2-binary>=2.9.11",
     "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
     "pypdf2>=3.0.1",
     "python-dotenv>=1.2.2",
     "python-jose[cryptography]>=3.5.0",
@@ -31,3 +35,17 @@ dependencies = [
     "sympy>=1.14.0",
     "uvicorn>=0.44.0",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]

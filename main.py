@@ -1,6 +1,14 @@
-def main():
-    print("Hello from a20-app-049!")
+"""
+main.py — Application entry point.
+Run: python main.py  OR  uvicorn src.api.app:app --reload
+"""
 
+import uvicorn
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(
+        "src.api.app:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )

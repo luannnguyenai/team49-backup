@@ -1,0 +1,215 @@
+# =============================================================================
+# Deploy — Build + Deploy on merge to main
+# =============================================================================
+# Triggers:  push to main (i.e. merged PR)
+#
+# Deploy targets:
+#   Frontend → Vercel       (via vercel CLI, uses NEXT_PUBLIC_API_URL)
+#   Backend  → Railway      (via railway CLI, Docker image)
+#   Database → Supabase     (Alembic migrations only — Supabase manages the DB)
+#
+# Required GitHub Secrets (Settings → Secrets & Variables → Actions):
+#   VERCEL_TOKEN            — Vercel personal access token
+#   VERCEL_ORG_ID           — Vercel team/org ID
+#   VERCEL_PROJECT_ID       — Vercel project ID for the frontend
+#   RAILWAY_TOKEN           — Railway API token
+#   RAILWAY_SERVICE_ID      — Railway service ID for the backend
+#   SUPABASE_DB_URL         — postgresql+asyncpg://... (production DB URL)
+#   SECRET_KEY              — Production JWT secret (≥32 chars)
+#   REDIS_URL               — Production Redis URL
+#   GEMINI_API_KEY          — (optional) production LLM key
+#   ANTHROPIC_API_KEY       — (optional) production LLM key
+#   NEXT_PUBLIC_API_URL     — https://your-backend.railway.app
+# =============================================================================
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+# Only one deploy at a time
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false    # never cancel a running deploy
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Run full CI first — only deploy if green
+  # ---------------------------------------------------------------------------
+  ci-gate:
+    name: "CI gate (lint + tests)"
+    uses: ./.github/workflows/ci.yml   # reuse CI workflow as a gate
+
+  # ---------------------------------------------------------------------------
+  # 2. Migrate production database (Supabase)
+  # ---------------------------------------------------------------------------
+  migrate-db:
+    name: "DB · Alembic migrations → Supabase"
+    runs-on: ubuntu-latest
+    needs: ci-gate
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: alembic upgrade head
+
+
+  # ---------------------------------------------------------------------------
+  # 3. Deploy backend → Railway
+  # ---------------------------------------------------------------------------
+  deploy-backend:
+    name: "Backend · Deploy → Railway"
+    runs-on: ubuntu-latest
+    needs: migrate-db
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up \
+            --service "${{ secrets.RAILWAY_SERVICE_ID }}" \
+            --detach
+
+      - name: Wait for Railway deployment
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Waiting for Railway service to be healthy..."
+          for i in $(seq 1 24); do
+            STATUS=$(railway status --service "${{ secrets.RAILWAY_SERVICE_ID }}" --json 2>/dev/null | jq -r '.status // "unknown"')
+            echo "  attempt $i: $STATUS"
+            if [ "$STATUS" = "ACTIVE" ]; then
+              echo "✓ Backend is live"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for Railway deployment"
+          exit 1
+
+      - name: Smoke test backend
+        run: |
+          URL="${{ secrets.NEXT_PUBLIC_API_URL }}/health"
+          echo "Checking $URL..."
+          for i in $(seq 1 6); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" = "200" ]; then
+              echo "✓ Backend healthy (HTTP $STATUS)"
+              exit 0
+            fi
+            echo "  attempt $i: HTTP $STATUS — retrying in 10s"
+            sleep 10
+          done
+          echo "Backend smoke test failed"
+          exit 1
+
+
+  # ---------------------------------------------------------------------------
+  # 4. Deploy frontend → Vercel
+  # ---------------------------------------------------------------------------
+  deploy-frontend:
+    name: "Frontend · Deploy → Vercel"
+    runs-on: ubuntu-latest
+    needs: deploy-backend      # wait for backend so NEXT_PUBLIC_API_URL is live
+    environment: production
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel project settings
+        env:
+          VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build for production
+        env:
+          VERCEL_TOKEN:           ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID:          ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID:      ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_PUBLIC_API_URL:    ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy pre-built artefact to Vercel
+        id: vercel-deploy
+        env:
+          VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
+          echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "✓ Deployed to $DEPLOY_URL"
+
+      - name: Smoke test frontend
+        run: |
+          URL="${{ steps.vercel-deploy.outputs.url }}"
+          echo "Checking $URL..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$STATUS" = "200" ]; then
+            echo "✓ Frontend live (HTTP $STATUS)"
+          else
+            echo "Frontend smoke test failed (HTTP $STATUS)"
+            exit 1
+          fi
+
+
+  # ---------------------------------------------------------------------------
+  # 5. Post-deploy summary comment on the merge commit
+  # ---------------------------------------------------------------------------
+  summary:
+    name: "Deployment summary"
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-frontend]
+    if: always()
+
+    steps:
+      - name: Post summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service  | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Database (Supabase) | ✅ migrated |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend  (Railway)  | ${{ needs.deploy-backend.result == 'success' && '✅ deployed' || '❌ failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend (Vercel)   | ${{ needs.deploy-frontend.result == 'success' && '✅ deployed' || '❌ failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY

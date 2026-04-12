@@ -1,0 +1,43 @@
+# =============================================================================
+# .dockerignore — Frontend (./frontend context)
+# =============================================================================
+
+# Dependencies (reinstalled in image)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (regenerated during docker build)
+.next/
+out/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# OS / editor artefacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker (not needed inside the image)
+Dockerfile*
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Test & coverage
+coverage/
+.nyc_output/
