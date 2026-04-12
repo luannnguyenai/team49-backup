@@ -8,15 +8,15 @@ Reads DATABASE_URL from the environment (or .env via config.py).
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # Import all models so their tables appear in metadata
 import src.models  # noqa: F401 — registers all Table objects
-from src.models.base import Base
+from alembic import context
 from src.config import settings
+from src.models.base import Base
 
 # ---- Alembic Config object ----
 config = context.config

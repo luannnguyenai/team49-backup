@@ -29,13 +29,12 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete, select  # noqa: E402
+from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
-from src.config import settings
-from src.database import async_session, engine
-from src.models.base import Base
-from src.models.content import (
+from src.config import settings  # noqa: E402
+from src.database import async_session  # noqa: E402
+from src.models.content import (  # noqa: E402
     BloomLevel,
     CorrectAnswer,
     DifficultyBucket,
@@ -59,6 +58,7 @@ QUESTIONS_FILE = DATA_DIR / "question_bank.json"
 # Loaders
 # ===========================================================================
 
+
 def load_json(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as f:
         return json.load(f)
@@ -74,6 +74,7 @@ def validate_files() -> None:
 # ===========================================================================
 # Seeding logic
 # ===========================================================================
+
 
 async def seed_modules(
     db: AsyncSession,
@@ -122,13 +123,9 @@ async def resolve_module_prerequisites(
             continue
 
         module_id = module_slug_to_uuid[m["slug"]]
-        module = (
-            await db.execute(select(Module).where(Module.id == module_id))
-        ).scalar_one()
+        module = (await db.execute(select(Module).where(Module.id == module_id))).scalar_one()
 
-        module.prerequisite_module_ids = [
-            str(module_slug_to_uuid[s]) for s in prereq_slugs
-        ]
+        module.prerequisite_module_ids = [str(module_slug_to_uuid[s]) for s in prereq_slugs]
         db.add(module)
 
     await db.flush()
@@ -223,13 +220,9 @@ async def resolve_topic_prerequisites(
             continue
 
         topic_id = topic_slug_to_uuid[t["slug"]]
-        topic = (
-            await db.execute(select(Topic).where(Topic.id == topic_id))
-        ).scalar_one()
+        topic = (await db.execute(select(Topic).where(Topic.id == topic_id))).scalar_one()
 
-        topic.prerequisite_topic_ids = [
-            str(topic_slug_to_uuid[s]) for s in prereq_slugs
-        ]
+        topic.prerequisite_topic_ids = [str(topic_slug_to_uuid[s]) for s in prereq_slugs]
         db.add(topic)
 
     await db.flush()
@@ -258,9 +251,7 @@ async def seed_questions(
         module_id = module_slug_to_uuid.get(q["module_slug"])
 
         if topic_id is None or module_id is None:
-            print(
-                f"  WARN: question '{item_id}' references unknown topic/module slug — skipped"
-            )
+            print(f"  WARN: question '{item_id}' references unknown topic/module slug — skipped")
             continue
 
         # Resolve KC slugs → UUIDs (best-effort)
@@ -308,6 +299,7 @@ async def seed_questions(
 # Clear helpers
 # ===========================================================================
 
+
 async def clear_curriculum(db: AsyncSession) -> None:
     """Delete all curriculum data in FK-safe order."""
     print("Clearing curriculum data...")
@@ -320,6 +312,7 @@ async def clear_curriculum(db: AsyncSession) -> None:
 # ===========================================================================
 # Entry point
 # ===========================================================================
+
 
 async def run_seed(clear: bool = False, dry_run: bool = False) -> None:
     print(f"\n{'DRY RUN — ' if dry_run else ''}Seeding database: {settings.database_url}\n")
@@ -357,8 +350,11 @@ async def run_seed(clear: bool = False, dry_run: bool = False) -> None:
 
             print("\n--- Seeding Questions ---")
             await seed_questions(
-                db, question_data,
-                topic_slug_to_uuid, module_slug_to_uuid, kc_slug_to_uuid,
+                db,
+                question_data,
+                topic_slug_to_uuid,
+                module_slug_to_uuid,
+                kc_slug_to_uuid,
             )
 
             await db.commit()

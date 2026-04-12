@@ -8,24 +8,30 @@ Unified FastAPI application combining:
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory, LearningProgress, init_db
-from src.services.llm_service import get_context_and_stream_gemini
+from src.config import settings
 from src.database import engine as async_engine
-from src.routers.auth import auth_router, users_router
+from src.models.store import (
+    Chapter,
+    LearningProgress,
+    Lecture,
+    QAHistory,
+    get_db,
+)
 from src.routers.assessment import assessment_router
+from src.routers.auth import auth_router, users_router
 from src.routers.content import content_router
 from src.routers.history import history_router
 from src.routers.learning_path import learning_path_router
 from src.routers.module_test import module_test_router
 from src.routers.quiz import quiz_router
-from src.config import settings
+from src.services.llm_service import get_context_and_stream_gemini
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +118,12 @@ def list_lectures(db: Session = Depends(get_db)):
 
 @app.get("/api/lectures/{lecture_id}/toc", tags=["Lectures"])
 def get_toc(lecture_id: str, db: Session = Depends(get_db)):
-    chapters = db.query(Chapter).filter(Chapter.lecture_id == lecture_id).order_by(Chapter.start_time).all()
+    chapters = (
+        db.query(Chapter)
+        .filter(Chapter.lecture_id == lecture_id)
+        .order_by(Chapter.start_time)
+        .all()
+    )
     if not chapters:
         raise HTTPException(status_code=404, detail="ToC not found")
     return chapters
@@ -126,10 +137,7 @@ def ask_question(req: AskRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="Lecture not found")
 
         generator = get_context_and_stream_gemini(
-            req.lecture_id,
-            req.current_timestamp,
-            req.question,
-            image_base64=req.image_base64
+            req.lecture_id, req.current_timestamp, req.question, image_base64=req.image_base64
         )
         return StreamingResponse(generator, media_type="text/event-stream")
     except Exception as e:
@@ -172,10 +180,14 @@ class ProgressRequest(BaseModel):
 @app.post("/api/progress", tags=["Progress"])
 def save_progress(req: ProgressRequest, db: Session = Depends(get_db)):
     """Upsert learning progress for a session + lecture pair."""
-    progress = db.query(LearningProgress).filter(
-        LearningProgress.session_id == req.session_id,
-        LearningProgress.lecture_id == req.lecture_id,
-    ).first()
+    progress = (
+        db.query(LearningProgress)
+        .filter(
+            LearningProgress.session_id == req.session_id,
+            LearningProgress.lecture_id == req.lecture_id,
+        )
+        .first()
+    )
     if progress:
         progress.last_timestamp = req.last_timestamp
     else:
@@ -192,12 +204,11 @@ def save_progress(req: ProgressRequest, db: Session = Depends(get_db)):
 @app.get("/api/progress/{session_id}", tags=["Progress"])
 def get_progress(session_id: str, db: Session = Depends(get_db)):
     """Get all learning progress entries for a session."""
-    rows = db.query(LearningProgress).filter(
-        LearningProgress.session_id == session_id
-    ).all()
+    rows = db.query(LearningProgress).filter(LearningProgress.session_id == session_id).all()
     return {row.lecture_id: row.last_timestamp for row in rows}
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

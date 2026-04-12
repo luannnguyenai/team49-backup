@@ -35,6 +35,7 @@ content_router = APIRouter(prefix="/api", tags=["Content"])
 # GET /api/modules
 # ---------------------------------------------------------------------------
 
+
 @content_router.get(
     "/modules",
     response_model=list[ModuleListItem],
@@ -49,6 +50,7 @@ async def api_list_modules(
 # ---------------------------------------------------------------------------
 # GET /api/modules/{module_id}
 # ---------------------------------------------------------------------------
+
 
 @content_router.get(
     "/modules/{module_id}",
@@ -72,6 +74,7 @@ async def api_get_module(
 # GET /api/topics/{topic_id}
 # ---------------------------------------------------------------------------
 
+
 @content_router.get(
     "/topics/{topic_id}",
     response_model=TopicDetailResponse,
@@ -93,6 +96,7 @@ async def api_get_topic(
 # ---------------------------------------------------------------------------
 # GET /api/topics/{topic_id}/content
 # ---------------------------------------------------------------------------
+
 
 @content_router.get(
     "/topics/{topic_id}/content",
@@ -122,6 +126,7 @@ async def api_seed_data(db: AsyncSession = Depends(get_async_db)):
     """Load modules and topics from JSON files into database."""
     import json
     from pathlib import Path
+
     from sqlalchemy import text
 
     modules_file = Path("data/modules.json")
@@ -135,7 +140,7 @@ async def api_seed_data(db: AsyncSession = Depends(get_async_db)):
     with open(topics_file) as f:
         topics_data = json.load(f)
 
-    from src.models.content import Module, Topic, KnowledgeComponent
+    from src.models.content import KnowledgeComponent, Module, Topic
 
     # Clear existing data
     await db.execute(text("DELETE FROM topics CASCADE"))
@@ -151,7 +156,11 @@ async def api_seed_data(db: AsyncSession = Depends(get_async_db)):
 
         prereq_ids = None
         if m.get("prerequisite_module_slugs"):
-            prereq_ids = [slug_to_module_id[s] for s in m["prerequisite_module_slugs"] if s in slug_to_module_id]
+            prereq_ids = [
+                slug_to_module_id[s]
+                for s in m["prerequisite_module_slugs"]
+                if s in slug_to_module_id
+            ]
 
         module = Module(
             id=module_id,

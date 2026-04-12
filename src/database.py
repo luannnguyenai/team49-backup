@@ -15,7 +15,6 @@ from sqlalchemy.ext.asyncio import (
 
 from src.config import settings
 
-
 # ---------------------------------------------------------------------------
 # Engine
 # ---------------------------------------------------------------------------
@@ -59,6 +58,7 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
 async def create_all_tables() -> None:
     """Create all tables defined in the metadata (dev / test only)."""
     from src.models.base import Base  # avoid circular import at module level
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -66,5 +66,6 @@ async def create_all_tables() -> None:
 async def drop_all_tables() -> None:
     """Drop all tables (dev / test only)."""
     from src.models.base import Base
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)

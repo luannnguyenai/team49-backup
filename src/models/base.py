@@ -6,25 +6,27 @@ Used by both original lecture models and new personalized learning models.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-
 # ---------------------------------------------------------------------------
 # Declarative base
 # ---------------------------------------------------------------------------
 
+
 class Base(DeclarativeBase):
     """Single shared declarative base for all models."""
+
     pass
 
 
 # ---------------------------------------------------------------------------
 # Mixins
 # ---------------------------------------------------------------------------
+
 
 class UUIDPrimaryKeyMixin:
     """Adds a UUID primary key generated server-side by PostgreSQL."""

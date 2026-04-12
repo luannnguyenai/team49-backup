@@ -9,13 +9,12 @@ Usage:
     docker compose exec backend python -m scripts.seed_lectures
 """
 
+import glob
 import json
 import os
 import re
-import glob
 
-from src.models.store import SessionLocal, Lecture, Chapter, TranscriptLine, init_db
-
+from src.models.store import Chapter, Lecture, SessionLocal, TranscriptLine, init_db
 
 DATA_DIR = "data/CS231n"
 TOC_DIR = os.path.join(DATA_DIR, "ToC_Summary")
@@ -37,7 +36,7 @@ def ts_to_seconds(ts: str) -> float:
 def parse_transcript(filepath: str) -> list[dict]:
     """Parse transcript file into list of {start_time, content}."""
     lines = []
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         raw = f.read()
 
     # Skip header (everything before first timestamp)
@@ -51,10 +50,12 @@ def parse_transcript(filepath: str) -> list[dict]:
         end = matches[i + 1].start() if i + 1 < len(matches) else len(raw)
         content = raw[start:end].strip()
         if content:
-            lines.append({
-                "start_time": ts_to_seconds(ts),
-                "content": content,
-            })
+            lines.append(
+                {
+                    "start_time": ts_to_seconds(ts),
+                    "content": content,
+                }
+            )
 
     return lines
 
@@ -102,7 +103,7 @@ def seed():
                 continue
             lecture_num = int(num_match.group(1))
 
-            with open(toc_file, "r", encoding="utf-8") as f:
+            with open(toc_file, encoding="utf-8") as f:
                 toc_data = json.load(f)
 
             lecture_id = f"cs231n-lecture-{lecture_num}"
@@ -146,7 +147,9 @@ def seed():
             if transcript_file:
                 lines = parse_transcript(transcript_file)
                 for j, line in enumerate(lines):
-                    end_time = lines[j + 1]["start_time"] if j + 1 < len(lines) else line["start_time"] + 5
+                    end_time = (
+                        lines[j + 1]["start_time"] if j + 1 < len(lines) else line["start_time"] + 5
+                    )
                     tl = TranscriptLine(
                         lecture_id=lecture_id,
                         start_time=line["start_time"],
@@ -156,7 +159,7 @@ def seed():
                     db.add(tl)
                 print(f"    + {len(lines)} transcript lines")
             else:
-                print(f"    (no transcript found)")
+                print("    (no transcript found)")
 
         db.commit()
         total = db.query(Lecture).count()

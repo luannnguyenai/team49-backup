@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
@@ -39,6 +39,7 @@ history_router = APIRouter(prefix="/api/history", tags=["History"])
 # ---------------------------------------------------------------------------
 # GET /api/history
 # ---------------------------------------------------------------------------
+
 
 @history_router.get(
     "",
@@ -83,6 +84,7 @@ async def api_get_history(
 # ---------------------------------------------------------------------------
 # GET /api/history/{session_id}/detail
 # ---------------------------------------------------------------------------
+
 
 @history_router.get(
     "/{session_id}/detail",

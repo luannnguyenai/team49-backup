@@ -9,11 +9,8 @@ import json
 import uuid
 from pathlib import Path
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.database import async_engine, AsyncSessionLocal
-from src.models.content import Module, Topic, KnowledgeComponent
+from src.database import AsyncSessionLocal
+from src.models.content import KnowledgeComponent, Module, Topic
 
 
 async def load_modules_and_topics():
@@ -35,6 +32,7 @@ async def load_modules_and_topics():
     async with AsyncSessionLocal() as session:
         # Clear existing data (optional)
         from sqlalchemy import text
+
         await session.execute(text("DELETE FROM topics CASCADE"))
         await session.execute(text("DELETE FROM modules CASCADE"))
         await session.commit()
@@ -50,7 +48,11 @@ async def load_modules_and_topics():
             # Resolve prerequisite module slugs to UUIDs
             prereq_ids = None
             if m.get("prerequisite_module_slugs"):
-                prereq_ids = [slug_to_module_id[s] for s in m["prerequisite_module_slugs"] if s in slug_to_module_id]
+                prereq_ids = [
+                    slug_to_module_id[s]
+                    for s in m["prerequisite_module_slugs"]
+                    if s in slug_to_module_id
+                ]
 
             module = Module(
                 id=module_id,

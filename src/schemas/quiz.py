@@ -21,10 +21,10 @@ from pydantic import BaseModel, Field
 from src.models.content import BloomLevel, CorrectAnswer, DifficultyBucket
 from src.models.learning import MasteryLevel, SelectedAnswer
 
-
 # ---------------------------------------------------------------------------
 # POST /api/quiz/start
 # ---------------------------------------------------------------------------
+
 
 class QuizStartRequest(BaseModel):
     topic_id: uuid.UUID
@@ -32,6 +32,7 @@ class QuizStartRequest(BaseModel):
 
 class QuestionForQuiz(BaseModel):
     """Question payload sent to client — correct_answer intentionally omitted."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -58,6 +59,7 @@ class QuizStartResponse(BaseModel):
 # POST /api/quiz/{session_id}/answer  (real-time, one at a time)
 # ---------------------------------------------------------------------------
 
+
 class QuizAnswerRequest(BaseModel):
     question_id: uuid.UUID
     selected_answer: SelectedAnswer
@@ -66,6 +68,7 @@ class QuizAnswerRequest(BaseModel):
 
 class QuizAnswerResponse(BaseModel):
     """Immediate feedback returned after each answered question."""
+
     is_correct: bool
     correct_answer: CorrectAnswer
     explanation_text: str | None
@@ -78,24 +81,25 @@ class QuizAnswerResponse(BaseModel):
 # POST /api/quiz/{session_id}/complete
 # ---------------------------------------------------------------------------
 
+
 class QuizCompleteResponse(BaseModel):
     session_id: uuid.UUID
     topic_id: uuid.UUID
     topic_name: str
 
     # Raw score
-    score: str                  # e.g. "7/10"
-    percent: float              # 0.0 – 100.0
+    score: str  # e.g. "7/10"
+    percent: float  # 0.0 – 100.0
 
     # Mastery delta
-    mastery_before: float       # score_percent before this quiz
-    mastery_after: float        # score_percent after EMA update
-    mastery_level: MasteryLevel # resulting level bucket
+    mastery_before: float  # score_percent before this quiz
+    mastery_after: float  # score_percent after EMA update
+    mastery_level: MasteryLevel  # resulting level bucket
 
     # Bloom + KCs
     bloom_breakdown: dict[str, str]  # {"remember": "2/3", "analyze": "1/2"}
-    weak_kcs: list[str]              # KC names (not UUIDs) for wrong answers
-    misconceptions: list[str]        # misconception IDs detected in this quiz
+    weak_kcs: list[str]  # KC names (not UUIDs) for wrong answers
+    misconceptions: list[str]  # misconception IDs detected in this quiz
 
     # Timing
     time_total_seconds: float
@@ -108,6 +112,7 @@ class QuizCompleteResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # GET /api/quiz/history
 # ---------------------------------------------------------------------------
+
 
 class QuizHistorySummary(BaseModel):
     session_id: uuid.UUID

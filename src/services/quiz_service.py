@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select, text
@@ -57,22 +57,20 @@ from src.models.content import (
 from src.models.learning import (
     Interaction,
     LearningPath,
-    MasteryLevel,
     MasteryScore,
-    PathAction,
     PathStatus,
     SelectedAnswer,
     Session,
     SessionType,
 )
 from src.schemas.quiz import (
+    QuestionForQuiz,
     QuizAnswerRequest,
     QuizAnswerResponse,
     QuizCompleteResponse,
     QuizHistoryResponse,
     QuizHistorySummary,
     QuizStartResponse,
-    QuestionForQuiz,
 )
 from src.services.mastery_evaluator import (
     QuestionResult,
@@ -82,16 +80,15 @@ from src.services.mastery_evaluator import (
     update_bloom_max,
 )
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 # Target counts per difficulty bucket
 _DIFFICULTY_SLOTS: list[tuple[DifficultyBucket, int]] = [
-    (DifficultyBucket.easy,   3),
+    (DifficultyBucket.easy, 3),
     (DifficultyBucket.medium, 4),
-    (DifficultyBucket.hard,   3),
+    (DifficultyBucket.hard, 3),
 ]
 
 # How many recent assessment sessions to look back for exclusion
@@ -102,6 +99,7 @@ _RECENT_ASSESSMENT_LOOKBACK = 2
 # POST /api/quiz/start
 # ===========================================================================
 
+
 async def start_quiz(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -109,7 +107,7 @@ async def start_quiz(
 ) -> QuizStartResponse:
 
     # 1. Validate topic
-    topic = await _get_topic_or_404(db, topic_id)
+    await _get_topic_or_404(db, topic_id)
 
     # 2. Get question IDs seen in last N assessment sessions
     excluded_from_assessments = await _recent_assessment_question_ids(
@@ -136,9 +134,9 @@ async def start_quiz(
         pool = [q for q in pool if q.id not in selected_ids]
 
         # Split into priority tiers
-        tier1 = [q for q in pool if q.id not in answered_ids]    # never answered
-        tier2 = [q for q in pool if q.id in ever_wrong]          # prev wrong
-        tier3 = [q for q in pool if q.id in always_correct]      # prev all-correct
+        tier1 = [q for q in pool if q.id not in answered_ids]  # never answered
+        tier2 = [q for q in pool if q.id in ever_wrong]  # prev wrong
+        tier3 = [q for q in pool if q.id in always_correct]  # prev all-correct
 
         chosen = _sample_with_priority([tier1, tier2, tier3], count)
         selected.extend(chosen)
@@ -148,7 +146,7 @@ async def start_quiz(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Không tìm thấy câu hỏi quiz cho topic này. "
-                   "Hãy đảm bảo question bank đã được seeded.",
+            "Hãy đảm bảo question bank đã được seeded.",
         )
 
     # 5. Shuffle final list so difficulty doesn't cluster
@@ -179,6 +177,7 @@ async def start_quiz(
 # POST /api/quiz/{session_id}/answer
 # ===========================================================================
 
+
 async def answer_question(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -195,9 +194,7 @@ async def answer_question(
         )
 
     # 2. Load question and verify it belongs to the session topic
-    q_result = await db.execute(
-        select(Question).where(Question.id == req.question_id)
-    )
+    q_result = await db.execute(select(Question).where(Question.id == req.question_id))
     question = q_result.scalar_one_or_none()
     if question is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found.")
@@ -231,33 +228,33 @@ async def answer_question(
 
     # 6. Global sequence position (across all user sessions)
     max_global_result = await db.execute(
-        select(func.max(Interaction.global_sequence_position))
-        .where(Interaction.user_id == user_id)
+        select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
     )
     base_global: int = max_global_result.scalar() or 0
 
     # 7. Persist interaction
-    db.add(Interaction(
-        user_id=user_id,
-        session_id=session_id,
-        question_id=req.question_id,
-        sequence_position=seq_pos,
-        global_sequence_position=base_global + 1,
-        selected_answer=SelectedAnswer(req.selected_answer.value),
-        is_correct=is_correct,
-        response_time_ms=req.response_time_ms,
-        changed_answer=False,
-        hint_used=False,
-        explanation_viewed=bool(question.explanation_text),
-        timestamp=datetime.now(timezone.utc),
-    ))
+    db.add(
+        Interaction(
+            user_id=user_id,
+            session_id=session_id,
+            question_id=req.question_id,
+            sequence_position=seq_pos,
+            global_sequence_position=base_global + 1,
+            selected_answer=SelectedAnswer(req.selected_answer.value),
+            is_correct=is_correct,
+            response_time_ms=req.response_time_ms,
+            changed_answer=False,
+            hint_used=False,
+            explanation_viewed=bool(question.explanation_text),
+            timestamp=datetime.now(UTC),
+        )
+    )
     await db.flush()
 
     # 8. Running tally for live progress display
     # Count all interactions in this session (including the one just saved)
     all_interactions_result = await db.execute(
-        select(Interaction.is_correct)
-        .where(Interaction.session_id == session_id)
+        select(Interaction.is_correct).where(Interaction.session_id == session_id)
     )
     all_correct_flags = all_interactions_result.scalars().all()
     questions_answered = len(all_correct_flags)
@@ -275,6 +272,7 @@ async def answer_question(
 # ===========================================================================
 # POST /api/quiz/{session_id}/complete
 # ===========================================================================
+
 
 async def complete_quiz(
     db: AsyncSession,
@@ -303,7 +301,7 @@ async def complete_quiz(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Không có câu trả lời nào trong phiên quiz. "
-                   "Hãy trả lời ít nhất 1 câu trước khi hoàn thành.",
+            "Hãy trả lời ít nhất 1 câu trước khi hoàn thành.",
         )
 
     topic_id = session.topic_id
@@ -357,7 +355,7 @@ async def complete_quiz(
             new_bloom_max = update_bloom_max(new_bloom_max, r.bloom_level)
 
     # 8. Upsert MasteryScore
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if mastery_score is None:
         mastery_score = MasteryScore(
             user_id=user_id,
@@ -377,14 +375,10 @@ async def complete_quiz(
     weak_kc_names = await _resolve_kc_names(db, eval_result.weak_kc_ids)
 
     # 10. Update LearningPath status if mastery ≥ 76 → mark completed
-    lp_updated = await _maybe_complete_learning_path(
-        db, user_id, topic_id, mastery_after
-    )
+    lp_updated = await _maybe_complete_learning_path(db, user_id, topic_id, mastery_after)
 
     # 11. Compute timing
-    time_total_ms = sum(
-        (interaction.response_time_ms or 0) for interaction, _ in rows
-    )
+    time_total_ms = sum((interaction.response_time_ms or 0) for interaction, _ in rows)
     time_total_sec = round(time_total_ms / 1000, 1)
     avg_time_sec = round(time_total_sec / total_answered, 1) if total_answered else 0.0
 
@@ -418,6 +412,7 @@ async def complete_quiz(
 # ===========================================================================
 # GET /api/quiz/history
 # ===========================================================================
+
 
 async def get_quiz_history(
     db: AsyncSession,
@@ -461,6 +456,7 @@ async def get_quiz_history(
 # Internal helpers
 # ===========================================================================
 
+
 async def _get_topic_or_404(db: AsyncSession, topic_id: uuid.UUID) -> Topic:
     result = await db.execute(select(Topic).where(Topic.id == topic_id))
     topic = result.scalar_one_or_none()
@@ -472,9 +468,7 @@ async def _get_topic_or_404(db: AsyncSession, topic_id: uuid.UUID) -> Topic:
     return topic
 
 
-async def _get_quiz_session(
-    db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID
-) -> Session:
+async def _get_quiz_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID) -> Session:
     result = await db.execute(
         select(Session).where(
             Session.id == session_id,
@@ -540,7 +534,7 @@ async def _prior_topic_interactions(
     rows = result.all()
 
     # Aggregate: ever_wrong = any row where is_correct=False
-    per_question: dict[uuid.UUID, bool] = {}   # True = ever wrong
+    per_question: dict[uuid.UUID, bool] = {}  # True = ever wrong
     for qid, is_correct in rows:
         if qid not in per_question:
             per_question[qid] = False

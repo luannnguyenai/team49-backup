@@ -10,23 +10,28 @@ Models: Lecture, Chapter, TranscriptLine, QAHistory
 from datetime import datetime
 
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Float, ForeignKey, Text, DateTime,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
     UniqueConstraint,
+    create_engine,
 )
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import relationship, sessionmaker
 
-from src.models.base import Base
 from src.config import settings
+from src.models.base import Base
 
 # ---------------------------------------------------------------------------
 # Sync engine for legacy lecture operations (ingestion, llm_service)
 # Converts asyncpg URL → psycopg2 URL for synchronous SQLAlchemy usage.
 # ---------------------------------------------------------------------------
-_SYNC_DATABASE_URL = (
-    settings.database_url
-    .replace("postgresql+asyncpg://", "postgresql+psycopg2://")
-    .replace("postgresql://", "postgresql+psycopg2://")
-)
+_SYNC_DATABASE_URL = settings.database_url.replace(
+    "postgresql+asyncpg://", "postgresql+psycopg2://"
+).replace("postgresql://", "postgresql+psycopg2://")
 
 engine = create_engine(_SYNC_DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -43,7 +48,9 @@ class Lecture(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     chapters = relationship("Chapter", back_populates="lecture", cascade="all, delete-orphan")
-    transcript_lines = relationship("TranscriptLine", back_populates="lecture", cascade="all, delete-orphan")
+    transcript_lines = relationship(
+        "TranscriptLine", back_populates="lecture", cascade="all, delete-orphan"
+    )
 
 
 class Chapter(Base):
@@ -54,7 +61,7 @@ class Chapter(Base):
     title = Column(String)
     summary = Column(Text)
     start_time = Column(Float)  # seconds
-    end_time = Column(Float)    # seconds
+    end_time = Column(Float)  # seconds
 
     lecture = relationship("Lecture", back_populates="chapters")
 
@@ -94,9 +101,7 @@ class LearningProgress(Base):
     last_timestamp = Column(Float, default=0.0)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    __table_args__ = (
-        UniqueConstraint("session_id", "lecture_id", name="uq_session_lecture"),
-    )
+    __table_args__ = (UniqueConstraint("session_id", "lecture_id", name="uq_session_lecture"),)
 
 
 def init_db():

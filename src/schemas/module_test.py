@@ -20,10 +20,10 @@ from pydantic import BaseModel, Field
 from src.models.content import BloomLevel, DifficultyBucket
 from src.models.learning import SelectedAnswer
 
-
 # ---------------------------------------------------------------------------
 # POST /api/module-test/start
 # ---------------------------------------------------------------------------
+
 
 class ModuleTestStartRequest(BaseModel):
     module_id: uuid.UUID
@@ -31,6 +31,7 @@ class ModuleTestStartRequest(BaseModel):
 
 class QuestionForModuleTest(BaseModel):
     """Question sent to the client — correct_answer intentionally omitted."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -59,13 +60,14 @@ class ModuleTestStartResponse(BaseModel):
     module_id: uuid.UUID
     module_name: str
     total_topics: int
-    total_questions: int          # sum across all topics (≤ topics × 5)
+    total_questions: int  # sum across all topics (≤ topics × 5)
     topics: list[TopicQuestionsGroup]
 
 
 # ---------------------------------------------------------------------------
 # POST /api/module-test/{session_id}/submit
 # ---------------------------------------------------------------------------
+
 
 class ModuleTestAnswerInput(BaseModel):
     question_id: uuid.UUID
@@ -82,11 +84,11 @@ class TopicTestResult(BaseModel):
 
     topic_id: uuid.UUID
     topic_name: str
-    score: str                          # e.g. "4/5"
-    score_percent: float                # 0.0 – 100.0
-    bloom_max: str | None               # highest Bloom level answered correctly
-    verdict: Literal["pass", "fail"]    # pass ≥ 60 %
-    weak_kcs: list[str]                 # KC names linked to wrong answers
+    score: str  # e.g. "4/5"
+    score_percent: float  # 0.0 – 100.0
+    bloom_max: str | None  # highest Bloom level answered correctly
+    verdict: Literal["pass", "fail"]  # pass ≥ 60 %
+    weak_kcs: list[str]  # KC names linked to wrong answers
 
 
 class ReviewTopicSuggestion(BaseModel):
@@ -95,7 +97,7 @@ class ReviewTopicSuggestion(BaseModel):
     topic_id: uuid.UUID
     topic_name: str
     weak_kcs: list[str]
-    misconceptions: list[str]           # misconception IDs triggered
+    misconceptions: list[str]  # misconception IDs triggered
     estimated_review_hours: float
 
 
@@ -116,7 +118,7 @@ class WrongAnswerDetail(BaseModel):
     option_c: str
     option_d: str
     selected_answer: SelectedAnswer
-    correct_answer: str             # CorrectAnswer.value  e.g. "B"
+    correct_answer: str  # CorrectAnswer.value  e.g. "B"
     explanation_text: str | None
 
 
@@ -132,14 +134,14 @@ class ModuleTestResultResponse(BaseModel):
 
     # Overall
     total_score_percent: float
-    passed: bool                        # True if total ≥ 70 %
+    passed: bool  # True if total ≥ 70 %
 
     # Per-topic breakdown
     per_topic: list[TopicTestResult]
 
     # Remediation (non-empty only when passed == False)
     recommended_review_topics: list[ReviewTopicSuggestion]
-    estimated_review_hours: float       # sum of review hours for weak topics
+    estimated_review_hours: float  # sum of review hours for weak topics
 
     # Progression (non-None only when passed == True)
     next_module: NextModuleInfo | None

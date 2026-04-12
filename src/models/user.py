@@ -5,17 +5,19 @@ User account model for the adaptive learning platform.
 """
 
 import enum
-import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Date, DateTime, Enum, String, func
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, UUIDPrimaryKeyMixin
 
+if TYPE_CHECKING:
+    from src.models.learning import Interaction, LearningPath, MasteryScore, Session
 
-class PreferredMethod(str, enum.Enum):
+
+class PreferredMethod(enum.StrEnum):
     reading = "reading"
     video = "video"
 
@@ -25,9 +27,7 @@ class User(UUIDPrimaryKeyMixin, Base):
 
     __tablename__ = "users"
 
-    email: Mapped[str] = mapped_column(
-        String(255), unique=True, nullable=False, index=True
-    )
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     available_hours_per_week: Mapped[float | None] = mapped_column(
@@ -41,8 +41,11 @@ class User(UUIDPrimaryKeyMixin, Base):
         nullable=True,
     )
     is_onboarded: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="false",
-        comment="True once the user has completed the onboarding flow"
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+        comment="True once the user has completed the onboarding flow",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

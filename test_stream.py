@@ -1,10 +1,12 @@
 """Debug test - inspect chunk structure in detail."""
 import os
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from google import genai
-from google.genai import types
+from google import genai  # noqa: E402
+from google.genai import types  # noqa: E402
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 model = os.getenv("DEFAULT_MODEL", "gemini-3-flash-preview")

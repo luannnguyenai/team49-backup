@@ -6,19 +6,19 @@ package to discover all tables.
 """
 
 from src.models.base import Base  # noqa: F401
+from src.models.content import KnowledgeComponent, Module, Question, Topic  # noqa: F401
+from src.models.learning import (  # noqa: F401
+    Interaction,
+    LearningPath,
+    MasteryScore,
+    Session,
+)
 
 # Original lecture models
-from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory  # noqa: F401
+from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine  # noqa: F401
 
 # New personalized learning models
 from src.models.user import User  # noqa: F401
-from src.models.content import Module, Topic, KnowledgeComponent, Question  # noqa: F401
-from src.models.learning import (  # noqa: F401
-    Session,
-    Interaction,
-    MasteryScore,
-    LearningPath,
-)
 
 __all__ = [
     "Base",

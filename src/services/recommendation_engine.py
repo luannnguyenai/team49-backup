@@ -45,10 +45,10 @@ topic correctly in a *newer* interaction (crude recency check).
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import Module, Topic
@@ -56,7 +56,6 @@ from src.models.learning import (
     Interaction,
     LearningPath,
     MasteryScore,
-    MasteryLevel,
     PathAction,
     PathStatus,
     SelectedAnswer,
@@ -70,10 +69,10 @@ from src.schemas.learning_path import (
 from src.services.timeline_builder import TopicSlot, build_timeline
 from src.utils.topological_sort import CycleDetectedError, topological_sort
 
-
 # ---------------------------------------------------------------------------
 # Mastery → action mapping
 # ---------------------------------------------------------------------------
+
 
 def _mastery_to_action(score_percent: float) -> PathAction:
     if score_percent >= 76:
@@ -115,12 +114,13 @@ def _pick_hours(topic: Topic, action: PathAction) -> float:
     for h in candidates:
         if h is not None and h > 0:
             return h
-    return 1.0   # absolute fallback
+    return 1.0  # absolute fallback
 
 
 # ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
+
 
 async def generate_learning_path(
     db: AsyncSession,
@@ -186,7 +186,7 @@ async def generate_learning_path(
         select(MasteryScore).where(
             MasteryScore.user_id == user.id,
             MasteryScore.topic_id.in_(topic_ids),
-            MasteryScore.kc_id.is_(None),   # topic-grain only
+            MasteryScore.kc_id.is_(None),  # topic-grain only
         )
     )
     mastery_by_topic: dict[uuid.UUID, float] = {}
@@ -224,13 +224,15 @@ async def generate_learning_path(
             action = PathAction.remediate
 
         hours = _pick_hours(topic, action)
-        classified.append(_ClassifiedTopic(
-            topic=topic,
-            action=action,
-            estimated_hours=hours,
-            order_index=order_idx,
-            module_name=topic_module_name.get(tid, ""),
-        ))
+        classified.append(
+            _ClassifiedTopic(
+                topic=topic,
+                action=action,
+                estimated_hours=hours,
+                order_index=order_idx,
+                module_name=topic_module_name.get(tid, ""),
+            )
+        )
 
     # ── 7. Build timeline ──────────────────────────────────────────────────────
     slots = [
@@ -247,12 +249,10 @@ async def generate_learning_path(
     )
 
     # ── 8. Persist: full replace ──────────────────────────────────────────────
-    await db.execute(
-        delete(LearningPath).where(LearningPath.user_id == user.id)
-    )
+    await db.execute(delete(LearningPath).where(LearningPath.user_id == user.id))
     await db.flush()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     lp_records: list[LearningPath] = []
     for c in classified:
         week_num = timeline.topic_week_map.get(c.topic.id)
@@ -277,17 +277,19 @@ async def generate_learning_path(
     # ── 9. Build response ─────────────────────────────────────────────────────
     items: list[PathItemResponse] = []
     for c, lp in zip(classified, lp_records):
-        items.append(PathItemResponse(
-            id=lp.id,
-            topic_id=c.topic.id,
-            topic_name=c.topic.name,
-            module_name=c.module_name,
-            action=c.action,
-            estimated_hours=lp.estimated_hours,
-            order_index=lp.order_index,
-            week_number=lp.week_number,
-            status=lp.status,
-        ))
+        items.append(
+            PathItemResponse(
+                id=lp.id,
+                topic_id=c.topic.id,
+                topic_name=c.topic.name,
+                module_name=c.module_name,
+                action=c.action,
+                estimated_hours=lp.estimated_hours,
+                order_index=lp.order_index,
+                week_number=lp.week_number,
+                status=lp.status,
+            )
+        )
 
     return GeneratePathResponse(
         generated_at=now,
@@ -302,6 +304,7 @@ async def generate_learning_path(
 # ---------------------------------------------------------------------------
 # GET /api/learning-path — current path
 # ---------------------------------------------------------------------------
+
 
 async def get_learning_path(
     db: AsyncSession,
@@ -328,6 +331,7 @@ async def get_learning_path(
 # ---------------------------------------------------------------------------
 # GET /api/learning-path/timeline
 # ---------------------------------------------------------------------------
+
 
 async def get_learning_path_timeline(
     db: AsyncSession,
@@ -366,6 +370,7 @@ async def get_learning_path_timeline(
 # PUT /api/learning-path/{path_id}/status
 # ---------------------------------------------------------------------------
 
+
 async def update_path_status(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -395,6 +400,7 @@ async def update_path_status(
 # ---------------------------------------------------------------------------
 # Internal: detect topics with unresolved misconceptions
 # ---------------------------------------------------------------------------
+
 
 async def _find_misconception_topics(
     db: AsyncSession,
@@ -456,7 +462,9 @@ async def _find_misconception_topics(
 # Simple dataclass-like helper (avoids importing dataclasses at top level)
 # ---------------------------------------------------------------------------
 
+
 def dataclass_like(cls):
     """Ultra-minimal dataclass decorator — just attaches __init__ from annotations."""
     import dataclasses
+
     return dataclasses.dataclass(cls)

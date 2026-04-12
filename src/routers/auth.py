@@ -18,6 +18,7 @@ from threading import Lock
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.user import User
@@ -40,12 +41,11 @@ from src.services.auth_service import (
     register_user,
     update_onboarding,
 )
-from src.config import settings
-
 
 # ---------------------------------------------------------------------------
 # In-process rate limiter for login (sliding window, per IP)
 # ---------------------------------------------------------------------------
+
 
 class _SlidingWindowRateLimiter:
     """Thread-safe sliding-window rate limiter stored in memory."""
@@ -86,6 +86,7 @@ users_router = APIRouter(prefix="/api/users", tags=["Users"])
 # Helper
 # ---------------------------------------------------------------------------
 
+
 def _build_token_pair(user: User) -> TokenPair:
     access_token, expires_in = create_access_token(user.id)
     refresh_token = create_refresh_token(user.id)
@@ -103,6 +104,7 @@ def _user_to_profile(user: User) -> UserProfile:
 # ---------------------------------------------------------------------------
 # POST /api/auth/register
 # ---------------------------------------------------------------------------
+
 
 @auth_router.post(
     "/register",
@@ -127,6 +129,7 @@ async def register(
 # ---------------------------------------------------------------------------
 # POST /api/auth/login
 # ---------------------------------------------------------------------------
+
 
 @auth_router.post(
     "/login",
@@ -161,6 +164,7 @@ async def login(
 # ---------------------------------------------------------------------------
 # POST /api/auth/refresh
 # ---------------------------------------------------------------------------
+
 
 @auth_router.post(
     "/refresh",
@@ -202,6 +206,7 @@ async def refresh_token(
 # GET /api/users/me
 # ---------------------------------------------------------------------------
 
+
 @users_router.get(
     "/me",
     response_model=UserProfile,
@@ -216,6 +221,7 @@ async def get_me(
 # ---------------------------------------------------------------------------
 # PUT /api/users/me/onboarding
 # ---------------------------------------------------------------------------
+
 
 @users_router.put(
     "/me/onboarding",

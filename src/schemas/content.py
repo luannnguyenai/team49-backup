@@ -16,10 +16,10 @@ from src.models.content import (
     QuestionStatus,
 )
 
-
 # ===========================================================================
 # Module
 # ===========================================================================
+
 
 class ModuleBase(BaseModel):
     name: str = Field(min_length=1, max_length=255)
@@ -50,6 +50,7 @@ class ModuleResponse(ModuleBase):
 # ===========================================================================
 # Topic
 # ===========================================================================
+
 
 class TopicBase(BaseModel):
     module_id: uuid.UUID
@@ -88,6 +89,7 @@ class TopicResponse(TopicBase):
 # KnowledgeComponent
 # ===========================================================================
 
+
 class KCBase(BaseModel):
     topic_id: uuid.UUID
     name: str = Field(min_length=1, max_length=255)
@@ -115,8 +117,10 @@ class KCResponse(KCBase):
 # Question
 # ===========================================================================
 
+
 class StemMedia(BaseModel):
     """Optional media attached to a question stem."""
+
     url: str
     media_type: str = Field(description="e.g. image/png, video/mp4")
     alt_text: str | None = None
@@ -125,7 +129,7 @@ class StemMedia(BaseModel):
 class QuestionBase(BaseModel):
     item_id: str = Field(
         pattern=r"^ITEM-[A-Z0-9]{2,8}-\d{5}$",
-        description="Format: ITEM-{MODULE_CODE}-{5_DIGITS}, e.g. ITEM-PYB-00001"
+        description="Format: ITEM-{MODULE_CODE}-{5_DIGITS}, e.g. ITEM-PYB-00001",
     )
     version: int = Field(default=1, ge=1)
     status: QuestionStatus = QuestionStatus.draft
@@ -172,6 +176,7 @@ class QuestionCreate(QuestionBase):
 
 class QuestionUpdate(BaseModel):
     """All fields optional for PATCH."""
+
     version: int | None = Field(default=None, ge=1)
     status: QuestionStatus | None = None
     bloom_level: BloomLevel | None = None
@@ -211,6 +216,7 @@ class QuestionResponse(QuestionBase):
 
 class QuestionSummary(BaseModel):
     """Lightweight view used in session/interaction responses."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -224,8 +230,10 @@ class QuestionSummary(BaseModel):
 # Content API response schemas  (GET /api/modules, /api/topics)
 # ===========================================================================
 
+
 class TopicSummary(BaseModel):
     """Lightweight topic row — used inside ModuleDetailResponse."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -238,6 +246,7 @@ class TopicSummary(BaseModel):
 
 class ModuleListItem(BaseModel):
     """One row in GET /api/modules."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -250,6 +259,7 @@ class ModuleListItem(BaseModel):
 
 class ModuleDetailResponse(BaseModel):
     """GET /api/modules/{id} — full module with topic list."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -264,6 +274,7 @@ class ModuleDetailResponse(BaseModel):
 
 class PrerequisiteTopic(BaseModel):
     """Resolved prerequisite topic node for graph rendering."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -273,6 +284,7 @@ class PrerequisiteTopic(BaseModel):
 
 class TopicDetailResponse(BaseModel):
     """GET /api/topics/{id} — topic detail + resolved prerequisite graph."""
+
     model_config = {"from_attributes": True}
 
     id: uuid.UUID

@@ -28,11 +28,10 @@ EMA update (quiz):
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from src.models.content import BloomLevel, CorrectAnswer
 from src.models.learning import MasteryLevel, SelectedAnswer
-
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -57,6 +56,7 @@ _BLOOM_ORDER: list[BloomLevel] = [
 # Data transfer objects (pure Python, no SQLAlchemy)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class QuestionResult:
     """Carries everything the evaluator needs about a single answered question."""
@@ -67,7 +67,7 @@ class QuestionResult:
     correct_answer: CorrectAnswer
     selected_answer: SelectedAnswer | None
     is_correct: bool
-    kc_ids: list[str]           # UUID strings from Question.kc_ids JSON column
+    kc_ids: list[str]  # UUID strings from Question.kc_ids JSON column
     misconception_a_id: str | None
     misconception_b_id: str | None
     misconception_c_id: str | None
@@ -81,11 +81,11 @@ class TopicMasteryResult:
     topic_id: uuid.UUID
     earned_points: int
     max_points: int
-    score_percent: float            # 0.0 – 100.0
+    score_percent: float  # 0.0 – 100.0
     mastery_level: MasteryLevel
-    mastery_probability: float      # 0.0 – 1.0  (score_percent / 100)
-    bloom_breakdown: dict[str, str] # {"remember": "1/1", "analyze": "0/2"}
-    weak_kc_ids: list[str]          # KC UUIDs/slugs linked to wrong answers
+    mastery_probability: float  # 0.0 – 1.0  (score_percent / 100)
+    bloom_breakdown: dict[str, str]  # {"remember": "1/1", "analyze": "0/2"}
+    weak_kc_ids: list[str]  # KC UUIDs/slugs linked to wrong answers
     misconceptions_detected: list[str]
     bloom_max_achieved: str | None  # highest Bloom level answered correctly
 
@@ -93,6 +93,7 @@ class TopicMasteryResult:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def classify_mastery(score_percent: float) -> MasteryLevel:
     """Map a 0–100 score_percent to its MasteryLevel bucket."""
@@ -142,8 +143,7 @@ def evaluate_topic(results: list[QuestionResult]) -> TopicMasteryResult:
             bloom_correct[r.bloom_level] += 1
             # Track highest Bloom level answered correctly
             if bloom_max_achieved is None or (
-                _BLOOM_ORDER.index(r.bloom_level)
-                > _BLOOM_ORDER.index(bloom_max_achieved)
+                _BLOOM_ORDER.index(r.bloom_level) > _BLOOM_ORDER.index(bloom_max_achieved)
             ):
                 bloom_max_achieved = r.bloom_level
         else:
@@ -169,8 +169,7 @@ def evaluate_topic(results: list[QuestionResult]) -> TopicMasteryResult:
 
     # "correct/total" string for every Bloom level (including those with 0 questions)
     bloom_breakdown: dict[str, str] = {
-        b.value: f"{bloom_correct[b]}/{bloom_total[b]}"
-        for b in BloomLevel
+        b.value: f"{bloom_correct[b]}/{bloom_total[b]}" for b in BloomLevel
     }
 
     return TopicMasteryResult(

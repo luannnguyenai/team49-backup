@@ -35,23 +35,25 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
-
+from datetime import UTC, date, datetime
 
 # ---------------------------------------------------------------------------
 # Data transfer objects
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class TopicSlot:
     """Input record: one topic with its pre-determined estimated_hours."""
+
     topic_id: uuid.UUID
-    estimated_hours: float       # 0 for 'skip' actions
+    estimated_hours: float  # 0 for 'skip' actions
 
 
 @dataclass
 class WeekBucket:
     """Output: topics grouped into one calendar week."""
+
     week: int
     topic_ids: list[uuid.UUID] = field(default_factory=list)
     total_hours: float = 0.0
@@ -60,10 +62,11 @@ class WeekBucket:
 @dataclass
 class TimelineResult:
     """Full output of build_timeline."""
+
     weeks: list[WeekBucket]
     total_hours: float
-    total_active_weeks: int          # weeks with at least one non-skip topic
-    required_hours_per_week: float | None   # None when deadline info not supplied
+    total_active_weeks: int  # weeks with at least one non-skip topic
+    required_hours_per_week: float | None  # None when deadline info not supplied
     warnings: list[str]
 
     # Convenience: map topic_id → assigned week_number
@@ -74,13 +77,14 @@ class TimelineResult:
 # Warning constants
 # ---------------------------------------------------------------------------
 
-_TIGHT_RATIO     = 1.2   # required > available × 1.2 → TIGHT
+_TIGHT_RATIO = 1.2  # required > available × 1.2 → TIGHT
 _VERY_TIGHT_RATIO = 1.5  # required > available × 1.5 → VERY_TIGHT
 
 
 # ---------------------------------------------------------------------------
 # Public function
 # ---------------------------------------------------------------------------
+
 
 def build_timeline(
     items: list[TopicSlot],
@@ -105,7 +109,7 @@ def build_timeline(
 
     # Separate actionable items (hours > 0) from skipped ones (hours == 0)
     actionable = [s for s in items if s.estimated_hours > 0]
-    skipped    = [s for s in items if s.estimated_hours == 0]
+    skipped = [s for s in items if s.estimated_hours == 0]
 
     total_hours = sum(s.estimated_hours for s in actionable)
 
@@ -114,7 +118,7 @@ def build_timeline(
     required_per_week: float | None = None
 
     if deadline is not None:
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         days_left = (deadline - today).days
         weeks_available = max(days_left / 7, 0)
 
@@ -143,7 +147,7 @@ def build_timeline(
                     )
 
     # ── Greedy bin-packing ────────────────────────────────────────────────────
-    capacity = max(available_hours_per_week, 0.5)   # floor to avoid ZeroDivisionError
+    capacity = max(available_hours_per_week, 0.5)  # floor to avoid ZeroDivisionError
     weeks: list[WeekBucket] = []
     current_week = WeekBucket(week=1)
 
