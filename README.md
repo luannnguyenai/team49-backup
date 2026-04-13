@@ -1,66 +1,217 @@
-# 🎓 AI Tutor: Real-time Multi-modal Learning Platform
+# AI Adaptive Learning Platform
 
-Hệ thống hỗ trợ học tập cá nhân hóa sử dụng AI để giải đáp thắc mắc của học viên trực tiếp dựa trên ngữ cảnh bài giảng đa phương thức (Video Frame + Transcript + ToC).
-
-## 🚀 Tính năng nổi bật
-
-- **⚡ Real-time Streaming**: Phản hồi tức thì từng chữ, tích hợp hiệu ứng "🧠 Thinking" chân thực.
-- **📸 Multi-modal Context**: Tự động chụp ảnh slide bài giảng tại thời điểm hỏi để AI phân tích trực quan.
-- **🕒 HH:MM:SS Precision**: Mọi mốc thời gian trong ngữ cảnh và câu trả lời đều được chuẩn hóa dạng `Giờ:Phút:Giây`.
-- **🗂️ Auto-Sanitized ToC**: Hệ thống tự động làm sạch tiêu đề bài giảng (ví dụ: `Lecture 1: Introduction`) giúp danh sách chọn lựa luôn gọn gàng.
-- **📐 Math & LaTeX**: Hiển thị công thức toán học/Deep Learning sắc nét qua KaTeX.
-
-## 🐳 Khởi chạy nhanh với Docker (Khuyên dùng)
-
-Dự án đã được Docker hóa hoàn chỉnh, giúp bạn bỏ qua bước cài đặt môi trường phức tạp.
-
-1.  **Thiết lập môi trường**: Tạo file `.env` và điền `GEMINI_API_KEY`.
-2.  **Tải dữ liệu bài giảng**: Tải thư mục `data/` (Video, Transcript, ToC) từ Google Drive của nhóm tại đây: [Link Google Drive của bạn] và giải nén vào thư mục gốc của dự án.
-3.  **Khởi chạy**:
-    ```bash
-    docker compose up -d
-    ```
-3.  **Truy cập**:
-    - **Giao diện chính (HTML/JS)**: `http://localhost:8000`
-    - **Giao diện Lab (Streamlit)**: `http://localhost:8501`
+Nền tảng học tập thích nghi kết hợp AI để cá nhân hóa lộ trình học, hỗ trợ hỏi đáp đa phương thức theo ngữ cảnh bài giảng (Video + Transcript + Slide), và đánh giá kiến thức tự động.
 
 ---
 
-## 🛠️ Cài đặt & Khởi chạy thủ công
+## Tổng quan kiến trúc
 
-### 1. Thiết lập môi trường
+| Thành phần | Công nghệ | Cổng |
+|---|---|---|
+| Backend API | FastAPI + SQLAlchemy (asyncpg) | `8000` |
+| Frontend | Next.js 14 (App Router) | `3000` |
+| Database | PostgreSQL 16 | `5432` |
+| Cache / Rate-limit | Redis 7 | `6379` |
+
+---
+
+## Yêu cầu trước khi chạy
+
+- **Docker Desktop** (≥ 4.x) và **Docker Compose v2**
+- **GEMINI_API_KEY** — bắt buộc để các tính năng AI hoạt động
+- (Tuỳ chọn) `ANTHROPIC_API_KEY` hoặc `OPENAI_API_KEY` nếu dùng provider khác
+- Thư mục dữ liệu bài giảng `data/CS231n/` (xem hướng dẫn bên dưới)
+
+---
+
+## Chạy demo nhanh với Docker (Khuyên dùng)
+
+### Bước 1 — Cấu hình môi trường
+
 ```bash
-uv venv .venv
-source .venv/bin/activate  # Hoặc activate.fish / activate.ps1
-uv sync
+cp .env.example .env
 ```
 
-### 2. Cấu hình .env
+Mở `.env` và điền giá trị thực:
+
 ```env
+# Bắt buộc
 GEMINI_API_KEY=AIza...
-DEFAULT_MODEL=gemini-3-flash-preview
+
+# Đặt mật khẩu ngẫu nhiên cho DB/Redis
+POSTGRES_PASSWORD=your_strong_db_password
+REDIS_PASSWORD=your_strong_redis_password
+DATABASE_URL=postgresql+asyncpg://postgres:your_strong_db_password@localhost:5432/ai_learning
+REDIS_URL=redis://:your_strong_redis_password@localhost:6379/0
+
+# Bảo mật JWT (tạo bằng: python -c "import secrets; print(secrets.token_hex(32))")
+SECRET_KEY=your_32_char_random_secret
 ```
 
-### 3. nạp dữ liệu (Ingestion)
-Để nạp dữ liệu bài giảng CS231N vào hệ thống:
-```bash
-PYTHONPATH=. uv run python scripts/ingest_cs231n.py
+> Các biến còn lại trong `.env.example` có giá trị mặc định hợp lý, không cần thay đổi để chạy demo.
+
+### Bước 2 — Tải dữ liệu bài giảng CS231n
+
+Tải thư mục `data/` từ Google Drive của nhóm và giải nén vào thư mục gốc của dự án. Cấu trúc cần có:
+
+```
+data/
+├── CS231n/
+│   ├── videos/          # File .mp4 mỗi bài giảng
+│   ├── transcripts/     # File .json transcript
+│   ├── ToC_Summary/     # File .json mục lục + tóm tắt
+│   └── slides/          # File .png slide (tuỳ chọn)
+├── modules.json
+├── topics.json
+└── question_bank.json
 ```
 
-### 4. Khởi chạy Backend
+> Nếu chưa có thư mục `data/`, backend vẫn khởi động nhưng tính năng AI Tutor sẽ không có bài giảng để truy vấn.
+
+### Bước 3 — Khởi chạy tất cả dịch vụ
+
 ```bash
-PYTHONPATH=. uv run python src/api/app.py
+docker compose up -d
+```
+
+Lần đầu sẽ build image (~3-5 phút). Theo dõi trạng thái:
+
+```bash
+docker compose logs -f backend   # xem log backend
+docker compose ps                 # kiểm tra health
+```
+
+Chờ đến khi tất cả dịch vụ có trạng thái `healthy`.
+
+### Bước 4 — Chạy migrations và seed dữ liệu
+
+Mở terminal khác và chạy lần lượt:
+
+```bash
+# 1. Chạy Alembic migration (tạo bảng)
+docker compose exec backend uv run alembic upgrade head
+
+# 2. Seed chương trình học (modules, topics, questions)
+docker compose exec backend uv run python scripts/seed.py
+
+# 3. Seed bài giảng CS231n (18 bài)
+docker compose exec backend uv run python scripts/seed_lectures.py
+```
+
+> Các lệnh seed có thể chạy nhiều lần (idempotent — không tạo dữ liệu trùng).
+
+### Bước 5 — Truy cập ứng dụng
+
+| URL | Mô tả |
+|---|---|
+| `http://localhost:3000` | Giao diện chính (Next.js) |
+| `http://localhost:8000/docs` | Swagger API docs |
+| `http://localhost:8000/health` | Health check backend |
+
+---
+
+## Hướng dẫn sử dụng tính năng chính
+
+### Đăng ký / Đăng nhập
+Truy cập `http://localhost:3000` → Tạo tài khoản mới → Hoàn thành onboarding.
+
+### AI Tutor (`/tutor`)
+- Chọn bài giảng CS231n từ danh sách
+- Phát video đến thời điểm muốn hỏi
+- Đặt câu hỏi — AI sẽ phân tích frame video + transcript + slide tại thời điểm đó
+- Hỗ trợ streaming real-time, LaTeX/KaTeX cho công thức toán học
+
+### Học tập thích nghi (`/learn`)
+- Học theo module và topic
+- Hệ thống theo dõi điểm Mastery Score (BKT algorithm)
+
+### Kiểm tra kiến thức
+- `/quiz` — Quiz ngắn theo topic
+- `/assessment` — Kiểm tra toàn diện
+- `/module-test` — Kiểm tra cuối module
+
+### Lịch sử học (`/history`)
+Xem lại toàn bộ tiến trình, câu hỏi đã hỏi và kết quả kiểm tra.
+
+---
+
+## Cài đặt thủ công (không dùng Docker)
+
+Yêu cầu: Python 3.12+, Node.js 18+, PostgreSQL 16, Redis 7, [uv](https://docs.astral.sh/uv/)
+
+### Backend
+
+```bash
+# Cài dependencies
+uv sync
+
+# Chạy migrations
+uv run alembic upgrade head
+
+# Seed dữ liệu
+uv run python scripts/seed.py
+uv run python scripts/seed_lectures.py
+
+# Khởi động backend
+uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 2
+```
+
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env.local    # NEXT_PUBLIC_API_URL=http://localhost:8000
+npm install
+npm run dev                    # dev server tại :3000
+# hoặc: npm run build && npm start
 ```
 
 ---
 
-## 📂 Cấu trúc thư mục quan trọng
-- `src/`: Mã nguồn chính (API, Models, Services).
-- `data/cs231n/`: Chứa Video, Transcript và ToC JSON.
-- `prompts/`: Chứa các mẫu prompt tối ưu để trích xuất dữ liệu bài giảng.
-- `app.db`: Database SQLite (Tự động khởi tạo khi chạy Docker/API).
-- `logs/`: Lịch sử câu hỏi dưới dạng JSON.
+## Cấu trúc dự án
 
-## 🧪 Tài liệu bổ sung
-- Sử dụng prompt trong `prompts/lecture_extraction_prompt.txt` để trích xuất summary bài giảng mới đạt độ chính xác cao nhất.
+```
+.
+├── src/
+│   ├── api/            # FastAPI routes, app entry point
+│   ├── models/         # SQLAlchemy ORM models
+│   ├── services/       # Business logic (AI, quiz, learning path...)
+│   └── config.py       # Pydantic settings
+├── frontend/           # Next.js 14 App Router
+│   └── app/
+│       ├── (auth)/     # Login, Register
+│       ├── (protected)/# Dashboard, Tutor, Learn, History, Profile
+│       ├── quiz/
+│       ├── assessment/
+│       └── module-test/
+├── scripts/
+│   ├── seed.py             # Seed curriculum (modules, topics, questions)
+│   ├── seed_lectures.py    # Seed CS231n lectures
+│   └── ingest_cs231n.py    # Ingest raw lecture data
+├── alembic/            # DB migration files
+├── data/               # Lecture videos, transcripts, ToC (không commit)
+├── docker-compose.yml
+├── Dockerfile
+└── .env.example
+```
 
+---
+
+## Dừng dịch vụ
+
+```bash
+docker compose down          # dừng, giữ data volumes
+docker compose down -v       # dừng + xoá toàn bộ data (reset hoàn toàn)
+```
+
+---
+
+## Troubleshooting
+
+| Vấn đề | Giải pháp |
+|---|---|
+| Backend không start | Kiểm tra `GEMINI_API_KEY` đã đặt trong `.env` |
+| `Cannot connect to database` | Chờ thêm 30s cho PostgreSQL healthy, rồi chạy lại migration |
+| Frontend báo API lỗi | Đảm bảo backend đang chạy: `curl http://localhost:8000/health` |
+| Port đã bị chiếm | Đổi `BACKEND_PORT` / `FRONTEND_PORT` trong `.env` |
+| Lỗi `image not found` (Mac M1/M2) | Thêm `platform: linux/amd64` vào service trong `docker-compose.yml` |
