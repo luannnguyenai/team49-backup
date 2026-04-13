@@ -95,26 +95,24 @@ services:
       target: runtime # use the runtime stage
     container_name: al_backend
     restart: unless-stopped
-    # Dev: hot-reload via uvicorn --reload (overrides Dockerfile CMD)
     command: >
       uv run python -m uvicorn src.api.app:app
         --host 0.0.0.0 --port 8000
-        --reload --reload-dir src
+        --workers 2
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       <<: *backend-env
     volumes:
-      # Mount source for hot-reload (dev only — removed in prod overlay)
       - .:/app
-      - /app/deps # keep deps from image, don't override with host
+      - /app/.venv  # mask host .venv with anonymous volume (Linux vs macOS)
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\" || exit 1" ]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -144,7 +142,7 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "wget -qO- http://localhost:3000/api/health 2>/dev/null || exit 1" ]
+      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health 2>/dev/null || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3
