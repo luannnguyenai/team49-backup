@@ -4,7 +4,10 @@ import subprocess
 import tempfile
 import os
 import logging
-import resource
+try:
+    import resource
+except ImportError:
+    resource = None
 
 logger = logging.getLogger("CodeSandbox")
 
