@@ -77,13 +77,10 @@ fi
 # =============================================================================
 log_section "Bước 1 — Build & Start Docker services"
 
-# Dừng các container cũ nếu đang chạy
-if docker compose ps --quiet 2>/dev/null | grep -q .; then
-  log_info "Đang dừng containers cũ..."
-  docker compose down
-fi
-
 log_info "Đang build và khởi chạy tất cả services (lần đầu ~3-5 phút)..."
+# up --build tự recreate container nếu image thay đổi, giữ nguyên volumes (DB data).
+# Dùng 'docker compose down' thủ công nếu muốn reset hoàn toàn (không xóa data).
+# Dùng 'docker compose down -v' nếu muốn xóa cả data volumes.
 docker compose up -d --build
 
 # =============================================================================
@@ -137,19 +134,24 @@ log_ok "Migration hoàn tất"
 # =============================================================================
 log_section "Bước 4 — Seed dữ liệu"
 
-log_info "Seed curriculum (modules, topics, questions)..."
-if docker compose exec -T backend uv run python scripts/seed.py --clear 2>&1; then
-  log_ok "Seed curriculum hoàn tất"
+# Kiểm tra bảng modules có data chưa — chỉ seed nếu rỗng
+MODULE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM modules;" 2>/dev/null | tr -d '[:space:]' || echo "0")
+if [ "$MODULE_COUNT" = "0" ]; then
+  log_info "Seed curriculum (modules, topics, questions)..."
+  docker compose exec -T backend uv run python scripts/seed.py 2>&1 && log_ok "Seed curriculum hoàn tất" \
+    || log_warn "seed.py thất bại — bỏ qua, tiếp tục"
 else
-  log_warn "seed.py báo lỗi. Thử không dùng --clear..."
-  docker compose exec -T backend uv run python scripts/seed.py 2>&1 || log_warn "seed.py thất bại — bỏ qua, tiếp tục"
+  log_ok "Curriculum đã có sẵn (${MODULE_COUNT} module) — bỏ qua seed"
 fi
 
-log_info "Seed bài giảng CS231n..."
-if docker compose exec -T backend uv run python scripts/seed_lectures.py 2>&1; then
-  log_ok "Seed bài giảng hoàn tất"
+# Kiểm tra bảng lectures có data chưa — chỉ seed nếu rỗng
+LECTURE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM lectures;" 2>/dev/null | tr -d '[:space:]' || echo "0")
+if [ "$LECTURE_COUNT" = "0" ]; then
+  log_info "Seed bài giảng CS231n..."
+  docker compose exec -T backend uv run python scripts/seed_lectures.py 2>&1 && log_ok "Seed bài giảng hoàn tất" \
+    || log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/CS231n/)"
 else
-  log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/CS231n/)"
+  log_ok "Lectures đã có sẵn (${LECTURE_COUNT} bài) — bỏ qua seed"
 fi
 
 # =============================================================================
