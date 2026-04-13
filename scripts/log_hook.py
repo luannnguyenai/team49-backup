@@ -174,7 +174,12 @@ def main():
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     # Output valid JSON (required by some tools like Gemini)
-    print(json.dumps({"status": "logged"}))
+    # only output JSON if explicitly needed
+    if os.environ.get("AI_TOOL_NAME") == "claude":
+        sys.stdout.write(json.dumps({"continue": True}))
+        sys.stdout.flush()
+    else:
+        print(json.dumps({"status": "logged"}))
 
 
 if __name__ == "__main__":
