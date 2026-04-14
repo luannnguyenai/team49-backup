@@ -21,11 +21,12 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select, text
+from sqlalchemy import case, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import (
     BloomLevel,
+    DifficultyBucket,
     KnowledgeComponent,
     Question,
     QuestionStatus,
@@ -82,22 +83,41 @@ async def start_assessment(
             detail=f"Topics not found: {[str(m) for m in missing]}",
         )
 
-    # 2. Collect question_ids the user has already answered (dedup across sessions)
+    # 2. Collect question_ids + estimate ability from the user's history
     answered_result = await db.execute(
-        select(Interaction.question_id).where(Interaction.user_id == user_id).distinct()
+        select(Interaction.question_id, Interaction.is_correct)
+        .where(Interaction.user_id == user_id)
+        .distinct(Interaction.question_id)
     )
-    excluded_ids: set[uuid.UUID] = {row[0] for row in answered_result}
+    rows = answered_result.all()
+    excluded_ids: set[uuid.UUID] = {row[0] for row in rows}
+
+    # Rough IRT ability estimate: proportion correct mapped to logit scale
+    # -1.0 (struggling) … 0.0 (average) … +1.0 (strong)
+    if rows:
+        correct_frac = sum(1 for _, ok in rows if ok) / len(rows)
+        # Map [0,1] → [-1.5, 1.5] via logit-like stretch
+        ability = (correct_frac - 0.5) * 3.0
+    else:
+        ability = 0.0  # new user: assume average ability
 
     # 3. Select questions for each topic
     all_questions: list[Question] = []
+    skipped_topics: list[str] = []
     for topic_id in topic_ids:
-        topic_qs = await _select_questions_for_topic(db, topic_id, excluded_ids)
-        all_questions.extend(topic_qs)
+        topic_qs = await _select_questions_for_topic(db, topic_id, excluded_ids, ability)
+        if topic_qs:
+            all_questions.extend(topic_qs)
+        else:
+            skipped_topics.append(str(topic_id))
 
     if not all_questions:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="No eligible assessment questions found for the requested topics.",
+            detail=(
+                "No eligible assessment questions found for any of the requested topics. "
+                "The question bank may not include active assessment questions for these topics."
+            ),
         )
 
     # 4. Create the Session (no topic_id/module_id — spans multiple topics)
@@ -124,13 +144,39 @@ async def _select_questions_for_topic(
     db: AsyncSession,
     topic_id: uuid.UUID,
     excluded_ids: set[uuid.UUID],
+    ability: float = 0.0,
 ) -> list[Question]:
     """
     Select up to 5 questions for a single topic following the bloom distribution.
-    Questions already in `excluded_ids` (previously answered) are skipped.
+
+    IRT-based ordering:
+    - If ``irt_difficulty`` is set, prefer questions whose difficulty is closest
+      to the user's estimated ability (|difficulty − ability| ascending).
+    - Fallback: when ``irt_difficulty`` is NULL, proxy via ``difficulty_bucket``
+      (easy → 0.0, medium → 0.5, hard → 1.0 on a [0,1] scale, remapped to
+      [-1.5, 1.5] to match the logit-scale ability estimate).
+    - ``RANDOM()`` is a tiebreaker so we don't always pick the same questions.
+
+    Questions already in ``excluded_ids`` (previously answered) are skipped.
     If a bloom slot has fewer questions than requested, we take what's available.
     """
     selected: list[Question] = []
+
+    # IRT difficulty proxy for questions without explicit IRT params
+    # difficulty_bucket values are stored as enum strings
+    bucket_proxy = case(
+        (Question.difficulty_bucket == DifficultyBucket.easy, literal(-1.0)),
+        (Question.difficulty_bucket == DifficultyBucket.medium, literal(0.0)),
+        (Question.difficulty_bucket == DifficultyBucket.hard, literal(1.0)),
+        else_=literal(0.0),
+    )
+
+    # Distance to the user's estimated ability: use IRT param when available,
+    # otherwise fall back to the difficulty_bucket proxy
+    irt_distance = case(
+        (Question.irt_difficulty.isnot(None), func.abs(Question.irt_difficulty - ability)),
+        else_=func.abs(bucket_proxy - ability),
+    )
 
     for bloom_levels, count in _BLOOM_SLOTS:
         # Grow exclusion set as we pick within this topic (avoid intra-topic dupes)
@@ -145,7 +191,8 @@ async def _select_questions_for_topic(
                 text("usage_context::jsonb @> '[\"assessment\"]'::jsonb"),
                 Question.bloom_level.in_(bloom_levels),
             )
-            .order_by(func.random())
+            # IRT-closest questions first; random tiebreaker for variety
+            .order_by(irt_distance.asc(), func.random())
             .limit(count)
         )
         if exclusion:

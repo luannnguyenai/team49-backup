@@ -133,13 +133,17 @@ export default function AssessmentPage() {
         setPhase("active");
       } catch (e: unknown) {
         if (!cancelled) {
-          const detail = (e as { response?: { data?: { detail?: string } } })
-            ?.response?.data?.detail;
-          setErrorMsg(
+          console.error("[Assessment] Failed to start:", e);
+          const data = (e as { response?: { data?: unknown } })?.response?.data;
+          console.error("[Assessment] API response body:", data);
+          const detail = (data as { detail?: unknown })?.detail;
+          const msg =
             typeof detail === "string"
               ? detail
-              : "Không thể bắt đầu assessment. Vui lòng thử lại."
-          );
+              : Array.isArray(detail)
+              ? (detail as { msg?: string }[])[0]?.msg ?? "Dữ liệu không hợp lệ."
+              : "Không thể bắt đầu assessment. Vui lòng thử lại.";
+          setErrorMsg(msg);
           setPhase("error");
         }
       }
