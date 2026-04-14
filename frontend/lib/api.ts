@@ -59,7 +59,7 @@ export const api = axios.create({
   baseURL:
     typeof window !== "undefined"
       ? "" // use Next.js rewrite proxy in the browser
-      : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"),
+      : (process.env.API_INTERNAL_URL ?? "http://backend:8000"),
   headers: { "Content-Type": "application/json" },
   timeout: 15_000,
 });
@@ -94,7 +94,7 @@ async function doRefresh(): Promise<string | null> {
       access_token: string;
       expires_in: number;
     }>(
-      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/auth/refresh`,
+      "/api/auth/refresh",
       { refresh_token: refreshToken }
     );
     const { access_token, expires_in } = res.data;

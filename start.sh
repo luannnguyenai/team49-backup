@@ -149,18 +149,9 @@ echo ""
 log_ok "Backend healthy tại http://localhost:8000"
 
 # =============================================================================
-# BƯỚC 3 — Migration
+# BƯỚC 3 — Seed dữ liệu
 # =============================================================================
-log_section "Bước 3 — Chạy Database Migration"
-
-log_info "Chạy Alembic migrations..."
-docker compose exec -T backend uv run alembic upgrade head
-log_ok "Migration hoàn tất"
-
-# =============================================================================
-# BƯỚC 4 — Seed dữ liệu
-# =============================================================================
-log_section "Bước 4 — Seed dữ liệu"
+log_section "Bước 3 — Seed dữ liệu"
 
 # Kiểm tra bảng modules có data chưa — chỉ seed nếu rỗng
 MODULE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM modules;" 2>/dev/null | tr -d '[:space:]' || echo "0")
@@ -183,9 +174,9 @@ else
 fi
 
 # =============================================================================
-# BƯỚC 5 — Kiểm tra data trong container
+# BƯỚC 4 — Kiểm tra data trong container
 # =============================================================================
-log_section "Bước 5 — Kiểm tra data trong backend"
+log_section "Bước 4 — Kiểm tra data trong backend"
 
 log_info "Kiểm tra thư mục /app/data trong container..."
 docker compose exec -T backend python - <<'EOF'

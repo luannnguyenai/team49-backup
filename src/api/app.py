@@ -187,7 +187,3 @@ def get_progress(session_id: str, db: Session = Depends(get_db)):
     ).all()
     return {row.lecture_id: row.last_timestamp for row in rows}
 
-if __name__ == "__main__":
-
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

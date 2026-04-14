@@ -27,8 +27,6 @@ ENV PYTHONPATH="/app"
 
 # Expose the API port
 EXPOSE 8000
-# Expose Streamlit port
-EXPOSE 8501
 
 # Command to run the FastAPI backend
 # We use 'uv run' to ensure the environment is correctly set up

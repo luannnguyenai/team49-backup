@@ -13,9 +13,17 @@ import {
   AlignLeft,
   ToggleLeft,
   ToggleRight,
+  Sparkles,
+  Zap,
+  BookOpen,
+  MessageSquare,
+  Bot,
+  PlayCircle,
+  Clock,
 } from "lucide-react";
 
-// ---- Types ----
+// ── Types ────────────────────────────────────────────────────────────────────
+
 interface Lecture {
   id: string;
   title: string;
@@ -40,27 +48,31 @@ interface ChatMessage {
   rating?: number | null;
 }
 
-// ---- Helpers ----
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
+  if (h > 0) return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
+  return [m, s].map((v) => String(v).padStart(2, "0")).join(":");
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+type RightTab = "lesson" | "transcript" | "copilot";
+
 export default function TutorPage() {
-  // ---- State ----
+  // ── State ──────────────────────────────────────────────────────────────────
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [selectedLecture, setSelectedLecture] = useState<string>("");
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "ai", content: "Chào bạn! Hãy chọn bài giảng và đặt câu hỏi bất cứ lúc nào trong khi xem video." },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [quizEnabled, setQuizEnabled] = useState(false);
-  const [rightTab, setRightTab] = useState<"lesson" | "transcript">("transcript");
+  const [rightTab, setRightTab] = useState<RightTab>("transcript");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
 
@@ -68,7 +80,7 @@ export default function TutorPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // ---- Progress tracking ----
+  // ── Session / progress ────────────────────────────────────────────────────
   const sessionId = useRef(
     typeof window !== "undefined"
       ? localStorage.getItem("al_tutor_session") ??
@@ -89,7 +101,6 @@ export default function TutorPage() {
     }).catch(() => {});
   }, [selectedLecture]);
 
-  // Save progress every 10s while playing
   useEffect(() => {
     const interval = setInterval(() => {
       if (videoRef.current && !videoRef.current.paused) saveProgress();
@@ -97,7 +108,7 @@ export default function TutorPage() {
     return () => clearInterval(interval);
   }, [saveProgress]);
 
-  // ---- Load lectures on mount ----
+  // ── Load lectures ─────────────────────────────────────────────────────────
   useEffect(() => {
     api.get<Lecture[]>("/api/lectures").then((r) => {
       setLectures(r.data);
@@ -105,7 +116,7 @@ export default function TutorPage() {
     }).catch(() => {});
   }, []);
 
-  // ---- Load chapters + restore progress when lecture changes ----
+  // ── Load chapters + restore progress ─────────────────────────────────────
   useEffect(() => {
     if (!selectedLecture) return;
     api.get<Chapter[]>(`/api/lectures/${selectedLecture}/toc`).then((r) => {
@@ -114,23 +125,21 @@ export default function TutorPage() {
 
     api.get<Record<string, number>>(`/api/progress/${sessionId.current}`).then((r) => {
       const ts = r.data[selectedLecture];
-      if (ts && ts > 1 && videoRef.current) {
-        videoRef.current.currentTime = ts;
-      }
+      if (ts && ts > 1 && videoRef.current) videoRef.current.currentTime = ts;
     }).catch(() => {});
   }, [selectedLecture]);
 
-  // ---- Auto-scroll chat ----
+  // ── Auto-scroll chat ──────────────────────────────────────────────────────
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ---- Video time update ----
+  // ── Video time update ─────────────────────────────────────────────────────
   const handleTimeUpdate = () => {
     if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
   };
 
-  // ---- Capture frame ----
+  // ── Capture frame ─────────────────────────────────────────────────────────
   const captureFrame = (): string | null => {
     const v = videoRef.current;
     if (!v || !v.videoWidth) return null;
@@ -145,7 +154,7 @@ export default function TutorPage() {
     }
   };
 
-  // ---- Rate answer ----
+  // ── Rate answer ───────────────────────────────────────────────────────────
   const rateAnswer = async (msgIdx: number, qaId: number, rating: number) => {
     try {
       await api.post(`/api/history/${qaId}/rate`, { rating });
@@ -155,22 +164,31 @@ export default function TutorPage() {
     } catch {}
   };
 
-  // ---- Send question ----
-  const handleSend = async () => {
-    const q = input.trim();
+  // ── Send message ──────────────────────────────────────────────────────────
+  const handleSend = useCallback(async (textOverride?: string) => {
+    const q = (textOverride ?? input).trim();
     if (!q || streaming || !selectedLecture) return;
 
+    // Switch to copilot tab so user sees the response
+    setRightTab("copilot");
     setInput("");
     setStreaming(true);
     const img = captureFrame();
 
-    setMessages((prev) => [...prev, { role: "user", content: q }]);
+    const userMsg: ChatMessage = { role: "user", content: q };
+    const aiPlaceholder: ChatMessage = { role: "ai", content: "" };
+
+    setMessages((prev) => {
+      const next = [...prev, userMsg, aiPlaceholder];
+      return next;
+    });
+
+    // aiIdx = messages.length + 1 after adding userMsg
     const aiIdx = messages.length + 1;
-    setMessages((prev) => [...prev, { role: "ai", content: "" }]);
 
     try {
       const resp = await fetch(
-        `${typeof window !== "undefined" ? "" : "http://localhost:8000"}/api/lectures/ask`,
+        "/api/lectures/ask",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -227,19 +245,25 @@ export default function TutorPage() {
       setStreaming(false);
       inputRef.current?.focus();
     }
-  };
+  }, [input, streaming, selectedLecture, messages.length, currentTime]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Derived ───────────────────────────────────────────────────────────────
   const lecture = lectures.find((l) => l.id === selectedLecture);
   const activeChapter = chapters.find(
     (ch) => currentTime >= ch.start_time && currentTime < ch.end_time
   );
+  const hasMessages = messages.length > 0;
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
       className="flex h-[calc(100vh-4.5rem)] overflow-hidden -mx-4 -mt-4 md:-mx-6 md:-mt-6"
       style={{ backgroundColor: "var(--bg-page)" }}
     >
-      {/* ── LEFT PANEL: Course content ── */}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          LEFT PANEL — Course content (lecture list)
+      ═══════════════════════════════════════════════════════════════════ */}
       <aside
         className="flex flex-col border-r shrink-0 transition-all duration-300 overflow-hidden"
         style={{
@@ -248,19 +272,19 @@ export default function TutorPage() {
           backgroundColor: "var(--bg-card)",
         }}
       >
-        {/* Panel header */}
+        {/* Header */}
         <div
           className="flex h-12 items-center justify-between border-b px-3 shrink-0"
           style={{ borderColor: "var(--border)" }}
         >
           {!leftCollapsed && (
-            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
               Nội dung khóa học
             </span>
           )}
           <button
             onClick={() => setLeftCollapsed((c) => !c)}
-            className="ml-auto rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="ml-auto rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
             style={{ color: "var(--text-muted)" }}
           >
             {leftCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -268,98 +292,129 @@ export default function TutorPage() {
         </div>
 
         {!leftCollapsed && (
-          <div className="flex flex-col flex-1 overflow-y-auto p-3 gap-4">
-            {/* Lecture selector */}
-            <select
-              value={selectedLecture}
-              onChange={(e) => setSelectedLecture(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                backgroundColor: "var(--bg-page)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
-              }}
-            >
-              {lectures.map((l) => (
-                <option key={l.id} value={l.id}>{l.title}</option>
-              ))}
-              {lectures.length === 0 && <option>Chưa có bài giảng</option>}
-            </select>
-
-            {/* Lecture info */}
+          <div className="flex flex-col flex-1 overflow-y-auto">
+            {/* Course stats */}
             {lecture && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  {lecture.title}
+              <div className="px-4 py-3 border-b" style={{ borderColor: "var(--border)" }}>
+                <p className="text-xs leading-relaxed line-clamp-2 mb-2" style={{ color: "var(--text-secondary)" }}>
+                  {lecture.description ?? "Khóa học video bài giảng"}
                 </p>
-                {lecture.description && (
-                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                    {lecture.description}
-                  </p>
-                )}
-                {/* Progress */}
-                <div>
+                {/* Progress bar */}
+                <div className="mb-2">
                   <div className="flex justify-between text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-                    <span>Tiến độ học tập</span>
+                    <span>Tiến độ</span>
                     <span>0%</span>
                   </div>
                   <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-page)" }}>
                     <div className="h-full w-0 rounded-full bg-primary-600" />
                   </div>
                 </div>
-                {/* Stats */}
-                <div className="flex gap-3 text-xs" style={{ color: "var(--text-muted)" }}>
+                <div className="flex gap-4 text-xs" style={{ color: "var(--text-muted)" }}>
                   <span className="flex items-center gap-1">
-                    <span className="font-semibold text-primary-600">{chapters.length || 1}</span> Video
+                    <span className="font-bold" style={{ color: "var(--text-primary)" }}>{lectures.length}</span>
+                    &nbsp;Video
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="font-semibold text-emerald-600">0</span> Hoàn thành
+                    <span className="font-bold text-emerald-600">0</span>
+                    &nbsp;Hoàn thành
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Video list */}
+            {/* Lecture list */}
+            <div className="flex-1 overflow-y-auto py-2">
+              {lectures.length === 0 ? (
+                <p className="text-center text-sm py-8" style={{ color: "var(--text-muted)" }}>
+                  Chưa có bài giảng
+                </p>
+              ) : (
+                <div className="px-2 space-y-0.5">
+                  {lectures.map((l, idx) => {
+                    const isActive = l.id === selectedLecture;
+                    return (
+                      <button
+                        key={l.id}
+                        onClick={() => setSelectedLecture(l.id)}
+                        className="w-full text-left rounded-lg px-3 py-2.5 transition-colors group"
+                        style={{
+                          backgroundColor: isActive ? "rgba(37,99,235,0.08)" : "transparent",
+                        }}
+                      >
+                        <div className="flex items-start gap-2">
+                          <PlayCircle
+                            className="h-4 w-4 shrink-0 mt-0.5 transition-colors"
+                            style={{ color: isActive ? "#2563eb" : "var(--text-muted)" }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-xs font-medium leading-snug line-clamp-2"
+                              style={{ color: isActive ? "#2563eb" : "var(--text-secondary)" }}
+                            >
+                              {idx + 1}. {l.title}
+                            </p>
+                            {l.duration != null && (
+                              <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                                <Clock className="h-3 w-3" />
+                                {formatTime(l.duration)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Chapter list (when a lecture is selected) */}
             {chapters.length > 0 && (
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              <div className="border-t py-2" style={{ borderColor: "var(--border)" }}>
+                <p className="text-xs font-semibold uppercase tracking-wider px-4 mb-1" style={{ color: "var(--text-muted)" }}>
                   Video bài giảng
                 </p>
-                {chapters.map((ch, i) => {
-                  const active = currentTime >= ch.start_time && currentTime < ch.end_time;
-                  return (
-                    <button
-                      key={ch.id}
-                      onClick={() => {
-                        if (videoRef.current) videoRef.current.currentTime = ch.start_time;
-                      }}
-                      className="w-full text-left rounded-lg px-3 py-2 text-sm transition-colors"
-                      style={{
-                        borderLeft: active ? "3px solid #2563eb" : "3px solid transparent",
-                        backgroundColor: active ? "rgba(37,99,235,0.07)" : "transparent",
-                        color: active ? "#2563eb" : "var(--text-secondary)",
-                      }}
-                    >
-                      <p className="font-medium truncate">
-                        {i + 1}. {ch.title}
-                      </p>
-                      <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                        {formatTime(ch.start_time)}
-                      </p>
-                    </button>
-                  );
-                })}
+                <div className="px-2 space-y-0.5">
+                  {chapters.map((ch, i) => {
+                    const active = currentTime >= ch.start_time && currentTime < ch.end_time;
+                    return (
+                      <button
+                        key={ch.id}
+                        onClick={() => {
+                          if (videoRef.current) videoRef.current.currentTime = ch.start_time;
+                        }}
+                        className="w-full text-left rounded-lg px-3 py-2 transition-colors"
+                        style={{
+                          borderLeft: active ? "3px solid #2563eb" : "3px solid transparent",
+                          backgroundColor: active ? "rgba(37,99,235,0.07)" : "transparent",
+                        }}
+                      >
+                        <p
+                          className="text-xs font-medium truncate"
+                          style={{ color: active ? "#2563eb" : "var(--text-secondary)" }}
+                        >
+                          {i + 1}. {ch.title}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                          {formatTime(ch.start_time)}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
         )}
       </aside>
 
-      {/* ── CENTER: Video player ── */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          CENTER — Video player
+      ═══════════════════════════════════════════════════════════════════ */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Quiz toggle bar */}
         <div
-          className="flex h-12 items-center justify-center border-b shrink-0"
+          className="flex h-12 items-center justify-center border-b shrink-0 gap-3"
           style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
         >
           <button
@@ -392,7 +447,7 @@ export default function TutorPage() {
             />
           </div>
 
-          {/* Video title + timestamp */}
+          {/* Video info */}
           <div className="px-6 py-4" style={{ backgroundColor: "var(--bg-card)" }}>
             <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
               {activeChapter?.title ?? lecture?.title ?? "Chọn bài giảng"}
@@ -404,11 +459,13 @@ export default function TutorPage() {
         </div>
       </div>
 
-      {/* ── RIGHT PANEL: Lesson content + Transcript ── */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          RIGHT PANEL — Lesson content + Transcript + AI Copilot
+      ═══════════════════════════════════════════════════════════════════ */}
       <aside
         className="flex flex-col border-l shrink-0 transition-all duration-300 overflow-hidden"
         style={{
-          width: rightCollapsed ? "3rem" : "20rem",
+          width: rightCollapsed ? "3rem" : "22rem",
           borderColor: "var(--border)",
           backgroundColor: "var(--bg-card)",
         }}
@@ -426,7 +483,7 @@ export default function TutorPage() {
             {rightCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </button>
           {!rightCollapsed && (
-            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
               Nội dung bài học
             </span>
           )}
@@ -435,187 +492,271 @@ export default function TutorPage() {
         {!rightCollapsed && (
           <>
             {/* Tabs */}
-            <div
-              className="flex border-b shrink-0"
-              style={{ borderColor: "var(--border)" }}
-            >
-              <button
-                onClick={() => setRightTab("lesson")}
-                className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors"
-                style={{
-                  borderBottom: rightTab === "lesson" ? "2px solid #2563eb" : "2px solid transparent",
-                  color: rightTab === "lesson" ? "#2563eb" : "var(--text-muted)",
-                }}
-              >
-                <FileText className="h-3.5 w-3.5" />
-                Bài giảng
-              </button>
-              <button
-                onClick={() => setRightTab("transcript")}
-                className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors"
-                style={{
-                  borderBottom: rightTab === "transcript" ? "2px solid #2563eb" : "2px solid transparent",
-                  color: rightTab === "transcript" ? "#2563eb" : "var(--text-muted)",
-                }}
-              >
-                <AlignLeft className="h-3.5 w-3.5" />
-                Transcript
-              </button>
+            <div className="flex border-b shrink-0" style={{ borderColor: "var(--border)" }}>
+              {(["lesson", "transcript", "copilot"] as RightTab[]).map((tab) => {
+                const labels: Record<RightTab, { label: string; icon: React.ReactNode }> = {
+                  lesson:     { label: "Bài giảng",  icon: <FileText className="h-3.5 w-3.5" /> },
+                  transcript: { label: "Transcript", icon: <AlignLeft className="h-3.5 w-3.5" /> },
+                  copilot:    { label: "AI",          icon: <Bot className="h-3.5 w-3.5" /> },
+                };
+                const { label, icon } = labels[tab];
+                const isActive = rightTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setRightTab(tab)}
+                    className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors relative"
+                    style={{
+                      color: isActive ? "#2563eb" : "var(--text-muted)",
+                    }}
+                  >
+                    {icon}
+                    {label}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Tab content */}
-            <div className="flex-1 overflow-y-auto">
-              {rightTab === "lesson" ? (
-                <div className="p-4 space-y-3">
-                  {lecture ? (
-                    <>
-                      <div
-                        className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:opacity-80 transition-opacity"
-                        style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
-                      >
-                        <FileText className="h-5 w-5 text-primary-600 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
-                            Slide bài giảng
-                          </p>
-                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                            {chapters.length} slides
-                          </p>
-                        </div>
+            {rightTab === "lesson" && (
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {lecture ? (
+                  <>
+                    <div
+                      className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
+                    >
+                      <FileText className="h-5 w-5 text-primary-600 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                          Slide bài giảng
+                        </p>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          {chapters.length} slides
+                        </p>
                       </div>
-                      <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                        {lecture.description ?? "Không có mô tả cho bài giảng này."}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
-                      Chọn bài giảng để xem nội dung.
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                      {lecture.description ?? "Không có mô tả cho bài giảng này."}
                     </p>
-                  )}
-                </div>
-              ) : (
-                /* Transcript = chapters */
-                <div className="p-3 space-y-3">
-                  {chapters.length === 0 ? (
-                    <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
-                      Chưa có transcript.
-                    </p>
-                  ) : (
-                    chapters.map((ch) => {
-                      const active = currentTime >= ch.start_time && currentTime < ch.end_time;
-                      return (
-                        <button
-                          key={ch.id}
-                          onClick={() => {
-                            if (videoRef.current) videoRef.current.currentTime = ch.start_time;
-                          }}
-                          className="w-full text-left rounded-lg p-3 transition-colors"
-                          style={{
-                            backgroundColor: active ? "rgba(37,99,235,0.08)" : "transparent",
-                          }}
-                        >
-                          <p
-                            className="text-xs font-semibold mb-1"
-                            style={{ color: active ? "#2563eb" : "var(--text-muted)" }}
-                          >
-                            {formatTime(ch.start_time)}
-                          </p>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)" }}
-                          >
-                            {ch.summary || ch.title}
-                          </p>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Chat input — always visible at bottom */}
-            <div className="border-t p-3 shrink-0" style={{ borderColor: "var(--border)" }}>
-              <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>
-                Hỏi AI Tutor
-              </p>
-              <div className="flex gap-2">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  placeholder="Đặt câu hỏi về bài giảng..."
-                  rows={2}
-                  className="flex-1 rounded-lg border px-3 py-2 text-sm resize-none outline-none focus:ring-1 focus:ring-primary-500"
-                  style={{
-                    backgroundColor: "var(--bg-page)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={streaming || !input.trim()}
-                  className="self-end rounded-lg px-3 py-2 transition-opacity disabled:opacity-40"
-                  style={{ backgroundColor: "var(--primary-600, #2563eb)", color: "white" }}
-                >
-                  {streaming ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </button>
+                  </>
+                ) : (
+                  <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
+                    Chọn bài giảng để xem nội dung.
+                  </p>
+                )}
               </div>
+            )}
 
-              {/* Recent AI messages */}
-              {messages.filter((m) => m.role !== "user").length > 1 && (
-                <div className="mt-3 space-y-2 max-h-36 overflow-y-auto">
-                  {messages
-                    .filter((m) => m.content)
-                    .slice(-4)
-                    .map((msg, idx) => (
-                      <div key={idx}>
-                        <div
-                          className="rounded-lg px-3 py-2 text-xs leading-relaxed"
-                          style={
-                            msg.role === "user"
-                              ? { backgroundColor: "rgba(37,99,235,0.1)", color: "#2563eb" }
-                              : msg.role === "error"
-                              ? { backgroundColor: "rgba(239,68,68,0.1)", color: "#f87171" }
-                              : { backgroundColor: "var(--bg-page)", color: "var(--text-secondary)" }
-                          }
+            {rightTab === "transcript" && (
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {chapters.length === 0 ? (
+                  <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
+                    Chưa có transcript.
+                  </p>
+                ) : (
+                  chapters.map((ch) => {
+                    const active = currentTime >= ch.start_time && currentTime < ch.end_time;
+                    return (
+                      <button
+                        key={ch.id}
+                        onClick={() => {
+                          if (videoRef.current) videoRef.current.currentTime = ch.start_time;
+                        }}
+                        className="w-full text-left rounded-lg p-3 transition-colors"
+                        style={{
+                          backgroundColor: active ? "rgba(37,99,235,0.08)" : "transparent",
+                        }}
+                      >
+                        <p
+                          className="text-xs font-semibold mb-1"
+                          style={{ color: active ? "#2563eb" : "var(--text-muted)" }}
                         >
-                          {msg.content}
-                        </div>
-                        {msg.role === "ai" && msg.id && msg.content && (
-                          <div className="flex gap-1 mt-1">
-                            <button
-                              onClick={() => rateAnswer(messages.indexOf(msg), msg.id!, 1)}
-                              disabled={msg.rating !== undefined && msg.rating !== null}
-                              style={{ color: msg.rating === 1 ? "#4ade80" : "var(--text-muted)" }}
-                            >
-                              <ThumbsUp className="h-3 w-3" />
-                            </button>
-                            <button
-                              onClick={() => rateAnswer(messages.indexOf(msg), msg.id!, -1)}
-                              disabled={msg.rating !== undefined && msg.rating !== null}
-                              style={{ color: msg.rating === -1 ? "#f87171" : "var(--text-muted)" }}
-                            >
-                              <ThumbsDown className="h-3 w-3" />
-                            </button>
-                          </div>
-                        )}
+                          {formatTime(ch.start_time)}
+                        </p>
+                        <p
+                          className="text-sm leading-relaxed"
+                          style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)" }}
+                        >
+                          {ch.summary || ch.title}
+                        </p>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
+
+            {/* ── AI Copilot tab ── */}
+            {rightTab === "copilot" && (
+              <div className="flex flex-1 flex-col overflow-hidden">
+                {/* Messages area */}
+                <div className="flex-1 overflow-y-auto">
+                  {!hasMessages ? (
+                    /* Welcome state */
+                    <div className="flex flex-col items-center justify-center h-full px-5 py-8 gap-5 text-center">
+                      {/* Sparkle icon */}
+                      <div
+                        className="flex h-16 w-16 items-center justify-center rounded-full"
+                        style={{ backgroundColor: "rgba(37,99,235,0.08)" }}
+                      >
+                        <Sparkles className="h-8 w-8 text-primary-600" />
                       </div>
-                    ))}
+
+                      <div className="space-y-1.5">
+                        <h3 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+                          Xin chào! Tôi là AI Copilot
+                        </h3>
+                        <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                          Tôi có thể giúp bạn tóm tắt bài học, giải thích khái niệm khó hoặc phân tích dữ liệu admin.
+                        </p>
+                      </div>
+
+                      {/* Quick actions */}
+                      <div className="w-full space-y-2">
+                        <button
+                          onClick={() => handleSend("Tóm tắt nội dung bài học này cho tôi")}
+                          className="flex w-full items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm transition-colors hover:opacity-80 text-left"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--bg-page)",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+                          Tóm tắt trang này
+                        </button>
+                        <button
+                          onClick={() => handleSend("Lộ trình học tiếp theo của tôi là gì?")}
+                          className="flex w-full items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm transition-colors hover:opacity-80 text-left"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--bg-page)",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          <BookOpen className="h-4 w-4 text-emerald-500 shrink-0" />
+                          Lộ trình tiếp theo
+                        </button>
+                        <button
+                          onClick={() => handleSend("Giải thích các thuật ngữ quan trọng trong bài này")}
+                          className="flex w-full items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm transition-colors hover:opacity-80 text-left"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--bg-page)",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          <MessageSquare className="h-4 w-4 text-violet-500 shrink-0" />
+                          Giải thích thuật ngữ
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Conversation */
+                    <div className="flex flex-col gap-3 p-3">
+                      {messages.map((msg, idx) => (
+                        <div key={idx} className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                          {msg.role !== "user" && (
+                            <div
+                              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full mt-0.5 mr-2"
+                              style={{ backgroundColor: "rgba(37,99,235,0.1)" }}
+                            >
+                              <Bot className="h-3.5 w-3.5 text-primary-600" />
+                            </div>
+                          )}
+                          <div className="max-w-[85%]">
+                            <div
+                              className="rounded-2xl px-3 py-2 text-sm leading-relaxed"
+                              style={
+                                msg.role === "user"
+                                  ? { backgroundColor: "#2563eb", color: "white", borderBottomRightRadius: "0.25rem" }
+                                  : msg.role === "error"
+                                  ? { backgroundColor: "rgba(239,68,68,0.1)", color: "#ef4444", borderBottomLeftRadius: "0.25rem" }
+                                  : { backgroundColor: "var(--bg-page)", color: "var(--text-primary)", borderBottomLeftRadius: "0.25rem" }
+                              }
+                            >
+                              {msg.content || (
+                                <span className="flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  Đang trả lời...
+                                </span>
+                              )}
+                            </div>
+                            {msg.role === "ai" && msg.id && msg.content && (
+                              <div className="flex gap-2 mt-1 ml-1">
+                                <button
+                                  onClick={() => rateAnswer(idx, msg.id!, 1)}
+                                  disabled={msg.rating !== undefined && msg.rating !== null}
+                                  className="transition-colors"
+                                  style={{ color: msg.rating === 1 ? "#4ade80" : "var(--text-muted)" }}
+                                >
+                                  <ThumbsUp className="h-3 w-3" />
+                                </button>
+                                <button
+                                  onClick={() => rateAnswer(idx, msg.id!, -1)}
+                                  disabled={msg.rating !== undefined && msg.rating !== null}
+                                  className="transition-colors"
+                                  style={{ color: msg.rating === -1 ? "#f87171" : "var(--text-muted)" }}
+                                >
+                                  <ThumbsDown className="h-3 w-3" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      <div ref={chatEndRef} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+
+                {/* Chat input */}
+                <div
+                  className="border-t p-3 shrink-0"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <div
+                    className="flex items-end gap-2 rounded-xl border px-3 py-2 transition-colors focus-within:border-primary-500"
+                    style={{
+                      borderColor: "var(--border)",
+                      backgroundColor: "var(--bg-page)",
+                    }}
+                  >
+                    <textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                      placeholder="Gửi tin nhắn cho AI..."
+                      rows={1}
+                      className="flex-1 resize-none bg-transparent outline-none text-sm"
+                      style={{ color: "var(--text-primary)", maxHeight: "6rem" }}
+                    />
+                    <button
+                      onClick={() => handleSend()}
+                      disabled={streaming || !input.trim()}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all disabled:opacity-40"
+                      style={{ backgroundColor: "#2563eb", color: "white" }}
+                    >
+                      {streaming ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </aside>

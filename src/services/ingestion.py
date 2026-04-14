@@ -1,8 +1,11 @@
 import json
+import logging
 import os
 import re
 
 from src.models.store import Chapter, Lecture, SessionLocal, TranscriptLine, init_db
+
+logger = logging.getLogger(__name__)
 
 
 def parse_toc_file(file_path):
@@ -109,7 +112,7 @@ def ingest_lecture(lecture_id, toc_path, transcript_paths, video_rel_path=None):
     # Parse ToC
     toc_data = parse_toc_file(toc_path)
     if not toc_data:
-        print(f"Error: ToC file not found at {toc_path}")
+        logger.error("ToC file not found at %s", toc_path)
         return
 
     # Standardize Title
@@ -165,7 +168,7 @@ def ingest_lecture(lecture_id, toc_path, transcript_paths, video_rel_path=None):
     db.commit()
     lecture_title = lecture.title
     db.close()
-    print(f"Successfully ingested lecture: {lecture_id} ({lecture_title})")
+    logger.info("Ingested lecture: %s (%s)", lecture_id, lecture_title)
 
 
 if __name__ == "__main__":
