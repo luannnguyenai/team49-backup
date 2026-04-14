@@ -60,7 +60,7 @@ async def create_all_tables() -> None:
     from src.models.base import Base  # avoid circular import at module level
 
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
 
 
 async def drop_all_tables() -> None:

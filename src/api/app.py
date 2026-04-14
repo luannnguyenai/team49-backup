@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory, LearningProgress, init_db
+from src.models.store import get_db, Lecture, Chapter, TranscriptLine, QAHistory, LearningProgress
 from src.services.llm_service import get_context_and_stream_langgraph
 from src.database import engine as async_engine
 from src.routers.auth import auth_router, users_router
@@ -33,8 +33,6 @@ from src.config import settings
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create sync tables for lectures (backward compat)
-    init_db()
     yield
     # Shutdown: dispose async engine
     await async_engine.dispose()

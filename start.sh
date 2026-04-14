@@ -11,8 +11,10 @@ FORCE_REBUILD=false
 for arg in "$@"; do
   case $arg in
     --rebuild) FORCE_REBUILD=true ;;
+    --prod)    FORCE_PROD=true ;;
   esac
 done
+FORCE_PROD=${FORCE_PROD:-false}
 
 # ── Màu sắc terminal ──────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -86,19 +88,27 @@ fi
 # =============================================================================
 log_section "Bước 1 — Start Docker services"
 
-# Kiểm tra image đã tồn tại chưa
+# Chọn compose command dựa vào flag
+if [ "$FORCE_PROD" = true ]; then
+  COMPOSE_CMD="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+  log_info "Chế độ: PRODUCTION (full build, không hot reload)"
+else
+  COMPOSE_CMD="docker compose"
+  log_info "Chế độ: DEVELOPMENT (volume mount, hot reload tự động)"
+fi
+
+# Kiểm tra image backend đã tồn tại chưa
 BACKEND_IMAGE=$(docker images -q ai-adaptive-learning-backend 2>/dev/null)
-FRONTEND_IMAGE=$(docker images -q ai-adaptive-learning-frontend 2>/dev/null)
 
 if [ "$FORCE_REBUILD" = true ]; then
-  log_info "Force rebuild images (--rebuild flag)..."
-  docker compose up -d --build
-elif [ -z "$BACKEND_IMAGE" ] || [ -z "$FRONTEND_IMAGE" ]; then
+  log_info "Force rebuild tất cả images..."
+  $COMPOSE_CMD up -d --build
+elif [ -z "$BACKEND_IMAGE" ]; then
   log_info "Images chưa tồn tại — build lần đầu (~3-5 phút)..."
-  docker compose up -d --build
+  $COMPOSE_CMD up -d --build
 else
-  log_info "Images đã có — khởi chạy nhanh (không rebuild)..."
-  docker compose up -d
+  log_info "Images đã có — khởi chạy (frontend hot reload qua volume mount)..."
+  $COMPOSE_CMD up -d
 fi
 
 # =============================================================================
@@ -216,8 +226,12 @@ echo -e "  ${GREEN}Backend:${NC}   http://localhost:8000"
 echo -e "  ${GREEN}API Docs:${NC}  http://localhost:8000/docs"
 echo -e "  ${GREEN}Health:${NC}    http://localhost:8000/health"
 echo -e ""
-echo -e "  Xem logs:      ${YELLOW}docker compose logs -f backend${NC}"
-echo -e "  Dừng app:      ${YELLOW}docker compose stop${NC}          # giữ container"
-echo -e "  Xóa container: ${YELLOW}docker compose down${NC}          # giữ data volumes"
-echo -e "  Rebuild image: ${YELLOW}bash start.sh --rebuild${NC}      # khi đổi Dockerfile/deps"
+echo -e "  Xem logs:         ${YELLOW}docker compose logs -f backend${NC}"
+echo -e "  Dừng app:         ${YELLOW}docker compose stop${NC}             # giữ container"
+echo -e "  Xóa container:    ${YELLOW}docker compose down${NC}             # giữ data volumes"
+echo -e "  Rebuild deps:     ${YELLOW}bash start.sh --rebuild${NC}         # khi thêm package npm/pip mới"
+echo -e "  Chạy production:  ${YELLOW}bash start.sh --prod${NC}            # production build (không hot reload)"
+echo -e ""
+echo -e "  ${BLUE}[DEV MODE]${NC} Sửa code frontend → tự động hot reload, KHÔNG cần restart Docker"
+echo -e "  ${BLUE}[DEV MODE]${NC} Sửa code backend  → tự động reload (uvicorn --reload)"
 echo -e ""

@@ -99,7 +99,7 @@ class LearningProgress(Base):
 
 def init_db():
     """Create all tables (sync, for lecture models)."""
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine, checkfirst=True)
 
 
 def get_db():

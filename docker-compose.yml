@@ -1,17 +1,18 @@
 # =============================================================================
-# docker-compose.yml — Development stack
+# docker-compose.yml — Development stack (default)
 # =============================================================================
 # Usage:
-#   docker compose up -d          # start all services
-#   docker compose up -d backend  # start only backend
-#   docker compose logs -f        # tail logs
-#   docker compose down -v        # stop + remove volumes
+#   docker compose up -d                                          # dev mode (hot reload)
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d  # production
+#   bash start.sh           # dev
+#   bash start.sh --prod    # production
+#   bash start.sh --rebuild # rebuild images (khi thêm package mới)
 # =============================================================================
 
 name: ai-adaptive-learning
 
 # ---------------------------------------------------------------------------
-# Shared environment anchors (reduces duplication)
+# Shared environment anchors
 # ---------------------------------------------------------------------------
 x-db-env: &db-env
   POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -54,7 +55,7 @@ services:
       - al_db_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/00_init.sql:ro
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_learning}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_learning}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -79,7 +80,7 @@ services:
     volumes:
       - al_redis_data:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123secure}", "ping" ]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123secure}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -87,84 +88,74 @@ services:
     networks:
       - al_internal
 
-  # ── FastAPI backend ────────────────────────────────────────────────────────
+  # ── FastAPI backend (dev: source mount + auto-reload) ─────────────────────
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runtime # use the runtime stage
+      target: runtime
     container_name: al_backend
     restart: unless-stopped
-    command: >
-      uv run python -m uvicorn src.api.app:app
-        --host 0.0.0.0 --port 8000
-        --workers 2
+    command:
+      - sh
+      - -c
+      - "uv run alembic upgrade head && uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 1 --reload"
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       <<: *backend-env
     volumes:
       - .:/app
-      - /app/.venv  # mask host .venv with anonymous volume (Linux vs macOS)
+      - /app/.venv
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\" || exit 1" ]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\" || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 5
       start_period: 30s
     networks:
       - al_internal
-      - al_external # exposes HTTP to host
+      - al_external
 
-  # ── Next.js frontend ───────────────────────────────────────────────────────
+  # ── Next.js frontend (dev: volume mount + hot reload) ─────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: runner
-      args:
-        API_INTERNAL_URL: http://backend:8000
+      target: deps          # dev: chỉ install dependencies, không build
     container_name: al_frontend
     restart: unless-stopped
+    command: npm run dev    # dev: Next.js dev server với hot reload
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      # In-container API calls go through backend service name
-      API_INTERNAL_URL: http://backend:8000
+      NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:8000
-      NODE_ENV: production
+      API_INTERNAL_URL: http://backend:8000
+      WATCHPACK_POLLING: "true"   # bắt buộc cho hot reload trên Windows/WSL
+    volumes:
+      - ./frontend:/app           # mount code từ host → hot reload
+      - /app/node_modules         # giữ node_modules trong container
+      - /app/.next                # giữ .next build cache trong container
     depends_on:
       backend:
         condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health 2>/dev/null || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     networks:
       - al_internal
       - al_external
 
 # ---------------------------------------------------------------------------
-# Networks
-# ---------------------------------------------------------------------------
 networks:
   al_internal:
-    # Service-to-service only — not reachable from host
     driver: bridge
-    internal: false # set true for full isolation; false lets services reach internet (for LLM APIs)
   al_external:
-    # Bridges backend + frontend to host ports
     driver: bridge
 
-# ---------------------------------------------------------------------------
-# Volumes
 # ---------------------------------------------------------------------------
 volumes:
   al_db_data:

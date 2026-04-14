@@ -1,32 +1,21 @@
 "use client";
 // app/(protected)/layout.tsx
-// Main app layout with sidebar + topbar. Guards auth + onboarding.
+// Main app layout with top navigation bar. Guards auth + onboarding.
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import Sidebar from "@/components/layout/Sidebar";
-import TopBar from "@/components/layout/TopBar";
+import { useRouter } from "next/navigation";
+import TopNav from "@/components/layout/TopNav";
 import { useAuthStore } from "@/stores/authStore";
 import { tokenStorage } from "@/lib/api";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/tutor": "AI Tutor",
-  "/learn": "Học tập",
-  "/history": "Lịch sử",
-  "/profile": "Hồ sơ",
-};
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [checking, setChecking] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
   const { user, fetchMe } = useAuthStore();
 
   // Client-side auth + onboarding guard
@@ -42,7 +31,7 @@ export default function ProtectedLayout({
       setChecking(false);
     };
     verify();
-  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Redirect if not onboarded (after user is loaded)
   useEffect(() => {
@@ -50,11 +39,6 @@ export default function ProtectedLayout({
       router.replace("/onboarding");
     }
   }, [checking, user, router]);
-
-  const pageTitle =
-    PAGE_TITLES[pathname] ??
-    Object.entries(PAGE_TITLES).find(([k]) => pathname.startsWith(k))?.[1] ??
-    "";
 
   if (checking) {
     return (
@@ -65,20 +49,11 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar
-        mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
-      />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar title={pageTitle} onMenuClick={() => setMobileOpen(true)} />
-        <main
-          className="flex-1 overflow-y-auto p-4 md:p-6 animate-fade-in"
-          style={{ backgroundColor: "var(--bg-page)" }}
-        >
-          {children}
-        </main>
-      </div>
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: "var(--bg-page)" }}>
+      <TopNav />
+      <main className="flex-1 overflow-y-auto p-4 md:p-6 animate-fade-in">
+        {children}
+      </main>
     </div>
   );
 }

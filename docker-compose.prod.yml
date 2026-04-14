@@ -3,40 +3,29 @@
 # =============================================================================
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-# Or via Makefile:
-#   make deploy
+#   bash start.sh --prod
 # =============================================================================
 
 services:
 
-  # ── PostgreSQL: no host port exposure ─────────────────────────────────────
+  # ── PostgreSQL: ẩn port khỏi host ─────────────────────────────────────────
   db:
     restart: always
-    ports: [] # internal only — never expose DB to internet
+    ports: []
 
-  # ── Redis: no host port exposure ──────────────────────────────────────────
+  # ── Redis: ẩn port khỏi host ──────────────────────────────────────────────
   redis:
     restart: always
-    ports: [] # internal only
+    ports: []
 
-  # ── Backend: production Uvicorn (no hot-reload, no source mount) ───────────
+  # ── Backend: production Uvicorn (4 workers, no reload, no source mount) ───
   backend:
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: runtime
-      args:
-        BUILDKIT_INLINE_CACHE: "1"
-    # Override dev command — no --reload, 4 workers
-    command: >
-      uv run python -m uvicorn src.api.app:app
-        --host 0.0.0.0 --port 8000
-        --workers 4
-        --log-level warning
-        --proxy-headers
-        --forwarded-allow-ips "*"
-    volumes: [] # no source mounts in prod
+    command:
+      - sh
+      - -c
+      - "uv run alembic upgrade head && uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 4 --log-level warning --proxy-headers --forwarded-allow-ips '*'"
+    volumes: []
     environment:
       DEBUG: "false"
       DB_ECHO: "false"
@@ -44,16 +33,25 @@ services:
       DB_MAX_OVERFLOW: "20"
       LOG_LEVEL: "WARNING"
 
-  # ── Frontend: rebuild with production API URL baked in ────────────────────
+  # ── Frontend: production build (no source mount, no hot reload) ───────────
   frontend:
     restart: always
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: runner
+      target: runner        # prod: full build với standalone output
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.yourdomain.com}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
         BUILDKIT_INLINE_CACHE: "1"
+    command: node server.js
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.yourdomain.com}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      WATCHPACK_POLLING: ""
+    volumes: []
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
