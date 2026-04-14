@@ -114,6 +114,15 @@ export default function AssessmentPage() {
           );
         }
 
+        // Cap at 10 topics to keep the assessment manageable
+        if (topicIds.length > 10) {
+          topicIds = topicIds.slice(0, 10);
+          const kept = new Set(topicIds);
+          (Object.keys(nameMap) as string[]).forEach((k: string) => {
+            if (!kept.has(k)) delete nameMap[k];
+          });
+        }
+
         const resp = await assessmentApi.start(topicIds);
         if (cancelled) return;
 

@@ -20,8 +20,8 @@ from src.models.learning import MasteryLevel, SelectedAnswer
 class AssessmentStartRequest(BaseModel):
     topic_ids: list[uuid.UUID] = Field(
         min_length=1,
-        max_length=10,
-        description="Topics to include in this assessment (1-10)",
+        max_length=50,
+        description="Topics to include in this assessment (1-50)",
     )
 
 

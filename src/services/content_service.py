@@ -72,13 +72,15 @@ async def get_module_detail(db: AsyncSession, module_id: uuid.UUID) -> ModuleDet
     )
     topics = topics_result.scalars().all()
 
+    topic_list = [TopicSummary.model_validate(t) for t in topics]
     return ModuleDetailResponse(
         id=module.id,
         name=module.name,
         description=module.description,
         order_index=module.order_index,
         prerequisite_module_ids=_parse_uuid_list(module.prerequisite_module_ids),
-        topics=[TopicSummary.model_validate(t) for t in topics],
+        topics_count=len(topic_list),
+        topics=topic_list,
         created_at=module.created_at,
         updated_at=module.updated_at,
     )
