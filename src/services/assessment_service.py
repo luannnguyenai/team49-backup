@@ -17,6 +17,7 @@ Question selection per topic (5 questions):
   Exclude: questions the user has ever answered before
 """
 
+import math
 import uuid
 from datetime import UTC, datetime
 
@@ -53,6 +54,99 @@ from src.services.mastery_evaluator import (
 )
 
 # ---------------------------------------------------------------------------
+# 2PL IRT model
+# ---------------------------------------------------------------------------
+#
+# P(θ | a, b) = 1 / (1 + exp(−a · (θ − b)))
+#
+#   a  — discrimination: steepness of the ICC curve  (default 1.0 when uncalibrated)
+#   b  — difficulty: θ value at which P = 0.50       (default from difficulty_bucket)
+#   θ  — ability estimate on a logit scale  [−3, +3]
+#
+# No guessing parameter (c = 0), unlike 3PL.
+# ---------------------------------------------------------------------------
+
+# Default parameter values used when a question has not been IRT-calibrated yet.
+_IRT_DEFAULT_DISCRIMINATION: float = 1.0
+_IRT_BUCKET_DIFFICULTY: dict[str, float] = {
+    "easy": -1.0,    # b ≈ −1 SD  → answered correctly by most users
+    "medium": 0.0,   # b =  0     → average difficulty
+    "hard": 1.0,     # b ≈ +1 SD  → challenging for most users
+}
+
+
+def _resolve_2pl_params(q: "Question") -> tuple[float, float]:
+    """Return (a, b) for a question.
+
+    Uses stored IRT params when available; falls back to bucket defaults so
+    that the 2PL model works even before formal calibration.
+    """
+    a = q.irt_discrimination if q.irt_discrimination is not None else _IRT_DEFAULT_DISCRIMINATION
+    if q.irt_difficulty is not None:
+        b = q.irt_difficulty
+    else:
+        bucket_key = q.difficulty_bucket.value if q.difficulty_bucket else "medium"
+        b = _IRT_BUCKET_DIFFICULTY.get(bucket_key, 0.0)
+    return max(a, 0.1), b  # a must be strictly positive
+
+
+def _irt_2pl_prob(theta: float, a: float, b: float) -> float:
+    """Probability of a correct response under the 2PL model."""
+    exponent = -a * (theta - b)
+    exponent = max(-500.0, min(500.0, exponent))  # guard against overflow
+    return 1.0 / (1.0 + math.exp(exponent))
+
+
+def _irt_2pl_information(theta: float, a: float, b: float) -> float:
+    """Item information function: I(θ) = a² · P(θ) · (1 − P(θ)).
+
+    Maximum information is achieved when θ ≈ b (item difficulty), so
+    selecting items whose b is closest to the current θ maximises measurement
+    precision — equivalent to, but more principled than, simple |b − θ|.
+    """
+    p = _irt_2pl_prob(theta, a, b)
+    return a * a * p * (1.0 - p)
+
+
+def _estimate_theta_2pl(
+    responses: list[tuple[float, float, bool]],
+    theta_init: float = 0.0,
+) -> float:
+    """Newton-Raphson MLE for ability θ under the 2PL IRT model.
+
+    Parameters
+    ----------
+    responses  : list of (a, b, is_correct) triples
+    theta_init : starting value; use prior mastery estimate when available
+
+    Returns
+    -------
+    float — θ̂ clamped to [−3.0, 3.0].  Returns theta_init when the response
+            vector is empty or the likelihood is flat (all correct / all wrong).
+    """
+    if not responses:
+        return theta_init
+
+    theta = theta_init
+    for _ in range(50):
+        L1 = 0.0   # ∂ log L / ∂θ   (score function)
+        L2 = 0.0   # ∂² log L / ∂θ² (observed information, negative)
+        for a, b, correct in responses:
+            p = _irt_2pl_prob(theta, a, b)
+            q_val = 1.0 - p
+            L1 += a * (int(correct) - p)
+            L2 -= a * a * p * q_val
+        if abs(L2) < 1e-9:
+            break  # flat likelihood — can't improve (e.g. all correct / all wrong)
+        delta = L1 / L2
+        theta -= delta
+        if abs(delta) < 1e-4:
+            break  # converged
+
+    return max(-3.0, min(3.0, theta))
+
+
+# ---------------------------------------------------------------------------
 # Question selection: bloom slot definition
 # ---------------------------------------------------------------------------
 
@@ -83,7 +177,7 @@ async def start_assessment(
             detail=f"Topics not found: {[str(m) for m in missing]}",
         )
 
-    # 2. Collect question_ids + estimate ability from the user's history
+    # 2. Collect answered question IDs + estimate ability (θ) from user history
     answered_result = await db.execute(
         select(Interaction.question_id, Interaction.is_correct)
         .where(Interaction.user_id == user_id)
@@ -92,14 +186,27 @@ async def start_assessment(
     rows = answered_result.all()
     excluded_ids: set[uuid.UUID] = {row[0] for row in rows}
 
-    # Rough IRT ability estimate: proportion correct mapped to logit scale
-    # -1.0 (struggling) … 0.0 (average) … +1.0 (strong)
+    # ── 2PL MLE ability estimate ──────────────────────────────────────────────
+    # Build (a, b, is_correct) triples for every previously answered question.
+    # Questions without calibrated IRT params use bucket-derived defaults so
+    # the 2PL estimator works even before formal item calibration.
+    ability = 0.0  # θ = 0 for brand-new users (average ability prior)
     if rows:
-        correct_frac = sum(1 for _, ok in rows if ok) / len(rows)
-        # Map [0,1] → [-1.5, 1.5] via logit-like stretch
-        ability = (correct_frac - 0.5) * 3.0
-    else:
-        ability = 0.0  # new user: assume average ability
+        hist_ids = [row[0] for row in rows]
+        hist_q_result = await db.execute(
+            select(Question).where(Question.id.in_(hist_ids))
+        )
+        hist_q_map: dict[uuid.UUID, Question] = {
+            q.id: q for q in hist_q_result.scalars().all()
+        }
+        correct_map: dict[uuid.UUID, bool] = {row[0]: row[1] for row in rows}
+
+        irt_responses: list[tuple[float, float, bool]] = [
+            (*_resolve_2pl_params(hist_q_map[qid]), is_correct)
+            for qid, is_correct in correct_map.items()
+            if qid in hist_q_map
+        ]
+        ability = _estimate_theta_2pl(irt_responses)
 
     # 3. Select questions for each topic
     all_questions: list[Question] = []
@@ -145,41 +252,38 @@ async def _select_questions_for_topic(
     topic_id: uuid.UUID,
     excluded_ids: set[uuid.UUID],
     ability: float = 0.0,
+    _candidate_multiplier: int = 5,
 ) -> list[Question]:
     """
     Select up to 5 questions for a single topic following the bloom distribution.
 
-    IRT-based ordering:
-    - If ``irt_difficulty`` is set, prefer questions whose difficulty is closest
-      to the user's estimated ability (|difficulty − ability| ascending).
-    - Fallback: when ``irt_difficulty`` is NULL, proxy via ``difficulty_bucket``
-      (easy → 0.0, medium → 0.5, hard → 1.0 on a [0,1] scale, remapped to
-      [-1.5, 1.5] to match the logit-scale ability estimate).
-    - ``RANDOM()`` is a tiebreaker so we don't always pick the same questions.
+    2PL IRT question selection:
+    ─ Fetch up to (count × _candidate_multiplier) candidates per bloom slot via SQL,
+      pre-ordered by |b − θ| as a cheap proximity filter.
+    ─ Re-rank in Python by 2PL item information: I(θ) = a²·P(θ)·(1−P(θ))
+      selecting the questions that are most informative at the current ability level.
+    ─ Questions without calibrated IRT params use bucket-derived defaults so the
+      ranking is meaningful even before formal calibration.
 
     Questions already in ``excluded_ids`` (previously answered) are skipped.
-    If a bloom slot has fewer questions than requested, we take what's available.
+    If a bloom slot has fewer candidates than requested, we take what's available.
     """
     selected: list[Question] = []
 
-    # IRT difficulty proxy for questions without explicit IRT params
-    # difficulty_bucket values are stored as enum strings
+    # SQL pre-filter: order by |b_proxy − ability| so the candidate pool already
+    # skews toward on-target difficulty before Python re-ranking.
     bucket_proxy = case(
         (Question.difficulty_bucket == DifficultyBucket.easy, literal(-1.0)),
         (Question.difficulty_bucket == DifficultyBucket.medium, literal(0.0)),
         (Question.difficulty_bucket == DifficultyBucket.hard, literal(1.0)),
         else_=literal(0.0),
     )
-
-    # Distance to the user's estimated ability: use IRT param when available,
-    # otherwise fall back to the difficulty_bucket proxy
-    irt_distance = case(
+    sql_distance = case(
         (Question.irt_difficulty.isnot(None), func.abs(Question.irt_difficulty - ability)),
         else_=func.abs(bucket_proxy - ability),
     )
 
     for bloom_levels, count in _BLOOM_SLOTS:
-        # Grow exclusion set as we pick within this topic (avoid intra-topic dupes)
         exclusion = excluded_ids | {q.id for q in selected}
 
         stmt = (
@@ -187,19 +291,30 @@ async def _select_questions_for_topic(
             .where(
                 Question.topic_id == topic_id,
                 Question.status == QuestionStatus.active,
-                # JSONB containment: usage_context must include "assessment"
                 text("usage_context::jsonb @> '[\"assessment\"]'::jsonb"),
                 Question.bloom_level.in_(bloom_levels),
             )
-            # IRT-closest questions first; random tiebreaker for variety
-            .order_by(irt_distance.asc(), func.random())
-            .limit(count)
+            .order_by(sql_distance.asc(), func.random())
+            .limit(count * _candidate_multiplier)
         )
         if exclusion:
             stmt = stmt.where(Question.id.not_in(list(exclusion)))
 
         result = await db.execute(stmt)
-        selected.extend(result.scalars().all())
+        candidates: list[Question] = list(result.scalars().all())
+
+        if not candidates:
+            continue
+
+        # ── 2PL information re-ranking ────────────────────────────────────────
+        # Sort descending by I(θ): the most informative item for this ability
+        # level goes first. Negate so sorted() gives descending order.
+        def _neg_information(q: Question) -> float:
+            a, b = _resolve_2pl_params(q)
+            return -_irt_2pl_information(ability, a, b)
+
+        ranked = sorted(candidates, key=_neg_information)
+        selected.extend(ranked[:count])
 
     return selected
 
@@ -300,7 +415,7 @@ async def submit_assessment(
     session.score_percent = round(correct_count / total * 100, 1) if total else 0.0
     db.add(session)
 
-    # 7. Evaluate mastery per topic
+    # 7. Evaluate mastery per topic + compute 2PL theta per topic
     grouped: dict[uuid.UUID, list[QuestionResult]] = {}
     for qr in question_results:
         grouped.setdefault(qr.topic_id, []).append(qr)
@@ -309,11 +424,29 @@ async def submit_assessment(
         topic_id: evaluate_topic(qrs) for topic_id, qrs in grouped.items()
     }
 
+    # Build per-topic IRT response vectors and estimate final θ̂ per topic.
+    # The seed θ_init per topic is the overall session ability (all answers).
+    all_irt: list[tuple[float, float, bool]] = [
+        (*_resolve_2pl_params(questions[qr.question_id]), qr.is_correct)
+        for qr in question_results
+        if qr.question_id in questions
+    ]
+    session_theta = _estimate_theta_2pl(all_irt)
+
+    topic_theta: dict[uuid.UUID, float] = {}
+    for topic_id, qrs in grouped.items():
+        irt_vec: list[tuple[float, float, bool]] = [
+            (*_resolve_2pl_params(questions[qr.question_id]), qr.is_correct)
+            for qr in qrs
+            if qr.question_id in questions
+        ]
+        topic_theta[topic_id] = _estimate_theta_2pl(irt_vec, theta_init=session_theta)
+
     # 8. Upsert topic-grain MasteryScore records
     await _upsert_mastery_scores(db, user_id, topic_results_map, now)
     await db.flush()
 
-    return await _build_result_response(db, session_id, topic_results_map, now)
+    return await _build_result_response(db, session_id, topic_results_map, now, topic_theta)
 
 
 # ===========================================================================
@@ -439,6 +572,7 @@ async def _build_result_response(
     session_id: uuid.UUID,
     topic_results_map: dict[uuid.UUID, TopicMasteryResult],
     completed_at: datetime,
+    topic_theta: dict[uuid.UUID, float] | None = None,
 ) -> AssessmentResultResponse:
     """Construct the API response, resolving topic names and KC names."""
 
@@ -470,6 +604,7 @@ async def _build_result_response(
     overall_score = round(total_earned / total_max * 100, 1) if total_max > 0 else 0.0
 
     # Build per-topic result list
+    theta_map = topic_theta or {}
     topic_results: list[TopicResult] = []
     for topic_id, r in topic_results_map.items():
         topic = topics.get(topic_id)
@@ -480,9 +615,9 @@ async def _build_result_response(
                 score_percent=r.score_percent,
                 mastery_level=r.mastery_level,
                 bloom_breakdown=r.bloom_breakdown,
-                # Resolve UUID → KC name; fall back to raw string if not found
                 weak_kcs=[kc_name_by_id.get(kc_id, kc_id) for kc_id in r.weak_kc_ids],
                 misconceptions_detected=r.misconceptions_detected,
+                theta_estimate=round(theta_map.get(topic_id, 0.0), 4),
             )
         )
 

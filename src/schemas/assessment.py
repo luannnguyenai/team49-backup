@@ -77,6 +77,13 @@ class TopicResult(BaseModel):
     bloom_breakdown: dict[str, str]  # e.g. {"remember": "1/1", "analyze": "1/2"}
     weak_kcs: list[str]  # KC names where the user made errors
     misconceptions_detected: list[str]  # misconception IDs from wrong-answer mapping
+    theta_estimate: float = Field(
+        default=0.0,
+        description=(
+            "2PL IRT ability estimate (θ̂) for this topic on a logit scale. "
+            "−3 = very low ability, 0 = average, +3 = very high ability."
+        ),
+    )
 
 
 class AssessmentResultResponse(BaseModel):

@@ -29,13 +29,14 @@ export default function StepKnownTopics({ modules, selectedIds, onToggle }: Prop
   return (
     <div className="space-y-6">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Tick những topics bạn đã nắm — hệ thống sẽ bỏ qua chúng khi tạo lộ trình.{" "}
+        Chọn những topics bạn đã nắm — hệ thống sẽ đánh giá kiến thức của bạn
+        với <span className="font-semibold" style={{ color: "var(--text-primary)" }}>5 câu hỏi mỗi topic</span>.{" "}
         <span className="font-medium" style={{ color: "var(--text-primary)" }}>
           Bỏ qua nếu bạn mới bắt đầu.
         </span>
         {selectedIds.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
-            ({selectedIds.length}/{totalTopics} đã chọn)
+            ({selectedIds.length} topic · {selectedIds.length * 5} câu hỏi)
           </span>
         )}
       </p>

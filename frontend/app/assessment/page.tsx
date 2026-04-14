@@ -14,6 +14,7 @@ import { assessmentApi, contentApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type {
   AnswerInput,
+  ModuleDetail,
   QuestionForAssessment,
   SelectedAnswer,
 } from "@/types";
@@ -82,28 +83,39 @@ export default function AssessmentPage() {
 
     async function bootstrap() {
       try {
-        // Resolve topic IDs from module IDs stored by onboarding page
-        const moduleIdsRaw = sessionStorage.getItem("al_pending_module_ids");
-        let topicIds: string[] = [];
-        const nameMap: Record<string, string> = {};
+        // ── Read the specific topic IDs the user selected for mastery assessment ──
+        // These are saved by the onboarding page (known_topic_ids from Step 0).
+        // Each topic → 5 questions, so total = selected_topics × 5.
+        const topicIdsRaw = sessionStorage.getItem("al_pending_topic_ids");
+        const topicNamesRaw = sessionStorage.getItem("al_pending_topic_names");
 
-        if (moduleIdsRaw) {
-          const moduleIds = JSON.parse(moduleIdsRaw) as string[];
-          const modules = await Promise.all(
-            moduleIds.map((id) => contentApi.moduleDetail(id))
-          );
-          modules.forEach((m) =>
-            m.topics.forEach((t) => {
-              topicIds.push(t.id);
-              nameMap[t.id] = t.name;
-            })
-          );
+        let topicIds: string[] = topicIdsRaw ? JSON.parse(topicIdsRaw) as string[] : [];
+        let nameMap: Record<string, string> = topicNamesRaw
+          ? JSON.parse(topicNamesRaw) as Record<string, string>
+          : {};
+
+        // Fallback: if no topic IDs saved (e.g. direct URL access), resolve
+        // from module IDs or all modules — keeps the page functional outside
+        // the normal onboarding flow.
+        if (topicIds.length === 0) {
+          const moduleIdsRaw = sessionStorage.getItem("al_pending_module_ids");
+          if (moduleIdsRaw) {
+            const moduleIds = JSON.parse(moduleIdsRaw) as string[];
+            const mods: ModuleDetail[] = await Promise.all(
+              moduleIds.map((id) => contentApi.moduleDetail(id))
+            );
+            mods.forEach((m) =>
+              m.topics.forEach((t) => {
+                topicIds.push(t.id);
+                nameMap[t.id] = t.name;
+              })
+            );
+          }
         }
 
-        // Fallback: use ALL modules if nothing in sessionStorage
         if (topicIds.length === 0) {
           const allModules = await contentApi.modules();
-          const details = await Promise.all(
+          const details: ModuleDetail[] = await Promise.all(
             allModules.map((m) => contentApi.moduleDetail(m.id))
           );
           details.forEach((m) =>
@@ -112,15 +124,6 @@ export default function AssessmentPage() {
               nameMap[t.id] = t.name;
             })
           );
-        }
-
-        // Cap at 10 topics to keep the assessment manageable
-        if (topicIds.length > 10) {
-          topicIds = topicIds.slice(0, 10);
-          const kept = new Set(topicIds);
-          (Object.keys(nameMap) as string[]).forEach((k: string) => {
-            if (!kept.has(k)) delete nameMap[k];
-          });
         }
 
         const resp = await assessmentApi.start(topicIds);
@@ -218,7 +221,10 @@ export default function AssessmentPage() {
 
     try {
       await assessmentApi.submit(sessionId, answerList);
+      // Clean up all onboarding→assessment sessionStorage keys
       sessionStorage.removeItem("al_pending_module_ids");
+      sessionStorage.removeItem("al_pending_topic_ids");
+      sessionStorage.removeItem("al_pending_topic_names");
       router.push(`/assessment/results?session_id=${sessionId}`);
     } catch (e: unknown) {
       const detail = (e as { response?: { data?: { detail?: string } } })

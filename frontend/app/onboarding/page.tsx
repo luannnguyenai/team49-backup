@@ -145,9 +145,32 @@ export default function OnboardingPage() {
     clearError();
     try {
       await onboard(data);
-      // Persist selected module IDs so the assessment page can resolve topic IDs
+
+      // Persist selected module IDs (used by learning-path generation)
       sessionStorage.setItem("al_pending_module_ids", JSON.stringify(data.desired_module_ids));
-      router.push("/assessment");
+
+      // Persist the specific topic IDs the user chose for mastery assessment.
+      // The assessment page will test ONLY these topics (5 questions each).
+      sessionStorage.setItem("al_pending_topic_ids", JSON.stringify(data.known_topic_ids));
+
+      // Build a topic-name lookup so the assessment page can display names
+      // without extra API calls.
+      const topicNameMap: Record<string, string> = {};
+      for (const mod of modules) {
+        for (const t of mod.topics) {
+          if (data.known_topic_ids.includes(t.id)) {
+            topicNameMap[t.id] = t.name;
+          }
+        }
+      }
+      sessionStorage.setItem("al_pending_topic_names", JSON.stringify(topicNameMap));
+
+      if (data.known_topic_ids.length > 0) {
+        router.push("/assessment");
+      } else {
+        // No topics selected → nothing to assess → go straight to dashboard
+        router.push("/dashboard");
+      }
     } catch {
       /* error message is shown from the store */
     }
