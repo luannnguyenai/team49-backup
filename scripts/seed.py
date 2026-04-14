@@ -125,7 +125,7 @@ async def resolve_module_prerequisites(
         module_id = module_slug_to_uuid[m["slug"]]
         module = (await db.execute(select(Module).where(Module.id == module_id))).scalar_one()
 
-        module.prerequisite_module_ids = [str(module_slug_to_uuid[s]) for s in prereq_slugs]
+        module.prerequisite_module_ids = [str(module_slug_to_uuid[s]) for s in prereq_slugs if s in module_slug_to_uuid]
         db.add(module)
 
     await db.flush()
@@ -222,7 +222,7 @@ async def resolve_topic_prerequisites(
         topic_id = topic_slug_to_uuid[t["slug"]]
         topic = (await db.execute(select(Topic).where(Topic.id == topic_id))).scalar_one()
 
-        topic.prerequisite_topic_ids = [str(topic_slug_to_uuid[s]) for s in prereq_slugs]
+        topic.prerequisite_topic_ids = [str(topic_slug_to_uuid[s]) for s in prereq_slugs if s in topic_slug_to_uuid]
         db.add(topic)
 
     await db.flush()
@@ -236,16 +236,22 @@ async def seed_questions(
     kc_slug_to_uuid: dict[str, uuid.UUID],
 ) -> None:
     """Insert questions, skipping any with duplicate item_id."""
+    seen_item_ids: set[str] = set()
     for q in question_data:
         item_id = q["item_id"]
 
-        # Idempotent check
+        # Skip in-session duplicates first (question_bank.json may have dupes)
+        if item_id in seen_item_ids:
+            print(f"  skip question '{item_id}' (duplicate in source)")
+            continue
+        # Idempotent check against DB
         existing = (
             await db.execute(select(Question).where(Question.item_id == item_id))
         ).scalar_one_or_none()
         if existing:
             print(f"  skip question '{item_id}' (already exists)")
             continue
+        seen_item_ids.add(item_id)
 
         topic_id = topic_slug_to_uuid.get(q["topic_slug"])
         module_id = module_slug_to_uuid.get(q["module_slug"])

@@ -267,6 +267,7 @@ class ModuleDetailResponse(BaseModel):
     description: str | None
     order_index: int
     prerequisite_module_ids: list[uuid.UUID] | None
+    topics_count: int
     topics: list[TopicSummary]
     created_at: datetime
     updated_at: datetime
