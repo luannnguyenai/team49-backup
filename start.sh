@@ -2,8 +2,17 @@
 # =============================================================================
 # start.sh — Khởi chạy toàn bộ AI Adaptive Learning Platform
 # Chỉ cần chạy: bash start.sh
+# Flags:
+#   --rebuild   Force rebuild Docker images (dùng khi thay đổi Dockerfile/deps)
 # =============================================================================
 set -euo pipefail
+
+FORCE_REBUILD=false
+for arg in "$@"; do
+  case $arg in
+    --rebuild) FORCE_REBUILD=true ;;
+  esac
+done
 
 # ── Màu sắc terminal ──────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -75,13 +84,22 @@ fi
 # =============================================================================
 # BƯỚC 1 — Khởi chạy services
 # =============================================================================
-log_section "Bước 1 — Build & Start Docker services"
+log_section "Bước 1 — Start Docker services"
 
-log_info "Đang build và khởi chạy tất cả services (lần đầu ~3-5 phút)..."
-# up --build tự recreate container nếu image thay đổi, giữ nguyên volumes (DB data).
-# Dùng 'docker compose down' thủ công nếu muốn reset hoàn toàn (không xóa data).
-# Dùng 'docker compose down -v' nếu muốn xóa cả data volumes.
-docker compose up -d --build
+# Kiểm tra image đã tồn tại chưa
+BACKEND_IMAGE=$(docker images -q ai-adaptive-learning-backend 2>/dev/null)
+FRONTEND_IMAGE=$(docker images -q ai-adaptive-learning-frontend 2>/dev/null)
+
+if [ "$FORCE_REBUILD" = true ]; then
+  log_info "Force rebuild images (--rebuild flag)..."
+  docker compose up -d --build
+elif [ -z "$BACKEND_IMAGE" ] || [ -z "$FRONTEND_IMAGE" ]; then
+  log_info "Images chưa tồn tại — build lần đầu (~3-5 phút)..."
+  docker compose up -d --build
+else
+  log_info "Images đã có — khởi chạy nhanh (không rebuild)..."
+  docker compose up -d
+fi
 
 # =============================================================================
 # BƯỚC 2 — Chờ backend healthy
@@ -198,6 +216,8 @@ echo -e "  ${GREEN}Backend:${NC}   http://localhost:8000"
 echo -e "  ${GREEN}API Docs:${NC}  http://localhost:8000/docs"
 echo -e "  ${GREEN}Health:${NC}    http://localhost:8000/health"
 echo -e ""
-echo -e "  Xem logs:   ${YELLOW}docker compose logs -f backend${NC}"
-echo -e "  Dừng app:   ${YELLOW}docker compose down${NC}"
+echo -e "  Xem logs:      ${YELLOW}docker compose logs -f backend${NC}"
+echo -e "  Dừng app:      ${YELLOW}docker compose stop${NC}          # giữ container"
+echo -e "  Xóa container: ${YELLOW}docker compose down${NC}          # giữ data volumes"
+echo -e "  Rebuild image: ${YELLOW}bash start.sh --rebuild${NC}      # khi đổi Dockerfile/deps"
 echo -e ""
