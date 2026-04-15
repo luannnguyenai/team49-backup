@@ -16,7 +16,13 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('qa_history', sa.Column('rating', sa.Integer(), nullable=True))
+    conn = op.get_bind()
+    result = conn.execute(sa.text(
+        "SELECT 1 FROM information_schema.columns "
+        "WHERE table_name = 'qa_history' AND column_name = 'rating'"
+    ))
+    if not result.fetchone():
+        op.add_column('qa_history', sa.Column('rating', sa.Integer(), nullable=True))
 
 
 def downgrade() -> None:
