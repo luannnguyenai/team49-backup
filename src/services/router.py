@@ -11,11 +11,18 @@ Costs ~150 tokens per request (router) + ~300 tokens for SIMPLE answers.
 
 import json
 import logging
-
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage
 
 from src.config import FAST_MODEL, MODEL_PROVIDER
+
+
+def _fmt_ts(seconds: float) -> str:
+    """Format seconds → HH:MM:SS (e.g. 00:14:32)."""
+    s = int(seconds)
+    h, rem = divmod(s, 3600)
+    m, sec = divmod(rem, 60)
+    return f"{h:02d}:{m:02d}:{sec:02d}"
 
 logger = logging.getLogger("SmartRouter")
 
@@ -59,7 +66,8 @@ _BLOCK_MESSAGES = {
 }
 
 
-def route_question(question: str, lecture_title: str, context_summary: str = "") -> dict:
+def route_question(question: str, lecture_title: str, context_summary: str = "",
+                   current_timestamp: float = 0, current_chapter: str = "") -> dict:
     """
     Smart Router: classifies the question and optionally answers it directly.
 
@@ -83,8 +91,11 @@ def route_question(question: str, lecture_title: str, context_summary: str = "")
 
         # Build context for router
         user_text = f'Lecture: "{lecture_title}"\n'
+        user_text += f"Student is currently at: {_fmt_ts(current_timestamp)}"
+        if current_chapter:
+            user_text += f' — Chapter: "{current_chapter}"'
         if context_summary:
-            user_text += f"\nLecture outline:\n{context_summary}\n"
+            user_text += f"\n\nLecture outline:\n{context_summary}\n"
         user_text += f'\nStudent question: "{question}"'
 
         response = router_llm.invoke([

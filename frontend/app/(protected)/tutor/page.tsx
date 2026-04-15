@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type RefObject, type MouseEvent as ReactMouseEvent } from "react";
 import { api } from "@/lib/api";
 import {
   Send,
@@ -62,6 +62,172 @@ function formatTime(seconds: number): string {
 
 type RightTab = "lesson" | "transcript" | "copilot";
 
+// ── Custom Video Controls with YouTube-style chapter markers ──────────────────
+function VideoControls({
+  videoRef,
+  currentTime,
+  duration,
+  chapters,
+  onSeek,
+}: {
+  videoRef: RefObject<HTMLVideoElement>;
+  currentTime: number;
+  duration: number;
+  chapters: Chapter[];
+  onSeek: (t: number) => void;
+}) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [hoveredChapter, setHoveredChapter] = useState<string | null>(null);
+  const [hoverPct, setHoverPct] = useState(0);
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    v.addEventListener("play", onPlay);
+    v.addEventListener("pause", onPause);
+    return () => {
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
+    };
+  }, [videoRef]);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) v.play(); else v.pause();
+  };
+
+  const handleProgressClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const rect = progressRef.current?.getBoundingClientRect();
+    if (!rect || !duration) return;
+    const pct = (e.clientX - rect.left) / rect.width;
+    onSeek(Math.max(0, Math.min(pct * duration, duration)));
+  };
+
+  const handleProgressHover = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const rect = progressRef.current?.getBoundingClientRect();
+    if (!rect || !duration) return;
+    const pct = Math.max(0, Math.min((e.clientX - rect.left) / rect.width, 1));
+    setHoverPct(pct * 100);
+    const t = pct * duration;
+    setHoveredChapter(
+      chapters.find((c) => t >= c.start_time && t < c.end_time)?.title ?? null
+    );
+  };
+
+  const playedPct = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const activeTitle = chapters.find(
+    (ch) => currentTime >= ch.start_time && currentTime < ch.end_time
+  )?.title ?? "";
+
+  return (
+    <div
+      className="px-3 py-2 space-y-1.5 shrink-0"
+      style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border)" }}
+    >
+      {/* Seekbar + chapter markers */}
+      <div className="relative pt-2">
+        <div
+          ref={progressRef}
+          className="relative h-1.5 rounded-full cursor-pointer"
+          style={{ backgroundColor: "var(--bg-page)" }}
+          onClick={handleProgressClick}
+          onMouseMove={handleProgressHover}
+          onMouseLeave={() => setHoveredChapter(null)}
+        >
+          {/* Played fill */}
+          <div
+            className="absolute left-0 top-0 h-full rounded-full pointer-events-none"
+            style={{ width: `${playedPct}%`, backgroundColor: "#2563eb" }}
+          />
+          {/* Chapter markers */}
+          {chapters.map((ch) => {
+            const pct = duration > 0 ? (ch.start_time / duration) * 100 : 0;
+            if (pct <= 0.5 || pct >= 99.5) return null;
+            return (
+              <div
+                key={ch.id}
+                className="absolute w-2 h-2 rounded-full bg-white ring-1 ring-blue-400 pointer-events-none"
+                style={{ left: `${pct}%`, top: "50%", transform: "translate(-50%,-50%)" }}
+              />
+            );
+          })}
+          {/* Hover tooltip */}
+          {hoveredChapter && (
+            <div
+              className="absolute bottom-5 px-2 py-1 rounded text-xs text-white pointer-events-none whitespace-nowrap z-10"
+              style={{
+                left: `${hoverPct}%`,
+                transform: "translateX(-50%)",
+                backgroundColor: "rgba(0,0,0,0.85)",
+              }}
+            >
+              {hoveredChapter}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Controls row */}
+      <div className="flex items-center gap-3">
+        {/* Play/Pause */}
+        <button
+          onClick={togglePlay}
+          className="shrink-0 transition-opacity hover:opacity-70"
+          style={{ color: "var(--text-primary)" }}
+        >
+          {isPlaying ? (
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
+            </svg>
+          ) : (
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+          )}
+        </button>
+
+        {/* Time display */}
+        <span className="text-xs tabular-nums shrink-0" style={{ color: "var(--text-muted)" }}>
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </span>
+
+        {/* Active chapter name */}
+        <span className="text-xs flex-1 truncate" style={{ color: "var(--text-secondary)" }}>
+          {activeTitle}
+        </span>
+
+        {/* Volume */}
+        <input
+          type="range" min={0} max={1} step={0.05} value={volume}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            setVolume(v);
+            if (videoRef.current) videoRef.current.volume = v;
+          }}
+          className="w-16 h-1 shrink-0 cursor-pointer accent-blue-600"
+        />
+
+        {/* Fullscreen */}
+        <button
+          onClick={() => videoRef.current?.requestFullscreen?.()}
+          className="shrink-0 transition-opacity hover:opacity-70"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function TutorPage() {
   // ── State ──────────────────────────────────────────────────────────────────
   const [lectures, setLectures] = useState<Lecture[]>([]);
@@ -71,6 +237,7 @@ export default function TutorPage() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [quizEnabled, setQuizEnabled] = useState(false);
   const [rightTab, setRightTab] = useState<RightTab>("transcript");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
@@ -206,9 +373,10 @@ export default function TutorPage() {
       let fullText = "";
       let qaId: number | undefined;
 
+      let hasError = false;
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done || hasError) break;
         const text = decoder.decode(value);
         for (const line of text.split("\n")) {
           if (!line.trim()) continue;
@@ -218,7 +386,13 @@ export default function TutorPage() {
               setMessages((prev) =>
                 prev.map((m, i) => i === aiIdx ? { ...m, role: "error", content: data.e } : m)
               );
+              hasError = true;
               break;
+            }
+            if (data.status) {
+              setMessages((prev) =>
+                prev.map((m, i) => i === aiIdx ? { ...m, content: fullText || data.status } : m)
+              );
             }
             if (data.a) {
               fullText += data.a;
@@ -249,9 +423,6 @@ export default function TutorPage() {
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const lecture = lectures.find((l) => l.id === selectedLecture);
-  const activeChapter = chapters.find(
-    (ch) => currentTime >= ch.start_time && currentTime < ch.end_time
-  );
   const hasMessages = messages.length > 0;
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -440,22 +611,29 @@ export default function TutorPage() {
           <div className="w-full aspect-video bg-black shrink-0">
             <video
               ref={videoRef}
-              controls
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain cursor-pointer"
               onTimeUpdate={handleTimeUpdate}
+              onDurationChange={() => {
+                if (videoRef.current) setDuration(videoRef.current.duration || 0);
+              }}
+              onClick={() => {
+                const v = videoRef.current;
+                if (v) v.paused ? v.play() : v.pause();
+              }}
               src={lecture?.video_url ? `/${lecture.video_url}` : undefined}
             />
           </div>
 
-          {/* Video info */}
-          <div className="px-6 py-4" style={{ backgroundColor: "var(--bg-card)" }}>
-            <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-              {activeChapter?.title ?? lecture?.title ?? "Chọn bài giảng"}
-            </h2>
-            <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
-              {formatTime(currentTime)} / {formatTime(lecture?.duration ?? 0)}
-            </p>
-          </div>
+          {/* YouTube-style custom video controls */}
+          <VideoControls
+            videoRef={videoRef}
+            currentTime={currentTime}
+            duration={duration || lecture?.duration || 0}
+            chapters={chapters}
+            onSeek={(t) => {
+              if (videoRef.current) videoRef.current.currentTime = t;
+            }}
+          />
         </div>
       </div>
 

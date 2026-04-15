@@ -155,7 +155,15 @@ def get_context_and_stream_langgraph(lecture_id, current_timestamp, user_questio
             context_summary += f"- {chap.title}: {chap.summary}\n"
 
         # 1. Smart Router: classify the question
-        routing = route_question(user_question, lecture_title, context_summary)
+        current_chapter = next(
+            (ch.title for ch in chapters
+             if ch.start_time <= current_timestamp < ch.end_time), ""
+        )
+        routing = route_question(
+            user_question, lecture_title, context_summary,
+            current_timestamp=current_timestamp,
+            current_chapter=current_chapter,
+        )
         route = routing.get("route", "COMPLEX")
 
         # --- BLOCKED ---
