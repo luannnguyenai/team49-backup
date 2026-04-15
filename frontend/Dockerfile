@@ -6,7 +6,7 @@
 FROM node:20-alpine AS deps
 
 # libc6-compat required for some native node modules
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache
 
 WORKDIR /app
 

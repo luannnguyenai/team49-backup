@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = Field(default="", description="Google Gemini API key")
     default_model: str = Field(default="gemini-3-flash-preview", description="Default LLM model")
     fast_model: str = Field(default="gemini-2.5-flash", description="Fast model for minor tasks")
-    model_provider: str = Field(default="google_genai", description="LLM provider")
+    model_provider: str = Field(default ="google_genai", description="LLM provider")
     log_level: str = Field(default="INFO", description="Logging level")
 
     # ---- Database (PostgreSQL async) ----

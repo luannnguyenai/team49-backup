@@ -279,9 +279,22 @@ CRITICAL STRICT RULES (Must follow without exception):
 
             # Stream generation tokens to UI
             # We enforce that it's generating text (not arguments for tool calls)
-            if isinstance(chunk, BaseMessageChunk) and hasattr(chunk, "content") and isinstance(chunk.content, str) and chunk.content and not chunk.tool_calls:
-                full_answer += chunk.content
-                yield json.dumps({"a": chunk.content}) + "\n"
+            # Handle both str content (most models) and list content (gemini-3-flash-preview returns
+            # [{'type': 'text', 'text': '...', 'extras': {...}}] structured blocks)
+            if isinstance(chunk, BaseMessageChunk) and not getattr(chunk, "tool_calls", None):
+                raw = chunk.content
+                if isinstance(raw, str):
+                    text_chunk = raw
+                elif isinstance(raw, list):
+                    text_chunk = "".join(
+                        b.get("text", "") for b in raw
+                        if isinstance(b, dict) and b.get("type") == "text"
+                    )
+                else:
+                    text_chunk = ""
+                if text_chunk:
+                    full_answer += text_chunk
+                    yield json.dumps({"a": text_chunk}) + "\n"
             
             # If the Boss was too hard (Fallback node)
             if isinstance(chunk, AIMessage) and chunk.content == "That Boss so hard, I can't beat it":
