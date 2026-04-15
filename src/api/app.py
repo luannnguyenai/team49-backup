@@ -160,24 +160,54 @@ class ProgressRequest(BaseModel):
     lecture_id: str
     last_timestamp: float
 
+_WATCHED_THRESHOLD = 0.8  # 80% watched → "watched"
+
 @app.post("/api/progress")
 def save_progress(req: ProgressRequest, db: Session = Depends(get_db)):
-    """Upsert learning progress for a session + lecture pair."""
+    """Upsert learning progress. Auto-upgrades state to 'watched' at 80%."""
     progress = db.query(LearningProgress).filter(
         LearningProgress.session_id == req.session_id,
         LearningProgress.lecture_id == req.lecture_id,
     ).first()
-    if progress:
-        progress.last_timestamp = req.last_timestamp
-    else:
+    if not progress:
         progress = LearningProgress(
             session_id=req.session_id,
             lecture_id=req.lecture_id,
             last_timestamp=req.last_timestamp,
+            checkpoint_state="unwatched",
         )
         db.add(progress)
+    else:
+        progress.last_timestamp = req.last_timestamp
+
+    # Auto-promote to "watched" if reached threshold (never downgrade)
+    if progress.checkpoint_state == "unwatched":
+        lecture = db.query(Lecture).filter(Lecture.id == req.lecture_id).first()
+        if lecture and lecture.duration and lecture.duration > 0:
+            if req.last_timestamp / lecture.duration >= _WATCHED_THRESHOLD:
+                progress.checkpoint_state = "watched"
+
     db.commit()
-    return {"status": "ok"}
+    return {"status": "ok", "checkpoint_state": progress.checkpoint_state}
+
+@app.post("/api/progress/{session_id}/{lecture_id}/quiz-complete")
+def mark_quiz_complete(session_id: str, lecture_id: str, db: Session = Depends(get_db)):
+    """Mark lecture quiz as completed (always upgrades to quiz_completed)."""
+    progress = db.query(LearningProgress).filter(
+        LearningProgress.session_id == session_id,
+        LearningProgress.lecture_id == lecture_id,
+    ).first()
+    if not progress:
+        progress = LearningProgress(
+            session_id=session_id,
+            lecture_id=lecture_id,
+            checkpoint_state="quiz_completed",
+        )
+        db.add(progress)
+    else:
+        progress.checkpoint_state = "quiz_completed"
+    db.commit()
+    return {"status": "ok", "checkpoint_state": "quiz_completed"}
 
 @app.get("/api/progress/{session_id}")
 def get_progress(session_id: str, db: Session = Depends(get_db)):
@@ -185,5 +215,11 @@ def get_progress(session_id: str, db: Session = Depends(get_db)):
     rows = db.query(LearningProgress).filter(
         LearningProgress.session_id == session_id
     ).all()
-    return {row.lecture_id: row.last_timestamp for row in rows}
+    return {
+        row.lecture_id: {
+            "last_timestamp": row.last_timestamp,
+            "checkpoint_state": row.checkpoint_state,
+        }
+        for row in rows
+    }
 

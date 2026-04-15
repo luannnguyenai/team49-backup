@@ -97,8 +97,21 @@ else
   log_info "Chế độ: DEVELOPMENT (volume mount, hot reload tự động)"
 fi
 
-# Kiểm tra image backend đã tồn tại chưa
+# Kiểm tra image đã tồn tại chưa
 BACKEND_IMAGE=$(docker images -q ai-adaptive-learning-backend 2>/dev/null)
+FRONTEND_IMAGE=$(docker images -q ai-adaptive-learning-frontend 2>/dev/null)
+
+# Phát hiện package-lock.json thay đổi sau khi build frontend image
+NEED_FRONTEND_REBUILD=false
+if [ -n "$FRONTEND_IMAGE" ]; then
+  IMAGE_EPOCH=$(docker inspect --format='{{.Created}}' ai-adaptive-learning-frontend 2>/dev/null \
+    | xargs -I{} date -d {} +%s 2>/dev/null || echo "0")
+  PKG_EPOCH=$(stat -c %Y frontend/package-lock.json 2>/dev/null || echo "0")
+  if [ "$PKG_EPOCH" -gt "$IMAGE_EPOCH" ]; then
+    log_warn "package-lock.json thay đổi sau khi build image — sẽ rebuild frontend..."
+    NEED_FRONTEND_REBUILD=true
+  fi
+fi
 
 if [ "$FORCE_REBUILD" = true ]; then
   log_info "Force rebuild tất cả images..."
@@ -106,6 +119,10 @@ if [ "$FORCE_REBUILD" = true ]; then
 elif [ -z "$BACKEND_IMAGE" ]; then
   log_info "Images chưa tồn tại — build lần đầu (~3-5 phút)..."
   $COMPOSE_CMD up -d --build
+elif [ "$NEED_FRONTEND_REBUILD" = true ]; then
+  log_info "Rebuilding frontend image (npm deps thay đổi)..."
+  $COMPOSE_CMD build frontend
+  $COMPOSE_CMD up -d
 else
   log_info "Images đã có — khởi chạy (frontend hot reload qua volume mount)..."
   $COMPOSE_CMD up -d
