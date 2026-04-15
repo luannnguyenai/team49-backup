@@ -9,6 +9,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   FileText,
   AlignLeft,
   ToggleLeft,
@@ -242,6 +243,7 @@ export default function TutorPage() {
   const [rightTab, setRightTab] = useState<RightTab>("transcript");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [chaptersOpen, setChaptersOpen] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -539,40 +541,56 @@ export default function TutorPage() {
               )}
             </div>
 
-            {/* Chapter list (when a lecture is selected) */}
+            {/* Chapter list (when a lecture is selected) — collapsible */}
             {chapters.length > 0 && (
-              <div className="border-t py-2" style={{ borderColor: "var(--border)" }}>
-                <p className="text-xs font-semibold uppercase tracking-wider px-4 mb-1" style={{ color: "var(--text-muted)" }}>
-                  Video bài giảng
-                </p>
-                <div className="px-2 space-y-0.5">
-                  {chapters.map((ch, i) => {
-                    const active = currentTime >= ch.start_time && currentTime < ch.end_time;
-                    return (
-                      <button
-                        key={ch.id}
-                        onClick={() => {
-                          if (videoRef.current) videoRef.current.currentTime = ch.start_time;
-                        }}
-                        className="w-full text-left rounded-lg px-3 py-2 transition-colors"
-                        style={{
-                          borderLeft: active ? "3px solid #2563eb" : "3px solid transparent",
-                          backgroundColor: active ? "rgba(37,99,235,0.07)" : "transparent",
-                        }}
-                      >
-                        <p
-                          className="text-xs font-medium truncate"
-                          style={{ color: active ? "#2563eb" : "var(--text-secondary)" }}
+              <div className="border-t shrink-0" style={{ borderColor: "var(--border)" }}>
+                {/* Dropdown toggle */}
+                <button
+                  onClick={() => setChaptersOpen((o) => !o)}
+                  className="w-full flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                >
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                    Video bài giảng
+                  </span>
+                  <ChevronDown
+                    className="h-3.5 w-3.5 transition-transform duration-200"
+                    style={{
+                      color: "var(--text-muted)",
+                      transform: chaptersOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                  />
+                </button>
+
+                {chaptersOpen && (
+                  <div className="px-2 pb-2 space-y-0.5">
+                    {chapters.map((ch, i) => {
+                      const active = currentTime >= ch.start_time && currentTime < ch.end_time;
+                      return (
+                        <button
+                          key={ch.id}
+                          onClick={() => {
+                            if (videoRef.current) videoRef.current.currentTime = ch.start_time;
+                          }}
+                          className="w-full text-left rounded-lg px-3 py-2 transition-colors"
+                          style={{
+                            borderLeft: active ? "3px solid #2563eb" : "3px solid transparent",
+                            backgroundColor: active ? "rgba(37,99,235,0.07)" : "transparent",
+                          }}
                         >
-                          {i + 1}. {ch.title}
-                        </p>
-                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                          {formatTime(ch.start_time)}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
+                          <p
+                            className="text-xs font-medium truncate"
+                            style={{ color: active ? "#2563eb" : "var(--text-secondary)" }}
+                          >
+                            {i + 1}. {ch.title}
+                          </p>
+                          <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                            {formatTime(ch.start_time)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
