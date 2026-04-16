@@ -21,6 +21,7 @@ build/
 
 # Data — ignore large binary/video assets, track JSON configs
 data/CS231n/
+data/CS224n/
 
 # Project local files
 app.db
