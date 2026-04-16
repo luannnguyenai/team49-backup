@@ -26,6 +26,14 @@ def _fmt_ts(seconds: float) -> str:
 
 logger = logging.getLogger("SmartRouter")
 
+# Initialize router LLM once at module level (avoid re-init on every request)
+_router_llm = init_chat_model(
+    model=FAST_MODEL,
+    model_provider=MODEL_PROVIDER,
+    temperature=0,
+    max_tokens=1200,
+)
+
 # --- Router Prompt -----------------------------------------------------------
 _ROUTER_SYSTEM = """\
 You are a Smart Router for an AI Tutor platform about university lectures.
@@ -82,13 +90,6 @@ def route_question(question: str, lecture_title: str, context_summary: str = "",
         {"route": "COMPLEX", "reason": "..."}
     """
     try:
-        router_llm = init_chat_model(
-            model=FAST_MODEL,
-            model_provider=MODEL_PROVIDER,
-            temperature=0,
-            max_tokens=800,  # allow room for SIMPLE direct_answer
-        )
-
         # Build context for router
         user_text = f'Lecture: "{lecture_title}"\n'
         user_text += f"Student is currently at: {_fmt_ts(current_timestamp)}"
@@ -98,7 +99,7 @@ def route_question(question: str, lecture_title: str, context_summary: str = "",
             user_text += f"\n\nLecture outline:\n{context_summary}\n"
         user_text += f'\nStudent question: "{question}"'
 
-        response = router_llm.invoke([
+        response = _router_llm.invoke([
             SystemMessage(content=_ROUTER_SYSTEM),
             HumanMessage(content=user_text),
         ])

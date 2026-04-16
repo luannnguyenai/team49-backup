@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, type RefObject, type MouseEvent as ReactMouseEvent } from "react";
+import ReactMarkdown from "react-markdown";
 import { api } from "@/lib/api";
 import {
   Send,
@@ -21,6 +22,7 @@ import {
   Bot,
   PlayCircle,
   Clock,
+  CheckCircle2,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -244,6 +246,7 @@ export default function TutorPage() {
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [chaptersOpen, setChaptersOpen] = useState(false);
+  const [progressMap, setProgressMap] = useState<Record<string, { last_timestamp: number; checkpoint_state: string }>>({});
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -263,10 +266,18 @@ export default function TutorPage() {
 
   const saveProgress = useCallback(() => {
     if (!selectedLecture || !videoRef.current || videoRef.current.currentTime < 1) return;
-    api.post("/api/progress", {
+    api.post<{ checkpoint_state: string }>("/api/progress", {
       session_id: sessionId.current,
       lecture_id: selectedLecture,
       last_timestamp: videoRef.current.currentTime,
+    }).then((r) => {
+      setProgressMap((prev) => ({
+        ...prev,
+        [selectedLecture]: {
+          last_timestamp: videoRef.current!.currentTime,
+          checkpoint_state: r.data.checkpoint_state,
+        },
+      }));
     }).catch(() => {});
   }, [selectedLecture]);
 
@@ -285,6 +296,13 @@ export default function TutorPage() {
     }).catch(() => {});
   }, []);
 
+  // ── Load all progress once at mount ──────────────────────────────────────
+  useEffect(() => {
+    api.get<Record<string, { last_timestamp: number; checkpoint_state: string }>>(
+      `/api/progress/${sessionId.current}`
+    ).then((r) => setProgressMap(r.data)).catch(() => {});
+  }, []);
+
   // ── Load chapters + restore progress ─────────────────────────────────────
   useEffect(() => {
     if (!selectedLecture) return;
@@ -292,16 +310,32 @@ export default function TutorPage() {
       setChapters(r.data);
     }).catch(() => setChapters([]));
 
-    api.get<Record<string, number>>(`/api/progress/${sessionId.current}`).then((r) => {
-      const ts = r.data[selectedLecture];
-      if (ts && ts > 1 && videoRef.current) videoRef.current.currentTime = ts;
-    }).catch(() => {});
-  }, [selectedLecture]);
+    const saved = progressMap[selectedLecture];
+    if (saved && saved.last_timestamp > 1 && videoRef.current) {
+      videoRef.current.currentTime = saved.last_timestamp;
+    }
+  }, [selectedLecture]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-scroll chat ──────────────────────────────────────────────────────
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // ── Quiz complete ─────────────────────────────────────────────────────────
+  const markQuizComplete = useCallback(() => {
+    if (!selectedLecture) return;
+    api.post(`/api/progress/${sessionId.current}/${selectedLecture}/quiz-complete`)
+      .then(() => {
+        setProgressMap((prev) => ({
+          ...prev,
+          [selectedLecture]: {
+            last_timestamp: prev[selectedLecture]?.last_timestamp ?? 0,
+            checkpoint_state: "quiz_completed",
+          },
+        }));
+        setQuizEnabled(false);
+      }).catch(() => {});
+  }, [selectedLecture]);
 
   // ── Video time update ─────────────────────────────────────────────────────
   const handleTimeUpdate = () => {
@@ -473,25 +507,36 @@ export default function TutorPage() {
                   {lecture.description ?? "Khóa học video bài giảng"}
                 </p>
                 {/* Progress bar */}
-                <div className="mb-2">
-                  <div className="flex justify-between text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-                    <span>Tiến độ</span>
-                    <span>0%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-page)" }}>
-                    <div className="h-full w-0 rounded-full bg-primary-600" />
-                  </div>
-                </div>
-                <div className="flex gap-4 text-xs" style={{ color: "var(--text-muted)" }}>
-                  <span className="flex items-center gap-1">
-                    <span className="font-bold" style={{ color: "var(--text-primary)" }}>{lectures.length}</span>
-                    &nbsp;Video
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="font-bold text-emerald-600">0</span>
-                    &nbsp;Hoàn thành
-                  </span>
-                </div>
+                {(() => {
+                  const completedCount = Object.values(progressMap).filter(p => p.checkpoint_state === "quiz_completed").length;
+                  const progressPct = lectures.length > 0 ? Math.round(completedCount / lectures.length * 100) : 0;
+                  return (
+                    <>
+                      <div className="mb-2">
+                        <div className="flex justify-between text-xs mb-1" style={{ color: "var(--text-muted)" }}>
+                          <span>Tiến độ</span>
+                          <span>{progressPct}%</span>
+                        </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-page)" }}>
+                          <div
+                            className="h-full rounded-full bg-primary-600 transition-all duration-500"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-4 text-xs" style={{ color: "var(--text-muted)" }}>
+                        <span className="flex items-center gap-1">
+                          <span className="font-bold" style={{ color: "var(--text-primary)" }}>{lectures.length}</span>
+                          &nbsp;Video
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="font-bold text-emerald-600">{completedCount}</span>
+                          &nbsp;Hoàn thành
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
 
@@ -515,10 +560,12 @@ export default function TutorPage() {
                         }}
                       >
                         <div className="flex items-start gap-2">
-                          <PlayCircle
-                            className="h-4 w-4 shrink-0 mt-0.5 transition-colors"
-                            style={{ color: isActive ? "#2563eb" : "var(--text-muted)" }}
-                          />
+                          {(() => {
+                            const state = progressMap[l.id]?.checkpoint_state;
+                            if (state === "quiz_completed") return <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-500" />;
+                            if (state === "watched") return <PlayCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />;
+                            return <PlayCircle className="h-4 w-4 shrink-0 mt-0.5 transition-colors" style={{ color: isActive ? "#2563eb" : "var(--text-muted)" }} />;
+                          })()}
                           <div className="flex-1 min-w-0">
                             <p
                               className="text-xs font-medium leading-snug line-clamp-2"
@@ -606,22 +653,40 @@ export default function TutorPage() {
           className="flex h-12 items-center justify-center border-b shrink-0 gap-3"
           style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
         >
-          <button
-            onClick={() => setQuizEnabled((q) => !q)}
-            className="flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors hover:opacity-80"
-            style={{
-              borderColor: "var(--border)",
-              color: quizEnabled ? "#2563eb" : "var(--text-secondary)",
-              backgroundColor: quizEnabled ? "rgba(37,99,235,0.07)" : "var(--bg-page)",
-            }}
-          >
-            {quizEnabled ? (
-              <ToggleRight className="h-4 w-4 text-primary-600" />
-            ) : (
-              <ToggleLeft className="h-4 w-4" />
-            )}
-            Quiz giữa bài: {quizEnabled ? "Bật" : "Tắt"}
-          </button>
+          {progressMap[selectedLecture]?.checkpoint_state === "quiz_completed" ? (
+            <span className="flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium text-emerald-500 border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30">
+              <CheckCircle2 className="h-4 w-4" />
+              Quiz đã hoàn thành
+            </span>
+          ) : (
+            <>
+              <button
+                onClick={() => setQuizEnabled((q) => !q)}
+                className="flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors hover:opacity-80"
+                style={{
+                  borderColor: "var(--border)",
+                  color: quizEnabled ? "#2563eb" : "var(--text-secondary)",
+                  backgroundColor: quizEnabled ? "rgba(37,99,235,0.07)" : "var(--bg-page)",
+                }}
+              >
+                {quizEnabled ? (
+                  <ToggleRight className="h-4 w-4 text-primary-600" />
+                ) : (
+                  <ToggleLeft className="h-4 w-4" />
+                )}
+                Quiz giữa bài: {quizEnabled ? "Bật" : "Tắt"}
+              </button>
+              {quizEnabled && (
+                <button
+                  onClick={markQuizComplete}
+                  className="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Hoàn thành Quiz
+                </button>
+              )}
+            </>
+          )}
         </div>
 
         {/* Video */}
@@ -630,6 +695,7 @@ export default function TutorPage() {
             <video
               ref={videoRef}
               className="w-full h-full object-contain cursor-pointer"
+              crossOrigin="anonymous"
               onTimeUpdate={handleTimeUpdate}
               onDurationChange={() => {
                 if (videoRef.current) setDuration(videoRef.current.duration || 0);
@@ -875,12 +941,18 @@ export default function TutorPage() {
                                   : { backgroundColor: "var(--bg-page)", color: "var(--text-primary)", borderBottomLeftRadius: "0.25rem" }
                               }
                             >
-                              {msg.content || (
-                                <span className="flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                  Đang trả lời...
-                                </span>
-                              )}
+                              {msg.role === "ai" && msg.content
+                                ? (
+                                  <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:my-2 prose-code:text-xs">
+                                    {msg.content}
+                                  </ReactMarkdown>
+                                )
+                                : msg.content || (
+                                  <span className="flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    Đang trả lời...
+                                  </span>
+                                )}
                             </div>
                             {msg.role === "ai" && msg.id && msg.content && (
                               <div className="flex gap-2 mt-1 ml-1">

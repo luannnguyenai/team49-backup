@@ -86,11 +86,13 @@ class QAHistory(Base):
 
 class LearningProgress(Base):
     __tablename__ = "learning_progress"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String, index=True, nullable=False)
     lecture_id = Column(String, ForeignKey("lectures.id"), nullable=False)
-    last_timestamp = Column(Float, default=0.0)  # seconds into video
+    last_timestamp = Column(Float, default=0.0)       # seconds into video
+    # "unwatched" | "watched" | "quiz_completed"
+    checkpoint_state = Column(String, nullable=False, default="unwatched")
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
