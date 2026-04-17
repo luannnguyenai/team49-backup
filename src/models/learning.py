@@ -256,6 +256,43 @@ class MasteryScore(UUIDPrimaryKeyMixin, Base):
 
 
 # ---------------------------------------------------------------------------
+# MasteryHistory (audit trail for every mastery change)
+# ---------------------------------------------------------------------------
+
+
+class MasteryHistory(UUIDPrimaryKeyMixin, Base):
+    """Append-only audit log of mastery changes — one row per upsert."""
+
+    __tablename__ = "mastery_history"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    topic_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("topics.id", ondelete="CASCADE"), nullable=False
+    )
+    kc_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("knowledge_components.id", ondelete="SET NULL"), nullable=True
+    )
+    old_mastery_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
+    new_mastery_probability: Mapped[float] = mapped_column(Float, nullable=False)
+    old_mastery_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    new_mastery_level: Mapped[str] = mapped_column(String(50), nullable=False)
+    evidence_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    trigger_session_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="SET NULL"), nullable=True
+    )
+    changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_mh_user_topic", "user_id", "topic_id"),
+        Index("ix_mh_changed_at", "changed_at"),
+    )
+
+
+# ---------------------------------------------------------------------------
 # LearningPath
 # ---------------------------------------------------------------------------
 
