@@ -42,6 +42,12 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = Field(default=7)
     rate_limit_login_per_minute: int = Field(default=5)
 
+    # ---- Redis ----
+    redis_url: str = Field(
+        default="redis://:redis123secure@localhost:6379/0",
+        description="Redis URL for rate limiting + token denylist",
+    )
+
     # ---- CORS ----
     cors_origins: list[str] = Field(
         default=["http://localhost:3000", "http://localhost:8000"],

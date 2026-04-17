@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import engine as async_engine, get_async_db
 from src.exception_handlers import domain_exception_handler
 from src.exceptions import DomainError
+from src.redis_client import connect_redis, disconnect_redis
 from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
 from src.services.llm_service import get_context_and_stream_langgraph
 from src.routers.auth import auth_router, users_router
@@ -36,7 +37,9 @@ from src.config import settings
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await connect_redis()
     yield
+    await disconnect_redis()
     await async_engine.dispose()
 
 
