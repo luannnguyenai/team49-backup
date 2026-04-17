@@ -54,7 +54,8 @@ import random
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, status
+from src.exceptions import ConflictError, NotFoundError, ValidationError
+
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -129,10 +130,7 @@ async def start_module_test(
     topics: list[Topic] = topics_result.scalars().all()
 
     if not topics:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Module '{module.name}' không có topic nào.",
-        )
+        raise ValidationError(f"Module '{module.name}' không có topic nào.")
 
     # 3. Validate completed quizzes for every topic ───────────────────────────
     incomplete: list[str] = []
@@ -151,14 +149,11 @@ async def start_module_test(
             incomplete.append(topic.name)
 
     if incomplete:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
+        raise ValidationError((
                 "Bạn chưa hoàn thành quiz cho các topic sau: "
                 + ", ".join(f"'{t}'" for t in incomplete)
                 + ". Hãy hoàn thành quiz tất cả topics trước khi thi module test."
-            ),
-        )
+            ))
 
     # 4. Select 5 questions per topic ─────────────────────────────────────────
     topic_groups: list[TopicQuestionsGroup] = []
@@ -186,13 +181,10 @@ async def start_module_test(
             selected_ids.update(q.id for q in chosen)
 
         if not selected:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
+            raise ValidationError((
                     f"Không tìm thấy câu hỏi module_test cho topic '{topic.name}'. "
                     'Hãy seed question bank với usage_context=["module_test"].'
-                ),
-            )
+                ))
 
         random.shuffle(selected)
         total_question_count += len(selected)
@@ -242,10 +234,7 @@ async def submit_module_test(
     # 1. Validate session ──────────────────────────────────────────────────────
     session = await _get_module_test_session(db, user_id, session_id)
     if session.completed_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Module test đã được nộp trước đó.",
-        )
+        raise ConflictError("Module test đã được nộp trước đó.")
 
     # 2. Load module + topics ──────────────────────────────────────────────────
     module = await _get_module_or_404(db, session.module_id)
@@ -263,10 +252,7 @@ async def submit_module_test(
     # Validate module ownership of every question
     for q in question_by_id.values():
         if q.module_id != session.module_id:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Question {q.id} không thuộc module này.",
-            )
+            raise ValidationError(f"Question {q.id} không thuộc module này.")
 
     # 4. Guard: no duplicate answers in same session ───────────────────────────
     existing_qs_result = await db.execute(
@@ -274,10 +260,7 @@ async def submit_module_test(
     )
     already_answered: set[uuid.UUID] = {r[0] for r in existing_qs_result}
     if already_answered:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Module test đã có câu trả lời. Không thể nộp lại.",
-        )
+        raise ConflictError("Module test đã có câu trả lời. Không thể nộp lại.")
 
     # 5. Determine global sequence base ────────────────────────────────────────
     max_global_result = await db.execute(
@@ -320,10 +303,7 @@ async def submit_module_test(
     rows = rows_result.all()
 
     if not rows:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Không có câu trả lời hợp lệ nào.",
-        )
+        raise ValidationError("Không có câu trả lời hợp lệ nào.")
 
     # 8. Compute result ────────────────────────────────────────────────────────
     result = await _build_result(db, session, rows, topic_by_id, module)
@@ -360,10 +340,7 @@ async def get_module_test_results(
     # 1. Validate session ──────────────────────────────────────────────────────
     session = await _get_module_test_session(db, user_id, session_id)
     if session.completed_at is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Module test chưa được nộp.",
-        )
+        raise ConflictError("Module test chưa được nộp.")
 
     # 2. Load module + topics ──────────────────────────────────────────────────
     module = await _get_module_or_404(db, session.module_id)
@@ -668,10 +645,7 @@ async def _get_module_or_404(db: AsyncSession, module_id: uuid.UUID) -> Module:
     result = await db.execute(select(Module).where(Module.id == module_id))
     module = result.scalar_one_or_none()
     if module is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Module {module_id} not found.",
-        )
+        raise NotFoundError(f"Module {module_id} not found.")
     return module
 
 
@@ -689,10 +663,7 @@ async def _get_module_test_session(
     )
     sess = result.scalar_one_or_none()
     if sess is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Module test session not found.",
-        )
+        raise NotFoundError("Module test session not found.")
     return sess
 
 

@@ -25,7 +25,6 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -48,6 +47,7 @@ from src.schemas.history import (
     ScoreTrendPoint,
     SessionDetailResponse,
 )
+from src.exceptions import ConflictError, NotFoundError
 from src.services.mastery_evaluator import (
     BloomLevel,
     QuestionResult,
@@ -225,15 +225,9 @@ async def get_session_detail(
     )
     sess = sess_result.scalar_one_or_none()
     if sess is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found.",
-        )
+        raise NotFoundError("Session not found.")
     if sess.completed_at is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Session has not been completed yet.",
-        )
+        raise ConflictError("Session has not been completed yet.")
 
     # 2. Load interactions + questions
     rows_result = await db.execute(

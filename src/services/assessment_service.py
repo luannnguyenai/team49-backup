@@ -21,7 +21,6 @@ import math
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, status
 from sqlalchemy import case, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -47,6 +46,7 @@ from src.schemas.assessment import (
     QuestionForAssessment,
     TopicResult,
 )
+from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.services.mastery_evaluator import (
     QuestionResult,
     TopicMasteryResult,
@@ -172,10 +172,7 @@ async def start_assessment(
     found_ids = {t.id for t in topics_result.scalars().all()}
     missing = [tid for tid in topic_ids if tid not in found_ids]
     if missing:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Topics not found: {[str(m) for m in missing]}",
-        )
+        raise NotFoundError(f"Topics not found: {[str(m) for m in missing]}")
 
     # 2. Collect answered question IDs + estimate ability (θ) from user history
     answered_result = await db.execute(
@@ -219,13 +216,10 @@ async def start_assessment(
             skipped_topics.append(str(topic_id))
 
     if not all_questions:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
+        raise ValidationError((
                 "No eligible assessment questions found for any of the requested topics. "
                 "The question bank may not include active assessment questions for these topics."
-            ),
-        )
+            ))
 
     # 4. Create the Session (no topic_id/module_id — spans multiple topics)
     session = Session(
@@ -333,28 +327,19 @@ async def submit_assessment(
     # 1. Load + validate session ownership
     session = await _get_session(db, user_id, session_id)
     if session.completed_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has already been submitted.",
-        )
+        raise ConflictError("This assessment has already been submitted.")
 
     # 2. Reject duplicate question_ids in the submission
     question_ids = [a.question_id for a in answers]
     if len(question_ids) != len(set(question_ids)):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Duplicate question_id entries in answers.",
-        )
+        raise ValidationError("Duplicate question_id entries in answers.")
 
     # 3. Batch-load all referenced questions
     questions_result = await db.execute(select(Question).where(Question.id.in_(question_ids)))
     questions: dict[uuid.UUID, Question] = {q.id: q for q in questions_result.scalars().all()}
     missing = [qid for qid in question_ids if qid not in questions]
     if missing:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Unknown question IDs: {[str(m) for m in missing]}",
-        )
+        raise ValidationError(f"Unknown question IDs: {[str(m) for m in missing]}")
 
     # 4. Determine next global_sequence_position for this user
     max_global_result = await db.execute(
@@ -461,10 +446,7 @@ async def get_assessment_results(
 ) -> AssessmentResultResponse:
     session = await _get_session(db, user_id, session_id)
     if session.completed_at is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Assessment not yet submitted.",
-        )
+        raise NotFoundError("Assessment not yet submitted.")
 
     # Load all interactions joined with their questions
     rows_result = await db.execute(
@@ -476,10 +458,7 @@ async def get_assessment_results(
     rows = rows_result.all()
 
     if not rows:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No interaction data found for this session.",
-        )
+        raise NotFoundError("No interaction data found for this session.")
 
     # Rebuild QuestionResult list from stored interactions
     question_results: list[QuestionResult] = [
@@ -526,10 +505,7 @@ async def _get_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UU
     )
     session = result.scalar_one_or_none()
     if session is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Assessment session not found.",
-        )
+        raise NotFoundError("Assessment session not found.")
     return session
 
 
