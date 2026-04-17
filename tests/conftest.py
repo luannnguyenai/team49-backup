@@ -13,8 +13,11 @@ Usage:
     DATABASE_URL=postgresql+asyncpg://test:test@localhost/test_ai_learning pytest tests/
 """
 
-import asyncio
-import pytest
+# Load .env into os.environ BEFORE any src imports so LangChain/OpenAI
+# can find the API keys at module-level initialization time.
+from dotenv import load_dotenv
+load_dotenv()
+
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -26,29 +29,15 @@ from src.models.base import Base
 
 
 # ---------------------------------------------------------------------------
-# Event loop — use one loop for the whole test session
-# ---------------------------------------------------------------------------
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-# ---------------------------------------------------------------------------
 # Test database engine (re-created once per session)
 # ---------------------------------------------------------------------------
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def test_engine():
-    """Create all tables in the test DB, yield the engine, drop tables after."""
+    """Per-test engine — avoids event-loop mismatch with session-scoped fixtures."""
     engine = create_async_engine(settings.database_url, echo=False)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Tables already exist (migrated via Alembic) — don't create/drop in tests.
     yield engine
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
 
 
