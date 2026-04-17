@@ -1,32 +1,39 @@
 {
   "hooks": {
-    "UserPromptSubmit": [
+    "SessionStart": [
       {
         "hooks": [
           {
+            "name": "log-prompt",
             "type": "command",
-            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py"
+            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py",
+            "timeout": 10000
           }
         ]
       }
     ],
-    "PostToolUse": [
+    "TaskCompleted": [
       {
         "matcher": ".*",
         "hooks": [
           {
+            "name": "log-model",
             "type": "command",
-            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py"
+            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py",
+            "timeout": 10000
           }
         ]
       }
     ],
-    "Stop": [
+    "SessionEnd": [
       {
+        "matcher": ".*",
         "hooks": [
           {
+            "name": "log-session-end",
             "type": "command",
-            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py"
+            "command": "AI_TOOL_NAME=claude python3 scripts/log_hook.py",
+            "timeout": 10000
           }
         ]
       }
