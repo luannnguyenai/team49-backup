@@ -42,6 +42,12 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = Field(default=7)
     rate_limit_login_per_minute: int = Field(default=5)
 
+    # ---- CORS ----
+    cors_origins: list[str] = Field(
+        default=["http://localhost:3000", "http://localhost:8000"],
+        description="Allowed CORS origins. Never use ['*'] with credentials=True.",
+    )
+
     # ---- App ----
     app_name: str = "AI Adaptive Learning Platform"
     debug: bool = False
