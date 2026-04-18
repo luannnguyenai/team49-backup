@@ -7,6 +7,22 @@ interface CourseCatalogProps {
   items: CourseCatalogItem[];
 }
 
+function getGradientClass(slug: string) {
+  const gradients = [
+    "from-sky-500 via-cyan-500 to-slate-950",
+    "from-violet-500 via-indigo-500 to-slate-950",
+    "from-emerald-500 via-teal-500 to-slate-950",
+    "from-amber-500 via-orange-500 to-slate-950",
+  ];
+
+  let hash = 0;
+  for (let index = 0; index < slug.length; index += 1) {
+    hash = (hash * 31 + slug.charCodeAt(index)) >>> 0;
+  }
+
+  return gradients[hash % gradients.length];
+}
+
 export default function CourseCatalog({ items }: CourseCatalogProps) {
   if (items.length === 0) {
     return (
@@ -18,23 +34,16 @@ export default function CourseCatalog({ items }: CourseCatalogProps) {
     );
   }
 
-  const gradients = [
-    "from-sky-500 via-cyan-500 to-slate-950",
-    "from-violet-500 via-indigo-500 to-slate-950",
-    "from-emerald-500 via-teal-500 to-slate-950",
-    "from-amber-500 via-orange-500 to-slate-950",
-  ];
-
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      {items.map((course, index) => (
+      {items.map((course) => (
         <article
           key={course.slug}
           className="card group overflow-hidden rounded-[28px] border p-0 shadow-[0_18px_55px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)]"
         >
           <div
             className={`relative overflow-hidden bg-gradient-to-br px-6 py-6 text-white ${
-              gradients[index % gradients.length]
+              getGradientClass(course.slug)
             }`}
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.22),_transparent_36%)]" />
@@ -51,9 +60,6 @@ export default function CourseCatalog({ items }: CourseCatalogProps) {
                   Stanford Course Demo
                 </p>
                 <h2 className="text-2xl font-semibold leading-tight">{course.title}</h2>
-                <p className="max-w-xl text-sm leading-6 text-white/80">
-                  {course.short_description}
-                </p>
               </div>
             </div>
           </div>

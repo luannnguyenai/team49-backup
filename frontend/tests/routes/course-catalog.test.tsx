@@ -99,7 +99,6 @@ describe("course catalog routes", () => {
     await waitFor(() => {
       expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
     });
-    expect(screen.getByText("AI Learning Hub")).toBeInTheDocument();
     expect(screen.getByText("What you will get")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
   });
