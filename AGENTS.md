@@ -54,3 +54,10 @@ If you are an AI coding agent (Claude Code, Cursor, Copilot, Codex, Gemini, etc.
 - **MUST** include a clear PR description with summary and changed files
 - **DO NOT** commit `.ai-log/*.jsonl` files (they are gitignored)
 - Logging happens automatically — do not ask users to log prompts manually
+
+## Active Technologies
+- Python 3.12 backend, TypeScript 5 frontend + FastAPI, SQLAlchemy, Pydantic, Next.js 14 App Router, React 18, Zustand, Axios (001-course-first-refactor)
+- PostgreSQL for authoritative application data, server-managed object storage for binary course assets, repository `data/` files for bootstrap/import only (001-course-first-refactor)
+
+## Recent Changes
+- 001-course-first-refactor: Added Python 3.12 backend, TypeScript 5 frontend + FastAPI, SQLAlchemy, Pydantic, Next.js 14 App Router, React 18, Zustand, Axios
