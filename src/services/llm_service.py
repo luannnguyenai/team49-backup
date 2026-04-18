@@ -13,7 +13,8 @@ from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 
-from src.config import DEFAULT_MODEL, MODEL_PROVIDER
+from src.config import DEFAULT_MODEL
+from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.sandbox import run_python_code
 from src.services.router import route_question
 from src.models.store import SessionLocal, Lecture, Chapter, TranscriptLine, QAHistory
@@ -58,7 +59,12 @@ tool_node = ToolNode(tools)
 @lru_cache(maxsize=1)
 def _get_llm_with_tools():
     """Lazily create the main tutor LLM so FastAPI can import without secrets."""
-    llm = init_chat_model(model=DEFAULT_MODEL, model_provider=MODEL_PROVIDER, temperature=0.2)
+    llm = init_chat_model(
+        **build_chat_model_kwargs(
+            model=DEFAULT_MODEL,
+            temperature=0.2,
+        )
+    )
     try:
         return llm.bind_tools(tools)
     except Exception:

@@ -16,7 +16,8 @@ from functools import lru_cache
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from src.config import FAST_MODEL, MODEL_PROVIDER
+from src.config import FAST_MODEL
+from src.services.chat_model_factory import build_chat_model_kwargs
 
 
 def _fmt_ts(seconds: float) -> str:
@@ -33,10 +34,11 @@ logger = logging.getLogger("SmartRouter")
 def _get_router_llm():
     """Lazily create the router LLM so app imports do not require API keys."""
     return init_chat_model(
-        model=FAST_MODEL,
-        model_provider=MODEL_PROVIDER,
-        temperature=0,
-        max_tokens=1200,
+        **build_chat_model_kwargs(
+            model=FAST_MODEL,
+            temperature=0,
+            max_tokens=1200,
+        )
     )
 
 # --- Router Prompt -----------------------------------------------------------
