@@ -1,5 +1,6 @@
 "use client";
 
+import TopNav from "@/components/layout/TopNav";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -82,29 +83,34 @@ export default function CourseOverviewPage({ params }: CourseOverviewPageProps) 
   };
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)] px-4 py-10 md:px-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <Link
-          href="/"
-          className="inline-flex items-center text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
-        >
-          ← Back to catalog
-        </Link>
+    <>
+      <TopNav />
+      <main className="min-h-screen px-4 py-8 md:px-6">
+        <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
+          <section className="space-y-2">
+            <Link
+              href="/"
+              className="inline-flex items-center text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
+            >
+              ← Back to catalog
+            </Link>
+          </section>
 
-        {isLoading && (
-          <div className="card rounded-[28px] p-10 text-center text-sm text-slate-600">
-            Loading course overview...
-          </div>
-        )}
+          {isLoading && (
+            <div className="card rounded-[28px] p-10 text-center text-sm text-slate-600">
+              Loading course overview...
+            </div>
+          )}
 
-        {error && (
-          <div className="card rounded-[28px] border-red-200 bg-red-50 p-8 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="card rounded-[28px] border-red-200 bg-red-50 p-8 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-        {data && <CourseOverview data={data} isStarting={isStarting} onStart={handleStart} />}
-      </div>
-    </main>
+          {data && <CourseOverview data={data} isStarting={isStarting} onStart={handleStart} />}
+        </div>
+      </main>
+    </>
   );
 }
