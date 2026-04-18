@@ -3,9 +3,58 @@
 // app/tutor/page.tsx
 // "Khoá học đang tham gia" — hub page listing enrolled + recommended courses
 
+import { useEffect, useState } from "react";
 import { GraduationCap } from "lucide-react";
+import { courseApi } from "@/lib/api";
+import type { CourseCatalogItem } from "@/types";
+
+interface CatalogSplit {
+  enrolled: CourseCatalogItem[];
+  recommended: CourseCatalogItem[];
+  others: CourseCatalogItem[];
+}
+
+function splitCatalog(items: CourseCatalogItem[], activeSlug: string | null): CatalogSplit {
+  const enrolled: CourseCatalogItem[] = [];
+  const recommended: CourseCatalogItem[] = [];
+  const others: CourseCatalogItem[] = [];
+  for (const item of items) {
+    if (activeSlug && item.slug === activeSlug) enrolled.push(item);
+    else if (item.is_recommended) recommended.push(item);
+    else others.push(item);
+  }
+  return { enrolled, recommended, others };
+}
 
 export default function TutorPage() {
+  const [items, setItems] = useState<CourseCatalogItem[]>([]);
+  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem("al_active_learning_unit");
+      if (raw) {
+        const parsed = JSON.parse(raw) as { courseSlug?: string };
+        if (parsed.courseSlug) setActiveSlug(parsed.courseSlug);
+      }
+    } catch {
+      // sessionStorage may be unavailable; ignore and proceed with null.
+    }
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    courseApi
+      .catalog({ view: "all", includeUnavailable: false })
+      .then((res) => setItems(res.items))
+      .catch(() => setError("Không thể tải danh sách khoá học. Vui lòng thử lại."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const { enrolled, recommended, others } = splitCatalog(items, activeSlug);
+
   return (
     <div className="space-y-8 animate-fade-in">
       <header className="flex items-start gap-3">
@@ -22,14 +71,24 @@ export default function TutorPage() {
         </div>
       </header>
 
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Đang tải danh sách khoá học...
-          </p>
+      {loading ? (
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Đang tải danh sách khoá học...
+            </p>
+          </div>
         </div>
-      </div>
+      ) : error ? (
+        <div className="card flex min-h-40 items-center justify-center">
+          <p className="text-sm font-medium text-red-600">{error}</p>
+        </div>
+      ) : (
+        <div className="text-sm" style={{ color: "var(--text-muted)" }}>
+          {`Tìm thấy ${items.length} khoá · ${enrolled.length} đang tham gia · ${recommended.length} gợi ý · ${others.length} khác.`}
+        </div>
+      )}
     </div>
   );
 }
