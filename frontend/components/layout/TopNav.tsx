@@ -60,7 +60,7 @@ export default function TopNav() {
       >
         <div className="flex h-16 items-center gap-4 px-4 md:px-6">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
               <Brain className="h-4 w-4 text-white" />
             </div>
@@ -97,15 +97,15 @@ export default function TopNav() {
 
           {/* Search — center, flex-1 */}
           <div className="flex-1 max-w-xs mx-auto hidden sm:block">
-            <div
-              className="flex items-center gap-2 rounded-full border px-3 py-2"
-              style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
-            >
+            <label className="flex items-center gap-2 rounded-full border px-3 py-2" style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}>
               <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
-              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Tìm kiếm khóa học...
-              </span>
-            </div>
+              <input
+                aria-label="Tìm kiếm khóa học"
+                placeholder="Tìm kiếm khóa học..."
+                className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
+                style={{ color: "var(--text-primary)" }}
+              />
+            </label>
           </div>
 
           {/* Right actions */}
