@@ -5,8 +5,11 @@ Unified application settings loaded from environment variables via Pydantic Sett
 Merges original A20-App-049 config (LLM keys) with AI Personalized config (DB, Auth).
 """
 
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import json
+from typing import Annotated, Any
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -49,7 +52,7 @@ class Settings(BaseSettings):
     )
 
     # ---- CORS ----
-    cors_origins: list[str] = Field(
+    cors_origins: Annotated[list[str], NoDecode] = Field(
         default=["http://localhost:3000", "http://localhost:8000"],
         description="Allowed CORS origins. Never use ['*'] with credentials=True.",
     )
@@ -57,6 +60,27 @@ class Settings(BaseSettings):
     # ---- App ----
     app_name: str = "AI Adaptive Learning Platform"
     debug: bool = False
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: Any) -> list[str]:
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return []
+
+            if value.startswith("["):
+                parsed = json.loads(value)
+                if not isinstance(parsed, list):
+                    raise ValueError("CORS_ORIGINS JSON must decode to a list.")
+                return [str(item).strip() for item in parsed if str(item).strip()]
+
+            return [item.strip() for item in value.split(",") if item.strip()]
+
+        raise ValueError("CORS_ORIGINS must be a list or a string.")
 
 
 settings = Settings()

@@ -7,6 +7,7 @@ Unified FastAPI application:
 """
 
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,16 +33,23 @@ from src.routers.module_test import module_test_router
 from src.routers.quiz import quiz_router
 from src.config import settings
 
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Lifespan — startup / shutdown
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await connect_redis()
-    yield
-    await disconnect_redis()
-    await async_engine.dispose()
+    try:
+        await connect_redis()
+    except Exception as exc:
+        logger.warning("Redis unavailable during startup; continuing without shared cache: %s", exc)
+
+    try:
+        yield
+    finally:
+        await disconnect_redis()
+        await async_engine.dispose()
 
 
 # ---------------------------------------------------------------------------
