@@ -43,6 +43,7 @@ from src.services.auth_service import (
     register_user,
     update_onboarding,
 )
+from src.services.token_guard import is_payload_revoked
 
 # ---------------------------------------------------------------------------
 # In-process rate limiter for login (sliding window, per IP)
@@ -200,6 +201,9 @@ async def refresh_token(
     try:
         payload: TokenPayload = decode_token(body.refresh_token)
     except ValueError:
+        raise invalid_exc
+
+    if await is_payload_revoked(payload):
         raise invalid_exc
 
     if payload.type != "refresh":

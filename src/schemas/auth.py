@@ -77,6 +77,7 @@ class TokenPayload(BaseModel):
     sub: str  # user UUID as string
     type: str  # "access" | "refresh"
     exp: int  # unix timestamp
+    jti: str
 
 
 # ---------------------------------------------------------------------------

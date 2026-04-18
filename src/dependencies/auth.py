@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_db
 from src.models.user import User
 from src.services.auth_service import decode_token, get_user_by_id
+from src.services.token_guard import is_payload_revoked
 
 # OAuth2 bearer extractor — returns 401 automatically when header is absent
 _bearer = HTTPBearer(auto_error=True)
@@ -38,6 +39,9 @@ async def get_current_user(
     try:
         payload = decode_token(credentials.credentials)
     except ValueError:
+        raise credentials_exception
+
+    if await is_payload_revoked(payload):
         raise credentials_exception
 
     if payload.type != "access":

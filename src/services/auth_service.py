@@ -47,6 +47,7 @@ def create_access_token(user_id: uuid.UUID) -> tuple[str, int]:
         "type": "access",
         "exp": int(expire.timestamp()),
         "iat": int(_now_utc().timestamp()),
+        "jti": str(uuid.uuid4()),
     }
     token = jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
     return token, settings.access_token_expire_minutes * 60
@@ -59,6 +60,7 @@ def create_refresh_token(user_id: uuid.UUID) -> str:
         "type": "refresh",
         "exp": int(expire.timestamp()),
         "iat": int(_now_utc().timestamp()),
+        "jti": str(uuid.uuid4()),
     }
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 
@@ -70,6 +72,12 @@ def decode_token(token: str) -> TokenPayload:
         return TokenPayload(**raw)
     except JWTError as exc:
         raise ValueError(f"Invalid token: {exc}") from exc
+
+
+def get_token_remaining_seconds(payload: TokenPayload) -> int:
+    """Return remaining TTL for a decoded token, never below zero."""
+    remaining = payload.exp - int(_now_utc().timestamp())
+    return max(0, remaining)
 
 
 # ---------------------------------------------------------------------------
