@@ -7,6 +7,18 @@ package to discover all tables.
 
 from src.models.base import Base  # noqa: F401
 from src.models.content import KnowledgeComponent, Module, Question, Topic  # noqa: F401
+from src.models.course import (  # noqa: F401
+    Course,
+    CourseAsset,
+    CourseOverview,
+    CourseRecommendation,
+    CourseSection,
+    LearnerAssessmentProfile,
+    LearningProgressRecord,
+    LearningUnit,
+    LegacyLectureMapping,
+    TutorContextBinding,
+)
 from src.models.learning import (  # noqa: F401
     Interaction,
     LearningPath,
@@ -34,6 +46,17 @@ __all__ = [
     "Topic",
     "KnowledgeComponent",
     "Question",
+    # Course platform
+    "Course",
+    "CourseOverview",
+    "CourseSection",
+    "LearningUnit",
+    "CourseAsset",
+    "LearnerAssessmentProfile",
+    "CourseRecommendation",
+    "LearningProgressRecord",
+    "TutorContextBinding",
+    "LegacyLectureMapping",
     # Learning
     "Session",
     "Interaction",

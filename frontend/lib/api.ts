@@ -157,6 +157,10 @@ import type {
   ModuleTestAnswerInput,
   ModuleTestResultResponse,
   ModuleTestStartResponse,
+  CourseCatalogResponse,
+  CourseCatalogView,
+  CourseOverviewResponse,
+  LearningUnitResponse,
   OnboardingPayload,
   QuizAnswerResponse,
   QuizCompleteResponse,
@@ -165,6 +169,7 @@ import type {
   SelectedAnswer,
   SessionDetailResponse,
   SessionType,
+  StartLearningDecisionResponse,
   TokenPair,
   TopicContent,
   User,
@@ -196,6 +201,36 @@ export const contentApi = {
 
   topicContent: (id: string) =>
     api.get<TopicContent>(`/api/topics/${id}/content`).then((r) => r.data),
+};
+
+export const courseApi = {
+  catalog: (params?: {
+    view?: CourseCatalogView;
+    includeUnavailable?: boolean;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.view) q.set("view", params.view);
+    if (params?.includeUnavailable != null) {
+      q.set("include_unavailable", String(params.includeUnavailable));
+    }
+    const suffix = q.toString() ? `?${q.toString()}` : "";
+    return api.get<CourseCatalogResponse>(`/api/courses${suffix}`).then((r) => r.data);
+  },
+
+  overview: (courseSlug: string) =>
+    api
+      .get<CourseOverviewResponse>(`/api/courses/${courseSlug}/overview`)
+      .then((r) => r.data),
+
+  start: (courseSlug: string) =>
+    api
+      .post<StartLearningDecisionResponse>(`/api/courses/${courseSlug}/start`)
+      .then((r) => r.data),
+
+  learningUnit: (courseSlug: string, unitSlug: string) =>
+    api
+      .get<LearningUnitResponse>(`/api/courses/${courseSlug}/units/${unitSlug}`)
+      .then((r) => r.data),
 };
 
 export const quizApi = {

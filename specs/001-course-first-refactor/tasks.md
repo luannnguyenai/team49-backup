@@ -25,11 +25,11 @@
 
 **Purpose**: Add the missing test and fixture scaffolding needed before course-platform implementation starts.
 
-- [ ] T001 Update frontend test scripts and dev dependencies in `frontend/package.json`
-- [ ] T002 [P] Create Vitest configuration for route and component tests in `frontend/vitest.config.ts`
-- [ ] T003 [P] Create frontend test bootstrap and mocks in `frontend/tests/setup.ts`
-- [ ] T004 [P] Create Playwright configuration for catalog-to-learning flows in `frontend/playwright.config.ts`
-- [ ] T005 [P] Create bootstrap fixture files for demo courses in `data/course_bootstrap/courses.json` and `data/course_bootstrap/overviews.json`
+- [X] T001 Update frontend test scripts and dev dependencies in `frontend/package.json`
+- [X] T002 [P] Create Vitest configuration for route and component tests in `frontend/vitest.config.ts`
+- [X] T003 [P] Create frontend test bootstrap and mocks in `frontend/tests/setup.ts`
+- [X] T004 [P] Create Playwright configuration for catalog-to-learning flows in `frontend/playwright.config.ts`
+- [X] T005 [P] Create bootstrap fixture files for demo courses in `data/course_bootstrap/courses.json` and `data/course_bootstrap/overviews.json`
 
 ---
 
@@ -39,17 +39,17 @@
 
 **⚠️ CRITICAL**: No user story work should start before this phase is complete.
 
-- [ ] T006 Create canonical course-platform ORM models in `src/models/course.py`
-- [ ] T007 [P] Register the new course-platform models in `src/models/__init__.py`
-- [ ] T008 [P] Create course-platform API schemas in `src/schemas/course.py`
-- [ ] T009 Create the course-platform schema migration in `alembic/versions/20260418_course_platform_schema.py`
-- [ ] T010 [P] Create bootstrap and import helpers for course-platform data in `src/services/course_bootstrap_service.py`
-- [ ] T011 [P] Create shared course catalog query service skeleton in `src/services/course_catalog_service.py`
-- [ ] T012 [P] Create start-learning decision service skeleton in `src/services/course_entry_service.py`
-- [ ] T013 [P] Create learning-unit service skeleton in `src/services/learning_unit_service.py`
-- [ ] T014 Create the shared course router and wire it into the API app in `src/routers/courses.py` and `src/api/app.py`
-- [ ] T015 [P] Extend frontend course API clients and domain types in `frontend/lib/api.ts` and `frontend/types/index.ts`
-- [ ] T016 [P] Create shared course gating helpers for blocked and gated entry states in `frontend/lib/course-gate.ts`
+- [X] T006 Create canonical course-platform ORM models in `src/models/course.py`
+- [X] T007 [P] Register the new course-platform models in `src/models/__init__.py`
+- [X] T008 [P] Create course-platform API schemas in `src/schemas/course.py`
+- [X] T009 Create the course-platform schema migration in `alembic/versions/20260418_course_platform_schema.py`
+- [X] T010 [P] Create bootstrap and import helpers for course-platform data in `src/services/course_bootstrap_service.py`
+- [X] T011 [P] Create shared course catalog query service skeleton in `src/services/course_catalog_service.py`
+- [X] T012 [P] Create start-learning decision service skeleton in `src/services/course_entry_service.py`
+- [X] T013 [P] Create learning-unit service skeleton in `src/services/learning_unit_service.py`
+- [X] T014 Create the shared course router and wire it into the API app in `src/routers/courses.py` and `src/api/app.py`
+- [X] T015 [P] Extend frontend course API clients and domain types in `frontend/lib/api.ts` and `frontend/types/index.ts`
+- [X] T016 [P] Create shared course gating helpers for blocked and gated entry states in `frontend/lib/course-gate.ts`
 
 **Checkpoint**: The repo now has one canonical course-platform domain and shared contracts that all user stories can build on.
 

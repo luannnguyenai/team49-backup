@@ -1,0 +1,26 @@
+[
+  {
+    "id": "course_cs231n",
+    "slug": "cs231n",
+    "title": "CS231n: Deep Learning for Computer Vision",
+    "short_description": "Deep learning foundations for computer vision, from classifiers to generative models.",
+    "status": "ready",
+    "visibility": "public",
+    "cover_image_url": "/courses/cs231n/cover.jpg",
+    "hero_badge": "Available now",
+    "primary_subject": "computer_vision",
+    "sort_order": 1
+  },
+  {
+    "id": "course_cs224n",
+    "slug": "cs224n",
+    "title": "CS224n: Natural Language Processing with Deep Learning",
+    "short_description": "Modern NLP systems, language models, prompting, agents, and retrieval workflows.",
+    "status": "coming_soon",
+    "visibility": "public",
+    "cover_image_url": "/courses/cs224n/cover.jpg",
+    "hero_badge": "Coming soon",
+    "primary_subject": "nlp",
+    "sort_order": 2
+  }
+]

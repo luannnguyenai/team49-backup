@@ -21,6 +21,7 @@ from src.database import engine as async_engine
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router
 from src.routers.content import content_router
+from src.routers.courses import courses_router
 from src.routers.history import history_router
 from src.routers.learning_path import learning_path_router
 from src.routers.module_test import module_test_router
@@ -69,6 +70,7 @@ app.mount("/static", StaticFiles(directory="src/api/static"), name="static")
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(content_router)
+app.include_router(courses_router)
 app.include_router(assessment_router)
 app.include_router(history_router)
 app.include_router(learning_path_router)
@@ -222,4 +224,3 @@ def get_progress(session_id: str, db: Session = Depends(get_db)):
         }
         for row in rows
     }
-

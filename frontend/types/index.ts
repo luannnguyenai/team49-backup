@@ -131,6 +131,89 @@ export interface TopicContent {
   video_url: string | null;
 }
 
+// ---- Course platform API shapes ----
+
+export type CourseStatus = "ready" | "coming_soon" | "metadata_partial";
+export type CourseCatalogView = "all" | "recommended";
+export type StartLearningReason =
+  | "auth_required"
+  | "skill_test_required"
+  | "course_unavailable"
+  | "learning_ready";
+
+export interface CourseCatalogItem {
+  id: string;
+  slug: string;
+  title: string;
+  short_description: string;
+  status: CourseStatus;
+  cover_image_url: string | null;
+  hero_badge: string | null;
+  is_recommended: boolean;
+}
+
+export interface CourseCatalogResponse {
+  items: CourseCatalogItem[];
+}
+
+export interface CourseOverviewContent {
+  headline: string;
+  subheadline: string | null;
+  summary_markdown: string;
+  learning_outcomes: string[];
+  target_audience: string | null;
+  prerequisites_summary: string | null;
+  estimated_duration_text: string | null;
+  structure_snapshot: Record<string, unknown> | null;
+  cta_label: string | null;
+}
+
+export interface StartLearningDecisionResponse {
+  decision: string;
+  target: string;
+  reason: StartLearningReason;
+}
+
+export interface CourseOverviewResponse {
+  course: CourseCatalogItem;
+  overview: CourseOverviewContent;
+  entry: StartLearningDecisionResponse;
+}
+
+export interface LearningUnitCourseSummary {
+  slug: string;
+  title: string;
+}
+
+export interface LearningUnitSummary {
+  id: string;
+  slug: string;
+  title: string;
+  unit_type: string;
+  status: CourseStatus;
+  entry_mode: "text" | "video" | "hybrid";
+}
+
+export interface LearningUnitContentPayload {
+  body_markdown: string | null;
+  video_url: string | null;
+  transcript_available: boolean;
+  slides_available: boolean;
+}
+
+export interface TutorContextPayload {
+  enabled: boolean;
+  mode: string;
+  context_binding_id: string | null;
+}
+
+export interface LearningUnitResponse {
+  course: LearningUnitCourseSummary;
+  unit: LearningUnitSummary;
+  content: LearningUnitContentPayload;
+  tutor: TutorContextPayload;
+}
+
 // ---- Quiz API shapes ----
 
 export interface QuestionForQuiz {
