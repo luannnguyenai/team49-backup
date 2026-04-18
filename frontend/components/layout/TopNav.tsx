@@ -7,7 +7,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Brain,
-  BookOpen,
   Moon,
   Sun,
   Bell,
