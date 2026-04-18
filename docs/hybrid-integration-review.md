@@ -60,7 +60,7 @@ Lý do giữ:
 - explicit `cors_origins` / `redis_url`
 - rate limit pattern cho login
 - token revoke / denylist pattern cho auth
-- repository pattern cho user/auth state và recommendation query
+- repository pattern cho user/auth state, recommendation query, và history read-model
 
 Những uplift đã có mặt trong code:
 
@@ -73,6 +73,7 @@ Những uplift đã có mặt trong code:
 - frontend logout gọi backend revoke
 - `auth_service` đã đi qua `UserRepository`
 - `course_catalog_service` đã đi qua `CourseRecommendationRepository`
+- `history_service` đã đi qua `HistoryRepository`
 
 ## Những gì resolve thủ công
 
@@ -110,7 +111,7 @@ Hybrid branch hiện đã rõ hơn ở chỗ:
 Các điểm sau vẫn chưa xong:
 
 - course metadata runtime chưa DB-authoritative hoàn toàn
-- repository layer mới rollout một phần, chưa phủ assessment/history
+- repository layer mới rollout một phần, chưa phủ assessment hoàn chỉnh
 - compose-backed smoke hiện đã chạy được và backend compose đã lên `healthy`
 - live full flow `login -> onboarding -> assessment -> return-to-course` đã được re-verify trên hybrid branch
 
@@ -152,7 +153,7 @@ Những gì chưa cover trọn vẹn:
 ### Điểm chưa nên tự tin quá mức
 
 - Chưa đủ để gọi là production-ready hoàn chỉnh
-- Repository strategy mới chỉ được chứng minh ở slice `user/auth state + recommendation`
+- Repository strategy mới chỉ được chứng minh ở slice `user/auth state + recommendation + history read-model`
 - Chưa migrate được `CS231n` sang canonical model hoàn toàn
 
 ## Recommendation cho bước tiếp theo
