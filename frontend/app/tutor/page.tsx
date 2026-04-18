@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { GraduationCap, PlayCircle } from "lucide-react";
+import { Compass, GraduationCap, PlayCircle } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import CourseCatalog from "@/components/course/CourseCatalog";
 import type { CourseCatalogItem } from "@/types";
@@ -58,6 +58,7 @@ export default function TutorPage() {
   }, []);
 
   const { enrolled, recommended, others } = splitCatalog(items, activeSlug);
+  const hasNothingToShow = enrolled.length === 0 && recommended.length === 0;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -142,6 +143,42 @@ export default function TutorPage() {
               </div>
               <CourseCatalog items={recommended} />
             </section>
+          )}
+
+          {hasNothingToShow && (
+            <section
+              className="flex flex-col items-center gap-4 rounded-2xl border border-dashed p-10 text-center"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30">
+                <Compass className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Chưa có khoá nào đang tham gia
+                </p>
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  Khám phá danh mục để chọn khoá phù hợp và bắt đầu học cùng AI Tutor.
+                </p>
+              </div>
+              <Link href="/" className="btn-primary inline-flex items-center gap-2">
+                <Compass size={16} />
+                Khám phá khoá học
+              </Link>
+            </section>
+          )}
+
+          {others.length > 0 && (
+            <div className="pt-2 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+              Còn {others.length} khoá khác trong danh mục.{" "}
+              <Link
+                href="/"
+                className="font-semibold underline"
+                style={{ color: "var(--color-primary-600)" }}
+              >
+                Xem tất cả
+              </Link>
+            </div>
           )}
         </div>
       )}
