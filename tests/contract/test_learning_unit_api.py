@@ -6,22 +6,38 @@ and legacy tutor compatibility behavior.
 """
 
 import unittest
+import uuid
+from types import SimpleNamespace
+from urllib.parse import parse_qs, urlparse
+from unittest.mock import AsyncMock, patch
 
 from httpx import ASGITransport, AsyncClient
 
 from src.api.app import app
+from src.dependencies.auth import get_current_onboarded_user
 
 
 class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
     """Contract tests for the learning unit endpoint."""
 
     async def asyncSetUp(self) -> None:
+        self._access_patcher = patch(
+            "src.routers.courses.assert_learning_access",
+            new=AsyncMock(),
+        )
+        self._access_patcher.start()
+        app.dependency_overrides[get_current_onboarded_user] = lambda: SimpleNamespace(
+            id=uuid.uuid4(),
+            is_onboarded=True,
+        )
         self.client = AsyncClient(
             transport=ASGITransport(app=app),
             base_url="http://testserver",
         )
 
     async def asyncTearDown(self) -> None:
+        self._access_patcher.stop()
+        app.dependency_overrides.clear()
         await self.client.aclose()
 
     # ------------------------------------------------------------------
@@ -50,6 +66,11 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
         # Content payload
         self.assertIn("content", data)
         self.assertIn("video_url", data["content"])
+        self.assertIsNotNone(data["content"]["video_url"])
+        parsed_video_url = urlparse(data["content"]["video_url"])
+        self.assertTrue(parsed_video_url.path.startswith("/data/CS231n/videos/"))
+        self.assertIn("exp", parse_qs(parsed_video_url.query))
+        self.assertIn("sig", parse_qs(parsed_video_url.query))
 
         # Tutor context
         self.assertIn("tutor", data)

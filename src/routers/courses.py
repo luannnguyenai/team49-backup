@@ -8,11 +8,11 @@ US2 changes: optional auth on catalog and start endpoints to support
 auth-gated decision logic and recommendation-aware catalog.
 """
 
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from src.dependencies.auth import get_current_onboarded_user
+from src.models.user import User
 from src.schemas.course import (
     CourseCatalogResponse,
     CourseOverviewResponse,
@@ -20,7 +20,7 @@ from src.schemas.course import (
     StartLearningDecisionResponse,
 )
 from src.services.course_catalog_service import get_course_overview, list_course_catalog
-from src.services.course_entry_service import get_start_learning_decision
+from src.services.course_entry_service import assert_learning_access, get_start_learning_decision
 from src.services.learning_unit_service import get_learning_unit_payload
 
 courses_router = APIRouter(prefix="/api/courses", tags=["Courses"])
@@ -123,7 +123,12 @@ async def api_start_course(
     "/{course_slug}/units/{unit_slug}",
     response_model=LearningUnitResponse,
 )
-async def api_get_learning_unit(course_slug: str, unit_slug: str) -> LearningUnitResponse:
+async def api_get_learning_unit(
+    course_slug: str,
+    unit_slug: str,
+    current_user: User = Depends(get_current_onboarded_user),
+) -> LearningUnitResponse:
+    await assert_learning_access(course_slug, current_user)
     result = await get_learning_unit_payload(course_slug, unit_slug)
     if result is None:
         raise HTTPException(

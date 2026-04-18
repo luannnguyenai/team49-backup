@@ -104,4 +104,35 @@ describe("InContextTutor", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("includes context_binding_id in tutor requests when provided", async () => {
+    fetchMock.mockResolvedValue(
+      buildChunkedNdjsonResponse(200, ['{"a":"Bound to unit context."}\n{"qa_id":7}\n']),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={120}
+        captureFrame={() => null}
+        contextBindingId="ctx_unit_lecture_01"
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Keep this tied to the active unit" },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toMatchObject({
+      context_binding_id: "ctx_unit_lecture_01",
+    });
+  });
 });

@@ -68,6 +68,7 @@ class QAHistory(Base):
     answer = Column(Text)
     thoughts = Column(Text, nullable=True)
     current_timestamp = Column(Float)
+    context_binding_id = Column(String(255), nullable=True)
     image_base64 = Column(Text, nullable=True)
     rating = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

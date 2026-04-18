@@ -12,7 +12,7 @@ Usage in a route:
 
 import uuid
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,19 +25,24 @@ from src.services.token_guard import is_payload_revoked
 _bearer = HTTPBearer(auto_error=True)
 
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
-    db: AsyncSession = Depends(get_async_db),
-) -> User:
-    """Validate Bearer token and return the authenticated User ORM object."""
-    credentials_exception = HTTPException(
+def _credentials_exception() -> HTTPException:
+    return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials.",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+
+async def _resolve_user_from_token(
+    token: str | None,
+    db: AsyncSession,
+) -> User:
+    credentials_exception = _credentials_exception()
+    if not token:
+        raise credentials_exception
+
     try:
-        payload = decode_token(credentials.credentials)
+        payload = decode_token(token)
     except ValueError:
         raise credentials_exception
 
@@ -61,6 +66,33 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: AsyncSession = Depends(get_async_db),
+) -> User:
+    """Validate Bearer token and return the authenticated User ORM object."""
+    return await _resolve_user_from_token(credentials.credentials, db)
+
+
+async def get_current_user_from_request(
+    request: Request,
+    db: AsyncSession = Depends(get_async_db),
+) -> User:
+    """Resolve the current user from Bearer auth first, then access-token cookie."""
+    token: str | None = None
+
+    authorization = request.headers.get("authorization")
+    if authorization:
+        scheme, _, credentials = authorization.partition(" ")
+        if scheme.lower() == "bearer" and credentials:
+            token = credentials.strip()
+
+    if not token:
+        token = request.cookies.get("al_access_token")
+
+    return await _resolve_user_from_token(token, db)
 
 
 async def get_current_onboarded_user(

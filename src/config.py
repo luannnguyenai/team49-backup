@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30)
     refresh_token_expire_days: int = Field(default=7)
     rate_limit_login_per_minute: int = Field(default=5)
+    asset_url_expire_seconds: int = Field(default=900)
 
     # ---- Redis ----
     redis_url: str = Field(

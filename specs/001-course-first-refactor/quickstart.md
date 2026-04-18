@@ -72,13 +72,16 @@ cd frontend && ./node_modules/.bin/tsc --noEmit
 ### Vitest Route Tests
 
 ```bash
-cd frontend && node ./node_modules/.bin/vitest run
+cd frontend && node ./node_modules/.bin/vitest run \
+  tests/routes/course/catalog.test.tsx \
+  tests/routes/course/personalized-catalog.test.tsx \
+  tests/routes/learning/unit.test.tsx
 ```
 
-**Expected**: 3 test files, 15 tests pass:
-- `course-catalog.test.tsx` (3 tests) — US1 public catalog
-- `personalized-catalog.test.tsx` (6 tests) — US2 recommended tabs
-- `learning-unit.test.tsx` (6 tests) — US3 unified lecture
+**Expected**: 3 test files, 18 tests pass:
+- `tests/routes/course/catalog.test.tsx` (3 tests) — US1 public catalog
+- `tests/routes/course/personalized-catalog.test.tsx` (6 tests) — US2 recommended tabs
+- `tests/routes/learning/unit.test.tsx` (9 tests) — US3 unified lecture
 
 ### Playwright E2E (requires running dev servers)
 
@@ -94,11 +97,11 @@ cd frontend && npx playwright test tests/e2e/
 |-------|-------|-------|---------|
 | Foundation | `test_course_platform_foundation` | 3 | `.venv/bin/python -m unittest tests.test_course_platform_foundation -v` |
 | US1 Backend | `test_course_catalog_api` | 3 | `.venv/bin/python -m unittest tests.contract.test_course_catalog_api -v` |
-| US1 Frontend | `course-catalog.test.tsx` | 3 | `cd frontend && vitest run tests/routes/course-catalog.test.tsx` |
+| US1 Frontend | `tests/routes/course/catalog.test.tsx` | 3 | `cd frontend && vitest run tests/routes/course/catalog.test.tsx` |
 | US2 Backend | `test_course_start_api` | 6 | `.venv/bin/python -m unittest tests.contract.test_course_start_api -v` |
-| US2 Frontend | `personalized-catalog.test.tsx` | 6 | `cd frontend && vitest run tests/routes/personalized-catalog.test.tsx` |
+| US2 Frontend | `tests/routes/course/personalized-catalog.test.tsx` | 6 | `cd frontend && vitest run tests/routes/course/personalized-catalog.test.tsx` |
 | US3 Backend | `test_learning_unit_api` | 6 | `.venv/bin/python -m unittest tests.contract.test_learning_unit_api -v` |
-| US3 Frontend | `learning-unit.test.tsx` | 6 | `cd frontend && vitest run tests/routes/learning-unit.test.tsx` |
+| US3 Frontend | `tests/routes/learning/unit.test.tsx` | 9 | `cd frontend && vitest run tests/routes/learning/unit.test.tsx` |
 | TypeScript | `tsc --noEmit` | — | `cd frontend && tsc --noEmit` |
 | **Total** | | **33** | |
 

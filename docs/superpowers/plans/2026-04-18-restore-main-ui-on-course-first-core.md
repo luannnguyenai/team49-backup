@@ -26,11 +26,11 @@
   - Build the new overview page using the restored visual vocabulary from `main`.
 - Modify: `frontend/components/learn/LearningUnitShell.tsx`
   - Re-skin the learning route shell toward `main` without changing tutor/player behavior.
-- Test: `frontend/tests/routes/course-catalog.test.tsx`
+- Test: `frontend/tests/routes/course/catalog.test.tsx`
   - Assert restored shell elements on home and overview.
-- Test: `frontend/tests/routes/personalized-catalog.test.tsx`
+- Test: `frontend/tests/routes/course/personalized-catalog.test.tsx`
   - Assert recommended/all tabs still coexist with the restored home UI.
-- Test: `frontend/tests/routes/learning-unit.test.tsx`
+- Test: `frontend/tests/routes/learning/unit.test.tsx`
   - Assert restored learning shell keeps breadcrumb and tutor toggle behavior.
 
 ### Task 1: Restore Shared Navigation And Home Shell
@@ -39,8 +39,8 @@
 - Modify: `frontend/components/layout/TopNav.tsx`
 - Modify: `frontend/components/layout/Sidebar.tsx`
 - Modify: `frontend/app/page.tsx`
-- Test: `frontend/tests/routes/course-catalog.test.tsx`
-- Test: `frontend/tests/routes/personalized-catalog.test.tsx`
+- Test: `frontend/tests/routes/course/catalog.test.tsx`
+- Test: `frontend/tests/routes/course/personalized-catalog.test.tsx`
 
 - [ ] **Step 1: Write the failing UI assertions for the restored home shell**
 
@@ -68,7 +68,7 @@ it("renders the restored course shell on the public catalog home", async () => {
 Run:
 
 ```bash
-cd frontend && npm test -- --run tests/routes/course-catalog.test.tsx tests/routes/personalized-catalog.test.tsx
+cd frontend && npm test -- --run tests/routes/course/catalog.test.tsx tests/routes/course/personalized-catalog.test.tsx
 ```
 
 Expected: FAIL because the current home page still uses the refactor-era hero shell instead of the restored `main` chrome.
@@ -114,7 +114,7 @@ return (
 Run:
 
 ```bash
-cd frontend && npm test -- --run tests/routes/course-catalog.test.tsx tests/routes/personalized-catalog.test.tsx
+cd frontend && npm test -- --run tests/routes/course/catalog.test.tsx tests/routes/course/personalized-catalog.test.tsx
 ```
 
 Expected: PASS with the restored shell and existing recommendation behavior both intact.
@@ -122,7 +122,7 @@ Expected: PASS with the restored shell and existing recommendation behavior both
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/components/layout/TopNav.tsx frontend/components/layout/Sidebar.tsx frontend/app/page.tsx frontend/tests/routes/course-catalog.test.tsx frontend/tests/routes/personalized-catalog.test.tsx
+git add frontend/components/layout/TopNav.tsx frontend/components/layout/Sidebar.tsx frontend/app/page.tsx frontend/tests/routes/course/catalog.test.tsx frontend/tests/routes/course/personalized-catalog.test.tsx
 git commit -m "refactor: restore main shell for course catalog"
 ```
 
@@ -132,7 +132,7 @@ git commit -m "refactor: restore main shell for course catalog"
 - Modify: `frontend/components/course/CourseCatalog.tsx`
 - Modify: `frontend/components/course/CourseOverview.tsx`
 - Modify: `frontend/app/courses/[courseSlug]/page.tsx`
-- Test: `frontend/tests/routes/course-catalog.test.tsx`
+- Test: `frontend/tests/routes/course/catalog.test.tsx`
 
 - [ ] **Step 1: Extend the route tests with overview-shell expectations**
 
@@ -158,7 +158,7 @@ it("renders overview with restored page chrome and start CTA", async () => {
 Run:
 
 ```bash
-cd frontend && npm test -- --run tests/routes/course-catalog.test.tsx
+cd frontend && npm test -- --run tests/routes/course/catalog.test.tsx
 ```
 
 Expected: FAIL because the current overview still uses the newer gradient-heavy layout instead of the restored shared shell.
@@ -216,7 +216,7 @@ Keep the current `handleStart` decision and `coming_soon` disabling behavior unt
 Run:
 
 ```bash
-cd frontend && npm test -- --run tests/routes/course-catalog.test.tsx
+cd frontend && npm test -- --run tests/routes/course/catalog.test.tsx
 cd frontend && ./node_modules/.bin/tsc --noEmit
 ```
 
@@ -225,7 +225,7 @@ Expected: PASS for both commands.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/components/course/CourseCatalog.tsx frontend/components/course/CourseOverview.tsx frontend/app/courses/[courseSlug]/page.tsx frontend/tests/routes/course-catalog.test.tsx
+git add frontend/components/course/CourseCatalog.tsx frontend/components/course/CourseOverview.tsx frontend/app/courses/[courseSlug]/page.tsx frontend/tests/routes/course/catalog.test.tsx
 git commit -m "refactor: restore main styling for catalog and overview"
 ```
 
@@ -233,7 +233,7 @@ git commit -m "refactor: restore main styling for catalog and overview"
 
 **Files:**
 - Modify: `frontend/components/learn/LearningUnitShell.tsx`
-- Test: `frontend/tests/routes/learning-unit.test.tsx`
+- Test: `frontend/tests/routes/learning/unit.test.tsx`
 
 - [ ] **Step 1: Add a failing test for the restored learning shell framing**
 
@@ -261,7 +261,7 @@ it("renders the restored learning shell chrome with tutor toggle intact", async 
 Run:
 
 ```bash
-cd frontend && npm test -- --run tests/routes/learning-unit.test.tsx
+cd frontend && npm test -- --run tests/routes/learning/unit.test.tsx
 ```
 
 Expected: FAIL once the new shell assertions are added and before the learning page is reskinned.
@@ -301,7 +301,7 @@ captureFrame()
 Run:
 
 ```bash
-cd frontend && npm test -- --run tests/routes/learning-unit.test.tsx tests/routes/course-catalog.test.tsx tests/routes/personalized-catalog.test.tsx tests/routes/course-start.test.tsx tests/routes/legacy-tutor-redirect.test.tsx
+cd frontend && npm test -- --run tests/routes/learning/unit.test.tsx tests/routes/course/catalog.test.tsx tests/routes/course/personalized-catalog.test.tsx tests/routes/course/start.test.tsx tests/routes/learning/legacy-tutor-redirect.test.tsx
 cd frontend && ./node_modules/.bin/tsc --noEmit
 ```
 
@@ -310,7 +310,7 @@ Expected: PASS for all route tests and typecheck.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/components/learn/LearningUnitShell.tsx frontend/tests/routes/learning-unit.test.tsx
+git add frontend/components/learn/LearningUnitShell.tsx frontend/tests/routes/learning/unit.test.tsx
 git commit -m "refactor: align learning shell with restored main ui"
 ```
 

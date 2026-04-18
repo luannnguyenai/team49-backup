@@ -33,6 +33,7 @@ export default function InContextTutor({
   lectureId,
   currentTime,
   captureFrame,
+  contextBindingId,
   unitTitle,
   onClose,
 }: InContextTutorProps) {
@@ -81,6 +82,7 @@ export default function InContextTutor({
           lecture_id: lectureId,
           current_timestamp: currentTime,
           question: q,
+          context_binding_id: contextBindingId,
           image_base64: img,
         }),
       });

@@ -9,11 +9,12 @@ Unified FastAPI application:
 import asyncio
 from contextlib import asynccontextmanager
 import logging
+from pathlib import Path
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,8 +27,10 @@ from src.database import (
 )
 from src.exception_handlers import domain_exception_handler
 from src.exceptions import DomainError
+from src.dependencies.auth import get_current_user_from_request
 from src.redis_client import connect_redis, disconnect_redis
 from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
+from src.services.asset_signing import verify_signed_asset_url
 from src.services.llm_service import get_context_and_stream_langgraph
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router
@@ -41,6 +44,12 @@ from src.routers.test_support import test_support_router
 from src.config import settings
 
 logger = logging.getLogger(__name__)
+DATA_ROOT = Path("data").resolve()
+PROTECTED_DATA_PREFIXES = (
+    "CS231n/videos/",
+    "CS231n/slides/",
+    "CS231n/transcripts/",
+)
 
 # ---------------------------------------------------------------------------
 # Lifespan — startup / shutdown
@@ -83,7 +92,6 @@ app.add_middleware(
 )
 
 # Static mounts
-app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/static", StaticFiles(directory="src/api/static"), name="static")
 
 
@@ -108,6 +116,37 @@ app.include_router(test_support_router)
 @app.get("/health", tags=["ops"])
 async def health_check():
     return {"status": "ok", "app": settings.app_name}
+
+
+def _resolve_data_file(asset_path: str) -> Path:
+    candidate = (DATA_ROOT / asset_path).resolve()
+    try:
+        candidate.relative_to(DATA_ROOT)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Asset not found") from exc
+
+    if not candidate.is_file():
+        raise HTTPException(status_code=404, detail="Asset not found")
+    return candidate
+
+
+@app.get("/data/{asset_path:path}", include_in_schema=False)
+async def serve_data_asset(
+    asset_path: str,
+    request: Request,
+    db: AsyncSession = Depends(get_async_db),
+):
+    normalized_path = asset_path.lstrip("/")
+
+    if normalized_path.startswith(PROTECTED_DATA_PREFIXES):
+        verify_signed_asset_url(
+            normalized_path,
+            expires_at=request.query_params.get("exp"),
+            signature=request.query_params.get("sig"),
+        )
+
+    file_path = _resolve_data_file(normalized_path)
+    return FileResponse(file_path)
 
 
 # ---------------------------------------------------------------------------
@@ -135,6 +174,7 @@ class AskRequest(BaseModel):
     lecture_id: str
     current_timestamp: float
     question: str
+    context_binding_id: str | None = None
     image_base64: str | None = None
 
 
@@ -193,6 +233,7 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
             req.current_timestamp,
             req.question,
             image_base64=req.image_base64,
+            context_binding_id=req.context_binding_id,
         )
         return StreamingResponse(generator, media_type="text/event-stream")
     except HTTPException:
