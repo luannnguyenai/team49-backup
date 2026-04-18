@@ -32,6 +32,7 @@ from src.routers.history import history_router
 from src.routers.learning_path import learning_path_router
 from src.routers.module_test import module_test_router
 from src.routers.quiz import quiz_router
+from src.routers.test_support import test_support_router
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -92,6 +93,7 @@ app.include_router(history_router)
 app.include_router(learning_path_router)
 app.include_router(module_test_router)
 app.include_router(quiz_router)
+app.include_router(test_support_router)
 
 
 # ---------------------------------------------------------------------------

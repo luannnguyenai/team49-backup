@@ -74,6 +74,116 @@ async function createLearnerWithAssessableTopic(
   throw new Error("No assessable topic found for e2e gating test.");
 }
 
+async function persistAuthenticatedUser(
+  page: Page,
+  request: APIRequestContext,
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+  },
+) {
+  const me = await request.get("http://127.0.0.1:8000/api/users/me", {
+    headers: {
+      Authorization: `Bearer ${tokens.access_token}`,
+    },
+  });
+  expect(me.ok()).toBeTruthy();
+  const user = await me.json();
+
+  const expiresAt = String(Date.now() + tokens.expires_in * 1000);
+  const cookiePairs = [
+    { name: "al_access_token", value: tokens.access_token },
+    { name: "al_refresh_token", value: tokens.refresh_token },
+    { name: "al_token_expires_at", value: expiresAt },
+  ] as const;
+
+  await page.context().addCookies(
+    cookiePairs.flatMap((cookie) => [
+      { ...cookie, url: "http://127.0.0.1:3000" },
+      { ...cookie, url: "http://localhost:3000" },
+    ]),
+  );
+
+  await page.addInitScript((persistedUser) => {
+    window.localStorage.setItem(
+      "al-auth",
+      JSON.stringify({
+        state: { user: persistedUser },
+        version: 0,
+      }),
+    );
+  }, user);
+
+  return user;
+}
+
+async function registerAuthenticatedLearner(
+  page: Page,
+  request: APIRequestContext,
+  label: string,
+  opts?: { onboard?: boolean },
+) {
+  const email = `e2e-catalog-${label}-${Date.now()}@example.com`;
+  const password = "Password123";
+  const fullName = `E2E ${label}`;
+
+  const register = await request.post("http://127.0.0.1:8000/api/auth/register", {
+    data: {
+      email,
+      password,
+      full_name: fullName,
+    },
+  });
+  expect(register.ok()).toBeTruthy();
+
+  const tokens = (await register.json()) as {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+  };
+
+  if (opts?.onboard) {
+    const onboard = await request.put("http://127.0.0.1:8000/api/users/me/onboarding", {
+      headers: {
+        Authorization: `Bearer ${tokens.access_token}`,
+      },
+      data: {
+        known_topic_ids: [],
+        desired_module_ids: [],
+        available_hours_per_week: 6,
+        target_deadline: "2026-12-31",
+        preferred_method: "video",
+      },
+    });
+    expect(onboard.ok()).toBeTruthy();
+  }
+
+  const user = await persistAuthenticatedUser(page, request, tokens);
+
+  return { email, password, user, tokens };
+}
+
+async function seedRecommendedCourses(
+  request: APIRequestContext,
+  accessToken: string,
+  courseSlugs: string[],
+) {
+  const response = await request.post(
+    "http://127.0.0.1:8000/api/test-support/course-recommendations",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      data: {
+        course_slugs: courseSlugs,
+      },
+    },
+  );
+
+  expect(response.ok()).toBeTruthy();
+}
+
 async function completeAssessment(page: Page) {
   for (let i = 0; i < 8; i += 1) {
     await expect(page.getByRole("radiogroup", { name: "Lựa chọn" })).toBeVisible();
@@ -201,36 +311,38 @@ test.describe("US2: course gating flow", () => {
 });
 
 test.describe("US2: personalized catalog after skill test", () => {
-  // These tests require authenticated + skill-test-completed user state.
-  // They serve as journey specs — run with seeded test data.
+  test("authenticated user with completed skill test sees recommended and all-courses tabs", async ({
+    page,
+    request,
+  }) => {
+    const learner = await registerAuthenticatedLearner(page, request, "recommended-tabs", {
+      onboard: true,
+    });
+    await seedRecommendedCourses(request, learner.tokens.access_token, ["cs231n"]);
 
-  test.skip(
-    "authenticated user with completed skill test sees recommended and all-courses tabs",
-    async ({ page }) => {
-      // This test requires a pre-seeded authenticated session with
-      // completed assessment and generated recommendations.
-      // Skip until e2e test infrastructure supports user seeding.
+    await page.goto("/");
 
-      await page.goto("/");
+    await expect(page.getByRole("tablist")).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Recommended for you" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "All courses" })).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Recommended for you" }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByText("CS231n: Deep Learning for Computer Vision")).toBeVisible();
+  });
 
-      // Tab bar should be visible
-      await expect(page.getByRole("tablist")).toBeVisible();
-      await expect(page.getByRole("tab", { name: "Recommended for you" })).toBeVisible();
-      await expect(page.getByRole("tab", { name: "All courses" })).toBeVisible();
-    },
-  );
+  test("authenticated user without recommendations sees all-courses without tabs", async ({
+    page,
+    request,
+  }) => {
+    await registerAuthenticatedLearner(page, request, "no-recommendations");
 
-  test.skip(
-    "authenticated user without recommendations sees all-courses without tabs",
-    async ({ page }) => {
-      // This test requires a pre-seeded authenticated session WITHOUT
-      // completed assessment.
+    await page.goto("/");
 
-      await page.goto("/");
-
-      // No tab bar — just the all-courses view
-      await expect(page.getByRole("tablist")).not.toBeVisible();
-      await expect(page.getByText("CS231n: Deep Learning for Computer Vision")).toBeVisible();
-    },
-  );
+    await expect(page.getByRole("tablist")).not.toBeVisible();
+    await expect(page.getByText("CS231n: Deep Learning for Computer Vision")).toBeVisible();
+    await expect(
+      page.getByText("CS224n: Natural Language Processing with Deep Learning"),
+    ).toBeVisible();
+  });
 });

@@ -118,10 +118,11 @@ Những gì đã verify được:
 - frontend route/unit/typecheck xanh
 - backend contract/auth/config tests xanh
 - Playwright smoke:
-  - `9 passed`
-  - `2 skipped` (hai case personalized catalog vẫn đang intentionally skip vì thiếu seeded recommendation state)
+  - smoke suite: `9 passed`
+  - `course-gating` suite: `6 passed`
 - cùng bộ Playwright smoke đó đã pass trên backend chạy local và trên backend chạy qua `docker compose`
 - backend `docker compose` không còn restart loop hay `unhealthy` giả do healthcheck tool mismatch
+- personalized catalog sau skill test hiện đã được cover bằng e2e seed path, không còn `skip` trong `course-gating.spec.ts`
 - live smoke đã cover:
   - public catalog
   - course overview
@@ -133,7 +134,7 @@ Những gì đã verify được:
 
 Những gì chưa cover trọn vẹn:
 
-- personalized catalog sau skill test với recommendation state seeded
+- repository layer integration sau hybrid merge vẫn chưa rollout vào các vùng DB-backed lớn hơn
 
 ## Đánh giá thực tế
 
