@@ -16,6 +16,7 @@ from collections import defaultdict
 from threading import Lock
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
@@ -43,7 +44,7 @@ from src.services.auth_service import (
     register_user,
     update_onboarding,
 )
-from src.services.token_guard import is_payload_revoked
+from src.services.token_guard import is_payload_revoked, revoke_payload
 
 # ---------------------------------------------------------------------------
 # In-process rate limiter for login (sliding window, per IP)
@@ -83,6 +84,7 @@ _login_limiter = _SlidingWindowRateLimiter(
 
 auth_router = APIRouter(prefix="/api/auth", tags=["Auth"])
 users_router = APIRouter(prefix="/api/users", tags=["Users"])
+_bearer = HTTPBearer(auto_error=True)
 
 
 # ---------------------------------------------------------------------------
@@ -220,6 +222,33 @@ async def refresh_token(
 
     access_token, expires_in = create_access_token(user.id)
     return AccessToken(access_token=access_token, expires_in=expires_in)
+
+
+# ---------------------------------------------------------------------------
+# POST /api/auth/logout
+# ---------------------------------------------------------------------------
+
+
+@auth_router.post(
+    "/logout",
+    summary="Revoke the current bearer token",
+)
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+) -> dict[str, str]:
+    invalid_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = decode_token(credentials.credentials)
+    except ValueError:
+        raise invalid_exc
+
+    await revoke_payload(payload)
+    return {"status": "ok"}
 
 
 # ---------------------------------------------------------------------------

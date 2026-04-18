@@ -40,3 +40,4 @@ dist/
 data/cs231n/
 frontend/test-results/
 frontend/playwright-report/
+frontend/tsconfig.tsbuildinfo
