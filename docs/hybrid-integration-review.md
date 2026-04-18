@@ -108,8 +108,8 @@ Các điểm sau vẫn chưa xong:
 
 - course metadata runtime chưa DB-authoritative hoàn toàn
 - repository layer chưa rollout rộng
-- live full flow `login -> onboarding -> assessment -> return-to-course` chưa được re-verify đầy đủ trên hybrid branch
-- compose-backed smoke hiện đã chạy được và backend compose đã lên `healthy`, nhưng full auth/onboarding/assessment journey vẫn chưa cover trọn
+- compose-backed smoke hiện đã chạy được và backend compose đã lên `healthy`
+- live full flow `login -> onboarding -> assessment -> return-to-course` đã được re-verify trên hybrid branch
 
 ## Verification snapshot hiện tại
 
@@ -127,12 +127,12 @@ Những gì đã verify được:
   - course overview
   - coming-soon gate
   - unauthenticated start -> login redirect with `next`
+  - login -> onboarding -> assessment -> return-to-course
   - learning unit page
   - AI Tutor panel open
 
 Những gì chưa cover trọn vẹn:
 
-- `login -> onboarding -> assessment -> return-to-course` như một journey đầy đủ
 - personalized catalog sau skill test với recommendation state seeded
 
 ## Đánh giá thực tế

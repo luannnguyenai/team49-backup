@@ -72,7 +72,7 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 - [x] T036 Chạy contract tests `tests/contract/test_course_catalog_api.py`, `tests/contract/test_course_start_api.py`, `tests/contract/test_learning_unit_api.py`
 - [x] T037 Chạy tutor/lecture related tests `tests/test_lecture_routes.py`, `tests/test_chat_model_factory.py` để chắc rằng Redis/config/exception refactor không làm gãy AI Tutor
 - [x] T038 Chạy các tests backend nền `tests/test_course_platform_foundation.py`, `tests/test_course_entry_service.py`, và các auth tests liên quan sau khi merge
-- [ ] T039 Kiểm tra live flow trên local: `Home -> Overview -> Start -> login/onboarding/assessment -> return to course -> learning unit -> AI Tutor`
+- [x] T039 Kiểm tra live flow trên local: `Home -> Overview -> Start -> login/onboarding/assessment -> return to course -> learning unit -> AI Tutor`
 
 ## Phase 9: Documentation and Review Artifacts
 

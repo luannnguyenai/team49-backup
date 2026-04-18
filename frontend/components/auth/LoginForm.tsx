@@ -43,6 +43,9 @@ export default function LoginForm() {
     }
   };
 
+  const next = searchParams.get("next") ?? searchParams.get("from");
+  const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
       {/* Global API error */}
@@ -92,7 +95,7 @@ export default function LoginForm() {
 
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
         Chưa có tài khoản?{" "}
-        <Link href="/register" className="link">
+        <Link href={registerHref} className="link">
           Đăng ký ngay
         </Link>
       </p>
