@@ -177,6 +177,7 @@ def main():
     entry = normalize(data, tool)
     if not entry:
         sys.exit(0)
+    event = entry.get("event", "")
 
     log_dir = resolve_log_dir()
     log_dir.mkdir(exist_ok=True)
@@ -185,13 +186,13 @@ def main():
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-    # Output valid JSON (required by some tools like Gemini)
-    # only output JSON if explicitly needed
+    # Return hook output only when the tool expects it.
     if os.environ.get("AI_TOOL_NAME") == "claude":
         sys.stdout.write(json.dumps({"continue": True}))
         sys.stdout.flush()
-    else:
-        print(json.dumps({"status": "logged"}))
+    elif tool == "codex" and event == "Stop":
+        sys.stdout.write(json.dumps({"continue": True}))
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":

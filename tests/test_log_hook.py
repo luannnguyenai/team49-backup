@@ -1,5 +1,8 @@
 import importlib.util
 import os
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -40,6 +43,50 @@ class LogHookPathTests(unittest.TestCase):
 
         expected = self.module.REPO_ROOT / "custom-log-dir"
         self.assertEqual(log_dir, expected)
+
+    def test_codex_prompt_submit_writes_log_without_stdout(self):
+        payload = '{"hook_event_name":"UserPromptSubmit","prompt":"hello","transcript_path":"session.jsonl"}'
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env = os.environ.copy()
+            env["AI_TOOL_NAME"] = "codex"
+            env["AI_LOG_DIR"] = temp_dir
+
+            result = subprocess.run(
+                [sys.executable, str(self.module.REPO_ROOT / "scripts" / "log_hook.py")],
+                input=payload,
+                text=True,
+                capture_output=True,
+                env=env,
+                check=True,
+            )
+
+            self.assertEqual(result.stdout, "")
+            log_file = Path(temp_dir) / "session.jsonl"
+            self.assertTrue(log_file.exists())
+            self.assertIn('"tool": "codex"', log_file.read_text(encoding="utf-8"))
+
+    def test_codex_stop_returns_valid_continue_json(self):
+        payload = '{"hook_event_name":"Stop","transcript_path":"session.jsonl"}'
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env = os.environ.copy()
+            env["AI_TOOL_NAME"] = "codex"
+            env["AI_LOG_DIR"] = temp_dir
+
+            result = subprocess.run(
+                [sys.executable, str(self.module.REPO_ROOT / "scripts" / "log_hook.py")],
+                input=payload,
+                text=True,
+                capture_output=True,
+                env=env,
+                check=True,
+            )
+
+            self.assertEqual(result.stdout.strip(), '{"continue": true}')
+            log_file = Path(temp_dir) / "session.jsonl"
+            self.assertTrue(log_file.exists())
+            self.assertIn('"event": "Stop"', log_file.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # ---- Database (PostgreSQL async) ----
     database_url: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/ai_learning",
+        default="postgresql+asyncpg://postgres:change_me_strong_password@localhost:5432/ai_learning",
         description="Full asyncpg-compatible connection URL",
     )
     db_echo: bool = Field(default=False, description="Log all SQL statements")

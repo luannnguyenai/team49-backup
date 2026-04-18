@@ -16,13 +16,13 @@ name: ai-adaptive-learning
 # ---------------------------------------------------------------------------
 x-db-env: &db-env
   POSTGRES_USER: ${POSTGRES_USER:-postgres}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123secure}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_strong_password}
   POSTGRES_DB: ${POSTGRES_DB:-ai_learning}
   POSTGRES_HOST: db
   POSTGRES_PORT: 5432
 
 x-backend-env: &backend-env
-  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres123secure}@db:5432/${POSTGRES_DB:-ai_learning}
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-change_me_strong_password}@db:5432/${POSTGRES_DB:-ai_learning}
   REDIS_URL: redis://:${REDIS_PASSWORD:-redis123secure}@redis:6379/0
   SECRET_KEY: ${SECRET_KEY:-dev_secret_key_min_32_chars_change_me}
   ALGORITHM: ${ALGORITHM:-HS256}
