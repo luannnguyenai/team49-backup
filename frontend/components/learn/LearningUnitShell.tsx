@@ -96,75 +96,74 @@ export default function LearningUnitShell({
 
   return (
     <div
-      className="flex h-[calc(100vh-4.5rem)] overflow-hidden"
-      style={{ backgroundColor: "var(--bg-page)" }}
+      data-testid="learning-shell-frame"
+      className="rounded-[32px] border shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
+      style={{
+        backgroundColor: "var(--bg-card)",
+        borderColor: "var(--border)",
+      }}
     >
-      {/* ═══════════════════════════════════════════════════════════════
-          MAIN AREA — Video + Course Info
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        {/* Breadcrumb bar */}
-        <div
-          className="flex h-12 items-center gap-2 border-b px-4 shrink-0"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--bg-card)",
-          }}
-        >
-          <Link
-            href={`/courses/${courseSlug}`}
-            className="text-xs font-medium transition-colors hover:underline"
-            style={{ color: "var(--text-muted)" }}
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0">
+          <div
+            className="flex flex-wrap items-center gap-3 border-b px-5 py-4 md:px-6"
+            style={{ borderColor: "var(--border)" }}
           >
-            {course.title}
-          </Link>
-          <span style={{ color: "var(--text-muted)" }}>›</span>
-          <span
-            className="text-xs font-semibold truncate"
-            style={{ color: "var(--text-primary)" }}
-          >
-            {unit.title}
-          </span>
-
-          {/* AI Tutor toggle */}
-          {tutor.enabled && (
-            <button
-              onClick={() => setTutorOpen((o) => !o)}
-              className="ml-auto flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200"
-              style={{
-                backgroundColor: tutorOpen
-                  ? "rgba(37,99,235,0.1)"
-                  : "var(--bg-page)",
-                color: tutorOpen ? "#2563eb" : "var(--text-secondary)",
-                border: `1px solid ${tutorOpen ? "rgba(37,99,235,0.3)" : "var(--border)"}`,
-              }}
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="flex min-w-0 items-center gap-2 text-xs">
+              <Link
+                href={`/courses/${courseSlug}`}
+                className="font-medium transition-colors hover:underline"
+                style={{ color: "var(--text-muted)" }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                />
-              </svg>
-              AI Tutor
-            </button>
-          )}
-        </div>
+                {course.title}
+              </Link>
+              <span style={{ color: "var(--text-muted)" }}>›</span>
+              <span
+                className="truncate font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {unit.title}
+              </span>
+            </div>
 
-        {/* Video player */}
-        <div className="flex-1 overflow-y-auto flex flex-col">
-          {content.video_url ? (
-            <>
-              <div className="w-full aspect-video bg-black shrink-0">
+            {tutor.enabled && (
+              <button
+                onClick={() => setTutorOpen((o) => !o)}
+                className="ml-auto inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-200"
+                style={{
+                  backgroundColor: tutorOpen
+                    ? "rgba(37,99,235,0.08)"
+                    : "var(--bg-page)",
+                  color: tutorOpen ? "#2563eb" : "var(--text-secondary)",
+                  borderColor: tutorOpen
+                    ? "rgba(37,99,235,0.25)"
+                    : "var(--border)",
+                }}
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                  />
+                </svg>
+                AI Tutor
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-5 p-5 md:p-6">
+            <div className="overflow-hidden rounded-[28px] border bg-black shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+              {content.video_url ? (
                 <video
                   ref={videoRef}
-                  className="w-full h-full object-contain cursor-pointer"
+                  className="aspect-video w-full cursor-pointer object-contain"
                   crossOrigin="anonymous"
                   onTimeUpdate={handleTimeUpdate}
                   onDurationChange={() => {
@@ -177,18 +176,29 @@ export default function LearningUnitShell({
                   }}
                   src={content.video_url}
                 />
-              </div>
+              ) : content.body_markdown ? (
+                <div className="prose prose-slate max-w-none bg-[color:var(--bg-card)] p-6 md:p-8">
+                  <ReactMarkdown>{content.body_markdown}</ReactMarkdown>
+                </div>
+              ) : (
+                <div className="flex min-h-[24rem] items-center justify-center bg-[color:var(--bg-card)] p-6 text-center">
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    Content is being prepared for this unit.
+                  </p>
+                </div>
+              )}
+            </div>
 
-              {/* Progress bar */}
+            {content.video_url && (
               <div
-                className="px-3 py-2 shrink-0"
+                className="rounded-[24px] border px-4 py-3"
                 style={{
                   backgroundColor: "var(--bg-card)",
-                  borderTop: "1px solid var(--border)",
+                  borderColor: "var(--border)",
                 }}
               >
                 <div
-                  className="relative h-1.5 rounded-full cursor-pointer"
+                  className="relative h-1.5 cursor-pointer rounded-full"
                   style={{ backgroundColor: "var(--bg-page)" }}
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -198,14 +208,15 @@ export default function LearningUnitShell({
                   }}
                 >
                   <div
-                    className="absolute left-0 top-0 h-full rounded-full pointer-events-none"
+                    className="pointer-events-none absolute left-0 top-0 h-full rounded-full"
                     style={{
                       width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
                       backgroundColor: "#2563eb",
                     }}
                   />
                 </div>
-                <div className="flex items-center justify-between mt-1.5">
+
+                <div className="mt-2 flex items-center justify-between gap-3">
                   <span
                     className="text-xs tabular-nums"
                     style={{ color: "var(--text-muted)" }}
@@ -214,7 +225,7 @@ export default function LearningUnitShell({
                   </span>
                   {chapters.length > 0 && (
                     <span
-                      className="text-xs truncate"
+                      className="min-w-0 truncate text-xs"
                       style={{ color: "var(--text-secondary)" }}
                     >
                       {chapters.find(
@@ -226,96 +237,74 @@ export default function LearningUnitShell({
                   )}
                 </div>
               </div>
-            </>
-          ) : (
-            // No video — show markdown content or placeholder
-            <div className="flex-1 p-6 overflow-y-auto">
-              {content.body_markdown ? (
-                <div className="prose prose-slate max-w-3xl mx-auto">
-                  <ReactMarkdown>{content.body_markdown}</ReactMarkdown>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center min-h-[40vh]">
-                  <p
-                    className="text-sm"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    Content is being prepared for this unit.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+            )}
 
-          {/* Chapter list below video */}
-          {chapters.length > 0 && (
-            <div
-              className="border-t px-4 py-3 shrink-0"
-              style={{
-                borderColor: "var(--border)",
-                backgroundColor: "var(--bg-card)",
-              }}
-            >
-              <p
-                className="text-xs font-semibold uppercase tracking-wider mb-2"
-                style={{ color: "var(--text-muted)" }}
+            {chapters.length > 0 && (
+              <section
+                className="rounded-[24px] border px-4 py-4 md:px-5"
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                }}
               >
-                Chapters
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {chapters.map((ch) => {
-                  const isActive =
-                    currentTime >= ch.start_time &&
-                    currentTime < ch.end_time;
-                  return (
-                    <button
-                      key={ch.id}
-                      onClick={() => {
-                        if (videoRef.current)
-                          videoRef.current.currentTime = ch.start_time;
-                      }}
-                      className="rounded-lg px-3 py-1.5 text-xs transition-colors"
-                      style={{
-                        backgroundColor: isActive
-                          ? "rgba(37,99,235,0.1)"
-                          : "var(--bg-page)",
-                        color: isActive
-                          ? "#2563eb"
-                          : "var(--text-secondary)",
-                        fontWeight: isActive ? 600 : 400,
-                      }}
-                    >
-                      {formatTime(ch.start_time)} · {ch.title}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                <p
+                  className="text-xs font-semibold uppercase tracking-[0.22em]"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Chapters
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {chapters.map((ch) => {
+                    const isActive =
+                      currentTime >= ch.start_time &&
+                      currentTime < ch.end_time;
+                    return (
+                      <button
+                        key={ch.id}
+                        onClick={() => {
+                          if (videoRef.current)
+                            videoRef.current.currentTime = ch.start_time;
+                        }}
+                        className="rounded-full px-3 py-1.5 text-xs transition-colors"
+                        style={{
+                          backgroundColor: isActive
+                            ? "rgba(37,99,235,0.1)"
+                            : "var(--bg-page)",
+                          color: isActive
+                            ? "#2563eb"
+                            : "var(--text-secondary)",
+                          fontWeight: isActive ? 600 : 400,
+                        }}
+                      >
+                        {formatTime(ch.start_time)} · {ch.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          RIGHT PANEL — In-Context AI Tutor
-      ═══════════════════════════════════════════════════════════════ */}
-      {tutor.enabled && tutorOpen && (
-        <aside
-          className="flex flex-col border-l shrink-0 w-[22rem] overflow-hidden"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--bg-card)",
-          }}
-        >
-          <InContextTutor
-            lectureId={getLegacyLectureId()}
-            currentTime={currentTime}
-            captureFrame={captureFrame}
-            contextBindingId={tutor.context_binding_id ?? undefined}
-            unitTitle={unit.title}
-            onClose={() => setTutorOpen(false)}
-          />
-        </aside>
-      )}
+        {tutor.enabled && tutorOpen && (
+          <aside
+            className="border-t lg:border-l lg:border-t-0"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--bg-card)",
+            }}
+          >
+            <InContextTutor
+              lectureId={getLegacyLectureId()}
+              currentTime={currentTime}
+              captureFrame={captureFrame}
+              contextBindingId={tutor.context_binding_id ?? undefined}
+              unitTitle={unit.title}
+              onClose={() => setTutorOpen(false)}
+            />
+          </aside>
+        )}
+      </div>
     </div>
   );
 }
