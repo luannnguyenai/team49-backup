@@ -96,15 +96,20 @@ export default function LearningUnitShell({
 
   return (
     <div
-      data-testid="learning-shell-frame"
-      className="rounded-[32px] border shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
+      className="h-[calc(100vh-4.5rem)] overflow-hidden rounded-[32px] border shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
       style={{
         backgroundColor: "var(--bg-card)",
         borderColor: "var(--border)",
       }}
     >
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="min-w-0">
+      <div
+        className={
+          tutor.enabled && tutorOpen
+            ? "flex h-full flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_22rem]"
+            : "flex h-full flex-col"
+        }
+      >
+        <div className="min-w-0 flex flex-1 flex-col overflow-hidden">
           <div
             className="flex flex-wrap items-center gap-3 border-b px-5 py-4 md:px-6"
             style={{ borderColor: "var(--border)" }}
@@ -158,7 +163,7 @@ export default function LearningUnitShell({
             )}
           </div>
 
-          <div className="space-y-5 p-5 md:p-6">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 md:p-6">
             <div className="overflow-hidden rounded-[28px] border bg-black shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
               {content.video_url ? (
                 <video
@@ -288,7 +293,7 @@ export default function LearningUnitShell({
 
         {tutor.enabled && tutorOpen && (
           <aside
-            className="border-t lg:border-l lg:border-t-0"
+            className="h-[24rem] shrink-0 overflow-hidden border-t lg:h-full lg:border-l lg:border-t-0"
             style={{
               borderColor: "var(--border)",
               backgroundColor: "var(--bg-card)",

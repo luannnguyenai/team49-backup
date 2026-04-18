@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LearningPage from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page";
@@ -150,13 +150,16 @@ describe("learning unit page (US3)", () => {
       <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-1-introduction" }} />,
     );
 
-    const shell = await screen.findByTestId("learning-shell-frame");
-    expect(shell).toHaveClass("rounded-[32px]");
-    expect(await within(shell).findByText("Lecture 1: Introduction")).toBeInTheDocument();
-    expect(await within(shell).findByText("AI Tutor")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", {
+        name: "CS231n: Deep Learning for Computer Vision",
+      }),
+    ).toHaveAttribute("href", "/courses/cs231n");
+    expect(screen.getByText("Lecture 1: Introduction")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "AI Tutor" })).toBeInTheDocument();
     await waitFor(() => {
-      expect(within(shell).getByText("Chapters")).toBeInTheDocument();
-      expect(within(shell).getByText("00:00 · Introduction")).toBeInTheDocument();
+      expect(screen.getByText("Chapters")).toBeInTheDocument();
+      expect(screen.getByText("00:00 · Introduction")).toBeInTheDocument();
     });
   });
 
