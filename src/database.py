@@ -37,6 +37,9 @@ async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(
     autocommit=False,
 )
 
+# Backward-compatible alias used by newer course-platform services.
+async_session_factory = async_session
+
 
 # ---------------------------------------------------------------------------
 # FastAPI dependency

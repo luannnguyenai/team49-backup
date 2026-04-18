@@ -147,7 +147,7 @@ function CourseCard({ module, idx }: { module: ModuleListItem; idx: number }) {
 
         {/* CTA */}
         <Link
-          href="/tutor"
+          href="/courses/cs231n/start"
           className="mt-auto flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-opacity hover:opacity-90"
           style={{ backgroundColor: "var(--primary-600, #2563eb)", color: "white" }}
         >

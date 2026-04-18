@@ -57,10 +57,11 @@ export function middleware(request: NextRequest) {
   // ② Authenticated but already going to login/register → redirect away
   if (isAuthenticated && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
-    // If there's a "from" param, redirect there instead of dashboard
-    const from = searchParams.get("from");
-    url.pathname = from || "/dashboard";
+    // If there's a redirect param, honor it instead of dashboard.
+    const redirectTo = searchParams.get("next") || searchParams.get("from");
+    url.pathname = redirectTo || "/dashboard";
     url.searchParams.delete("from");
+    url.searchParams.delete("next");
     return NextResponse.redirect(url);
   }
 

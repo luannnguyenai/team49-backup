@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Brain,
   ChevronLeft,
@@ -65,6 +65,7 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
 
   // Current step (0-indexed) and transition direction
@@ -145,6 +146,7 @@ export default function OnboardingPage() {
     clearError();
     try {
       await onboard(data);
+      const next = searchParams.get("next");
 
       // Persist selected module IDs (used by learning-path generation)
       sessionStorage.setItem("al_pending_module_ids", JSON.stringify(data.desired_module_ids));
@@ -166,10 +168,13 @@ export default function OnboardingPage() {
       sessionStorage.setItem("al_pending_topic_names", JSON.stringify(topicNameMap));
 
       if (data.known_topic_ids.length > 0) {
-        router.push("/assessment");
+        const assessmentTarget = next
+          ? `/assessment?next=${encodeURIComponent(next)}`
+          : "/assessment";
+        router.push(assessmentTarget);
       } else {
         // No topics selected → nothing to assess → go straight to dashboard
-        router.push("/dashboard");
+        router.push(next ?? "/dashboard");
       }
     } catch {
       /* error message is shown from the store */

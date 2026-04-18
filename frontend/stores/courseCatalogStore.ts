@@ -64,13 +64,19 @@ export const useCourseCatalogStore = create<CourseCatalogState>()((set, get) => 
         view: "recommended",
         includeUnavailable: true,
       });
+      const hasRecommendations = response.items.length > 0;
       set({
         recommendedCourses: response.items,
-        hasRecommendations: response.items.length > 0,
+        hasRecommendations,
+        activeView: hasRecommendations ? "recommended" : "all",
       });
     } catch {
       // Recommendation failures are non-fatal — user can still use all-courses
-      set({ recommendedCourses: [], hasRecommendations: false });
+      set({
+        recommendedCourses: [],
+        hasRecommendations: false,
+        activeView: "all",
+      });
     }
   },
 

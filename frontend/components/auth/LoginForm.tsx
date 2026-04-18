@@ -36,8 +36,8 @@ export default function LoginForm() {
     clearError();
     try {
       await login(data);
-      const from = searchParams.get("from") ?? "/dashboard";
-      router.push(from);
+      const next = searchParams.get("next") ?? searchParams.get("from") ?? "/dashboard";
+      router.push(next);
     } catch {
       // error is set in store
     }

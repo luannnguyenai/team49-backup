@@ -78,6 +78,7 @@ function AssessmentResultsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const next = searchParams.get("next");
 
   const [result, setResult] = useState<AssessmentResultResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +109,7 @@ function AssessmentResultsInner() {
   // ── Go to dashboard ───────────────────────────────────────────────────────
   const goToDashboard = () => {
     setNavigating(true);
-    router.push("/dashboard");
+    router.push(next ?? "/dashboard");
   };
 
   // ── Loading skeleton ──────────────────────────────────────────────────────

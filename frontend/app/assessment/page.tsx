@@ -4,7 +4,7 @@
 //   load → start session → question-by-question → submit → /assessment/results
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Bookmark,
   BookmarkCheck,
@@ -63,6 +63,7 @@ function useElapsedTimer(active: boolean) {
 
 export default function AssessmentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // ── Core state ─────────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<Phase>("loading");
@@ -238,10 +239,15 @@ export default function AssessmentPage() {
 
     try {
       await assessmentApi.submit(sessionId, answerList);
+      const next = searchParams.get("next");
       sessionStorage.removeItem("al_pending_module_ids");
       sessionStorage.removeItem("al_pending_topic_ids");
       sessionStorage.removeItem("al_pending_topic_names");
-      router.push(`/assessment/results?session_id=${sessionId}`);
+      const resultsParams = new URLSearchParams({ session_id: sessionId });
+      if (next) {
+        resultsParams.set("next", next);
+      }
+      router.push(`/assessment/results?${resultsParams.toString()}`);
     } catch (e: unknown) {
       const detail = (e as { response?: { data?: { detail?: string } } })
         ?.response?.data?.detail;

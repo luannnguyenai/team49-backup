@@ -137,8 +137,14 @@ describe("personalized catalog (US2)", () => {
       expect(screen.getByRole("tablist")).toBeInTheDocument();
     });
 
-    // CS231n should appear (recommended)
+    expect(screen.getByRole("tab", { name: "Recommended for you" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     expect(screen.getByText("CS231n: Deep Learning for Computer Vision")).toBeInTheDocument();
+    expect(
+      screen.queryByText("CS224n: Natural Language Processing with Deep Learning"),
+    ).not.toBeInTheDocument();
   });
 
   it("shows all-courses view without tabs when authenticated but no recommendations", async () => {

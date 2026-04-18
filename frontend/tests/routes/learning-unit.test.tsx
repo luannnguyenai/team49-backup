@@ -15,11 +15,17 @@ const courseApiMock = vi.hoisted(() => ({
   learningUnit: vi.fn(),
 }));
 
+const apiMock = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+}));
+
 vi.mock("@/lib/api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
   return {
     ...actual,
     courseApi: courseApiMock,
+    api: apiMock,
   };
 });
 
@@ -86,6 +92,7 @@ const DISABLED_TUTOR_UNIT: LearningUnitResponse = {
 describe("learning unit page (US3)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    apiMock.get.mockResolvedValue({ data: [] });
   });
 
   it("renders loading state initially", () => {

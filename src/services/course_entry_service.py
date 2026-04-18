@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 from src.schemas.course import StartLearningDecisionResponse
 from src.services.course_bootstrap_service import get_bootstrap_course
+from src.services.learning_unit_service import get_first_unit_slug
 
 if TYPE_CHECKING:
     from src.models.user import User
@@ -85,9 +86,15 @@ async def get_start_learning_decision(
         )
 
     # ── All gates pass: learning is ready ────────────────────────────────
+    first_unit_slug = get_first_unit_slug(course_slug)
+    learning_target = (
+        f"/courses/{course_slug}/learn/{first_unit_slug}"
+        if first_unit_slug
+        else f"/courses/{course_slug}"
+    )
     return StartLearningDecisionResponse(
         decision="redirect",
-        target=f"/courses/{course_slug}/learn",
+        target=learning_target,
         reason="learning_ready",
     )
 

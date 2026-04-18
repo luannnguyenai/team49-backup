@@ -72,6 +72,16 @@ export default function LearningPage({ params }: LearningPageProps) {
     };
   }, [params.courseSlug, params.unitSlug]);
 
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      "al_active_learning_unit",
+      JSON.stringify({
+        courseSlug: params.courseSlug,
+        unitSlug: params.unitSlug,
+      }),
+    );
+  }, [params.courseSlug, params.unitSlug]);
+
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-4.5rem)] items-center justify-center -mx-4 -mt-4 md:-mx-6 md:-mt-6">
