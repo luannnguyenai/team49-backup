@@ -41,6 +41,7 @@ UNITS_FILE = Path("data/course_bootstrap/units.json")
 TRANSCRIPTS_DIR = Path("data/CS231n/transcripts")
 SLIDES_DIR = Path("data/CS231n/slides")
 _LECTURE_NUMBER_RE = re.compile(r"(?:lecture|Lecture)[_ -]?0*(\d+)")
+_LECTURE_AVAILABILITY_CACHE: dict[Path, tuple[int | None, set[int]]] = {}
 
 
 def _read_json(path: Path) -> Any:
@@ -70,14 +71,29 @@ def _extract_available_lecture_numbers(directory: Path) -> set[int]:
     return numbers
 
 
-@lru_cache(maxsize=1)
+def _directory_mtime_ns(directory: Path) -> int | None:
+    if not directory.exists():
+        return None
+    return directory.stat().st_mtime_ns
+
+
+def _available_lecture_numbers(directory: Path) -> set[int]:
+    current_mtime = _directory_mtime_ns(directory)
+    cached = _LECTURE_AVAILABILITY_CACHE.get(directory)
+    if cached is not None and cached[0] == current_mtime:
+        return set(cached[1])
+
+    numbers = _extract_available_lecture_numbers(directory)
+    _LECTURE_AVAILABILITY_CACHE[directory] = (current_mtime, numbers)
+    return set(numbers)
+
+
 def _available_transcript_lectures() -> set[int]:
-    return _extract_available_lecture_numbers(TRANSCRIPTS_DIR)
+    return _available_lecture_numbers(TRANSCRIPTS_DIR)
 
 
-@lru_cache(maxsize=1)
 def _available_slide_lectures() -> set[int]:
-    return _extract_available_lecture_numbers(SLIDES_DIR)
+    return _available_lecture_numbers(SLIDES_DIR)
 
 
 def get_bootstrap_unit(course_slug: str, unit_slug: str) -> dict[str, Any] | None:
