@@ -166,6 +166,30 @@ Thứ tự thực dụng nhất từ đây:
 2. Chỉ port repository layer tiếp ở nơi thật sự DB-backed, không repository hóa bootstrap services
 3. Sau đó mới cân nhắc canonicalize sâu hơn phần `CS231n` legacy adapter
 
+## Main port status
+
+Sau khi đối chiếu với `main` mới nhất (`cc14d53`), hybrid đã port xong một slice runtime an toàn:
+
+- `docker-compose.yml`
+  - đổi DB image sang `pgvector/pgvector:pg16`
+- `start.sh`
+  - parse timestamp image bằng `python3` để bớt phụ thuộc GNU `date`
+  - reset backend container nếu đang crash loop trước khi `docker compose up`
+
+Regression đã thêm và pass:
+
+- `tests/test_docker_compose_healthcheck.py`
+- `tests/test_start_script_content.py`
+
+Những gì chưa port:
+
+- `schema v1` migration từ `main`
+
+Lý do chưa port:
+
+- migration này chạm mạnh vào schema LMS cũ
+- cần review sâu hơn với `hybrid` canonical course model trước khi quyết định
+
 ## Quy tắc chọn nhánh khi có tranh luận trong team
 
 Nếu tranh luận về:

@@ -44,9 +44,9 @@ x-backend-env: &backend-env
 # ---------------------------------------------------------------------------
 services:
 
-  # ── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  # ── PostgreSQL 16 + pgvector ───────────────────────────────────────────────
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: al_db
     restart: unless-stopped
     environment:
