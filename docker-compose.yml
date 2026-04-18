@@ -101,7 +101,7 @@ services:
     command:
       - sh
       - -c
-      - "uv run alembic upgrade head && uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 1 --reload"
+      - "uv run alembic upgrade head && uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --workers 1 --reload --reload-dir src"
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:

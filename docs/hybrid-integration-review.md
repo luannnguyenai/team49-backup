@@ -172,6 +172,7 @@ Sau khi đối chiếu với `main` mới nhất (`cc14d53`), hybrid đã port x
 
 - `docker-compose.yml`
   - đổi DB image sang `pgvector/pgvector:pg16`
+  - giới hạn backend auto-reload vào `src/` bằng `--reload-dir src`
 - `start.sh`
   - parse timestamp image bằng `python3` để bớt phụ thuộc GNU `date`
   - reset backend container nếu đang crash loop trước khi `docker compose up`
