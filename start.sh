@@ -102,15 +102,30 @@ BACKEND_IMAGE=$(docker images -q ai-adaptive-learning-backend 2>/dev/null)
 FRONTEND_IMAGE=$(docker images -q ai-adaptive-learning-frontend 2>/dev/null)
 
 # Phát hiện package-lock.json thay đổi sau khi build frontend image
+# Dùng python3 để parse timestamp — tương thích cả macOS và Linux
 NEED_FRONTEND_REBUILD=false
 if [ -n "$FRONTEND_IMAGE" ]; then
   IMAGE_EPOCH=$(docker inspect --format='{{.Created}}' ai-adaptive-learning-frontend 2>/dev/null \
-    | xargs -I{} date -d {} +%s 2>/dev/null || echo "0")
-  PKG_EPOCH=$(stat -c %Y frontend/package-lock.json 2>/dev/null || echo "0")
+    | python3 -c "
+import sys, datetime
+d = sys.stdin.read().strip()
+if d:
+    print(int(datetime.datetime.fromisoformat(d.replace('Z', '+00:00')).timestamp()))
+else:
+    print(0)
+" 2>/dev/null || echo "0")
+  PKG_EPOCH=$(python3 -c "import os; print(int(os.path.getmtime('frontend/package-lock.json')))" 2>/dev/null || echo "0")
   if [ "$PKG_EPOCH" -gt "$IMAGE_EPOCH" ]; then
     log_warn "package-lock.json thay đổi sau khi build image — sẽ rebuild frontend..."
     NEED_FRONTEND_REBUILD=true
   fi
+fi
+
+# Phát hiện backend đang crash loop → force recreate để reset anonymous .venv volume
+BACKEND_STATUS=$(docker inspect al_backend --format='{{.State.Status}}' 2>/dev/null || echo "absent")
+if [ "$BACKEND_STATUS" = "restarting" ] || [ "$BACKEND_STATUS" = "exited" ]; then
+  log_warn "Backend đang crash loop (${BACKEND_STATUS}) — force recreate để reset .venv volume..."
+  docker compose rm -f -s backend 2>/dev/null || true
 fi
 
 if [ "$FORCE_REBUILD" = true ]; then
