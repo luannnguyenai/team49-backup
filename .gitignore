@@ -40,3 +40,6 @@ dist/
 data/cs231n/
 
 .codex
+
+# Git worktrees
+.worktrees/
