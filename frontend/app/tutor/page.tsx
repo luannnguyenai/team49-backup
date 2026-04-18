@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GraduationCap, PlayCircle } from "lucide-react";
 import { courseApi } from "@/lib/api";
+import CourseCatalog from "@/components/course/CourseCatalog";
 import type { CourseCatalogItem } from "@/types";
 
 interface CatalogSplit {
@@ -112,6 +113,20 @@ export default function TutorPage() {
                 <PlayCircle size={16} />
                 Tiếp tục
               </Link>
+            </section>
+          )}
+
+          {enrolled.length > 0 && (
+            <section className="space-y-3">
+              <div>
+                <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Khoá của bạn
+                </h2>
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  Các khoá bạn đang theo học.
+                </p>
+              </div>
+              <CourseCatalog items={enrolled} />
             </section>
           )}
 
