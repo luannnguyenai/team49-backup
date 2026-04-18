@@ -9,6 +9,17 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
+async def test_root_returns_backend_api_landing(client: AsyncClient):
+    """GET / should explain that port 8000 is the backend API surface."""
+    response = await client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["surface"] == "backend_api"
+    assert data["frontend_dev_url"] == "http://127.0.0.1:3000"
+    assert data["legacy_static_ui"] == "/static/index.html"
+
+
+@pytest.mark.asyncio
 async def test_health_check(client: AsyncClient):
     """GET /health should return 200 and status=ok."""
     response = await client.get("/health")

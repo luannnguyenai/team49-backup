@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -87,11 +87,20 @@ async def health_check():
 
 
 # ---------------------------------------------------------------------------
-# Static HTML UI (original)
+# API landing
 # ---------------------------------------------------------------------------
-@app.get("/")
-def read_root():
-    return FileResponse("src/api/static/index.html")
+@app.get("/", tags=["ops"])
+async def read_root():
+    return {
+        "app": settings.app_name,
+        "surface": "backend_api",
+        "message": "This server exposes the FastAPI backend only. Open the Next.js frontend on port 3000 for the course UI.",
+        "frontend_dev_url": "http://127.0.0.1:3000",
+        "health_url": "/health",
+        "openapi_url": "/openapi.json",
+        "docs_url": "/docs",
+        "legacy_static_ui": "/static/index.html",
+    }
 
 
 # ---------------------------------------------------------------------------
