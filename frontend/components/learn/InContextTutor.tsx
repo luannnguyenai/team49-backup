@@ -110,12 +110,17 @@ export default function InContextTutor({
       let fullText = "";
       let qaId: number | undefined;
       let hasError = false;
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done || hasError) break;
-        const text = decoder.decode(value);
-        for (const line of text.split("\n")) {
+        if (hasError) break;
+
+        buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+        const lines = buffer.split("\n");
+        buffer = done ? "" : lines.pop() ?? "";
+
+        for (const line of lines) {
           if (!line.trim()) continue;
           try {
             const data = JSON.parse(line.trim());
@@ -169,6 +174,58 @@ export default function InContextTutor({
             }
             if (data.qa_id) qaId = data.qa_id;
           } catch {}
+        }
+
+        if (done) {
+          const tail = buffer.trim();
+          if (tail && !hasError) {
+            try {
+              const data = JSON.parse(tail);
+              if (data.e) {
+                setMessages((prev) =>
+                  prev.map((m, i) =>
+                    i === aiIdx ? { ...m, role: "error", content: data.e } : m,
+                  ),
+                );
+              } else if (data.blocked && data.message) {
+                setMessages((prev) =>
+                  prev.map((m, i) =>
+                    i === aiIdx
+                      ? { ...m, role: "error", content: data.message }
+                      : m,
+                  ),
+                );
+              } else if (data.detail) {
+                setMessages((prev) =>
+                  prev.map((m, i) =>
+                    i === aiIdx
+                      ? { ...m, role: "error", content: String(data.detail) }
+                      : m,
+                  ),
+                );
+              } else {
+                if (data.status) {
+                  setMessages((prev) =>
+                    prev.map((m, i) =>
+                      i === aiIdx
+                        ? { ...m, content: fullText || data.status }
+                        : m,
+                    ),
+                  );
+                }
+                if (data.a) {
+                  fullText += data.a;
+                  setMessages((prev) =>
+                    prev.map((m, i) =>
+                      i === aiIdx ? { ...m, content: fullText } : m,
+                    ),
+                  );
+                }
+                if (data.qa_id) qaId = data.qa_id;
+              }
+            } catch {}
+          }
+          break;
         }
       }
 
