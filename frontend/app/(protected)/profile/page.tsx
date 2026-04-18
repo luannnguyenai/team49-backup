@@ -5,13 +5,17 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Trophy, Clock, TrendingUp } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { contentApi, historyApi } from "@/lib/api";
-import type { HistorySummary, ModuleListItem } from "@/types";
+import { authApi, contentApi, historyApi } from "@/lib/api";
+import type {
+  HistoryItem,
+  HistorySummary,
+  ModuleListItem,
+  UserSkillSnapshot,
+} from "@/types";
 import RadarChart from "@/components/assessment/RadarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
-// Placeholder AI skill data — will be replaced by real assessment data when available
-const PLACEHOLDER_SKILLS = [
+const DEFAULT_SKILLS: UserSkillSnapshot[] = [
   { label: "Machine Learning", value: 0, level: "not_started" },
   { label: "Deep Learning", value: 0, level: "not_started" },
   { label: "Computer Vision", value: 0, level: "not_started" },
@@ -27,10 +31,96 @@ const SKILL_COLORS: Record<string, string> = {
   mastered: "#34d399",
 };
 
-// Achievement badge (placeholder)
-const ACHIEVEMENTS = [
-  { title: "Người học chăm chỉ", desc: "Hoàn thành 5 khóa học", icon: "🏆", color: "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" },
-];
+interface AchievementBadge {
+  title: string;
+  desc: string;
+  icon: string;
+  color: string;
+}
+
+function getMembershipLabel(
+  completedSessions: number,
+  totalHours: number,
+  hasSkillEvidence: boolean,
+) {
+  if (completedSessions >= 10 || totalHours >= 20) return "Học viên nâng cao";
+  if (hasSkillEvidence || completedSessions >= 3) return "Học viên đang tiến bộ";
+  return "Học viên mới";
+}
+
+function normalizeDateKey(dateStr: string) {
+  return new Date(dateStr).toISOString().slice(0, 10);
+}
+
+function calculateStudyStreak(items: HistoryItem[]) {
+  const uniqueDays = Array.from(
+    new Set(
+      items
+        .filter((item) => item.completed_at)
+        .map((item) => normalizeDateKey(item.completed_at as string)),
+    ),
+  ).sort((a, b) => b.localeCompare(a));
+
+  if (!uniqueDays.length) return 0;
+
+  let streak = 1;
+  let cursor = new Date(`${uniqueDays[0]}T00:00:00Z`);
+  for (let i = 1; i < uniqueDays.length; i += 1) {
+    const next = new Date(`${uniqueDays[i]}T00:00:00Z`);
+    const deltaDays = Math.round((cursor.getTime() - next.getTime()) / 86_400_000);
+    if (deltaDays === 1) {
+      streak += 1;
+      cursor = next;
+      continue;
+    }
+    if (deltaDays > 1) break;
+  }
+
+  return streak;
+}
+
+function buildAchievements(
+  completedSessions: number,
+  totalHours: number,
+  hasSkillEvidence: boolean,
+) {
+  const badges: AchievementBadge[] = [];
+
+  if (hasSkillEvidence) {
+    badges.push({
+      title: "Đã mở khóa hồ sơ kỹ năng",
+      desc: "Hoàn thành assessment để ghi nhận năng lực hiện tại",
+      icon: "🧠",
+      color: "border-blue-400 bg-blue-50 dark:bg-blue-900/20",
+    });
+  }
+  if (completedSessions >= 1) {
+    badges.push({
+      title: "Phiên học đầu tiên",
+      desc: "Đã hoàn thành ít nhất 1 phiên học hoặc assessment",
+      icon: "✨",
+      color: "border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20",
+    });
+  }
+  if (completedSessions >= 5) {
+    badges.push({
+      title: "Người học chăm chỉ",
+      desc: "Hoàn thành từ 5 phiên học trở lên",
+      icon: "🏆",
+      color: "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20",
+    });
+  }
+  if (totalHours >= 10) {
+    badges.push({
+      title: "Bền bỉ",
+      desc: "Tích lũy từ 10 giờ học trở lên",
+      icon: "⏱️",
+      color: "border-violet-400 bg-violet-50 dark:bg-violet-900/20",
+    });
+  }
+
+  return badges;
+}
 
 interface StatRowProps {
   icon: React.ReactNode;
@@ -64,16 +154,21 @@ export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
   const [modules, setModules] = useState<ModuleListItem[]>([]);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
+  const [skills, setSkills] = useState<UserSkillSnapshot[]>(DEFAULT_SKILLS);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       contentApi.modules(),
-      historyApi.list({ page_size: 1 }),
+      historyApi.list({ page_size: 100 }),
+      authApi.mySkills(),
     ])
-      .then(([mods, hist]) => {
+      .then(([mods, hist, skillOverview]) => {
         setModules(mods);
         setSummary(hist.summary);
+        setSkills(skillOverview.skills);
+        setHistoryItems(hist.items);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -93,6 +188,18 @@ export default function ProfilePage() {
     : 0;
 
   const completedSessions = summary?.completed_sessions ?? 0;
+  const hasSkillEvidence = skills.some((skill) => skill.level !== "not_started");
+  const streakDays = calculateStudyStreak(historyItems);
+  const membershipLabel = getMembershipLabel(
+    completedSessions,
+    totalHours,
+    hasSkillEvidence,
+  );
+  const achievements = buildAchievements(
+    completedSessions,
+    totalHours,
+    hasSkillEvidence,
+  );
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
@@ -121,7 +228,7 @@ export default function ProfilePage() {
                     {user.full_name}
                   </p>
                   <span className="mt-1 inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2.5 py-0.5 text-xs font-semibold">
-                    Học viên Pro
+                    {membershipLabel}
                   </span>
                 </div>
               </div>
@@ -150,7 +257,7 @@ export default function ProfilePage() {
                   icon={<TrendingUp className="h-4 w-4 text-orange-500" />}
                   iconBg="bg-orange-100 dark:bg-orange-900/30"
                   label="Streak"
-                  value="0 ngày"
+                  value={`${streakDays} ngày`}
                 />
               </div>
             </div>
@@ -160,22 +267,28 @@ export default function ProfilePage() {
               <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
                 Thành tích
               </h3>
-              {ACHIEVEMENTS.map((a) => (
-                <div
-                  key={a.title}
-                  className={`flex items-center gap-3 rounded-xl border p-3 ${a.color}`}
-                >
-                  <span className="text-2xl">{a.icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {a.title}
-                    </p>
-                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                      {a.desc}
-                    </p>
+              {achievements.length > 0 ? (
+                achievements.map((a) => (
+                  <div
+                    key={a.title}
+                    className={`flex items-center gap-3 rounded-xl border p-3 ${a.color}`}
+                  >
+                    <span className="text-2xl">{a.icon}</span>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                        {a.title}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                        {a.desc}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  Hoàn thành assessment hoặc các phiên học đầu tiên để mở khóa thành tích.
+                </p>
+              )}
             </div>
 
             {/* Account info */}
@@ -214,7 +327,7 @@ export default function ProfilePage() {
 
             {/* Radar chart */}
             <div className="flex justify-center">
-              <RadarChart data={PLACEHOLDER_SKILLS} size={280} />
+              <RadarChart data={skills} size={280} />
             </div>
 
             {/* Legend */}
@@ -225,7 +338,7 @@ export default function ProfilePage() {
 
             {/* Skill progress bars */}
             <div className="space-y-3">
-              {PLACEHOLDER_SKILLS.map((skill) => (
+              {skills.map((skill) => (
                 <div key={skill.label}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
@@ -255,7 +368,9 @@ export default function ProfilePage() {
             </div>
 
             <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-              Hoàn thành assessment để cập nhật kỹ năng của bạn.
+              {hasSkillEvidence
+                ? "Kỹ năng này được tính từ kết quả assessment và các bài luyện tập đã lưu."
+                : "Hoàn thành assessment để cập nhật kỹ năng của bạn."}
             </p>
           </div>
         </div>

@@ -9,6 +9,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from src.models.learning import MasteryLevel
 from src.models.user import PreferredMethod
 
 # ---------------------------------------------------------------------------
@@ -120,3 +121,13 @@ class UserProfile(BaseModel):
     preferred_method: PreferredMethod | None
     is_onboarded: bool
     created_at: datetime
+
+
+class UserSkillSnapshot(BaseModel):
+    label: str
+    value: float = Field(ge=0, le=100)
+    level: MasteryLevel | str
+
+
+class UserSkillOverview(BaseModel):
+    skills: list[UserSkillSnapshot]

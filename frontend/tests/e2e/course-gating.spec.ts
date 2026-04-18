@@ -300,8 +300,13 @@ test.describe("US2: course gating flow", () => {
     await page.waitForURL(/\/assessment/);
     await completeAssessment(page);
 
+    const learningPathButton = page.getByRole("button", { name: "Xem lộ trình học" });
     await expect(page.getByText("Assessment hoàn thành!")).toBeVisible();
-    await page.getByRole("button", { name: "Xem lộ trình học" }).click();
+    await expect(learningPathButton).toBeVisible();
+    await expect(learningPathButton).toBeEnabled();
+    await learningPathButton.scrollIntoViewIfNeeded();
+    await learningPathButton.click({ trial: true });
+    await learningPathButton.click();
 
     await page.waitForURL(/\/courses\/cs231n\/learn\/lecture-1-introduction/, {
       timeout: 20000,

@@ -12,6 +12,16 @@ export interface User {
   created_at: string;
 }
 
+export interface UserSkillSnapshot {
+  label: string;
+  value: number;
+  level: MasteryLevel | "not_started";
+}
+
+export interface UserSkillOverview {
+  skills: UserSkillSnapshot[];
+}
+
 export interface TokenPair {
   access_token: string;
   refresh_token: string;

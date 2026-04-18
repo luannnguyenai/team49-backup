@@ -175,6 +175,7 @@ import type {
   TokenPair,
   TopicContent,
   User,
+  UserSkillOverview,
 } from "@/types";
 
 export const assessmentApi = {
@@ -304,6 +305,8 @@ export const authApi = {
       .then((r) => r.data),
 
   me: () => api.get<User>("/api/users/me").then((r) => r.data),
+
+  mySkills: () => api.get<UserSkillOverview>("/api/users/me/skills").then((r) => r.data),
 
   onboarding: (data: OnboardingPayload) =>
     api.put<User>("/api/users/me/onboarding", data).then((r) => r.data),

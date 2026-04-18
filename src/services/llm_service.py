@@ -16,7 +16,7 @@ from langgraph.prebuilt import ToolNode
 from sqlalchemy import select
 
 from src.config import DEFAULT_MODEL
-from src.database import async_session as _async_session
+from src.database import tutor_thread_async_session_factory
 from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory
 from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.sandbox import run_python_code
@@ -46,13 +46,13 @@ def format_timestamp(seconds):
 
 # ---------------------------------------------------------------------------
 # Async DB helpers — called via asyncio.run() from within the sync generator.
-# FastAPI runs sync routes in a threadpool (no running event loop), so
-# asyncio.run() is safe here. Each call opens a fresh session & closes it.
+# They use a dedicated NullPool session factory so asyncpg connections are not
+# reused across different event loops in the threadpool streaming path.
 # ---------------------------------------------------------------------------
 
 async def _fetch_lecture_context(lecture_id: str) -> tuple:
     """Fetch lecture, chapters, and recent QA history in one session."""
-    async with _async_session() as db:
+    async with tutor_thread_async_session_factory() as db:
         result = await db.execute(select(Lecture).where(Lecture.id == lecture_id))
         lecture = result.scalar_one_or_none()
 
@@ -75,7 +75,7 @@ async def _fetch_lecture_context(lecture_id: str) -> tuple:
 async def _fetch_transcript_window(
     lecture_id: str, start_window: float, end_window: float
 ) -> list:
-    async with _async_session() as db:
+    async with tutor_thread_async_session_factory() as db:
         result = await db.execute(
             select(TranscriptLine)
             .where(
@@ -96,7 +96,7 @@ async def _save_qa_history(
     current_timestamp: float,
     image_base64: str | None,
 ) -> int:
-    async with _async_session() as db:
+    async with tutor_thread_async_session_factory() as db:
         history = QAHistory(
             lecture_id=lecture_id,
             question=question,

@@ -17,11 +17,14 @@ from threading import Lock
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
+from src.models.content import Module, Topic
+from src.models.learning import MasteryScore
 from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
 from src.redis_client import get_redis
@@ -34,7 +37,10 @@ from src.schemas.auth import (
     TokenPair,
     TokenPayload,
     UserProfile,
+    UserSkillOverview,
+    UserSkillSnapshot,
 )
+from src.services.mastery_evaluator import classify_mastery
 from src.services.auth_service import (
     authenticate_user,
     create_access_token,
@@ -104,6 +110,70 @@ def _build_token_pair(user: User) -> TokenPair:
 
 def _user_to_profile(user: User) -> UserProfile:
     return UserProfile.model_validate(user)
+
+
+_SKILL_LABELS = [
+    "Machine Learning",
+    "Deep Learning",
+    "Computer Vision",
+    "NLP",
+    "LLM",
+]
+
+
+def _resolve_skill_bucket(*parts: str | None) -> str | None:
+    text = " ".join(part or "" for part in parts).lower()
+    if any(token in text for token in ("computer vision", "3d vision", "vision and language", "vision")):
+        return "Computer Vision"
+    if any(token in text for token in ("natural language", "nlp", "language processing")):
+        return "NLP"
+    if any(token in text for token in ("llm", "language model", "prompt", "rag", "agent")):
+        return "LLM"
+    if "deep learning" in text:
+        return "Deep Learning"
+    if "machine learning" in text or " ml " in f" {text} ":
+        return "Machine Learning"
+    return None
+
+
+async def _build_user_skill_overview(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+) -> UserSkillOverview:
+    result = await db.execute(
+        select(MasteryScore, Topic, Module)
+        .join(Topic, MasteryScore.topic_id == Topic.id)
+        .join(Module, Topic.module_id == Module.id)
+        .where(
+            MasteryScore.user_id == user_id,
+            MasteryScore.kc_id.is_(None),
+        )
+    )
+
+    grouped: dict[str, list[float]] = {label: [] for label in _SKILL_LABELS}
+
+    for mastery, topic, module in result.all():
+        bucket = _resolve_skill_bucket(
+            topic.name,
+            topic.description,
+            module.name,
+            module.description,
+        )
+        if bucket is None:
+            continue
+        grouped[bucket].append(round(mastery.mastery_probability * 100, 1))
+
+    skills = []
+    for label in _SKILL_LABELS:
+        if grouped[label]:
+            value = round(sum(grouped[label]) / len(grouped[label]), 1)
+            level = classify_mastery(value)
+        else:
+            value = 0.0
+            level = "not_started"
+        skills.append(UserSkillSnapshot(label=label, value=value, level=level))
+
+    return UserSkillOverview(skills=skills)
 
 
 async def _is_login_allowed(client_ip: str) -> bool:
@@ -265,6 +335,18 @@ async def get_me(
     current_user: User = Depends(get_current_user),
 ) -> UserProfile:
     return _user_to_profile(current_user)
+
+
+@users_router.get(
+    "/me/skills",
+    response_model=UserSkillOverview,
+    summary="Return the authenticated user's current AI skill overview",
+)
+async def get_my_skills(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> UserSkillOverview:
+    return await _build_user_skill_overview(db, current_user.id)
 
 
 # ---------------------------------------------------------------------------
