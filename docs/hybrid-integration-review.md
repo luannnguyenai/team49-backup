@@ -173,6 +173,8 @@ Sau khi đối chiếu với `main` mới nhất (`cc14d53`), hybrid đã port x
 - `docker-compose.yml`
   - đổi DB image sang `pgvector/pgvector:pg16`
   - giới hạn backend auto-reload vào `src/` bằng `--reload-dir src`
+- `alembic/versions/20260418_enable_pgvector_extension.py`
+  - bật `vector` extension trên current hybrid head bằng migration riêng
 - `start.sh`
   - parse timestamp image bằng `python3` để bớt phụ thuộc GNU `date`
   - reset backend container nếu đang crash loop trước khi `docker compose up`
@@ -181,6 +183,7 @@ Regression đã thêm và pass:
 
 - `tests/test_docker_compose_healthcheck.py`
 - `tests/test_start_script_content.py`
+- `tests/test_pgvector_migration.py`
 
 Những gì chưa port:
 

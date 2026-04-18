@@ -38,7 +38,7 @@ Rules:
 - [ ] T015 Review `main` Alembic head topology and reconcile it with `hybrid/alembic/versions/*` before copying any revision files
 - [ ] T016 Port only non-conflicting migration improvements from `main/alembic/versions/*` into `hybrid/alembic/versions/*`
 - [ ] T017 Update `hybrid/alembic.ini` if `main` contains safer or more consistent migration/runtime settings
-- [ ] T018 Integrate approved `pgvector` setup changes from `main` into `hybrid/docker-compose.yml`, `hybrid/pyproject.toml`, and any related migration files
+- [x] T018 Integrate approved `pgvector` setup changes from `main` into `hybrid/docker-compose.yml`, `hybrid/pyproject.toml`, and any related migration files
 - [ ] T019 Add regression coverage for migration topology and extension setup in `tests/test_alembic_heads.py` and a new migration/runtime test file under `tests/`
 
 ## Phase 5: Strengthen Hybrid Persistence Without Regressing Product Flow
@@ -90,6 +90,7 @@ Rules:
 ## Current Notes
 
 - `pgvector` was selected as a safe compose/runtime port.
+- `pgvector` was also promoted into a dedicated hybrid migration: `alembic/versions/20260418_enable_pgvector_extension.py`
 - `start.sh` crash-loop reset and cross-platform timestamp parsing were selected as safe startup ports.
 - `schema v1` from `main` remains under review and should not be ported wholesale.
 - `pyproject.toml`, `requirements.txt`, and `uv.lock` had no new runtime changes in `cc14d53`, so T012-T013 were effectively no-op.
