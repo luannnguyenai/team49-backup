@@ -6,6 +6,7 @@ Unified FastAPI application:
 - Auth & Learning routes (async)
 """
 
+import asyncio
 from contextlib import asynccontextmanager
 import logging
 
@@ -17,7 +18,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import engine as async_engine, get_async_db
+from src.database import async_session_factory, engine as async_engine, get_async_db
 from src.exception_handlers import domain_exception_handler
 from src.exceptions import DomainError
 from src.redis_client import connect_redis, disconnect_redis
@@ -129,6 +130,25 @@ class AskRequest(BaseModel):
     image_base64: str | None = None
 
 
+def _ensure_lecture_exists(lecture_id: str, db: object | None = None) -> None:
+    if db is not None:
+        lecture = db.query(Lecture).filter(Lecture.id == lecture_id).first()
+        if not lecture:
+            raise HTTPException(status_code=404, detail="Lecture not found")
+        return
+
+    async def _load_lecture_id() -> str | None:
+        async with async_session_factory() as session:
+            result = await session.execute(
+                select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
+            )
+            return result.scalar_one_or_none()
+
+    lecture = asyncio.run(_load_lecture_id())
+    if not lecture:
+        raise HTTPException(status_code=404, detail="Lecture not found")
+
+
 @app.get("/api/lectures", tags=["Lectures"])
 async def list_lectures(db: AsyncSession = Depends(get_async_db)):
     result = await db.execute(select(Lecture))
@@ -149,13 +169,14 @@ async def get_toc(lecture_id: str, db: AsyncSession = Depends(get_async_db)):
 
 
 @app.post("/api/lectures/ask", tags=["Lectures"])
-def ask_question(req: AskRequest):
+def ask_question(req: AskRequest, db: object | None = None):
     """
     Sync route — runs in FastAPI threadpool.
     llm_service uses asyncio.run() internally for DB access.
     LangGraph streaming remains sync (no async streaming support yet).
     """
     try:
+        _ensure_lecture_exists(req.lecture_id, db=db)
         generator = get_context_and_stream_langgraph(
             req.lecture_id,
             req.current_timestamp,

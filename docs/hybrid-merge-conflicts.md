@@ -49,3 +49,88 @@
 
 - Sau merge đầu tiên, chỉ có 2 conflict code thực sự cần resolve
 - Đây là dấu hiệu tốt: `course-first core` và `db-review` backend hygiene đang ít đè nhau hơn dự đoán ban đầu
+
+## Post-Merge Integration Decisions
+
+Sau merge commit `73a8d1a`, hybrid branch tiếp tục có thêm một số quyết định tích hợp quan trọng không xuất hiện như conflict Git thuần túy, nhưng vẫn là conflict kiến trúc cần ghi lại.
+
+## Decision 3: `src/routers/auth.py`
+
+### Conflict source
+
+- `001-course-first-refactor` cần giữ flow `login -> onboarding -> assessment -> return-to-course`
+- `db-review` có pattern Redis/rate-limit/denylist tốt hơn nhưng không được phép làm gãy flow course-first hiện tại
+
+### Decision
+
+- Resolve thủ công trên nền behavior của `001-course-first-refactor`
+- Thêm Redis-backed rate limiting theo kiểu `best available`
+- Fallback về in-memory limiter khi Redis unavailable
+- Thêm token denylist guard và `POST /api/auth/logout`
+- Giữ frontend logout clear-local-state trong `finally`, còn revoke backend là best-effort
+
+### Reason
+
+- Auth là vùng vừa nhạy về behavior vừa nhạy về security; không nên lấy nguyên một bên
+- Hybrid cần upgrade security/runtime quality mà không được mất redirect context của flow học
+
+## Decision 4: `src/config.py`
+
+### Conflict source
+
+- `db-review` có config explicit hơn cho `cors_origins`, `redis_url`
+- Branch hiện tại cần giữ compatibility với cách project đang nạp `.env`
+
+### Decision
+
+- Giữ `Settings` hiện tại làm base
+- Hấp thụ thêm parsing linh hoạt cho `cors_origins`
+  - CSV string
+  - JSON array string
+  - direct list
+
+### Reason
+
+- Đây là uplift an toàn, không thay đổi product flow
+- Làm app chạy ổn hơn giữa local/dev/deploy mà không kéo thêm debt config mới
+
+## Decision 5: `src/api/app.py`
+
+### Conflict source
+
+- Hybrid cần Redis lifespan + exception handler + explicit CORS
+- Đồng thời phải giữ backend root `/` là API landing, không quay lại static legacy UI
+- Lecture ask route sau merge bị mất precheck lecture existence từng có ở branch course-first
+
+### Decision
+
+- Giữ root `/` là backend API landing
+- Giữ Redis fail-soft startup/shutdown behavior
+- Khôi phục precheck `Lecture not found` cho `POST /api/lectures/ask`
+- Giữ route theo sync streaming pattern, nhưng dùng async session factory nội bộ khi không có test double được inject
+
+### Reason
+
+- Khôi phục đúng behavior contract cũ mà không rollback về sync DB dependency toàn phần
+- Giữ tutor route tương thích với runtime hiện tại và unit tests hiện có
+
+## Decision 6: Legacy lecture boundary
+
+### Conflict source
+
+- `CS231n` vẫn cần lecture/tutor stack cũ để hoạt động
+- Nhưng hybrid không được để lecture stack quay lại làm product domain trung tâm
+
+### Decision
+
+- Tạo `src/services/legacy_lecture_adapter.py`
+- Gom các helper bridge:
+  - `normalize_legacy_lecture_id(...)`
+  - `get_unit_by_legacy_lecture_id(...)`
+  - `build_tutor_bridge_payload(...)`
+- Ghi rõ boundary note trong `src/models/store.py` và `src/services/llm_service.py`
+
+### Reason
+
+- Tách rõ legacy adapter khỏi canonical learning-unit contract
+- Giảm mơ hồ cho team khi review hoặc tiếp tục migrate CS231n về canonical model sau này

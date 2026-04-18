@@ -13,36 +13,36 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 
 ## Phase 1: Setup Integration Branch
 
-- [ ] T001 Tạo nhánh tích hợp từ `001-course-first-refactor` bằng lệnh `git checkout -b hybrid/integrate-db-review` để giữ product baseline
-- [ ] T002 Merge `db-review` vào `hybrid/integrate-db-review` bằng `git merge --no-ff db-review` để preserve history commit của cả team
-- [ ] T003 Ghi lại danh sách conflict files vào `docs/hybrid-merge-conflicts.md` để team resolve có chủ đích thay vì xử lý ad-hoc
-- [ ] T004 Đối chiếu conflict với [docs/hybrid-system-design.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/hybrid-system-design.md) và [docs/branch-hybrid-merge-plan.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/branch-hybrid-merge-plan.md) trước khi resolve file nào cũng theo cùng một nguyên tắc
+- [x] T001 Tạo nhánh tích hợp từ `001-course-first-refactor` bằng lệnh `git checkout -b hybrid/integrate-db-review` để giữ product baseline
+- [x] T002 Merge `db-review` vào `hybrid/integrate-db-review` bằng `git merge --no-ff db-review` để preserve history commit của cả team
+- [x] T003 Ghi lại danh sách conflict files vào `docs/hybrid-merge-conflicts.md` để team resolve có chủ đích thay vì xử lý ad-hoc
+- [x] T004 Đối chiếu conflict với [docs/hybrid-system-design.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/hybrid-system-design.md) và [docs/branch-hybrid-merge-plan.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/branch-hybrid-merge-plan.md) trước khi resolve file nào cũng theo cùng một nguyên tắc
 
 ## Phase 2: Foundational Conflict Resolution
 
-- [ ] T005 Resolve `src/models/course.py` theo `001-course-first-refactor`, giữ canonical course domain làm product source of truth
-- [ ] T006 Resolve `src/schemas/course.py` theo `001-course-first-refactor`, giữ DTO/schema cho course-first API
-- [ ] T007 Resolve `src/routers/courses.py` theo `001-course-first-refactor`, giữ catalog/overview/start/learning-unit routes
-- [ ] T008 Resolve `src/services/course_bootstrap_service.py`, `src/services/course_catalog_service.py`, `src/services/course_entry_service.py`, `src/services/learning_unit_service.py` theo `001-course-first-refactor`
-- [ ] T009 Resolve `frontend/app/page.tsx`, `frontend/app/courses/[courseSlug]/page.tsx`, `frontend/app/courses/[courseSlug]/start/page.tsx`, `frontend/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page.tsx` theo flow course-first hiện tại
-- [ ] T010 Resolve `frontend/components/course/*`, `frontend/components/learn/*`, `frontend/features/course-platform/presenters.ts`, `frontend/lib/course-gate.ts`, `frontend/lib/auth-redirect.ts`, `frontend/stores/courseCatalogStore.ts` theo `001-course-first-refactor`
-- [ ] T011 Resolve `src/models/store.py`, `src/services/llm_service.py`, `src/services/router.py` theo nguyên tắc `legacy adapter only`, không để lecture stack quay lại làm domain trung tâm
+- [x] T005 Resolve `src/models/course.py` theo `001-course-first-refactor`, giữ canonical course domain làm product source of truth
+- [x] T006 Resolve `src/schemas/course.py` theo `001-course-first-refactor`, giữ DTO/schema cho course-first API
+- [x] T007 Resolve `src/routers/courses.py` theo `001-course-first-refactor`, giữ catalog/overview/start/learning-unit routes
+- [x] T008 Resolve `src/services/course_bootstrap_service.py`, `src/services/course_catalog_service.py`, `src/services/course_entry_service.py`, `src/services/learning_unit_service.py` theo `001-course-first-refactor`
+- [x] T009 Resolve `frontend/app/page.tsx`, `frontend/app/courses/[courseSlug]/page.tsx`, `frontend/app/courses/[courseSlug]/start/page.tsx`, `frontend/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page.tsx` theo flow course-first hiện tại
+- [x] T010 Resolve `frontend/components/course/*`, `frontend/components/learn/*`, `frontend/features/course-platform/presenters.ts`, `frontend/lib/course-gate.ts`, `frontend/lib/auth-redirect.ts`, `frontend/stores/courseCatalogStore.ts` theo `001-course-first-refactor`
+- [x] T011 Resolve `src/models/store.py`, `src/services/llm_service.py`, `src/services/router.py` theo nguyên tắc `legacy adapter only`, không để lecture stack quay lại làm domain trung tâm
 
 ## Phase 3: App Config and Backend Hardening
 
-- [ ] T012 Resolve `src/config.py` bằng cách giữ config đang phục vụ course-first app và port thêm `cors_origins`, `redis_url` cùng các field explicit hữu ích từ `db-review:src/config.py`
-- [ ] T013 Resolve `src/api/app.py` bằng cách giữ routers/runtime behavior của branch hiện tại, thêm Redis lifespan, exception handlers, explicit CORS từ `db-review:src/api/app.py`, và không khôi phục root static HTML
-- [ ] T014 Thêm hoặc port `src/exceptions.py` từ pattern của `db-review` để có `DomainError` hierarchy rõ ràng
-- [ ] T015 Thêm hoặc port `src/exception_handlers.py` từ pattern của `db-review` rồi wire vào `src/api/app.py`
-- [ ] T016 Thêm hoặc port `src/services/redis_client.py` để có lifecycle Redis chuẩn cho auth/rate-limit/cache ngắn hạn
-- [ ] T017 Viết hoặc cập nhật test backend cho `src/api/app.py`, `src/config.py`, `src/exception_handlers.py` trong `tests/` để xác nhận app startup, CORS config, và error responses không làm gãy course routes
+- [x] T012 Resolve `src/config.py` bằng cách giữ config đang phục vụ course-first app và port thêm `cors_origins`, `redis_url` cùng các field explicit hữu ích từ `db-review:src/config.py`
+- [x] T013 Resolve `src/api/app.py` bằng cách giữ routers/runtime behavior của branch hiện tại, thêm Redis lifespan, exception handlers, explicit CORS từ `db-review:src/api/app.py`, và không khôi phục root static HTML
+- [x] T014 Thêm hoặc port `src/exceptions.py` từ pattern của `db-review` để có `DomainError` hierarchy rõ ràng
+- [x] T015 Thêm hoặc port `src/exception_handlers.py` từ pattern của `db-review` rồi wire vào `src/api/app.py`
+- [x] T016 Thêm hoặc port `src/services/redis_client.py` để có lifecycle Redis chuẩn cho auth/rate-limit/cache ngắn hạn
+- [x] T017 Viết hoặc cập nhật test backend cho `src/api/app.py`, `src/config.py`, `src/exception_handlers.py` trong `tests/` để xác nhận app startup, CORS config, và error responses không làm gãy course routes
 
 ## Phase 4: Auth and Security Integration
 
-- [ ] T018 Resolve `src/routers/auth.py` thủ công, giữ behavior tương thích flow `login -> onboarding -> assessment -> return-to-course`
-- [ ] T019 Port có chọn lọc `db-review` rate-limit pattern vào auth flow, ưu tiên Redis-backed limiter thay cho in-memory limiter trong `src/routers/auth.py`
-- [ ] T020 Port token denylist hoặc revocation support từ `db-review` vào auth/security layer nếu implementation đủ chín để không phá current session flow
-- [ ] T021 Cập nhật test auth tương ứng trong `tests/` để xác nhận login, onboarding gate, assessment gate, và return redirect vẫn đúng
+- [x] T018 Resolve `src/routers/auth.py` thủ công, giữ behavior tương thích flow `login -> onboarding -> assessment -> return-to-course`
+- [x] T019 Port có chọn lọc `db-review` rate-limit pattern vào auth flow, ưu tiên Redis-backed limiter thay cho in-memory limiter trong `src/routers/auth.py`
+- [x] T020 Port token denylist hoặc revocation support từ `db-review` vào auth/security layer nếu implementation đủ chín để không phá current session flow
+- [x] T021 Cập nhật test auth tương ứng trong `tests/` để xác nhận login, onboarding gate, assessment gate, và return redirect vẫn đúng
 
 ## Phase 5: Repository Layer Integration
 
@@ -54,32 +54,32 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 
 ## Phase 6: Legacy Adapter Boundary Cleanup
 
-- [ ] T027 Xác nhận `src/models/store.py` chỉ còn phục vụ legacy lecture/tutor adapter cho `CS231n`
-- [ ] T028 Xác nhận mapping canonical-to-legacy trong `src/models/course.py` hoặc service liên quan vẫn là đường một chiều từ `LearningUnit` xuống `Lecture`, không ngược lại
-- [ ] T029 Kiểm tra `src/routers/courses.py` và `src/services/learning_unit_service.py` để đảm bảo learning unit contract vẫn là public-facing contract
-- [ ] T030 Kiểm tra `src/api/app.py` và lecture routes để đảm bảo `/api/lectures/*` chỉ còn là compatibility layer cho tutor/legacy retrieval
-- [ ] T031 Cập nhật [docs/course-first-refactor-architecture.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/course-first-refactor-architecture.md) hoặc [docs/hybrid-system-design.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/hybrid-system-design.md) nếu ranh giới adapter thay đổi sau integration
+- [x] T027 Xác nhận `src/models/store.py` chỉ còn phục vụ legacy lecture/tutor adapter cho `CS231n`
+- [x] T028 Xác nhận mapping canonical-to-legacy trong `src/models/course.py` hoặc service liên quan vẫn là đường một chiều từ `LearningUnit` xuống `Lecture`, không ngược lại
+- [x] T029 Kiểm tra `src/routers/courses.py` và `src/services/learning_unit_service.py` để đảm bảo learning unit contract vẫn là public-facing contract
+- [x] T030 Kiểm tra `src/api/app.py` và lecture routes để đảm bảo `/api/lectures/*` chỉ còn là compatibility layer cho tutor/legacy retrieval
+- [x] T031 Cập nhật [docs/course-first-refactor-architecture.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/course-first-refactor-architecture.md) hoặc [docs/hybrid-system-design.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/hybrid-system-design.md) nếu ranh giới adapter thay đổi sau integration
 
 ## Phase 7: Frontend Stability Verification
 
-- [ ] T032 Chạy lại route tests cho `frontend/tests/routes/course-catalog.test.tsx`, `frontend/tests/routes/course-start.test.tsx`, `frontend/tests/routes/personalized-catalog.test.tsx`, `frontend/tests/routes/learning-unit.test.tsx`, `frontend/tests/routes/legacy-tutor-redirect.test.tsx`
-- [ ] T033 Chạy lại tutor/component tests cho `frontend/tests/unit/in-context-tutor.test.tsx` và các unit tests liên quan presenter/auth redirect
-- [ ] T034 Chạy `frontend` typecheck để xác nhận merge không làm vỡ contracts giữa presenter, routes, và components
+- [x] T032 Chạy lại route tests cho `frontend/tests/routes/course-catalog.test.tsx`, `frontend/tests/routes/course-start.test.tsx`, `frontend/tests/routes/personalized-catalog.test.tsx`, `frontend/tests/routes/learning-unit.test.tsx`, `frontend/tests/routes/legacy-tutor-redirect.test.tsx`
+- [x] T033 Chạy lại tutor/component tests cho `frontend/tests/unit/in-context-tutor.test.tsx` và các unit tests liên quan presenter/auth redirect
+- [x] T034 Chạy `frontend` typecheck để xác nhận merge không làm vỡ contracts giữa presenter, routes, và components
 - [ ] T035 Chạy các e2e specs đã có trong `frontend/tests/e2e/course-discovery.spec.ts`, `frontend/tests/e2e/course-gating.spec.ts`, `frontend/tests/e2e/lecture-tutor.spec.ts` nếu môi trường local đủ điều kiện
 
 ## Phase 8: Backend Stability Verification
 
-- [ ] T036 Chạy contract tests `tests/contract/test_course_catalog_api.py`, `tests/contract/test_course_start_api.py`, `tests/contract/test_learning_unit_api.py`
-- [ ] T037 Chạy tutor/lecture related tests `tests/test_lecture_routes.py`, `tests/test_chat_model_factory.py` để chắc rằng Redis/config/exception refactor không làm gãy AI Tutor
-- [ ] T038 Chạy các tests backend nền `tests/test_course_platform_foundation.py`, `tests/test_course_entry_service.py`, và các auth tests liên quan sau khi merge
+- [x] T036 Chạy contract tests `tests/contract/test_course_catalog_api.py`, `tests/contract/test_course_start_api.py`, `tests/contract/test_learning_unit_api.py`
+- [x] T037 Chạy tutor/lecture related tests `tests/test_lecture_routes.py`, `tests/test_chat_model_factory.py` để chắc rằng Redis/config/exception refactor không làm gãy AI Tutor
+- [x] T038 Chạy các tests backend nền `tests/test_course_platform_foundation.py`, `tests/test_course_entry_service.py`, và các auth tests liên quan sau khi merge
 - [ ] T039 Kiểm tra live flow trên local: `Home -> Overview -> Start -> login/onboarding/assessment -> return to course -> learning unit -> AI Tutor`
 
 ## Phase 9: Documentation and Review Artifacts
 
-- [ ] T040 Cập nhật [docs/hybrid-system-design.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/hybrid-system-design.md) nếu thực tế integration khác với design ban đầu
-- [ ] T041 Cập nhật [docs/branch-hybrid-merge-plan.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/branch-hybrid-merge-plan.md) với các conflict thực tế và quyết định đã chốt
-- [ ] T042 Hoàn thiện `docs/hybrid-merge-conflicts.md` thành decision log cho từng file/package conflict lớn
-- [ ] T043 Viết summary review cho team vào `docs/hybrid-integration-review.md`, nêu rõ phần nào lấy từ nhánh nào và vì sao
+- [x] T040 Cập nhật [docs/hybrid-system-design.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/hybrid-system-design.md) nếu thực tế integration khác với design ban đầu
+- [x] T041 Cập nhật [docs/branch-hybrid-merge-plan.md](/mnt/shared/AI-Thuc-Chien/A20-App-049/docs/branch-hybrid-merge-plan.md) với các conflict thực tế và quyết định đã chốt
+- [x] T042 Hoàn thiện `docs/hybrid-merge-conflicts.md` thành decision log cho từng file/package conflict lớn
+- [x] T043 Viết summary review cho team vào `docs/hybrid-integration-review.md`, nêu rõ phần nào lấy từ nhánh nào và vì sao
 
 ## Phase 10: Merge to Main With History Preserved
 

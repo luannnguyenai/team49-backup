@@ -9,6 +9,26 @@ Thiết kế hybrid này kết hợp:
 
 Mục tiêu không phải trộn hai nhánh theo kiểu ngang hàng. Mục tiêu là giữ `course-first core` làm trục chính, rồi hấp thụ có chọn lọc các điểm mạnh từ `db-review` để hệ thống sạch hơn, production-oriented hơn, nhưng không phá flow sản phẩm đã chốt.
 
+## Trạng thái implementation hiện tại
+
+Các phần đã hiện diện trên `hybrid/integrate-db-review`:
+
+- `course-first core` vẫn là product direction chính
+- `DomainError` + exception handlers đã được wire vào app
+- Redis lifecycle đã được thêm vào app startup/shutdown theo kiểu fail-soft
+- auth đã có:
+  - Redis-backed login rate limit fallback
+  - token denylist guard
+  - `POST /api/auth/logout`
+  - frontend logout gọi backend revoke theo kiểu best-effort
+- `legacy lecture stack` đã được cô lập thêm qua `src/services/legacy_lecture_adapter.py`
+
+Các phần vẫn còn transitional:
+
+- course catalog/overview/unit runtime chưa được DB-authoritative hoàn toàn
+- repository layer mới hấp thụ một phần pattern, chưa rollout rộng
+- lecture/tutor stack vẫn còn dựa vào legacy tables cho `CS231n`
+
 ## Kiến trúc tổng thể
 
 ```mermaid
@@ -156,6 +176,12 @@ Hybrid này chấp nhận giai đoạn chuyển tiếp:
 - `legacy lecture/tutor stack` vẫn tồn tại để phục vụ `CS231n`
 
 Nhưng lớp legacy phải được xem là `adapter`, không phải source of truth dài hạn cho toàn product.
+
+Hiện tại boundary này được thể hiện rõ hơn bằng:
+
+- `src/services/legacy_lecture_adapter.py`
+- boundary note trong `src/models/store.py`
+- boundary note trong `src/services/llm_service.py`
 
 ## Data Ownership
 
@@ -366,6 +392,7 @@ flowchart TB
 - `DomainError` + exception handlers
 - repository abstractions
 - các service split tốt hơn ở auth/assessment
+- rate limit / token revoke patterns đã được áp một phần vào auth flow
 
 ### Không nên mang nguyên xi từ `db-review`
 
@@ -426,6 +453,8 @@ Section này dùng để resolve merge theo mức file/package cụ thể, khôn
 | `db-review:src/exceptions.py` | `db-review` | Mang sang nếu chưa có tương đương |
 | `db-review:src/exception_handlers.py` | `db-review` | Mang sang để chuẩn hóa error responses |
 | `db-review:src/services/redis_client.py` | `db-review` | Dùng làm Redis integration base nếu package phù hợp |
+| `db-review:src/services/rate_limit.py` | `db-review` | Đã hấp thụ một phần pattern vào `src/routers/auth.py`, có fallback local khi Redis unavailable |
+| `db-review:src/services/token_denylist.py` | `db-review` | Đã hấp thụ ý tưởng revoke/denylist vào `src/services/token_guard.py` |
 
 #### Repository / service decomposition
 
@@ -434,8 +463,8 @@ Section này dùng để resolve merge theo mức file/package cụ thể, khôn
 | `db-review:src/repositories/base.py` | `db-review` | Làm mẫu cho repository layer |
 | `db-review:src/repositories/question_repo.py` | `db-review` | Tham khảo pattern query-heavy repository |
 | `db-review:src/services/question_selector.py` | `db-review` | Hấp thụ nếu muốn dọn assessment selection logic |
-| `db-review:src/services/rate_limit.py` | `db-review` | Chỉ dùng khi wiring thật vào auth flow |
-| `db-review:src/services/token_denylist.py` | `db-review` | Hấp thụ nếu đủ chín cho auth/security |
+| `db-review:src/services/rate_limit.py` | `db-review` | Pattern đã được áp một phần; phần còn lại chỉ mở rộng khi thật sự cần |
+| `db-review:src/services/token_denylist.py` | `db-review` | Pattern đã được áp một phần; không cần copy nguyên file nếu `token_guard` hiện tại đủ |
 
 ### File cần resolve thủ công, không nên lấy nguyên một bên
 
@@ -446,6 +475,7 @@ Section này dùng để resolve merge theo mức file/package cụ thể, khôn
 | `src/routers/auth.py` | Giữ behavior tương thích flow hiện tại, port dần Redis/rate-limit/denylist theo mức đủ chín |
 | `src/models/store.py` | Giữ legacy lecture stack như adapter; không mở rộng nó thành product domain mới |
 | `src/services/llm_service.py` | Giữ fix API key và in-context tutor flow hiện tại; chỉ refactor cấu trúc nếu có lợi rõ |
+| `src/services/legacy_lecture_adapter.py` | Giữ làm adapter boundary mới; mở rộng tại đây thay vì đẩy logic bridge ngược vào course service hoặc lecture model |
 | `src/services/router.py` | Giữ behavior tutor routing hiện tại; chỉ dọn theo hướng service hygiene |
 | `src/database.py` | Giữ setup phù hợp branch hiện tại, nhưng có thể hấp thụ cleanup async/session pattern từ `db-review` |
 

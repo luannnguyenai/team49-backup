@@ -131,6 +131,25 @@ Hybrid tối ưu nhất là:
 - giữ `001-course-first-refactor` làm `behavior and product architecture source`
 - dùng `db-review` làm `backend infrastructure and quality pattern source`
 
+## Trạng thái tích hợp hiện tại trên `hybrid/integrate-db-review`
+
+Những gì đã hoàn tất:
+
+- merge `db-review` bằng `--no-ff` và giữ history commit của cả hai bên
+- resolve các conflict nền cho `src/api/app.py` và `src/services/llm_service.py`
+- port `DomainError`, exception handler, Redis lifecycle, explicit CORS/config parsing
+- thêm Redis-backed login rate limit với fallback local khi Redis unavailable
+- thêm token denylist guard và `POST /api/auth/logout`
+- nối frontend logout sang revoke backend theo kiểu best-effort
+- cô lập `legacy lecture adapter` qua `src/services/legacy_lecture_adapter.py`
+
+Những gì chưa hoàn tất:
+
+- repository layer integration chọn lọc
+- rerun e2e đủ rộng cho learning/tutor flow
+- live smoke full flow `login -> onboarding -> assessment -> return-to-course`
+- merge cuối cùng vào `main`
+
 ## Thứ tự tích hợp an toàn
 
 Sau khi merge `db-review` vào integration branch và resolve conflict tối thiểu để branch build lại được, tiếp tục làm thêm các commit integration theo từng nhóm nhỏ.
