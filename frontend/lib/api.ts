@@ -7,6 +7,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import Cookies from "js-cookie";
+import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
 
 // ---------------------------------------------------------------------------
 // Token cookie helpers
@@ -133,7 +134,8 @@ api.interceptors.response.use(
 
       // Refresh failed → redirect to login
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        const currentPath = `${window.location.pathname}${window.location.search}`;
+        window.location.href = buildUnauthorizedRedirectTarget(currentPath);
       }
     }
 

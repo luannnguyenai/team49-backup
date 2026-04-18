@@ -23,6 +23,10 @@ function isPublicPath(pathname: string): boolean {
   // Exact public paths
   if (PUBLIC_PATHS.some((p) => pathname === p)) return true;
 
+  // Legacy compatibility redirects stay public so stale links do not force auth.
+  if (pathname === "/tutor") return true;
+  if (pathname === "/learn" || pathname.startsWith("/learn/")) return true;
+
   // Course catalog and overview pages are public (but not /courses/*/learn/*)
   if (pathname.startsWith("/courses/") && !pathname.includes("/learn/")) return true;
 

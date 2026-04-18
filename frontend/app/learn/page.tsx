@@ -1,5 +1,3 @@
-// app/(protected)/learn/page.tsx
-// US3: Redirect legacy learn page to course catalog
 "use client";
 
 import { useEffect } from "react";
@@ -9,7 +7,6 @@ export default function LearnPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to the course catalog — learning now starts from courses
     router.replace("/");
   }, [router]);
 

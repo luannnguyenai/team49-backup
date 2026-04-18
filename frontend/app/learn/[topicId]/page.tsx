@@ -1,10 +1,5 @@
 "use client";
 
-// app/(protected)/learn/[topicId]/page.tsx
-// US3: Legacy topic learn page now redirects to the course-first flow.
-// The standalone learn-by-topic experience is deprecated in favor of
-// canonical course units at /courses/{slug}/learn/{unitSlug}.
-
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 
@@ -13,9 +8,6 @@ export default function LearnTopicPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Legacy topic IDs don't map directly to course units.
-    // Redirect to the CS231n course overview as the default ready course.
-    // In a future iteration, we could map topic IDs to specific units.
     router.replace("/courses/cs231n");
   }, [router, topicId]);
 

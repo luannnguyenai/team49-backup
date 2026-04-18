@@ -1,4 +1,47 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function signInAsOnboardedLearner(page: Page, label: string) {
+  const accessToken = `e2e-access-${label}-${Date.now()}`;
+  const refreshToken = `e2e-refresh-${label}-${Date.now()}`;
+  const expiresAt = String(Date.now() + 30 * 60 * 1000);
+  const cookiePairs = [
+    {
+      name: "al_access_token",
+      value: accessToken,
+    },
+    {
+      name: "al_refresh_token",
+      value: refreshToken,
+    },
+    {
+      name: "al_token_expires_at",
+      value: expiresAt,
+    },
+  ] as const;
+
+  await page.context().addCookies(
+    cookiePairs.flatMap((cookie) => [
+      {
+        ...cookie,
+        url: "http://127.0.0.1:3000",
+      },
+      {
+        ...cookie,
+        url: "http://localhost:3000",
+      },
+    ]),
+  );
+
+  await page.goto("/");
+  await page.evaluate(
+    ({ accessToken: access, refreshToken: refresh, expiresAt: expires }) => {
+      document.cookie = `al_access_token=${access}; Path=/; SameSite=Lax`;
+      document.cookie = `al_refresh_token=${refresh}; Path=/; SameSite=Lax`;
+      document.cookie = `al_token_expires_at=${expires}; Path=/; SameSite=Lax`;
+    },
+    { accessToken, refreshToken, expiresAt },
+  );
+}
 
 /**
  * US3 E2E: Lecture and tutor journey.
@@ -6,30 +49,20 @@ import { expect, test } from "@playwright/test";
  * These tests validate that:
  * 1. Course overview leads into the learning unit page
  * 2. The learning unit page shows the lecture shell with AI Tutor
- * 3. Legacy /tutor page shows a redirect banner
- * 4. Legacy /learn page redirects to course catalog
+ * 3. Legacy /tutor redirects into the course-first experience
+ * 4. Legacy /learn redirects to the public catalog
  */
 
 test.describe("US3: unified lecture experience", () => {
-  test("legacy tutor page shows course-first redirect banner", async ({
-    page,
-  }) => {
+  test("legacy tutor page redirects to the default course overview", async ({ page }) => {
     await page.goto("/tutor");
-
-    // Should show the compatibility banner
-    await expect(
-      page.getByText("AI Tutor is now built into the course learning experience"),
-    ).toBeVisible();
-
-    // "Go to courses" link should be visible
-    await expect(page.getByRole("link", { name: /Go to courses/i })).toBeVisible();
+    await page.waitForURL(/\/courses\/cs231n$/, { timeout: 5000 });
   });
 
   test("legacy learn page redirects to course catalog", async ({ page }) => {
     await page.goto("/learn");
 
-    // Should redirect to the home catalog
-    await page.waitForURL("/", { timeout: 5000 });
+    await page.waitForURL(/\/$/, { timeout: 5000 });
   });
 });
 
@@ -37,15 +70,9 @@ test.describe("US3: learning unit page", () => {
   test("CS231n lecture 1 learning unit page loads with course breadcrumb", async ({
     page,
   }) => {
-    // Navigate from course overview
-    await page.goto("/courses/cs231n");
-    await expect(page.getByRole("button", { name: "Start learning" })).toBeVisible();
-
-    // Click start learning (this goes through the decision gate)
-    // For this test we directly navigate to the learning page
+    await signInAsOnboardedLearner(page, "learning-shell");
     await page.goto("/courses/cs231n/learn/lecture-1-introduction");
 
-    // Should show the unit title and course breadcrumb
     await expect(page.getByText("Lecture 1: Introduction")).toBeVisible();
     await expect(
       page.getByText("CS231n: Deep Learning for Computer Vision"),
@@ -55,21 +82,20 @@ test.describe("US3: learning unit page", () => {
   test("AI Tutor toggle is visible on learning unit page", async ({
     page,
   }) => {
+    await signInAsOnboardedLearner(page, "tutor-toggle");
     await page.goto("/courses/cs231n/learn/lecture-1-introduction");
 
-    // AI Tutor button should be visible for ready units with video
     await expect(page.getByText("AI Tutor")).toBeVisible();
   });
 
-  test.skip(
+  test(
     "clicking AI Tutor opens the in-context tutor panel",
     async ({ page }) => {
+      await signInAsOnboardedLearner(page, "tutor-panel");
       await page.goto("/courses/cs231n/learn/lecture-1-introduction");
 
-      // Click the AI Tutor toggle
       await page.getByText("AI Tutor").click();
 
-      // Should show the tutor panel with input
       await expect(
         page.getByPlaceholder("Ask about this lecture..."),
       ).toBeVisible();

@@ -1,7 +1,7 @@
 import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import TutorPage from "@/app/(protected)/tutor/page";
+import TutorPage from "@/app/tutor/page";
 
 const navigationMock = vi.hoisted(() => ({
   replace: vi.fn(),

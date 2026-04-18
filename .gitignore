@@ -38,3 +38,5 @@ dist/
 .env.test.local
 .env.production.local
 data/cs231n/
+frontend/test-results/
+frontend/playwright-report/

@@ -1,5 +1,5 @@
 import Button from "@/components/ui/Button";
-import { getCourseGateState } from "@/lib/course-gate";
+import { buildCourseOverviewViewModel } from "@/features/course-platform/presenters";
 import type { CourseOverviewResponse } from "@/types";
 
 interface CourseOverviewProps {
@@ -13,10 +13,7 @@ export default function CourseOverview({
   isStarting = false,
   onStart,
 }: CourseOverviewProps) {
-  const gate = getCourseGateState(data.course.status, data.entry);
-  const ctaLabel = gate.canStartLearning
-    ? data.overview.cta_label ?? "Start learning"
-    : "Coming soon";
+  const model = buildCourseOverviewViewModel({ data, isStarting });
 
   return (
     <div className="space-y-8">
@@ -47,7 +44,7 @@ export default function CourseOverview({
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
                   Availability
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{data.course.title}</p>
+                <p className="mt-2 text-2xl font-semibold">{model.courseTitle}</p>
                 <p className="mt-2 text-sm text-slate-200">
                   {data.overview.estimated_duration_text ?? "Duration will be added later"}
                 </p>
@@ -64,19 +61,19 @@ export default function CourseOverview({
                 </p>
               </div>
 
-              {gate.message && (
+              {model.bannerMessage && (
                 <p className="rounded-2xl border border-amber-200/50 bg-amber-50/10 px-4 py-3 text-sm text-amber-100">
-                  {gate.message}
+                  {model.bannerMessage}
                 </p>
               )}
 
               <Button
                 onClick={onStart}
-                disabled={!gate.canStartLearning}
-                loading={isStarting}
+                disabled={model.cta.disabled}
+                loading={model.cta.loading}
                 className="w-full rounded-full"
               >
-                {ctaLabel}
+                {model.cta.label}
               </Button>
             </div>
           </div>

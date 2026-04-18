@@ -29,8 +29,8 @@ test.describe("US2: course gating flow", () => {
     // Should redirect to login with course context preserved
     await page.waitForURL(/\/login/);
     const url = new URL(page.url());
-    const fromParam = url.searchParams.get("from");
-    expect(fromParam).toContain("cs231n");
+    const nextParam = url.searchParams.get("next") ?? url.searchParams.get("from");
+    expect(nextParam).toContain("/courses/cs231n/start");
   });
 
   test("coming-soon course blocks start action regardless of auth state", async ({ page }) => {
