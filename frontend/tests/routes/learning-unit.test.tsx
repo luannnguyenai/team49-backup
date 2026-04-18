@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LearningPage from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page";
+import LearningUnitShell from "@/components/learn/LearningUnitShell";
 import TopNav from "@/components/layout/TopNav";
 import type { LearningUnitResponse } from "@/types";
 
@@ -138,6 +139,44 @@ const CHAPTERS = [
   },
 ];
 
+const LECTURE_2_UNIT: LearningUnitResponse = {
+  course: {
+    slug: "cs231n",
+    title: "CS231n: Deep Learning for Computer Vision",
+  },
+  unit: {
+    id: "unit_lecture_02",
+    slug: "lecture-2-linear-classifiers",
+    title: "Lecture 2: Image Classification with Linear Classifiers",
+    unit_type: "lecture",
+    status: "ready",
+    entry_mode: "video",
+  },
+  content: {
+    body_markdown: null,
+    video_url: "/data/CS231n/videos/lecture-2.mp4",
+    transcript_available: true,
+    slides_available: true,
+  },
+  tutor: {
+    enabled: true,
+    mode: "in_context",
+    context_binding_id: "ctx_unit_lecture_02",
+    legacy_lecture_id: "cs231n-lecture-2",
+  },
+};
+
+const CHAPTERS_2 = [
+  {
+    id: 2,
+    lecture_id: "cs231n-lecture-2",
+    title: "Linear Classification",
+    summary: "Linear classifier overview",
+    start_time: 0,
+    end_time: 90,
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -203,6 +242,56 @@ describe("learning unit page (US3)", () => {
     await waitFor(() => {
       expect(screen.getByText("Chapters")).toBeInTheDocument();
       expect(screen.getByText("00:00 · Introduction")).toBeInTheDocument();
+    });
+  });
+
+  it("ignores stale chapter responses when switching lectures quickly", async () => {
+    let resolveLecture1: ((value: { data: typeof CHAPTERS }) => void) | undefined;
+    let resolveLecture2: ((value: { data: typeof CHAPTERS_2 }) => void) | undefined;
+
+    apiMock.get.mockImplementation((url: string) => {
+      if (url.includes("cs231n-lecture-1")) {
+        return new Promise((resolve) => {
+          resolveLecture1 = resolve;
+        });
+      }
+      if (url.includes("cs231n-lecture-2")) {
+        return new Promise((resolve) => {
+          resolveLecture2 = resolve;
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    const { rerender } = render(
+      <LearningUnitShell data={LECTURE_1_UNIT} courseSlug="cs231n" />,
+    );
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith("/api/lectures/cs231n-lecture-1/toc");
+    });
+
+    rerender(<LearningUnitShell data={LECTURE_2_UNIT} courseSlug="cs231n" />);
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith("/api/lectures/cs231n-lecture-2/toc");
+    });
+
+    resolveLecture2?.({ data: CHAPTERS_2 });
+
+    await waitFor(() => {
+      expect(screen.getByText("00:00 · Linear Classification")).toBeInTheDocument();
+    });
+
+    resolveLecture1?.({ data: CHAPTERS });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("00:00 · Introduction"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText("00:00 · Linear Classification"),
+      ).toBeInTheDocument();
     });
   });
 
