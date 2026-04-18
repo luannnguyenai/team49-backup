@@ -20,7 +20,8 @@ build/
 
 
 # Data — ignore large binary/video assets, track JSON configs
-data/CS231n/
+data/CS231n/*
+!data/CS231n/syllabus.json
 data/CS224n/
 
 # Project local files
@@ -38,8 +39,6 @@ dist/
 .env.test.local
 .env.production.local
 data/cs231n/
-
-.codex
-
-# Git worktrees
-.worktrees/
+frontend/test-results/
+frontend/playwright-report/
+frontend/tsconfig.tsbuildinfo

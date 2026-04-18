@@ -9,6 +9,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from src.models.learning import MasteryLevel
 from src.models.user import PreferredMethod
 
 # ---------------------------------------------------------------------------
@@ -46,6 +47,22 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    """POST /api/auth/forgot-password"""
+
+    email: EmailStr
+    new_password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one digit.")
+        if not any(c.isalpha() for c in v):
+            raise ValueError("Password must contain at least one letter.")
+        return v
+
+
 # ---------------------------------------------------------------------------
 # Token responses
 # ---------------------------------------------------------------------------
@@ -77,6 +94,7 @@ class TokenPayload(BaseModel):
     sub: str  # user UUID as string
     type: str  # "access" | "refresh"
     exp: int  # unix timestamp
+    jti: str
 
 
 # ---------------------------------------------------------------------------
@@ -119,3 +137,13 @@ class UserProfile(BaseModel):
     preferred_method: PreferredMethod | None
     is_onboarded: bool
     created_at: datetime
+
+
+class UserSkillSnapshot(BaseModel):
+    label: str
+    value: float = Field(ge=0, le=100)
+    level: MasteryLevel | str
+
+
+class UserSkillOverview(BaseModel):
+    skills: list[UserSkillSnapshot]

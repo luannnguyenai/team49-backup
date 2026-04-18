@@ -25,12 +25,10 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import (
-    KnowledgeComponent,
     Module,
     Question,
     Topic,
@@ -48,6 +46,8 @@ from src.schemas.history import (
     ScoreTrendPoint,
     SessionDetailResponse,
 )
+from src.exceptions import ConflictError, NotFoundError
+from src.repositories.history_repo import HistoryRepository
 from src.services.mastery_evaluator import (
     BloomLevel,
     QuestionResult,
@@ -69,6 +69,7 @@ async def get_history(
     page: int = 1,
     page_size: int = 20,
 ) -> HistoryResponse:
+    repo = HistoryRepository(db)
 
     # ── Base filter ────────────────────────────────────────────────────────
     filters = [Session.user_id == user_id]
@@ -92,27 +93,14 @@ async def get_history(
         filters.append(Session.started_at >= cutoff)
 
     # ── Count total ────────────────────────────────────────────────────────
-    count_result = await db.execute(select(func.count()).select_from(Session).where(*filters))
-    total: int = count_result.scalar() or 0
+    total = await repo.count_sessions(filters=filters)
 
     # ── Fetch page ─────────────────────────────────────────────────────────
-    page_result = await db.execute(
-        select(
-            Session,
-            Topic.name.label("topic_name"),
-            Module.name.label("module_name"),
-        )
-        .outerjoin(Topic, Session.topic_id == Topic.id)
-        .outerjoin(
-            Module,
-            (Session.module_id == Module.id) | (Topic.module_id == Module.id),
-        )
-        .where(*filters)
-        .order_by(Session.started_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
+    page_rows = await repo.fetch_history_page(
+        filters=filters,
+        page=page,
+        page_size=page_size,
     )
-    page_rows = page_result.all()
 
     items: list[HistoryItem] = []
     for sess, topic_name, module_name in page_rows:
@@ -167,11 +155,9 @@ async def _compute_summary(
     filters: list,
 ) -> HistorySummary:
     """Compute stats over ALL rows matching filters (ignores pagination)."""
+    repo = HistoryRepository(db)
 
-    all_result = await db.execute(
-        select(Session).where(*filters).order_by(Session.started_at.asc())
-    )
-    sessions: list[Session] = all_result.scalars().all()
+    sessions = await repo.fetch_sessions_for_summary(filters=filters)
 
     completed = [s for s in sessions if s.completed_at is not None]
 
@@ -215,35 +201,17 @@ async def get_session_detail(
     user_id: uuid.UUID,
     session_id: uuid.UUID,
 ) -> SessionDetailResponse:
+    repo = HistoryRepository(db)
 
     # 1. Validate session ownership
-    sess_result = await db.execute(
-        select(Session).where(
-            Session.id == session_id,
-            Session.user_id == user_id,
-        )
-    )
-    sess = sess_result.scalar_one_or_none()
+    sess = await repo.get_owned_session(user_id=user_id, session_id=session_id)
     if sess is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found.",
-        )
+        raise NotFoundError("Session not found.")
     if sess.completed_at is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Session has not been completed yet.",
-        )
+        raise ConflictError("Session has not been completed yet.")
 
     # 2. Load interactions + questions
-    rows_result = await db.execute(
-        select(Interaction, Question, Topic.name.label("topic_name"))
-        .join(Question, Interaction.question_id == Question.id)
-        .outerjoin(Topic, Question.topic_id == Topic.id)
-        .where(Interaction.session_id == session_id)
-        .order_by(Interaction.sequence_position)
-    )
-    rows = rows_result.all()
+    rows = await repo.fetch_session_detail_rows(session_id)
 
     if not rows:
         return SessionDetailResponse(
@@ -351,6 +319,6 @@ async def _resolve_kc_names(
             pass
     if not valid:
         return kc_id_strs
-    result = await db.execute(select(KnowledgeComponent).where(KnowledgeComponent.id.in_(valid)))
-    name_map = {str(kc.id): kc.name for kc in result.scalars().all()}
+    repo = HistoryRepository(db)
+    name_map = await repo.resolve_kc_names(valid)
     return [name_map.get(s, s) for s in kc_id_strs]

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
@@ -36,6 +36,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
@@ -70,11 +71,15 @@ export default function RegisterForm() {
         password: data.password,
         full_name: data.full_name,
       });
-      router.push("/onboarding");
+      const next = searchParams.get("next") ?? searchParams.get("from");
+      router.push(next ? `/onboarding?next=${encodeURIComponent(next)}` : "/onboarding");
     } catch {
       // error set in store
     }
   };
+
+  const next = searchParams.get("next") ?? searchParams.get("from");
+  const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -170,7 +175,7 @@ export default function RegisterForm() {
 
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
         Đã có tài khoản?{" "}
-        <Link href="/login" className="link">
+        <Link href={loginHref} className="link">
           Đăng nhập
         </Link>
       </p>

@@ -128,14 +128,23 @@ if [ "$BACKEND_STATUS" = "restarting" ] || [ "$BACKEND_STATUS" = "exited" ]; the
   docker compose rm -f -s backend 2>/dev/null || true
 fi
 
+# Phát hiện frontend đang crash loop → force recreate để reset anonymous node_modules volume
+FRONTEND_STATUS=$(docker inspect al_frontend --format='{{.State.Status}}' 2>/dev/null || echo "absent")
+if [ "$FRONTEND_STATUS" = "restarting" ] || [ "$FRONTEND_STATUS" = "exited" ]; then
+  log_warn "Frontend đang crash loop (${FRONTEND_STATUS}) — force recreate để reset node_modules volume..."
+  docker compose rm -f -s frontend 2>/dev/null || true
+fi
+
 if [ "$FORCE_REBUILD" = true ]; then
   log_info "Force rebuild tất cả images..."
+  docker compose rm -f -s frontend 2>/dev/null || true
   $COMPOSE_CMD up -d --build
 elif [ -z "$BACKEND_IMAGE" ]; then
   log_info "Images chưa tồn tại — build lần đầu (~3-5 phút)..."
   $COMPOSE_CMD up -d --build
 elif [ "$NEED_FRONTEND_REBUILD" = true ]; then
   log_info "Rebuilding frontend image (npm deps thay đổi)..."
+  docker compose rm -f -s frontend 2>/dev/null || true
   $COMPOSE_CMD build frontend
   $COMPOSE_CMD up -d
 else

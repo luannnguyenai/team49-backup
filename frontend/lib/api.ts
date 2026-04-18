@@ -7,6 +7,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import Cookies from "js-cookie";
+import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
 
 // ---------------------------------------------------------------------------
 // Token cookie helpers
@@ -133,7 +134,8 @@ api.interceptors.response.use(
 
       // Refresh failed → redirect to login
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        const currentPath = `${window.location.pathname}${window.location.search}`;
+        window.location.href = buildUnauthorizedRedirectTarget(currentPath);
       }
     }
 
@@ -157,7 +159,12 @@ import type {
   ModuleTestAnswerInput,
   ModuleTestResultResponse,
   ModuleTestStartResponse,
+  CourseCatalogResponse,
+  CourseCatalogView,
+  CourseOverviewResponse,
+  LearningUnitResponse,
   OnboardingPayload,
+  ForgotPasswordPayload,
   QuizAnswerResponse,
   QuizCompleteResponse,
   QuizStartResponse,
@@ -165,9 +172,11 @@ import type {
   SelectedAnswer,
   SessionDetailResponse,
   SessionType,
+  StartLearningDecisionResponse,
   TokenPair,
   TopicContent,
   User,
+  UserSkillOverview,
 } from "@/types";
 
 export const assessmentApi = {
@@ -196,6 +205,36 @@ export const contentApi = {
 
   topicContent: (id: string) =>
     api.get<TopicContent>(`/api/topics/${id}/content`).then((r) => r.data),
+};
+
+export const courseApi = {
+  catalog: (params?: {
+    view?: CourseCatalogView;
+    includeUnavailable?: boolean;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.view) q.set("view", params.view);
+    if (params?.includeUnavailable != null) {
+      q.set("include_unavailable", String(params.includeUnavailable));
+    }
+    const suffix = q.toString() ? `?${q.toString()}` : "";
+    return api.get<CourseCatalogResponse>(`/api/courses${suffix}`).then((r) => r.data);
+  },
+
+  overview: (courseSlug: string) =>
+    api
+      .get<CourseOverviewResponse>(`/api/courses/${courseSlug}/overview`)
+      .then((r) => r.data),
+
+  start: (courseSlug: string) =>
+    api
+      .post<StartLearningDecisionResponse>(`/api/courses/${courseSlug}/start`)
+      .then((r) => r.data),
+
+  learningUnit: (courseSlug: string, unitSlug: string) =>
+    api
+      .get<LearningUnitResponse>(`/api/courses/${courseSlug}/units/${unitSlug}`)
+      .then((r) => r.data),
 };
 
 export const quizApi = {
@@ -261,6 +300,9 @@ export const authApi = {
   login: (data: LoginPayload) =>
     api.post<TokenPair>("/api/auth/login", data).then((r) => r.data),
 
+  forgotPassword: (data: ForgotPasswordPayload) =>
+    api.post<{ status: string }>("/api/auth/forgot-password", data).then((r) => r.data),
+
   refresh: (refreshToken: string) =>
     api
       .post<AccessToken>("/api/auth/refresh", { refresh_token: refreshToken })
@@ -268,6 +310,10 @@ export const authApi = {
 
   me: () => api.get<User>("/api/users/me").then((r) => r.data),
 
+  mySkills: () => api.get<UserSkillOverview>("/api/users/me/skills").then((r) => r.data),
+
   onboarding: (data: OnboardingPayload) =>
     api.put<User>("/api/users/me/onboarding", data).then((r) => r.data),
+
+  logout: () => api.post("/api/auth/logout").then(() => undefined),
 };

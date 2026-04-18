@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 VN_TZ = timezone(timedelta(hours=7))
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def git(cmd):
@@ -21,6 +22,17 @@ def git(cmd):
         ).strip()
     except Exception:
         return ""
+
+
+def resolve_log_dir() -> Path:
+    """Resolve the log directory relative to the repo root, not the hook cwd."""
+    raw_path = os.environ.get("AI_LOG_DIR")
+    if raw_path:
+        log_dir = Path(raw_path).expanduser()
+        if not log_dir.is_absolute():
+            log_dir = REPO_ROOT / log_dir
+        return log_dir
+    return REPO_ROOT / ".ai-log"
 
 
 def detect_tool(data: dict) -> str:
@@ -165,21 +177,22 @@ def main():
     entry = normalize(data, tool)
     if not entry:
         sys.exit(0)
+    event = entry.get("event", "")
 
-    log_dir = Path(os.environ.get("AI_LOG_DIR", ".ai-log"))
+    log_dir = resolve_log_dir()
     log_dir.mkdir(exist_ok=True)
     log_file = log_dir / "session.jsonl"
 
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-    # Output valid JSON (required by some tools like Gemini)
-    # only output JSON if explicitly needed
+    # Return hook output only when the tool expects it.
     if os.environ.get("AI_TOOL_NAME") == "claude":
         sys.stdout.write(json.dumps({"continue": True}))
         sys.stdout.flush()
-    else:
-        print(json.dumps({"status": "logged"}))
+    elif tool == "codex" and event == "Stop":
+        sys.stdout.write(json.dumps({"continue": True}))
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":

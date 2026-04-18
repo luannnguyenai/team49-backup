@@ -13,7 +13,13 @@ Usage:
     DATABASE_URL=postgresql+asyncpg://test:test@localhost/test_ai_learning pytest tests/
 """
 
+# Load .env into os.environ BEFORE any src imports so LangChain/OpenAI
+# can find the API keys at module-level initialization time.
 import asyncio
+
+from dotenv import load_dotenv
+load_dotenv()
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -26,29 +32,15 @@ from src.models.base import Base
 
 
 # ---------------------------------------------------------------------------
-# Event loop — use one loop for the whole test session
-# ---------------------------------------------------------------------------
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-# ---------------------------------------------------------------------------
 # Test database engine (re-created once per session)
 # ---------------------------------------------------------------------------
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def test_engine():
-    """Create all tables in the test DB, yield the engine, drop tables after."""
+    """Per-test engine — avoids event-loop mismatch with session-scoped fixtures."""
     engine = create_async_engine(settings.database_url, echo=False)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Tables already exist (migrated via Alembic) — don't create/drop in tests.
     yield engine
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
 
 
@@ -62,7 +54,12 @@ async def db_session(test_engine):
     Yield an AsyncSession wrapped in a savepoint.
     Any changes made during the test are rolled back automatically.
     """
-    async with test_engine.connect() as conn:
+    try:
+        conn = await asyncio.wait_for(test_engine.connect(), timeout=2.0)
+    except Exception as exc:
+        pytest.skip(f"Test database unavailable: {exc}")
+
+    async with conn:
         await conn.begin()
         session_factory = async_sessionmaker(bind=conn, expire_on_commit=False)
         session: AsyncSession = session_factory()
@@ -79,7 +76,18 @@ async def db_session(test_engine):
 # ---------------------------------------------------------------------------
 
 @pytest_asyncio.fixture
-async def client(db_session: AsyncSession):
+async def client():
+    """AsyncClient for routes that do not require DB overrides."""
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+    ) as ac:
+        yield ac
+
+
+@pytest_asyncio.fixture
+async def db_client(db_session: AsyncSession):
     """AsyncClient wired to the FastAPI app with the test DB session injected."""
 
     async def override_db():

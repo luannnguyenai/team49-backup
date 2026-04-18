@@ -1,38 +1,20 @@
 "use client";
-// app/(protected)/dashboard/page.tsx
-// Dashboard: welcome, stats, and course listing with 4 filter tabs.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookOpen, TrendingUp, Clock, Play, ChevronDown } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
-import { contentApi, historyApi } from "@/lib/api";
-import type { ModuleListItem, HistorySummary } from "@/types";
+
+import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import {
+  buildDashboardCourseCardModel,
+  filterDashboardCourses,
+  type DashboardCourseTab,
+} from "@/features/dashboard/presenters";
+import { courseApi, historyApi } from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
+import type { CourseCatalogItem, HistorySummary } from "@/types";
 
-// ---- Difficulty helpers ----
-type Difficulty = "for-you" | "basic" | "intermediate" | "advanced";
-
-function getDifficulty(m: ModuleListItem): "basic" | "intermediate" | "advanced" {
-  const prereqs = m.prerequisite_module_ids?.length ?? 0;
-  if (prereqs === 0) return "basic";
-  if (prereqs === 1) return "intermediate";
-  return "advanced";
-}
-
-const DIFF_LABEL: Record<string, string> = {
-  basic: "Cơ bản",
-  intermediate: "Trung bình",
-  advanced: "Nâng cao",
-};
-
-const DIFF_COLOR: Record<string, string> = {
-  basic: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  intermediate: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  advanced: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-};
-
-// Gradient thumbnails per order_index
 const GRADIENTS = [
   "from-blue-500 to-indigo-600",
   "from-violet-500 to-purple-600",
@@ -42,14 +24,13 @@ const GRADIENTS = [
   "from-cyan-500 to-blue-500",
 ];
 
-const TABS: { key: Difficulty; label: string }[] = [
+const TABS: { key: DashboardCourseTab; label: string }[] = [
   { key: "for-you", label: "Dành cho bạn" },
-  { key: "basic", label: "Cơ bản" },
-  { key: "intermediate", label: "Trung bình" },
-  { key: "advanced", label: "Nâng cao" },
+  { key: "all", label: "Tất cả" },
+  { key: "ready", label: "Sẵn sàng" },
+  { key: "coming_soon", label: "Sắp ra mắt" },
 ];
 
-// ---- Stat card ----
 function StatCard({
   icon,
   iconBg,
@@ -81,61 +62,54 @@ function StatCard({
   );
 }
 
-// ---- Course card ----
-function CourseCard({ module, idx }: { module: ModuleListItem; idx: number }) {
-  const diff = getDifficulty(module);
+function CourseCard({ course, idx }: { course: CourseCatalogItem; idx: number }) {
   const gradient = GRADIENTS[idx % GRADIENTS.length];
+  const model = buildDashboardCourseCardModel(course);
 
   return (
     <div
-      className="card overflow-hidden flex flex-col group hover:shadow-md transition-shadow"
+      className="card flex flex-col overflow-hidden transition-shadow group hover:shadow-md"
       style={{ backgroundColor: "var(--bg-card)", padding: 0 }}
     >
-      {/* Thumbnail */}
-      <div className={`relative h-36 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+      <div
+        className={`relative flex h-36 items-center justify-center bg-gradient-to-br ${gradient}`}
+      >
         <BookOpen className="h-12 w-12 text-white opacity-30" />
-        <span
-          className={`absolute top-3 right-3 rounded-full px-2.5 py-0.5 text-xs font-semibold ${DIFF_COLOR[diff]}`}
-        >
-          {DIFF_LABEL[diff]}
-        </span>
+        <div className="absolute right-3 top-3">
+          <CourseStatusBadge status={course.status} />
+        </div>
       </div>
 
-      {/* Body */}
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <h3
-            className="font-semibold leading-snug line-clamp-2"
+            className="line-clamp-2 font-semibold leading-snug"
             style={{ color: "var(--text-primary)" }}
           >
-            {module.name}
+            {course.title}
           </h3>
-          {module.description && (
-            <p
-              className="mt-1 text-sm line-clamp-2"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              {module.description}
-            </p>
-          )}
+          <p
+            className="mt-1 line-clamp-2 text-sm"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {course.short_description}
+          </p>
         </div>
 
-        {/* Stats row */}
         <div className="flex items-center gap-4 text-xs" style={{ color: "var(--text-muted)" }}>
           <span className="flex items-center gap-1">
             <Play className="h-3 w-3" />
-            {module.topics_count} bài
+            {course.status === "ready" ? "Sẵn sàng học" : "Đang hoàn thiện"}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            0 bài tập
+            {model.statusDetail}
           </span>
         </div>
 
-        {/* Progress bar */}
         <div>
           <div
-            className="h-1.5 w-full rounded-full overflow-hidden"
+            className="h-1.5 w-full overflow-hidden rounded-full"
             style={{ backgroundColor: "var(--bg-page)" }}
           >
             <div className="h-full w-0 rounded-full bg-primary-600" />
@@ -145,67 +119,55 @@ function CourseCard({ module, idx }: { module: ModuleListItem; idx: number }) {
           </p>
         </div>
 
-        {/* CTA */}
         <Link
-          href="/tutor"
+          href={model.href}
           className="mt-auto flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-opacity hover:opacity-90"
           style={{ backgroundColor: "var(--primary-600, #2563eb)", color: "white" }}
         >
           <Play className="h-3.5 w-3.5" />
-          Bắt đầu học
+          {model.ctaLabel}
         </Link>
       </div>
     </div>
   );
 }
 
-// ---- Page ----
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const [modules, setModules] = useState<ModuleListItem[]>([]);
+  const [courses, setCourses] = useState<CourseCatalogItem[]>([]);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Difficulty>("for-you");
+  const [activeTab, setActiveTab] = useState<DashboardCourseTab>("for-you");
 
   useEffect(() => {
-    Promise.all([
-      contentApi.modules(),
-      historyApi.list({ page_size: 1 }),
-    ])
-      .then(([mods, hist]) => {
-        setModules(mods);
+    Promise.all([courseApi.catalog({ includeUnavailable: true }), historyApi.list({ page_size: 1 })])
+      .then(([catalog, hist]) => {
+        setCourses(catalog.items);
         setSummary(hist.summary);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter courses based on active tab
-  const filtered =
-    activeTab === "for-you"
-      ? modules
-      : modules.filter((m) => getDifficulty(m) === activeTab);
-
-  const totalHours = summary
-    ? Math.round((summary.total_study_seconds ?? 0) / 3600)
-    : 0;
+  const filtered = filterDashboardCourses(courses, activeTab);
+  const totalHours = summary ? Math.round((summary.total_study_seconds ?? 0) / 3600) : 0;
   const avgScore = summary?.avg_score != null ? Math.round(summary.avg_score) : 0;
+  const firstName = user?.full_name.split(" ")[0] ?? "bạn";
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto animate-fade-in">
-      {/* Welcome */}
+    <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Chào mừng trở lại! 👋
+          Chào mừng trở lại, {firstName}! 👋
         </h1>
         <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Tiếp tục hành trình học AI của bạn
+          Dashboard giờ dùng cùng course catalog với landing page, nên mỗi card sẽ dẫn đúng flow
+          học tương ứng.
         </p>
       </div>
 
-      {/* Stat cards */}
       {loading ? (
-        <div className="flex items-center justify-center h-24">
+        <div className="flex h-24 items-center justify-center">
           <LoadingSpinner size="md" />
         </div>
       ) : (
@@ -213,8 +175,8 @@ export default function DashboardPage() {
           <StatCard
             icon={<BookOpen className="h-6 w-6 text-blue-600" />}
             iconBg="bg-blue-100 dark:bg-blue-900/30"
-            value={String(modules.length)}
-            label="Khóa học đang học"
+            value={String(courses.length)}
+            label="Khóa học trong catalog"
           />
           <StatCard
             icon={<TrendingUp className="h-6 w-6 text-emerald-600" />}
@@ -231,13 +193,11 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Course listing */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
             Tất cả khóa học
           </h2>
-          {/* Sort dropdown — visual only */}
           <button
             className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm"
             style={{
@@ -250,9 +210,8 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Filter tabs */}
         <div
-          className="flex gap-1 rounded-xl p-1 mb-6 w-fit"
+          className="mb-6 flex gap-1 rounded-xl p-1 w-fit"
           style={{ backgroundColor: "var(--bg-page)" }}
         >
           {TABS.map(({ key, label }) => (
@@ -261,7 +220,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab(key)}
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeTab === key
-                  ? "bg-white dark:bg-slate-800 shadow-sm text-primary-600"
+                  ? "bg-white text-primary-600 shadow-sm dark:bg-slate-800"
                   : "hover:bg-white/60 dark:hover:bg-slate-800/60"
               }`}
               style={activeTab !== key ? { color: "var(--text-secondary)" } : {}}
@@ -271,22 +230,21 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Cards grid */}
         {loading ? (
-          <div className="flex items-center justify-center h-40">
+          <div className="flex h-40 items-center justify-center">
             <LoadingSpinner size="md" />
           </div>
         ) : filtered.length === 0 ? (
           <div
-            className="flex items-center justify-center h-40 rounded-xl border"
+            className="flex h-40 items-center justify-center rounded-xl border"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
-            Không có khóa học nào.
+            Không có khóa học nào trong mục này.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((m, i) => (
-              <CourseCard key={m.id} module={m} idx={i} />
+            {filtered.map((course, idx) => (
+              <CourseCard key={course.id} course={course} idx={idx} />
             ))}
           </div>
         )}

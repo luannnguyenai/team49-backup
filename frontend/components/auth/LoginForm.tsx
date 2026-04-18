@@ -36,12 +36,16 @@ export default function LoginForm() {
     clearError();
     try {
       await login(data);
-      const from = searchParams.get("from") ?? "/dashboard";
-      router.push(from);
+      const next = searchParams.get("next") ?? searchParams.get("from") ?? "/dashboard";
+      router.push(next);
     } catch {
       // error is set in store
     }
   };
+
+  const next = searchParams.get("next") ?? searchParams.get("from");
+  const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
+  const forgotPasswordHref = next ? `/forgot-password?next=${encodeURIComponent(next)}` : "/forgot-password";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
@@ -86,13 +90,19 @@ export default function LoginForm() {
         {...register("password")}
       />
 
+      <div className="flex justify-end">
+        <Link href={forgotPasswordHref} className="link text-sm">
+          Quên mật khẩu?
+        </Link>
+      </div>
+
       <Button type="submit" loading={isLoading} className="w-full">
         Đăng nhập
       </Button>
 
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
         Chưa có tài khoản?{" "}
-        <Link href="/register" className="link">
+        <Link href={registerHref} className="link">
           Đăng ký ngay
         </Link>
       </p>

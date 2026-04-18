@@ -6,26 +6,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  BookOpen,
-  History,
-  User,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Brain,
-  MessageSquareText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tutor", label: "AI Tutor", icon: MessageSquareText },
-  { href: "/learn", label: "Học", icon: BookOpen },
-  { href: "/history", label: "Lịch sử", icon: History },
-  { href: "/profile", label: "Hồ sơ", icon: User },
-];
+import { NAV_ITEMS } from "@/components/layout/navItems";
 
 interface Props {
   mobileOpen: boolean;
@@ -63,7 +51,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
         style={{ borderColor: "var(--border)" }}
       >
         <Link
-          href="/dashboard"
+          href="/"
           className="flex items-center gap-2.5 min-w-0"
           onClick={onMobileClose}
         >
@@ -72,7 +60,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           </div>
           {!collapsed && (
             <span className="truncate text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-              AI Learning
+              AI Learning Hub
             </span>
           )}
         </Link>
@@ -97,8 +85,11 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
       {/* Nav items */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+        {NAV_ITEMS.map((navItem) => {
+          const { href, label, icon: Icon } = navItem;
+          const active = (navItem as any).exact
+            ? pathname === href
+            : pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}

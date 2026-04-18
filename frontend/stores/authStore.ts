@@ -25,7 +25,7 @@ interface AuthState {
   // Actions
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
   fetchMe: () => Promise<void>;
   onboard: (payload: OnboardingPayload) => Promise<void>;
@@ -115,11 +115,17 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // ---- logout ----
-      logout: () => {
+      logout: async () => {
         const timer = get()._refreshTimer;
         if (timer) clearTimeout(timer);
-        tokenStorage.clear();
-        set({ user: null, error: null, _refreshTimer: null });
+        try {
+          await authApi.logout();
+        } catch {
+          // Best-effort revoke; local cleanup must still happen.
+        } finally {
+          tokenStorage.clear();
+          set({ user: null, error: null, _refreshTimer: null });
+        }
       },
 
       // ---- refresh ----
@@ -136,7 +142,7 @@ export const useAuthStore = create<AuthState>()(
           );
           return true;
         } catch {
-          get().logout();
+          await get().logout();
           return false;
         }
       },

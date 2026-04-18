@@ -21,16 +21,12 @@ import math
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, status
-from sqlalchemy import case, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import (
     BloomLevel,
-    DifficultyBucket,
     KnowledgeComponent,
     Question,
-    QuestionStatus,
     Topic,
 )
 from src.models.learning import (
@@ -47,11 +43,15 @@ from src.schemas.assessment import (
     QuestionForAssessment,
     TopicResult,
 )
+from src.exceptions import ConflictError, NotFoundError, ValidationError
+from src.repositories.assessment_repo import AssessmentRepository
+from src.repositories.question_repo import QuestionRepository
 from src.services.mastery_evaluator import (
     QuestionResult,
     TopicMasteryResult,
     evaluate_topic,
 )
+from src.services.question_selector import QuestionSelector
 
 # ---------------------------------------------------------------------------
 # 2PL IRT model
@@ -167,23 +167,15 @@ async def start_assessment(
     user_id: uuid.UUID,
     topic_ids: list[uuid.UUID],
 ) -> AssessmentStartResponse:
+    repo = AssessmentRepository(db)
     # 1. Validate all requested topics exist
-    topics_result = await db.execute(select(Topic).where(Topic.id.in_(topic_ids)))
-    found_ids = {t.id for t in topics_result.scalars().all()}
+    found_ids = {t.id for t in await repo.get_topics_by_ids(topic_ids)}
     missing = [tid for tid in topic_ids if tid not in found_ids]
     if missing:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Topics not found: {[str(m) for m in missing]}",
-        )
+        raise NotFoundError(f"Topics not found: {[str(m) for m in missing]}")
 
     # 2. Collect answered question IDs + estimate ability (θ) from user history
-    answered_result = await db.execute(
-        select(Interaction.question_id, Interaction.is_correct)
-        .where(Interaction.user_id == user_id)
-        .distinct(Interaction.question_id)
-    )
-    rows = answered_result.all()
+    rows = await repo.get_answered_question_rows(user_id)
     excluded_ids: set[uuid.UUID] = {row[0] for row in rows}
 
     # ── 2PL MLE ability estimate ──────────────────────────────────────────────
@@ -193,12 +185,7 @@ async def start_assessment(
     ability = 0.0  # θ = 0 for brand-new users (average ability prior)
     if rows:
         hist_ids = [row[0] for row in rows]
-        hist_q_result = await db.execute(
-            select(Question).where(Question.id.in_(hist_ids))
-        )
-        hist_q_map: dict[uuid.UUID, Question] = {
-            q.id: q for q in hist_q_result.scalars().all()
-        }
+        hist_q_map = {q.id: q for q in await repo.get_questions_by_ids(hist_ids)}
         correct_map: dict[uuid.UUID, bool] = {row[0]: row[1] for row in rows}
 
         irt_responses: list[tuple[float, float, bool]] = [
@@ -212,20 +199,17 @@ async def start_assessment(
     all_questions: list[Question] = []
     skipped_topics: list[str] = []
     for topic_id in topic_ids:
-        topic_qs = await _select_questions_for_topic(db, topic_id, excluded_ids, ability)
+        topic_qs = await _select_questions_for_topic(db, user_id, topic_id, excluded_ids, ability)
         if topic_qs:
             all_questions.extend(topic_qs)
         else:
             skipped_topics.append(str(topic_id))
 
     if not all_questions:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
+        raise ValidationError((
                 "No eligible assessment questions found for any of the requested topics. "
                 "The question bank may not include active assessment questions for these topics."
-            ),
-        )
+            ))
 
     # 4. Create the Session (no topic_id/module_id — spans multiple topics)
     session = Session(
@@ -249,74 +233,20 @@ async def start_assessment(
 
 async def _select_questions_for_topic(
     db: AsyncSession,
+    user_id: uuid.UUID,
     topic_id: uuid.UUID,
     excluded_ids: set[uuid.UUID],
     ability: float = 0.0,
-    _candidate_multiplier: int = 5,
 ) -> list[Question]:
-    """
-    Select up to 5 questions for a single topic following the bloom distribution.
-
-    2PL IRT question selection:
-    ─ Fetch up to (count × _candidate_multiplier) candidates per bloom slot via SQL,
-      pre-ordered by |b − θ| as a cheap proximity filter.
-    ─ Re-rank in Python by 2PL item information: I(θ) = a²·P(θ)·(1−P(θ))
-      selecting the questions that are most informative at the current ability level.
-    ─ Questions without calibrated IRT params use bucket-derived defaults so the
-      ranking is meaningful even before formal calibration.
-
-    Questions already in ``excluded_ids`` (previously answered) are skipped.
-    If a bloom slot has fewer candidates than requested, we take what's available.
-    """
-    selected: list[Question] = []
-
-    # SQL pre-filter: order by |b_proxy − ability| so the candidate pool already
-    # skews toward on-target difficulty before Python re-ranking.
-    bucket_proxy = case(
-        (Question.difficulty_bucket == DifficultyBucket.easy, literal(-1.0)),
-        (Question.difficulty_bucket == DifficultyBucket.medium, literal(0.0)),
-        (Question.difficulty_bucket == DifficultyBucket.hard, literal(1.0)),
-        else_=literal(0.0),
+    """Select assessment questions through the shared QuestionSelector strategy."""
+    selector = QuestionSelector(QuestionRepository(db))
+    return await selector.select_by_bloom_irt(
+        user_id=user_id,
+        topic_id=topic_id,
+        slots=_BLOOM_SLOTS,
+        ability=ability,
+        excluded_ids=excluded_ids,
     )
-    sql_distance = case(
-        (Question.irt_difficulty.isnot(None), func.abs(Question.irt_difficulty - ability)),
-        else_=func.abs(bucket_proxy - ability),
-    )
-
-    for bloom_levels, count in _BLOOM_SLOTS:
-        exclusion = excluded_ids | {q.id for q in selected}
-
-        stmt = (
-            select(Question)
-            .where(
-                Question.topic_id == topic_id,
-                Question.status == QuestionStatus.active,
-                text("usage_context::jsonb @> '[\"assessment\"]'::jsonb"),
-                Question.bloom_level.in_(bloom_levels),
-            )
-            .order_by(sql_distance.asc(), func.random())
-            .limit(count * _candidate_multiplier)
-        )
-        if exclusion:
-            stmt = stmt.where(Question.id.not_in(list(exclusion)))
-
-        result = await db.execute(stmt)
-        candidates: list[Question] = list(result.scalars().all())
-
-        if not candidates:
-            continue
-
-        # ── 2PL information re-ranking ────────────────────────────────────────
-        # Sort descending by I(θ): the most informative item for this ability
-        # level goes first. Negate so sorted() gives descending order.
-        def _neg_information(q: Question) -> float:
-            a, b = _resolve_2pl_params(q)
-            return -_irt_2pl_information(ability, a, b)
-
-        ranked = sorted(candidates, key=_neg_information)
-        selected.extend(ranked[:count])
-
-    return selected
 
 
 # ===========================================================================
@@ -330,37 +260,25 @@ async def submit_assessment(
     session_id: uuid.UUID,
     answers: list[AnswerInput],
 ) -> AssessmentResultResponse:
+    repo = AssessmentRepository(db)
     # 1. Load + validate session ownership
     session = await _get_session(db, user_id, session_id)
     if session.completed_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has already been submitted.",
-        )
+        raise ConflictError("This assessment has already been submitted.")
 
     # 2. Reject duplicate question_ids in the submission
     question_ids = [a.question_id for a in answers]
     if len(question_ids) != len(set(question_ids)):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Duplicate question_id entries in answers.",
-        )
+        raise ValidationError("Duplicate question_id entries in answers.")
 
     # 3. Batch-load all referenced questions
-    questions_result = await db.execute(select(Question).where(Question.id.in_(question_ids)))
-    questions: dict[uuid.UUID, Question] = {q.id: q for q in questions_result.scalars().all()}
+    questions = {q.id: q for q in await repo.get_questions_by_ids(question_ids)}
     missing = [qid for qid in question_ids if qid not in questions]
     if missing:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Unknown question IDs: {[str(m) for m in missing]}",
-        )
+        raise ValidationError(f"Unknown question IDs: {[str(m) for m in missing]}")
 
     # 4. Determine next global_sequence_position for this user
-    max_global_result = await db.execute(
-        select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
-    )
-    base_global: int = max_global_result.scalar() or 0
+    base_global = await repo.get_max_global_sequence(user_id)
 
     # 5. Grade answers, create Interactions, build QuestionResult list
     now = datetime.now(UTC)
@@ -459,27 +377,16 @@ async def get_assessment_results(
     user_id: uuid.UUID,
     session_id: uuid.UUID,
 ) -> AssessmentResultResponse:
+    repo = AssessmentRepository(db)
     session = await _get_session(db, user_id, session_id)
     if session.completed_at is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Assessment not yet submitted.",
-        )
+        raise NotFoundError("Assessment not yet submitted.")
 
     # Load all interactions joined with their questions
-    rows_result = await db.execute(
-        select(Interaction, Question)
-        .join(Question, Interaction.question_id == Question.id)
-        .where(Interaction.session_id == session_id)
-        .order_by(Interaction.sequence_position)
-    )
-    rows = rows_result.all()
+    rows = await repo.get_session_question_rows(session_id)
 
     if not rows:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No interaction data found for this session.",
-        )
+        raise NotFoundError("No interaction data found for this session.")
 
     # Rebuild QuestionResult list from stored interactions
     question_results: list[QuestionResult] = [
@@ -517,19 +424,10 @@ async def get_assessment_results(
 
 
 async def _get_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID) -> Session:
-    result = await db.execute(
-        select(Session).where(
-            Session.id == session_id,
-            Session.user_id == user_id,
-            Session.session_type == SessionType.assessment,
-        )
-    )
-    session = result.scalar_one_or_none()
+    repo = AssessmentRepository(db)
+    session = await repo.get_assessment_session(user_id=user_id, session_id=session_id)
     if session is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Assessment session not found.",
-        )
+        raise NotFoundError("Assessment session not found.")
     return session
 
 
@@ -541,14 +439,8 @@ async def _upsert_mastery_scores(
 ) -> None:
     """Insert or update topic-grain MasteryScore for every evaluated topic."""
     for topic_id, r in results.items():
-        existing_result = await db.execute(
-            select(MasteryScore).where(
-                MasteryScore.user_id == user_id,
-                MasteryScore.topic_id == topic_id,
-                MasteryScore.kc_id.is_(None),  # topic-grain (not KC-grain)
-            )
-        )
-        score = existing_result.scalar_one_or_none()
+        repo = AssessmentRepository(db)
+        score = await repo.get_mastery_score(user_id=user_id, topic_id=topic_id)
 
         if score is None:
             score = MasteryScore(
@@ -579,8 +471,8 @@ async def _build_result_response(
     topic_ids = list(topic_results_map.keys())
 
     # Batch-fetch topic names
-    topics_result = await db.execute(select(Topic).where(Topic.id.in_(topic_ids)))
-    topics: dict[uuid.UUID, Topic] = {t.id: t for t in topics_result.scalars().all()}
+    repo = AssessmentRepository(db)
+    topics = await repo.get_topic_map(topic_ids)
 
     # Batch-fetch KC names for all weak KC UUIDs
     all_weak_kc_uuids: list[uuid.UUID] = []
@@ -593,10 +485,7 @@ async def _build_result_response(
 
     kc_name_by_id: dict[str, str] = {}
     if all_weak_kc_uuids:
-        kcs_result = await db.execute(
-            select(KnowledgeComponent).where(KnowledgeComponent.id.in_(all_weak_kc_uuids))
-        )
-        kc_name_by_id = {str(kc.id): kc.name for kc in kcs_result.scalars().all()}
+        kc_name_by_id = await repo.get_kc_name_map(all_weak_kc_uuids)
 
     # Compute overall weighted score across all topics
     total_earned = sum(r.earned_points for r in topic_results_map.values())

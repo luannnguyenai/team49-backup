@@ -16,14 +16,21 @@ from collections import defaultdict
 from threading import Lock
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
+from src.models.content import Module, Topic
+from src.models.learning import MasteryScore
+from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
+from src.redis_client import get_redis
 from src.schemas.auth import (
     AccessToken,
+    ForgotPasswordRequest,
     LoginRequest,
     OnboardingRequest,
     RefreshRequest,
@@ -31,7 +38,10 @@ from src.schemas.auth import (
     TokenPair,
     TokenPayload,
     UserProfile,
+    UserSkillOverview,
+    UserSkillSnapshot,
 )
+from src.services.mastery_evaluator import classify_mastery
 from src.services.auth_service import (
     authenticate_user,
     create_access_token,
@@ -39,8 +49,10 @@ from src.services.auth_service import (
     decode_token,
     get_user_by_id,
     register_user,
+    reset_password_for_email,
     update_onboarding,
 )
+from src.services.token_guard import is_payload_revoked, revoke_payload
 
 # ---------------------------------------------------------------------------
 # In-process rate limiter for login (sliding window, per IP)
@@ -80,6 +92,7 @@ _login_limiter = _SlidingWindowRateLimiter(
 
 auth_router = APIRouter(prefix="/api/auth", tags=["Auth"])
 users_router = APIRouter(prefix="/api/users", tags=["Users"])
+_bearer = HTTPBearer(auto_error=True)
 
 
 # ---------------------------------------------------------------------------
@@ -99,6 +112,84 @@ def _build_token_pair(user: User) -> TokenPair:
 
 def _user_to_profile(user: User) -> UserProfile:
     return UserProfile.model_validate(user)
+
+
+_SKILL_LABELS = [
+    "Machine Learning",
+    "Deep Learning",
+    "Computer Vision",
+    "NLP",
+    "LLM",
+]
+
+
+def _resolve_skill_bucket(*parts: str | None) -> str | None:
+    text = " ".join(part or "" for part in parts).lower()
+    if any(token in text for token in ("computer vision", "3d vision", "vision and language", "vision")):
+        return "Computer Vision"
+    if any(token in text for token in ("natural language", "nlp", "language processing")):
+        return "NLP"
+    if any(token in text for token in ("llm", "language model", "prompt", "rag", "agent")):
+        return "LLM"
+    if "deep learning" in text:
+        return "Deep Learning"
+    if "machine learning" in text or " ml " in f" {text} ":
+        return "Machine Learning"
+    return None
+
+
+async def _build_user_skill_overview(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+) -> UserSkillOverview:
+    result = await db.execute(
+        select(MasteryScore, Topic, Module)
+        .join(Topic, MasteryScore.topic_id == Topic.id)
+        .join(Module, Topic.module_id == Module.id)
+        .where(
+            MasteryScore.user_id == user_id,
+            MasteryScore.kc_id.is_(None),
+        )
+    )
+
+    grouped: dict[str, list[float]] = {label: [] for label in _SKILL_LABELS}
+
+    for mastery, topic, module in result.all():
+        bucket = _resolve_skill_bucket(
+            topic.name,
+            topic.description,
+            module.name,
+            module.description,
+        )
+        if bucket is None:
+            continue
+        grouped[bucket].append(round(mastery.mastery_probability * 100, 1))
+
+    skills = []
+    for label in _SKILL_LABELS:
+        if grouped[label]:
+            value = round(sum(grouped[label]) / len(grouped[label]), 1)
+            level = classify_mastery(value)
+        else:
+            value = 0.0
+            level = "not_started"
+        skills.append(UserSkillSnapshot(label=label, value=value, level=level))
+
+    return UserSkillOverview(skills=skills)
+
+
+async def _is_login_allowed(client_ip: str) -> bool:
+    try:
+        redis = get_redis()
+    except RuntimeError:
+        return _login_limiter.is_allowed(client_ip)
+
+    return await check_rate_limit(
+        redis,
+        f"rl:login:{client_ip}",
+        limit=settings.rate_limit_login_per_minute,
+        window_sec=60,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +234,7 @@ async def login(
 ) -> TokenPair:
     # Rate limiting — key by client IP
     client_ip = request.client.host if request.client else "unknown"
-    if not _login_limiter.is_allowed(client_ip):
+    if not await _is_login_allowed(client_ip):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many login attempts. Please wait 60 seconds and try again.",
@@ -159,6 +250,24 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return _build_token_pair(user)
+
+
+@auth_router.post(
+    "/forgot-password",
+    summary="Reset password directly with email + new password",
+)
+async def forgot_password(
+    body: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_async_db),
+) -> dict[str, str]:
+    try:
+        await reset_password_for_email(db, body.email, body.new_password)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    return {"status": "ok"}
 
 
 # ---------------------------------------------------------------------------
@@ -186,6 +295,9 @@ async def refresh_token(
     except ValueError:
         raise invalid_exc
 
+    if await is_payload_revoked(payload):
+        raise invalid_exc
+
     if payload.type != "refresh":
         raise invalid_exc
 
@@ -203,6 +315,33 @@ async def refresh_token(
 
 
 # ---------------------------------------------------------------------------
+# POST /api/auth/logout
+# ---------------------------------------------------------------------------
+
+
+@auth_router.post(
+    "/logout",
+    summary="Revoke the current bearer token",
+)
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+) -> dict[str, str]:
+    invalid_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = decode_token(credentials.credentials)
+    except ValueError:
+        raise invalid_exc
+
+    await revoke_payload(payload)
+    return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
 # GET /api/users/me
 # ---------------------------------------------------------------------------
 
@@ -216,6 +355,18 @@ async def get_me(
     current_user: User = Depends(get_current_user),
 ) -> UserProfile:
     return _user_to_profile(current_user)
+
+
+@users_router.get(
+    "/me/skills",
+    response_model=UserSkillOverview,
+    summary="Return the authenticated user's current AI skill overview",
+)
+async def get_my_skills(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> UserSkillOverview:
+    return await _build_user_skill_overview(db, current_user.id)
 
 
 # ---------------------------------------------------------------------------

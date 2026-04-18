@@ -44,10 +44,10 @@ import random
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, status
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.content import (
     DifficultyBucket,
     KnowledgeComponent,
@@ -143,11 +143,8 @@ async def start_quiz(
         selected_ids.update(q.id for q in chosen)
 
     if not selected:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Không tìm thấy câu hỏi quiz cho topic này. "
-            "Hãy đảm bảo question bank đã được seeded.",
-        )
+        raise ValidationError("Không tìm thấy câu hỏi quiz cho topic này. "
+            "Hãy đảm bảo question bank đã được seeded.")
 
     # 5. Shuffle final list so difficulty doesn't cluster
     random.shuffle(selected)
@@ -188,21 +185,15 @@ async def answer_question(
     # 1. Load and validate session
     session = await _get_quiz_session(db, user_id, session_id)
     if session.completed_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Quiz đã hoàn thành. Không thể ghi thêm câu trả lời.",
-        )
+        raise ConflictError("Quiz đã hoàn thành. Không thể ghi thêm câu trả lời.")
 
     # 2. Load question and verify it belongs to the session topic
     q_result = await db.execute(select(Question).where(Question.id == req.question_id))
     question = q_result.scalar_one_or_none()
     if question is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found.")
+        raise NotFoundError("Question not found.")
     if question.topic_id != session.topic_id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Question does not belong to this quiz's topic.",
-        )
+        raise ValidationError("Question does not belong to this quiz's topic.")
 
     # 3. Guard: already answered this question in this session?
     existing = await db.execute(
@@ -212,10 +203,7 @@ async def answer_question(
         )
     )
     if existing.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Câu hỏi này đã được trả lời trong phiên quiz này.",
-        )
+        raise ConflictError("Câu hỏi này đã được trả lời trong phiên quiz này.")
 
     # 4. Determine correctness
     is_correct = question.correct_answer.value == req.selected_answer.value
@@ -283,10 +271,7 @@ async def complete_quiz(
     # 1. Validate session
     session = await _get_quiz_session(db, user_id, session_id)
     if session.completed_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Quiz đã được hoàn thành trước đó.",
-        )
+        raise ConflictError("Quiz đã được hoàn thành trước đó.")
 
     # 2. Load all interactions + questions for this session
     rows_result = await db.execute(
@@ -298,11 +283,8 @@ async def complete_quiz(
     rows = rows_result.all()
 
     if not rows:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Không có câu trả lời nào trong phiên quiz. "
-            "Hãy trả lời ít nhất 1 câu trước khi hoàn thành.",
-        )
+        raise ValidationError("Không có câu trả lời nào trong phiên quiz. "
+            "Hãy trả lời ít nhất 1 câu trước khi hoàn thành.")
 
     topic_id = session.topic_id
     topic = await _get_topic_or_404(db, topic_id)
@@ -461,10 +443,7 @@ async def _get_topic_or_404(db: AsyncSession, topic_id: uuid.UUID) -> Topic:
     result = await db.execute(select(Topic).where(Topic.id == topic_id))
     topic = result.scalar_one_or_none()
     if topic is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Topic {topic_id} not found.",
-        )
+        raise NotFoundError(f"Topic {topic_id} not found.")
     return topic
 
 
@@ -478,10 +457,7 @@ async def _get_quiz_session(db: AsyncSession, user_id: uuid.UUID, session_id: uu
     )
     sess = result.scalar_one_or_none()
     if sess is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Quiz session not found.",
-        )
+        raise NotFoundError("Quiz session not found.")
     return sess
 
 

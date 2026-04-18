@@ -47,8 +47,8 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, status
 from sqlalchemy import delete, select
+from src.exceptions import NotFoundError, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import Module, Topic
@@ -150,10 +150,7 @@ async def generate_learning_path(
     rows = topics_result.all()
 
     if not rows:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No topics found for the specified modules.",
-        )
+        raise NotFoundError("No topics found for the specified modules.")
 
     topics: list[Topic] = [r[0] for r in rows]
     topic_module_name: dict[uuid.UUID, str] = {r[0].id: r[1] for r in rows}
@@ -176,10 +173,7 @@ async def generate_learning_path(
     try:
         sorted_ids = topological_sort(topic_ids, prereq_graph)
     except CycleDetectedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Prerequisite cycle detected: {exc}",
-        ) from exc
+        raise ValidationError(f"Prerequisite cycle detected: {exc}") from exc
 
     # ── 4. Load mastery scores ────────────────────────────────────────────────
     mastery_result = await db.execute(
@@ -385,10 +379,7 @@ async def update_path_status(
     )
     lp = result.scalar_one_or_none()
     if lp is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Learning path item not found.",
-        )
+        raise NotFoundError("Learning path item not found.")
 
     lp.status = new_status
     db.add(lp)

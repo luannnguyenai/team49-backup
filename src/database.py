@@ -12,26 +12,53 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from src.config import settings
 
 # ---------------------------------------------------------------------------
 # Engine
 # ---------------------------------------------------------------------------
-engine = create_async_engine(
-    settings.database_url,
-    echo=settings.db_echo,
-    pool_size=settings.db_pool_size,
-    max_overflow=settings.db_max_overflow,
-    pool_pre_ping=True,
-    pool_recycle=1800,
-)
+def _build_async_engine(*, use_pool: bool):
+    kwargs = {
+        "echo": settings.db_echo,
+        "pool_pre_ping": True,
+        "pool_recycle": 1800,
+    }
+    if use_pool:
+        kwargs.update(
+            {
+                "pool_size": settings.db_pool_size,
+                "max_overflow": settings.db_max_overflow,
+            }
+        )
+    else:
+        kwargs["poolclass"] = NullPool
+    return create_async_engine(settings.database_url, **kwargs)
+
+
+engine = _build_async_engine(use_pool=True)
+
+# Dedicated no-pool engine for sync tutor helpers that call asyncio.run() in a
+# threadpool. Reusing pooled asyncpg connections across event loops causes
+# "Future attached to a different loop" failures.
+tutor_thread_engine = _build_async_engine(use_pool=False)
 
 # ---------------------------------------------------------------------------
 # Session factory
 # ---------------------------------------------------------------------------
 async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(
     bind=engine,
+    expire_on_commit=False,
+    autoflush=False,
+    autocommit=False,
+)
+
+# Backward-compatible alias used by newer course-platform services.
+async_session_factory = async_session
+
+tutor_thread_async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
+    bind=tutor_thread_engine,
     expire_on_commit=False,
     autoflush=False,
     autocommit=False,
