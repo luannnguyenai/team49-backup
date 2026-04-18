@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 import { buildCourseOverviewViewModel } from "@/features/course-platform/presenters";
+import ReactMarkdown from "react-markdown";
 import type { CourseOverviewResponse } from "@/types";
 
 interface CourseOverviewProps {
@@ -39,9 +40,9 @@ export default function CourseOverview({
               )}
             </div>
 
-            <p className="max-w-2xl text-sm leading-7 text-slate-600">
-              {data.overview.summary_markdown}
-            </p>
+            <div className="prose prose-sm max-w-2xl text-slate-600 prose-p:my-0 prose-ul:my-3 prose-li:my-1">
+              <ReactMarkdown>{data.overview.summary_markdown}</ReactMarkdown>
+            </div>
 
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
