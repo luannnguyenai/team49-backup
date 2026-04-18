@@ -307,4 +307,6 @@ export const authApi = {
 
   onboarding: (data: OnboardingPayload) =>
     api.put<User>("/api/users/me/onboarding", data).then((r) => r.data),
+
+  logout: () => api.post("/api/auth/logout").then(() => undefined),
 };
