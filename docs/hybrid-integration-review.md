@@ -109,7 +109,7 @@ Các điểm sau vẫn chưa xong:
 - course metadata runtime chưa DB-authoritative hoàn toàn
 - repository layer chưa rollout rộng
 - live full flow `login -> onboarding -> assessment -> return-to-course` chưa được re-verify đầy đủ trên hybrid branch
-- backend docker-compose bootstrap hiện còn vướng Alembic multiple-heads ở bước `alembic upgrade head`
+- compose-backed smoke hiện đã chạy được, nhưng full auth/onboarding/assessment journey vẫn chưa cover trọn
 
 ## Verification snapshot hiện tại
 
@@ -120,6 +120,7 @@ Những gì đã verify được:
 - Playwright smoke:
   - `9 passed`
   - `2 skipped` (hai case personalized catalog vẫn đang intentionally skip vì thiếu seeded recommendation state)
+- cùng bộ Playwright smoke đó đã pass trên backend chạy local và trên backend chạy qua `docker compose`
 - live smoke đã cover:
   - public catalog
   - course overview
@@ -131,7 +132,7 @@ Những gì đã verify được:
 Những gì chưa cover trọn vẹn:
 
 - `login -> onboarding -> assessment -> return-to-course` như một journey đầy đủ
-- startup qua `docker compose` không cần workaround local uvicorn
+- personalized catalog sau skill test với recommendation state seeded
 
 ## Đánh giá thực tế
 

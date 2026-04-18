@@ -21,65 +21,79 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    course_status_enum = sa.Enum(
+    course_status_enum = postgresql.ENUM(
         "ready",
         "coming_soon",
         "metadata_partial",
         name="course_status_enum",
+        create_type=False,
     )
-    course_visibility_enum = sa.Enum("public", "hidden", name="course_visibility_enum")
-    course_section_kind_enum = sa.Enum(
+    course_visibility_enum = postgresql.ENUM(
+        "public",
+        "hidden",
+        name="course_visibility_enum",
+        create_type=False,
+    )
+    course_section_kind_enum = postgresql.ENUM(
         "module",
         "unit",
         "lesson_group",
         "lecture_group",
         name="course_section_kind_enum",
+        create_type=False,
     )
-    learning_unit_type_enum = sa.Enum(
+    learning_unit_type_enum = postgresql.ENUM(
         "lesson",
         "lecture",
         "reading",
         "practice",
         name="learning_unit_type_enum",
+        create_type=False,
     )
-    learning_unit_status_enum = sa.Enum(
+    learning_unit_status_enum = postgresql.ENUM(
         "ready",
         "coming_soon",
         "metadata_partial",
         name="learning_unit_status_enum",
+        create_type=False,
     )
-    learning_unit_entry_mode_enum = sa.Enum(
+    learning_unit_entry_mode_enum = postgresql.ENUM(
         "text",
         "video",
         "hybrid",
         name="learning_unit_entry_mode_enum",
+        create_type=False,
     )
-    course_asset_type_enum = sa.Enum(
+    course_asset_type_enum = postgresql.ENUM(
         "video",
         "transcript",
         "slides",
         "thumbnail",
         "supplement",
         name="course_asset_type_enum",
+        create_type=False,
     )
-    course_asset_availability_status_enum = sa.Enum(
+    course_asset_availability_status_enum = postgresql.ENUM(
         "available",
         "processing",
         "missing",
         name="course_asset_availability_status_enum",
+        create_type=False,
     )
-    learning_progress_status_enum = sa.Enum(
+    learning_progress_status_enum = postgresql.ENUM(
         "not_started",
         "in_progress",
         "completed",
         "blocked",
         name="learning_progress_status_enum",
+        create_type=False,
     )
-    legacy_lecture_migration_state_enum = sa.Enum(
+    legacy_lecture_migration_state_enum = postgresql.ENUM(
         "pending",
         "mapped",
         "deprecated",
         name="legacy_lecture_migration_state_enum",
+        create_type=False,
     )
 
     bind = op.get_bind()
