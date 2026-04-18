@@ -7,11 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Brain,
-  LayoutDashboard,
   BookOpen,
-  Library,
-  History,
-  User,
   Moon,
   Sun,
   Bell,
@@ -23,13 +19,7 @@ import {
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/", label: "Courses", icon: Library, exact: true },
-  { href: "/history", label: "Lịch sử", icon: History },
-  { href: "/profile", label: "Hồ sơ", icon: User },
-];
+import { NAV_ITEMS } from "@/components/layout/navItems";
 
 export default function TopNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -97,11 +87,17 @@ export default function TopNav() {
 
           {/* Search — center, flex-1 */}
           <div className="flex-1 max-w-xs mx-auto hidden sm:block">
-            <label className="flex items-center gap-2 rounded-full border px-3 py-2" style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}>
+            <label
+              className="flex items-center gap-2 rounded-full border px-3 py-2"
+              style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
+            >
               <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
               <input
                 aria-label="Tìm kiếm khóa học"
                 placeholder="Tìm kiếm khóa học..."
+                readOnly
+                tabIndex={-1}
+                value=""
                 className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
                 style={{ color: "var(--text-primary)" }}
               />

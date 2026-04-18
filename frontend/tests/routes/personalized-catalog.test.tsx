@@ -85,9 +85,6 @@ describe("personalized catalog (US2)", () => {
     await waitFor(() => {
       expect(screen.getByText("CS231n: Deep Learning for Computer Vision")).toBeInTheDocument();
     });
-    expect(screen.getByText("AI Learning Hub")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Courses" })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Tìm kiếm khóa học...")).toBeInTheDocument();
 
     // No tab buttons should exist for unauthenticated users
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();

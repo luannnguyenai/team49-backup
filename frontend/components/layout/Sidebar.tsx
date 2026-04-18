@@ -6,10 +6,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  Library,
-  History,
-  User,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -17,13 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/", label: "Courses", icon: Library, exact: true },
-  { href: "/history", label: "Lịch sử", icon: History },
-  { href: "/profile", label: "Hồ sơ", icon: User },
-];
+import { NAV_ITEMS } from "@/components/layout/navItems";
 
 interface Props {
   mobileOpen: boolean;
