@@ -21,7 +21,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
+from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
+from src.redis_client import get_redis
 from src.schemas.auth import (
     AccessToken,
     LoginRequest,
@@ -101,6 +103,20 @@ def _user_to_profile(user: User) -> UserProfile:
     return UserProfile.model_validate(user)
 
 
+async def _is_login_allowed(client_ip: str) -> bool:
+    try:
+        redis = get_redis()
+    except RuntimeError:
+        return _login_limiter.is_allowed(client_ip)
+
+    return await check_rate_limit(
+        redis,
+        f"rl:login:{client_ip}",
+        limit=settings.rate_limit_login_per_minute,
+        window_sec=60,
+    )
+
+
 # ---------------------------------------------------------------------------
 # POST /api/auth/register
 # ---------------------------------------------------------------------------
@@ -143,7 +159,7 @@ async def login(
 ) -> TokenPair:
     # Rate limiting — key by client IP
     client_ip = request.client.host if request.client else "unknown"
-    if not _login_limiter.is_allowed(client_ip):
+    if not await _is_login_allowed(client_ip):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many login attempts. Please wait 60 seconds and try again.",
