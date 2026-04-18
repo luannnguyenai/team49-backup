@@ -130,9 +130,19 @@ export default function TutorPage() {
             </section>
           )}
 
-          <div className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {`Tìm thấy ${items.length} khoá · ${enrolled.length} đang tham gia · ${recommended.length} gợi ý · ${others.length} khác.`}
-          </div>
+          {recommended.length > 0 && (
+            <section className="space-y-3">
+              <div>
+                <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Gợi ý cho bạn
+                </h2>
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  Khoá phù hợp với lộ trình cá nhân hoá.
+                </p>
+              </div>
+              <CourseCatalog items={recommended} />
+            </section>
+          )}
         </div>
       )}
     </div>
