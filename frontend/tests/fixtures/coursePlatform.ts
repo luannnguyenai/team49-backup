@@ -117,6 +117,7 @@ export const LECTURE_1_UNIT: LearningUnitResponse = {
     enabled: true,
     mode: "in_context",
     context_binding_id: "ctx_unit_lecture_01",
+    legacy_lecture_id: "cs231n-lecture-1",
   },
 };
 
@@ -143,5 +144,6 @@ export const DISABLED_TUTOR_UNIT: LearningUnitResponse = {
     enabled: false,
     mode: "disabled",
     context_binding_id: null,
+    legacy_lecture_id: null,
   },
 };

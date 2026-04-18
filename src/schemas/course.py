@@ -79,6 +79,7 @@ class TutorContextPayload(BaseModel):
     enabled: bool
     mode: str
     context_binding_id: str | None = None
+    legacy_lecture_id: str | None = None
 
 
 class LearningUnitResponse(BaseModel):

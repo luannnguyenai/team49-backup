@@ -140,6 +140,8 @@ def ask_question(req: AskRequest, db: Session = Depends(get_db)):
             image_base64=req.image_base64
         )
         return StreamingResponse(generator, media_type="text/event-stream")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

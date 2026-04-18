@@ -55,6 +55,7 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("tutor", data)
         self.assertIsInstance(data["tutor"]["enabled"], bool)
         self.assertIn("mode", data["tutor"])
+        self.assertEqual(data["tutor"]["legacy_lecture_id"], "cs231n-lecture-1")
 
     async def test_get_unit_for_nonexistent_course_returns_404(self):
         """Unit lookup for non-existent course → 404."""
@@ -113,7 +114,7 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn(key, data["content"])
 
         # Tutor keys
-        for key in ["enabled", "mode", "context_binding_id"]:
+        for key in ["enabled", "mode", "context_binding_id", "legacy_lecture_id"]:
             self.assertIn(key, data["tutor"])
 
     async def test_multiple_units_accessible(self):

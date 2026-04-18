@@ -162,6 +162,7 @@ class CoursePlatformFoundationTests(unittest.TestCase):
                 enabled=True,
                 mode="in_context",
                 context_binding_id="ctx_lecture_01",
+                legacy_lecture_id="cs231n-lecture-1",
             ),
         )
         self.assertTrue(learning_unit.tutor.enabled)

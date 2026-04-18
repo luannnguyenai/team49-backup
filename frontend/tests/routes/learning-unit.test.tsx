@@ -96,6 +96,7 @@ const LECTURE_1_UNIT: LearningUnitResponse = {
     enabled: true,
     mode: "in_context",
     context_binding_id: "ctx_unit_lecture_01",
+    legacy_lecture_id: "cs231n-lecture-1",
   },
 };
 
@@ -122,13 +123,14 @@ const DISABLED_TUTOR_UNIT: LearningUnitResponse = {
     enabled: false,
     mode: "disabled",
     context_binding_id: null,
+    legacy_lecture_id: null,
   },
 };
 
 const CHAPTERS = [
   {
     id: 1,
-    lecture_id: "cs231n_lecture_01",
+    lecture_id: "cs231n-lecture-1",
     title: "Introduction",
     summary: "Opening context",
     start_time: 0,

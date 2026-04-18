@@ -14,6 +14,7 @@ connect unit slugs to legacy lecture IDs and video files.
 from __future__ import annotations
 
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -79,6 +80,17 @@ def list_course_units(course_slug: str) -> list[dict[str, Any]]:
     return units
 
 
+def _normalize_legacy_lecture_id(raw_lecture_id: str | None, order_index: int | None) -> str | None:
+    """Normalize transitional legacy lecture IDs to the format stored in the DB."""
+    if raw_lecture_id:
+        normalized = raw_lecture_id.replace("_", "-")
+        normalized = re.sub(r"lecture-(0+)(\d+)", r"lecture-\2", normalized)
+        return normalized
+    if order_index:
+        return f"cs231n-lecture-{order_index}"
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Main service function
 # ---------------------------------------------------------------------------
@@ -122,6 +134,10 @@ async def get_learning_unit_payload(
     # Tutor is enabled when the unit is ready and has video content
     tutor_enabled = unit_row["status"] == "ready" and video_url is not None
     context_binding_id = f"ctx_{unit_row['id']}" if tutor_enabled else None
+    legacy_lecture_id = _normalize_legacy_lecture_id(
+        unit_row.get("legacy_lecture_id"),
+        unit_row.get("order_index"),
+    )
 
     return LearningUnitResponse(
         course=LearningUnitCourseSummary(
@@ -146,5 +162,6 @@ async def get_learning_unit_payload(
             enabled=tutor_enabled,
             mode="in_context" if tutor_enabled else "disabled",
             context_binding_id=context_binding_id,
+            legacy_lecture_id=legacy_lecture_id,
         ),
     )

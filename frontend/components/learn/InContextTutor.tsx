@@ -85,7 +85,27 @@ export default function InContextTutor({
         }),
       });
 
-      const reader = resp.body!.getReader();
+      if (!resp.ok) {
+        let detail = `Tutor request failed (${resp.status})`;
+        try {
+          const payload = await resp.json();
+          if (typeof payload?.detail === "string" && payload.detail.trim()) {
+            detail = payload.detail;
+          }
+        } catch {
+          try {
+            const text = await resp.text();
+            if (text.trim()) detail = text.trim();
+          } catch {}
+        }
+        throw new Error(detail);
+      }
+
+      if (!resp.body) {
+        throw new Error("Tutor response stream was empty");
+      }
+
+      const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let fullText = "";
       let qaId: number | undefined;
@@ -103,6 +123,28 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx ? { ...m, role: "error", content: data.e } : m,
+                ),
+              );
+              hasError = true;
+              break;
+            }
+            if (data.blocked && data.message) {
+              setMessages((prev) =>
+                prev.map((m, i) =>
+                  i === aiIdx
+                    ? { ...m, role: "error", content: data.message }
+                    : m,
+                ),
+              );
+              hasError = true;
+              break;
+            }
+            if (data.detail) {
+              setMessages((prev) =>
+                prev.map((m, i) =>
+                  i === aiIdx
+                    ? { ...m, role: "error", content: String(data.detail) }
+                    : m,
                 ),
               );
               hasError = true;

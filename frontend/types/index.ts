@@ -205,6 +205,7 @@ export interface TutorContextPayload {
   enabled: boolean;
   mode: string;
   context_binding_id: string | null;
+  legacy_lecture_id?: string | null;
 }
 
 export interface LearningUnitResponse {

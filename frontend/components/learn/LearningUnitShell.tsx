@@ -46,6 +46,7 @@ export default function LearningUnitShell({
   courseSlug,
 }: LearningUnitShellProps) {
   const { course, unit, content, tutor } = data;
+  const legacyLectureId = tutor.legacy_lecture_id ?? null;
 
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
@@ -56,17 +57,16 @@ export default function LearningUnitShell({
 
   // Load chapters from legacy lecture API if available
   useEffect(() => {
-    // Extract legacy lecture ID from the unit context binding
-    // The binding ID format is "ctx_unit_lecture_XX"
-    const unitId = unit.id; // e.g. "unit_lecture_01"
-    const lectureNum = unitId.replace("unit_lecture_", "");
-    const legacyLectureId = `cs231n_lecture_${lectureNum}`;
+    if (!legacyLectureId) {
+      setChapters([]);
+      return;
+    }
 
     api
       .get<Chapter[]>(`/api/lectures/${legacyLectureId}/toc`)
       .then((r) => setChapters(r.data))
       .catch(() => setChapters([]));
-  }, [unit.id]);
+  }, [legacyLectureId]);
 
   // Video time tracking
   const handleTimeUpdate = () => {
@@ -87,12 +87,6 @@ export default function LearningUnitShell({
       return null;
     }
   }, []);
-
-  // Get legacy lecture ID for the tutor
-  const getLegacyLectureId = () => {
-    const lectureNum = unit.id.replace("unit_lecture_", "");
-    return `cs231n_lecture_${lectureNum}`;
-  };
 
   return (
     <div
@@ -300,7 +294,7 @@ export default function LearningUnitShell({
             }}
           >
             <InContextTutor
-              lectureId={getLegacyLectureId()}
+              lectureId={legacyLectureId ?? ""}
               currentTime={currentTime}
               captureFrame={captureFrame}
               contextBindingId={tutor.context_binding_id ?? undefined}
