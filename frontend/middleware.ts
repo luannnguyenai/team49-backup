@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Routes that don't require authentication
-const PUBLIC_PATHS = ["/login", "/register", "/"];
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/"];
 
 // Routes that require auth but NOT onboarding
 const ONBOARDING_PATH = "/onboarding";
@@ -58,8 +58,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ② Authenticated but already going to login/register → redirect away
-  if (isAuthenticated && (pathname === "/login" || pathname === "/register")) {
+  // ② Authenticated but already going to auth pages → redirect away
+  if (
+    isAuthenticated &&
+    (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password")
+  ) {
     const url = request.nextUrl.clone();
     // If there's a redirect param, honor it instead of dashboard.
     const redirectTo = searchParams.get("next") || searchParams.get("from");
