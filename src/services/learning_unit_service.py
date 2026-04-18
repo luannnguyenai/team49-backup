@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
+import re
 from typing import Any
 
 from src.schemas.course import (
@@ -27,7 +28,6 @@ from src.schemas.course import (
 )
 from src.services.legacy_lecture_adapter import (
     build_tutor_bridge_payload,
-    get_unit_by_legacy_lecture_id,
     normalize_legacy_lecture_id,
 )
 from src.services.course_bootstrap_service import get_bootstrap_course
@@ -37,6 +37,9 @@ from src.services.course_bootstrap_service import get_bootstrap_course
 # ---------------------------------------------------------------------------
 
 UNITS_FILE = Path("data/course_bootstrap/units.json")
+TRANSCRIPTS_DIR = Path("data/CS231n/transcripts")
+SLIDES_DIR = Path("data/CS231n/slides")
+_LECTURE_NUMBER_RE = re.compile(r"(?:lecture|Lecture)[_ -]?0*(\d+)")
 
 
 def _read_json(path: Path) -> Any:
@@ -50,6 +53,30 @@ def load_bootstrap_units() -> list[dict[str, Any]]:
     if not UNITS_FILE.exists():
         return []
     return _read_json(UNITS_FILE)
+
+
+def _extract_available_lecture_numbers(directory: Path) -> set[int]:
+    if not directory.exists():
+        return set()
+
+    numbers: set[int] = set()
+    for asset in directory.iterdir():
+        if not asset.is_file():
+            continue
+        match = _LECTURE_NUMBER_RE.search(asset.name)
+        if match:
+            numbers.add(int(match.group(1)))
+    return numbers
+
+
+@lru_cache(maxsize=1)
+def _available_transcript_lectures() -> set[int]:
+    return _extract_available_lecture_numbers(TRANSCRIPTS_DIR)
+
+
+@lru_cache(maxsize=1)
+def _available_slide_lectures() -> set[int]:
+    return _extract_available_lecture_numbers(SLIDES_DIR)
 
 
 def get_bootstrap_unit(course_slug: str, unit_slug: str) -> dict[str, Any] | None:
@@ -110,10 +137,8 @@ async def get_learning_unit_payload(
 
     # Check transcript and slides availability
     lecture_num = unit_row.get("order_index", 0)
-    transcript_dir = Path("data/CS231n/transcripts")
-    slides_dir = Path("data/CS231n/slides")
-    transcript_available = transcript_dir.exists() and any(transcript_dir.iterdir()) if transcript_dir.exists() else False
-    slides_available = slides_dir.exists() and any(slides_dir.iterdir()) if slides_dir.exists() else False
+    transcript_available = bool(lecture_num and lecture_num in _available_transcript_lectures())
+    slides_available = bool(lecture_num and lecture_num in _available_slide_lectures())
 
     # Determine if tutor should be enabled
     # Tutor is enabled when the unit is ready and has video content

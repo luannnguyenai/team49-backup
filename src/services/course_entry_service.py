@@ -17,6 +17,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
+from src.exceptions import ForbiddenError, NotFoundError
 from src.schemas.course import StartLearningDecisionResponse
 from src.services.course_bootstrap_service import get_bootstrap_course
 from src.services.learning_unit_service import get_first_unit_slug
@@ -97,6 +98,34 @@ async def get_start_learning_decision(
         target=learning_target,
         reason="learning_ready",
     )
+
+
+async def assert_learning_access(
+    course_slug: str,
+    user: User | None,
+) -> None:
+    """
+    Enforce the same course-learning gate used by the start flow.
+
+    This guards direct API/data access so callers cannot bypass `/start`
+    by guessing canonical unit or asset URLs.
+    """
+    course_row = get_bootstrap_course(course_slug)
+    if course_row is None:
+        raise NotFoundError(f"Course '{course_slug}' not found.")
+
+    if user is None:
+        raise ForbiddenError("Authentication is required to access this learning content.")
+
+    if course_row["status"] != "ready":
+        raise ForbiddenError("This course is not available for learning yet.")
+
+    if not user.is_onboarded:
+        raise ForbiddenError("Please complete onboarding before accessing this learning content.")
+
+    has_completed_skill_test = await _check_skill_test_completed(user.id)
+    if not has_completed_skill_test:
+        raise ForbiddenError("Please complete the skill assessment before accessing this learning content.")
 
 
 async def _check_skill_test_completed(user_id: uuid.UUID) -> bool:
