@@ -26,6 +26,7 @@ from src.schemas.course import (
     LearningUnitSummary,
     TutorContextPayload,
 )
+from src.services.asset_signing import build_signed_asset_url
 from src.services.legacy_lecture_adapter import (
     build_tutor_bridge_payload,
     normalize_legacy_lecture_id,
@@ -130,10 +131,10 @@ async def get_learning_unit_payload(
     video_filename = unit_row.get("video_filename")
     video_url: str | None = None
     if video_filename:
-        # The video files are served from the /data static mount
+        # Protected course assets are exposed via short-lived signed URLs.
         video_path = Path(f"data/CS231n/videos/{video_filename}")
         if video_path.exists():
-            video_url = f"/data/CS231n/videos/{video_filename}"
+            video_url = build_signed_asset_url(f"CS231n/videos/{video_filename}")
 
     # Check transcript and slides availability
     lecture_num = unit_row.get("order_index", 0)

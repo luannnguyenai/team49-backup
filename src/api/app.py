@@ -30,7 +30,7 @@ from src.exceptions import DomainError
 from src.dependencies.auth import get_current_user_from_request
 from src.redis_client import connect_redis, disconnect_redis
 from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
-from src.services.course_entry_service import assert_learning_access
+from src.services.asset_signing import verify_signed_asset_url
 from src.services.llm_service import get_context_and_stream_langgraph
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router
@@ -137,12 +137,15 @@ async def serve_data_asset(
     db: AsyncSession = Depends(get_async_db),
 ):
     normalized_path = asset_path.lstrip("/")
-    file_path = _resolve_data_file(normalized_path)
 
     if normalized_path.startswith(PROTECTED_DATA_PREFIXES):
-        user = await get_current_user_from_request(request, db)
-        await assert_learning_access("cs231n", user)
+        verify_signed_asset_url(
+            normalized_path,
+            expires_at=request.query_params.get("exp"),
+            signature=request.query_params.get("sig"),
+        )
 
+    file_path = _resolve_data_file(normalized_path)
     return FileResponse(file_path)
 
 

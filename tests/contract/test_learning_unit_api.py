@@ -8,6 +8,7 @@ and legacy tutor compatibility behavior.
 import unittest
 import uuid
 from types import SimpleNamespace
+from urllib.parse import parse_qs, urlparse
 from unittest.mock import AsyncMock, patch
 
 from httpx import ASGITransport, AsyncClient
@@ -65,6 +66,11 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
         # Content payload
         self.assertIn("content", data)
         self.assertIn("video_url", data["content"])
+        self.assertIsNotNone(data["content"]["video_url"])
+        parsed_video_url = urlparse(data["content"]["video_url"])
+        self.assertTrue(parsed_video_url.path.startswith("/data/CS231n/videos/"))
+        self.assertIn("exp", parse_qs(parsed_video_url.query))
+        self.assertIn("sig", parse_qs(parsed_video_url.query))
 
         # Tutor context
         self.assertIn("tutor", data)
