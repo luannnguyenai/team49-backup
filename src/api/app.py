@@ -171,6 +171,7 @@ class AskRequest(BaseModel):
     lecture_id: str
     current_timestamp: float
     question: str
+    context_binding_id: str | None = None
     image_base64: str | None = None
 
 
@@ -229,6 +230,7 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
             req.current_timestamp,
             req.question,
             image_base64=req.image_base64,
+            context_binding_id=req.context_binding_id,
         )
         return StreamingResponse(generator, media_type="text/event-stream")
     except HTTPException:

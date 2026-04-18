@@ -95,6 +95,7 @@ async def _save_qa_history(
     answer: str,
     thoughts: str,
     current_timestamp: float,
+    context_binding_id: str | None,
     image_base64: str | None,
 ) -> int:
     async with tutor_thread_async_session_factory() as db:
@@ -104,6 +105,7 @@ async def _save_qa_history(
             answer=answer,
             thoughts=thoughts,
             current_timestamp=current_timestamp,
+            context_binding_id=context_binding_id,
             image_base64=image_base64[:500] if image_base64 else None,
         )
         db.add(history)
@@ -277,7 +279,13 @@ def get_context_and_stream_langgraph(
             thoughts = f"[SIMPLE] {routing.get('reason', '')}"
             _log_qa(lecture_id, current_timestamp, user_question, direct_answer, thoughts)
             qa_id = asyncio.run(_save_qa_history(
-                lecture_id, user_question, direct_answer, thoughts, current_timestamp, image_base64
+                lecture_id,
+                user_question,
+                direct_answer,
+                thoughts,
+                current_timestamp,
+                context_binding_id,
+                image_base64,
             ))
             yield json.dumps({"qa_id": qa_id}) + "\n"
             return
@@ -407,7 +415,13 @@ Answer the student's question using ONLY the provided lecture context (transcrip
         thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
         _log_qa(lecture_id, current_timestamp, user_question, full_answer, thoughts)
         qa_id = asyncio.run(_save_qa_history(
-            lecture_id, user_question, full_answer, thoughts, current_timestamp, image_base64
+            lecture_id,
+            user_question,
+            full_answer,
+            thoughts,
+            current_timestamp,
+            context_binding_id,
+            image_base64,
         ))
         yield json.dumps({"qa_id": qa_id}) + "\n"
 
