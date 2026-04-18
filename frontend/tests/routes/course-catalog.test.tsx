@@ -2,7 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import HomePage from "@/app/page";
-import CourseOverviewPage from "@/app/courses/[courseSlug]/page";
+import CourseOverviewInteractive from "@/components/course/CourseOverviewInteractive";
+import TopNav from "@/components/layout/TopNav";
+import type { CourseOverviewResponse } from "@/types";
 
 const navigationMock = vi.hoisted(() => ({
   pathname: "/",
@@ -105,7 +107,7 @@ describe("course catalog routes", () => {
   });
 
   it("shows a startable overview for CS231n", async () => {
-    courseApiMock.overview.mockResolvedValue({
+    const data: CourseOverviewResponse = {
       course: {
         id: "course_cs231n",
         slug: "cs231n",
@@ -132,21 +134,24 @@ describe("course catalog routes", () => {
         target: "/courses/cs231n/start",
         reason: "learning_ready",
       },
-    });
+    };
 
     navigationMock.pathname = "/courses/cs231n";
-    render(<CourseOverviewPage params={{ courseSlug: "cs231n" }} />);
+    render(
+      <>
+        <TopNav />
+        <CourseOverviewInteractive courseSlug="cs231n" data={data} />
+      </>,
+    );
 
-    await waitFor(() => {
-      expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
-    });
+    expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
     expect(screen.getByText("What you will get")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
   });
 
   it("shows a blocked overview for CS224n", async () => {
-    courseApiMock.overview.mockResolvedValue({
+    const data: CourseOverviewResponse = {
       course: {
         id: "course_cs224n",
         slug: "cs224n",
@@ -173,16 +178,19 @@ describe("course catalog routes", () => {
         target: "/courses/cs224n",
         reason: "course_unavailable",
       },
-    });
+    };
 
     navigationMock.pathname = "/courses/cs224n";
-    render(<CourseOverviewPage params={{ courseSlug: "cs224n" }} />);
+    render(
+      <>
+        <TopNav />
+        <CourseOverviewInteractive courseSlug="cs224n" data={data} />
+      </>,
+    );
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("Explore modern NLP and language modeling workflows"),
-      ).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText("Explore modern NLP and language modeling workflows"),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Coming soon" })).toBeDisabled();
   });
 });

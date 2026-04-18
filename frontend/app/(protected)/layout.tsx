@@ -14,7 +14,7 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(() => !tokenStorage.getAccess());
   const router = useRouter();
   const { user, fetchMe } = useAuthStore();
 
@@ -26,12 +26,15 @@ export default function ProtectedLayout({
         router.replace("/login");
         return;
       }
-      // Hydrate user if store was cleared (e.g. hard refresh)
-      if (!user) await fetchMe();
       setChecking(false);
+
+      // Hydrate user in the background when store was cleared (e.g. hard refresh).
+      if (!user) {
+        void fetchMe();
+      }
     };
     verify();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchMe, router, user]);
 
   // Redirect if not onboarded (after user is loaded)
   useEffect(() => {

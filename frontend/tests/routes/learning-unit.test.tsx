@@ -1,21 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import LearningPage from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page";
+import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/loading";
 import LearningUnitShell from "@/components/learn/LearningUnitShell";
+import LearningPageScreen from "@/components/learn/LearningPageScreen";
 import TopNav from "@/components/layout/TopNav";
 import type { LearningUnitResponse } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------------
-
-const courseApiMock = vi.hoisted(() => ({
-  catalog: vi.fn(),
-  overview: vi.fn(),
-  start: vi.fn(),
-  learningUnit: vi.fn(),
-}));
 
 const apiMock = vi.hoisted(() => ({
   get: vi.fn(),
@@ -47,7 +41,6 @@ vi.mock("@/lib/api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
   return {
     ...actual,
-    courseApi: courseApiMock,
     api: apiMock,
   };
 });
@@ -188,35 +181,30 @@ describe("learning unit page (US3)", () => {
     navigationMock.pathname = "/";
   });
 
-  it("renders loading state initially", () => {
-    courseApiMock.learningUnit.mockImplementation(() => new Promise(() => {})); // never resolves
-
-    render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-1-introduction" }} />,
-    );
-
+  it("renders route loading state while the server component is resolving", () => {
+    render(<LearningUnitLoading />);
     expect(screen.getByText("Loading learning unit...")).toBeInTheDocument();
   });
 
-  it("renders error state when unit is not found", async () => {
-    courseApiMock.learningUnit.mockRejectedValue({
-      response: { status: 404 },
-    });
-
+  it("renders error state when the server wrapper reports a missing unit", async () => {
     render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "does-not-exist" }} />,
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="does-not-exist"
+        error="This learning unit is not available. It may not exist or the course content has not been published yet."
+      />,
     );
 
-    await waitFor(() => {
-      expect(screen.getByText(/not available/i)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/not available/i)).toBeInTheDocument();
   });
 
-  it("renders the learning unit shell after loading", async () => {
-    courseApiMock.learningUnit.mockResolvedValue(LECTURE_1_UNIT);
-
+  it("renders the learning unit shell from server-provided data", async () => {
     render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-1-introduction" }} />,
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
     );
 
     await waitFor(() => {
@@ -225,11 +213,14 @@ describe("learning unit page (US3)", () => {
   });
 
   it("renders the restored learning shell frame with preserved tutor cues", async () => {
-    courseApiMock.learningUnit.mockResolvedValue(LECTURE_1_UNIT);
     apiMock.get.mockResolvedValue({ data: CHAPTERS });
 
     render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-1-introduction" }} />,
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
     );
 
     expect(
@@ -296,10 +287,12 @@ describe("learning unit page (US3)", () => {
   });
 
   it("shows AI Tutor toggle when tutor is enabled", async () => {
-    courseApiMock.learningUnit.mockResolvedValue(LECTURE_1_UNIT);
-
     render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-1-introduction" }} />,
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
     );
 
     await waitFor(() => {
@@ -308,10 +301,12 @@ describe("learning unit page (US3)", () => {
   });
 
   it("does not show AI Tutor toggle when tutor is disabled", async () => {
-    courseApiMock.learningUnit.mockResolvedValue(DISABLED_TUTOR_UNIT);
-
     render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-99-placeholder" }} />,
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-99-placeholder"
+        data={DISABLED_TUTOR_UNIT}
+      />,
     );
 
     await waitFor(() => {
@@ -322,10 +317,12 @@ describe("learning unit page (US3)", () => {
   });
 
   it("shows course breadcrumb link", async () => {
-    courseApiMock.learningUnit.mockResolvedValue(LECTURE_1_UNIT);
-
     render(
-      <LearningPage params={{ courseSlug: "cs231n", unitSlug: "lecture-1-introduction" }} />,
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
     );
 
     await waitFor(() => {
