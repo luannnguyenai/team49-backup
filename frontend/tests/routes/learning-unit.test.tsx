@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LearningPage from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page";
+import TopNav from "@/components/layout/TopNav";
 import type { LearningUnitResponse } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -20,12 +21,51 @@ const apiMock = vi.hoisted(() => ({
   post: vi.fn(),
 }));
 
+const navigationMock = vi.hoisted(() => ({
+  pathname: "/",
+  router: {
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  },
+}));
+
+const authStoreMock = vi.hoisted(() => ({
+  user: {
+    id: "user_1",
+    full_name: "Test User",
+    is_onboarded: true,
+  } as { id: string; full_name: string; is_onboarded: boolean } | null,
+  logout: vi.fn(),
+}));
+
 vi.mock("@/lib/api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
   return {
     ...actual,
     courseApi: courseApiMock,
     api: apiMock,
+  };
+});
+
+vi.mock("@/stores/authStore", async () => {
+  return {
+    useAuthStore: (selector?: (state: unknown) => unknown) => {
+      const state = { user: authStoreMock.user, logout: authStoreMock.logout };
+      return selector ? selector(state) : state;
+    },
+  };
+});
+
+vi.mock("next/navigation", async () => {
+  const actual = await vi.importActual<typeof import("next/navigation")>("next/navigation");
+  return {
+    ...actual,
+    usePathname: () => navigationMock.pathname,
+    useRouter: () => navigationMock.router,
   };
 });
 
@@ -104,6 +144,7 @@ describe("learning unit page (US3)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     apiMock.get.mockResolvedValue({ data: [] });
+    navigationMock.pathname = "/";
   });
 
   it("renders loading state initially", () => {
@@ -201,5 +242,16 @@ describe("learning unit page (US3)", () => {
       expect(breadcrumb).toBeInTheDocument();
       expect(breadcrumb.closest("a")).toHaveAttribute("href", "/courses/cs231n");
     });
+  });
+
+  it("keeps the Courses nav item active on a nested learning route", async () => {
+    navigationMock.pathname = "/courses/cs231n/learn/lecture-1-introduction";
+
+    render(<TopNav />);
+
+    expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 });

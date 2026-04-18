@@ -18,7 +18,7 @@ import {
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import { NAV_ITEMS } from "@/components/layout/navItems";
+import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
 
 export default function TopNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -26,6 +26,7 @@ export default function TopNav() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
+  const isAuthenticated = user !== null;
 
   const handleLogout = () => {
     logout();
@@ -40,6 +41,13 @@ export default function TopNav() {
         .join("")
         .toUpperCase()
     : "?";
+
+  const isNavItemActive = (navItem: NavItem) =>
+    navItem.isActive
+      ? navItem.isActive(pathname)
+      : navItem.exact
+        ? pathname === navItem.href
+        : pathname === navItem.href || pathname.startsWith(`${navItem.href}/`);
 
   return (
     <>
@@ -62,13 +70,12 @@ export default function TopNav() {
           <nav className="hidden md:flex items-center gap-1 ml-4">
             {NAV_ITEMS.map((navItem) => {
               const { href, label, icon: Icon } = navItem;
-              const active = (navItem as any).exact
-                ? pathname === href
-                : pathname === href || pathname.startsWith(href + "/");
+              const active = isNavItemActive(navItem);
               return (
                 <Link
                   key={href}
                   href={href}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
@@ -129,23 +136,34 @@ export default function TopNav() {
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
             </button>
 
-            {/* Avatar */}
-            <Link
-              href="/profile"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 text-sm font-semibold transition-opacity hover:opacity-80"
-            >
-              {initials}
-            </Link>
+            {isAuthenticated ? (
+              <>
+                {/* Avatar */}
+                <Link
+                  href="/profile"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 text-sm font-semibold transition-opacity hover:opacity-80"
+                >
+                  {initials}
+                </Link>
 
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="hidden sm:flex h-9 items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden lg:block">Đăng xuất</span>
-            </button>
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  className="hidden sm:flex h-9 items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden lg:block">Đăng xuất</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex h-9 items-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                Đăng nhập
+              </Link>
+            )}
 
             {/* Mobile hamburger */}
             <button
@@ -167,14 +185,13 @@ export default function TopNav() {
           >
             {NAV_ITEMS.map((navItem) => {
               const { href, label, icon: Icon } = navItem;
-              const active = (navItem as any).exact
-                ? pathname === href
-                : pathname === href || pathname.startsWith(href + "/");
+              const active = isNavItemActive(navItem);
               return (
                 <Link
                   key={href}
                   href={href}
                   onClick={() => setMobileOpen(false)}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     active
@@ -188,14 +205,24 @@ export default function TopNav() {
                 </Link>
               );
             })}
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <LogOut className="h-4 w-4" />
-              Đăng xuất
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                <LogOut className="h-4 w-4" />
+                Đăng xuất
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex w-full items-center justify-center rounded-lg bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                Đăng nhập
+              </Link>
+            )}
           </div>
         )}
       </header>

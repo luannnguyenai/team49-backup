@@ -4,11 +4,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import HomePage from "@/app/page";
 import CourseOverviewPage from "@/app/courses/[courseSlug]/page";
 
+const navigationMock = vi.hoisted(() => ({
+  pathname: "/",
+  router: {
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  },
+}));
+
 const courseApiMock = vi.hoisted(() => ({
   catalog: vi.fn(),
   overview: vi.fn(),
   start: vi.fn(),
   learningUnit: vi.fn(),
+}));
+
+const authStoreMock = vi.hoisted(() => ({
+  user: null as { id: string; full_name: string; is_onboarded: boolean } | null,
+  logout: vi.fn(),
 }));
 
 vi.mock("@/lib/api", async () => {
@@ -19,9 +36,29 @@ vi.mock("@/lib/api", async () => {
   };
 });
 
+vi.mock("@/stores/authStore", async () => {
+  return {
+    useAuthStore: (selector?: (state: unknown) => unknown) => {
+      const state = { user: authStoreMock.user, logout: authStoreMock.logout };
+      return selector ? selector(state) : state;
+    },
+  };
+});
+
+vi.mock("next/navigation", async () => {
+  const actual = await vi.importActual<typeof import("next/navigation")>("next/navigation");
+  return {
+    ...actual,
+    usePathname: () => navigationMock.pathname,
+    useRouter: () => navigationMock.router,
+  };
+});
+
 describe("course catalog routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authStoreMock.user = null;
+    navigationMock.pathname = "/";
   });
 
   it("renders both demo courses on the public catalog home", async () => {
@@ -58,6 +95,9 @@ describe("course catalog routes", () => {
     expect(screen.getByText("AI Learning Hub")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Courses" })).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Tìm kiếm khóa học...")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Đăng nhập" })).toHaveAttribute("href", "/login");
+    expect(screen.queryByRole("link", { name: "?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Đăng xuất" })).not.toBeInTheDocument();
     expect(
       screen.getByText("CS224n: Natural Language Processing with Deep Learning"),
     ).toBeInTheDocument();
@@ -94,12 +134,14 @@ describe("course catalog routes", () => {
       },
     });
 
+    navigationMock.pathname = "/courses/cs231n";
     render(<CourseOverviewPage params={{ courseSlug: "cs231n" }} />);
 
     await waitFor(() => {
       expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
     });
     expect(screen.getByText("What you will get")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
   });
 
@@ -133,6 +175,7 @@ describe("course catalog routes", () => {
       },
     });
 
+    navigationMock.pathname = "/courses/cs224n";
     render(<CourseOverviewPage params={{ courseSlug: "cs224n" }} />);
 
     await waitFor(() => {
