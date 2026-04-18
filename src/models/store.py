@@ -1,32 +1,18 @@
 """
 models/store.py
 ---------------
-Original A20-App-049 lecture models, now using the shared Base from base.py.
-Provides both sync (get_db) and async (get_async_db) database access.
+Original A20-App-049 lecture models, using the shared Base from base.py.
+All DB access is async via AsyncSession (get_async_db dependency).
 
-Models: Lecture, Chapter, TranscriptLine, QAHistory
+Models: Lecture, Chapter, TranscriptLine, QAHistory, LearningProgress
 """
 
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Text, DateTime, UniqueConstraint
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, UniqueConstraint
+from sqlalchemy.orm import relationship
 
 from src.models.base import Base
-from src.config import settings
-
-# ---------------------------------------------------------------------------
-# Sync engine for legacy lecture operations (ingestion, llm_service)
-# Converts asyncpg URL → psycopg2 URL for synchronous SQLAlchemy usage.
-# ---------------------------------------------------------------------------
-_SYNC_DATABASE_URL = (
-    settings.database_url
-    .replace("postgresql+asyncpg://", "postgresql+psycopg2://")
-    .replace("postgresql://", "postgresql+psycopg2://")
-)
-
-engine = create_engine(_SYNC_DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 class Lecture(Base):
@@ -99,15 +85,3 @@ class LearningProgress(Base):
         UniqueConstraint("session_id", "lecture_id", name="uq_session_lecture"),
     )
 
-def init_db():
-    """Create all tables (sync, for lecture models)."""
-    Base.metadata.create_all(bind=engine, checkfirst=True)
-
-
-def get_db():
-    """Sync database session dependency for FastAPI (legacy lecture routes)."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
