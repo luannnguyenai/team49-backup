@@ -48,6 +48,11 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+  new_password: string;
+}
+
 export interface OnboardingPayload {
   known_topic_ids: string[];
   desired_module_ids: string[];

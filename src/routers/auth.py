@@ -30,6 +30,7 @@ from src.models.user import User
 from src.redis_client import get_redis
 from src.schemas.auth import (
     AccessToken,
+    ForgotPasswordRequest,
     LoginRequest,
     OnboardingRequest,
     RefreshRequest,
@@ -48,6 +49,7 @@ from src.services.auth_service import (
     decode_token,
     get_user_by_id,
     register_user,
+    reset_password_for_email,
     update_onboarding,
 )
 from src.services.token_guard import is_payload_revoked, revoke_payload
@@ -248,6 +250,24 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return _build_token_pair(user)
+
+
+@auth_router.post(
+    "/forgot-password",
+    summary="Reset password directly with email + new password",
+)
+async def forgot_password(
+    body: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_async_db),
+) -> dict[str, str]:
+    try:
+        await reset_password_for_email(db, body.email, body.new_password)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    return {"status": "ok"}
 
 
 # ---------------------------------------------------------------------------

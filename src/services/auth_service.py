@@ -124,6 +124,20 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
     return user
 
 
+async def reset_password_for_email(
+    db: AsyncSession,
+    email: str,
+    new_password: str,
+) -> User:
+    repo = UserRepository(db)
+    user = await repo.get_by_email(email)
+    if not user:
+        raise ValueError("No account found for this email.")
+
+    hashed_password = hash_password(new_password)
+    return await repo.update_hashed_password(user, hashed_password)
+
+
 async def update_onboarding(
     db: AsyncSession,
     user: User,

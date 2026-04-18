@@ -164,6 +164,7 @@ import type {
   CourseOverviewResponse,
   LearningUnitResponse,
   OnboardingPayload,
+  ForgotPasswordPayload,
   QuizAnswerResponse,
   QuizCompleteResponse,
   QuizStartResponse,
@@ -298,6 +299,9 @@ export const authApi = {
 
   login: (data: LoginPayload) =>
     api.post<TokenPair>("/api/auth/login", data).then((r) => r.data),
+
+  forgotPassword: (data: ForgotPasswordPayload) =>
+    api.post<{ status: string }>("/api/auth/forgot-password", data).then((r) => r.data),
 
   refresh: (refreshToken: string) =>
     api

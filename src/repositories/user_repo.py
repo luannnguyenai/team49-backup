@@ -22,3 +22,10 @@ class UserRepository(BaseRepository[User]):
             select(User).where(User.email == email.lower())
         )
         return result.scalar_one_or_none()
+
+    async def update_hashed_password(self, user: User, hashed_password: str) -> User:
+        user.hashed_password = hashed_password
+        self.session.add(user)
+        await self.session.flush()
+        await self.session.refresh(user)
+        return user

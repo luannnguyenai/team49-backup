@@ -77,6 +77,15 @@ describe("auth forms preserve next redirect context", () => {
     );
   });
 
+  it("login form preserves next on the forgot-password link", () => {
+    render(<LoginForm />);
+
+    expect(screen.getByRole("link", { name: "Quên mật khẩu?" })).toHaveAttribute(
+      "href",
+      "/forgot-password?next=%2Fcourses%2Fcs231n%2Fstart",
+    );
+  });
+
   it("register form submits onboarding with preserved next", async () => {
     registerUserMock.mockResolvedValue(undefined);
 

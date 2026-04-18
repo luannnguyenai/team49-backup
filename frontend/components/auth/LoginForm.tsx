@@ -45,6 +45,7 @@ export default function LoginForm() {
 
   const next = searchParams.get("next") ?? searchParams.get("from");
   const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
+  const forgotPasswordHref = next ? `/forgot-password?next=${encodeURIComponent(next)}` : "/forgot-password";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
@@ -88,6 +89,12 @@ export default function LoginForm() {
         error={errors.password?.message}
         {...register("password")}
       />
+
+      <div className="flex justify-end">
+        <Link href={forgotPasswordHref} className="link text-sm">
+          Quên mật khẩu?
+        </Link>
+      </div>
 
       <Button type="submit" loading={isLoading} className="w-full">
         Đăng nhập
