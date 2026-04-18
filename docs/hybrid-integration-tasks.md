@@ -65,7 +65,7 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 - [x] T032 Chạy lại route tests cho `frontend/tests/routes/course-catalog.test.tsx`, `frontend/tests/routes/course-start.test.tsx`, `frontend/tests/routes/personalized-catalog.test.tsx`, `frontend/tests/routes/learning-unit.test.tsx`, `frontend/tests/routes/legacy-tutor-redirect.test.tsx`
 - [x] T033 Chạy lại tutor/component tests cho `frontend/tests/unit/in-context-tutor.test.tsx` và các unit tests liên quan presenter/auth redirect
 - [x] T034 Chạy `frontend` typecheck để xác nhận merge không làm vỡ contracts giữa presenter, routes, và components
-- [ ] T035 Chạy các e2e specs đã có trong `frontend/tests/e2e/course-discovery.spec.ts`, `frontend/tests/e2e/course-gating.spec.ts`, `frontend/tests/e2e/lecture-tutor.spec.ts` nếu môi trường local đủ điều kiện
+- [x] T035 Chạy các e2e specs đã có trong `frontend/tests/e2e/course-discovery.spec.ts`, `frontend/tests/e2e/course-gating.spec.ts`, `frontend/tests/e2e/lecture-tutor.spec.ts` nếu môi trường local đủ điều kiện
 
 ## Phase 8: Backend Stability Verification
 

@@ -108,8 +108,30 @@ Các điểm sau vẫn chưa xong:
 
 - course metadata runtime chưa DB-authoritative hoàn toàn
 - repository layer chưa rollout rộng
-- e2e chưa rerun đủ rộng sau integration
 - live full flow `login -> onboarding -> assessment -> return-to-course` chưa được re-verify đầy đủ trên hybrid branch
+- backend docker-compose bootstrap hiện còn vướng Alembic multiple-heads ở bước `alembic upgrade head`
+
+## Verification snapshot hiện tại
+
+Những gì đã verify được:
+
+- frontend route/unit/typecheck xanh
+- backend contract/auth/config tests xanh
+- Playwright smoke:
+  - `9 passed`
+  - `2 skipped` (hai case personalized catalog vẫn đang intentionally skip vì thiếu seeded recommendation state)
+- live smoke đã cover:
+  - public catalog
+  - course overview
+  - coming-soon gate
+  - unauthenticated start -> login redirect with `next`
+  - learning unit page
+  - AI Tutor panel open
+
+Những gì chưa cover trọn vẹn:
+
+- `login -> onboarding -> assessment -> return-to-course` như một journey đầy đủ
+- startup qua `docker compose` không cần workaround local uvicorn
 
 ## Đánh giá thực tế
 
