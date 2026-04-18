@@ -46,10 +46,10 @@ async def test_protected_endpoint_requires_auth(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_register_and_login(client: AsyncClient):
+async def test_register_and_login(db_client: AsyncClient):
     """Register a new user, login, and verify token is returned."""
     # Register
-    reg = await client.post("/api/auth/register", json={
+    reg = await db_client.post("/api/auth/register", json={
         "email": "testuser@example.com",
         "password": "SecurePass123!",
         "full_name": "Test User",
@@ -60,7 +60,7 @@ async def test_register_and_login(client: AsyncClient):
     assert "refresh_token" in tokens
 
     # Login
-    login = await client.post("/api/auth/login", json={
+    login = await db_client.post("/api/auth/login", json={
         "email": "testuser@example.com",
         "password": "SecurePass123!",
     })
@@ -69,7 +69,7 @@ async def test_register_and_login(client: AsyncClient):
     assert "access_token" in login_tokens
 
     # /api/users/me with token
-    me = await client.get(
+    me = await db_client.get(
         "/api/users/me",
         headers={"Authorization": f"Bearer {login_tokens['access_token']}"},
     )
