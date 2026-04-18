@@ -58,7 +58,11 @@ class QuestionRepository(BaseRepository[Question]):
                 Question.id.notin_(excluded_ids) if excluded_ids else True,
             )
         )
-        candidates = result.scalars().all()
+        candidates = [
+            question
+            for question in result.scalars().all()
+            if question.usage_context is None or "assessment" in question.usage_context
+        ]
         # Sort by 2PL information: I(θ) ∝ a²·P(1-P), higher = better discrimination at ability
         return sorted(candidates, key=lambda q: _irt_information(q, ability), reverse=True)[:limit]
 

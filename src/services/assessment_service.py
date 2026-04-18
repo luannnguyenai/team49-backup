@@ -21,15 +21,12 @@ import math
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import case, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.content import (
     BloomLevel,
-    DifficultyBucket,
     KnowledgeComponent,
     Question,
-    QuestionStatus,
     Topic,
 )
 from src.models.learning import (
@@ -48,11 +45,13 @@ from src.schemas.assessment import (
 )
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.repositories.assessment_repo import AssessmentRepository
+from src.repositories.question_repo import QuestionRepository
 from src.services.mastery_evaluator import (
     QuestionResult,
     TopicMasteryResult,
     evaluate_topic,
 )
+from src.services.question_selector import QuestionSelector
 
 # ---------------------------------------------------------------------------
 # 2PL IRT model
@@ -200,7 +199,7 @@ async def start_assessment(
     all_questions: list[Question] = []
     skipped_topics: list[str] = []
     for topic_id in topic_ids:
-        topic_qs = await _select_questions_for_topic(db, topic_id, excluded_ids, ability)
+        topic_qs = await _select_questions_for_topic(db, user_id, topic_id, excluded_ids, ability)
         if topic_qs:
             all_questions.extend(topic_qs)
         else:
@@ -234,74 +233,20 @@ async def start_assessment(
 
 async def _select_questions_for_topic(
     db: AsyncSession,
+    user_id: uuid.UUID,
     topic_id: uuid.UUID,
     excluded_ids: set[uuid.UUID],
     ability: float = 0.0,
-    _candidate_multiplier: int = 5,
 ) -> list[Question]:
-    """
-    Select up to 5 questions for a single topic following the bloom distribution.
-
-    2PL IRT question selection:
-    ─ Fetch up to (count × _candidate_multiplier) candidates per bloom slot via SQL,
-      pre-ordered by |b − θ| as a cheap proximity filter.
-    ─ Re-rank in Python by 2PL item information: I(θ) = a²·P(θ)·(1−P(θ))
-      selecting the questions that are most informative at the current ability level.
-    ─ Questions without calibrated IRT params use bucket-derived defaults so the
-      ranking is meaningful even before formal calibration.
-
-    Questions already in ``excluded_ids`` (previously answered) are skipped.
-    If a bloom slot has fewer candidates than requested, we take what's available.
-    """
-    selected: list[Question] = []
-
-    # SQL pre-filter: order by |b_proxy − ability| so the candidate pool already
-    # skews toward on-target difficulty before Python re-ranking.
-    bucket_proxy = case(
-        (Question.difficulty_bucket == DifficultyBucket.easy, literal(-1.0)),
-        (Question.difficulty_bucket == DifficultyBucket.medium, literal(0.0)),
-        (Question.difficulty_bucket == DifficultyBucket.hard, literal(1.0)),
-        else_=literal(0.0),
+    """Select assessment questions through the shared QuestionSelector strategy."""
+    selector = QuestionSelector(QuestionRepository(db))
+    return await selector.select_by_bloom_irt(
+        user_id=user_id,
+        topic_id=topic_id,
+        slots=_BLOOM_SLOTS,
+        ability=ability,
+        excluded_ids=excluded_ids,
     )
-    sql_distance = case(
-        (Question.irt_difficulty.isnot(None), func.abs(Question.irt_difficulty - ability)),
-        else_=func.abs(bucket_proxy - ability),
-    )
-
-    for bloom_levels, count in _BLOOM_SLOTS:
-        exclusion = excluded_ids | {q.id for q in selected}
-
-        stmt = (
-            select(Question)
-            .where(
-                Question.topic_id == topic_id,
-                Question.status == QuestionStatus.active,
-                text("usage_context::jsonb @> '[\"assessment\"]'::jsonb"),
-                Question.bloom_level.in_(bloom_levels),
-            )
-            .order_by(sql_distance.asc(), func.random())
-            .limit(count * _candidate_multiplier)
-        )
-        if exclusion:
-            stmt = stmt.where(Question.id.not_in(list(exclusion)))
-
-        result = await db.execute(stmt)
-        candidates: list[Question] = list(result.scalars().all())
-
-        if not candidates:
-            continue
-
-        # ── 2PL information re-ranking ────────────────────────────────────────
-        # Sort descending by I(θ): the most informative item for this ability
-        # level goes first. Negate so sorted() gives descending order.
-        def _neg_information(q: Question) -> float:
-            a, b = _resolve_2pl_params(q)
-            return -_irt_2pl_information(ability, a, b)
-
-        ranked = sorted(candidates, key=_neg_information)
-        selected.extend(ranked[:count])
-
-    return selected
 
 
 # ===========================================================================

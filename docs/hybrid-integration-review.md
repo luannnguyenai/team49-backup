@@ -75,6 +75,7 @@ Những uplift đã có mặt trong code:
 - `course_catalog_service` đã đi qua `CourseRecommendationRepository`
 - `history_service` đã đi qua `HistoryRepository`
 - `assessment_service` đã đi qua `AssessmentRepository` cho các query/lookup DB-backed
+- `assessment_service` đã nối `QuestionSelector` + `QuestionRepository` cho assessment item selection thay vì giữ selector riêng trong service
 
 ## Những gì resolve thủ công
 
@@ -112,7 +113,7 @@ Hybrid branch hiện đã rõ hơn ở chỗ:
 Các điểm sau vẫn chưa xong:
 
 - course metadata runtime chưa DB-authoritative hoàn toàn
-- repository layer đã rollout cho `user/auth`, `recommendation`, `history`, và phần query helpers của `assessment`
+- repository layer đã rollout cho `user/auth`, `recommendation`, `history`, `assessment` query helpers, và `QuestionSelector` cho assessment item selection
 - compose-backed smoke hiện đã chạy được và backend compose đã lên `healthy`
 - live full flow `login -> onboarding -> assessment -> return-to-course` đã được re-verify trên hybrid branch
 
@@ -161,10 +162,9 @@ Những gì chưa cover trọn vẹn:
 
 Thứ tự thực dụng nhất từ đây:
 
-1. Mở rộng repository rollout sang assessment/history nếu test coverage đủ
-2. Cập nhật docs task/status một vòng nữa khi Phase 5 hoàn tất
-3. Chỉ port repository layer ở nơi thật sự DB-backed
-4. Sau đó mới cân nhắc merge vào `main`
+1. Chốt verify cuối trước khi merge preserve-history vào `main`
+2. Chỉ port repository layer tiếp ở nơi thật sự DB-backed, không repository hóa bootstrap services
+3. Sau đó mới cân nhắc canonicalize sâu hơn phần `CS231n` legacy adapter
 
 ## Quy tắc chọn nhánh khi có tranh luận trong team
 

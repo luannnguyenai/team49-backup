@@ -49,8 +49,8 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 - [x] T022 Thêm `src/repositories/base.py` theo pattern của `db-review` làm nền cho repository layer của hybrid branch
 - [x] T023 Áp repository layer cho phần user/auth state, tạo hoặc cập nhật `src/repositories/*` tương ứng cho user/session/profile nếu vùng này đã DB-backed thật
 - [x] T024 Áp repository layer cho assessment/history/recommendation ở `src/repositories/*` chỉ khi logic đang chạm DB thật, không bọc giả các bootstrap services
-- [ ] T025 Giữ `src/services/course_catalog_service.py`, `src/services/course_entry_service.py`, `src/services/learning_unit_service.py` ở vai trò application service, chưa ép repository hóa mọi thứ khi runtime data còn transitional
-- [ ] T026 Nếu tích hợp `db-review:src/services/question_selector.py`, đặt nó vào `src/services/question_selector.py` hoặc package phù hợp và chỉ nối vào flow assessment khi test coverage đủ
+- [x] T025 Giữ `src/services/course_catalog_service.py`, `src/services/course_entry_service.py`, `src/services/learning_unit_service.py` ở vai trò application service, chưa ép repository hóa mọi thứ khi runtime data còn transitional
+- [x] T026 Nếu tích hợp `db-review:src/services/question_selector.py`, đặt nó vào `src/services/question_selector.py` hoặc package phù hợp và chỉ nối vào flow assessment khi test coverage đủ
 
 ## Phase 6: Legacy Adapter Boundary Cleanup
 
