@@ -1,5 +1,12 @@
 import type { LucideIcon } from "lucide-react";
-import { History, LayoutDashboard, Library, User } from "lucide-react";
+import {
+  BookOpen,
+  History,
+  LayoutDashboard,
+  Library,
+  MessageSquareText,
+  User,
+} from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -11,6 +18,8 @@ export interface NavItem {
 
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/tutor", label: "AI Tutor", icon: MessageSquareText },
+  { href: "/learn", label: "Học", icon: BookOpen },
   {
     href: "/",
     label: "Courses",

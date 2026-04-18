@@ -51,7 +51,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
         style={{ borderColor: "var(--border)" }}
       >
         <Link
-          href="/"
+          href="/dashboard"
           className="flex items-center gap-2.5 min-w-0"
           onClick={onMobileClose}
         >
@@ -60,7 +60,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           </div>
           {!collapsed && (
             <span className="truncate text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-              AI Learning Hub
+              AI Learning
             </span>
           )}
         </Link>
