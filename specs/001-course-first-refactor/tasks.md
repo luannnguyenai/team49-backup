@@ -63,20 +63,20 @@
 
 ### Tests for User Story 1
 
-- [ ] T017 [P] [US1] Add backend contract tests for `GET /api/courses` and `GET /api/courses/{course_slug}/overview` in `tests/contract/test_course_catalog_api.py`
-- [ ] T018 [P] [US1] Add frontend route tests for the public catalog and course overview states in `frontend/tests/routes/course-catalog.test.tsx`
-- [ ] T019 [P] [US1] Add the Playwright public discovery journey in `frontend/tests/e2e/course-discovery.spec.ts`
+- [X] T017 [P] [US1] Add backend contract tests for `GET /api/courses` and `GET /api/courses/{course_slug}/overview` in `tests/contract/test_course_catalog_api.py`
+- [X] T018 [P] [US1] Add frontend route tests for the public catalog and course overview states in `frontend/tests/routes/course-catalog.test.tsx`
+- [X] T019 [P] [US1] Add the Playwright public discovery journey in `frontend/tests/e2e/course-discovery.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement authoritative catalog and overview read queries in `src/services/course_catalog_service.py`
+- [X] T020 [US1] Implement authoritative catalog and overview read queries in `src/services/course_catalog_service.py`
 - [ ] T021 [US1] Implement CS231n and CS224n bootstrap ingestion using server-side records in `src/services/course_bootstrap_service.py` and `src/services/ingestion.py`
-- [ ] T022 [US1] Expose public catalog and overview endpoints in `src/routers/courses.py`
-- [ ] T023 [P] [US1] Build reusable catalog cards and status badge components in `frontend/components/course/CourseCatalog.tsx` and `frontend/components/course/CourseStatusBadge.tsx`
-- [ ] T024 [P] [US1] Build the course overview presentation component in `frontend/components/course/CourseOverview.tsx`
-- [ ] T025 [US1] Replace the auth-first root redirect with the public catalog home in `frontend/app/page.tsx`
-- [ ] T026 [US1] Create the public course overview route in `frontend/app/courses/[courseSlug]/page.tsx`
-- [ ] T027 [US1] Add consistent coming-soon messaging and blocked deep-link handling in `frontend/app/courses/[courseSlug]/page.tsx` and `frontend/lib/course-gate.ts`
+- [X] T022 [US1] Expose public catalog and overview endpoints in `src/routers/courses.py`
+- [X] T023 [P] [US1] Build reusable catalog cards and status badge components in `frontend/components/course/CourseCatalog.tsx` and `frontend/components/course/CourseStatusBadge.tsx`
+- [X] T024 [P] [US1] Build the course overview presentation component in `frontend/components/course/CourseOverview.tsx`
+- [X] T025 [US1] Replace the auth-first root redirect with the public catalog home in `frontend/app/page.tsx`
+- [X] T026 [US1] Create the public course overview route in `frontend/app/courses/[courseSlug]/page.tsx`
+- [X] T027 [US1] Add consistent coming-soon messaging and blocked deep-link handling in `frontend/app/courses/[courseSlug]/page.tsx` and `frontend/lib/course-gate.ts`
 
 **Checkpoint**: The MVP course catalog and overview flow is functional and can be demonstrated without login.
 

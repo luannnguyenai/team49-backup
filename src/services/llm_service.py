@@ -4,6 +4,7 @@ import json
 import logging
 import operator
 from datetime import datetime, timedelta
+from functools import lru_cache
 from typing import Annotated, TypedDict
 
 from langchain.chat_models import init_chat_model
@@ -53,16 +54,19 @@ def execute_python(code: str) -> str:
 tools = [execute_python]
 tool_node = ToolNode(tools)
 
-# Initialize LLM with tools (provider-agnostic)
-llm = init_chat_model(model=DEFAULT_MODEL, model_provider=MODEL_PROVIDER, temperature=0.2)
-try:
-    llm_with_tools = llm.bind_tools(tools)
-except Exception:
-    # Local models may not support tool calling — degrade gracefully (no Sandbox)
-    llm_with_tools = llm
+
+@lru_cache(maxsize=1)
+def _get_llm_with_tools():
+    """Lazily create the main tutor LLM so FastAPI can import without secrets."""
+    llm = init_chat_model(model=DEFAULT_MODEL, model_provider=MODEL_PROVIDER, temperature=0.2)
+    try:
+        return llm.bind_tools(tools)
+    except Exception:
+        # Local models may not support tool calling — degrade gracefully (no Sandbox)
+        return llm
 
 def call_model(state: AgentState):
-    response = llm_with_tools.invoke(state["messages"])
+    response = _get_llm_with_tools().invoke(state["messages"])
     return {"messages": [response]}
 
 def should_continue(state: AgentState):

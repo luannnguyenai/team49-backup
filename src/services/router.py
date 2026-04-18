@@ -11,6 +11,8 @@ Costs ~150 tokens per request (router) + ~300 tokens for SIMPLE answers.
 
 import json
 import logging
+from functools import lru_cache
+
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -26,13 +28,16 @@ def _fmt_ts(seconds: float) -> str:
 
 logger = logging.getLogger("SmartRouter")
 
-# Initialize router LLM once at module level (avoid re-init on every request)
-_router_llm = init_chat_model(
-    model=FAST_MODEL,
-    model_provider=MODEL_PROVIDER,
-    temperature=0,
-    max_tokens=1200,
-)
+
+@lru_cache(maxsize=1)
+def _get_router_llm():
+    """Lazily create the router LLM so app imports do not require API keys."""
+    return init_chat_model(
+        model=FAST_MODEL,
+        model_provider=MODEL_PROVIDER,
+        temperature=0,
+        max_tokens=1200,
+    )
 
 # --- Router Prompt -----------------------------------------------------------
 _ROUTER_SYSTEM = """\
@@ -99,7 +104,7 @@ def route_question(question: str, lecture_title: str, context_summary: str = "",
             user_text += f"\n\nLecture outline:\n{context_summary}\n"
         user_text += f'\nStudent question: "{question}"'
 
-        response = _router_llm.invoke([
+        response = _get_router_llm().invoke([
             SystemMessage(content=_ROUTER_SYSTEM),
             HumanMessage(content=user_text),
         ])
