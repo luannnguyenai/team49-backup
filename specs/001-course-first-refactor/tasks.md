@@ -137,10 +137,10 @@
 
 **Purpose**: Clean up navigation, lock in architecture notes, add shared fixtures, and run the end-to-end validation matrix.
 
-- [ ] T047 [P] Update navigation to surface the catalog-first flow in `frontend/components/layout/TopNav.tsx` and `frontend/components/layout/Sidebar.tsx`
-- [ ] T048 [P] Document server-authoritative data architecture and import boundaries in `docs/course-platform-architecture.md`
-- [ ] T049 [P] Add shared backend and frontend course-platform fixtures in `tests/fixtures/course_platform/README.md` and `frontend/tests/fixtures/coursePlatform.ts`
-- [ ] T050 Run the full quickstart validation matrix and record any command updates in `specs/001-course-first-refactor/quickstart.md`
+- [X] T047 [P] Update navigation to surface the catalog-first flow in `frontend/components/layout/TopNav.tsx` and `frontend/components/layout/Sidebar.tsx`
+- [X] T048 [P] Document server-authoritative data architecture and import boundaries in `docs/course-platform-architecture.md`
+- [X] T049 [P] Add shared backend and frontend course-platform fixtures in `tests/fixtures/course_platform/README.md` and `frontend/tests/fixtures/coursePlatform.ts`
+- [X] T050 Run the full quickstart validation matrix and record any command updates in `specs/001-course-first-refactor/quickstart.md`
 
 ---
 

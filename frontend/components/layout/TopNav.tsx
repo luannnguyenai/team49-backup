@@ -9,7 +9,7 @@ import {
   Brain,
   LayoutDashboard,
   BookOpen,
-  MessageSquareText,
+  Library,
   History,
   User,
   Moon,
@@ -26,8 +26,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/learn", label: "Học", icon: BookOpen },
-  { href: "/tutor", label: "AI Tutor", icon: MessageSquareText },
+  { href: "/", label: "Courses", icon: Library, exact: true },
   { href: "/history", label: "Lịch sử", icon: History },
   { href: "/profile", label: "Hồ sơ", icon: User },
 ];
@@ -72,8 +71,11 @@ export default function TopNav() {
 
           {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-1 ml-4">
-            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href || pathname.startsWith(href + "/");
+            {NAV_ITEMS.map((navItem) => {
+              const { href, label, icon: Icon } = navItem;
+              const active = (navItem as any).exact
+                ? pathname === href
+                : pathname === href || pathname.startsWith(href + "/");
               return (
                 <Link
                   key={href}
@@ -168,8 +170,11 @@ export default function TopNav() {
             className="md:hidden border-t px-4 py-3 space-y-1"
             style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
           >
-            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href || pathname.startsWith(href + "/");
+            {NAV_ITEMS.map((navItem) => {
+              const { href, label, icon: Icon } = navItem;
+              const active = (navItem as any).exact
+                ? pathname === href
+                : pathname === href || pathname.startsWith(href + "/");
               return (
                 <Link
                   key={href}
