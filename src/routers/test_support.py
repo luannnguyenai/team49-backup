@@ -12,12 +12,12 @@ from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.course import (
     Course,
-    CourseRecommendation,
     CourseStatus,
     CourseVisibility,
     LearnerAssessmentProfile,
 )
 from src.models.user import User
+from src.repositories.course_recommendation_repo import CourseRecommendationRepository
 from src.services.course_bootstrap_service import get_bootstrap_course
 
 test_support_router = APIRouter(prefix="/api/test-support", tags=["Test Support"])
@@ -112,16 +112,15 @@ async def api_seed_course_recommendations(
 
     courses = await _ensure_bootstrap_course_rows(db, body.course_slugs)
 
-    await db.execute(delete(CourseRecommendation).where(CourseRecommendation.user_id == user.id))
+    recommendation_repo = CourseRecommendationRepository(db)
+    await recommendation_repo.delete_for_user(user.id)
 
     for rank, course in enumerate(courses, start=1):
-        db.add(
-            CourseRecommendation(
-                user_id=user.id,
-                course_id=course.id,
-                rank=rank,
-                reason_summary="Seeded for e2e verification.",
-            )
+        await recommendation_repo.create(
+            user_id=user.id,
+            course_id=course.id,
+            rank=rank,
+            reason_summary="Seeded for e2e verification.",
         )
 
     await _upsert_assessment_profile(

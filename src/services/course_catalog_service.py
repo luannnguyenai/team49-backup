@@ -18,6 +18,7 @@ from src.schemas.course import (
     CourseOverviewResponse,
     StartLearningDecisionResponse,
 )
+from src.repositories.course_recommendation_repo import CourseRecommendationRepository
 from src.services.course_bootstrap_service import (
     get_bootstrap_course,
     get_bootstrap_overview,
@@ -143,16 +144,9 @@ async def _get_recommended_course_slugs(user_id: uuid.UUID) -> set[str]:
     """
     try:
         from src.database import async_session_factory
-        from sqlalchemy import select
-        from src.models.course import Course, CourseRecommendation
 
         async with async_session_factory() as db:
-            result = await db.execute(
-                select(Course.slug)
-                .join(CourseRecommendation, CourseRecommendation.course_id == Course.id)
-                .where(CourseRecommendation.user_id == user_id)
-                .order_by(CourseRecommendation.rank)
-            )
-            return {row[0] for row in result.all()}
+            repo = CourseRecommendationRepository(db)
+            return await repo.get_recommended_slugs_for_user(user_id)
     except Exception:
         return set()

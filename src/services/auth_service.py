@@ -10,11 +10,11 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 from jose import JWTError, jwt
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.models.user import User
+from src.repositories.user_repo import UserRepository
 from src.schemas.auth import OnboardingRequest, RegisterRequest, TokenPayload
 
 # ---------------------------------------------------------------------------
@@ -86,13 +86,13 @@ def get_token_remaining_seconds(payload: TokenPayload) -> int:
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    result = await db.execute(select(User).where(User.email == email.lower()))
-    return result.scalar_one_or_none()
+    repo = UserRepository(db)
+    return await repo.get_by_email(email)
 
 
 async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
-    result = await db.execute(select(User).where(User.id == user_id))
-    return result.scalar_one_or_none()
+    repo = UserRepository(db)
+    return await repo.get_by_id(user_id)
 
 
 # ---------------------------------------------------------------------------
@@ -102,24 +102,23 @@ async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
 
 async def register_user(db: AsyncSession, data: RegisterRequest) -> User:
     """Create a new user. Raises ValueError if email already exists."""
-    existing = await get_user_by_email(db, data.email)
+    repo = UserRepository(db)
+    existing = await repo.get_by_email(data.email)
     if existing:
         raise ValueError("An account with this email already exists.")
 
-    user = User(
+    user = await repo.create(
         email=data.email.lower(),
         full_name=data.full_name.strip(),
         hashed_password=hash_password(data.password),
     )
-    db.add(user)
-    await db.flush()  # get the generated UUID before commit
-    await db.refresh(user)
     return user
 
 
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User:
     """Verify credentials. Raises ValueError on invalid email or password."""
-    user = await get_user_by_email(db, email.lower())
+    repo = UserRepository(db)
+    user = await repo.get_by_email(email)
     if not user or not verify_password(password, user.hashed_password):
         raise ValueError("Incorrect email or password.")
     return user

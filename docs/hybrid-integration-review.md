@@ -60,6 +60,7 @@ Lý do giữ:
 - explicit `cors_origins` / `redis_url`
 - rate limit pattern cho login
 - token revoke / denylist pattern cho auth
+- repository pattern cho user/auth state và recommendation query
 
 Những uplift đã có mặt trong code:
 
@@ -70,6 +71,8 @@ Những uplift đã có mặt trong code:
 - denylist guard ở dependency/auth flow
 - `POST /api/auth/logout`
 - frontend logout gọi backend revoke
+- `auth_service` đã đi qua `UserRepository`
+- `course_catalog_service` đã đi qua `CourseRecommendationRepository`
 
 ## Những gì resolve thủ công
 
@@ -107,7 +110,7 @@ Hybrid branch hiện đã rõ hơn ở chỗ:
 Các điểm sau vẫn chưa xong:
 
 - course metadata runtime chưa DB-authoritative hoàn toàn
-- repository layer chưa rollout rộng
+- repository layer mới rollout một phần, chưa phủ assessment/history
 - compose-backed smoke hiện đã chạy được và backend compose đã lên `healthy`
 - live full flow `login -> onboarding -> assessment -> return-to-course` đã được re-verify trên hybrid branch
 
@@ -144,19 +147,20 @@ Những gì chưa cover trọn vẹn:
 - Hấp thụ được nhiều uplift backend mà không phá flow chính
 - Commit history của cả team vẫn được preserve
 - Boundary giữa canonical course layer và legacy lecture layer rõ hơn trước
+- Repository layer đã bắt đầu được dùng thật ở vùng DB-backed thay vì chỉ tồn tại riêng trong assessment stack
 
 ### Điểm chưa nên tự tin quá mức
 
 - Chưa đủ để gọi là production-ready hoàn chỉnh
-- Chưa chứng minh xong repository strategy tối ưu
+- Repository strategy mới chỉ được chứng minh ở slice `user/auth state + recommendation`
 - Chưa migrate được `CS231n` sang canonical model hoàn toàn
 
 ## Recommendation cho bước tiếp theo
 
 Thứ tự thực dụng nhất từ đây:
 
-1. Rerun thêm e2e/smoke cho flow học thật
-2. Cập nhật docs task/status một vòng nữa nếu có thay đổi
+1. Mở rộng repository rollout sang assessment/history nếu test coverage đủ
+2. Cập nhật docs task/status một vòng nữa khi Phase 5 hoàn tất
 3. Chỉ port repository layer ở nơi thật sự DB-backed
 4. Sau đó mới cân nhắc merge vào `main`
 
