@@ -1,6 +1,12 @@
 "use client";
 
+// ⚠️ LEGACY TUTOR PAGE — US3 compatibility redirect
+// This standalone tutor surface is deprecated in favor of the course-first
+// learning experience. A redirect banner is shown at the top.
+// The route still functions for users who deep-link here.
+
 import { useState, useEffect, useRef, useCallback, type RefObject, type MouseEvent as ReactMouseEvent } from "react";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { api } from "@/lib/api";
 import {
@@ -463,10 +469,25 @@ export default function TutorPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div
-      className="flex h-[calc(100vh-4.5rem)] overflow-hidden -mx-4 -mt-4 md:-mx-6 md:-mt-6"
-      style={{ backgroundColor: "var(--bg-page)" }}
-    >
+    <div className="flex flex-col h-[calc(100vh-4.5rem)] overflow-hidden -mx-4 -mt-4 md:-mx-6 md:-mt-6">
+      {/* ═══════════════════════════════════════════════════════════════
+          US3 COMPATIBILITY BANNER — redirects to course-first flow
+      ═══════════════════════════════════════════════════════════════ */}
+      <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-amber-50 to-amber-100 border-b border-amber-200 px-4 py-2.5 shrink-0">
+        <p className="text-xs text-amber-800">
+          <span className="font-semibold">New:</span> AI Tutor is now built into the course learning experience.
+        </p>
+        <Link
+          href="/"
+          className="shrink-0 rounded-full bg-amber-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
+        >
+          Go to courses →
+        </Link>
+      </div>
+      <div
+        className="flex flex-1 overflow-hidden"
+        style={{ backgroundColor: "var(--bg-page)" }}
+      >
 
       {/* ═══════════════════════════════════════════════════════════════════
           LEFT PANEL — Course content (lecture list)
@@ -1028,6 +1049,7 @@ export default function TutorPage() {
           </>
         )}
       </aside>
+      </div>
     </div>
   );
 }

@@ -115,19 +115,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T037 [P] [US3] Add backend contract tests for `GET /api/courses/{course_slug}/units/{unit_slug}` and legacy tutor compatibility in `tests/contract/test_learning_unit_api.py`
-- [ ] T038 [P] [US3] Add frontend tests for the unified learning page and in-context tutor behavior in `frontend/tests/routes/learning-unit.test.tsx`
-- [ ] T039 [P] [US3] Add the Playwright lecture and tutor journey in `frontend/tests/e2e/lecture-tutor.spec.ts`
+- [X] T037 [P] [US3] Add backend contract tests for `GET /api/courses/{course_slug}/units/{unit_slug}` and legacy tutor compatibility in `tests/contract/test_learning_unit_api.py`
+- [X] T038 [P] [US3] Add frontend tests for the unified learning page and in-context tutor behavior in `frontend/tests/routes/learning-unit.test.tsx`
+- [X] T039 [P] [US3] Add the Playwright lecture and tutor journey in `frontend/tests/e2e/lecture-tutor.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T040 [US3] Add legacy lecture-to-learning-unit mapping and tutor context persistence in `src/models/store.py` and `src/services/learning_unit_service.py`
-- [ ] T041 [US3] Implement `GET /api/courses/{course_slug}/units/{unit_slug}` in `src/services/learning_unit_service.py` and `src/routers/courses.py`
-- [ ] T042 [US3] Bind tutor question context to active learning units in `src/services/llm_service.py` and `src/services/history_service.py`
-- [ ] T043 [P] [US3] Create the protected canonical learning route in `frontend/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page.tsx`
-- [ ] T044 [P] [US3] Build the unified lecture shell and in-context tutor UI in `frontend/components/learn/LearningUnitShell.tsx` and `frontend/components/learn/InContextTutor.tsx`
-- [ ] T045 [US3] Replace the standalone tutor surface with a compatibility redirect in `frontend/app/(protected)/tutor/page.tsx`
-- [ ] T046 [US3] Update legacy protected learn entry points to route into canonical course units in `frontend/app/(protected)/learn/page.tsx` and `frontend/app/(protected)/learn/[topicId]/page.tsx`
+- [X] T040 [US3] Add legacy lecture-to-learning-unit mapping and tutor context persistence in `src/models/store.py` and `src/services/learning_unit_service.py`
+- [X] T041 [US3] Implement `GET /api/courses/{course_slug}/units/{unit_slug}` in `src/services/learning_unit_service.py` and `src/routers/courses.py`
+- [X] T042 [US3] Bind tutor question context to active learning units in `src/services/llm_service.py` and `src/services/history_service.py`
+- [X] T043 [P] [US3] Create the protected canonical learning route in `frontend/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page.tsx`
+- [X] T044 [P] [US3] Build the unified lecture shell and in-context tutor UI in `frontend/components/learn/LearningUnitShell.tsx` and `frontend/components/learn/InContextTutor.tsx`
+- [X] T045 [US3] Replace the standalone tutor surface with a compatibility redirect in `frontend/app/(protected)/tutor/page.tsx`
+- [X] T046 [US3] Update legacy protected learn entry points to route into canonical course units in `frontend/app/(protected)/learn/page.tsx` and `frontend/app/(protected)/learn/[topicId]/page.tsx`
 
 **Checkpoint**: Ready-course learning is course-first end to end, and the tutor is only accessible inside the active unit experience.
 

@@ -141,7 +141,15 @@ def _save_and_log(db, lecture_id, current_timestamp, user_question, full_answer,
 
 
 # --- Main Generator ---
-def get_context_and_stream_langgraph(lecture_id, current_timestamp, user_question, image_base64=None):
+def get_context_and_stream_langgraph(lecture_id, current_timestamp, user_question, image_base64=None, context_binding_id=None):
+    """
+    Main tutor streaming function.
+
+    US3: Accepts an optional context_binding_id that binds this Q&A
+    interaction to a specific learning unit context. When provided,
+    the binding ID is logged with the QA history for context-aware
+    retrieval and tutor memory scoping.
+    """
     db = SessionLocal()
     
     try:
