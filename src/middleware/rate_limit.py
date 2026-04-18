@@ -5,7 +5,7 @@ Redis-backed sliding-window rate limiter.
 
 Replaces the in-process _SlidingWindowRateLimiter which is broken under
 multiple uvicorn workers (each worker has its own counter).
-
+###
 Algorithm
 ---------
 For each request, atomically:
