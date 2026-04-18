@@ -14,7 +14,6 @@ connect unit slugs to legacy lecture IDs and video files.
 from __future__ import annotations
 
 import json
-import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -25,6 +24,11 @@ from src.schemas.course import (
     LearningUnitResponse,
     LearningUnitSummary,
     TutorContextPayload,
+)
+from src.services.legacy_lecture_adapter import (
+    build_tutor_bridge_payload,
+    get_unit_by_legacy_lecture_id,
+    normalize_legacy_lecture_id,
 )
 from src.services.course_bootstrap_service import get_bootstrap_course
 
@@ -65,30 +69,11 @@ def get_first_unit_slug(course_slug: str) -> str | None:
     return units[0]["slug"]
 
 
-def get_unit_by_legacy_lecture_id(lecture_id: str) -> dict[str, Any] | None:
-    """Find a learning unit by its legacy lecture ID."""
-    for unit in load_bootstrap_units():
-        if unit.get("legacy_lecture_id") == lecture_id:
-            return unit
-    return None
-
-
 def list_course_units(course_slug: str) -> list[dict[str, Any]]:
     """List all learning units for a course, ordered by order_index."""
     units = [u for u in load_bootstrap_units() if u["course_slug"] == course_slug]
     units.sort(key=lambda u: u.get("order_index", 0))
     return units
-
-
-def _normalize_legacy_lecture_id(raw_lecture_id: str | None, order_index: int | None) -> str | None:
-    """Normalize transitional legacy lecture IDs to the format stored in the DB."""
-    if raw_lecture_id:
-        normalized = raw_lecture_id.replace("_", "-")
-        normalized = re.sub(r"lecture-(0+)(\d+)", r"lecture-\2", normalized)
-        return normalized
-    if order_index:
-        return f"cs231n-lecture-{order_index}"
-    return None
 
 
 # ---------------------------------------------------------------------------
@@ -133,10 +118,14 @@ async def get_learning_unit_payload(
     # Determine if tutor should be enabled
     # Tutor is enabled when the unit is ready and has video content
     tutor_enabled = unit_row["status"] == "ready" and video_url is not None
-    context_binding_id = f"ctx_{unit_row['id']}" if tutor_enabled else None
-    legacy_lecture_id = _normalize_legacy_lecture_id(
+    legacy_lecture_id = normalize_legacy_lecture_id(
         unit_row.get("legacy_lecture_id"),
         unit_row.get("order_index"),
+    )
+    tutor_bridge = build_tutor_bridge_payload(
+        tutor_enabled=tutor_enabled,
+        unit_id=unit_row["id"],
+        legacy_lecture_id=legacy_lecture_id,
     )
 
     return LearningUnitResponse(
@@ -159,9 +148,9 @@ async def get_learning_unit_payload(
             slides_available=slides_available,
         ),
         tutor=TutorContextPayload(
-            enabled=tutor_enabled,
-            mode="in_context" if tutor_enabled else "disabled",
-            context_binding_id=context_binding_id,
-            legacy_lecture_id=legacy_lecture_id,
+            enabled=tutor_bridge["enabled"],
+            mode=tutor_bridge["mode"],
+            context_binding_id=tutor_bridge["context_binding_id"],
+            legacy_lecture_id=tutor_bridge["legacy_lecture_id"],
         ),
     )

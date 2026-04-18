@@ -5,6 +5,11 @@ Original A20-App-049 lecture models, using the shared Base from base.py.
 All DB access is async via AsyncSession (get_async_db dependency).
 
 Models: Lecture, Chapter, TranscriptLine, QAHistory, LearningProgress
+
+Important boundary:
+- These tables are transitional adapter tables for the legacy CS231n tutor stack.
+- They must not replace the canonical course-first product domain in
+  `src/models/course.py`.
 """
 
 from datetime import datetime
@@ -84,4 +89,3 @@ class LearningProgress(Base):
     __table_args__ = (
         UniqueConstraint("session_id", "lecture_id", name="uq_session_lecture"),
     )
-

@@ -229,6 +229,11 @@ def get_context_and_stream_langgraph(
     `context_binding_id` is accepted to preserve the course-first tutor
     contract even while tutor retrieval still relies on the legacy lecture
     adapter. The binding is not yet persisted in QA history.
+
+    `lecture_id` here is intentionally a legacy lecture adapter ID resolved
+    from the canonical learning-unit payload. This service should remain
+    behind the compatibility boundary rather than becoming a product-level
+    course service.
     """
     try:
         # Fetch all DB data upfront (asyncio.run is safe in FastAPI threadpool)
