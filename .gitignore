@@ -43,3 +43,4 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/tsconfig.tsbuildinfo
 scripts/save_ui_cycle.ps1
+.superpowers
