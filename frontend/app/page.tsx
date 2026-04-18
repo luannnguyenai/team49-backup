@@ -1,48 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 
 import CourseCatalog from "@/components/course/CourseCatalog";
-import { courseApi } from "@/lib/api";
-import type { CourseCatalogItem } from "@/types";
+import { useCourseCatalogStore } from "@/stores/courseCatalogStore";
+import { useAuthStore } from "@/stores/authStore";
+import type { CourseCatalogView } from "@/types";
 
 export default function RootPage() {
-  const [courses, setCourses] = useState<CourseCatalogItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    activeView,
+    allCourses,
+    recommendedCourses,
+    isLoading,
+    error,
+    hasRecommendations,
+    setActiveView,
+    loadCatalog,
+  } = useCourseCatalogStore();
+
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = user !== null;
 
   useEffect(() => {
-    let active = true;
+    loadCatalog({ isAuthenticated });
+  }, [isAuthenticated, loadCatalog]);
 
-    async function loadCatalog() {
-      setIsLoading(true);
-      setError(null);
+  // Determine which courses to display based on active view
+  const displayedCourses =
+    activeView === "recommended" && hasRecommendations
+      ? recommendedCourses
+      : allCourses;
 
-      try {
-        const response = await courseApi.catalog({
-          view: "all",
-          includeUnavailable: true,
-        });
-        if (active) {
-          setCourses(response.items);
-        }
-      } catch (err) {
-        if (active) {
-          setError(err instanceof Error ? err.message : "Failed to load course catalog.");
-        }
-      } finally {
-        if (active) {
-          setIsLoading(false);
-        }
-      }
-    }
+  // Show tabs only when user is authenticated and has recommendations
+  const showTabs = isAuthenticated && hasRecommendations;
 
-    loadCatalog();
-    return () => {
-      active = false;
-    };
-  }, []);
+  const tabs: { key: CourseCatalogView; label: string }[] = [
+    { key: "recommended", label: "Recommended for you" },
+    { key: "all", label: "All courses" },
+  ];
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef6ff_55%,#ffffff_100%)] px-4 py-10 md:px-8">
@@ -54,20 +51,25 @@ export default function RootPage() {
             </p>
             <div className="space-y-4">
               <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-5xl">
-                Start from the catalog, then move into a guided lecture experience with AI Tutor in context.
+                {isAuthenticated
+                  ? `Welcome back, ${user.full_name.split(" ")[0]}`
+                  : "Start from the catalog, then move into a guided lecture experience with AI Tutor in context."}
               </h1>
               <p className="max-w-2xl text-base leading-7 text-slate-200">
-                The home landing now surfaces every public course. Ready courses open into overview and learning flow.
-                Upcoming courses stay visible so the platform can grow without breaking the contract.
+                {isAuthenticated
+                  ? "Pick up where you left off or explore new courses. Your recommended path is based on your skill assessment."
+                  : "The home landing now surfaces every public course. Ready courses open into overview and learning flow. Upcoming courses stay visible so the platform can grow without breaking the contract."}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/login"
-                className="inline-flex items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-100"
-              >
-                Sign in to continue
-              </Link>
+              {!isAuthenticated && (
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-100"
+                >
+                  Sign in to continue
+                </Link>
+              )}
               <span className="rounded-full border border-white/20 px-4 py-2 text-sm text-slate-100">
                 Demo courses: CS231n and CS224n
               </span>
@@ -76,12 +78,26 @@ export default function RootPage() {
 
           <div className="rounded-[28px] border border-white/10 bg-white/8 p-6 backdrop-blur">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
-              Current rollout rules
+              {isAuthenticated ? "Your learning status" : "Current rollout rules"}
             </p>
             <ul className="mt-5 space-y-4 text-sm leading-6 text-slate-200">
-              <li>CS231n is the only learnable demo course in this phase.</li>
-              <li>CS224n stays visible with a consistent coming-soon state.</li>
-              <li>Start learning routes into auth and onboarding gates before the protected flow.</li>
+              {isAuthenticated ? (
+                <>
+                  <li>
+                    {hasRecommendations
+                      ? "✅ Skill test completed — personalized recommendations active."
+                      : "📋 Complete the skill assessment to unlock recommended courses."}
+                  </li>
+                  <li>CS231n is the only learnable demo course in this phase.</li>
+                  <li>CS224n stays visible with a consistent coming-soon state.</li>
+                </>
+              ) : (
+                <>
+                  <li>CS231n is the only learnable demo course in this phase.</li>
+                  <li>CS224n stays visible with a consistent coming-soon state.</li>
+                  <li>Start learning routes into auth and onboarding gates before the protected flow.</li>
+                </>
+              )}
             </ul>
           </div>
         </section>
@@ -89,10 +105,39 @@ export default function RootPage() {
         <section className="space-y-5">
           <div className="space-y-2">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">
-              Public catalog
+              {showTabs ? "Your catalog" : "Public catalog"}
             </p>
-            <h2 className="text-3xl font-semibold text-slate-950">Explore available courses</h2>
+            <h2 className="text-3xl font-semibold text-slate-950">
+              {showTabs ? "Your learning path" : "Explore available courses"}
+            </h2>
           </div>
+
+          {/* Tab bar — only shown for authenticated users with recommendations */}
+          {showTabs && (
+            <div
+              className="flex gap-1 rounded-full bg-slate-100 p-1"
+              role="tablist"
+              aria-label="Catalog view"
+            >
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  id={`tab-${tab.key}`}
+                  aria-selected={activeView === tab.key}
+                  aria-controls={`panel-${tab.key}`}
+                  onClick={() => setActiveView(tab.key)}
+                  className={`flex-1 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                    activeView === tab.key
+                      ? "bg-white text-slate-950 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {isLoading && (
             <div className="card rounded-[28px] p-10 text-center text-sm text-slate-600">
@@ -106,7 +151,15 @@ export default function RootPage() {
             </div>
           )}
 
-          {!isLoading && !error && <CourseCatalog items={courses} />}
+          {!isLoading && !error && (
+            <div
+              role="tabpanel"
+              id={`panel-${activeView}`}
+              aria-labelledby={showTabs ? `tab-${activeView}` : undefined}
+            >
+              <CourseCatalog items={displayedCourses} />
+            </div>
+          )}
         </section>
       </div>
     </main>

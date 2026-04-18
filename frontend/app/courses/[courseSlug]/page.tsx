@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import CourseOverview from "@/components/course/CourseOverview";
 import { courseApi } from "@/lib/api";
+import { getCourseGateState } from "@/lib/course-gate";
 import type { CourseOverviewResponse } from "@/types";
 
 interface CourseOverviewPageProps {
@@ -55,10 +56,28 @@ export default function CourseOverviewPage({ params }: CourseOverviewPageProps) 
 
     setIsStarting(true);
     try {
+      // Call the start-learning decision endpoint.
+      // The backend evaluates auth, onboarding, skill-test gates
+      // and returns the appropriate redirect target.
       const decision = await courseApi.start(data.course.slug);
-      router.push(decision.target);
+      const gate = getCourseGateState(data.course.status, decision);
+
+      if (gate.redirectTarget) {
+        router.push(gate.redirectTarget);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start course.");
+      // If the API call fails (e.g., network error), the user might
+      // not be authenticated. Redirect to login with course context.
+      if (
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err as { response?: { status: number } }).response?.status === 401
+      ) {
+        router.push(`/login?from=/courses/${data.course.slug}/start`);
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to start course.");
+      }
     } finally {
       setIsStarting(false);
     }

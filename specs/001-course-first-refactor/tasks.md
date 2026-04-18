@@ -90,18 +90,18 @@
 
 ### Tests for User Story 2
 
-- [ ] T028 [P] [US2] Add backend contract tests for `POST /api/courses/{course_slug}/start` and recommendation-aware catalog responses in `tests/contract/test_course_start_api.py`
-- [ ] T029 [P] [US2] Add frontend tests for auth-gated start behavior and recommended versus all-courses tabs in `frontend/tests/routes/personalized-catalog.test.tsx`
-- [ ] T030 [P] [US2] Add the Playwright auth-to-skill-test course-entry flow in `frontend/tests/e2e/course-gating.spec.ts`
+- [X] T028 [P] [US2] Add backend contract tests for `POST /api/courses/{course_slug}/start` and recommendation-aware catalog responses in `tests/contract/test_course_start_api.py`
+- [X] T029 [P] [US2] Add frontend tests for auth-gated start behavior and recommended versus all-courses tabs in `frontend/tests/routes/personalized-catalog.test.tsx`
+- [X] T030 [P] [US2] Add the Playwright auth-to-skill-test course-entry flow in `frontend/tests/e2e/course-gating.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T031 [US2] Implement start-learning decision logic with preserved course context in `src/services/course_entry_service.py`
-- [ ] T032 [US2] Extend assessment and recommendation services to return course recommendation payloads in `src/services/assessment_service.py` and `src/services/recommendation_engine.py`
-- [ ] T033 [US2] Add the start-learning endpoint and recommendation-aware catalog behavior in `src/routers/courses.py`
-- [ ] T034 [P] [US2] Create catalog view state management for recommended and all-courses tabs in `frontend/stores/courseCatalogStore.ts`
-- [ ] T035 [US2] Render recommended and all-courses catalog tabs on the public home shell in `frontend/app/page.tsx` and `frontend/components/course/CourseCatalog.tsx`
-- [ ] T036 [US2] Route learning entry through auth, onboarding, and skill-test gates in `frontend/stores/authStore.ts` and `frontend/middleware.ts`
+- [X] T031 [US2] Implement start-learning decision logic with preserved course context in `src/services/course_entry_service.py`
+- [X] T032 [US2] Extend assessment and recommendation services to return course recommendation payloads in `src/services/assessment_service.py` and `src/services/recommendation_engine.py`
+- [X] T033 [US2] Add the start-learning endpoint and recommendation-aware catalog behavior in `src/routers/courses.py`
+- [X] T034 [P] [US2] Create catalog view state management for recommended and all-courses tabs in `frontend/stores/courseCatalogStore.ts`
+- [X] T035 [US2] Render recommended and all-courses catalog tabs on the public home shell in `frontend/app/page.tsx` and `frontend/components/course/CourseCatalog.tsx`
+- [X] T036 [US2] Route learning entry through auth, onboarding, and skill-test gates in `frontend/stores/authStore.ts` and `frontend/middleware.ts`
 
 **Checkpoint**: Authenticated learners can re-enter the same course context after completing the skill-test gate and can switch between recommended and full catalog views.
 

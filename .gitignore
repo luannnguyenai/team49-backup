@@ -38,5 +38,3 @@ dist/
 .env.test.local
 .env.production.local
 data/cs231n/
-
-.codex
