@@ -62,8 +62,8 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 
 ## Phase 7: Frontend Stability Verification
 
-- [x] T032 Chạy lại route tests cho `frontend/tests/routes/course-catalog.test.tsx`, `frontend/tests/routes/course-start.test.tsx`, `frontend/tests/routes/personalized-catalog.test.tsx`, `frontend/tests/routes/learning-unit.test.tsx`, `frontend/tests/routes/legacy-tutor-redirect.test.tsx`
-- [x] T033 Chạy lại tutor/component tests cho `frontend/tests/unit/in-context-tutor.test.tsx` và các unit tests liên quan presenter/auth redirect
+- [x] T032 Chạy lại route tests cho `frontend/tests/routes/course/catalog.test.tsx`, `frontend/tests/routes/course/start.test.tsx`, `frontend/tests/routes/course/personalized-catalog.test.tsx`, `frontend/tests/routes/learning/unit.test.tsx`, `frontend/tests/routes/learning/legacy-tutor-redirect.test.tsx`
+- [x] T033 Chạy lại tutor/component tests cho `frontend/tests/unit/tutor/in-context-tutor.test.tsx` và các unit tests liên quan presenter/auth redirect
 - [x] T034 Chạy `frontend` typecheck để xác nhận merge không làm vỡ contracts giữa presenter, routes, và components
 - [x] T035 Chạy các e2e specs đã có trong `frontend/tests/e2e/course-discovery.spec.ts`, `frontend/tests/e2e/course-gating.spec.ts`, `frontend/tests/e2e/lecture-tutor.spec.ts` nếu môi trường local đủ điều kiện
 
@@ -71,7 +71,7 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 
 - [x] T036 Chạy contract tests `tests/contract/test_course_catalog_api.py`, `tests/contract/test_course_start_api.py`, `tests/contract/test_learning_unit_api.py`
 - [x] T037 Chạy tutor/lecture related tests `tests/test_lecture_routes.py`, `tests/test_chat_model_factory.py` để chắc rằng Redis/config/exception refactor không làm gãy AI Tutor
-- [x] T038 Chạy các tests backend nền `tests/test_course_platform_foundation.py`, `tests/test_course_entry_service.py`, và các auth tests liên quan sau khi merge
+- [x] T038 Chạy các tests backend nền `tests/test_course_platform_foundation.py`, `tests/services/test_course_entry_service.py`, và các auth tests liên quan sau khi merge
 - [x] T039 Kiểm tra live flow trên local: `Home -> Overview -> Start -> login/onboarding/assessment -> return to course -> learning unit -> AI Tutor`
 
 ## Phase 9: Documentation and Review Artifacts
@@ -83,10 +83,14 @@ Format bám theo tinh thần `speckit-tasks`: dependency-ordered, có phase, có
 
 ## Phase 10: Merge to Main With History Preserved
 
-- [ ] T044 Commit riêng từng cụm integration trên `hybrid/integrate-db-review`, tránh dồn mọi thay đổi vào một commit lớn
-- [ ] T045 Merge `hybrid/integrate-db-review` vào `main` bằng `git merge --no-ff hybrid/integrate-db-review` hoặc PR kiểu `Create a merge commit`
-- [ ] T046 Không dùng `Squash and merge` hoặc `Rebase and merge` khi đưa hybrid branch vào `main`
+- [x] T044 Commit riêng từng cụm integration trên `hybrid/integrate-db-review`, tránh dồn mọi thay đổi vào một commit lớn
+- [x] T045 Merge `hybrid/integrate-db-review` vào `main` bằng `git merge --no-ff hybrid/integrate-db-review` hoặc PR kiểu `Create a merge commit`
+- [x] T046 Không dùng `Squash and merge` hoặc `Rebase and merge` khi đưa hybrid branch vào `main`
 - [ ] T047 Sau khi merge vào `main`, chạy smoke verification tối thiểu cho UI `3000` và backend `8000`
+
+Ghi chú review sau merge:
+- `T045` và `T046` đã được xác nhận bởi merge commit `fe3ea17` trên `main` (`Merge pull request #15 from a20-ai-thuc-chien/hybrid/integrate-db-review`).
+- `T047` chưa có bằng chứng rõ ràng trong commit history nên vẫn giữ trạng thái pending.
 
 ---
 

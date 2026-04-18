@@ -64,7 +64,7 @@
 ### Tests for User Story 1
 
 - [X] T017 [P] [US1] Add backend contract tests for `GET /api/courses` and `GET /api/courses/{course_slug}/overview` in `tests/contract/test_course_catalog_api.py`
-- [X] T018 [P] [US1] Add frontend route tests for the public catalog and course overview states in `frontend/tests/routes/course-catalog.test.tsx`
+- [X] T018 [P] [US1] Add frontend route tests for the public catalog and course overview states in `frontend/tests/routes/course/catalog.test.tsx`
 - [X] T019 [P] [US1] Add the Playwright public discovery journey in `frontend/tests/e2e/course-discovery.spec.ts`
 
 ### Implementation for User Story 1
@@ -91,7 +91,7 @@
 ### Tests for User Story 2
 
 - [X] T028 [P] [US2] Add backend contract tests for `POST /api/courses/{course_slug}/start` and recommendation-aware catalog responses in `tests/contract/test_course_start_api.py`
-- [X] T029 [P] [US2] Add frontend tests for auth-gated start behavior and recommended versus all-courses tabs in `frontend/tests/routes/personalized-catalog.test.tsx`
+- [X] T029 [P] [US2] Add frontend tests for auth-gated start behavior and recommended versus all-courses tabs in `frontend/tests/routes/course/personalized-catalog.test.tsx`
 - [X] T030 [P] [US2] Add the Playwright auth-to-skill-test course-entry flow in `frontend/tests/e2e/course-gating.spec.ts`
 
 ### Implementation for User Story 2
@@ -116,7 +116,7 @@
 ### Tests for User Story 3
 
 - [X] T037 [P] [US3] Add backend contract tests for `GET /api/courses/{course_slug}/units/{unit_slug}` and legacy tutor compatibility in `tests/contract/test_learning_unit_api.py`
-- [X] T038 [P] [US3] Add frontend tests for the unified learning page and in-context tutor behavior in `frontend/tests/routes/learning-unit.test.tsx`
+- [X] T038 [P] [US3] Add frontend tests for the unified learning page and in-context tutor behavior in `frontend/tests/routes/learning/unit.test.tsx`
 - [X] T039 [P] [US3] Add the Playwright lecture and tutor journey in `frontend/tests/e2e/lecture-tutor.spec.ts`
 
 ### Implementation for User Story 3
@@ -184,7 +184,7 @@
 ```bash
 # Test-first work for US1
 Task: "Add backend contract tests for GET /api/courses and GET /api/courses/{course_slug}/overview in tests/contract/test_course_catalog_api.py"
-Task: "Add frontend route tests for the public catalog and course overview states in frontend/tests/routes/course-catalog.test.tsx"
+Task: "Add frontend route tests for the public catalog and course overview states in frontend/tests/routes/course/catalog.test.tsx"
 Task: "Add the Playwright public discovery journey in frontend/tests/e2e/course-discovery.spec.ts"
 
 # UI component work for US1
@@ -199,7 +199,7 @@ Task: "Build the course overview presentation component in frontend/components/c
 ```bash
 # Test-first work for US2
 Task: "Add backend contract tests for POST /api/courses/{course_slug}/start and recommendation-aware catalog responses in tests/contract/test_course_start_api.py"
-Task: "Add frontend tests for auth-gated start behavior and recommended versus all-courses tabs in frontend/tests/routes/personalized-catalog.test.tsx"
+Task: "Add frontend tests for auth-gated start behavior and recommended versus all-courses tabs in frontend/tests/routes/course/personalized-catalog.test.tsx"
 Task: "Add the Playwright auth-to-skill-test course-entry flow in frontend/tests/e2e/course-gating.spec.ts"
 
 # Implementation work for US2
@@ -214,7 +214,7 @@ Task: "Create catalog view state management for recommended and all-courses tabs
 ```bash
 # Test-first work for US3
 Task: "Add backend contract tests for GET /api/courses/{course_slug}/units/{unit_slug} and legacy tutor compatibility in tests/contract/test_learning_unit_api.py"
-Task: "Add frontend tests for the unified learning page and in-context tutor behavior in frontend/tests/routes/learning-unit.test.tsx"
+Task: "Add frontend tests for the unified learning page and in-context tutor behavior in frontend/tests/routes/learning/unit.test.tsx"
 Task: "Add the Playwright lecture and tutor journey in frontend/tests/e2e/lecture-tutor.spec.ts"
 
 # UI work for US3

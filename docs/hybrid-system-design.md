@@ -436,11 +436,11 @@ Section này dùng để resolve merge theo mức file/package cụ thể, khôn
 | `frontend/lib/course-gate.ts` | `001-course-first-refactor` | Course gating logic ở client |
 | `frontend/lib/auth-redirect.ts` | `001-course-first-refactor` | Preserve `next` redirect context |
 | `frontend/stores/courseCatalogStore.ts` | `001-course-first-refactor` | State orchestration cho catalog |
-| `frontend/tests/routes/course-catalog.test.tsx` | `001-course-first-refactor` | Route test cho catalog flow |
-| `frontend/tests/routes/course-start.test.tsx` | `001-course-first-refactor` | Route test cho start flow |
-| `frontend/tests/routes/learning-unit.test.tsx` | `001-course-first-refactor` | Route test cho learning unit |
-| `frontend/tests/routes/legacy-tutor-redirect.test.tsx` | `001-course-first-refactor` | Guard cho compatibility route |
-| `frontend/tests/routes/personalized-catalog.test.tsx` | `001-course-first-refactor` | Route test cho recommended/all flow |
+| `frontend/tests/routes/course/catalog.test.tsx` | `001-course-first-refactor` | Route test cho catalog flow |
+| `frontend/tests/routes/course/start.test.tsx` | `001-course-first-refactor` | Route test cho start flow |
+| `frontend/tests/routes/learning/unit.test.tsx` | `001-course-first-refactor` | Route test cho learning unit |
+| `frontend/tests/routes/learning/legacy-tutor-redirect.test.tsx` | `001-course-first-refactor` | Guard cho compatibility route |
+| `frontend/tests/routes/course/personalized-catalog.test.tsx` | `001-course-first-refactor` | Route test cho recommended/all flow |
 
 ### Ưu tiên hấp thụ từ `db-review`
 

@@ -87,3 +87,44 @@ Tuy nhiên, để chặn sinh viên (hoặc hacker) đánh lừa Agent sinh ra c
 3. **Graceful Degradation:** `bind_tools()` được bọc trong `try/except` — local model không support function calling vẫn chạy được (chỉ thiếu Python Sandbox).
 
 **Hệ quả:** Tiết kiệm ~80% tokens cho câu hỏi đơn giản (450 vs 2000-3000). Hệ thống linh hoạt — đổi 3 dòng `.env` là chạy từ GPT cloud xuống Ollama local trên máy yếu. Trade-off: thêm 1 LLM call (~150 tokens) cho mọi request, nhưng chi phí này nhỏ hơn nhiều so với tiết kiệm được.
+
+---
+
+### [ADR-6] Hợp nhất `course-first` và `db-review` qua nhánh hybrid giữ nguyên history — 18/04/2026
+
+**Bối cảnh:** `main` mạnh về product flow `Course -> Overview -> Start -> Learning Unit`, còn `db-review` mạnh về PostgreSQL, repository layer, Redis auth hardening, và cấu trúc backend sạch hơn. Merge thẳng một nhánh lên nhánh kia có nguy cơ hoặc làm mất UX course-first, hoặc kéo các giả định lecture-first quay lại làm trung tâm.
+
+**Các lựa chọn đã xem xét:**
+- **Cherry-pick vài commit từ `db-review`**: Ít xung đột hơn nhưng bỏ lỡ tính nhất quán của repository layer, auth hardening, migration chain, và tạo vòng lặp "port lẻ tẻ" về sau.
+- **Merge `db-review` đè lên `main`**: Giữ được DB hygiene nhưng rủi ro cao với public contract mới của course platform, frontend routes, và flow onboarding/assessment/return-to-course.
+- **Tạo `hybrid/integrate-db-review` rồi resolve thủ công**: Lấy `course-first` làm baseline sản phẩm, port có chọn lọc internals từ `db-review`, ghi decision log đầy đủ, rồi merge về `main` bằng merge commit.
+
+**Quyết định:** Chọn phương án **hybrid integration branch**. Giữ `course-first platform` làm public contract và kiến trúc sản phẩm chính; hấp thụ có chọn lọc:
+- repository layer cho auth/history/recommendation/assessment,
+- `QuestionSelector`,
+- `DomainError` + exception handlers,
+- Redis-backed auth rate limiting + token denylist + logout revoke,
+- PostgreSQL schema v1 + `pgvector` extension,
+- compose/runtime hardening.
+
+Merge kết quả về `main` bằng merge commit `fe3ea17` để preserve history thay vì squash.
+
+**Hệ quả:** `main` có nền backend mạnh hơn mà không bỏ course-first UX. Đổi lại, nhánh hybrid phát sinh nhiều conflict kiến trúc nên bắt buộc phải có design docs, merge plan, regression tests, và decision logs để giữ toàn bộ team đi cùng một hướng.
+
+---
+
+### [ADR-7] Giữ `course-first` làm contract công khai, cô lập lecture stack thành compatibility layer — 18/04/2026
+
+**Bối cảnh:** Sau refactor, UI và flow chính của sản phẩm đi theo `Course / LearningUnit`. Tuy nhiên tutor và một phần dữ liệu cũ vẫn phụ thuộc lecture-centric stack. Nếu không khóa boundary, model cũ dễ rò ngược ra public API và frontend.
+
+**Các lựa chọn đã xem xét:**
+- **Giữ lecture routes làm trung tâm**: Dễ tận dụng code cũ nhưng đi ngược thiết kế course-first và làm contract sản phẩm tiếp tục mơ hồ.
+- **Xóa ngay toàn bộ lecture stack**: Kiến trúc đẹp hơn nhưng rủi ro phá tutor compatibility và retrieval hiện có.
+- **Cô lập lecture stack sau adapter/service boundary**: Public vẫn dùng `Course`, `CourseOverview`, `StartDecision`, `LearningUnit`; lecture chỉ còn phục vụ tutor và compatibility routing.
+
+**Quyết định:** Chọn phương án **adapter boundary**:
+- `src/routers/courses.py`, `src/schemas/course.py`, `src/services/course_*` và `src/services/learning_unit_service.py` là contract public chuẩn.
+- `/api/lectures/*`, legacy lecture id, và mapping canonical-to-legacy chỉ còn là compatibility layer cho tutor/retrieval.
+- Bổ sung lecture-aware scope guard để tutor không vượt ngữ cảnh learning unit đang học.
+
+**Hệ quả:** Hướng migration dài hạn rõ ràng hơn, UI không còn bị khóa vào lecture model cũ. Đổi lại, hệ thống phải duy trì thêm mapping/guard ở tầng adapter trong giai đoạn chuyển tiếp.
