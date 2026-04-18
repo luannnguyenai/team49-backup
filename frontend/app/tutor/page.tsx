@@ -4,7 +4,8 @@
 // "Khoá học đang tham gia" — hub page listing enrolled + recommended courses
 
 import { useEffect, useState } from "react";
-import { GraduationCap } from "lucide-react";
+import Link from "next/link";
+import { GraduationCap, PlayCircle } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import type { CourseCatalogItem } from "@/types";
 
@@ -29,6 +30,7 @@ function splitCatalog(items: CourseCatalogItem[], activeSlug: string | null): Ca
 export default function TutorPage() {
   const [items, setItems] = useState<CourseCatalogItem[]>([]);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [activeUnitSlug, setActiveUnitSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,8 +38,9 @@ export default function TutorPage() {
     try {
       const raw = window.sessionStorage.getItem("al_active_learning_unit");
       if (raw) {
-        const parsed = JSON.parse(raw) as { courseSlug?: string };
+        const parsed = JSON.parse(raw) as { courseSlug?: string; unitSlug?: string };
         if (parsed.courseSlug) setActiveSlug(parsed.courseSlug);
+        if (parsed.unitSlug) setActiveUnitSlug(parsed.unitSlug);
       }
     } catch {
       // sessionStorage may be unavailable; ignore and proceed with null.
@@ -85,8 +88,36 @@ export default function TutorPage() {
           <p className="text-sm font-medium text-red-600">{error}</p>
         </div>
       ) : (
-        <div className="text-sm" style={{ color: "var(--text-muted)" }}>
-          {`Tìm thấy ${items.length} khoá · ${enrolled.length} đang tham gia · ${recommended.length} gợi ý · ${others.length} khác.`}
+        <div className="space-y-6">
+          {enrolled.length > 0 && activeUnitSlug && (
+            <section
+              className="flex flex-col gap-4 rounded-2xl border p-5 md:flex-row md:items-center md:justify-between"
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
+            >
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                  Tiếp tục học
+                </p>
+                <h2 className="mt-1 truncate text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                  {enrolled[0].title}
+                </h2>
+                <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                  {enrolled[0].short_description}
+                </p>
+              </div>
+              <Link
+                href={`/courses/${enrolled[0].slug}/learn/${activeUnitSlug}`}
+                className="btn-primary flex shrink-0 items-center gap-2"
+              >
+                <PlayCircle size={16} />
+                Tiếp tục
+              </Link>
+            </section>
+          )}
+
+          <div className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {`Tìm thấy ${items.length} khoá · ${enrolled.length} đang tham gia · ${recommended.length} gợi ý · ${others.length} khác.`}
+          </div>
         </div>
       )}
     </div>
