@@ -1,3 +1,4 @@
+from src.repositories.assessment_repo import AssessmentRepository
 from src.repositories.base import BaseRepository
 from src.repositories.course_recommendation_repo import CourseRecommendationRepository
 from src.repositories.history_repo import HistoryRepository
@@ -8,6 +9,7 @@ from src.repositories.interaction_repo import InteractionRepository
 from src.repositories.user_repo import UserRepository
 
 __all__ = [
+    "AssessmentRepository",
     "BaseRepository",
     "CourseRecommendationRepository",
     "HistoryRepository",

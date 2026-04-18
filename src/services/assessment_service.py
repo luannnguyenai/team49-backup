@@ -47,6 +47,7 @@ from src.schemas.assessment import (
     TopicResult,
 )
 from src.exceptions import ConflictError, NotFoundError, ValidationError
+from src.repositories.assessment_repo import AssessmentRepository
 from src.services.mastery_evaluator import (
     QuestionResult,
     TopicMasteryResult,
@@ -167,20 +168,15 @@ async def start_assessment(
     user_id: uuid.UUID,
     topic_ids: list[uuid.UUID],
 ) -> AssessmentStartResponse:
+    repo = AssessmentRepository(db)
     # 1. Validate all requested topics exist
-    topics_result = await db.execute(select(Topic).where(Topic.id.in_(topic_ids)))
-    found_ids = {t.id for t in topics_result.scalars().all()}
+    found_ids = {t.id for t in await repo.get_topics_by_ids(topic_ids)}
     missing = [tid for tid in topic_ids if tid not in found_ids]
     if missing:
         raise NotFoundError(f"Topics not found: {[str(m) for m in missing]}")
 
     # 2. Collect answered question IDs + estimate ability (θ) from user history
-    answered_result = await db.execute(
-        select(Interaction.question_id, Interaction.is_correct)
-        .where(Interaction.user_id == user_id)
-        .distinct(Interaction.question_id)
-    )
-    rows = answered_result.all()
+    rows = await repo.get_answered_question_rows(user_id)
     excluded_ids: set[uuid.UUID] = {row[0] for row in rows}
 
     # ── 2PL MLE ability estimate ──────────────────────────────────────────────
@@ -190,12 +186,7 @@ async def start_assessment(
     ability = 0.0  # θ = 0 for brand-new users (average ability prior)
     if rows:
         hist_ids = [row[0] for row in rows]
-        hist_q_result = await db.execute(
-            select(Question).where(Question.id.in_(hist_ids))
-        )
-        hist_q_map: dict[uuid.UUID, Question] = {
-            q.id: q for q in hist_q_result.scalars().all()
-        }
+        hist_q_map = {q.id: q for q in await repo.get_questions_by_ids(hist_ids)}
         correct_map: dict[uuid.UUID, bool] = {row[0]: row[1] for row in rows}
 
         irt_responses: list[tuple[float, float, bool]] = [
@@ -324,6 +315,7 @@ async def submit_assessment(
     session_id: uuid.UUID,
     answers: list[AnswerInput],
 ) -> AssessmentResultResponse:
+    repo = AssessmentRepository(db)
     # 1. Load + validate session ownership
     session = await _get_session(db, user_id, session_id)
     if session.completed_at is not None:
@@ -335,17 +327,13 @@ async def submit_assessment(
         raise ValidationError("Duplicate question_id entries in answers.")
 
     # 3. Batch-load all referenced questions
-    questions_result = await db.execute(select(Question).where(Question.id.in_(question_ids)))
-    questions: dict[uuid.UUID, Question] = {q.id: q for q in questions_result.scalars().all()}
+    questions = {q.id: q for q in await repo.get_questions_by_ids(question_ids)}
     missing = [qid for qid in question_ids if qid not in questions]
     if missing:
         raise ValidationError(f"Unknown question IDs: {[str(m) for m in missing]}")
 
     # 4. Determine next global_sequence_position for this user
-    max_global_result = await db.execute(
-        select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
-    )
-    base_global: int = max_global_result.scalar() or 0
+    base_global = await repo.get_max_global_sequence(user_id)
 
     # 5. Grade answers, create Interactions, build QuestionResult list
     now = datetime.now(UTC)
@@ -444,18 +432,13 @@ async def get_assessment_results(
     user_id: uuid.UUID,
     session_id: uuid.UUID,
 ) -> AssessmentResultResponse:
+    repo = AssessmentRepository(db)
     session = await _get_session(db, user_id, session_id)
     if session.completed_at is None:
         raise NotFoundError("Assessment not yet submitted.")
 
     # Load all interactions joined with their questions
-    rows_result = await db.execute(
-        select(Interaction, Question)
-        .join(Question, Interaction.question_id == Question.id)
-        .where(Interaction.session_id == session_id)
-        .order_by(Interaction.sequence_position)
-    )
-    rows = rows_result.all()
+    rows = await repo.get_session_question_rows(session_id)
 
     if not rows:
         raise NotFoundError("No interaction data found for this session.")
@@ -496,14 +479,8 @@ async def get_assessment_results(
 
 
 async def _get_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID) -> Session:
-    result = await db.execute(
-        select(Session).where(
-            Session.id == session_id,
-            Session.user_id == user_id,
-            Session.session_type == SessionType.assessment,
-        )
-    )
-    session = result.scalar_one_or_none()
+    repo = AssessmentRepository(db)
+    session = await repo.get_assessment_session(user_id=user_id, session_id=session_id)
     if session is None:
         raise NotFoundError("Assessment session not found.")
     return session
@@ -517,14 +494,8 @@ async def _upsert_mastery_scores(
 ) -> None:
     """Insert or update topic-grain MasteryScore for every evaluated topic."""
     for topic_id, r in results.items():
-        existing_result = await db.execute(
-            select(MasteryScore).where(
-                MasteryScore.user_id == user_id,
-                MasteryScore.topic_id == topic_id,
-                MasteryScore.kc_id.is_(None),  # topic-grain (not KC-grain)
-            )
-        )
-        score = existing_result.scalar_one_or_none()
+        repo = AssessmentRepository(db)
+        score = await repo.get_mastery_score(user_id=user_id, topic_id=topic_id)
 
         if score is None:
             score = MasteryScore(
@@ -555,8 +526,8 @@ async def _build_result_response(
     topic_ids = list(topic_results_map.keys())
 
     # Batch-fetch topic names
-    topics_result = await db.execute(select(Topic).where(Topic.id.in_(topic_ids)))
-    topics: dict[uuid.UUID, Topic] = {t.id: t for t in topics_result.scalars().all()}
+    repo = AssessmentRepository(db)
+    topics = await repo.get_topic_map(topic_ids)
 
     # Batch-fetch KC names for all weak KC UUIDs
     all_weak_kc_uuids: list[uuid.UUID] = []
@@ -569,10 +540,7 @@ async def _build_result_response(
 
     kc_name_by_id: dict[str, str] = {}
     if all_weak_kc_uuids:
-        kcs_result = await db.execute(
-            select(KnowledgeComponent).where(KnowledgeComponent.id.in_(all_weak_kc_uuids))
-        )
-        kc_name_by_id = {str(kc.id): kc.name for kc in kcs_result.scalars().all()}
+        kc_name_by_id = await repo.get_kc_name_map(all_weak_kc_uuids)
 
     # Compute overall weighted score across all topics
     total_earned = sum(r.earned_points for r in topic_results_map.values())
