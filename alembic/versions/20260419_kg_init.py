@@ -180,7 +180,7 @@ def upgrade() -> None:
             "synced_at", sa.TIMESTAMP(timezone=True), nullable=False,
             server_default=sa.text("now()"),
         ),
-        sa.Column("status", sa.Text(), nullable=False, server_default="'ok'"),
+        sa.Column("status", sa.Text(), nullable=False, server_default=sa.text("'ok'")),
         sa.UniqueConstraint("entity_type", "entity_ref", name="uq_kg_sync_state_entity"),
     )
     op.create_index("ix_kg_sync_state_entity_type", "kg_sync_state", ["entity_type"])
