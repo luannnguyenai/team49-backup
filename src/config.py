@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     # ---- App ----
     app_name: str = "AI Adaptive Learning Platform"
     debug: bool = False
+    kg_phase: int = Field(default=0, ge=0, le=1, description="Knowledge Graph build phase")
+    admin_token: str = Field(default="", description="Admin token for protected ops endpoints")
 
     @field_validator("cors_origins", mode="before")
     @classmethod
