@@ -235,6 +235,13 @@ export const courseApi = {
     api
       .get<LearningUnitResponse>(`/api/courses/${courseSlug}/units/${unitSlug}`)
       .then((r) => r.data),
+
+  listUnits: (courseSlug: string) =>
+    api
+      .get<{ units: { slug: string; title: string; status: string; unit_type: string; order_index: number }[] }>(
+        `/api/courses/${courseSlug}/units`
+      )
+      .then((r) => r.data.units),
 };
 
 export const quizApi = {
