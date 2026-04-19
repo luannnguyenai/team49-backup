@@ -101,6 +101,7 @@ def upgrade() -> None:
         sa.Column(
             "is_deleted", sa.Boolean(), nullable=False, server_default=sa.text("false"),
         ),
+        sa.Column("deleted_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
             "created_at", sa.TIMESTAMP(timezone=True), nullable=False,
             server_default=sa.text("now()"),
@@ -148,6 +149,7 @@ def upgrade() -> None:
         sa.Column(
             "is_deleted", sa.Boolean(), nullable=False, server_default=sa.text("false"),
         ),
+        sa.Column("deleted_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
             "created_at", sa.TIMESTAMP(timezone=True), nullable=False,
             server_default=sa.text("now()"),
@@ -177,6 +179,7 @@ def upgrade() -> None:
         sa.Column("entity_type", sa.Text(), nullable=False),
         sa.Column("entity_ref", sa.Text(), nullable=False),
         sa.Column("content_hash", sa.Text(), nullable=False),
+        sa.Column("source", sa.Text(), nullable=False),
         sa.Column(
             "synced_at", sa.TIMESTAMP(timezone=True), nullable=False,
             server_default=sa.text("now()"),
