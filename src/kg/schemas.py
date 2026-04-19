@@ -126,7 +126,7 @@ class TopicRef(BaseModel):
     slug: str
     module_slug: str
     name: str
-    prerequisite_topic_slugs: list[str]
+    prerequisite_topic_slugs: tuple[str, ...]
 
 
 class BridgesDoc(BaseModel):
@@ -140,13 +140,13 @@ class BridgesDoc(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    concepts: list[KGConcept]
-    instance_of: list[KGEdge]
-    transfers_to: list[KGEdge]
+    concepts: tuple[KGConcept, ...]
+    instance_of: tuple[KGEdge, ...]
+    transfers_to: tuple[KGEdge, ...]
 
     @field_validator("instance_of")
     @classmethod
-    def _validate_instance_of_edges(cls, edges: list[KGEdge]) -> list[KGEdge]:
+    def _validate_instance_of_edges(cls, edges: tuple[KGEdge, ...]) -> tuple[KGEdge, ...]:
         """All instance_of edges must go from concept → kc."""
         for edge in edges:
             if edge.src_kind != "concept":
@@ -158,3 +158,44 @@ class BridgesDoc(BaseModel):
                     f'instance_of edges must have dst_kind="kc", got "{edge.dst_kind}"'
                 )
         return edges
+
+
+class LoadedSources(BaseModel):
+    """All data loaded from source files by the KG builder.
+
+    Args:
+        topics: All topic references from curriculum data.
+        kcs: All KC references from curriculum data.
+        questions: Raw question dicts (typed further in Phase 1).
+        bridges: Parsed bridges YAML document.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    topics: tuple[TopicRef, ...]
+    kcs: tuple[KCRef, ...]
+    questions: tuple[dict[str, Any], ...]
+    bridges: BridgesDoc
+
+
+# ---------------------------------------------------------------------------
+# Sync result schema
+# ---------------------------------------------------------------------------
+
+
+class SyncReport(BaseModel):
+    """Summary of a KG sync operation.
+
+    Args:
+        created: Entity refs that were inserted.
+        updated: Entity refs that were updated (hash changed).
+        unchanged: Entity refs that required no change.
+        soft_deleted: Entity refs that were marked is_deleted=true.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    created: tuple[str, ...]
+    updated: tuple[str, ...]
+    unchanged: tuple[str, ...]
+    soft_deleted: tuple[str, ...]
