@@ -18,3 +18,30 @@ EdgeType = Literal[
 ]
 EdgeSource = Literal["schema", "manual", "embedding", "llm", "heuristic"]
 ConceptSource = Literal["manual", "embedding", "llm", "heuristic"]
+
+
+# ---------------------------------------------------------------------------
+# Node schemas
+# ---------------------------------------------------------------------------
+
+
+class KGConcept(BaseModel):
+    """A concept node in the Knowledge Graph.
+
+    Args:
+        id: Stable UUID for this concept.
+        name: Human-readable concept name.
+        description: Optional longer explanation.
+        canonical_kc_slug: Slug of the KnowledgeComponent this concept maps to.
+        source: How this concept was produced.
+        embedding_version: Version tag of the embedding model used (None = not embedded).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    id: uuid.UUID
+    name: str
+    description: str | None = None
+    canonical_kc_slug: str | None = None
+    source: ConceptSource
+    embedding_version: int | None = None
