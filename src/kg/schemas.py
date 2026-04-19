@@ -45,3 +45,42 @@ class KGConcept(BaseModel):
     canonical_kc_slug: str | None = None
     source: ConceptSource
     embedding_version: int | None = None
+
+
+# ---------------------------------------------------------------------------
+# Edge schemas
+# ---------------------------------------------------------------------------
+
+
+class KGEdge(BaseModel):
+    """A directed, typed edge between two KG nodes.
+
+    Args:
+        src_kind: Node kind of the source.
+        src_ref: Slug or UUID string identifying the source node.
+        dst_kind: Node kind of the destination.
+        dst_ref: Slug or UUID string identifying the destination node.
+        type: Semantic relationship type.
+        weight: Edge strength in [0.0, 1.0].
+        source: How this edge was produced.
+        meta: Arbitrary extra data (e.g. confidence scores).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    src_kind: NodeKind
+    src_ref: str
+    dst_kind: NodeKind
+    dst_ref: str
+    type: EdgeType
+    weight: float
+    source: EdgeSource
+    meta: dict[str, Any] | None = None
+
+    @field_validator("weight")
+    @classmethod
+    def _validate_weight(cls, v: float) -> float:
+        """Ensure weight is in the closed interval [0.0, 1.0]."""
+        if not (0.0 <= v <= 1.0):
+            raise ValueError(f"weight must be between 0.0 and 1.0, got {v}")
+        return v
