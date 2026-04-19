@@ -51,3 +51,8 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 ignore = ["E501"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]
