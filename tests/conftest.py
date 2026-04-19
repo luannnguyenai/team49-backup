@@ -59,16 +59,16 @@ async def db_session(test_engine):
     except Exception as exc:
         pytest.skip(f"Test database unavailable: {exc}")
 
-    async with conn:
-        await conn.begin()
-        session_factory = async_sessionmaker(bind=conn, expire_on_commit=False)
-        session: AsyncSession = session_factory()
-        await conn.begin_nested()  # savepoint
-
+    await conn.begin()
+    session_factory = async_sessionmaker(bind=conn, expire_on_commit=False)
+    session: AsyncSession = session_factory()
+    await conn.begin_nested()  # savepoint
+    try:
         yield session
-
+    finally:
         await session.close()
         await conn.rollback()
+        await conn.close()
 
 
 # ---------------------------------------------------------------------------

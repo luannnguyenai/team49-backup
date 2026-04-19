@@ -15,6 +15,8 @@ async def db_with_seed(db_session: AsyncSession) -> AsyncSession:
     mod_cv_id = uuid.uuid4()
     mod_nlp_id = uuid.uuid4()
 
+    await db_session.execute(sa.text("UPDATE topics SET status = 'archived'"))
+
     await db_session.execute(
         sa.text(
             "INSERT INTO modules (id, name, slug, order_index, created_at, updated_at) "
@@ -77,13 +79,13 @@ async def db_with_seed(db_session: AsyncSession) -> AsyncSession:
                 "  id, item_id, version, status, topic_id, module_id,"
                 "  bloom_level, difficulty_bucket, stem_text,"
                 "  option_a, option_b, option_c, option_d, correct_answer,"
-                "  review_status, source, calibration_status,"
+                "  review_status, source, calibration_status, total_responses,"
                 "  created_at, updated_at"
                 ") VALUES ("
                 "  :id, :item_id, 1, 'active', :topic_id, :module_id,"
                 "  'remember', 'easy', :stem,"
                 "  'A', 'B', 'C', 'D', 'A',"
-                "  'published', 'human', 'uncalibrated',"
+                "  'published', 'human', 'uncalibrated', 0,"
                 "  now(), now()"
                 ")"
             ),

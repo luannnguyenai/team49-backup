@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from pathlib import Path
 from typing import Annotated
 
@@ -12,11 +13,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import Settings, settings
-from src.database import get_async_db
+from src.database import async_session_factory, get_async_db
 from src.kg.builder import CycleError
 from src.kg.models import KGConceptORM, KGEdgeORM, KGSyncStateORM
 from src.kg.pipeline import run_build_kg as _run_pipeline
-from src.kg.schemas import SyncReport
+from src.kg.providers import DBMasteryProvider
+from src.kg.schemas import LearningPath, RankedCandidate, SyncReport, TopicContext
+from src.kg.service import KGService
 
 router = APIRouter(prefix="/kg", tags=["kg"])
 
@@ -27,9 +30,23 @@ class KGSyncRequest(BaseModel):
     phase: int | None = Field(default=None, ge=0, le=1)
 
 
+class KGPathRequest(BaseModel):
+    """Request body for KG path building."""
+
+    user_id: uuid.UUID
+    target_topics: list[str] = Field(min_length=1)
+    hours_per_week: float = Field(gt=0)
+
+
 def get_settings() -> Settings:
     """Dependency wrapper for settings."""
     return settings
+
+
+def get_kg_service() -> KGService:
+    """Create the DB-backed KG read service."""
+    mastery = DBMasteryProvider(async_session_factory)
+    return KGService(session_factory=async_session_factory, mastery=mastery, repo=None)
 
 
 async def require_admin(
@@ -95,3 +112,42 @@ async def sync_kg(
 async def kg_health(payload: Annotated[dict, Depends(get_kg_health)]) -> dict:
     """Return KG health metrics."""
     return payload
+
+
+@router.get("/topic/{slug}/context", response_model=TopicContext)
+async def kg_topic_context(
+    slug: str,
+    service: Annotated[KGService, Depends(get_kg_service)],
+    hops: int = 2,
+) -> TopicContext:
+    """Return KG context for one topic."""
+    try:
+        return await service.get_topic_context(slug, hops=hops)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Topic not found: {slug}") from exc
+
+
+@router.post("/path", response_model=LearningPath)
+async def kg_path(
+    body: KGPathRequest,
+    service: Annotated[KGService, Depends(get_kg_service)],
+) -> LearningPath:
+    """Build a KG learning path for a user and target topics."""
+    try:
+        return await service.build_path(
+            user_id=body.user_id,
+            target_topics=body.target_topics,
+            hours_per_week=body.hours_per_week,
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Topic not found: {exc.args[0]}") from exc
+
+
+@router.get("/recommend/next", response_model=list[RankedCandidate])
+async def kg_recommend_next(
+    user_id: uuid.UUID,
+    service: Annotated[KGService, Depends(get_kg_service)],
+    candidate_limit: int = 20,
+) -> list[RankedCandidate]:
+    """Rank next candidate topics for a user."""
+    return await service.rank_next(user_id=user_id, candidate_limit=candidate_limit)
