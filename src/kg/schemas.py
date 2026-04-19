@@ -179,6 +179,96 @@ class LoadedSources(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Read/service response schemas
+# ---------------------------------------------------------------------------
+
+
+class TopicNode(BaseModel):
+    """Topic shape used by KG read services."""
+
+    model_config = ConfigDict(frozen=True)
+
+    slug: str
+    module_slug: str
+    name: str
+    prerequisite_topic_slugs: tuple[str, ...]
+    estimated_hours_beginner: float = 1.0
+    estimated_hours_review: float = 0.5
+
+
+class KCNode(BaseModel):
+    """Knowledge component shape used by KG read services."""
+
+    model_config = ConfigDict(frozen=True)
+
+    slug: str
+    topic_slug: str
+    module_slug: str
+    name: str
+    description: str | None = None
+
+
+class TopicContext(BaseModel):
+    """Context bundle for one topic."""
+
+    model_config = ConfigDict(frozen=True)
+
+    topic: TopicNode
+    prereqs: tuple[TopicNode, ...]
+    kcs: tuple[KCNode, ...]
+    sibling_kcs: tuple[KCNode, ...]
+    transfers: tuple[KGEdge, ...]
+
+
+PathMode = Literal["learn", "review"]
+
+
+class PathTopic(BaseModel):
+    """One topic scheduled in a learning path."""
+
+    model_config = ConfigDict(frozen=True)
+
+    slug: str
+    mode: PathMode
+    hours: float
+    mastery: float
+    shortcuts: tuple[str, ...] = ()
+
+
+class PathWeek(BaseModel):
+    """One packed week in a learning path."""
+
+    model_config = ConfigDict(frozen=True)
+
+    week_number: int
+    topics: tuple[PathTopic, ...]
+    total_hours: float
+    shortcuts: tuple[str, ...] = ()
+
+
+class LearningPath(BaseModel):
+    """A week-by-week learning path."""
+
+    model_config = ConfigDict(frozen=True)
+
+    weeks: tuple[PathWeek, ...]
+
+
+class RankedCandidate(BaseModel):
+    """Ranked next-topic recommendation with feature values."""
+
+    model_config = ConfigDict(frozen=True)
+
+    topic_slug: str
+    score: float
+    mastery_gap: float
+    prereq_ready: float
+    transfer_boost: float
+    goal_distance: float
+    freshness_penalty: float
+
+
+# ---------------------------------------------------------------------------
 # Sync result schema
 # ---------------------------------------------------------------------------
 

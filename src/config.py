@@ -6,6 +6,7 @@ Merges original A20-App-049 config (LLM keys) with AI Personalized config (DB, A
 """
 
 import json
+from collections.abc import Mapping
 from typing import Annotated, Any
 
 from pydantic import Field, field_validator
@@ -63,6 +64,23 @@ class Settings(BaseSettings):
     debug: bool = False
     kg_phase: int = Field(default=0, ge=0, le=1, description="Knowledge Graph build phase")
     admin_token: str = Field(default="", description="Admin token for protected ops endpoints")
+    kg_mastery_skip_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    kg_mastery_review_threshold: float = Field(default=0.4, ge=0.0, le=1.0)
+    kg_shortcut_mastery_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    kg_shortcut_hours_factor: float = Field(default=0.4, ge=0.0, le=1.0)
+    kg_path_week_buffer: float = Field(default=0.2, ge=0.0)
+    kg_bucket_weights: dict[str, float] = Field(
+        default_factory=lambda: {"easy": 1.0, "medium": 1.3, "hard": 1.6}
+    )
+    kg_recsys_weights: dict[str, float] = Field(
+        default_factory=lambda: {
+            "mastery_gap": 0.35,
+            "prereq_ready": 0.25,
+            "transfer_boost": 0.2,
+            "goal_distance": 0.15,
+            "freshness": 0.05,
+        }
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -84,6 +102,15 @@ class Settings(BaseSettings):
             return [item.strip() for item in value.split(",") if item.strip()]
 
         raise ValueError("CORS_ORIGINS must be a list or a string.")
+
+    @field_validator("kg_bucket_weights", "kg_recsys_weights", mode="before")
+    @classmethod
+    def parse_float_mapping(cls, value: Any) -> dict[str, float]:
+        if isinstance(value, str):
+            value = json.loads(value)
+        if not isinstance(value, Mapping):
+            raise ValueError("value must be a mapping or JSON object string")
+        return {str(key): float(item) for key, item in value.items()}
 
 
 settings = Settings()
