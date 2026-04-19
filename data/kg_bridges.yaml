@@ -1,0 +1,91 @@
+concepts:
+  - id: CON-self-attention
+    name: Self-Attention
+    description: Mechanism where each token/patch attends to all others via Q/K/V.
+    canonical_kc_slug: KC-NLP-self-attention
+
+  - id: CON-optimization
+    name: Gradient-Based Optimization
+    description: First- and second-order methods (SGD, Adam, momentum) for minimizing loss.
+    canonical_kc_slug: KC-CV-optimization
+
+  - id: CON-seq2seq-attention
+    name: Seq2Seq with Attention
+    description: Encoder-decoder architecture with additive or multiplicative attention.
+    canonical_kc_slug: KC-CV-seq2seq
+
+  - id: CON-vlm
+    name: Vision-Language Models
+    description: Models that jointly encode image and text such as CLIP, BLIP, and Flamingo.
+    canonical_kc_slug: KC-CV-vlm
+
+  - id: CON-rlhf-ppo
+    name: RLHF with PPO
+    description: Reinforcement Learning from Human Feedback using Proximal Policy Optimization.
+    canonical_kc_slug: KC-NLP-rlhf
+
+  - id: CON-self-supervised-pretrain
+    name: Self-Supervised Pretraining
+    description: Learning representations without labels via pretext tasks such as MAE, SimCLR, and BERT MLM.
+    canonical_kc_slug: KC-CV-self-supervised
+
+  - id: CON-adversarial
+    name: Adversarial Robustness
+    description: Adversarial examples, PGD attacks, and adversarial training for model robustness.
+    canonical_kc_slug: KC-CV-adversarial
+
+instance_of:
+  - kc_slug: KC-CV-self-attention
+    concept_id: CON-self-attention
+  - kc_slug: KC-NLP-self-attention
+    concept_id: CON-self-attention
+  - kc_slug: KC-CV-optimization
+    concept_id: CON-optimization
+  - kc_slug: KC-NLP-optimization
+    concept_id: CON-optimization
+  - kc_slug: KC-CV-seq2seq
+    concept_id: CON-seq2seq-attention
+  - kc_slug: KC-NLP-seq2seq
+    concept_id: CON-seq2seq-attention
+  - kc_slug: KC-CV-vlm
+    concept_id: CON-vlm
+  - kc_slug: KC-NLP-vlm
+    concept_id: CON-vlm
+  - kc_slug: KC-NLP-rlhf
+    concept_id: CON-rlhf-ppo
+  - kc_slug: KC-CV-self-supervised
+    concept_id: CON-self-supervised-pretrain
+  - kc_slug: KC-NLP-self-supervised
+    concept_id: CON-self-supervised-pretrain
+  - kc_slug: KC-CV-adversarial
+    concept_id: CON-adversarial
+
+transfers_to:
+  - from_topic: nlp_transformers
+    to_topic: cv_attention_transformers
+    weight: 0.95
+    reason: CON-self-attention overlap
+  - from_topic: cv_captioning_seq2seq
+    to_topic: nlp_transformers
+    weight: 0.88
+    reason: CON-seq2seq-attention overlap
+  - from_topic: cv_optimization
+    to_topic: nlp_pretraining
+    weight: 0.82
+    reason: CON-optimization overlap
+  - from_topic: nlp_transformers
+    to_topic: cv_vision_language
+    weight: 0.87
+    reason: CON-vlm overlap
+  - from_topic: nlp_pretraining
+    to_topic: nlp_post_training
+    weight: 0.80
+    reason: CON-rlhf-ppo dependency
+  - from_topic: cv_self_supervised
+    to_topic: nlp_pretraining
+    weight: 0.85
+    reason: CON-self-supervised-pretrain overlap
+  - from_topic: cv_visualization_adversarial
+    to_topic: nlp_post_training
+    weight: 0.72
+    reason: CON-adversarial overlap

@@ -1,0 +1,17 @@
+concepts:
+  - id: CON-mini-attention
+    name: Mini Attention
+    description: Minimal bridge concept used by loader tests.
+    canonical_kc_slug: KC-mini-nlp-t1-kc1
+
+instance_of:
+  - kc_slug: KC-mini-nlp-t1-kc1
+    concept_id: CON-mini-attention
+  - kc_slug: KC-mini-cv-t1-kc1
+    concept_id: CON-mini-attention
+
+transfers_to:
+  - from_topic: mini_nlp_t1
+    to_topic: mini_cv_t1
+    weight: 0.9
+    reason: CON-mini-attention overlap
