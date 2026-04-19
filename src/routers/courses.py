@@ -21,7 +21,7 @@ from src.schemas.course import (
 )
 from src.services.course_catalog_service import get_course_overview, list_course_catalog
 from src.services.course_entry_service import assert_learning_access, get_start_learning_decision
-from src.services.learning_unit_service import get_learning_unit_payload
+from src.services.learning_unit_service import get_learning_unit_payload, list_course_units
 
 courses_router = APIRouter(prefix="/api/courses", tags=["Courses"])
 
@@ -112,6 +112,28 @@ async def api_start_course(
             detail=f"Course '{course_slug}' not found.",
         )
     return result
+
+
+# ---------------------------------------------------------------------------
+# GET /api/courses/{slug}/units — list all units for a course
+# ---------------------------------------------------------------------------
+
+
+@courses_router.get("/{course_slug}/units")
+async def api_list_course_units(course_slug: str) -> dict:
+    units = list_course_units(course_slug)
+    return {
+        "units": [
+            {
+                "slug": u["slug"],
+                "title": u["title"],
+                "status": u["status"],
+                "unit_type": u["unit_type"],
+                "order_index": u["order_index"],
+            }
+            for u in units
+        ]
+    }
 
 
 # ---------------------------------------------------------------------------
