@@ -127,3 +127,34 @@ class TopicRef(BaseModel):
     module_slug: str
     name: str
     prerequisite_topic_slugs: list[str]
+
+
+class BridgesDoc(BaseModel):
+    """Parsed and validated kg_bridges.yaml document.
+
+    Args:
+        concepts: Concept nodes declared in the bridges file.
+        instance_of: Edges asserting concept→kc membership.
+        transfers_to: Edges asserting transfer-of-learning between nodes.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    concepts: list[KGConcept]
+    instance_of: list[KGEdge]
+    transfers_to: list[KGEdge]
+
+    @field_validator("instance_of")
+    @classmethod
+    def _validate_instance_of_edges(cls, edges: list[KGEdge]) -> list[KGEdge]:
+        """All instance_of edges must go from concept → kc."""
+        for edge in edges:
+            if edge.src_kind != "concept":
+                raise ValueError(
+                    f'instance_of edges must have src_kind="concept", got "{edge.src_kind}"'
+                )
+            if edge.dst_kind != "kc":
+                raise ValueError(
+                    f'instance_of edges must have dst_kind="kc", got "{edge.dst_kind}"'
+                )
+        return edges
