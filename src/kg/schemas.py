@@ -118,7 +118,7 @@ class TopicRef(BaseModel):
         slug: Unique topic identifier.
         module_slug: Parent module slug.
         name: Display name.
-        prerequisite_topic_slugs: Ordered list of prerequisite topic slugs.
+        prerequisite_topic_slugs: Ordered tuple of prerequisite topic slugs.
     """
 
     model_config = ConfigDict(frozen=True)

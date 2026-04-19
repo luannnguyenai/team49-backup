@@ -105,6 +105,7 @@ def upgrade() -> None:
             "created_at", sa.TIMESTAMP(timezone=True), nullable=False,
             server_default=sa.text("now()"),
         ),
+        # TODO(phase-1): add BEFORE UPDATE trigger to auto-refresh updated_at
         sa.Column(
             "updated_at", sa.TIMESTAMP(timezone=True), nullable=False,
             server_default=sa.text("now()"),
