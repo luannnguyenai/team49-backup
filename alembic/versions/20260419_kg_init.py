@@ -9,6 +9,7 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.types import UserDefinedType
 
@@ -45,13 +46,40 @@ class _Vector(UserDefinedType):
 
 def upgrade() -> None:
     """Create kg_concepts, kg_edges, kg_sync_state with all indexes and constraints."""
-    bind = op.get_bind()
-
-    # Create enum types (checkfirst prevents errors on repeated runs)
-    sa.Enum(*_NODE_KIND, name="node_kind_enum").create(bind, checkfirst=True)
-    sa.Enum(*_EDGE_TYPE, name="edge_type_enum").create(bind, checkfirst=True)
-    sa.Enum(*_EDGE_SOURCE, name="edge_source_enum").create(bind, checkfirst=True)
-    sa.Enum(*_CONCEPT_SOURCE, name="concept_source_enum").create(bind, checkfirst=True)
+    # Create enum types via raw SQL DO blocks (idempotent: no error on repeated runs)
+    op.execute(sa.text(
+        "DO $$ BEGIN "
+        "  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'node_kind_enum') THEN "
+        "    CREATE TYPE node_kind_enum AS ENUM "
+        "      ('module', 'topic', 'kc', 'concept', 'question', 'skill'); "
+        "  END IF; "
+        "END $$;"
+    ))
+    op.execute(sa.text(
+        "DO $$ BEGIN "
+        "  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'edge_type_enum') THEN "
+        "    CREATE TYPE edge_type_enum AS ENUM "
+        "      ('INSTANCE_OF', 'ALIGNS_WITH', 'TRANSFERS_TO', "
+        "       'REQUIRES_KC', 'DEVELOPS', 'COVERS'); "
+        "  END IF; "
+        "END $$;"
+    ))
+    op.execute(sa.text(
+        "DO $$ BEGIN "
+        "  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'edge_source_enum') THEN "
+        "    CREATE TYPE edge_source_enum AS ENUM "
+        "      ('schema', 'manual', 'embedding', 'llm', 'heuristic'); "
+        "  END IF; "
+        "END $$;"
+    ))
+    op.execute(sa.text(
+        "DO $$ BEGIN "
+        "  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'concept_source_enum') THEN "
+        "    CREATE TYPE concept_source_enum AS ENUM "
+        "      ('manual', 'embedding', 'llm', 'heuristic'); "
+        "  END IF; "
+        "END $$;"
+    ))
 
     # ------------------------------------------------------------------ kg_concepts
     op.create_table(
@@ -65,7 +93,7 @@ def upgrade() -> None:
         sa.Column("canonical_kc_slug", sa.String(100), nullable=True),
         sa.Column(
             "source",
-            sa.Enum(*_CONCEPT_SOURCE, name="concept_source_enum", create_type=False),
+            PG_ENUM(*_CONCEPT_SOURCE, name="concept_source_enum", create_type=False),
             nullable=False,
         ),
         sa.Column("embedding_version", sa.Integer(), nullable=True),
@@ -94,25 +122,25 @@ def upgrade() -> None:
         ),
         sa.Column(
             "src_kind",
-            sa.Enum(*_NODE_KIND, name="node_kind_enum", create_type=False),
+            PG_ENUM(*_NODE_KIND, name="node_kind_enum", create_type=False),
             nullable=False,
         ),
         sa.Column("src_ref", sa.Text(), nullable=False),
         sa.Column(
             "dst_kind",
-            sa.Enum(*_NODE_KIND, name="node_kind_enum", create_type=False),
+            PG_ENUM(*_NODE_KIND, name="node_kind_enum", create_type=False),
             nullable=False,
         ),
         sa.Column("dst_ref", sa.Text(), nullable=False),
         sa.Column(
             "type",
-            sa.Enum(*_EDGE_TYPE, name="edge_type_enum", create_type=False),
+            PG_ENUM(*_EDGE_TYPE, name="edge_type_enum", create_type=False),
             nullable=False,
         ),
         sa.Column("weight", sa.Float(), nullable=False, server_default=sa.text("1.0")),
         sa.Column(
             "source",
-            sa.Enum(*_EDGE_SOURCE, name="edge_source_enum", create_type=False),
+            PG_ENUM(*_EDGE_SOURCE, name="edge_source_enum", create_type=False),
             nullable=False,
         ),
         sa.Column("meta", JSONB(), nullable=True),
@@ -165,8 +193,7 @@ def downgrade() -> None:
     op.drop_table("kg_edges")
     op.drop_table("kg_concepts")
 
-    bind = op.get_bind()
-    sa.Enum(name="concept_source_enum").drop(bind, checkfirst=True)
-    sa.Enum(name="edge_source_enum").drop(bind, checkfirst=True)
-    sa.Enum(name="edge_type_enum").drop(bind, checkfirst=True)
-    sa.Enum(name="node_kind_enum").drop(bind, checkfirst=True)
+    op.execute(sa.text("DROP TYPE IF EXISTS concept_source_enum"))
+    op.execute(sa.text("DROP TYPE IF EXISTS edge_source_enum"))
+    op.execute(sa.text("DROP TYPE IF EXISTS edge_type_enum"))
+    op.execute(sa.text("DROP TYPE IF EXISTS node_kind_enum"))
