@@ -84,3 +84,46 @@ class KGEdge(BaseModel):
         if not (0.0 <= v <= 1.0):
             raise ValueError(f"weight must be between 0.0 and 1.0, got {v}")
         return v
+
+
+# ---------------------------------------------------------------------------
+# Loader output schemas
+# ---------------------------------------------------------------------------
+
+
+class KCRef(BaseModel):
+    """Flattened reference to a KnowledgeComponent — loader output.
+
+    Args:
+        slug: Unique KC identifier.
+        topic_slug: Parent topic slug.
+        module_slug: Grandparent module slug.
+        name: Display name.
+        description: Optional explanation.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    slug: str
+    topic_slug: str
+    module_slug: str
+    name: str
+    description: str | None = None
+
+
+class TopicRef(BaseModel):
+    """Flattened reference to a Topic — loader output.
+
+    Args:
+        slug: Unique topic identifier.
+        module_slug: Parent module slug.
+        name: Display name.
+        prerequisite_topic_slugs: Ordered list of prerequisite topic slugs.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    slug: str
+    module_slug: str
+    name: str
+    prerequisite_topic_slugs: list[str]
