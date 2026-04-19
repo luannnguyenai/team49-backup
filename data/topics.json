@@ -12,9 +12,18 @@
     "content_markdown": "# History of NLP\n\n## Các giai đoạn phát triển\n\n### 1. Rule-Based Era (1950s–1980s)\n\n- **Turing Test (1950)**: Alan Turing đặt câu hỏi \"Máy có thể suy nghĩ?\"\n- **ELIZA (1966)**: Chương trình chatbot đầu tiên, dùng pattern matching\n- **Chomsky's Formal Grammars**: Context-free grammars cho cú pháp ngôn ngữ\n- Hạn chế: Quá nhiều rules, không scale được\n\n### 2. Statistical NLP (1990s–2010s)\n\n- **Noisy Channel Model**: P(output|input) ∝ P(input|output) × P(output)\n- **N-gram Language Models**: Xác suất từ tiếp theo dựa trên n-1 từ trước\n- **HMMs & CRFs**: Cho POS tagging, Named Entity Recognition\n- **IBM Models**: Statistical Machine Translation\n- **TF-IDF, Bag-of-Words**: Biểu diễn văn bản thô sơ\n\n### 3. Neural NLP (2013–nay)\n\n- **Word2Vec (2013)**: Mikolov et al. — dense word embeddings\n- **Seq2Seq + Attention (2014-2015)**: Bahdanau attention cho MT\n- **Transformer (2017)**: \"Attention Is All You Need\" — Vaswani et al.\n- **BERT (2018)**: Bidirectional pretraining\n- **GPT Series (2018–2023)**: Autoregressive LLMs scale lên\n- **ChatGPT (2022)**: RLHF mở ra kỷ nguyên AI conversational\n\n## Timeline tóm tắt\n\n| Năm | Milestone | Ý nghĩa |\n|------|-----------|---------|\n| 1950 | Turing Test | Khái niệm AI |\n| 1966 | ELIZA | Chatbot đầu tiên |\n| 1990s | Statistical MT | Dữ liệu thay thế rules |\n| 2003 | Neural LM (Bengio) | Neural networks cho ngôn ngữ |\n| 2013 | Word2Vec | Dense word embeddings |\n| 2017 | Transformer | Self-attention architecture |\n| 2018 | BERT, GPT | Pretrained language models |\n| 2022 | ChatGPT | LLMs trở nên mainstream |",
     "video_url": "https://example.com/videos/cs224n/history_nlp.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-rule-based-era", "name": "Rule-Based NLP và Formal Grammars"},
-      {"slug": "KC-NLP-statistical-era", "name": "Statistical NLP Methods"},
-      {"slug": "KC-NLP-neural-revolution", "name": "Neural NLP Revolution và Key Milestones"}
+      {
+        "slug": "KC-NLP-rule-based-era",
+        "name": "Rule-Based NLP và Formal Grammars"
+      },
+      {
+        "slug": "KC-NLP-statistical-era",
+        "name": "Statistical NLP Methods"
+      },
+      {
+        "slug": "KC-NLP-neural-revolution",
+        "name": "Neural NLP Revolution và Key Milestones"
+      }
     ]
   },
   {
@@ -23,17 +32,31 @@
     "name": "Word Vectors",
     "description": "Biểu diễn từ dưới dạng dense vectors: Word2Vec (CBOW, Skip-gram), GloVe, đánh giá word embeddings.",
     "order_index": 2,
-    "prerequisite_topic_slugs": ["nlp_history"],
+    "prerequisite_topic_slugs": [
+      "nlp_history"
+    ],
     "estimated_hours_beginner": 3.5,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Word Vectors\n\n## Tại sao cần Word Vectors?\n\n**One-hot encoding** không capture được ngữ nghĩa:\n- dim = |V| (vocabulary size, thường 50K–100K+)\n- Mọi cặp từ đều orthogonal → không có similarity\n\n**Distributional Hypothesis** (Harris, 1954): \"Từ được đặc trưng bởi ngữ cảnh xuất hiện\"\n\n## Word2Vec (Mikolov et al., 2013)\n\n### Skip-gram Model\n\nCho trước center word, dự đoán context words:\n\n$$P(o|c) = \\frac{\\exp(u_o^T v_c)}{\\sum_{w \\in V} \\exp(u_w^T v_c)}$$\n\n- $v_c$: vector center word\n- $u_o$: vector outside (context) word\n- Objective: Maximize log-likelihood trên toàn corpus\n\n### CBOW (Continuous Bag of Words)\n\nNgược lại: dự đoán center word từ context words.\n\n### Negative Sampling\n\nSoftmax trên toàn bộ vocab quá tốn kém → sample k negative examples:\n\n$$J = -\\log \\sigma(u_o^T v_c) - \\sum_{k=1}^{K} \\log \\sigma(-u_k^T v_c)$$\n\n## GloVe (Pennington et al., 2014)\n\nKết hợp global matrix factorization + local context window:\n\n$$J = \\sum_{i,j=1}^{|V|} f(X_{ij})(w_i^T \\tilde{w}_j + b_i + \\tilde{b}_j - \\log X_{ij})^2$$\n\n- $X_{ij}$: co-occurrence count\n- $f(x)$: weighting function (cap tại x_max)\n\n## Đánh giá Word Vectors\n\n### Intrinsic\n- **Analogy task**: king - man + woman ≈ queen\n- **Similarity**: cosine similarity vs human judgments\n\n### Extrinsic\n- Dùng trong downstream task: NER, Sentiment Analysis\n\n## Code minh họa\n\n```python\nimport gensim.downloader as api\nmodel = api.load('word2vec-google-news-300')\nmodel.most_similar('king', topn=5)\nmodel.most_similar(positive=['king', 'woman'], negative=['man'])\n```",
     "video_url": "https://example.com/videos/cs224n/word_vectors.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-distributional-semantics", "name": "Distributional Semantics và One-Hot vs Dense"},
-      {"slug": "KC-NLP-word2vec", "name": "Word2Vec: Skip-gram, CBOW, Negative Sampling"},
-      {"slug": "KC-NLP-glove", "name": "GloVe và Co-occurrence Matrix"},
-      {"slug": "KC-NLP-embedding-eval", "name": "Word Embedding Evaluation (Intrinsic/Extrinsic)"}
+      {
+        "slug": "KC-NLP-distributional-semantics",
+        "name": "Distributional Semantics và One-Hot vs Dense"
+      },
+      {
+        "slug": "KC-NLP-word2vec",
+        "name": "Word2Vec: Skip-gram, CBOW, Negative Sampling"
+      },
+      {
+        "slug": "KC-NLP-glove",
+        "name": "GloVe và Co-occurrence Matrix"
+      },
+      {
+        "slug": "KC-NLP-embedding-eval",
+        "name": "Word Embedding Evaluation (Intrinsic/Extrinsic)"
+      }
     ]
   },
   {
@@ -49,9 +72,18 @@
     "content_markdown": "# Python Review Session\n\n## NumPy Essentials\n\n```python\nimport numpy as np\n\n# Tạo arrays\na = np.array([1, 2, 3])\nM = np.random.randn(3, 4)  # matrix 3x4\n\n# Operations\nnp.dot(a, a)        # dot product\nM @ a[:, None]      # matrix-vector multiply (broadcasting)\nnp.linalg.norm(a)   # L2 norm\n\n# Broadcasting\nv = np.array([1, 2, 3, 4])\nM + v  # adds v to each row of M\n```\n\n## Text Processing\n\n```python\nimport re\n\ntext = \"NLP is amazing! Let's tokenize this.\"\n\n# Simple tokenization\ntokens = text.lower().split()\n\n# Regex tokenization\ntokens = re.findall(r\"\\b\\w+\\b\", text.lower())\n# ['nlp', 'is', 'amazing', 'let', 's', 'tokenize', 'this']\n\n# Vocabulary building\nfrom collections import Counter\nvocab = Counter(tokens)\nvocab.most_common(5)\n```\n\n## Matplotlib Basics\n\n```python\nimport matplotlib.pyplot as plt\n\n# Plot word frequency\nwords, counts = zip(*vocab.most_common(10))\nplt.bar(words, counts)\nplt.xlabel('Words')\nplt.ylabel('Frequency')\nplt.title('Top 10 Words')\nplt.xticks(rotation=45)\nplt.show()\n```\n\n## File I/O cho NLP\n\n```python\n# Đọc corpus\nwith open('corpus.txt', 'r', encoding='utf-8') as f:\n    lines = f.readlines()\n\n# JSON\nimport json\nwith open('data.json', 'r') as f:\n    data = json.load(f)\n```",
     "video_url": "https://example.com/videos/cs224n/python_review.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-numpy-ops", "name": "NumPy Array Operations cho NLP"},
-      {"slug": "KC-NLP-text-processing", "name": "Text Processing và Tokenization"},
-      {"slug": "KC-NLP-data-loading", "name": "Data Loading và Visualization"}
+      {
+        "slug": "KC-NLP-numpy-ops",
+        "name": "NumPy Array Operations cho NLP"
+      },
+      {
+        "slug": "KC-NLP-text-processing",
+        "name": "Text Processing và Tokenization"
+      },
+      {
+        "slug": "KC-NLP-data-loading",
+        "name": "Data Loading và Visualization"
+      }
     ]
   },
   {
@@ -60,17 +92,32 @@
     "name": "Backpropagation and Neural Network Basics",
     "description": "Nền tảng neural networks: forward pass, loss functions, chain rule, backpropagation, gradient descent, và áp dụng cho NLP.",
     "order_index": 4,
-    "prerequisite_topic_slugs": ["nlp_word_vectors", "nlp_python_review"],
+    "prerequisite_topic_slugs": [
+      "nlp_word_vectors",
+      "nlp_python_review"
+    ],
     "estimated_hours_beginner": 4.0,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Backpropagation and Neural Network Basics\n\n## Neural Network cơ bản\n\n### Forward Pass\n\n$$h = f(Wx + b)$$\n$$\\hat{y} = \\text{softmax}(Uh + c)$$\n\n- $f$: activation function (ReLU, sigmoid, tanh)\n- $W, U$: weight matrices\n- $b, c$: bias vectors\n\n### Activation Functions\n\n| Function | Formula | Range | Đặc điểm |\n|----------|---------|-------|----------|\n| Sigmoid | $\\sigma(x) = 1/(1+e^{-x})$ | (0,1) | Vanishing gradient |\n| Tanh | $\\tanh(x)$ | (-1,1) | Zero-centered |\n| ReLU | $\\max(0, x)$ | [0,∞) | Phổ biến nhất |\n\n## Backpropagation\n\n### Chain Rule\n\nCho $y = f(g(x))$:\n\n$$\\frac{\\partial y}{\\partial x} = \\frac{\\partial y}{\\partial g} \\cdot \\frac{\\partial g}{\\partial x}$$\n\n### Computation Graph\n\nMỗi node là một phép toán. Gradient flows ngược lại:\n\n1. **Forward pass**: Tính output + cache intermediate values\n2. **Backward pass**: Tính gradients từ loss → inputs\n\n### Ví dụ: Gradient cho softmax + cross-entropy\n\n$$L = -\\sum_i y_i \\log \\hat{y}_i$$\n\n$$\\frac{\\partial L}{\\partial z} = \\hat{y} - y$$\n\n(Đẹp và đơn giản!)\n\n## Gradient Descent\n\n### SGD\n$$\\theta_{t+1} = \\theta_t - \\eta \\nabla_\\theta J(\\theta)$$\n\n### Mini-batch SGD\n- Batch size thường: 32, 64, 128\n- Trade-off giữa noise và computation\n\n## Tips thực hành\n\n- **Gradient checking**: So sánh analytical gradient với numerical gradient\n- **Learning rate**: Quá lớn → diverge, quá nhỏ → chậm\n- **Initialization**: Xavier/He initialization cho weights",
     "video_url": "https://example.com/videos/cs224n/backprop.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-forward-pass", "name": "Neural Network Forward Pass"},
-      {"slug": "KC-NLP-backprop", "name": "Backpropagation và Chain Rule"},
-      {"slug": "KC-NLP-gradient-descent", "name": "Gradient Descent Variants"},
-      {"slug": "KC-NLP-activations", "name": "Activation Functions và Initialization"}
+      {
+        "slug": "KC-NLP-forward-pass",
+        "name": "Neural Network Forward Pass"
+      },
+      {
+        "slug": "KC-NLP-backprop",
+        "name": "Backpropagation và Chain Rule"
+      },
+      {
+        "slug": "KC-NLP-gradient-descent",
+        "name": "Gradient Descent Variants"
+      },
+      {
+        "slug": "KC-NLP-activations",
+        "name": "Activation Functions và Initialization"
+      }
     ]
   },
   {
@@ -79,17 +126,31 @@
     "name": "Language Models and RNNs",
     "description": "N-gram language models, Recurrent Neural Networks, vanishing/exploding gradients, LSTMs, GRUs.",
     "order_index": 5,
-    "prerequisite_topic_slugs": ["nlp_backprop_nn"],
+    "prerequisite_topic_slugs": [
+      "nlp_backprop_nn"
+    ],
     "estimated_hours_beginner": 4.0,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Language Models and RNNs\n\n## Language Models\n\nMục tiêu: Tính xác suất chuỗi từ $P(w_1, w_2, ..., w_T)$\n\n$$P(w_1, ..., w_T) = \\prod_{t=1}^{T} P(w_t | w_1, ..., w_{t-1})$$\n\n### N-gram LMs\n\nMarkov assumption bậc n-1:\n$$P(w_t | w_1, ..., w_{t-1}) \\approx P(w_t | w_{t-n+1}, ..., w_{t-1})$$\n\n- Sparsity problem: nhiều n-grams chưa bao giờ thấy\n- Smoothing: add-k, Kneser-Ney\n\n## Recurrent Neural Networks (RNNs)\n\n### Vanilla RNN\n\n$$h_t = \\tanh(W_h h_{t-1} + W_x x_t + b)$$\n$$\\hat{y}_t = \\text{softmax}(U h_t + c)$$\n\n- Shared weights qua mọi time steps\n- Lý thuyết: capture arbitrary long dependencies\n- Thực tế: **vanishing/exploding gradients**\n\n### Vanishing Gradient Problem\n\n$$\\frac{\\partial h_t}{\\partial h_1} = \\prod_{i=2}^{t} \\frac{\\partial h_i}{\\partial h_{i-1}}$$\n\nKhi $t$ lớn → gradient tiến về 0 hoặc ∞\n\n## LSTM (Long Short-Term Memory)\n\n$$f_t = \\sigma(W_f [h_{t-1}, x_t] + b_f)$$\n$$i_t = \\sigma(W_i [h_{t-1}, x_t] + b_i)$$\n$$\\tilde{c}_t = \\tanh(W_c [h_{t-1}, x_t] + b_c)$$\n$$c_t = f_t \\odot c_{t-1} + i_t \\odot \\tilde{c}_t$$\n$$o_t = \\sigma(W_o [h_{t-1}, x_t] + b_o)$$\n$$h_t = o_t \\odot \\tanh(c_t)$$\n\n- **Forget gate** $f_t$: quyết định quên thông tin cũ\n- **Input gate** $i_t$: quyết định nhận thông tin mới\n- **Cell state** $c_t$: \"highway\" cho gradient flow\n\n## GRU (Gated Recurrent Unit)\n\nĐơn giản hơn LSTM (2 gates thay vì 3):\n\n$$z_t = \\sigma(W_z [h_{t-1}, x_t])$$\n$$r_t = \\sigma(W_r [h_{t-1}, x_t])$$\n$$\\tilde{h}_t = \\tanh(W [r_t \\odot h_{t-1}, x_t])$$\n$$h_t = (1 - z_t) \\odot h_{t-1} + z_t \\odot \\tilde{h}_t$$\n\n## Ứng dụng\n\n- Language modeling & text generation\n- Machine translation (Seq2Seq)\n- Sentiment analysis\n- Named Entity Recognition",
     "video_url": "https://example.com/videos/cs224n/lm_rnns.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-language-models", "name": "Language Models và N-grams"},
-      {"slug": "KC-NLP-vanilla-rnn", "name": "Vanilla RNN Architecture"},
-      {"slug": "KC-NLP-vanishing-gradient", "name": "Vanishing/Exploding Gradient Problem"},
-      {"slug": "KC-NLP-lstm-gru", "name": "LSTM và GRU Architectures"}
+      {
+        "slug": "KC-NLP-language-models",
+        "name": "Language Models và N-grams"
+      },
+      {
+        "slug": "KC-NLP-vanilla-rnn",
+        "name": "Vanilla RNN Architecture"
+      },
+      {
+        "slug": "KC-NLP-vanishing-gradient",
+        "name": "Vanishing/Exploding Gradient Problem"
+      },
+      {
+        "slug": "KC-NLP-lstm-gru",
+        "name": "LSTM và GRU Architectures"
+      }
     ]
   },
   {
@@ -98,17 +159,32 @@
     "name": "PyTorch Tutorial Session",
     "description": "Thực hành PyTorch: tensors, autograd, nn.Module, DataLoader, training loop, GPU acceleration.",
     "order_index": 6,
-    "prerequisite_topic_slugs": ["nlp_python_review", "nlp_backprop_nn"],
+    "prerequisite_topic_slugs": [
+      "nlp_python_review",
+      "nlp_backprop_nn"
+    ],
     "estimated_hours_beginner": 3.0,
     "estimated_hours_intermediate": 1.0,
     "estimated_hours_review": 0.5,
     "content_markdown": "# PyTorch Tutorial Session\n\n## Tensors\n\n```python\nimport torch\n\n# Tạo tensors\nx = torch.tensor([1.0, 2.0, 3.0])\nM = torch.randn(3, 4)\nzeros = torch.zeros(2, 3)\n\n# Operations\ny = M @ x[:, None]  # matrix-vector multiply\nz = torch.relu(y)   # element-wise ReLU\n\n# GPU\ndevice = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\nx = x.to(device)\n```\n\n## Autograd\n\n```python\nx = torch.tensor([2.0], requires_grad=True)\ny = x ** 2 + 3 * x\ny.backward()\nprint(x.grad)  # tensor([7.]) vì dy/dx = 2x + 3 = 7\n```\n\n## nn.Module\n\n```python\nimport torch.nn as nn\n\nclass TextClassifier(nn.Module):\n    def __init__(self, vocab_size, embed_dim, num_classes):\n        super().__init__()\n        self.embedding = nn.Embedding(vocab_size, embed_dim)\n        self.fc1 = nn.Linear(embed_dim, 128)\n        self.fc2 = nn.Linear(128, num_classes)\n        self.dropout = nn.Dropout(0.3)\n\n    def forward(self, x):\n        x = self.embedding(x).mean(dim=1)  # average pooling\n        x = torch.relu(self.fc1(x))\n        x = self.dropout(x)\n        return self.fc2(x)\n```\n\n## Training Loop\n\n```python\nfrom torch.utils.data import DataLoader\n\nmodel = TextClassifier(vocab_size=10000, embed_dim=300, num_classes=5)\nmodel.to(device)\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)\ncriterion = nn.CrossEntropyLoss()\n\nfor epoch in range(num_epochs):\n    model.train()\n    for batch_x, batch_y in train_loader:\n        batch_x, batch_y = batch_x.to(device), batch_y.to(device)\n        optimizer.zero_grad()\n        logits = model(batch_x)\n        loss = criterion(logits, batch_y)\n        loss.backward()\n        optimizer.step()\n\n    # Evaluation\n    model.eval()\n    with torch.no_grad():\n        # ... validation loop\n```\n\n## Tips\n\n- Luôn gọi `model.eval()` và `torch.no_grad()` khi inference\n- Dùng `torch.nn.utils.clip_grad_norm_` để tránh exploding gradients\n- `DataLoader(shuffle=True, num_workers=4)` cho training",
     "video_url": "https://example.com/videos/cs224n/pytorch_tutorial.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-pytorch-tensors", "name": "PyTorch Tensors và Operations"},
-      {"slug": "KC-NLP-autograd", "name": "Autograd và Computation Graph"},
-      {"slug": "KC-NLP-nn-module", "name": "nn.Module và Model Definition"},
-      {"slug": "KC-NLP-training-loop", "name": "Training Loop và DataLoader"}
+      {
+        "slug": "KC-NLP-pytorch-tensors",
+        "name": "PyTorch Tensors và Operations"
+      },
+      {
+        "slug": "KC-NLP-autograd",
+        "name": "Autograd và Computation Graph"
+      },
+      {
+        "slug": "KC-NLP-nn-module",
+        "name": "nn.Module và Model Definition"
+      },
+      {
+        "slug": "KC-NLP-training-loop",
+        "name": "Training Loop và DataLoader"
+      }
     ]
   },
   {
@@ -117,17 +193,31 @@
     "name": "Transformers",
     "description": "Kiến trúc Transformer: self-attention, multi-head attention, positional encoding, encoder-decoder architecture.",
     "order_index": 7,
-    "prerequisite_topic_slugs": ["nlp_lm_rnns"],
+    "prerequisite_topic_slugs": [
+      "nlp_lm_rnns"
+    ],
     "estimated_hours_beginner": 5.0,
     "estimated_hours_intermediate": 2.0,
     "estimated_hours_review": 0.75,
     "content_markdown": "# Transformers\n\n## Motivation\n\nRNNs xử lý tuần tự → không parallelizable, khó capture long-range dependencies.\nTransformer giải quyết cả hai vấn đề bằng **self-attention**.\n\n## Self-Attention\n\n### Scaled Dot-Product Attention\n\n$$\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right) V$$\n\n- $Q$ (Query), $K$ (Key), $V$ (Value): linear projections từ input\n- $d_k$: dimension of keys (scaling factor)\n- Mỗi token \"attend\" đến mọi token khác\n\n### Multi-Head Attention\n\n$$\\text{MultiHead}(Q, K, V) = \\text{Concat}(\\text{head}_1, ..., \\text{head}_h) W^O$$\n$$\\text{head}_i = \\text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$\n\n- Cho phép model attend đến thông tin từ nhiều representation subspaces\n- Thường: $h = 8$ heads, $d_k = d_{model} / h$\n\n## Positional Encoding\n\nTransformer không có khái niệm thứ tự → thêm positional encoding:\n\n$$PE_{(pos, 2i)} = \\sin(pos / 10000^{2i/d_{model}})$$\n$$PE_{(pos, 2i+1)} = \\cos(pos / 10000^{2i/d_{model}})$$\n\n## Transformer Block\n\n```\nInput\n  → Multi-Head Self-Attention\n  → Add & LayerNorm (residual connection)\n  → Feed-Forward Network (FFN)\n  → Add & LayerNorm\n  → Output\n```\n\nFFN: $\\text{FFN}(x) = \\max(0, xW_1 + b_1)W_2 + b_2$\n\n## Encoder-Decoder Architecture\n\n**Encoder** (BERT-style):\n- Bidirectional self-attention\n- Mỗi token nhìn thấy tất cả tokens\n\n**Decoder** (GPT-style):\n- Causal (masked) self-attention\n- Token chỉ nhìn thấy tokens trước nó\n- Cross-attention đến encoder output (trong seq2seq)\n\n## So sánh\n\n| | RNN | Transformer |\n|---|-----|-------------|\n| Parallelization | ❌ Sequential | ✅ Fully parallel |\n| Long-range deps | Khó (vanishing grad) | ✅ Direct attention |\n| Complexity per layer | O(T·d²) | O(T²·d) |\n| Memory | O(1) per step | O(T²) attention |",
     "video_url": "https://example.com/videos/cs224n/transformers.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-self-attention", "name": "Scaled Dot-Product Self-Attention"},
-      {"slug": "KC-NLP-multi-head", "name": "Multi-Head Attention"},
-      {"slug": "KC-NLP-positional-enc", "name": "Positional Encoding"},
-      {"slug": "KC-NLP-transformer-arch", "name": "Transformer Encoder-Decoder Architecture"}
+      {
+        "slug": "KC-NLP-self-attention",
+        "name": "Scaled Dot-Product Self-Attention"
+      },
+      {
+        "slug": "KC-NLP-multi-head",
+        "name": "Multi-Head Attention"
+      },
+      {
+        "slug": "KC-NLP-positional-enc",
+        "name": "Positional Encoding"
+      },
+      {
+        "slug": "KC-NLP-transformer-arch",
+        "name": "Transformer Encoder-Decoder Architecture"
+      }
     ]
   },
   {
@@ -136,16 +226,27 @@
     "name": "Final Projects: Custom and Default; Practical Tips",
     "description": "Hướng dẫn final project: default projects, custom project proposals, practical tips cho nghiên cứu NLP.",
     "order_index": 8,
-    "prerequisite_topic_slugs": ["nlp_transformers"],
+    "prerequisite_topic_slugs": [
+      "nlp_transformers"
+    ],
     "estimated_hours_beginner": 2.0,
     "estimated_hours_intermediate": 1.0,
     "estimated_hours_review": 0.25,
     "content_markdown": "# Final Projects: Custom and Default; Practical Tips\n\n## Default Projects\n\n### 1. Question Answering (SQuAD-style)\n- Input: passage + question\n- Output: span trong passage\n- Baseline: Fine-tune pretrained model trên SQuAD 2.0\n\n### 2. Sentiment Analysis\n- Stanford Sentiment Treebank (SST-5)\n- 5-class classification\n- Explore: attention visualization, error analysis\n\n## Custom Project Guidelines\n\n### Đề xuất project tốt\n- **Clear research question**: \"Liệu X có cải thiện Y trên task Z?\"\n- **Feasible scope**: Có thể hoàn thành trong 4-6 tuần\n- **Measurable**: Có metric rõ ràng để đánh giá\n\n### Cấu trúc project proposal\n1. Problem statement & motivation\n2. Related work (3-5 papers)\n3. Approach & methodology\n4. Dataset & evaluation metrics\n5. Timeline & milestones\n\n## Practical Tips\n\n### Training\n- Bắt đầu với model nhỏ, dataset nhỏ để debug\n- Log everything: loss, lr, gradient norms\n- Dùng **wandb** hoặc **tensorboard** để track experiments\n\n### Debugging NLP Models\n- Overfit trên 1 batch trước\n- Kiểm tra data pipeline: print samples\n- Gradient clipping cho stability\n\n### Writing\n- Viết theo format ACL/NeurIPS\n- Bao gồm: ablation studies, error analysis\n- Visualize attention weights khi có thể\n\n### Compute Resources\n- Google Colab (free GPU)\n- Dùng mixed precision (fp16) để tiết kiệm memory\n- Gradient accumulation thay vì large batch",
     "video_url": "https://example.com/videos/cs224n/final_projects.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-project-planning", "name": "NLP Project Planning và Scoping"},
-      {"slug": "KC-NLP-experiment-tips", "name": "Practical Experiment và Training Tips"},
-      {"slug": "KC-NLP-research-writing", "name": "Research Writing và Evaluation"}
+      {
+        "slug": "KC-NLP-project-planning",
+        "name": "NLP Project Planning và Scoping"
+      },
+      {
+        "slug": "KC-NLP-experiment-tips",
+        "name": "Practical Experiment và Training Tips"
+      },
+      {
+        "slug": "KC-NLP-research-writing",
+        "name": "Research Writing và Evaluation"
+      }
     ]
   },
   {
@@ -154,17 +255,31 @@
     "name": "Pretraining (Scaling, Systems, Data)",
     "description": "Pretraining LLMs: masked/causal language modeling, scaling laws, data curation, distributed training, BERT vs GPT paradigms.",
     "order_index": 9,
-    "prerequisite_topic_slugs": ["nlp_transformers"],
+    "prerequisite_topic_slugs": [
+      "nlp_transformers"
+    ],
     "estimated_hours_beginner": 4.0,
     "estimated_hours_intermediate": 2.0,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Pretraining (Scaling, Systems, Data)\n\n## Pretraining Objectives\n\n### Causal Language Modeling (GPT-style)\n$$L = -\\sum_{t=1}^{T} \\log P(w_t | w_{<t})$$\n- Autoregressive: dự đoán token tiếp theo\n- Dùng cho: GPT, LLaMA, Mistral\n\n### Masked Language Modeling (BERT-style)\n$$L = -\\sum_{i \\in M} \\log P(w_i | w_{\\backslash M})$$\n- Mask 15% tokens, dự đoán chúng\n- Bidirectional context\n- Dùng cho: BERT, RoBERTa, DeBERTa\n\n### Encoder-Decoder (T5-style)\n- Span corruption: mask spans of tokens\n- Decoder sinh lại spans bị mask\n\n## Scaling Laws (Kaplan et al., 2020)\n\n$$L(N, D) \\propto N^{-\\alpha_N} + D^{-\\alpha_D}$$\n\n- $N$: số parameters\n- $D$: dataset size (tokens)\n- Loss giảm power-law khi scale N hoặc D\n- **Chinchilla optimal**: $D \\approx 20N$ (Hoffmann et al., 2022)\n\n## Data\n\n### Data Sources\n- Common Crawl (web text, cần lọc kỹ)\n- Wikipedia, Books, Code (GitHub)\n- Curated: The Pile, RedPajama, FineWeb\n\n### Data Quality Pipeline\n1. **Deduplication**: MinHash, exact dedup\n2. **Filtering**: Language detection, quality scoring\n3. **Toxicity removal**: Classifier-based filtering\n4. **PII removal**: Regex + NER\n\n## Systems & Distributed Training\n\n### Parallelism Strategies\n| Strategy | Chia gì? | Khi nào dùng? |\n|----------|---------|---------------|\n| Data Parallel | Mini-batches | Model fit 1 GPU |\n| Tensor Parallel | Layers/matrices | Model > 1 GPU memory |\n| Pipeline Parallel | Layer groups | Very large models |\n| ZeRO (DeepSpeed) | Optimizer states | Memory optimization |\n\n### Mixed Precision Training\n- FP16/BF16 cho forward/backward\n- FP32 master weights\n- 2x speedup, 50% memory reduction\n\n## Key Models Timeline\n\n| Model | Year | Params | Training Tokens |\n|-------|------|--------|----------------|\n| BERT-base | 2018 | 110M | 3.3B |\n| GPT-2 | 2019 | 1.5B | 40B |\n| GPT-3 | 2020 | 175B | 300B |\n| LLaMA 2 | 2023 | 7-70B | 2T |\n| LLaMA 3 | 2024 | 8-405B | 15T+ |",
     "video_url": "https://example.com/videos/cs224n/pretraining.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-pretraining-objectives", "name": "Pretraining Objectives (CLM, MLM, Span Corruption)"},
-      {"slug": "KC-NLP-scaling-laws", "name": "Scaling Laws và Chinchilla Optimal"},
-      {"slug": "KC-NLP-data-curation", "name": "Pretraining Data Curation và Quality"},
-      {"slug": "KC-NLP-distributed-training", "name": "Distributed Training và Mixed Precision"}
+      {
+        "slug": "KC-NLP-pretraining-objectives",
+        "name": "Pretraining Objectives (CLM, MLM, Span Corruption)"
+      },
+      {
+        "slug": "KC-NLP-scaling-laws",
+        "name": "Scaling Laws và Chinchilla Optimal"
+      },
+      {
+        "slug": "KC-NLP-data-curation",
+        "name": "Pretraining Data Curation và Quality"
+      },
+      {
+        "slug": "KC-NLP-distributed-training",
+        "name": "Distributed Training và Mixed Precision"
+      }
     ]
   },
   {
@@ -173,17 +288,31 @@
     "name": "Post-training (RLHF, SFT, DPO)",
     "description": "Alignment techniques: Supervised Fine-Tuning, RLHF với PPO, DPO, reward modeling, và constitutional AI.",
     "order_index": 10,
-    "prerequisite_topic_slugs": ["nlp_pretraining"],
+    "prerequisite_topic_slugs": [
+      "nlp_pretraining"
+    ],
     "estimated_hours_beginner": 4.0,
     "estimated_hours_intermediate": 2.0,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Post-training (RLHF, SFT, DPO)\n\n## Pipeline tổng quan\n\n```\nPretrained LLM → SFT → Reward Model → RLHF/DPO → Aligned Model\n```\n\n## 1. Supervised Fine-Tuning (SFT)\n\nFine-tune pretrained model trên instruction-response pairs:\n\n```json\n{\"instruction\": \"Tóm tắt đoạn văn sau\",\n \"input\": \"Transformer là kiến trúc...\",\n \"output\": \"Transformer sử dụng self-attention...\"}\n```\n\n- Datasets: FLAN, Alpaca, OpenAssistant, ShareGPT\n- Loss: Standard cross-entropy trên response tokens\n- Thường chỉ cần 10K–100K high-quality examples\n\n## 2. Reward Modeling\n\nTrain reward model $R(x, y)$ từ human preferences:\n\n$$L_{RM} = -\\log \\sigma(R(x, y_w) - R(x, y_l))$$\n\n- $y_w$: response được prefer\n- $y_l$: response bị reject\n- Bradley-Terry model cho pairwise comparisons\n\n## 3. RLHF (Reinforcement Learning from Human Feedback)\n\n### PPO (Proximal Policy Optimization)\n\n$$L_{PPO} = \\mathbb{E}\\left[\\min\\left(r_t(\\theta) A_t, \\text{clip}(r_t(\\theta), 1-\\epsilon, 1+\\epsilon) A_t\\right)\\right]$$\n\nObjective kết hợp:\n$$J(\\theta) = \\mathbb{E}_{y \\sim \\pi_\\theta}[R(x, y)] - \\beta \\cdot D_{KL}(\\pi_\\theta || \\pi_{ref})$$\n\n- KL penalty giữ model không đi quá xa khỏi SFT model\n- Phức tạp: cần 4 models (policy, ref, reward, value)\n\n## 4. DPO (Direct Preference Optimization)\n\nBỏ qua reward model, optimize trực tiếp từ preferences:\n\n$$L_{DPO} = -\\log \\sigma\\left(\\beta \\log \\frac{\\pi_\\theta(y_w|x)}{\\pi_{ref}(y_w|x)} - \\beta \\log \\frac{\\pi_\\theta(y_l|x)}{\\pi_{ref}(y_l|x)}\\right)$$\n\n**Ưu điểm so với RLHF:**\n- Không cần reward model riêng\n- Không cần RL (PPO) → ổn định hơn\n- Chỉ cần 2 models (policy + reference)\n\n## So sánh\n\n| Method | Complexity | Stability | Performance |\n|--------|-----------|-----------|-------------|\n| SFT | Thấp | Cao | Baseline |\n| RLHF+PPO | Rất cao | Thấp | Strong |\n| DPO | Trung bình | Cao | Comparable |\n| KTO | Trung bình | Cao | Promising |",
     "video_url": "https://example.com/videos/cs224n/post_training.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-sft", "name": "Supervised Fine-Tuning (SFT)"},
-      {"slug": "KC-NLP-reward-modeling", "name": "Reward Modeling và Human Preferences"},
-      {"slug": "KC-NLP-rlhf-ppo", "name": "RLHF với PPO"},
-      {"slug": "KC-NLP-dpo", "name": "DPO và Alternatives"}
+      {
+        "slug": "KC-NLP-sft",
+        "name": "Supervised Fine-Tuning (SFT)"
+      },
+      {
+        "slug": "KC-NLP-reward-modeling",
+        "name": "Reward Modeling và Human Preferences"
+      },
+      {
+        "slug": "KC-NLP-rlhf-ppo",
+        "name": "RLHF với PPO"
+      },
+      {
+        "slug": "KC-NLP-dpo",
+        "name": "DPO và Alternatives"
+      }
     ]
   },
   {
@@ -192,16 +321,27 @@
     "name": "Efficient Adaptation (Prompting + PEFT)",
     "description": "Kỹ thuật adapt LLMs hiệu quả: prompting strategies, in-context learning, LoRA, prefix tuning, adapters.",
     "order_index": 11,
-    "prerequisite_topic_slugs": ["nlp_pretraining"],
+    "prerequisite_topic_slugs": [
+      "nlp_pretraining"
+    ],
     "estimated_hours_beginner": 3.5,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Efficient Adaptation (Prompting + PEFT)\n\n## Prompting\n\n### Zero-shot Prompting\n```\nClassify the sentiment: \"This movie was terrible\"\nSentiment:\n```\n\n### Few-shot / In-Context Learning\n```\nClassify the sentiment:\n\"Great film!\" → Positive\n\"Boring plot\" → Negative\n\"This movie was terrible\" →\n```\n\n### Chain-of-Thought (CoT)\n```\nQ: Roger has 5 balls. He buys 2 more cans of 3 balls each. How many?\nA: Let's think step by step.\n   Roger starts with 5 balls.\n   2 cans × 3 balls = 6 balls.\n   5 + 6 = 11 balls.\n   The answer is 11.\n```\n\n## Parameter-Efficient Fine-Tuning (PEFT)\n\n### Tại sao PEFT?\n- Full fine-tuning LLaMA-7B: cần ~28GB GPU memory\n- PEFT: train <1% parameters, hiệu quả gần tương đương\n\n### LoRA (Low-Rank Adaptation)\n\n$$W' = W + BA$$\n\n- $W \\in \\mathbb{R}^{d \\times d}$: frozen pretrained weight\n- $B \\in \\mathbb{R}^{d \\times r}$, $A \\in \\mathbb{R}^{r \\times d}$: trainable\n- Rank $r$: thường 4–64 (rất nhỏ so với $d$)\n- Trainable params: $2 \\times d \\times r$ thay vì $d^2$\n\n```python\nfrom peft import LoraConfig, get_peft_model\n\nconfig = LoraConfig(\n    r=16,\n    lora_alpha=32,\n    target_modules=['q_proj', 'v_proj'],\n    lora_dropout=0.05\n)\nmodel = get_peft_model(base_model, config)\nmodel.print_trainable_parameters()\n# trainable: 0.1% of total\n```\n\n### QLoRA\n- 4-bit quantized base model + LoRA\n- Fine-tune LLaMA-65B trên 1 GPU 48GB!\n\n### Prefix Tuning\n- Thêm trainable \"virtual tokens\" vào đầu mỗi layer\n- Không thay đổi model weights\n\n### Adapters\n- Chèn small bottleneck layers vào giữa Transformer layers\n- down-project → nonlinearity → up-project\n\n## So sánh Methods\n\n| Method | Trainable Params | Memory | Performance |\n|--------|-----------------|--------|-------------|\n| Full FT | 100% | Rất cao | Best |\n| LoRA | ~0.1% | Thấp | ~Full FT |\n| QLoRA | ~0.1% | Rất thấp | ~LoRA |\n| Prefix Tuning | ~0.1% | Thấp | Good |\n| Prompting | 0% | Thấp nhất | Varies |",
     "video_url": "https://example.com/videos/cs224n/efficient_adaptation.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-prompting", "name": "Prompting Strategies (Zero/Few-shot, CoT)"},
-      {"slug": "KC-NLP-lora", "name": "LoRA và QLoRA"},
-      {"slug": "KC-NLP-peft-methods", "name": "PEFT Methods (Prefix Tuning, Adapters)"}
+      {
+        "slug": "KC-NLP-prompting",
+        "name": "Prompting Strategies (Zero/Few-shot, CoT)"
+      },
+      {
+        "slug": "KC-NLP-lora",
+        "name": "LoRA và QLoRA"
+      },
+      {
+        "slug": "KC-NLP-peft-methods",
+        "name": "PEFT Methods (Prefix Tuning, Adapters)"
+      }
     ]
   },
   {
@@ -210,17 +350,31 @@
     "name": "Agents, Tool Use, and RAG",
     "description": "LLM agents, function calling, tool use, Retrieval-Augmented Generation, vector databases, và agentic workflows.",
     "order_index": 12,
-    "prerequisite_topic_slugs": ["nlp_pretraining"],
+    "prerequisite_topic_slugs": [
+      "nlp_pretraining"
+    ],
     "estimated_hours_beginner": 3.5,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Agents, Tool Use, and RAG\n\n## Retrieval-Augmented Generation (RAG)\n\n### Motivation\n- LLMs có knowledge cutoff → thiếu thông tin mới\n- Hallucination: tự tin nói sai\n- RAG: bổ sung knowledge từ external sources\n\n### RAG Pipeline\n\n```\nQuery → Retriever → Top-K Documents → LLM + Context → Answer\n```\n\n### Retrieval\n\n**Dense Retrieval:**\n$$\\text{score}(q, d) = \\text{sim}(E_q(q), E_d(d))$$\n\n- Embedding models: all-MiniLM-L6, BGE, E5\n- Vector databases: FAISS, Pinecone, Weaviate, Chroma\n- Similarity: cosine similarity, dot product\n\n**Chunking Strategies:**\n- Fixed-size chunks (512 tokens)\n- Sentence-based splitting\n- Recursive character splitting\n- Semantic chunking\n\n### Generation with Context\n\n```\nSystem: Answer based on the provided context.\nContext: [retrieved documents]\nQuestion: {user_query}\n```\n\n## Tool Use & Function Calling\n\n### Concept\nLLM quyết định khi nào cần gọi external tools:\n\n```json\n{\"tool\": \"calculator\", \"args\": {\"expression\": \"15 * 23 + 7\"}}\n{\"tool\": \"web_search\", \"args\": {\"query\": \"weather Tokyo today\"}}\n```\n\n### Training for Tool Use\n- Fine-tune trên tool-use datasets\n- Special tokens: `<tool_call>`, `<tool_result>`\n- Models: GPT-4, Claude, Gorilla\n\n## LLM Agents\n\n### ReAct Framework\n```\nThought: Tôi cần tìm dân số Việt Nam 2024\nAction: web_search(\"Vietnam population 2024\")\nObservation: 100.3 million (UN estimate)\nThought: Tôi đã có câu trả lời\nAnswer: Dân số Việt Nam năm 2024 khoảng 100.3 triệu người.\n```\n\n### Multi-Agent Systems\n- Agent delegation: agents giao việc cho nhau\n- Debate: multiple agents tranh luận → consensus\n- Supervisor pattern: 1 agent điều phối nhiều agents\n\n### Challenges\n- **Reliability**: Agents có thể loop hoặc hallucinate\n- **Safety**: Tool calls có thể có side effects\n- **Cost**: Nhiều LLM calls = expensive\n- **Evaluation**: Khó đánh giá end-to-end",
     "video_url": "https://example.com/videos/cs224n/agents_rag.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-rag-pipeline", "name": "RAG Pipeline và Dense Retrieval"},
-      {"slug": "KC-NLP-vector-db", "name": "Vector Databases và Chunking"},
-      {"slug": "KC-NLP-tool-use", "name": "Tool Use và Function Calling"},
-      {"slug": "KC-NLP-agents", "name": "LLM Agents và Agentic Workflows"}
+      {
+        "slug": "KC-NLP-rag-pipeline",
+        "name": "RAG Pipeline và Dense Retrieval"
+      },
+      {
+        "slug": "KC-NLP-vector-db",
+        "name": "Vector Databases và Chunking"
+      },
+      {
+        "slug": "KC-NLP-tool-use",
+        "name": "Tool Use và Function Calling"
+      },
+      {
+        "slug": "KC-NLP-agents",
+        "name": "LLM Agents và Agentic Workflows"
+      }
     ]
   },
   {
@@ -229,16 +383,28 @@
     "name": "Hugging Face Transformers Tutorial Session",
     "description": "Thực hành Hugging Face: pipelines, AutoModel, tokenizers, Trainer API, model hub, datasets library.",
     "order_index": 13,
-    "prerequisite_topic_slugs": ["nlp_pytorch_tutorial", "nlp_transformers"],
+    "prerequisite_topic_slugs": [
+      "nlp_pytorch_tutorial",
+      "nlp_transformers"
+    ],
     "estimated_hours_beginner": 3.0,
     "estimated_hours_intermediate": 1.0,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Hugging Face Transformers Tutorial Session\n\n## Pipelines (Quick Start)\n\n```python\nfrom transformers import pipeline\n\n# Sentiment analysis\nclassifier = pipeline('sentiment-analysis')\nclassifier('I love NLP!')\n# [{'label': 'POSITIVE', 'score': 0.9998}]\n\n# Text generation\ngenerator = pipeline('text-generation', model='gpt2')\ngenerator('The future of AI is', max_length=50)\n\n# Question answering\nqa = pipeline('question-answering')\nqa(question='What is NLP?', context='NLP is a subfield of AI...')\n```\n\n## AutoModel & Tokenizer\n\n```python\nfrom transformers import AutoTokenizer, AutoModelForSequenceClassification\n\nmodel_name = 'bert-base-uncased'\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)\n\n# Tokenization\ninputs = tokenizer('Hello, NLP world!', return_tensors='pt',\n                   padding=True, truncation=True)\n# inputs: {'input_ids': ..., 'attention_mask': ..., 'token_type_ids': ...}\n\n# Inference\noutputs = model(**inputs)\nlogits = outputs.logits\n```\n\n## Datasets Library\n\n```python\nfrom datasets import load_dataset\n\n# Load dataset\ndataset = load_dataset('imdb')\nprint(dataset['train'][0])\n# {'text': 'This movie...', 'label': 1}\n\n# Preprocess\ndef tokenize_fn(examples):\n    return tokenizer(examples['text'], truncation=True, max_length=512)\n\ntokenized = dataset.map(tokenize_fn, batched=True)\n```\n\n## Trainer API\n\n```python\nfrom transformers import TrainingArguments, Trainer\n\ntraining_args = TrainingArguments(\n    output_dir='./results',\n    num_train_epochs=3,\n    per_device_train_batch_size=16,\n    per_device_eval_batch_size=64,\n    learning_rate=2e-5,\n    weight_decay=0.01,\n    evaluation_strategy='epoch',\n    save_strategy='epoch',\n    load_best_model_at_end=True,\n    fp16=True,\n)\n\ntrainer = Trainer(\n    model=model,\n    args=training_args,\n    train_dataset=tokenized['train'],\n    eval_dataset=tokenized['test'],\n)\ntrainer.train()\n```\n\n## Model Hub\n\n```python\n# Push to Hub\nmodel.push_to_hub('my-bert-sentiment')\ntokenizer.push_to_hub('my-bert-sentiment')\n\n# Load from Hub\nmodel = AutoModelForSequenceClassification.from_pretrained('username/my-bert-sentiment')\n```\n\n## Tips\n\n- Dùng `model.half()` hoặc `torch_dtype=torch.float16` để giảm memory\n- `accelerate` library cho multi-GPU training\n- `PEFT` library tích hợp trực tiếp với HF Trainer",
     "video_url": "https://example.com/videos/cs224n/huggingface_tutorial.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-hf-pipelines", "name": "HuggingFace Pipelines và AutoModel"},
-      {"slug": "KC-NLP-hf-tokenizer", "name": "Tokenizers và Data Preprocessing"},
-      {"slug": "KC-NLP-hf-trainer", "name": "Trainer API và Model Hub"}
+      {
+        "slug": "KC-NLP-hf-pipelines",
+        "name": "HuggingFace Pipelines và AutoModel"
+      },
+      {
+        "slug": "KC-NLP-hf-tokenizer",
+        "name": "Tokenizers và Data Preprocessing"
+      },
+      {
+        "slug": "KC-NLP-hf-trainer",
+        "name": "Trainer API và Model Hub"
+      }
     ]
   },
   {
@@ -247,16 +413,27 @@
     "name": "Benchmarking and Evaluation",
     "description": "Đánh giá LLMs: benchmarks (MMLU, HumanEval, HELM), metrics, evaluation challenges, LLM-as-judge.",
     "order_index": 14,
-    "prerequisite_topic_slugs": ["nlp_pretraining"],
+    "prerequisite_topic_slugs": [
+      "nlp_pretraining"
+    ],
     "estimated_hours_beginner": 3.0,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Benchmarking and Evaluation\n\n## Tại sao Evaluation quan trọng?\n\n- So sánh models một cách công bằng\n- Phát hiện weaknesses và failure modes\n- Track progress trong research\n\n## Classic NLP Metrics\n\n### Classification\n- **Accuracy**: % dự đoán đúng\n- **F1 Score**: Harmonic mean của Precision & Recall\n- **AUC-ROC**: Area under ROC curve\n\n### Generation\n- **BLEU**: N-gram overlap với reference (MT)\n- **ROUGE**: Recall-oriented, dùng cho summarization\n- **BERTScore**: Semantic similarity via embeddings\n- **Perplexity**: $\\text{PPL} = \\exp(-\\frac{1}{T}\\sum \\log P(w_t|w_{<t}))$\n\n## LLM Benchmarks\n\n| Benchmark | Đo gì? | Format |\n|-----------|--------|--------|\n| MMLU | Kiến thức tổng quát (57 subjects) | Multiple choice |\n| HumanEval | Code generation | Pass@k |\n| GSM8K | Math reasoning | Exact match |\n| TruthfulQA | Factual accuracy | MC + generation |\n| HELM | Holistic evaluation (42 scenarios) | Mixed |\n| MT-Bench | Multi-turn conversation | LLM-as-judge |\n| AlpacaEval | Instruction following | Win rate vs ref |\n\n## Evaluation Challenges\n\n### Data Contamination\n- Benchmark data có thể nằm trong training set\n- Giải pháp: dynamic benchmarks, canary strings\n\n### Benchmark Saturation\n- Models đạt near-human trên nhiều benchmarks\n- Cần benchmarks khó hơn: GPQA, SWE-bench, ARC-AGI\n\n### LLM-as-Judge\n\n```\nPlease evaluate the following response on a scale of 1-10:\n[Criteria: helpfulness, accuracy, coherence]\nResponse: ...\nScore and explanation:\n```\n\n- Ưu: scalable, flexible\n- Nhược: position bias, verbosity bias, self-preference bias\n\n## Best Practices\n\n- Dùng nhiều benchmarks (không chỉ 1)\n- Report confidence intervals\n- Human evaluation cho open-ended tasks\n- Ablation studies để hiểu từng component",
     "video_url": "https://example.com/videos/cs224n/benchmarking.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-classic-metrics", "name": "Classic NLP Metrics (BLEU, ROUGE, F1)"},
-      {"slug": "KC-NLP-llm-benchmarks", "name": "LLM Benchmarks (MMLU, HumanEval, HELM)"},
-      {"slug": "KC-NLP-eval-challenges", "name": "Evaluation Challenges và LLM-as-Judge"}
+      {
+        "slug": "KC-NLP-classic-metrics",
+        "name": "Classic NLP Metrics (BLEU, ROUGE, F1)"
+      },
+      {
+        "slug": "KC-NLP-llm-benchmarks",
+        "name": "LLM Benchmarks (MMLU, HumanEval, HELM)"
+      },
+      {
+        "slug": "KC-NLP-eval-challenges",
+        "name": "Evaluation Challenges và LLM-as-Judge"
+      }
     ]
   },
   {
@@ -265,17 +442,31 @@
     "name": "Reasoning 1",
     "description": "Reasoning trong LLMs: chain-of-thought, self-consistency, tree-of-thought, math reasoning, symbolic reasoning.",
     "order_index": 15,
-    "prerequisite_topic_slugs": ["nlp_pretraining"],
+    "prerequisite_topic_slugs": [
+      "nlp_pretraining"
+    ],
     "estimated_hours_beginner": 3.5,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Reasoning 1\n\n## LLMs có thể \"suy luận\" không?\n\n- LLMs giỏi pattern matching, kém ở novel reasoning\n- Chain-of-thought giúp cải thiện đáng kể\n- Debate: \"thật sự reasoning\" vs \"sophisticated pattern matching\"?\n\n## Chain-of-Thought (CoT) Prompting\n\n### Standard CoT (Wei et al., 2022)\n\nThêm \"Let's think step by step\" hoặc few-shot examples với reasoning:\n\n```\nQ: Nếu có 3 quả táo, cho đi 1, mua thêm 5, có bao nhiêu?\nA: Bắt đầu: 3 quả\n   Cho đi 1: 3 - 1 = 2 quả\n   Mua thêm 5: 2 + 5 = 7 quả\n   Đáp án: 7 quả.\n```\n\n### Zero-shot CoT\nChỉ cần thêm \"Let's think step by step\" → cải thiện GSM8K từ 18% → 57%!\n\n## Self-Consistency (Wang et al., 2022)\n\n1. Sample nhiều CoT reasoning paths (temperature > 0)\n2. Extract final answer từ mỗi path\n3. Majority voting → answer\n\n$$\\hat{a} = \\arg\\max_a \\sum_{i=1}^{N} \\mathbb{1}[a_i = a]$$\n\nCải thiện: GSM8K 57% → 74% (với 40 samples)\n\n## Tree-of-Thought (Yao et al., 2023)\n\n- Mở rộng CoT thành tree search\n- Mỗi node: một thought/reasoning step\n- BFS hoặc DFS với LLM-based evaluation\n- Tốt cho: Game of 24, creative writing, planning\n\n## Math Reasoning\n\n### Approaches\n1. **CoT + Self-consistency**: Baseline mạnh\n2. **Program-of-Thought**: Sinh code Python thay vì text reasoning\n3. **Tool-augmented**: Dùng calculator/code interpreter\n4. **Specialized training**: MetaMath, WizardMath\n\n### Benchmarks\n| Benchmark | Difficulty | SOTA |\n|-----------|-----------|------|\n| GSM8K | Grade school | ~95% |\n| MATH | Competition | ~85% |\n| AIME | Very hard | ~30% |\n\n## Symbolic Reasoning\n\n- Last letter concatenation\n- Coin flip tracking\n- LLMs struggle khi input length tăng\n- Insight: LLMs learn shortcuts, không generalize",
     "video_url": "https://example.com/videos/cs224n/reasoning_1.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-cot", "name": "Chain-of-Thought Prompting"},
-      {"slug": "KC-NLP-self-consistency", "name": "Self-Consistency và Sampling"},
-      {"slug": "KC-NLP-tree-of-thought", "name": "Tree-of-Thought và Search"},
-      {"slug": "KC-NLP-math-reasoning", "name": "Math và Symbolic Reasoning"}
+      {
+        "slug": "KC-NLP-cot",
+        "name": "Chain-of-Thought Prompting"
+      },
+      {
+        "slug": "KC-NLP-self-consistency",
+        "name": "Self-Consistency và Sampling"
+      },
+      {
+        "slug": "KC-NLP-tree-of-thought",
+        "name": "Tree-of-Thought và Search"
+      },
+      {
+        "slug": "KC-NLP-math-reasoning",
+        "name": "Math và Symbolic Reasoning"
+      }
     ]
   },
   {
@@ -284,17 +475,31 @@
     "name": "Reasoning 2",
     "description": "Reasoning nâng cao: process reward models, verification, test-time compute scaling, o1-style reasoning, formal verification.",
     "order_index": 16,
-    "prerequisite_topic_slugs": ["nlp_reasoning_1"],
+    "prerequisite_topic_slugs": [
+      "nlp_reasoning_1"
+    ],
     "estimated_hours_beginner": 3.5,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Reasoning 2\n\n## Process Reward Models (PRMs)\n\n### Outcome vs Process Reward\n- **Outcome RM**: Chỉ đánh giá final answer đúng/sai\n- **Process RM**: Đánh giá từng step trong reasoning chain\n\n$$R_{process}(s_1, s_2, ..., s_k) = \\prod_{i=1}^{k} P(s_i \\text{ is correct})$$\n\nLet's Verify Step by Step (Lightman et al., 2023):\n- Human-labeled step-level correctness\n- PRM800K dataset\n- PRM + best-of-N selection cải thiện MATH benchmark đáng kể\n\n## Test-Time Compute Scaling\n\n### Concept\nThay vì scale model size (train-time), scale compute tại inference:\n\n- Nhiều samples + voting\n- Beam search với reward model\n- Iterative refinement\n- Search over reasoning trees\n\n### Compute-Optimal Inference\n$$\\text{Performance} \\approx f(\\text{model\\_size}, \\text{inference\\_compute})$$\n\nSmaller model + more inference compute có thể = larger model + less compute\n\n## o1-style Reasoning\n\n### Key Ideas\n- RL training cho \"thinking\" tokens\n- Model học khi nào cần suy nghĩ sâu hơn\n- Hidden chain-of-thought (không show cho user)\n- Trade-off: latency vs accuracy\n\n### Training Pipeline\n```\nSFT (basic reasoning) → RL with Process Rewards → Distillation\n```\n\n## Verification & Self-Correction\n\n### Self-Verification\n```\nStep 1: Generate answer\nStep 2: \"Is this answer correct? Let me verify...\"\nStep 3: If wrong, regenerate\n```\n\n### Challenges\n- LLMs kém ở self-correction mà không có external feedback\n- Verification dễ hơn generation (asymmetry)\n- External tools (code execution) giúp verification\n\n## Formal Verification\n\n- Dùng proof assistants (Lean, Coq) để verify math\n- LLM sinh proof → formal system verify\n- AlphaProof (DeepMind): Silver medal IMO 2024\n\n## Open Questions\n\n1. LLMs thật sự \"reason\" hay chỉ pattern match?\n2. Scaling test-time compute có limit không?\n3. Process supervision có thể automated hoàn toàn không?\n4. Formal verification có scale cho real-world tasks không?",
     "video_url": "https://example.com/videos/cs224n/reasoning_2.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-process-rm", "name": "Process Reward Models và Step-level Verification"},
-      {"slug": "KC-NLP-test-time-compute", "name": "Test-Time Compute Scaling"},
-      {"slug": "KC-NLP-o1-reasoning", "name": "o1-style Reasoning và RL for Thinking"},
-      {"slug": "KC-NLP-formal-verification", "name": "Formal Verification và Self-Correction"}
+      {
+        "slug": "KC-NLP-process-rm",
+        "name": "Process Reward Models và Step-level Verification"
+      },
+      {
+        "slug": "KC-NLP-test-time-compute",
+        "name": "Test-Time Compute Scaling"
+      },
+      {
+        "slug": "KC-NLP-o1-reasoning",
+        "name": "o1-style Reasoning và RL for Thinking"
+      },
+      {
+        "slug": "KC-NLP-formal-verification",
+        "name": "Formal Verification và Self-Correction"
+      }
     ]
   },
   {
@@ -303,16 +508,27 @@
     "name": "Guest Lecture: Tokenization and Multilinguality",
     "description": "Tokenization algorithms (BPE, WordPiece, SentencePiece), multilingual NLP, cross-lingual transfer, challenges.",
     "order_index": 17,
-    "prerequisite_topic_slugs": ["nlp_transformers"],
+    "prerequisite_topic_slugs": [
+      "nlp_transformers"
+    ],
     "estimated_hours_beginner": 2.5,
     "estimated_hours_intermediate": 1.0,
     "estimated_hours_review": 0.25,
     "content_markdown": "# Guest Lecture: Tokenization and Multilinguality\n\n## Tokenization\n\n### Tại sao tokenization quan trọng?\n- Input của model là token IDs, không phải text\n- Tokenization ảnh hưởng: vocabulary size, sequence length, OOV handling\n\n### Byte-Pair Encoding (BPE)\n\nAlgorithm:\n1. Bắt đầu với character-level vocabulary\n2. Đếm bigram frequency\n3. Merge cặp phổ biến nhất → thêm vào vocab\n4. Lặp lại đến khi đạt vocab size mong muốn\n\n```\n\"lowest\" → [\"l\", \"o\", \"w\", \"e\", \"s\", \"t\"]\n→ merge (e, s) → [\"l\", \"o\", \"w\", \"es\", \"t\"]\n→ merge (es, t) → [\"l\", \"o\", \"w\", \"est\"]\n→ merge (l, o) → [\"lo\", \"w\", \"est\"]\n...\n```\n\n### WordPiece (BERT)\n- Tương tự BPE nhưng merge dựa trên likelihood tăng\n- Prefix `##` cho subwords: `playing → play + ##ing`\n\n### SentencePiece\n- Language-agnostic (không cần pre-tokenize bằng spaces)\n- Quan trọng cho tiếng Nhật, tiếng Trung, tiếng Việt\n- Dùng bởi: T5, LLaMA, Gemma\n\n### Byte-level BPE (GPT-2+)\n- Bắt đầu từ bytes (256) thay vì characters\n- Không bao giờ OOV\n- Dùng bởi: GPT-2, GPT-4, LLaMA 3\n\n## Multilinguality\n\n### Multilingual Models\n- mBERT: BERT trained trên 104 ngôn ngữ\n- XLM-R: RoBERTa-based, 100 ngôn ngữ\n- mT5: T5 multilingual\n\n### Cross-lingual Transfer\n- Train trên English → zero-shot transfer sang ngôn ngữ khác\n- Surprisingly effective! Shared subword space giúp transfer\n\n### Challenges cho Low-resource Languages\n\n| Challenge | Ảnh hưởng |\n|-----------|----------|\n| Ít data | Pretrain kém |\n| Tokenization bias | Nhiều tokens/word hơn English |\n| Evaluation | Thiếu benchmarks |\n| Script diversity | Unicode complexity |\n\n### Tiếng Việt trong NLP\n- Word segmentation: \"Thành phố Hồ Chí Minh\" = 1 compound word?\n- PhoBERT: BERT cho tiếng Việt (VnCoreNLP segmenter)\n- ViT5: T5 cho tiếng Việt",
     "video_url": "https://example.com/videos/cs224n/tokenization_multilingual.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-bpe", "name": "BPE, WordPiece, và SentencePiece"},
-      {"slug": "KC-NLP-multilingual", "name": "Multilingual Models và Cross-lingual Transfer"},
-      {"slug": "KC-NLP-low-resource", "name": "Low-resource Languages Challenges"}
+      {
+        "slug": "KC-NLP-bpe",
+        "name": "BPE, WordPiece, và SentencePiece"
+      },
+      {
+        "slug": "KC-NLP-multilingual",
+        "name": "Multilingual Models và Cross-lingual Transfer"
+      },
+      {
+        "slug": "KC-NLP-low-resource",
+        "name": "Low-resource Languages Challenges"
+      }
     ]
   },
   {
@@ -321,17 +537,31 @@
     "name": "Guest Lecture: Interpretability",
     "description": "Hiểu cách LLMs hoạt động bên trong: attention visualization, probing, mechanistic interpretability, circuits.",
     "order_index": 18,
-    "prerequisite_topic_slugs": ["nlp_transformers"],
+    "prerequisite_topic_slugs": [
+      "nlp_transformers"
+    ],
     "estimated_hours_beginner": 3.0,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Guest Lecture: Interpretability\n\n## Tại sao Interpretability?\n\n- **Safety**: Hiểu model để phát hiện failure modes\n- **Trust**: Giải thích decisions cho users\n- **Science**: Hiểu cách neural networks encode knowledge\n\n## Levels of Interpretability\n\n### 1. Behavioral Analysis\n- Input-output analysis\n- Probing tasks\n- Contrast sets\n\n### 2. Attention Analysis\n- Visualize attention weights\n- Attention heads có roles khác nhau (syntactic, positional, rare words)\n\n```python\n# BertViz\nfrom bertviz import model_view\nmodel_view(attention, tokens)\n```\n\n**Caveats:**\n- Attention ≠ explanation (Jain & Wallace, 2019)\n- Nhưng attention rollout và attention flow có thể informative hơn\n\n### 3. Probing Classifiers\n\nTrain simple classifier trên hidden representations:\n\n```python\n# Probing for POS tags\nhidden_states = model(input_ids).last_hidden_state\nprobe = nn.Linear(hidden_dim, num_pos_tags)\n# Train probe, freeze model weights\n```\n\nPhát hiện: BERT encodes\n- Layer 1-4: Surface features (POS, word order)\n- Layer 5-8: Syntactic features (dependency, constituency)\n- Layer 9-12: Semantic features (NER, relations)\n\n## Mechanistic Interpretability\n\n### Circuits & Features\n- **Superposition**: Neurons encode nhiều features cùng lúc\n- **Circuits**: Subnetworks thực hiện specific computations\n\n### Key Findings\n- **Induction heads**: Copy patterns từ earlier context\n- **Name mover heads**: Di chuyển name information\n- **IOI (Indirect Object Identification)**: Circuit cho \"John gave Mary...\"\n\n### Sparse Autoencoders (SAEs)\n- Decompose activations thành interpretable features\n- Anthropic: Tìm được features cho Golden Gate Bridge, code bugs, deception\n\n$$h = \\text{decoder}(\\text{ReLU}(\\text{encoder}(x)))$$\n\nVới sparsity constraint trên latent space\n\n## Practical Methods\n\n| Method | Level | Computational Cost |\n|--------|-------|--------------------|\n| Attention Viz | Surface | Low |\n| Probing | Representation | Medium |\n| Activation Patching | Circuit | High |\n| SAEs | Feature | Very High |\n\n## Open Challenges\n\n- Scaling interpretability cho larger models\n- Automating circuit discovery\n- From interpretation → prediction of behavior\n- Connecting mechanistic understanding → safety",
     "video_url": "https://example.com/videos/cs224n/interpretability.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-attention-analysis", "name": "Attention Analysis và Visualization"},
-      {"slug": "KC-NLP-probing", "name": "Probing Classifiers và Representation Analysis"},
-      {"slug": "KC-NLP-mechanistic", "name": "Mechanistic Interpretability và Circuits"},
-      {"slug": "KC-NLP-saes", "name": "Sparse Autoencoders cho Feature Discovery"}
+      {
+        "slug": "KC-NLP-attention-analysis",
+        "name": "Attention Analysis và Visualization"
+      },
+      {
+        "slug": "KC-NLP-probing",
+        "name": "Probing Classifiers và Representation Analysis"
+      },
+      {
+        "slug": "KC-NLP-mechanistic",
+        "name": "Mechanistic Interpretability và Circuits"
+      },
+      {
+        "slug": "KC-NLP-saes",
+        "name": "Sparse Autoencoders cho Feature Discovery"
+      }
     ]
   },
   {
@@ -340,17 +570,31 @@
     "name": "Social and Broader Impacts of NLP (Risks)",
     "description": "Rủi ro và tác động xã hội của NLP/LLMs: bias, toxicity, misinformation, privacy, environmental impact, regulation.",
     "order_index": 19,
-    "prerequisite_topic_slugs": ["nlp_pretraining"],
+    "prerequisite_topic_slugs": [
+      "nlp_pretraining"
+    ],
     "estimated_hours_beginner": 2.5,
     "estimated_hours_intermediate": 1.0,
     "estimated_hours_review": 0.25,
     "content_markdown": "# Social and Broader Impacts of NLP (Risks)\n\n## Bias trong NLP\n\n### Các loại Bias\n- **Representation bias**: Training data không represent đều các nhóm\n- **Stereotypical bias**: \"Doctor\" → male, \"Nurse\" → female\n- **Selection bias**: Data collection methodology\n\n### Ví dụ\n```\nPrompt: \"The doctor told the nurse that [he/she]...\"\nBiased model: doctor → he, nurse → she\n```\n\n### Measuring Bias\n- WEAT (Word Embedding Association Test)\n- StereoSet, BBQ, WinoBias benchmarks\n- Counterfactual evaluation\n\n### Mitigation\n- Data filtering/balancing\n- Debiasing embeddings (Bolukbasi et al., 2016)\n- RLHF/Constitutional AI\n- Instruction tuning for fairness\n\n## Toxicity & Harmful Content\n\n- LLMs có thể generate toxic, offensive content\n- **Jailbreaking**: Bypass safety filters\n- Perspective API, Detoxify cho toxicity detection\n- Red teaming: Adversarial testing\n\n## Misinformation\n\n- **Hallucination**: Confident but false statements\n- **Deepfakes**: AI-generated text khó phân biệt với human\n- **Scale**: Misinformation generation at unprecedented scale\n- Detection: AI text detectors (GPTZero, watermarking)\n\n## Privacy\n\n- Training data có thể chứa PII\n- Memorization: LLMs có thể recall training data verbatim\n- Extraction attacks: Prompt model để \"nhớ lại\" data\n- Solutions: Differential privacy, data deduplication\n\n## Environmental Impact\n\n| Model | Training CO₂ (tons) | Equivalent |\n|-------|---------------------|------------|\n| BERT | 0.6 | 1 flight NY-SF |\n| GPT-3 | 552 | 120 cars/year |\n| LLaMA 2 70B | ~500 | Significant |\n\n- Inference costs cũng lớn khi deploy at scale\n- Efficient methods: distillation, quantization, pruning\n\n## Regulation & Ethics\n\n- **EU AI Act**: Risk-based regulation framework\n- **Responsible AI**: Transparency, fairness, accountability\n- **Open vs Closed**: Debate về open-sourcing powerful models\n\n## Recommendations\n\n1. Publish model cards với bias/limitation documentation\n2. Red team models trước khi deploy\n3. Monitor deployed systems continuously\n4. Consider who benefits và who is harmed\n5. Engage diverse stakeholders",
     "video_url": "https://example.com/videos/cs224n/social_impacts.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-bias", "name": "Bias Detection và Mitigation trong NLP"},
-      {"slug": "KC-NLP-toxicity", "name": "Toxicity, Misinformation, và Safety"},
-      {"slug": "KC-NLP-privacy-env", "name": "Privacy và Environmental Impact"},
-      {"slug": "KC-NLP-regulation", "name": "AI Regulation và Ethics"}
+      {
+        "slug": "KC-NLP-bias",
+        "name": "Bias Detection và Mitigation trong NLP"
+      },
+      {
+        "slug": "KC-NLP-toxicity",
+        "name": "Toxicity, Misinformation, và Safety"
+      },
+      {
+        "slug": "KC-NLP-privacy-env",
+        "name": "Privacy và Environmental Impact"
+      },
+      {
+        "slug": "KC-NLP-regulation",
+        "name": "AI Regulation và Ethics"
+      }
     ]
   },
   {
@@ -359,16 +603,27 @@
     "name": "Guest Lecture: Multimodality",
     "description": "Multimodal AI: vision-language models, CLIP, LLaVA, image captioning, visual question answering, video understanding.",
     "order_index": 20,
-    "prerequisite_topic_slugs": ["nlp_transformers"],
+    "prerequisite_topic_slugs": [
+      "nlp_transformers"
+    ],
     "estimated_hours_beginner": 3.0,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Guest Lecture: Multimodality\n\n## Multimodal AI là gì?\n\nKết hợp nhiều modalities: text, image, audio, video trong 1 model.\n\n## CLIP (Contrastive Language-Image Pretraining)\n\nOpenAI, 2021:\n\n$$\\mathcal{L} = -\\frac{1}{N}\\sum_{i=1}^{N}\\left[\\log\\frac{\\exp(s_{ii}/\\tau)}{\\sum_j \\exp(s_{ij}/\\tau)} + \\log\\frac{\\exp(s_{ii}/\\tau)}{\\sum_j \\exp(s_{ji}/\\tau)}\\right]$$\n\n- Image encoder (ViT) + Text encoder (Transformer)\n- Contrastive learning: match image-text pairs\n- 400M image-text pairs từ internet\n- Zero-shot classification: \"a photo of a [class]\"\n\n```python\nimport clip\nmodel, preprocess = clip.load('ViT-B/32')\nimage = preprocess(img).unsqueeze(0)\ntext = clip.tokenize(['a cat', 'a dog'])\n\nwith torch.no_grad():\n    image_features = model.encode_image(image)\n    text_features = model.encode_text(text)\n    similarity = (image_features @ text_features.T).softmax(dim=-1)\n```\n\n## Vision-Language Models (VLMs)\n\n### Architecture Patterns\n\n**1. Cross-attention (Flamingo)**\n- Frozen LLM + frozen vision encoder\n- Gated cross-attention layers between them\n\n**2. Projection (LLaVA)**\n- Vision encoder → Linear projection → LLM input\n- Simple & effective\n- LLaVA-1.5: ViT-L/14 + Vicuna-7B\n\n**3. Unified (Fuyu, Chameleon)**\n- Process image patches directly as tokens\n- Truly unified architecture\n\n### Training VLMs\n1. **Stage 1**: Pretrain projection layer (image-text pairs)\n2. **Stage 2**: Instruction fine-tuning (visual QA, captioning)\n\n## Tasks\n\n| Task | Input | Output |\n|------|-------|--------|\n| Image Captioning | Image | Text description |\n| Visual QA | Image + Question | Answer |\n| Image Generation | Text | Image (Diffusion) |\n| OCR/Document AI | Document image | Structured text |\n| Video Understanding | Video frames | Description/QA |\n\n## State-of-the-Art Models\n\n| Model | Architecture | Highlight |\n|-------|-------------|-----------|\n| GPT-4V/o | Proprietary | Strongest overall |\n| Gemini | Natively multimodal | Google's flagship |\n| LLaVA-NeXT | Open, projection | Strong open-source |\n| Qwen-VL | Open, unified | Competitive |\n| InternVL | Open, cross-attn | Good on benchmarks |\n\n## Challenges\n\n- Spatial reasoning (\"What is to the left of X?\")\n- Counting objects accurately\n- Fine-grained visual understanding\n- Hallucination (describing things not in image)\n- Video: temporal understanding, long videos",
     "video_url": "https://example.com/videos/cs224n/multimodality.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-clip", "name": "CLIP và Contrastive Learning"},
-      {"slug": "KC-NLP-vlm-arch", "name": "VLM Architectures (LLaVA, Flamingo)"},
-      {"slug": "KC-NLP-multimodal-tasks", "name": "Multimodal Tasks và Benchmarks"}
+      {
+        "slug": "KC-NLP-clip",
+        "name": "CLIP và Contrastive Learning"
+      },
+      {
+        "slug": "KC-NLP-vlm-arch",
+        "name": "VLM Architectures (LLaVA, Flamingo)"
+      },
+      {
+        "slug": "KC-NLP-multimodal-tasks",
+        "name": "Multimodal Tasks và Benchmarks"
+      }
     ]
   },
   {
@@ -377,17 +632,1053 @@
     "name": "Guest Lecture: Tinker and LoRA Without Regret",
     "description": "Deep-dive LoRA: lý thuyết, variants (DoRA, LoRA+, rsLoRA), best practices, hands-on tinkering, common pitfalls.",
     "order_index": 21,
-    "prerequisite_topic_slugs": ["nlp_efficient_adaptation"],
+    "prerequisite_topic_slugs": [
+      "nlp_efficient_adaptation"
+    ],
     "estimated_hours_beginner": 3.0,
     "estimated_hours_intermediate": 1.5,
     "estimated_hours_review": 0.5,
     "content_markdown": "# Guest Lecture: Tinker and LoRA Without Regret\n\n## LoRA Recap\n\n$$W' = W_0 + \\Delta W = W_0 + BA$$\n\nWhere $B \\in \\mathbb{R}^{d \\times r}$, $A \\in \\mathbb{R}^{r \\times d}$, $r \\ll d$\n\n### Initialization\n- $A$: Gaussian initialization\n- $B$: Zero initialization (so $\\Delta W = 0$ at start)\n- $\\alpha$: Scaling factor → $\\Delta W = \\frac{\\alpha}{r} BA$\n\n## LoRA Variants\n\n### DoRA (Weight-Decomposed Low-Rank Adaptation)\n\nDecompose weight thành magnitude + direction:\n$$W' = m \\cdot \\frac{W_0 + BA}{\\|W_0 + BA\\|}$$\n\n- $m$: trainable magnitude vector\n- Closer to full fine-tuning behavior\n\n### LoRA+ (Hayou et al., 2024)\n- Dùng different learning rates cho A và B\n- $\\eta_B = \\lambda \\cdot \\eta_A$ (thường $\\lambda = 16$)\n- Cải thiện convergence\n\n### rsLoRA (Rank-Stabilized LoRA)\n- Scaling: $\\frac{\\alpha}{\\sqrt{r}}$ thay vì $\\frac{\\alpha}{r}$\n- Ổn định hơn khi thay đổi rank\n\n### GaLore (Gradient Low-Rank Projection)\n- Project gradient thay vì weights\n- Giảm optimizer memory dramatically\n\n## Best Practices\n\n### Rank Selection\n```\nr = 4:    Very lightweight, good cho simple tasks\nr = 16:   Sweet spot cho hầu hết tasks\nr = 64:   Near full FT performance\nr = 256:  Diminishing returns\n```\n\n### Target Modules\n```python\n# Minimal (fastest)\ntarget_modules = ['q_proj', 'v_proj']\n\n# Recommended\ntarget_modules = ['q_proj', 'k_proj', 'v_proj', 'o_proj']\n\n# Aggressive (best performance)\ntarget_modules = ['q_proj', 'k_proj', 'v_proj', 'o_proj',\n                  'gate_proj', 'up_proj', 'down_proj']\n```\n\n### Alpha Setting\n- Rule of thumb: $\\alpha = 2r$ hoặc $\\alpha = r$\n- Larger $\\alpha$ → larger updates → có thể cần lower LR\n\n### Learning Rate\n- Thường 1e-4 đến 3e-4 (cao hơn full FT)\n- Warm-up 3-10% of steps\n- Cosine scheduler\n\n## Common Pitfalls\n\n| Pitfall | Symptom | Fix |\n|---------|---------|-----|\n| Rank quá thấp | Underfit | Tăng r |\n| LR quá cao | Loss spike/NaN | Giảm LR, add warmup |\n| Quên unfreeze LoRA | Loss không giảm | Check `requires_grad` |\n| Wrong target modules | Kém hơn expected | Thêm more modules |\n| Quên merge trước deploy | Slow inference | `model.merge_and_unload()` |\n\n## Hands-on Example\n\n```python\nfrom peft import LoraConfig, get_peft_model, TaskType\nfrom transformers import AutoModelForCausalLM\n\nmodel = AutoModelForCausalLM.from_pretrained(\n    'meta-llama/Llama-3.1-8B',\n    torch_dtype=torch.bfloat16,\n    device_map='auto'\n)\n\nconfig = LoraConfig(\n    task_type=TaskType.CAUSAL_LM,\n    r=16,\n    lora_alpha=32,\n    target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj',\n                    'gate_proj', 'up_proj', 'down_proj'],\n    lora_dropout=0.05,\n    bias='none'\n)\n\nmodel = get_peft_model(model, config)\nmodel.print_trainable_parameters()\n# trainable params: 27,262,976 || all params: 8,057,507,840\n# trainable%: 0.3384%\n\n# After training — merge for inference\nmodel = model.merge_and_unload()\nmodel.save_pretrained('merged_model')\n```",
     "video_url": "https://example.com/videos/cs224n/lora_tinker.mp4",
     "knowledge_components": [
-      {"slug": "KC-NLP-lora-deep", "name": "LoRA Theory và Initialization"},
-      {"slug": "KC-NLP-lora-variants", "name": "LoRA Variants (DoRA, LoRA+, rsLoRA)"},
-      {"slug": "KC-NLP-lora-practices", "name": "LoRA Best Practices và Hyperparameter Tuning"},
-      {"slug": "KC-NLP-lora-pitfalls", "name": "Common Pitfalls và Debugging"}
+      {
+        "slug": "KC-NLP-lora-deep",
+        "name": "LoRA Theory và Initialization"
+      },
+      {
+        "slug": "KC-NLP-lora-variants",
+        "name": "LoRA Variants (DoRA, LoRA+, rsLoRA)"
+      },
+      {
+        "slug": "KC-NLP-lora-practices",
+        "name": "LoRA Best Practices và Hyperparameter Tuning"
+      },
+      {
+        "slug": "KC-NLP-lora-pitfalls",
+        "name": "Common Pitfalls và Debugging"
+      }
+    ]
+  },
+  {
+    "slug": "cv_overview_knn",
+    "module_slug": "cs231n_cv",
+    "name": "Computer Vision Overview, Data-driven Approach, K-Nearest Neighbor",
+    "description": "Tổng quan Computer Vision, data-driven paradigm, và classifier đầu tiên: K-Nearest Neighbor với L1/L2 distance, hyperparameter tuning.",
+    "order_index": 1,
+    "prerequisite_topic_slugs": [],
+    "estimated_hours_beginner": 2.5,
+    "estimated_hours_intermediate": 1.0,
+    "estimated_hours_review": 0.25,
+    "learning_objectives": [
+      "Giải thích vì sao image classification khó (viewpoint, illumination, deformation, occlusion, intra-class variation)",
+      "Trình bày data-driven approach và pipeline train/val/test",
+      "Mô tả thuật toán KNN, so sánh L1 vs L2 distance, và cách chọn k bằng cross-validation"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 8,
+      "difficulty_distribution": {
+        "easy": 0.4,
+        "medium": 0.5,
+        "hard": 0.1
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Computer Vision Overview + KNN\n\n## Vì sao CV khó?\n- Viewpoint variation, illumination, deformation, occlusion, background clutter, intra-class variation.\n\n## Data-driven Approach\n1. Collect dataset của images + labels\n2. Train classifier\n3. Evaluate trên new images\n\n## K-Nearest Neighbor\n- Memorize train set. Predict = majority vote của K nearest points.\n- **L1 distance**: $d_1(I_1, I_2) = \\sum_p |I_1^p - I_2^p|$\n- **L2 distance**: $d_2(I_1, I_2) = \\sqrt{\\sum_p (I_1^p - I_2^p)^2}$\n- Hyperparameters: k, distance metric → chọn bằng **cross-validation**\n- Train O(1), Test O(N) → không dùng thực tế cho images (pixel distance kém).",
+    "video_url": "https://example.com/videos/cs231n/overview_knn.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-challenges",
+        "name": "Computer Vision Challenges"
+      },
+      {
+        "slug": "KC-CV-data-driven",
+        "name": "Data-driven Approach và Train/Val/Test Split"
+      },
+      {
+        "slug": "KC-CV-knn",
+        "name": "K-Nearest Neighbor và Distance Metrics"
+      }
+    ]
+  },
+  {
+    "slug": "cv_linear_classifiers",
+    "module_slug": "cs231n_cv",
+    "name": "Linear Classifiers, Softmax Loss, Regularization",
+    "description": "Linear classifier từ 3 viewpoints (algebraic, visual, geometric), SVM loss vs Softmax (cross-entropy) loss, L1/L2 regularization.",
+    "order_index": 2,
+    "prerequisite_topic_slugs": [
+      "cv_overview_knn"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Viết công thức $f(x, W) = Wx + b$ và giải thích từ 3 viewpoints: algebraic, visual (template), geometric (hyperplane)",
+      "Phân biệt Multiclass SVM hinge loss và Softmax cross-entropy loss",
+      "Giải thích vì sao cần regularization và so sánh L1 vs L2"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Linear Classifiers\n\n## Score function\n$$f(x, W) = Wx + b$$\n\n## 3 Viewpoints\n- **Algebraic**: matrix-vector multiply\n- **Visual**: mỗi row của W = template cho class\n- **Geometric**: hyperplanes chia không gian\n\n## Losses\n- **Multiclass SVM (hinge)**: $L_i = \\sum_{j \\neq y_i} \\max(0, s_j - s_{y_i} + 1)$\n- **Softmax (cross-entropy)**: $L_i = -\\log\\frac{e^{s_{y_i}}}{\\sum_j e^{s_j}}$\n\n## Regularization\n$$L = \\frac{1}{N}\\sum_i L_i + \\lambda R(W)$$\n- **L2**: $R(W) = \\sum W^2$ — prefer diffuse weights\n- **L1**: $R(W) = \\sum |W|$ — prefer sparse weights\n- Khác: dropout, batch norm, data augmentation.",
+    "video_url": "https://example.com/videos/cs231n/linear_classifiers.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-linear-score",
+        "name": "Linear Score Function và 3 Viewpoints"
+      },
+      {
+        "slug": "KC-CV-svm-loss",
+        "name": "Multiclass SVM Hinge Loss"
+      },
+      {
+        "slug": "KC-CV-softmax-loss",
+        "name": "Softmax Cross-Entropy Loss"
+      },
+      {
+        "slug": "KC-CV-regularization",
+        "name": "L1/L2 Regularization"
+      }
+    ]
+  },
+  {
+    "slug": "cv_optimization",
+    "module_slug": "cs231n_cv",
+    "name": "Optimization: SGD, Momentum, AdaGrad, Adam, LR Schedules",
+    "description": "Gradient descent và variants: SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam; learning rate schedules (step, cosine, warmup).",
+    "order_index": 3,
+    "prerequisite_topic_slugs": [
+      "cv_linear_classifiers"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "So sánh vanilla SGD, SGD+Momentum, Nesterov và giải thích vai trò của velocity",
+      "Phân biệt AdaGrad, RMSProp, Adam về cách adapt learning rate per-parameter",
+      "Áp dụng LR schedules phổ biến: step decay, cosine annealing, linear warmup"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Optimization\n\n## SGD\n$$w_{t+1} = w_t - \\eta \\nabla L$$\nVấn đề: oscillate ở ravines, mắc kẹt saddle points.\n\n## Momentum\n$$v_{t+1} = \\rho v_t + \\nabla L, \\quad w_{t+1} = w_t - \\eta v_{t+1}$$\n$\\rho$ thường = 0.9.\n\n## Nesterov Momentum\nLook-ahead gradient: tính gradient tại $w + \\rho v$.\n\n## AdaGrad\n$$w_{t+1} = w_t - \\frac{\\eta}{\\sqrt{G_t + \\epsilon}} \\nabla L$$\nLR giảm dần (có thể tắt sớm).\n\n## RMSProp\nEMA thay cho sum → không decay vĩnh viễn.\n\n## Adam (phổ biến nhất)\nKết hợp Momentum + RMSProp + bias correction. Default: `lr=1e-3`, `β1=0.9`, `β2=0.999`.\n\n## LR Schedules\n- **Step decay**: giảm 10x mỗi N epochs\n- **Cosine annealing**: $\\eta_t = \\eta_0 \\cdot 0.5(1 + \\cos(t\\pi/T))$\n- **Linear warmup** + cosine: chuẩn cho Transformer/ViT.",
+    "video_url": "https://example.com/videos/cs231n/optimization.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-sgd-momentum",
+        "name": "SGD, Momentum, Nesterov"
+      },
+      {
+        "slug": "KC-CV-adaptive-opt",
+        "name": "AdaGrad, RMSProp, Adam"
+      },
+      {
+        "slug": "KC-CV-lr-schedules",
+        "name": "Learning Rate Schedules và Warmup"
+      }
+    ]
+  },
+  {
+    "slug": "cv_mlp_backprop",
+    "module_slug": "cs231n_cv",
+    "name": "Multi-layer Perceptron và Backpropagation",
+    "description": "MLP: hidden layers, activation functions; backpropagation qua computation graphs, chain rule, gradient cho common gates.",
+    "order_index": 4,
+    "prerequisite_topic_slugs": [
+      "cv_optimization"
+    ],
+    "estimated_hours_beginner": 4.0,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Viết forward pass của 2-layer MLP và vai trò của activation phi tuyến",
+      "Dẫn xuất gradient qua computation graph bằng chain rule (add/mul/max/sigmoid gates)",
+      "Nhận diện các pattern gradient flow: add = distributor, mul = swap, max = router"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.2,
+        "medium": 0.5,
+        "hard": 0.3
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# MLP + Backpropagation\n\n## 2-layer MLP\n$$h = \\max(0, W_1 x + b_1)$$\n$$s = W_2 h + b_2$$\nKhông có ReLU → chỉ là linear model.\n\n## Backprop qua Computation Graph\n- **Add gate**: gradient distributor (copy upstream grad).\n- **Mul gate**: gradient swapper ($\\partial (xy)/\\partial x = y$).\n- **Max gate**: router (chỉ branch max nhận grad).\n- **Sigmoid**: $\\sigma'(x) = \\sigma(x)(1 - \\sigma(x))$.\n\n## Staged Backprop\n1. Forward: lưu cache.\n2. Backward: apply local gradient × upstream gradient.\n\n## Vectorized\nJacobian của matrix multiply: $\\partial (XW)/\\partial X = \\text{dout} \\cdot W^T$.",
+    "video_url": "https://example.com/videos/cs231n/mlp_backprop.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-mlp",
+        "name": "MLP Architecture và Activations"
+      },
+      {
+        "slug": "KC-CV-backprop",
+        "name": "Backpropagation qua Computation Graph"
+      },
+      {
+        "slug": "KC-CV-grad-patterns",
+        "name": "Gradient Patterns của Common Gates"
+      }
+    ]
+  },
+  {
+    "slug": "cv_image_features",
+    "module_slug": "cs231n_cv",
+    "name": "Higher-level Representations và Image Features",
+    "description": "Hand-crafted features (color histogram, HOG, bag-of-words) vs learned features; motivation chuyển sang deep learning.",
+    "order_index": 5,
+    "prerequisite_topic_slugs": [
+      "cv_mlp_backprop"
+    ],
+    "estimated_hours_beginner": 2.0,
+    "estimated_hours_intermediate": 0.75,
+    "estimated_hours_review": 0.25,
+    "learning_objectives": [
+      "Mô tả pipeline cổ điển: feature extraction → linear classifier",
+      "Phân biệt color histograms, HOG (Histogram of Oriented Gradients), Bag-of-Words",
+      "Giải thích vì sao end-to-end learned features vượt trội hand-crafted"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 8,
+      "difficulty_distribution": {
+        "easy": 0.4,
+        "medium": 0.5,
+        "hard": 0.1
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Image Features\n\n## Pipeline cổ điển\nImage → Feature extractor (fixed) → Linear classifier (learned).\n\n## Hand-crafted Features\n- **Color histogram**: count pixels/bin màu.\n- **HOG**: gradient orientations trong cells 8×8.\n- **Bag-of-Words**: codebook visual words → histogram.\n\n## Learned Features\nCNN: feature extractor **và** classifier đều learn end-to-end → performance nhảy vọt (ImageNet 2012).",
+    "video_url": "https://example.com/videos/cs231n/image_features.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-hog-bow",
+        "name": "HOG và Bag-of-Words"
+      },
+      {
+        "slug": "KC-CV-learned-vs-handcrafted",
+        "name": "Learned vs Hand-crafted Features"
+      }
+    ]
+  },
+  {
+    "slug": "cv_cnns",
+    "name": "Convolution, Pooling, Batch Normalization",
+    "module_slug": "cs231n_cv",
+    "description": "Convolutional layers: filters, stride, padding; pooling (max/avg); Batch Normalization lý thuyết và cách dùng train/test.",
+    "order_index": 6,
+    "prerequisite_topic_slugs": [
+      "cv_mlp_backprop"
+    ],
+    "estimated_hours_beginner": 4.5,
+    "estimated_hours_intermediate": 1.75,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Tính output size của conv layer theo $(W - F + 2P)/S + 1$ và đếm parameters",
+      "So sánh max pooling vs average pooling và vai trò trong translation invariance",
+      "Giải thích Batch Normalization, sự khác biệt giữa train vs test mode, và BN vs LayerNorm/GroupNorm"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 5,
+      "num_questions_quiz": 12,
+      "difficulty_distribution": {
+        "easy": 0.25,
+        "medium": 0.5,
+        "hard": 0.25
+      },
+      "min_mastery_to_pass": 0.75
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Convolution, Pooling, BatchNorm\n\n## Convolution\n- Filter slide trên image, inner product tại mỗi vị trí.\n- Output size: $(W - F + 2P)/S + 1$.\n- Params: $F \\times F \\times C_{in} \\times C_{out} + C_{out}$.\n- Padding 'same': giữ spatial size.\n\n## Pooling\n- **Max pooling 2×2, stride 2**: phổ biến nhất → downsample 2x.\n- Average pooling: dùng ở head (global avg pool).\n\n## Batch Normalization\n$$\\hat{x} = \\frac{x - \\mu_B}{\\sqrt{\\sigma_B^2 + \\epsilon}}, \\quad y = \\gamma \\hat{x} + \\beta$$\n- **Train**: dùng batch statistics, update running mean/var.\n- **Test**: dùng running statistics (fixed).\n- Ưu: faster convergence, higher LR, regularization effect.\n- Variants: LayerNorm (RNN/Transformer), GroupNorm (small batch), InstanceNorm (style transfer).",
+    "video_url": "https://example.com/videos/cs231n/cnns.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-conv",
+        "name": "Convolution Layer và Output Size"
+      },
+      {
+        "slug": "KC-CV-pooling",
+        "name": "Pooling Operations"
+      },
+      {
+        "slug": "KC-CV-batchnorm",
+        "name": "Batch Normalization và Variants"
+      }
+    ]
+  },
+  {
+    "slug": "cv_cnn_architectures",
+    "name": "CNN Architectures: AlexNet, VGG, ResNet, Transfer Learning",
+    "module_slug": "cs231n_cv",
+    "description": "Milestones kiến trúc CNN: AlexNet (2012), VGG (deep + small filters), ResNet (residual connections), và transfer learning workflow.",
+    "order_index": 7,
+    "prerequisite_topic_slugs": [
+      "cv_cnns"
+    ],
+    "estimated_hours_beginner": 4.0,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "So sánh AlexNet, VGG, GoogLeNet, ResNet về depth, param count, key innovation",
+      "Giải thích tại sao residual connections cho phép train mạng >100 layers",
+      "Thực hành transfer learning: feature extraction vs fine-tuning, khi nào dùng cái nào theo dataset size"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# CNN Architectures + Transfer Learning\n\n## Timeline\n| Năm | Model | Key idea |\n|-----|-------|----------|\n| 2012 | AlexNet | ReLU, dropout, GPU |\n| 2014 | VGG-16/19 | Small 3×3 filters, deep |\n| 2014 | GoogLeNet | Inception modules, 1×1 conv |\n| 2015 | ResNet | Residual connection → 152 layers |\n| 2016+ | DenseNet, SENet, EfficientNet | ... |\n\n## ResNet Residual Block\n$$y = F(x, W) + x$$\nGradient có highway → giải quyết vanishing gradient khi deep.\n\n## Transfer Learning\n| Dataset size | Similar domain | Dissimilar domain |\n|--------------|---------------|-------------------|\n| Small | Freeze, train linear classifier | Hard; use earlier layers |\n| Large | Fine-tune top layers | Fine-tune more layers |\n\n```python\nmodel = torchvision.models.resnet50(weights='IMAGENET1K_V2')\nfor p in model.parameters(): p.requires_grad = False\nmodel.fc = nn.Linear(2048, num_classes)\n```",
+    "video_url": "https://example.com/videos/cs231n/cnn_architectures.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-alexnet-vgg",
+        "name": "AlexNet và VGG"
+      },
+      {
+        "slug": "KC-CV-resnet",
+        "name": "ResNet và Residual Connections"
+      },
+      {
+        "slug": "KC-CV-transfer-learning",
+        "name": "Transfer Learning Workflow"
+      }
+    ]
+  },
+  {
+    "slug": "cv_rnns",
+    "name": "RNN, LSTM, GRU, Language Modeling",
+    "module_slug": "cs231n_cv",
+    "description": "Recurrent networks cho sequences: vanilla RNN, LSTM, GRU, vanishing/exploding gradients, character-level language models.",
+    "order_index": 8,
+    "prerequisite_topic_slugs": [
+      "cv_mlp_backprop"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Viết forward pass của vanilla RNN và xác định vấn đề vanishing/exploding gradient",
+      "Giải thích 3 gates của LSTM (forget, input, output) và cell state highway",
+      "Huấn luyện character-level language model và mô tả inference time sampling"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# RNNs, LSTM, GRU\n\n## Vanilla RNN\n$$h_t = \\tanh(W_h h_{t-1} + W_x x_t + b)$$\nShared weights. Vanishing/exploding gradient qua BPTT.\n\n## LSTM\n- Forget gate $f_t$, Input gate $i_t$, Output gate $o_t$, candidate $\\tilde{c}_t$\n- Cell state: $c_t = f_t \\odot c_{t-1} + i_t \\odot \\tilde{c}_t$ → gradient highway.\n\n## GRU\n2 gates (update, reset) — đơn giản hơn, gần bằng LSTM về performance.\n\n## Language Modeling\n- Char-level: predict char tiếp theo.\n- Loss: cross-entropy per step.\n- Sample: softmax(logits / T) với temperature T.\n\n## Gradient clipping\nThường clip global norm ≤ 5.",
+    "video_url": "https://example.com/videos/cs231n/rnns.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-vanilla-rnn",
+        "name": "Vanilla RNN và BPTT"
+      },
+      {
+        "slug": "KC-CV-lstm-gru",
+        "name": "LSTM và GRU"
+      },
+      {
+        "slug": "KC-CV-char-lm",
+        "name": "Character-level Language Modeling"
+      }
+    ]
+  },
+  {
+    "slug": "cv_captioning_seq2seq",
+    "name": "Image Captioning và Sequence-to-Sequence",
+    "module_slug": "cs231n_cv",
+    "description": "CNN encoder + RNN decoder cho image captioning, seq2seq với attention, teacher forcing, beam search.",
+    "order_index": 9,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures",
+      "cv_rnns"
+    ],
+    "estimated_hours_beginner": 3.0,
+    "estimated_hours_intermediate": 1.25,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Mô tả kiến trúc CNN encoder + RNN decoder cho image captioning",
+      "Phân biệt teacher forcing (train) và autoregressive sampling (inference)",
+      "Giải thích Bahdanau attention trong seq2seq và vì sao cải thiện long sequences"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 8,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Image Captioning + Seq2Seq\n\n## Show and Tell\nCNN (ResNet) → feature vector $v$ → init hidden state của RNN → generate caption tokens.\n\n## Show, Attend and Tell\nCNN → feature grid $H \\times W \\times C$ → RNN attend vào spatial locations tại mỗi step → cải thiện + visualize attention maps.\n\n## Seq2Seq\nEncoder RNN → context → Decoder RNN.\n**Bahdanau Attention**: weighted sum encoder hidden states tại mỗi decoder step.\n\n## Training Tricks\n- **Teacher forcing**: feed ground-truth token tại training.\n- **Scheduled sampling**: đôi khi feed prediction → giảm exposure bias.\n- **Beam search** (inference): giữ top-k beams.",
+    "video_url": "https://example.com/videos/cs231n/captioning_seq2seq.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-cnn-rnn-caption",
+        "name": "CNN + RNN Image Captioning"
+      },
+      {
+        "slug": "KC-CV-seq2seq",
+        "name": "Seq2Seq và Bahdanau Attention"
+      },
+      {
+        "slug": "KC-CV-beam-search",
+        "name": "Teacher Forcing và Beam Search"
+      }
+    ]
+  },
+  {
+    "slug": "cv_attention_transformers",
+    "name": "Self-Attention và Transformers",
+    "module_slug": "cs231n_cv",
+    "description": "Self-attention, multi-head attention, positional encoding, Transformer architecture, Vision Transformer (ViT).",
+    "order_index": 10,
+    "prerequisite_topic_slugs": [
+      "cv_captioning_seq2seq"
+    ],
+    "estimated_hours_beginner": 4.5,
+    "estimated_hours_intermediate": 2.0,
+    "estimated_hours_review": 0.75,
+    "learning_objectives": [
+      "Viết công thức scaled dot-product attention và vai trò của $\\sqrt{d_k}$",
+      "Giải thích multi-head attention và positional encoding",
+      "Mô tả kiến trúc Vision Transformer (ViT): patch embedding, CLS token, MLP head"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 5,
+      "num_questions_quiz": 12,
+      "difficulty_distribution": {
+        "easy": 0.25,
+        "medium": 0.5,
+        "hard": 0.25
+      },
+      "min_mastery_to_pass": 0.75
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Self-Attention + Transformers\n\n## Scaled Dot-Product Attention\n$$\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right) V$$\n\n## Multi-Head\n$h$ heads song song, concat + linear. Mỗi head học representation subspace khác.\n\n## Positional Encoding\nSinusoidal hoặc learned — Transformer permutation-invariant nếu thiếu.\n\n## Transformer Block\nMHA → Add&Norm → FFN → Add&Norm.\n\n## Vision Transformer (ViT)\n1. Chia image thành 16×16 patches → flatten → linear embed.\n2. Prepend [CLS] token + add positional embedding.\n3. Stack Transformer encoder layers.\n4. [CLS] → MLP head → class logits.\n\nCần dataset lớn (JFT-300M) hoặc pretraining để vượt CNN ở ImageNet.",
+    "video_url": "https://example.com/videos/cs231n/attention_transformers.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-self-attention",
+        "name": "Scaled Dot-Product Self-Attention"
+      },
+      {
+        "slug": "KC-CV-multi-head",
+        "name": "Multi-Head Attention và Positional Encoding"
+      },
+      {
+        "slug": "KC-CV-vit",
+        "name": "Vision Transformer (ViT)"
+      }
+    ]
+  },
+  {
+    "slug": "cv_object_detection",
+    "name": "Object Detection: Single-stage và Two-stage Detectors",
+    "module_slug": "cs231n_cv",
+    "description": "Two-stage (R-CNN family: Fast R-CNN, Faster R-CNN) vs single-stage (YOLO, SSD, RetinaNet); anchors, RoI pooling, Focal Loss, NMS.",
+    "order_index": 11,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures"
+    ],
+    "estimated_hours_beginner": 4.0,
+    "estimated_hours_intermediate": 1.75,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Phân biệt two-stage (proposal + classify) vs single-stage (direct prediction) detectors",
+      "Giải thích anchors, IoU, NMS và Focal Loss",
+      "So sánh Faster R-CNN, YOLO, RetinaNet về tốc độ và accuracy"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.25,
+        "medium": 0.5,
+        "hard": 0.25
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Object Detection\n\n## Two-stage (R-CNN family)\n1. **R-CNN**: Selective Search → crop → CNN per region (chậm).\n2. **Fast R-CNN**: 1 CNN full image → RoI pooling.\n3. **Faster R-CNN**: Region Proposal Network (RPN) thay Selective Search → end-to-end.\n\n## Single-stage\n- **YOLO**: grid cells, mỗi cell predict bboxes + class.\n- **SSD**: multi-scale feature maps.\n- **RetinaNet**: **Focal Loss** = $-(1-p_t)^\\gamma \\log p_t$ → xử lý class imbalance của background.\n\n## Key concepts\n- **Anchors**: template boxes ở các scale/ratio.\n- **IoU**: $|A \\cap B| / |A \\cup B|$.\n- **NMS**: giữ box có confidence cao nhất, xóa box overlap > threshold.\n- **mAP**: metric chuẩn (COCO, VOC).",
+    "video_url": "https://example.com/videos/cs231n/object_detection.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-two-stage",
+        "name": "Two-stage Detectors (R-CNN family)"
+      },
+      {
+        "slug": "KC-CV-single-stage",
+        "name": "Single-stage Detectors (YOLO, SSD, RetinaNet)"
+      },
+      {
+        "slug": "KC-CV-anchors-nms",
+        "name": "Anchors, IoU, NMS, Focal Loss"
+      }
+    ]
+  },
+  {
+    "slug": "cv_segmentation",
+    "name": "Semantic, Instance, Panoptic Segmentation",
+    "module_slug": "cs231n_cv",
+    "description": "FCN, U-Net, DeepLab cho semantic segmentation; Mask R-CNN cho instance; panoptic kết hợp cả hai.",
+    "order_index": 12,
+    "prerequisite_topic_slugs": [
+      "cv_object_detection"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Phân biệt semantic, instance, và panoptic segmentation",
+      "Mô tả FCN, U-Net (skip connections), DeepLab (atrous/dilated conv)",
+      "Giải thích Mask R-CNN: RoIAlign và mask branch"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Segmentation\n\n## 3 Loại\n| Loại | Output |\n|------|--------|\n| Semantic | Class per pixel (không tách instances) |\n| Instance | Mask + class per object |\n| Panoptic | Unify: things (countable) + stuff (amorphous) |\n\n## Semantic Seg Architectures\n- **FCN** (Long 2015): Fully convolutional, upsample bằng transposed conv.\n- **U-Net**: encoder-decoder + skip connections → phổ biến cho medical.\n- **DeepLab**: atrous (dilated) conv giữ spatial resolution + ASPP multi-scale.\n\n## Instance Seg\n- **Mask R-CNN**: Faster R-CNN + mask branch. **RoIAlign** thay RoI pooling (không quantize → mask chính xác hơn).\n\n## Metrics\n- **mIoU** cho semantic.\n- **AP (mask)** cho instance/panoptic.",
+    "video_url": "https://example.com/videos/cs231n/segmentation.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-semantic-seg",
+        "name": "Semantic Segmentation (FCN, U-Net, DeepLab)"
+      },
+      {
+        "slug": "KC-CV-mask-rcnn",
+        "name": "Mask R-CNN và Instance Segmentation"
+      },
+      {
+        "slug": "KC-CV-panoptic",
+        "name": "Panoptic Segmentation"
+      }
+    ]
+  },
+  {
+    "slug": "cv_visualization_adversarial",
+    "name": "Feature Visualization, Adversarial Examples, DeepDream, Style Transfer",
+    "module_slug": "cs231n_cv",
+    "description": "Hiểu CNN: saliency maps, gradient ascent visualization, feature inversion; adversarial attacks (FGSM, PGD); DeepDream; neural style transfer.",
+    "order_index": 13,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures"
+    ],
+    "estimated_hours_beginner": 3.0,
+    "estimated_hours_intermediate": 1.25,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Thực hiện saliency map, Grad-CAM, và feature inversion",
+      "Tạo adversarial example bằng FGSM và giải thích vì sao nhỏ mắt thường",
+      "Mô tả Gram matrix trong neural style transfer"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Visualization + Adversarial + Style\n\n## Visualization\n- **Saliency map**: $|\\partial s_c / \\partial I|$.\n- **Grad-CAM**: weighted feature map theo gradient.\n- **Guided Backprop**: chỉ backprop positive gradients.\n- **Gradient ascent** trên pixels để maximize activation của 1 neuron/class.\n\n## Adversarial Examples\n- **FGSM**: $I' = I + \\epsilon \\cdot \\text{sign}(\\nabla_I L)$.\n- **PGD**: iterative FGSM với projection vào L∞ ball.\n- Defenses: adversarial training, randomization, certified robustness.\n\n## DeepDream\nGradient ascent trên pre-existing activations → hallucinate features.\n\n## Neural Style Transfer (Gatys 2015)\n- Content loss: feature distance ở deep layer.\n- Style loss: Gram matrix distance across layers $G = F F^T$.\n- Optimize image pixels (hoặc train feed-forward network → real-time).",
+    "video_url": "https://example.com/videos/cs231n/viz_adversarial.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-saliency-gradcam",
+        "name": "Saliency, Grad-CAM, Feature Inversion"
+      },
+      {
+        "slug": "KC-CV-adversarial",
+        "name": "Adversarial Examples (FGSM, PGD)"
+      },
+      {
+        "slug": "KC-CV-deepdream-style",
+        "name": "DeepDream và Neural Style Transfer"
+      }
+    ]
+  },
+  {
+    "slug": "cv_video",
+    "name": "Video: Classification, 3D CNNs, Two-stream, Multimodal Video",
+    "module_slug": "cs231n_cv",
+    "description": "Video classification: 3D CNNs (C3D, I3D), two-stream (RGB + optical flow), SlowFast, video Transformers, multimodal (audio + text).",
+    "order_index": 14,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures",
+      "cv_attention_transformers"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "So sánh late-fusion 2D CNN, 3D CNN (C3D, I3D), và two-stream approaches",
+      "Giải thích SlowFast: slow pathway (spatial) + fast pathway (temporal)",
+      "Mô tả video Transformers (TimeSformer, ViViT) và multimodal fusion với audio/text"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Video Understanding\n\n## Approaches\n| Method | Input | Key idea |\n|--------|-------|----------|\n| Late Fusion 2D | RGB frames | Extract per-frame features, average/LSTM |\n| 3D CNN (C3D, I3D) | Clip T×H×W | 3D conv kernels |\n| Two-stream | RGB + Optical flow | Separate networks, fuse |\n| SlowFast | Low fps + High fps | Different frame rates |\n| Video Transformer (TimeSformer, ViViT) | Spatiotemporal patches | Divided/joint spatiotemporal attention |\n\n## I3D (Inflated 3D)\nInflate 2D ImageNet weights thành 3D → dùng Kinetics pretraining.\n\n## Multimodal Video\n- **Audio-visual**: audio + RGB (MoViNet, MBT).\n- **Text grounded**: video + caption (VideoBERT, VATT, InternVideo).\n- Tasks: action recognition, temporal grounding, video QA, dense captioning.",
+    "video_url": "https://example.com/videos/cs231n/video.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-3d-cnn",
+        "name": "3D CNNs (C3D, I3D)"
+      },
+      {
+        "slug": "KC-CV-two-stream",
+        "name": "Two-stream và SlowFast"
+      },
+      {
+        "slug": "KC-CV-multimodal-video",
+        "name": "Video Transformers và Multimodal Video"
+      }
+    ]
+  },
+  {
+    "slug": "cv_systems_parallelism",
+    "name": "Systems: GPU Utilization, Parallelism, Activation Checkpointing",
+    "module_slug": "cs231n_cv",
+    "description": "Tối ưu training: data/model/pipeline parallelism, mixed precision, gradient accumulation, activation checkpointing, FlashAttention.",
+    "order_index": 15,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures"
+    ],
+    "estimated_hours_beginner": 3.0,
+    "estimated_hours_intermediate": 1.25,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Phân biệt data parallel, tensor parallel, pipeline parallel",
+      "Giải thích activation checkpointing: trade compute cho memory",
+      "Áp dụng mixed precision (fp16/bf16) và gradient accumulation"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 8,
+      "difficulty_distribution": {
+        "easy": 0.25,
+        "medium": 0.5,
+        "hard": 0.25
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Systems + Parallelism\n\n## Parallelism Strategies\n| Strategy | Chia gì? | Khi nào dùng |\n|----------|---------|--------------|\n| Data Parallel (DDP) | Mini-batch across GPUs | Model fit 1 GPU |\n| Tensor Parallel | Weight matrices | Layer > GPU memory |\n| Pipeline Parallel | Layer groups | Very deep models |\n| ZeRO/FSDP | Optimizer states + grads + params | Huge models |\n\n## Activation Checkpointing\nDon't save activations của mọi layer → recompute trong backward.\nTrade: +33% compute, giảm activation memory đáng kể.\n\n## Mixed Precision\nForward/backward trong fp16/bf16, master weights fp32. 2x speed, 0.5x memory.\n\n## Other\n- **Gradient accumulation**: simulate large batch trên GPU nhỏ.\n- **FlashAttention**: tiled attention, tránh materialize $N^2$ matrix.\n- **GPU utilization**: kiểm tra bằng `nvidia-smi`, `torch.profiler`.",
+    "video_url": "https://example.com/videos/cs231n/systems.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-parallelism",
+        "name": "Data/Tensor/Pipeline Parallelism"
+      },
+      {
+        "slug": "KC-CV-act-checkpoint",
+        "name": "Activation Checkpointing"
+      },
+      {
+        "slug": "KC-CV-mixed-precision",
+        "name": "Mixed Precision và GPU Utilization"
+      }
+    ]
+  },
+  {
+    "slug": "cv_self_supervised",
+    "name": "Self-Supervised Learning: Pretext Tasks, Contrastive, Multisensory",
+    "module_slug": "cs231n_cv",
+    "description": "Pretext tasks (rotation, jigsaw, colorization); contrastive (SimCLR, MoCo, BYOL, DINO); masked image modeling (MAE); multisensory supervision.",
+    "order_index": 16,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures",
+      "cv_attention_transformers"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Mô tả các pretext tasks phổ biến và hạn chế của chúng",
+      "Giải thích InfoNCE loss và kiến trúc SimCLR/MoCo",
+      "So sánh contrastive (SimCLR) với non-contrastive (BYOL, DINO) và masked image modeling (MAE)"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.25,
+        "medium": 0.5,
+        "hard": 0.25
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Self-Supervised Learning\n\n## Pretext Tasks\n- Rotation prediction, Jigsaw puzzles, Colorization, Context prediction.\n- Features learned → transfer to downstream, nhưng thường kém contrastive.\n\n## Contrastive Learning\n### InfoNCE\n$$L = -\\log\\frac{\\exp(\\text{sim}(z_i, z_j^+)/\\tau)}{\\sum_k \\exp(\\text{sim}(z_i, z_k)/\\tau)}$$\n- **SimCLR**: 2 augmented views, large batch as negatives.\n- **MoCo**: momentum encoder + queue cho negatives.\n\n## Non-Contrastive\n- **BYOL**: online + target network, predictor, no negatives.\n- **DINO**: self-distillation ViT, centering + sharpening.\n\n## Masked Image Modeling\n- **MAE (He 2022)**: mask 75% patches, reconstruct missing patches.\n\n## Multisensory\n- Audio-visual correspondence, text-image (CLIP), video-audio self-supervision.",
+    "video_url": "https://example.com/videos/cs231n/self_supervised.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-pretext",
+        "name": "Pretext Tasks"
+      },
+      {
+        "slug": "KC-CV-contrastive",
+        "name": "Contrastive Learning (SimCLR, MoCo)"
+      },
+      {
+        "slug": "KC-CV-mae-dino",
+        "name": "BYOL, DINO, MAE"
+      },
+      {
+        "slug": "KC-CV-multisensory",
+        "name": "Multisensory Supervision"
+      }
+    ]
+  },
+  {
+    "slug": "cv_generative",
+    "name": "Generative Models: VAE, GAN, Autoregressive, Diffusion",
+    "module_slug": "cs231n_cv",
+    "description": "Variational Autoencoders, GANs (DCGAN, StyleGAN), autoregressive (PixelCNN, image GPT), diffusion (DDPM, Stable Diffusion).",
+    "order_index": 17,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures"
+    ],
+    "estimated_hours_beginner": 5.0,
+    "estimated_hours_intermediate": 2.0,
+    "estimated_hours_review": 0.75,
+    "learning_objectives": [
+      "Dẫn xuất ELBO của VAE và vai trò của reparameterization trick",
+      "Giải thích GAN minimax, mode collapse, và StyleGAN innovations",
+      "Mô tả forward/reverse diffusion process và classifier-free guidance"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 5,
+      "num_questions_quiz": 12,
+      "difficulty_distribution": {
+        "easy": 0.2,
+        "medium": 0.5,
+        "hard": 0.3
+      },
+      "min_mastery_to_pass": 0.75
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Generative Models\n\n## VAE\n$$\\mathcal{L} = \\mathbb{E}_{q(z|x)}[\\log p(x|z)] - D_{KL}(q(z|x) \\| p(z))$$\n- **Reparameterization**: $z = \\mu + \\sigma \\odot \\epsilon$, $\\epsilon \\sim \\mathcal{N}(0, I)$.\n- Samples blurry (pixel MSE loss).\n\n## GAN\n$$\\min_G \\max_D \\mathbb{E}[\\log D(x)] + \\mathbb{E}[\\log(1 - D(G(z)))]$$\n- Vấn đề: mode collapse, unstable training.\n- **DCGAN**, **WGAN-GP**, **StyleGAN** (AdaIN, progressive growing).\n\n## Autoregressive\n$$p(x) = \\prod_i p(x_i | x_{<i})$$\n- **PixelCNN**: masked conv.\n- **Image GPT**: Transformer trên sequence of pixels.\n- Slow sampling ($O(N)$).\n\n## Diffusion (DDPM)\n- **Forward**: dần thêm Gaussian noise $T$ bước.\n- **Reverse**: learn $\\epsilon_\\theta(x_t, t)$ để denoise.\n- Loss: $\\mathbb{E}[\\|\\epsilon - \\epsilon_\\theta(x_t, t)\\|^2]$.\n- **Classifier-free guidance**: $\\tilde{\\epsilon} = (1+w)\\epsilon(x_t, c) - w\\epsilon(x_t)$.\n- **Latent Diffusion (Stable Diffusion)**: diffuse trong latent space của VAE → efficient.",
+    "video_url": "https://example.com/videos/cs231n/generative.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-vae",
+        "name": "Variational Autoencoders (VAE)"
+      },
+      {
+        "slug": "KC-CV-gan",
+        "name": "GANs (DCGAN, StyleGAN)"
+      },
+      {
+        "slug": "KC-CV-autoregressive",
+        "name": "Autoregressive Image Models"
+      },
+      {
+        "slug": "KC-CV-diffusion",
+        "name": "Diffusion Models và Stable Diffusion"
+      }
+    ]
+  },
+  {
+    "slug": "cv_3d",
+    "name": "3D Vision: Shape Representations, Reconstruction, Neural Implicit",
+    "module_slug": "cs231n_cv",
+    "description": "3D representations (voxels, point clouds, meshes, SDF); shape reconstruction từ images; neural implicit (NeRF, occupancy nets).",
+    "order_index": 18,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "So sánh voxels, point clouds, meshes, implicit SDF về trade-offs",
+      "Mô tả pipeline shape reconstruction từ single/multi-view images",
+      "Giải thích NeRF: volume rendering, positional encoding, MLP"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# 3D Vision\n\n## Representations\n| Rep | Pros | Cons |\n|-----|------|------|\n| Voxels | Regular, easy conv | $O(N^3)$ memory |\n| Point cloud | Compact, sensors output | Unordered, sparse |\n| Mesh | Rendering-friendly | Topology fixed |\n| Implicit (SDF/occupancy) | Continuous, infinite resolution | Slow to query |\n\n## Networks\n- **PointNet / PointNet++**: permutation-invariant point cloud network.\n- **Pixel2Mesh**: deform template mesh từ image.\n- **OccupancyNet, DeepSDF**: MLP $f(x) = \\text{occupancy or SDF}$.\n\n## Neural Implicit: NeRF\n$$(c, \\sigma) = F_\\theta(x, d)$$\n- Positional encoding: $\\gamma(x) = [\\sin(2^k \\pi x), \\cos(2^k \\pi x)]_{k=0}^{L-1}$.\n- Volume rendering: $C(r) = \\int T(t) \\sigma(r(t)) c(r(t), d) dt$.\n- Overfit 1 scene từ nhiều views → photo-realistic novel views.\n- Variants: Instant-NGP (hash grid), Gaussian Splatting (explicit, real-time).",
+    "video_url": "https://example.com/videos/cs231n/3d.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-3d-repr",
+        "name": "3D Shape Representations"
+      },
+      {
+        "slug": "KC-CV-shape-recon",
+        "name": "Shape Reconstruction"
+      },
+      {
+        "slug": "KC-CV-nerf",
+        "name": "Neural Implicit Representations (NeRF)"
+      }
+    ]
+  },
+  {
+    "slug": "cv_vision_language",
+    "name": "Vision and Language: CLIP, VLMs, VQA, Captioning",
+    "module_slug": "cs231n_cv",
+    "description": "CLIP contrastive pretraining, VLMs (Flamingo, LLaVA, BLIP-2), VQA, grounding, visual reasoning, text-to-image generation.",
+    "order_index": 19,
+    "prerequisite_topic_slugs": [
+      "cv_attention_transformers",
+      "cv_captioning_seq2seq"
+    ],
+    "estimated_hours_beginner": 3.5,
+    "estimated_hours_intermediate": 1.5,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Mô tả CLIP contrastive pretraining và ứng dụng zero-shot classification",
+      "So sánh VLM architectures: cross-attention (Flamingo), projection (LLaVA), Q-Former (BLIP-2)",
+      "Giải thích tasks: VQA, visual grounding, visual reasoning"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Vision and Language\n\n## CLIP (2021)\n- Dual encoder: ViT + Text Transformer.\n- Contrastive trên 400M pairs.\n- Zero-shot: prompt = \"a photo of a {class}\".\n\n## VLM Architectures\n| Model | Cơ chế |\n|-------|--------|\n| Flamingo | Frozen LLM + Perceiver Resampler + gated cross-attention |\n| BLIP-2 | Q-Former bridges frozen vision + LLM |\n| LLaVA | Linear projection vision tokens → LLM input |\n| InstructBLIP, Qwen-VL | Instruction tuned |\n\n## Tasks\n- **VQA**: image + question → answer.\n- **Visual grounding / referring expressions**: detect object từ mô tả.\n- **Image-text retrieval**.\n- **Text-to-image**: DALL-E, Imagen, Stable Diffusion.\n\n## Challenges\nSpatial reasoning, counting, OCR, hallucination.",
+    "video_url": "https://example.com/videos/cs231n/vision_language.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-clip",
+        "name": "CLIP Contrastive Pretraining"
+      },
+      {
+        "slug": "KC-CV-vlm",
+        "name": "VLM Architectures (Flamingo, BLIP-2, LLaVA)"
+      },
+      {
+        "slug": "KC-CV-vqa",
+        "name": "VQA và Visual Grounding"
+      }
+    ]
+  },
+  {
+    "slug": "cv_deep_rl",
+    "name": "Deep Reinforcement Learning và Model Learning",
+    "module_slug": "cs231n_cv",
+    "description": "RL basics, DQN, Policy Gradients (REINFORCE, PPO, Actor-Critic), model-based RL, world models.",
+    "order_index": 20,
+    "prerequisite_topic_slugs": [
+      "cv_mlp_backprop"
+    ],
+    "estimated_hours_beginner": 4.0,
+    "estimated_hours_intermediate": 2.0,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Phân biệt value-based (DQN) và policy-based (REINFORCE, PPO) methods",
+      "Viết policy gradient theorem và giải thích advantage function",
+      "So sánh model-free và model-based RL, và vai trò của world models"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 4,
+      "num_questions_quiz": 10,
+      "difficulty_distribution": {
+        "easy": 0.25,
+        "medium": 0.5,
+        "hard": 0.25
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Deep Reinforcement Learning\n\n## MDP\n$(S, A, P, R, \\gamma)$. Tìm policy $\\pi$ maximize $\\mathbb{E}[\\sum \\gamma^t r_t]$.\n\n## Value-based: DQN\n$$Q^*(s, a) = \\mathbb{E}[r + \\gamma \\max_{a'} Q^*(s', a')]$$\n- Neural Q-function, experience replay, target network.\n- Atari from pixels (Mnih 2015).\n\n## Policy Gradient\n$$\\nabla_\\theta J = \\mathbb{E}[\\nabla_\\theta \\log \\pi_\\theta(a|s) \\cdot A(s, a)]$$\n- **REINFORCE**: Monte Carlo returns.\n- **Actor-Critic**: critic ước lượng $V$ → advantage $A = r + \\gamma V(s') - V(s)$.\n- **PPO**: clipped surrogate objective, stable.\n\n## Model-based RL / World Models\n- Learn dynamics $\\hat{p}(s' | s, a)$ → plan hoặc imagine rollouts.\n- **Dreamer**, **MuZero**, **World Models (Ha 2018)**.\n- Sample efficient nhưng biased bởi model errors.",
+    "video_url": "https://example.com/videos/cs231n/deep_rl.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-dqn",
+        "name": "DQN và Value-based RL"
+      },
+      {
+        "slug": "KC-CV-policy-gradient",
+        "name": "Policy Gradient (REINFORCE, PPO, Actor-Critic)"
+      },
+      {
+        "slug": "KC-CV-model-based",
+        "name": "Model-based RL và World Models"
+      }
+    ]
+  },
+  {
+    "slug": "cv_robotics",
+    "name": "Robotic Manipulation và Visuomotor Policies",
+    "module_slug": "cs231n_cv",
+    "description": "Learning-based robotic manipulation: imitation learning (BC, DAgger), visuomotor policies (RT-1/2, Diffusion Policy), sim-to-real.",
+    "order_index": 21,
+    "prerequisite_topic_slugs": [
+      "cv_deep_rl"
+    ],
+    "estimated_hours_beginner": 3.0,
+    "estimated_hours_intermediate": 1.25,
+    "estimated_hours_review": 0.5,
+    "learning_objectives": [
+      "Phân biệt imitation learning (BC, DAgger) và RL cho manipulation",
+      "Mô tả visuomotor policy architectures (RT-1/2, Diffusion Policy, ACT)",
+      "Giải thích sim-to-real techniques (domain randomization, domain adaptation)"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 8,
+      "difficulty_distribution": {
+        "easy": 0.3,
+        "medium": 0.5,
+        "hard": 0.2
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Robotic Manipulation\n\n## Imitation Learning\n- **Behavior Cloning (BC)**: supervised learning từ expert demos.\n- **DAgger**: query expert on states visited by policy → reduce distribution shift.\n\n## Visuomotor Policies\nInput: RGB (+ proprioception) → Output: action (joint/end-effector).\n- **RT-1/RT-2** (Google): Transformer + LLM, foundation model cho robots.\n- **Diffusion Policy** (Chi 2023): diffusion trên action sequences → smooth, multimodal.\n- **ACT**: action chunking Transformer (ALOHA bimanual).\n\n## Sim-to-Real\n- **Domain randomization**: randomize textures, lighting, dynamics trong sim.\n- **Domain adaptation**: aligned features giữa sim và real.\n- **Real-world RL**: expensive, safety issues → offline RL, residual policies.\n\n## Foundation Models for Robotics\nRT-2, PaLM-E, OpenVLA: LLM/VLM fine-tuned cho action tokens.",
+    "video_url": "https://example.com/videos/cs231n/robotics.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-imitation",
+        "name": "Imitation Learning (BC, DAgger)"
+      },
+      {
+        "slug": "KC-CV-visuomotor",
+        "name": "Visuomotor Policies (RT-1/2, Diffusion Policy)"
+      },
+      {
+        "slug": "KC-CV-sim2real",
+        "name": "Sim-to-Real Transfer"
+      }
+    ]
+  },
+  {
+    "slug": "cv_human_centered",
+    "name": "Human-Centered AI: Fairness, Safety, Societal Impact",
+    "module_slug": "cs231n_cv",
+    "description": "Bias trong vision models, fairness metrics, privacy (face recognition), deepfakes, responsible deployment, regulation.",
+    "order_index": 22,
+    "prerequisite_topic_slugs": [
+      "cv_cnn_architectures"
+    ],
+    "estimated_hours_beginner": 2.0,
+    "estimated_hours_intermediate": 0.75,
+    "estimated_hours_review": 0.25,
+    "learning_objectives": [
+      "Nhận diện bias trong vision datasets (ImageNet, face datasets) và tác động downstream",
+      "Áp dụng fairness metrics: demographic parity, equal opportunity",
+      "Đánh giá rủi ro: face recognition, deepfakes, surveillance, và các framework regulation (EU AI Act)"
+    ],
+    "assessment_config": {
+      "num_questions_placement": 3,
+      "num_questions_quiz": 8,
+      "difficulty_distribution": {
+        "easy": 0.4,
+        "medium": 0.5,
+        "hard": 0.1
+      },
+      "min_mastery_to_pass": 0.7
+    },
+    "version": 1,
+    "updated_at": "2026-04-18T00:00:00Z",
+    "content_markdown": "# Human-Centered AI\n\n## Bias trong Vision\n- **Dataset bias**: ImageNet thiên về Western contexts, geographic imbalance.\n- **Face recognition**: Gender Shades (Buolamwini 2018) — error rate cao hơn nhiều trên darker-skinned women.\n- Mitigation: balanced sampling, stratified evaluation, model cards.\n\n## Fairness Metrics\n- **Demographic parity**: $P(\\hat{y}=1 | A=0) = P(\\hat{y}=1 | A=1)$.\n- **Equal opportunity**: equal TPR across groups.\n- **Calibration**: $P(y=1 | \\hat{p}=p, A) = p$.\n\n## Rủi ro\n- **Face recognition + surveillance**: mass surveillance, chilling effects.\n- **Deepfakes**: non-consensual imagery, political misinformation.\n- **Autonomous vehicles**: edge cases, accountability.\n- **Medical CV**: distribution shift, liability.\n\n## Regulation & Practice\n- **EU AI Act**: risk tiers; face recognition ở public space = high risk/banned.\n- **GDPR**: biometric data = special category.\n- Best practices: datasheet for datasets, model cards, red teaming, diverse stakeholders, opt-in consent.",
+    "video_url": "https://example.com/videos/cs231n/human_centered.mp4",
+    "knowledge_components": [
+      {
+        "slug": "KC-CV-bias",
+        "name": "Bias trong Vision Datasets và Models"
+      },
+      {
+        "slug": "KC-CV-fairness",
+        "name": "Fairness Metrics"
+      },
+      {
+        "slug": "KC-CV-regulation",
+        "name": "Vision AI Regulation và Responsible Deployment"
+      }
     ]
   }
 ]

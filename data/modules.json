@@ -4,6 +4,20 @@
     "name": "CS224N: Natural Language Processing with Deep Learning",
     "description": "Khóa học chuyên sâu về NLP hiện đại: từ word vectors, RNNs, Transformers đến pretraining, post-training (RLHF/DPO), prompting, agents và RAG. Dựa trên CS224N của Stanford.",
     "order_index": 1,
-    "prerequisite_module_slugs": ["python_basics"]
+    "prerequisite_module_slugs": [
+      "python_basics"
+    ]
+  },
+  {
+    "slug": "cs231n_cv",
+    "name": "CS231n: Deep Learning for Computer Vision",
+    "description": "Khóa học chuyên sâu về Deep Learning cho Computer Vision: từ KNN, Linear Classifiers, CNNs đến Object Detection, Segmentation, Generative Models (VAE/GAN/Diffusion), 3D Vision, Vision-Language và Deep RL cho Robotics. Dựa trên CS231n của Stanford.",
+    "order_index": 2,
+    "prerequisite_module_slugs": [
+      "python_basics"
+    ],
+    "version": 1,
+    "status": "published",
+    "updated_at": "2026-04-18T00:00:00Z"
   }
 ]
