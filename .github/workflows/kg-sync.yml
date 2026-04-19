@@ -1,0 +1,51 @@
+name: KG Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/kg_bridges.yaml"
+      - "src/kg/**"
+      - "alembic/versions/*kg*"
+
+jobs:
+  kg-sync:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ai_learning_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ai_learning_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ai_learning_test
+      ADMIN_TOKEN: ci-admin-token
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run migrations
+        run: uv run alembic upgrade head
+
+      - name: Run KG tests
+        run: uv run pytest tests/kg
+
+      - name: KG dry-run
+        run: uv run python -m src.scripts.build_kg --dry-run
