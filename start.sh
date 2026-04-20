@@ -173,6 +173,20 @@ done
 echo ""
 log_ok "Database healthy"
 
+# =============================================================================
+# BƯỚC 2.5 — Chạy Alembic migrations
+# =============================================================================
+log_section "Bước 2.5 — Chạy database migrations"
+
+log_info "Đang chạy alembic upgrade head..."
+if docker compose exec -T backend uv run alembic upgrade head 2>&1; then
+  log_ok "Migrations hoàn tất"
+else
+  log_error "Migration thất bại. Xem logs để debug:"
+  docker compose logs backend | tail -20
+  exit 1
+fi
+
 log_info "Chờ backend (FastAPI) healthy..."
 TIMEOUT=120
 ELAPSED=0
