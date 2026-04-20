@@ -434,7 +434,7 @@ export default function QuizPage() {
               {feedback.explanation_text && (
                 <div
                   className="mt-2 pl-6 leading-relaxed"
-                  style={{ color: feedback.is_correct ? "rgb(21,128,61)" : "rgb(185,28,28)" }}
+                  style={{ color: feedback.is_correct ? "#15803d" : "#b91c1c" }}
                 >
                   <MarkdownRenderer text={feedback.explanation_text} />
                 </div>
