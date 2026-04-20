@@ -19,12 +19,12 @@ export default function CourseOverview({
 
   return (
     <div className="space-y-8">
-      <section className="card overflow-hidden rounded-[32px] border p-0 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+      <section className="card overflow-hidden rounded-card-lg border p-0 shadow-card">
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.85fr)]">
           <div className="space-y-6 p-6 md:p-8">
             <div className="flex flex-wrap items-center gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">
-                Course overview
+              <p className="text-xs font-semibold uppercase tracking-widest-md text-primary-700">
+                Tổng quan khóa học
               </p>
               <CourseStatusBadge status={data.course.status} />
             </div>
@@ -48,8 +48,8 @@ export default function CourseOverview({
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                 {model.courseTitle}
               </span>
-              <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                {data.overview.estimated_duration_text ?? "Duration will be added later"}
+              <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                {data.overview.estimated_duration_text ?? "Thời lượng sẽ được cập nhật"}
               </span>
               {data.course.hero_badge && (
                 <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
@@ -62,8 +62,8 @@ export default function CourseOverview({
           <aside className="border-t bg-slate-50/80 p-6 md:p-8 lg:border-l lg:border-t-0">
             <div className="space-y-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                  What to expect
+                <p className="text-xs font-semibold uppercase tracking-widest-sm text-slate-500">
+                  Những gì bạn sẽ học
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-slate-950">
                   {model.courseTitle}
@@ -72,12 +72,12 @@ export default function CourseOverview({
 
               <div className="space-y-3 text-sm leading-6 text-slate-600">
                 <p>
-                  <span className="font-semibold text-slate-950">Audience:</span>{" "}
-                  {data.overview.target_audience ?? "General learners"}
+                  <span className="font-semibold text-slate-950">Đối tượng:</span>{" "}
+                  {data.overview.target_audience ?? "Dành cho tất cả học viên"}
                 </p>
                 <p>
-                  <span className="font-semibold text-slate-950">Prerequisites:</span>{" "}
-                  {data.overview.prerequisites_summary ?? "To be added"}
+                  <span className="font-semibold text-slate-950">Yêu cầu trước:</span>{" "}
+                  {data.overview.prerequisites_summary ?? "Chưa có yêu cầu"}
                 </p>
               </div>
 
@@ -101,9 +101,9 @@ export default function CourseOverview({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
-        <article className="card rounded-[28px] p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
-            What you will get
+        <article className="card rounded-card p-7">
+          <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700">
+            Kết quả học tập
           </p>
           <ul className="mt-5 space-y-4">
             {data.overview.learning_outcomes.map((outcome) => (
@@ -118,14 +118,14 @@ export default function CourseOverview({
           </ul>
         </article>
 
-        <article className="card rounded-[28px] p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
-            Structure
+        <article className="card rounded-card p-7">
+          <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700">
+            Cấu trúc khóa học
           </p>
           <p className="mt-5 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>
             {typeof data.overview.structure_snapshot?.summary === "string"
               ? data.overview.structure_snapshot.summary
-              : "Course structure details will be backed by authoritative metadata later."}
+              : "Chi tiết cấu trúc khóa học sẽ được cập nhật sớm."}
           </p>
         </article>
       </section>

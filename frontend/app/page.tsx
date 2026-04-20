@@ -42,7 +42,7 @@ export default function RootPage() {
       <main className="min-h-screen px-4 py-8 md:px-6">
         <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
           <section className="space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">
+            <p className="text-sm font-semibold uppercase tracking-widest-md text-primary-700">
               {model.catalog.kicker}
             </p>
             <h1 className="text-3xl font-semibold text-slate-950 md:text-4xl">
@@ -88,13 +88,13 @@ export default function RootPage() {
           )}
 
           {isLoading && (
-            <div className="card rounded-[28px] p-10 text-center text-sm text-slate-600">
-              Loading course catalog...
+            <div className="card rounded-card p-10 text-center text-sm text-slate-600">
+              Đang tải danh sách khóa học...
             </div>
           )}
 
           {error && (
-            <div className="card rounded-[28px] border-red-200 bg-red-50 p-8 text-sm text-red-700">
+            <div className="card rounded-card border-red-200 bg-red-50 p-8 text-sm text-red-700">
               {error}
             </div>
           )}
