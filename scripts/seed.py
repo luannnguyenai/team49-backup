@@ -29,7 +29,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from sqlalchemy import delete, select  # noqa: E402
+from sqlalchemy import delete, select, text  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 from src.config import settings  # noqa: E402
@@ -92,7 +92,21 @@ async def seed_modules(
         ).scalar_one_or_none()
 
         if existing:
-            slug_to_uuid[slug] = existing.id
+            module_id = existing.id
+            slug_to_uuid[slug] = module_id
+            await db.execute(
+                text(
+                    "UPDATE modules "
+                    "SET slug = :slug, status = :status, version = :version "
+                    "WHERE id = :id"
+                ),
+                {
+                    "id": module_id,
+                    "slug": slug,
+                    "status": m.get("status", "published"),
+                    "version": m.get("version", 1),
+                },
+            )
             print(f"  skip module '{m['name']}' (already exists)")
             continue
 
@@ -106,6 +120,19 @@ async def seed_modules(
         await db.flush()
         await db.refresh(module)
         slug_to_uuid[slug] = module.id
+        await db.execute(
+            text(
+                "UPDATE modules "
+                "SET slug = :slug, status = :status, version = :version "
+                "WHERE id = :id"
+            ),
+            {
+                "id": module.id,
+                "slug": slug,
+                "status": m.get("status", "published"),
+                "version": m.get("version", 1),
+            },
+        )
         print(f"  + module '{m['name']}' → {module.id}")
 
     return slug_to_uuid
@@ -159,6 +186,19 @@ async def seed_topics(
 
         if existing:
             topic_slug_to_uuid[slug] = existing.id
+            await db.execute(
+                text(
+                    "UPDATE topics "
+                    "SET slug = :slug, status = :status, version = :version "
+                    "WHERE id = :id"
+                ),
+                {
+                    "id": existing.id,
+                    "slug": slug,
+                    "status": t.get("status", "published"),
+                    "version": t.get("version", 1),
+                },
+            )
             # Still need KC mappings
             for kc_def in t.get("knowledge_components", []):
                 existing_kc = (
@@ -171,6 +211,14 @@ async def seed_topics(
                 ).scalar_one_or_none()
                 if existing_kc:
                     kc_slug_to_uuid[kc_def["slug"]] = existing_kc.id
+                    await db.execute(
+                        text(
+                            "UPDATE knowledge_components "
+                            "SET slug = :slug "
+                            "WHERE id = :id"
+                        ),
+                        {"id": existing_kc.id, "slug": kc_def["slug"]},
+                    )
             print(f"  skip topic '{t['name']}' (already exists)")
             continue
 
@@ -190,6 +238,19 @@ async def seed_topics(
         await db.flush()
         await db.refresh(topic)
         topic_slug_to_uuid[slug] = topic.id
+        await db.execute(
+            text(
+                "UPDATE topics "
+                "SET slug = :slug, status = :status, version = :version "
+                "WHERE id = :id"
+            ),
+            {
+                "id": topic.id,
+                "slug": slug,
+                "status": t.get("status", "published"),
+                "version": t.get("version", 1),
+            },
+        )
         print(f"  + topic '{t['name']}' → {topic.id}")
 
         # Seed KnowledgeComponents
@@ -203,6 +264,14 @@ async def seed_topics(
             await db.flush()
             await db.refresh(kc)
             kc_slug_to_uuid[kc_def["slug"]] = kc.id
+            await db.execute(
+                text(
+                    "UPDATE knowledge_components "
+                    "SET slug = :slug "
+                    "WHERE id = :id"
+                ),
+                {"id": kc.id, "slug": kc_def["slug"]},
+            )
             print(f"    + kc '{kc_def['name']}' → {kc.id}")
 
     return topic_slug_to_uuid, kc_slug_to_uuid
@@ -283,7 +352,7 @@ async def seed_questions(
             option_b=q["option_b"],
             option_c=q["option_c"],
             option_d=q["option_d"],
-            correct_answer=CorrectAnswer(q["correct_answer"]),
+            correct_answer=CorrectAnswer(str(q["correct_answer"]).upper()),
             distractor_a_rationale=q.get("distractor_a_rationale"),
             distractor_b_rationale=q.get("distractor_b_rationale"),
             distractor_c_rationale=q.get("distractor_c_rationale"),
