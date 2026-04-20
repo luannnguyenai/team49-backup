@@ -7,7 +7,7 @@ concepts:
   - id: CON-optimization
     name: Gradient-Based Optimization
     description: First- and second-order methods (SGD, Adam, momentum) for minimizing loss.
-    canonical_kc_slug: KC-CV-optimization
+    canonical_kc_slug: KC-CV-sgd-momentum
 
   - id: CON-seq2seq-attention
     name: Seq2Seq with Attention
@@ -22,12 +22,12 @@ concepts:
   - id: CON-rlhf-ppo
     name: RLHF with PPO
     description: Reinforcement Learning from Human Feedback using Proximal Policy Optimization.
-    canonical_kc_slug: KC-NLP-rlhf
+    canonical_kc_slug: KC-NLP-rlhf-ppo
 
   - id: CON-self-supervised-pretrain
     name: Self-Supervised Pretraining
     description: Learning representations without labels via pretext tasks such as MAE, SimCLR, and BERT MLM.
-    canonical_kc_slug: KC-CV-self-supervised
+    canonical_kc_slug: KC-CV-mae-dino
 
   - id: CON-adversarial
     name: Adversarial Robustness
@@ -39,23 +39,27 @@ instance_of:
     concept_id: CON-self-attention
   - kc_slug: KC-NLP-self-attention
     concept_id: CON-self-attention
-  - kc_slug: KC-CV-optimization
+  - kc_slug: KC-CV-sgd-momentum
     concept_id: CON-optimization
-  - kc_slug: KC-NLP-optimization
+  - kc_slug: KC-CV-adaptive-opt
+    concept_id: CON-optimization
+  - kc_slug: KC-NLP-gradient-descent
     concept_id: CON-optimization
   - kc_slug: KC-CV-seq2seq
     concept_id: CON-seq2seq-attention
-  - kc_slug: KC-NLP-seq2seq
+  - kc_slug: KC-NLP-transformer-arch
     concept_id: CON-seq2seq-attention
   - kc_slug: KC-CV-vlm
     concept_id: CON-vlm
-  - kc_slug: KC-NLP-vlm
+  - kc_slug: KC-NLP-vlm-arch
     concept_id: CON-vlm
-  - kc_slug: KC-NLP-rlhf
+  - kc_slug: KC-NLP-rlhf-ppo
     concept_id: CON-rlhf-ppo
-  - kc_slug: KC-CV-self-supervised
+  - kc_slug: KC-CV-mae-dino
     concept_id: CON-self-supervised-pretrain
-  - kc_slug: KC-NLP-self-supervised
+  - kc_slug: KC-CV-contrastive
+    concept_id: CON-self-supervised-pretrain
+  - kc_slug: KC-NLP-pretraining-objectives
     concept_id: CON-self-supervised-pretrain
   - kc_slug: KC-CV-adversarial
     concept_id: CON-adversarial
