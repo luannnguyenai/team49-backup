@@ -6,11 +6,23 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Float, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, Enum, Float, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.base import Base
+
+_NODE_KIND = ("module", "topic", "kc", "concept", "question", "skill")
+_EDGE_TYPE = (
+    "INSTANCE_OF",
+    "ALIGNS_WITH",
+    "TRANSFERS_TO",
+    "REQUIRES_KC",
+    "DEVELOPS",
+    "COVERS",
+)
+_EDGE_SOURCE = ("schema", "manual", "embedding", "llm", "heuristic")
+_CONCEPT_SOURCE = ("manual", "embedding", "llm", "heuristic")
 
 
 class KGConceptORM(Base):
@@ -27,7 +39,10 @@ class KGConceptORM(Base):
     name: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     canonical_kc_slug: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    source: Mapped[str] = mapped_column(String(50), nullable=False)
+    source: Mapped[str] = mapped_column(
+        Enum(*_CONCEPT_SOURCE, name="concept_source_enum", create_type=False),
+        nullable=False,
+    )
     embedding_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -55,13 +70,25 @@ class KGEdgeORM(Base):
         default=uuid.uuid4,
         server_default=func.gen_random_uuid(),
     )
-    src_kind: Mapped[str] = mapped_column(String(50), nullable=False)
+    src_kind: Mapped[str] = mapped_column(
+        Enum(*_NODE_KIND, name="node_kind_enum", create_type=False),
+        nullable=False,
+    )
     src_ref: Mapped[str] = mapped_column(Text, nullable=False)
-    dst_kind: Mapped[str] = mapped_column(String(50), nullable=False)
+    dst_kind: Mapped[str] = mapped_column(
+        Enum(*_NODE_KIND, name="node_kind_enum", create_type=False),
+        nullable=False,
+    )
     dst_ref: Mapped[str] = mapped_column(Text, nullable=False)
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    type: Mapped[str] = mapped_column(
+        Enum(*_EDGE_TYPE, name="edge_type_enum", create_type=False),
+        nullable=False,
+    )
     weight: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
-    source: Mapped[str] = mapped_column(String(50), nullable=False)
+    source: Mapped[str] = mapped_column(
+        Enum(*_EDGE_SOURCE, name="edge_source_enum", create_type=False),
+        nullable=False,
+    )
     meta: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
