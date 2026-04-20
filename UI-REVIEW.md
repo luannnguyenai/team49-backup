@@ -282,3 +282,179 @@ These could be added to `tailwind.config.ts` as named shadow tokens (`shadow-car
 **Config:**
 - `frontend/tailwind.config.ts`
 - `frontend/package.json`
+
+---
+
+## Component Hierarchy Map
+
+> Generated: 2026-04-20  
+> Scanned 60 TSX files across 20 routes.  
+> Layout classes shown: flex · grid · position · sizing · spacing · z-index
+
+### Route `/forgot-password`
+
+```
+[Page: /forgot-password] - frontend/app/(auth)/forgot-password/page.tsx
+└── [ForgotPasswordForm] - frontend/components/auth/ForgotPasswordForm.tsx
+    ├── [Input] - frontend/components/ui/Input.tsx
+    └── [Button] - frontend/components/ui/Button.tsx (w-full)
+        └── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+```
+
+### Route `/login`
+
+```
+[Page: /login] - frontend/app/(auth)/login/page.tsx
+└── [LoginForm] - frontend/components/auth/LoginForm.tsx
+    ├── [Input] - frontend/components/ui/Input.tsx
+    └── [Button] - frontend/components/ui/Button.tsx (w-full)
+        └── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+```
+
+### Route `/register`
+
+```
+[Page: /register] - frontend/app/(auth)/register/page.tsx
+└── [RegisterForm] - frontend/components/auth/RegisterForm.tsx
+    ├── [Input] - frontend/components/ui/Input.tsx
+    └── [Button] - frontend/components/ui/Button.tsx (w-full mt-2)
+        └── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+```
+
+### Route `/courses/[courseSlug]/learn/[unitSlug]`
+
+```
+[Page: /courses/[courseSlug]/learn/[unitSlug]] - frontend/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/page.tsx
+└── [LearningPageScreen] - frontend/components/learn/LearningPageScreen.tsx
+    └── [LearningUnitShell] - frontend/components/learn/LearningUnitShell.tsx
+        └── [InContextTutor] - frontend/components/learn/InContextTutor.tsx
+```
+
+### Route `/dashboard`
+
+```
+[Page: /dashboard] - frontend/app/(protected)/dashboard/page.tsx
+├── [CourseStatusBadge] - frontend/components/course/CourseStatusBadge.tsx
+└── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+```
+
+### Route `/history`
+
+```
+[Page: /history] - frontend/app/(protected)/history/page.tsx
+└── [MarkdownRenderer] - frontend/components/assessment/MarkdownRenderer.tsx
+```
+
+### Route `/profile`
+
+```
+[Page: /profile] - frontend/app/(protected)/profile/page.tsx
+├── [RadarChart] - frontend/components/assessment/RadarChart.tsx
+└── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+```
+
+### Route `/assessment`
+
+```
+[Page: /assessment] - frontend/app/assessment/page.tsx
+├── [Button] - frontend/components/ui/Button.tsx
+│   └── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+├── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+└── [MarkdownRenderer] - frontend/components/assessment/MarkdownRenderer.tsx
+```
+
+### Route `/assessment/results`
+
+```
+[Page: /assessment/results] - frontend/app/assessment/results/page.tsx
+├── [Button] - frontend/components/ui/Button.tsx
+│   └── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+├── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+└── [RadarChart] - frontend/components/assessment/RadarChart.tsx
+```
+
+### Route `/courses/[courseSlug]`
+
+```
+[Page: /courses/[courseSlug]] - frontend/app/courses/[courseSlug]/page.tsx
+├── [CourseOverviewInteractive] - frontend/components/course/CourseOverviewInteractive.tsx
+│   └── [CourseOverview] - frontend/components/course/CourseOverview.tsx
+│       ├── [Button] - frontend/components/ui/Button.tsx
+│       └── [CourseStatusBadge] - frontend/components/course/CourseStatusBadge.tsx
+└── [TopNav] - frontend/components/layout/TopNav.tsx (min-h-screen px-4 py-8)
+```
+
+### Route `/courses/[courseSlug]/start`
+
+```
+[Page: /courses/[courseSlug]/start] - frontend/app/courses/[courseSlug]/start/page.tsx
+```
+
+### Route `/learn/[topicId]`
+
+```
+[Page: /learn/[topicId]] - frontend/app/learn/[topicId]/page.tsx
+```
+
+### Route `/learn`
+
+```
+[Page: /learn] - frontend/app/learn/page.tsx
+```
+
+### Route `/module-test/[moduleId]`
+
+```
+[Page: /module-test/[moduleId]] - frontend/app/module-test/[moduleId]/page.tsx
+└── [MarkdownRenderer] - frontend/components/assessment/MarkdownRenderer.tsx
+```
+
+### Route `/module-test/[moduleId]/results`
+
+```
+[Page: /module-test/[moduleId]/results] - frontend/app/module-test/[moduleId]/results/page.tsx
+└── [MarkdownRenderer] - frontend/components/assessment/MarkdownRenderer.tsx
+```
+
+### Route `/onboarding`
+
+```
+[Page: /onboarding] - frontend/app/onboarding/page.tsx
+├── [Button] - frontend/components/ui/Button.tsx
+│   └── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+├── [LoadingSpinner] - frontend/components/ui/LoadingSpinner.tsx
+├── [StepKnownTopics] - frontend/components/onboarding/StepKnownTopics.tsx
+├── [StepDesiredModules] - frontend/components/onboarding/StepDesiredModules.tsx
+├── [StepTimeSchedule] - frontend/components/onboarding/StepTimeSchedule.tsx
+└── [StepLearningMethod] - frontend/components/onboarding/StepLearningMethod.tsx
+```
+
+### Route `/`
+
+```
+[Page: /] - frontend/app/page.tsx
+├── [CourseCatalog] - frontend/components/course/CourseCatalog.tsx
+│   └── [CourseStatusBadge] - frontend/components/course/CourseStatusBadge.tsx (px-3 py-1)
+└── [TopNav] - frontend/components/layout/TopNav.tsx (min-h-screen px-4 py-8)
+```
+
+### Route `/quiz/[topicId]`
+
+```
+[Page: /quiz/[topicId]] - frontend/app/quiz/[topicId]/page.tsx
+└── [MarkdownRenderer] - frontend/components/assessment/MarkdownRenderer.tsx
+```
+
+### Route `/quiz/[topicId]/results`
+
+```
+[Page: /quiz/[topicId]/results] - frontend/app/quiz/[topicId]/results/page.tsx
+```
+
+### Route `/tutor`
+
+```
+[Page: /tutor] - frontend/app/tutor/page.tsx
+└── [CourseCatalog] - frontend/components/course/CourseCatalog.tsx
+    └── [CourseStatusBadge] - frontend/components/course/CourseStatusBadge.tsx (px-3 py-1)
+```
