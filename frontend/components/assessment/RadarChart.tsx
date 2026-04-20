@@ -28,15 +28,7 @@ function toPoints(pts: { x: number; y: number }[]) {
   return pts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
 }
 
-// ---------------------------------------------------------------------------
-// Mastery level → fill color
-// ---------------------------------------------------------------------------
-const LEVEL_COLOR: Record<string, string> = {
-  novice: "#f87171", // red-400
-  developing: "#fb923c", // orange-400
-  proficient: "#60a5fa", // blue-400
-  mastered: "#34d399", // emerald-400
-};
+import { SKILL_COLORS, BRAND_PRIMARY } from "@/lib/ui/skillColors";
 
 const GRID_LEVELS = [20, 40, 60, 80, 100] as const;
 
@@ -138,16 +130,16 @@ export default function RadarChart({ data, size = 320 }: Props) {
       {/* ── Data polygon fill ── */}
       <polygon
         points={toPoints(dataPoints)}
-        fill="#2563EB"
+        fill=BRAND_PRIMARY
         fillOpacity={0.18}
-        stroke="#2563EB"
+        stroke=BRAND_PRIMARY
         strokeWidth={2}
         strokeLinejoin="round"
       />
 
       {/* ── Data point dots ── */}
       {dataPoints.map((pt, i) => {
-        const color = LEVEL_COLOR[data[i].level] ?? "#2563EB";
+        const color = SKILL_COLORS[data[i].level] ?? BRAND_PRIMARY;
         return (
           <circle
             key={i}
@@ -181,7 +173,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
             y={lb.y + size * 0.046}
             textAnchor={lb.anchor}
             fontSize={size * 0.036}
-            fill={LEVEL_COLOR[lb.level] ?? "#2563EB"}
+            fill={SKILL_COLORS[lb.level] ?? BRAND_PRIMARY}
             fontWeight="700"
           >
             {lb.value.toFixed(0)}%
@@ -190,7 +182,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
       ))}
 
       {/* ── Center dot ── */}
-      <circle cx={cx} cy={cy} r={3} fill="#2563EB" fillOpacity={0.5} />
+      <circle cx={cx} cy={cy} r={3} fill=BRAND_PRIMARY fillOpacity={0.5} />
     </svg>
   );
 }

@@ -14,6 +14,7 @@ import type {
 } from "@/types";
 import RadarChart from "@/components/assessment/RadarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { SKILL_COLORS } from "@/lib/ui/skillColors";
 
 const DEFAULT_SKILLS: UserSkillSnapshot[] = [
   { label: "Machine Learning", value: 0, level: "not_started" },
@@ -23,13 +24,6 @@ const DEFAULT_SKILLS: UserSkillSnapshot[] = [
   { label: "LLM", value: 0, level: "not_started" },
 ];
 
-const SKILL_COLORS: Record<string, string> = {
-  not_started: "#94a3b8",
-  novice: "#f87171",
-  developing: "#fb923c",
-  proficient: "#60a5fa",
-  mastered: "#34d399",
-};
 
 interface AchievementBadge {
   title: string;

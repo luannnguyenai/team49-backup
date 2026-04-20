@@ -97,7 +97,7 @@ export default function LearningUnitShell({
 
   return (
     <div
-      className="h-[calc(100vh-4.5rem)] overflow-hidden rounded-[32px] border shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
+      className="h-[calc(100vh-4.5rem)] overflow-hidden rounded-card-lg border shadow-card"
       style={{
         backgroundColor: "var(--bg-card)",
         borderColor: "var(--border)",
@@ -170,7 +170,7 @@ export default function LearningUnitShell({
               className="hidden md:flex w-56 shrink-0 flex-col border-r overflow-y-auto"
               style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-sidebar, var(--bg-card))" }}
             >
-              <p className="px-4 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest"
+              <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest"
                 style={{ color: "var(--text-muted)" }}>
                 Bài học
               </p>
@@ -200,7 +200,7 @@ export default function LearningUnitShell({
 
           {/* Main content */}
           <div className="min-w-0 flex-1 space-y-5 overflow-y-auto p-5 md:p-6">
-            <div className="overflow-hidden rounded-[28px] border bg-black shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="overflow-hidden rounded-card border bg-black shadow-card">
               {content.video_url ? (
                 <video
                   ref={videoRef}
@@ -232,7 +232,7 @@ export default function LearningUnitShell({
 
             {content.video_url && (
               <div
-                className="rounded-[24px] border px-4 py-3"
+                className="rounded-card-sm border px-4 py-3"
                 style={{
                   backgroundColor: "var(--bg-card)",
                   borderColor: "var(--border)",
@@ -282,14 +282,14 @@ export default function LearningUnitShell({
 
             {chapters.length > 0 && (
               <section
-                className="rounded-[24px] border px-4 py-4 md:px-5"
+                className="rounded-card-sm border px-4 py-4 md:px-5"
                 style={{
                   backgroundColor: "var(--bg-card)",
                   borderColor: "var(--border)",
                 }}
               >
                 <p
-                  className="text-xs font-semibold uppercase tracking-[0.22em]"
+                  className="text-xs font-semibold uppercase tracking-widest-sm"
                   style={{ color: "var(--text-muted)" }}
                 >
                   Chapters
