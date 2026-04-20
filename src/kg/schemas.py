@@ -3,6 +3,8 @@
 All models are immutable (frozen=True). No I/O — pure data containers.
 """
 
+from __future__ import annotations
+
 import uuid
 from typing import Any, Literal
 
