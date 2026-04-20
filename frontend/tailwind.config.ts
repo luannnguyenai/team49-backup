@@ -33,6 +33,20 @@ const config: Config = {
         "slide-in-right": "slideInRight 0.25s ease-out",
         "spin-slow": "spin 2s linear infinite",
       },
+      borderRadius: {
+        card: "28px",
+        "card-lg": "32px",
+        "card-sm": "24px",
+      },
+      boxShadow: {
+        card: "0 18px 55px rgba(15,23,42,0.08)",
+        "card-hover": "0 24px 70px rgba(15,23,42,0.12)",
+      },
+      letterSpacing: {
+        "widest-xs": "0.16em",
+        "widest-sm": "0.22em",
+        "widest-md": "0.24em",
+      },
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0", transform: "translateY(4px)" },

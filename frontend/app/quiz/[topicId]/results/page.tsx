@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { MasteryLevel, QuizCompleteResponse } from "@/types";
+import { MASTERY_COLORS, BLOOM_COLORS } from "@/lib/ui/skillColors";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,14 +29,6 @@ const MASTERY_LABELS: Record<MasteryLevel, string> = {
   developing: "Đang phát triển",
   proficient: "Thành thạo",
   mastered: "Xuất sắc",
-};
-
-const MASTERY_COLORS: Record<MasteryLevel, string> = {
-  not_started: "#94a3b8",
-  novice: "#ef4444",
-  developing: "#f97316",
-  proficient: "#3b82f6",
-  mastered: "#10b981",
 };
 
 const MASTERY_BG: Record<MasteryLevel, string> = {
@@ -53,12 +46,6 @@ const BLOOM_LABELS: Record<string, string> = {
   analyze: "Phân tích",
 };
 
-const BLOOM_COLORS: Record<string, string> = {
-  remember: "#ef4444",
-  understand: "#f97316",
-  apply: "#3b82f6",
-  analyze: "#8b5cf6",
-};
 
 function fmtSeconds(s: number): string {
   const m = Math.floor(s / 60);
@@ -291,7 +278,7 @@ function QuizResultsInner() {
             Thay đổi:{" "}
             <span
               className="font-semibold"
-              style={{ color: result.mastery_after >= result.mastery_before ? "#10b981" : "#ef4444" }}
+              style={{ color: result.mastery_after >= result.mastery_before ? MASTERY_COLORS.mastered : MASTERY_COLORS.novice }}
             >
               {result.mastery_after >= result.mastery_before ? "+" : ""}
               {(result.mastery_after - result.mastery_before).toFixed(1)}%

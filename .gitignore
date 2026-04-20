@@ -39,8 +39,9 @@ dist/
 .env.test.local
 .env.production.local
 data/cs231n/
-frontend/test-results/
-frontend/playwright-report/
-frontend/tsconfig.tsbuildinfo
-scripts/save_ui_cycle.ps1
+
 .superpowers
+.claude/settings.local.json
+.claude/settings.local.json
+.claude/settings.local.json
+.claude/settings.local.json

@@ -13,6 +13,7 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
+import { getOptionStyle } from "@/lib/ui/feedbackStyles";
 import { quizApi } from "@/lib/api";
 import type {
   QuestionForQuiz,
@@ -362,26 +363,8 @@ export default function QuizPage() {
               const isCorrect = feedback?.correct_answer === key;
               const isWrong = isFeedback && isSelected && !feedback?.is_correct;
 
-              let borderStyle = "var(--border)";
-              let bgStyle = "var(--bg-elevated)";
-              let textStyle = "var(--text-primary)";
-              let ringClass = "";
-
-              if (isFeedback) {
-                if (isCorrect) {
-                  borderStyle = "rgb(34,197,94)";
-                  bgStyle = "rgb(240,253,244)";
-                  textStyle = "rgb(21,128,61)";
-                } else if (isWrong) {
-                  borderStyle = "rgb(239,68,68)";
-                  bgStyle = "rgb(254,242,242)";
-                  textStyle = "rgb(185,28,28)";
-                }
-              } else if (isSelected) {
-                borderStyle = "var(--color-primary-500)";
-                bgStyle = "var(--color-primary-50)";
-                ringClass = "ring-2 ring-primary-300";
-              }
+              const optStyle = getOptionStyle({ isFeedback, isCorrect, isWrong, isSelected });
+              const ringClass = isFeedback ? "" : isSelected ? "ring-2 ring-primary-300" : "";
 
               return (
                 <button
@@ -396,26 +379,17 @@ export default function QuizPage() {
                     !isFeedback && !submitting ? "hover:border-primary-400 cursor-pointer" : "cursor-default",
                     ringClass,
                   ].join(" ")}
-                  style={{ borderColor: borderStyle, background: bgStyle }}
+                  style={{ borderColor: optStyle.borderColor, background: optStyle.background }}
                 >
                   {/* Key badge */}
                   <span
                     className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                    style={{
-                      background: isFeedback && isCorrect
-                        ? "rgb(34,197,94)"
-                        : isFeedback && isWrong
-                        ? "rgb(239,68,68)"
-                        : isSelected
-                        ? "var(--color-primary-500)"
-                        : "var(--bg-secondary)",
-                      color: isFeedback && (isCorrect || isWrong) ? "white" : isSelected ? "white" : "var(--text-muted)",
-                    }}
+                    style={{ background: optStyle.badgeBg, color: optStyle.badgeColor }}
                   >
                     {key}
                   </span>
 
-                  <span className="flex-1 text-sm" style={{ color: textStyle }}>
+                  <span className="flex-1 text-sm" style={{ color: optStyle.textColor }}>
                     <MarkdownRenderer text={optionTexts[key]} />
                   </span>
 

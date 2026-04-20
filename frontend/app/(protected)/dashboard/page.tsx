@@ -161,8 +161,7 @@ export default function DashboardPage() {
           Chào mừng trở lại, {firstName}! 👋
         </h1>
         <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Dashboard giờ dùng cùng course catalog với landing page, nên mỗi card sẽ dẫn đúng flow
-          học tương ứng.
+          Tiếp tục hành trình học của bạn hôm nay.
         </p>
       </div>
 

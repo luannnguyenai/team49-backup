@@ -133,7 +133,8 @@ export default function TopNav() {
               aria-label="Thông báo"
             >
               <Bell className="h-4 w-4" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
+              <span className="sr-only">Có thông báo chưa đọc</span>
             </button>
 
             {isAuthenticated ? (

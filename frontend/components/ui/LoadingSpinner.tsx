@@ -16,7 +16,8 @@ export default function LoadingSpinner({ size = "md", className }: Props) {
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      aria-label="Loading"
+      role="status"
+      aria-label="Đang tải"
     >
       <circle
         className="opacity-25"
