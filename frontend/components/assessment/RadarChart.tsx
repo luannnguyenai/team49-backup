@@ -130,9 +130,9 @@ export default function RadarChart({ data, size = 320 }: Props) {
       {/* ── Data polygon fill ── */}
       <polygon
         points={toPoints(dataPoints)}
-        fill=BRAND_PRIMARY
+        fill={BRAND_PRIMARY}
         fillOpacity={0.18}
-        stroke=BRAND_PRIMARY
+        stroke={BRAND_PRIMARY}
         strokeWidth={2}
         strokeLinejoin="round"
       />
@@ -182,7 +182,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
       ))}
 
       {/* ── Center dot ── */}
-      <circle cx={cx} cy={cy} r={3} fill=BRAND_PRIMARY fillOpacity={0.5} />
+      <circle cx={cx} cy={cy} r={3} fill={BRAND_PRIMARY} fillOpacity={0.5} />
     </svg>
   );
 }
