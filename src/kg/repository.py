@@ -16,6 +16,7 @@ from src.kg.models import KGConceptORM, KGEdgeORM, KGSyncStateORM
 from src.kg.schemas import KGConcept, KGEdge, SyncReport
 
 _AUTO_SOFT_DELETE_SOURCES = frozenset({"schema", "heuristic", "embedding", "llm"})
+_CONCEPT_SOURCES = frozenset({"manual", "heuristic", "embedding", "llm"})
 
 
 def edge_entity_ref(edge: KGEdge | KGEdgeORM) -> str:
@@ -277,6 +278,9 @@ class KGRepository:
 
     async def _soft_delete_stale_concepts(self, seen_ids: set[str], source: str) -> list[str]:
         """Soft-delete stale concepts for one source."""
+        if source not in _CONCEPT_SOURCES:
+            return []
+
         stmt = sa.select(KGConceptORM).where(
             KGConceptORM.source == source,
             KGConceptORM.deleted_at.is_(None),
