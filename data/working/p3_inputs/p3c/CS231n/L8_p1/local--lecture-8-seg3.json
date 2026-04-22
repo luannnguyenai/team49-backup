@@ -1,0 +1,194 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_8",
+    "lecture_title": "Lecture 8: Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture_8::seg3",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Attention maps and the abstract attention operator",
+    "description": "Shows how attention weights can be visualized to interpret learned alignments, then abstracts attention away from RNNs into a stand-alone query/data/output operator.",
+    "summary": "The lecture next emphasizes that attention weights are not only useful for computation but also for interpretation, since the predicted attention matrix shows what the network is looking at while generating each output token [ts=1272s][ts=1287s]. In the English-to-French example, diagonal patterns indicate roughly in-order word correspondences, while off-diagonal or block patterns reveal reordering and less clean many-to-many alignments [ts=1401s][ts=1516s]. The instructor then extracts the common structure hidden inside the RNN example: there are data vectors containing information to summarize, query vectors representing outputs to compute, and attention returns one output vector per query by comparing the query to all data vectors, softmax-normalizing the scores, and taking a weighted combination of the data [ts=1587s][ts=1716s][ts=1814s][ts=1846s]. This reframing is the bridge from “attention in an RNN” to “attention as a general neural-network layer.”",
+    "key_points": [
+      {
+        "text": "Attention weights can be visualized as a 2D grid to inspect what the model attends to during translation.",
+        "timestamp_s": 1313,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Diagonal attention patterns indicate mostly in-order correspondence between input and output words.",
+        "timestamp_s": 1401,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Off-diagonal or block patterns reveal reordering or non one-to-one alignments between source and target phrases.",
+        "timestamp_s": 1516,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Abstractly, attention takes a query vector, looks back over data vectors, and produces an output vector summarizing the data for that query.",
+        "timestamp_s": 1716,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Single-query attention still follows the same pipeline: similarities, softmax attention weights, then a weighted combination of data vectors.",
+        "timestamp_s": 1814,
+        "evidence_type": "formula"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+      "start_s": 1260,
+      "end_s": 1919
+    },
+    "difficulty": 0.6,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "transcript_slice": "00:21:03\nSo we talked about these attention weights.\n\n00:21:06\nthe network was learning for itself,\n\n00:21:10\ndata, based on its training task.\n\n00:21:14\nis it also gives us a way to introspect and see\n\n00:21:19\ntrying to solve this problem.\n\n00:21:25\nwas between the input sequence and the output sequence.\n\n00:21:29\nthat the network predicts when trying to solve this task,\n\n00:21:35\nwhile trying to solve the problem.\n\n00:21:38\nthe processing of the neural network in some way.\n\n00:21:44\nin the process of producing a particular-- processing\n\n00:21:50\nweights that the network predicted\n\n00:21:53\nAnd we can visualize these in a two-dimensional grid.\n\n00:21:58\nto French translation.\n\n00:22:05\nThe agreement on the European Economic Area\n\n00:22:09\nAnd then running down the rows is the output sequence,\n\n00:22:16\nBut you can see that, basically, through this attention\n\n00:22:20\nremember, the way this attention mechanism worked\n\n00:22:25\nin the output sequence, it predicted a probability\n\n00:22:30\nSo we visualize that in that first row.\n\n00:22:35\nwe're visualizing that predicted probability distribution\n\n00:22:40\nAnd we see that when trying to predict that first word, \"le\"\n\n00:22:48\non the English word \"the\" and basically no probability mass\n\n00:22:52\nThen, when predicting the second word of the output sequence,\n\n00:22:57\nover the entire input sequence.\n\n00:23:01\nSo you can see that a chord, it puts\n\n00:23:07\nand then no probability mass anywhere else.\n\n00:23:12\ndid figure out the alignment between the input\n\n00:23:18\nAnd there's some interesting patterns here that pop up.\n\n00:23:23\nin this attention matrix, that means\n\n00:23:28\nin order between the input sequence and the output\n\n00:23:31\nSo in particular, we see that the agreement\n\n00:23:36\ncorrespond to this diagonal structure in the attention\n\n00:23:40\nSo that means that the network has decided for itself\n\n00:23:45\nalign, or match up, or correspond to the first four\n\n00:23:51\nfor the last several words.\n\n00:23:54\nat the end of the sequence, which means that August 1992,\n\n00:24:02\nwords in the French sequence.\n\n00:24:05\nbetween words in the output and words in the input.\n\n00:24:10\nhere.\n\n00:24:14\nBut in the French, we see words that\n\n00:24:19\nGood question, how does it figure out the grammar?\n\n00:24:24\nBut basically, we told that-- we didn't tell the network anything\n\n00:24:27\nWe told the network-- we supervised it\n\n00:24:30\nWe told it, here's an input sequence in English.\n\n00:24:34\nHere's a mechanism for processing this\n\n00:24:40\nthe weights of this architecture in order\n\n00:24:45\nWe'd never told it anything about grammar.\n\n00:24:50\nhave this intuition that maybe it makes sense\n\n00:24:54\nof the words, so we bake in a mechanism that we think,\n\n00:24:59\nthis problem.\n\n00:25:02\nin the process of doing the end-to-end task, how\n\n00:25:08\nAnd it's pretty amazing that it works.\n\n00:25:16\nSo it sees that we see this non-diagonal, sort\n\n00:25:21\nAnd that means that the network figured out\n\n00:25:26\nand words in French.\n\n00:25:32\nhere.\n\n00:25:35\nhave been a one-to-one correspondence\n\n00:25:39\nThere might have been two French words that corresponded\n\n00:25:43\ndisentangle perfectly.\n\n00:25:46\nover the process of training on a lot of data\n\n00:25:51\nAnd that's pretty cool.\n\n00:25:56\nand this actually was the initial usage of attention\n\n00:25:59\nIt actually came from these machine translation problems.\n\n00:26:06\n'Neural Machine Translation' by jointly alerting to align\n\n00:26:11\nAnd this paper actually just won the runner up test of Time Award\n\n00:26:16\nSo that's pretty cool.\n\n00:26:22\nBut it turns out that there's actually\n\n00:26:27\nhere.\n\n00:26:30\nof trying to fix our recurrent neural networks.\n\n00:26:34\nused to fix the recurrent neural networks actually\n\n00:26:39\nand really powerful in its own right.\n\n00:26:43\nthis idea of attention, and divorce the idea of attention\n\n00:26:49\nAnd it turns out that attention will\n\n00:26:53\nprimitive for neural networks in its own right,\n\n00:26:59\nand just be left with attention as the core\n\n00:27:03\nAnd that's where we're going towards.\n\n00:27:09\nas we saw it, in recurrent neural networks,\n\n00:27:13\nthis independent operator that can be used on its own.\n\n00:27:19\nBasically, what this attention mechanism did\n\n00:27:24\nThese are-- well, maybe it makes sense\n\n00:27:28\nSo there's data vectors, which are like data\n\n00:27:32\nThese are the encoder states of the encoder RNN.\n\n00:27:37\nAnd we've summarized that into a sequence of vectors.\n\n00:27:41\nthat we think is relevant for the problem\n\n00:27:44\nAnd now in the process of trying to make use of that data,\n\n00:27:50\nAnd for each output, we have a query vector.\n\n00:27:54\ntrying to use to solve an--\n\n00:27:57\nAnd in this case, the query vectors\n\n00:28:03\nAnd we have this property, that for each query vector,\n\n00:28:09\nand summarize the information in the data vectors\n\n00:28:16\nwell, OK, from the purpose of attention,\n\n00:28:20\nSo the output of the attention operator\n\n00:28:25\nSo if we're thinking about just, what\n\n00:28:30\nof the attention operator were the context vectors\n\n00:28:34\nSo then what is the attention operator doing?\n\n00:28:39\nto the input data vectors, summarizing the data\n\n00:28:45\nAnd that's what the attention operator is doing.\n\n00:28:51\nmechanism that we just saw?\n\n00:28:55\nYeah, I'll repeat it again because it's tricky.\n\n00:28:59\nAnd we're changing the words that we're\n\n00:29:02\nSo I get it, there's a lot happening.\n\n00:29:06\nis there's a bunch of data vectors, which\n\n00:29:09\nThen we have a bunch of query vectors,\n\n00:29:15\nNow, in the process of processing a query vector,\n\n00:29:19\nvectors, summarize the data vectors in a new custom\n\n00:29:27\nvector, which is the context to be fed\n\n00:29:31\nSo our query vectors are these guys in green.\n\n00:29:36\nsummarize the data vectors, and then produce\n\n00:29:40\nthat we then feed into the rest of the network.\n\n00:29:45\nto go into this architecture and carefully cut out the attention\n\n00:29:52\nSo then we're going to try to walk through this again\n\n00:29:57\nSo from the perspective of just the attention operator,\n\n00:30:02\nquery vector at first, which is one of the states in our RNN.\n\n00:30:08\nwhich are the encoder hidden states in the RNN.\n\n00:30:14\nis, first, compute similarities between that query vector\n\n00:30:18\nThis is the exact same thing that we just\n\n00:30:21\nSo we use this FATT function to compute the similarity scores\n\n00:30:30\nquery vector.\n\n00:30:33\nwe're going to squash them through a softmax\n\n00:30:37\nAnd this will be a distribution over the data vectors\n\n00:30:43\nThen we want to do is produce an output vector.\n\n00:30:50\nwhere those linear combination weights are the attention scores\n\n00:30:54\nSo this is the output of the attention layer.\n\n00:30:59\nthe output of the attention layer, or the attention operator\n\n00:31:05\nBut we're trying to deprecate the RNN,\n\n00:31:08\nWe just want to talk about the attention\n\n00:31:12\nlayer.\n\n00:31:18\nWe have this one--\n\n00:31:21\nagain of taking a query vector, using\n\n00:31:26\ngetting an output vector.\n\n00:31:28\nWhere did that query vector come from?\n\n00:31:31\nGet a new query vector, go back, summarize the data vectors,\n\n00:31:35\nAnd that's the core of the attention operator.\n\n00:31:39\nand make it even more powerful computational primitive.\n\n00:31:46\nhave to be-- it could be any function.\n\n00:31:49\noutputs a scalar in principle.\n\n00:31:52\nto make it simpler in a couple of slides.\n\n00:31:57\nthat you wanted there.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "global_kp_id": "kp_attention_heatmaps_as_learned_alignments",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "global_kp_id": "kp_attention_as_a_query_to_data_operator",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "global_kp_id": "kp_attention_scoring",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_attention_heatmaps_as_learned_alignments",
+      "name": "Attention heatmaps as learned alignments",
+      "description": "Visualizing attention matrices can reveal approximate word alignments, reorderings, and partial many-to-many correspondences learned without explicit alignment supervision.",
+      "track_tags": [
+        "attention",
+        "interpretability",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "model_interpretability",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.47,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because attention heatmaps as learned alignments clarifies visualizing attention matrices can reveal approximate word alignments, reorderings, and partial many-to-many correspondences learned without explicit alignment supervision, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_8::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_attention_as_a_query_to_data_operator",
+      "name": "Attention as a query-to-data operator",
+      "description": "Abstractly, attention maps query vectors and data vectors to output vectors by letting each query retrieve a custom summary of the data.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "transformers"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because attention as a query-to-data operator formalizes how abstractly, attention maps query vectors and data vectors to output vectors by letting each query retrieve a custom summary of the data, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_8::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_attention_scoring",
+      "name": "Attention scoring and alignment weights",
+      "description": "Attention begins by comparing a decoder/query state with each candidate source state, then applying softmax to turn those scores into normalized attention weights. Attention scores can be computed with dot-product, bilinear/multiplicative, low-rank projected dot-product, or additive neural-net scoring.",
+      "track_tags": [
+        "architectures",
+        "attention",
+        "deep_learning",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "ml_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because attention scoring and alignment weights clarifies attention begins by comparing a decoder/query state with each candidate source state, then applying softmax to turn those scores into normalized attention weights, sharpening later modeling, analysis, or evaluation choices though importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09-attention::kp5",
+        "local::lecture_8::kp2"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.45,
+    0.75
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L8_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture08-attention-and-transformers_transcript.txt"
+  }
+}

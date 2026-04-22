@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_14::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for concept questions on implicit density modeling and the role of the latent variable in a basic GAN setup.",
+  "question_bank": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement best describes an implicit density model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It may not output a numeric p(x), but it can still generate samples from the learned distribution",
+        "It always provides an exact closed-form likelihood for every sample",
+        "It can only be used for conditional generation and not unconditional generation",
+        "It requires labels y at training time in order to sample"
+      ],
+      "answer_index": 0,
+      "explanation": "Implicit density models focus on sampling rather than directly returning a tractable density value. They can still learn a useful data distribution even when p(x) is not explicitly available.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_implicit_density_modeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cannot output a density",
+          "can sample from distribution"
+        ],
+        "timestamps": [
+          "00:03:12",
+          "00:03:12"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the basic GAN setup, what is the role of the latent variable z?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is sampled from a simple prior and mapped by the generator into candidate data samples",
+        "It stores the discriminator's binary real-or-fake label for each image",
+        "It is the exact log-likelihood of the training example under the data distribution",
+        "It is the gradient of the discriminator with respect to the model weights"
+      ],
+      "answer_index": 0,
+      "explanation": "GANs begin from an easy-to-sample prior such as a Gaussian. The generator transforms z into outputs whose distribution should become similar to the real data distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sampled from a simple prior",
+          "generator distribution pG match pdata"
+        ],
+        "timestamps": [
+          "00:05:20",
+          "00:06:21"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "global_kp_id": "kp_implicit_density_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "role": "primary"
+    }
+  ]
+}

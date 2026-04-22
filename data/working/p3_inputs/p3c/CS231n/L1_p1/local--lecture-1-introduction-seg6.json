@@ -1,0 +1,210 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_1_introduction",
+    "lecture_title": "CS231n Lecture 1: Introduction",
+    "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A"
+  },
+  "unit": {
+    "unit_id": "local::lecture_1_introduction::seg6",
+    "course_id": "CS231N",
+    "name": "CS231n content roadmap: tasks, models, and beyond 2D recognition",
+    "description": "Transitions to the second half of the lecture, where the course roadmap is introduced: core tasks, model families, distributed training, and frontier topics including generative models, vision-language models, 3D vision, and embodied intelligence.",
+    "summary": "The course overview organizes CS231n into four themes: deep learning basics, perceiving and understanding the visual world, generative and interactive visual intelligence, and human-centered applications and implications [slides in Part 2 repeatedly show this four-part roadmap]. The lecture first frames image classification as a core task and uses it to motivate linear classifiers, regularization and optimization, and neural networks [slides show a cat example flowing into each of these model ideas]. It then broadens vision beyond image classification to semantic segmentation, object detection, instance segmentation, video classification, multimodal video understanding, and visualization or interpretation [ts=2615s] [ts=2690s]. Next, the lecture introduces models beyond multilayer perceptrons, especially convolutional networks, recurrent networks, transformers, and large-scale distributed training via data parallelism and model parallelism [ts=2700s] [ts=2825s]. The segment then turns to frontier areas beyond 2D recognition: self-supervised learning, generative modeling including diffusion, vision-language models with shared text-image representation spaces, 3D reconstruction and generation, and embodied agents that perceive, plan, and act [ts=3439s] [ts=3596s].",
+    "key_points": [
+      {
+        "text": "Image classification is introduced as a core computer vision task that anchors the early technical part of the course.",
+        "timestamp_s": 2635,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Vision tasks beyond classification include semantic segmentation, object detection, instance segmentation, video classification, and multimodal understanding.",
+        "timestamp_s": 2660,
+        "evidence_type": "example"
+      },
+      {
+        "text": "CS231n moves beyond multilayer perceptrons to CNNs, RNNs, and transformers.",
+        "timestamp_s": 2740,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Large-scale training uses data parallelism and model parallelism to overcome single-device limits.",
+        "timestamp_s": 2810,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Diffusion models reverse a gradual noising process to generate images.",
+        "timestamp_s": 3457,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Vision-language models place text and images in a shared representation space for retrieval or generation.",
+        "timestamp_s": 3488,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "3D vision and embodied intelligence extend vision into reconstruction, grounding, planning, and action.",
+        "timestamp_s": 3535,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+      "start_s": 2610,
+      "end_s": 3450
+    },
+    "difficulty": 0.59,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 14,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "transcript_slice": "00:43:36\nI'm also particularly excited by AI's medicine and health care\n\n00:43:41\nThis is something really dear to my heart.\n\n00:43:46\nalso co-instructors of this course, we three of us\n\n00:43:53\npatients and to try to use computer vision to deliver care\n\n00:44:00\nSo this is a good use.\n\n00:44:04\nhuman vision is remarkable.\n\n00:44:10\nbut also this entire course to appreciate,\n\n00:44:16\nthere's just so much more nuance, subtlety, richness,\n\n00:44:26\nLook at these kids studying whatever\n\n00:44:33\nThere's still a lot more that computer vision cannot do.\n\n00:44:38\nyou to study computer vision.\n\n00:44:45\nto go over the rest of the class.\n\n00:44:49\n[APPLAUSE]\n\n00:44:51\nThank you, Fei-Fei.\n\n00:44:57\nAnd I hope my microphone is working right now.\n\n00:45:01\nI'm seeing some nodding of heads.\n\n00:45:13\nAnd I'm hoping that you will have a fun\n\n00:45:23\nthat we have and great TAs.\n\n00:45:31\na wide variety of topics around computer vision and use\n\n00:45:37\ninto four different topics.\n\n00:45:45\nAnd let's start actually with a simple question of,\n\n00:45:52\nSo at its core, it's about enabling machines\n\n00:46:00\nAnd basically, this is the most fundamental task in this space--\n\n00:46:13\nYou give the model an image, say, of a cat.\n\n00:46:21\nAnd that's it.\n\n00:46:29\nfor much of more complex applications,\n\n00:46:36\nSo how do we teach a machine to do this?\n\n00:46:44\nas you can see in this slide.\n\n00:46:53\nis shown with a dot in that space.\n\n00:47:02\nwhich was driven from the image itself.\n\n00:47:09\nBut the task of a linear classifier\n\n00:47:17\nthat separates these two, say, cats from dogs.\n\n00:47:26\ngo just only so far.\n\n00:47:32\nwith a straight line.\n\n00:47:36\nWe'll get into the topics of how to model more complex patterns.\n\n00:47:49\nof overfitting and underfitting, which\n\n00:47:59\nAnd to strike the right balance, we\n\n00:48:08\nto control model complexity and optimization to find the best\n\n00:48:16\nSo these are the nuts and bolts of deep learning and creating\n\n00:48:26\nbut also generalizes to unseen and new data as well.\n\n00:48:33\nneural networks.\n\n00:48:38\nAnd what neural networks do, unlike the linear classifiers,\n\n00:48:47\nto model non-linear functions to be\n\n00:48:59\nclassification, and so on.\n\n00:49:09\nAnd now, everybody's familiar with ChatGPT, ChatGPT's vision\n\n00:49:15\nIn this course, we will go deep into the details of how they\n\n00:49:26\nAnd we will be looking into debugging and improving them.\n\n00:49:35\nwe will cover the topics of perceiving and understanding\n\n00:49:44\ninvolves interpreting a vast array of visual information.\n\n00:49:52\ntasks that refer to specific challenges or problems.\n\n00:49:59\nsome of the examples are object detection, scene understanding,\n\n00:50:03\nAnd to solve these tasks, we use different models, which\n\n00:50:13\nframeworks we develop to mimic or explain\n\n00:50:22\nOne of the examples of these types of models\n\n00:50:30\nSo by aligning models with tasks,\n\n00:50:41\nthe world around us.\n\n00:50:48\nof image classification, predicting a single label\n\n00:50:56\nBut we know that real world computer vision\n\n00:51:02\nAnd let's walk through some of the tasks that\n\n00:51:06\nFirst, semantic segmentation, where we are not just\n\n00:51:17\nas cat or tree or whatever.\n\n00:51:25\nin the image.\n\n00:51:30\nBut we don't distinguish between individual objects.\n\n00:51:38\nwhere we now want to not only say what is in the image\n\n00:51:47\nAnd that's why we create bounding boxes\n\n00:51:54\nAnd finally, we have instance segmentation.\n\n00:52:01\nthe most granular of them all.\n\n00:52:08\ntogether.\n\n00:52:13\nSo these tasks require much deeper special understanding\n\n00:52:21\nAnd they push the models to do more than just\n\n00:52:27\nThe complexity doesn't stop with static images.\n\n00:52:33\nSo there's the task of video classification,\n\n00:52:40\nwhat's happening in video.\n\n00:52:47\nThere is the topic of multimodal video understanding,\n\n00:52:56\nFor example, in this example, the person\n\n00:53:04\nwhat's happening here.\n\n00:53:08\nand audio features to be able to understand what's happening.\n\n00:53:14\nand understanding that we will be covering in this class, where\n\n00:53:24\nand see an attention frame or attention map of what\n\n00:53:35\nand so on.\n\n00:53:39\nWe look into models.\n\n00:53:46\nthat we'll be covering is Convolutional Neural Networks\n\n00:53:51\nThere are a number of operations.\n\n00:53:55\nin the class, starting from an image, a number of convolutions,\n\n00:54:01\nand, finally, creating the output.\n\n00:54:08\nwe will study recurrent neural networks for sequential data\n\n00:54:19\nand attention-based frameworks.\n\n00:54:29\ntraining topics, which is kind of new this quarter.\n\n00:54:38\nlarge vision models, and so on.\n\n00:54:44\nhow these models are actually trained.\n\n00:54:51\nAnd models are becoming larger and larger.\n\n00:54:59\nthere are some strategies--\n\n00:55:04\nmodel parallelization-- that we will cover in this class.\n\n00:55:11\nsuch as synchronization between these models and workers\n\n00:55:20\nthat we'll be covering in one of the lectures this quarter.\n\n00:55:31\nthese large models.\n\n00:55:36\nnext is looking into generative and interactive visual\n\n00:55:48\nwith self-supervised learning.\n\n00:55:55\nin which models learn to understand and represent data\n\n00:56:04\nWe will cover this topic.\n\n00:56:10\nof large scale models using vast amounts of data that do not\n\n00:56:18\nAnd they have played a key role in recent breakthroughs\n\n00:56:26\nAnd we will talk a little bit about generative models.\n\n00:56:33\nThey actually generate.\n\n00:56:39\nphoto, which is reimagined in the style of Van Gogh's Starry\n\n00:56:45\nThis is known as style transfer, a classic application\n\n00:56:54\nGenerative models can now translate language\n\n00:57:03\nA model like Dall-E, Dall-E 2 generates an entirely novel\n\n00:57:09\nThis showcases how generative vision models\n\n00:57:16\nin their generations.\n\n00:57:22\nabout the topic of diffusion models in general.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_1_introduction::seg6",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_1_introduction::seg6",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_1_introduction::seg6",
+      "global_kp_id": "kp_cs231n_curriculum_structure_and_learning_objectives",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "name": "Modern vision extends beyond classification",
+      "description": "The course treats vision as covering segmentation, detection, video, multimodal learning, generative models, vision-language models, 3D vision, and embodied intelligence.",
+      "track_tags": [
+        "frontier_topics",
+        "tasks"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_ai",
+        "multimodal_ai",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "industry",
+        "research",
+        "robotics"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because modern vision extends beyond classification formalizes how the course treats vision as covering segmentation, detection, video, multimodal learning, generative models, vision-language models, 3D vision, and embodied intelligence, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_1_introduction::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs231n_curriculum_structure_and_learning_objectives",
+      "name": "CS231n curriculum structure and learning objectives",
+      "description": "The course is organized around deep learning basics, visual understanding, generative/interactive intelligence, and human-centered AI, with explicit goals for problem formulation, model building, and field awareness.",
+      "track_tags": [
+        "course_structure",
+        "learning_objectives"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "education"
+      ],
+      "career_path_tags": [
+        "industry",
+        "research"
+      ],
+      "difficulty_level": 0.24,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cS231n curriculum structure and learning objectives clarifies the course is organized around deep learning basics, visual understanding, generative/interactive intelligence, and human-centered AI, with explicit goals for problem formulation, model building, and field awareness, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_1_introduction::kp10"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.44,
+    0.74
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L1_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture01-introduction_transcript.txt"
+  }
+}

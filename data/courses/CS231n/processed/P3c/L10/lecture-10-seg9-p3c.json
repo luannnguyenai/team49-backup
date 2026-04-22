@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_10::seg9",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for application-oriented questions on visually guided audio source separation and why efficient video understanding remains an important systems problem.",
+  "question_bank": [
+    {
+      "item_id": "lecture_10_seg9_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is visually guided audio source separation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Using visual information from the video to help separate a mixed audio signal into its component sources",
+        "Using audio only to predict object bounding boxes",
+        "Training a model to remove all sound from a video",
+        "Compressing sound waves into fewer frequency bins"
+      ],
+      "answer_index": 0,
+      "explanation": "In a mixed recording, the visual stream can reveal which objects or speakers are active. That information can guide the system to separate the combined audio into meaningful parts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_audio_visual_source_separation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "guide the source separation",
+          "sound components"
+        ],
+        "timestamps": [
+          "01:03:48",
+          "01:04:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_10_seg9_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is efficient video understanding an important research problem?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Long videos are too expensive to process exhaustively clip by clip, so models must decide what to analyze",
+        "Video models have already solved every recognition task",
+        "Audio makes video shorter and easier to store",
+        "Efficient methods always avoid using learned features"
+      ],
+      "answer_index": 0,
+      "explanation": "A long video can contain many clips, and processing all of them can be prohibitively expensive. Efficient methods try to focus computation on important moments or useful modalities.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_efficient_video_understanding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cannot do clip one by one",
+          "important clips"
+        ],
+        "timestamps": [
+          "01:05:54",
+          "01:06:14"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg9_q1",
+      "global_kp_id": "kp_audio_visual_source_separation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg9_q2",
+      "global_kp_id": "kp_efficient_video_understanding",
+      "role": "primary"
+    }
+  ]
+}

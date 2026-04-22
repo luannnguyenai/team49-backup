@@ -1,0 +1,331 @@
+{
+  "unit_id": "local::lecture_1_introduction::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript gives enough detail to assess the deep-learning resurgence through backpropagation, data scale, and responsible deployment concerns. The items avoid relying on slide-only timeline details, so no clip is needed.",
+  "qa_outputs": [
+    {
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The stem matches the backpropagation concept directly and the answer key is supported by the transcript evidence.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": [],
+      "item_id": "local::lecture_1_introduction::seg5::q1"
+    },
+    {
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item tests the role of data scale in deep-learning resurgence and uses evidence that directly motivates the correct answer.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": [],
+      "item_id": "local::lecture_1_introduction::seg5::q2"
+    },
+    {
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item checks a concrete deployment risk tied to human-generated data, and the distractors stay plausible without undermining answer clarity.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": [],
+      "item_id": "local::lecture_1_introduction::seg5::q3"
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the central role of backpropagation in neural network training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It sends error information backward through the network so parameters can be adjusted.",
+        "It manually fixes every parameter before training begins.",
+        "It replaces the need for labeled examples or output comparisons.",
+        "It converts every image into a hand-drawn sketch before classification."
+      ],
+      "answer_index": 0,
+      "explanation": "Backpropagation links output errors to internal parameters. This allows a multilayer network to learn by updating weights based on how far its predictions are from the desired outputs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "take the difference",
+          "propagate the information back",
+          "called backpropagation"
+        ],
+        "timestamps": [
+          "00:29:10",
+          "00:29:17",
+          "00:29:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why was large-scale visual data important for the resurgence of deep learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "High-capacity models need many examples to learn patterns that generalize beyond the training set.",
+        "Large datasets make model learning unnecessary because labels can be ignored.",
+        "More images only matter for storage hardware, not for recognition accuracy.",
+        "Large datasets mainly help hand-design every convolution parameter."
+      ],
+      "answer_index": 0,
+      "explanation": "A high-capacity model can fit complex patterns, but it needs enough varied data to learn generalizable structure rather than memorizing narrow examples.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "lack of data",
+          "high capacity algorithms",
+          "learn to generalize",
+          "ImageNet challenge"
+        ],
+        "timestamps": [
+          "00:31:22",
+          "00:31:29",
+          "00:31:39",
+          "00:33:02"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What risk follows from building large vision systems on data produced by human activity?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Biases in the data can propagate into model behavior, especially in high-stakes settings.",
+        "Data-driven systems are guaranteed to be neutral because they use many examples.",
+        "Bias disappears automatically when a model has more parameters.",
+        "Vision systems cannot affect people outside image classification benchmarks."
+      ],
+      "answer_index": 0,
+      "explanation": "Data reflects the world and the people who collect or label it. If that data contains bias, a model can learn patterns that cause unfair or harmful outcomes in real applications.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "data carry our bias",
+          "face recognition algorithms",
+          "deciding your job"
+        ],
+        "timestamps": [
+          "00:42:40",
+          "00:42:47",
+          "00:43:05"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q1",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Backpropagation is important but many learners have seen it before, so the item is medium difficulty with decent discrimination."
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.05,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "This is a medium item because it requires connecting performance gains to data scale rather than naming a single historical fact."
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "The item moves from descriptive content to a responsible-AI implication, making it slightly more demanding than basic recall."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_rationale": "It works well when checking whether the learner can connect training dynamics to a core deep-learning mechanism.",
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_rationale": "The item is useful when summarizing why modern deep learning became viable at scale.",
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_rationale": "It is strongest when learners need to transfer a general risk principle to real-world vision systems.",
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    }
+  ]
+}

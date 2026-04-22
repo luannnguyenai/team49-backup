@@ -1,0 +1,1277 @@
+{
+  "lecture_title": "Lecture 15 - Benchmarking and Evaluation",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Why evaluation changes across training, development, deployment, and publishing",
+      "start_s": 5,
+      "end_s": 478
+    },
+    {
+      "section_index": 2,
+      "title": "Close-ended NLP tasks, metrics, and spurious correlations",
+      "start_s": 479,
+      "end_s": 1052
+    },
+    {
+      "section_index": 3,
+      "title": "Open-ended generation metrics: BLEU, ROUGE, BERTScore, BLEURT, and reference quality",
+      "start_s": 1053,
+      "end_s": 1979
+    },
+    {
+      "section_index": 4,
+      "title": "Human evaluation as the gold standard and why it is difficult",
+      "start_s": 1980,
+      "end_s": 2603
+    },
+    {
+      "section_index": 5,
+      "title": "Chatbot evaluation, Chatbot Arena, LLM judges, and AlpacaEval",
+      "start_s": 2604,
+      "end_s": 3301
+    },
+    {
+      "section_index": 6,
+      "title": "How current LLMs are evaluated: benchmark suites, MMLU, coding, agents, and perplexity",
+      "start_s": 3302,
+      "end_s": 3836
+    },
+    {
+      "section_index": 7,
+      "title": "Consistency, contamination, overfitting, and dynamic/private testing",
+      "start_s": 3837,
+      "end_s": 4269
+    },
+    {
+      "section_index": 8,
+      "title": "Monoculture, multilinguality, efficiency, fairness, bias, and incentive problems",
+      "start_s": 4270,
+      "end_s": 4719
+    },
+    {
+      "section_index": 9,
+      "title": "Takeaways and rubric-based thinking for model-as-a-judge evaluation",
+      "start_s": 4720,
+      "end_s": 5054
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Evaluation goals differ across the ML lifecycle",
+      "description": "Introduces why evaluation is needed at training, development, model selection, deployment, and publishing, and why each stage wants different metric properties.",
+      "summary": "The lecture opens by framing evaluation as a stage-dependent design problem rather than a single universal metric. During training, metrics must be fast, cheap, differentiable, and resistant to shortcut optimization [ts=63s] [ts=176s]. During deployment, the requirements shift toward trustworthiness, task specificity, and absolute thresholds because production decisions need go/no-go judgments rather than just pairwise comparisons [ts=240s] [ts=266s]. The publishing setting is treated separately: academic benchmarks should be reproducible, standardized, easy to run, and directionally useful over years even if the metric is imperfect, with benchmark design balancing simplicity against difficulty so the task is neither random nor already saturated [ts=283s] [ts=332s] [ts=373s].",
+      "key_points": [
+        {
+          "text": "Training, development, model selection, deployment, and publishing each require evaluation, but not with the same metric properties.",
+          "timestamp_s": 150,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Training-time metrics should be fast, cheap, differentiable, and hard to game through shortcuts.",
+          "timestamp_s": 180,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Deployment metrics should be trustworthy, task-specific, and absolute enough to support thresholds like 'do not ship below 95%'.",
+          "timestamp_s": 255,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Academic benchmarks should be reproducible and standardized so papers remain comparable over many years.",
+          "timestamp_s": 294,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A useful academic benchmark balances difficulty and simplicity: too hard gives random performance, too easy gives saturated baselines.",
+          "timestamp_s": 380,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 5,
+        "end_s": 478
+      },
+      "difficulty": 0.34,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Close-ended tasks and the traps inside standard metrics",
+      "description": "Covers close-ended NLP tasks, standard classification metrics, benchmark aggregation, and the risk of spurious dataset artifacts.",
+      "summary": "Close-ended tasks are defined as tasks with a small answer space, often one or a few correct labels, so they can usually be evaluated with standard classification tools such as accuracy, precision, recall, and F1 [ts=535s] [ts=668s]. The lecture surveys sentiment analysis, entailment, part-of-speech tagging, named entity recognition, coreference, question answering, and multi-task benchmarks such as SuperGLUE [ts=576s] [ts=702s]. Yann then emphasizes that 'standard ML' does not mean 'easy': metric choice changes model behavior, accuracy can be misleading under class imbalance as in spam filtering, averaging heterogeneous benchmark columns is often ill-posed, and label collection can introduce spurious correlations, illustrated by SNLI hypotheses where negation alone predicts non-entailment surprisingly well [ts=858s] [ts=894s] [ts=980s].",
+      "key_points": [
+        {
+          "text": "A close-ended NLP task has a limited answer space, often fewer than 10 options.",
+          "timestamp_s": 541,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Typical close-ended benchmarks include IMDb/SST for sentiment and SNLI for entailment.",
+          "timestamp_s": 590,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Close-ended evaluation typically uses accuracy, precision, recall, and F1.",
+          "timestamp_s": 673,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Accuracy can be deceptive on imbalanced data; a classifier predicting 'not spam' always could score 90% accuracy without solving the task.",
+          "timestamp_s": 858,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Averaging columns that mix accuracy, F1, and correlation can yield misleading aggregate benchmark scores.",
+          "timestamp_s": 894,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "In SNLI, humans often wrote non-entailment hypotheses by inserting negation, creating a shortcut where models can do well from the hypothesis alone.",
+          "timestamp_s": 980,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 479,
+        "end_s": 1052
+      },
+      "difficulty": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Open-ended evaluation from overlap scores to learned judges",
+      "description": "Introduces open-ended tasks and walks through overlap metrics, embedding-based metrics, BLEURT, and the limitation that references themselves may be poor.",
+      "summary": "Open-ended tasks are contrasted with close-ended tasks by having many valid answers with graded quality, which makes standard right-or-wrong classification metrics inadequate [ts=1063s] [ts=1086s]. The lecture uses summarization, translation, and especially instruction-following as representative open-ended tasks, then categorizes evaluation methods into content overlap, model-based metrics, and human evaluation [ts=1105s] [ts=1199s]. Content-overlap metrics are introduced as word or n-gram comparison against human references; BLEU emphasizes precision with a length penalty, ROUGE emphasizes recall, and both can miss semantic equivalence or reward wrong answers with lexical overlap, as shown by the 'Heck yes!' examples [ts=1242s] [ts=1321s] [ts=1439s]. Learned metrics then move from word embeddings to contextual BERT representations in BERTScore and to fine-tuned evaluators in BLEURT, but the segment closes by arguing that reference-based evaluation is fundamentally bounded by reference quality, illustrated by weak ROUGE-human correlation on ordinary news summaries and improved correlation when experts write stronger references [ts=1595s] [ts=1646s] [ts=1754s] [ts=1833s].",
+      "key_points": [
+        {
+          "text": "Open-ended tasks have many valid answers and multiple levels of correctness.",
+          "timestamp_s": 1065,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Instruction-following can be viewed as a general interface that subsumes classification, summarization, and other tasks.",
+          "timestamp_s": 1155,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Content-overlap metrics compare model output to a human reference using lexical or n-gram overlap.",
+          "timestamp_s": 1242,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "BLEU tracks overlap precision with a length penalty, while ROUGE focuses on recall.",
+          "timestamp_s": 1321,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "BLEU can assign 0 to semantically correct outputs like 'Yup' and a high score to semantically wrong outputs like 'Heck no!'.",
+          "timestamp_s": 1435,
+          "evidence_type": "example"
+        },
+        {
+          "text": "BERTScore compares contextual BERT embeddings rather than raw lexical matches.",
+          "timestamp_s": 1610,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "BLEURT fine-tunes a pretrained BERT model to predict evaluation quality from examples with metric and human supervision.",
+          "timestamp_s": 1666,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Reference-based metrics are limited by the quality of the references themselves, not just by the scoring function.",
+          "timestamp_s": 1794,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 1053,
+        "end_s": 1979
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Human evaluation is the gold standard but operationally fragile",
+      "description": "Explains why human evaluation remains the reference point for open-ended tasks while cataloging its practical and statistical failure modes.",
+      "summary": "Human evaluation is presented as the gold standard for open-ended generation and the target against which automatic metrics should be validated [ts=1980s] [ts=2016s]. But the lecture quickly shows why this 'gold standard' is difficult to use well: evaluators should score multiple axes such as fluency, coherence, common sense, grammaticality, and redundancy, and scores from different human studies are not directly comparable because the annotators and protocols differ [ts=2056s] [ts=2081s]. Yann then details the operational problems: human evaluation is slow and expensive, annotators disagree heavily even with detailed rubrics, the Alpaca Farm team only achieved 67% agreement among five trained researchers, many published human studies are not repeatable, humans only observe sampled outputs rather than the model's full recall, and crowdworker incentives often favor shortcuts such as preferring longer answers [ts=2101s] [ts=2210s] [ts=2310s] [ts=2438s].",
+      "key_points": [
+        {
+          "text": "Human evaluation is the gold standard for open-ended tasks and the target automatic metrics should correlate with.",
+          "timestamp_s": 1985,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Humans should often score multiple dimensions such as fluency, coherence, style, grammaticality, and redundancy.",
+          "timestamp_s": 2062,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scores from different human-evaluation studies should not be directly compared because annotators and protocols differ.",
+          "timestamp_s": 2081,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Human evaluation is slow and expensive.",
+          "timestamp_s": 2106,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Even after detailed rubric discussion, five Alpaca Farm researchers agreed only 67% of the time.",
+          "timestamp_s": 2210,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A survey paper found that only about 5% of human evaluations were repeatable from public descriptions.",
+          "timestamp_s": 2330,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Humans mainly evaluate precision on sampled outputs, not recall over the model's whole output distribution.",
+          "timestamp_s": 2374,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Annotator incentives can reward shortcuts, such as preferring longer answers when working quickly.",
+          "timestamp_s": 2460,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 1980,
+        "end_s": 2603
+      },
+      "difficulty": 0.47,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg5",
+      "course_id": "cs224n-2024",
+      "name": "From Chatbot Arena to GPT-4 judges and AlpacaEval",
+      "description": "Covers pairwise chatbot evaluation, public arenas, model-as-a-judge methods, and the specific design of AlpacaEval.",
+      "summary": "The lecture next turns to chatbot evaluation, arguing that systems like ChatGPT are especially hard to score because they answer arbitrary tasks with arbitrary output length [ts=2610s] [ts=2628s]. The standard solution is pairwise comparison: two models answer the same prompt and a human or judge model chooses the preferred response; Chatbot Arena operationalizes this at scale with public side-by-side voting and Elo ratings derived from many pairwise matches [ts=2628s] [ts=2662s]. Yann then argues that LLM judges, especially GPT-4, make this much cheaper and faster while still correlating strongly with human-majority preferences because model judges have low variance, although they introduce systematic biases such as verbosity bias, position bias, and self-preference [ts=2770s] [ts=2878s] [ts=3000s] [ts=3013s]. AlpacaEval is presented as a concrete instantiation: GPT-4 compares a candidate model against a baseline on instructions, length bias is corrected by reweighting, the benchmark correlates about 98% with Chatbot Arena rankings, and evaluation takes only minutes and about ten dollars [ts=3044s] [ts=3075s] [ts=3110s].",
+      "key_points": [
+        {
+          "text": "Chatbot evaluation is difficult because the model may be asked any task and may produce arbitrarily long text.",
+          "timestamp_s": 2612,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A common chatbot-evaluation setup compares two model responses to the same prompt and asks which is better.",
+          "timestamp_s": 2628,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Chatbot Arena collects large-scale side-by-side human preferences and converts pairwise outcomes into Elo ratings.",
+          "timestamp_s": 2662,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Using GPT-4 as a judge is roughly 100x faster and 100x cheaper than human evaluation in the Alpaca setting.",
+          "timestamp_s": 2770,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Judge-model agreement with human-majority preferences can exceed the agreement of an individual human with the other humans.",
+          "timestamp_s": 2818,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Model judges show biases including preference for longer outputs, sensitivity to left/right position, and some self-bias.",
+          "timestamp_s": 3000,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "AlpacaEval asks GPT-4 to compare model outputs against a baseline, reweights for length bias, and reports a win rate.",
+          "timestamp_s": 3102,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 2604,
+        "end_s": 3301
+      },
+      "difficulty": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "course_id": "cs224n-2024",
+      "name": "What people actually use today to evaluate LLMs",
+      "description": "Surveys current LLM evaluation practice across perplexity, aggregate benchmark suites, arena-style comparisons, and specialized tasks such as coding and agents.",
+      "summary": "Yann summarizes current LLM evaluation practice into three families: perplexity or validation loss, averages over many benchmark tasks, and arena-like pairwise comparisons [ts=3302s] [ts=3327s]. The 'average over everything' family includes large suites such as HELM and the Hugging Face Open LLM Leaderboard, which bundle automatically scored tasks including GSM8K, MMLU, LegalBench, and MedQA [ts=3370s] [ts=3395s]. MMLU is highlighted as the most widely believed benchmark, consisting of multiple-choice questions over 57 subject areas, while coding benchmarks are valued because they correlate with reasoning and support easy automatic evaluation via test cases [ts=3434s] [ts=3512s] [ts=3543s]. The segment also raises agent evaluation as an emerging challenge requiring sandboxed tool environments and notes that perplexity is often a surprisingly strong proxy for downstream averages in pretrained models, though it is not comparable across datasets or tokenizers and should be treated carefully [ts=3600s] [ts=3691s] [ts=3750s].",
+      "key_points": [
+        {
+          "text": "Current LLM evaluation commonly uses perplexity, average benchmark scores, or arena-like pairwise comparisons.",
+          "timestamp_s": 3308,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "HELM and the Hugging Face Open LLM Leaderboard are aggregate suites over many automatically evaluated tasks.",
+          "timestamp_s": 3370,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Common benchmark tasks include GSM8K, MMLU, LegalBench, and MedQA.",
+          "timestamp_s": 3395,
+          "evidence_type": "example"
+        },
+        {
+          "text": "MMLU is a 57-task multiple-choice benchmark that many people treat as a key indicator of general capability.",
+          "timestamp_s": 3434,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Coding is widely benchmarked because it correlates with reasoning and can be checked automatically with tests.",
+          "timestamp_s": 3512,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Agent benchmarks need sandboxed environments because evaluating real actions safely is difficult.",
+          "timestamp_s": 3600,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Perplexity on pretraining/validation data is often strongly correlated with average downstream benchmark performance.",
+          "timestamp_s": 3691,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Perplexity is not comparable across datasets or tokenizers.",
+          "timestamp_s": 3750,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 3302,
+        "end_s": 3836
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "course_id": "cs224n-2024",
+      "name": "Implementation consistency, contamination, and keeping test sets alive",
+      "description": "Explains why benchmark results can change with formatting and implementation details, then discusses contamination, overfitting, and mitigations such as private or dynamic test sets.",
+      "summary": "This segment argues that even apparently simple benchmarks can be unstable. For multiple-choice tasks, changing how answers are formatted can change generations and model rankings, and MMLU historically had multiple incompatible implementations that differed in prompting and answer-selection procedures such as constrained decoding versus token or log-likelihood scoring [ts=3840s] [ts=3878s] [ts=3916s]. Yann then moves to contamination: benchmark scores can be inflated when test data or close variants appear in pretraining, illustrated by code-benchmark anecdotes where GPT-4 did very well on older Codeforces problems but failed on newer ones [ts=4032s] [ts=4063s]. The lecture separates contamination from broader overfitting to public test sets, then suggests mitigations including private or regenerated test sets such as GSM1K, dynamic test sets such as Dynabench, and leakage detection heuristics such as unusually confident answers or sensitivity to the original order of examples [ts=4153s] [ts=4197s] [ts=4223s].",
+      "key_points": [
+        {
+          "text": "Multiple-choice rankings can change if you relabel the answer options or alter the exact formatting.",
+          "timestamp_s": 3843,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "MMLU once had multiple mainstream implementations that produced different scores because prompting and scoring conventions differed.",
+          "timestamp_s": 3890,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Constrained decoding, raw-token prediction, and likelihood-based scoring can yield substantially different benchmark results.",
+          "timestamp_s": 3916,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A sharp performance drop from old to new benchmark items can indicate contamination from pretraining on the benchmark data.",
+          "timestamp_s": 4032,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Closed models and massive pretraining corpora make contamination hard to verify directly.",
+          "timestamp_s": 4092,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Rapid achievement of 'human-level' scores on public benchmarks may reflect contamination or repeated tuning on the test set.",
+          "timestamp_s": 4117,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Mitigations include private or regenerated test sets like GSM1K and dynamic benchmarks like Dynabench.",
+          "timestamp_s": 4153,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Possible leakage checks include looking for overconfident answer probabilities or drops when example order is scrambled.",
+          "timestamp_s": 4223,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 3837,
+        "end_s": 4269
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg8",
+      "course_id": "cs224n-2024",
+      "name": "Benchmark monoculture, English bias, fairness, and incentive failures",
+      "description": "Broadens the critique from single benchmarks to the field-wide incentive structure around English-centric, accuracy-only evaluation.",
+      "summary": "The lecture next argues that NLP benchmarking suffers from monoculture: many top papers evaluate only English and often only raw performance, leaving multilinguality, efficiency, interpretability, and fairness under-measured even though multilingual benchmarks already exist [ts=4270s] [ts=4337s] [ts=4390s]. Yann also criticizes single-number evaluation, noting that real deployments care about computational efficiency, harmful bias, and the unequal value of different examples rather than just average accuracy [ts=4455s] [ts=4512s]. He gives concrete alternatives such as MLPerf for speed-and-accuracy tradeoffs and DiscrimEval for bias probes under controlled demographic template changes [ts=4440s] [ts=4558s] [ts=4578s]. The segment closes by stressing that English-centric metrics like BLEU and ROUGE can break down in languages with different word-boundary conventions, and that LLM-based evaluators can amplify the default preferences of a single judge model across the whole field, all while academic incentives keep legacy metrics in place because they are standardized and reviewer-friendly [ts=4647s] [ts=4660s] [ts=4676s].",
+      "key_points": [
+        {
+          "text": "NLP benchmarking is dominated by English-only and performance-only evaluation.",
+          "timestamp_s": 4290,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Multilingual benchmarks such as MEGA, GlobalBench, and XTREME already exist, but the field lacks incentives to use them.",
+          "timestamp_s": 4390,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Single-number averages ignore efficiency, fairness, interpretability, and differing real-world value across examples.",
+          "timestamp_s": 4455,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "MLPerf evaluates how fast a target level of performance can be reached, incorporating efficiency directly into benchmarking.",
+          "timestamp_s": 4440,
+          "evidence_type": "example"
+        },
+        {
+          "text": "DiscrimEval probes discriminatory model behavior by varying demographic attributes in templates.",
+          "timestamp_s": 4578,
+          "evidence_type": "example"
+        },
+        {
+          "text": "BLEU and ROUGE are English-centric because they assume word tokenization conventions that do not transfer cleanly to languages like Thai.",
+          "timestamp_s": 4647,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "LLM-based evaluation can scale one judge model's demographic and cultural biases across the NLP community.",
+          "timestamp_s": 4660,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Academic incentives keep flawed legacy metrics alive because they support comparability and satisfy reviewers.",
+          "timestamp_s": 4676,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 4270,
+        "end_s": 4719
+      },
+      "difficulty": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg9",
+      "course_id": "cs224n-2024",
+      "name": "Takeaways and a more rubric-driven future for GPT-4 judges",
+      "description": "Wraps up the lecture with a recap and an audience discussion about how to trust judge models without blindly following them.",
+      "summary": "The closing recap revisits the full taxonomy: different stages of model work want different evaluation properties; close-ended tasks are standard ML but still demand careful metric design; open-ended tasks rely on BLEU, ROUGE, BERTScore, human judgment, and increasingly LLM-based judges; and the main practical threats are consistency problems, contamination, and bias [ts=4720s] [ts=4746s] [ts=4768s]. Yann's most practical advice is to inspect outputs directly instead of trusting leaderboard numbers blindly [ts=4777s]. In the final Q&A, he acknowledges tension between human inspection and human bias, argues that GPT-4's danger is not one person's bias but a single scalable monoculture, and suggests a better future in which judge models apply explicit, detailed rubrics rather than vague prompts such as 'how good is this summary out of five?' [ts=4880s] [ts=4940s] [ts=5010s].",
+      "key_points": [
+        {
+          "text": "Different evaluation settings want different metric properties.",
+          "timestamp_s": 4722,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture's three major challenge themes are consistency, contamination, and bias.",
+          "timestamp_s": 4768,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A core practical rule is to inspect model outputs rather than trust numbers blindly.",
+          "timestamp_s": 4777,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The danger of GPT-4 judging is scalable monoculture bias rather than the idiosyncratic bias of a single human.",
+          "timestamp_s": 4899,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A better judge-model setup would use a detailed rubric specifying what a good answer must contain.",
+          "timestamp_s": 5010,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+        "start_s": 4720,
+        "end_s": 5054
+      },
+      "difficulty": 0.41,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 9,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp1",
+      "name": "Evaluation objectives by lifecycle stage",
+      "description": "Different phases such as training, development, deployment, and publishing need different evaluation properties.",
+      "track_tags": [
+        "evaluation",
+        "benchmarking",
+        "ml-systems"
+      ],
+      "domain_tags": [
+        "nlp",
+        "machine-learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-ml",
+        "ml-infrastructure"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This framing organizes the rest of the lecture by explaining why no single metric is optimal everywhere.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp2",
+      "name": "Academic benchmark design tradeoffs",
+      "description": "Academic benchmarks prioritize reproducibility, standardization, ease of use, and directional progress over perfect realism.",
+      "track_tags": [
+        "benchmarking",
+        "research-methods"
+      ],
+      "domain_tags": [
+        "nlp",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "benchmark-design"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It explains why academic benchmarks often differ from real-world deployment metrics and why crude metrics can persist.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp3",
+      "name": "Close-ended NLP evaluation",
+      "description": "Tasks with a small answer space can often be evaluated with standard classification metrics.",
+      "track_tags": [
+        "classification",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "nlp",
+        "supervised-learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-ml"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the baseline evaluation regime from which open-ended NLP evaluation is contrasted.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp4",
+      "name": "Metric choice and aggregation pitfalls",
+      "description": "Accuracy, precision, recall, F1, and aggregate leaderboard averages can mislead when class balance or metric semantics differ.",
+      "track_tags": [
+        "metrics",
+        "benchmarking"
+      ],
+      "domain_tags": [
+        "machine-learning",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-ml",
+        "data-science"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture repeatedly warns that metric definitions and aggregation choices can change conclusions without changing the model.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp5",
+      "name": "Spurious correlations from dataset construction",
+      "description": "Benchmarks can contain shortcuts that let models exploit artifacts rather than solve the intended task.",
+      "track_tags": [
+        "dataset-quality",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "nlp",
+        "robustness"
+      ],
+      "career_path_tags": [
+        "research",
+        "dataset-curation"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Shortcut learning undermines the validity of apparently standard close-ended benchmarks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp6",
+      "name": "Open-ended generation evaluation",
+      "description": "Open-ended tasks have many valid answers and graded quality, so evaluation must move beyond exact labels.",
+      "track_tags": [
+        "generation",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "nlp",
+        "language-models"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This concept is the main transition point from classical classification-style evaluation to modern LLM evaluation.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp7",
+      "name": "BLEU and ROUGE overlap metrics",
+      "description": "Reference-based overlap metrics compare generated text to human references using lexical or n-gram overlap.",
+      "track_tags": [
+        "generation",
+        "metrics"
+      ],
+      "domain_tags": [
+        "nlp",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "BLEU and ROUGE are historically central and still shape benchmark reporting, despite their weaknesses.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp8",
+      "name": "BERTScore and BLEURT",
+      "description": "Embedding-based and learned evaluation metrics use contextual representations or supervised fine-tuning to improve over lexical overlap.",
+      "track_tags": [
+        "generation",
+        "learned-metrics"
+      ],
+      "domain_tags": [
+        "nlp",
+        "language-models"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "These metrics refine reference-based evaluation but are secondary to the lecture's broader arguments about validity and incentives.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp9",
+      "name": "Reference quality limits reference-based evaluation",
+      "description": "Even a decent scoring metric can fail if the human references used as gold outputs are weak or noisy.",
+      "track_tags": [
+        "generation",
+        "dataset-quality"
+      ],
+      "domain_tags": [
+        "nlp",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "dataset-curation"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This explains why benchmark failure is often about bad references, not just bad metrics.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp10",
+      "name": "Human evaluation design and disagreement",
+      "description": "Human evaluation remains the gold standard but suffers from cost, slowness, disagreement, and protocol sensitivity.",
+      "track_tags": [
+        "human-eval",
+        "annotation"
+      ],
+      "domain_tags": [
+        "nlp",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "annotation-ops",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Understanding the limits of human labels is necessary before trusting any automatic metric that claims to approximate them.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp11",
+      "name": "Pairwise chatbot evaluation and Elo ranking",
+      "description": "Modern chat systems are commonly evaluated by side-by-side preferences aggregated into rankings such as Elo scores.",
+      "track_tags": [
+        "llm-eval",
+        "pairwise-preference"
+      ],
+      "domain_tags": [
+        "language-models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the main operational evaluation paradigm for chat-oriented LLMs.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp12",
+      "name": "LLM-as-a-judge and AlpacaEval",
+      "description": "Judge models such as GPT-4 can replace or augment humans for fast pairwise evaluation, but introduce systematic biases.",
+      "track_tags": [
+        "llm-eval",
+        "model-as-a-judge"
+      ],
+      "domain_tags": [
+        "language-models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-llm",
+        "ml-systems"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the lecture's key modern mechanism for scalable evaluation of instruction-following systems.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp13",
+      "name": "Current LLM benchmark suites and task coverage",
+      "description": "Modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains.",
+      "track_tags": [
+        "benchmark-suites",
+        "llm-eval"
+      ],
+      "domain_tags": [
+        "language-models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Students need to recognize the benchmark ecosystem that papers and model cards rely on today.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp14",
+      "name": "Perplexity as a proxy metric",
+      "description": "Pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient.",
+      "track_tags": [
+        "language-modeling",
+        "metrics"
+      ],
+      "domain_tags": [
+        "language-models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "ml-infrastructure"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It matters operationally for model development, but the lecture treats it as a pragmatic proxy rather than an end goal.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp15",
+      "name": "Consistency, contamination, and overfitting in benchmarks",
+      "description": "Benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests.",
+      "track_tags": [
+        "benchmark-validity",
+        "robustness"
+      ],
+      "domain_tags": [
+        "language-models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "research",
+        "benchmark-design",
+        "applied-llm"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "These are the lecture's main failure modes for interpreting LLM benchmark numbers.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture15-benchmarking::kp16",
+      "name": "Monoculture, multilinguality, fairness, efficiency, and incentives",
+      "description": "Benchmarking choices are shaped by field-wide incentives, often producing English-centric, accuracy-only evaluations that miss important deployment concerns.",
+      "track_tags": [
+        "benchmarking",
+        "fairness",
+        "multilinguality",
+        "efficiency"
+      ],
+      "domain_tags": [
+        "language-models",
+        "evaluation",
+        "responsible-ai"
+      ],
+      "career_path_tags": [
+        "research",
+        "policy",
+        "applied-llm",
+        "ml-systems"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "This capstone concept integrates the lecture's technical critiques with the incentive structure that keeps flawed evaluation practice in place.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg1",
+      "local_kp_id": "local::lecture15-benchmarking::kp1",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment explicitly walks through training, development, model selection, deployment, and publishing as distinct evaluation settings [ts=63s] [ts=115s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg1",
+      "local_kp_id": "local::lecture15-benchmarking::kp2",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The academic-benchmark design criteria of reproducibility, standardization, ease, and the difficulty/simplicity tradeoff are introduced in detail [ts=283s] [ts=373s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "local_kp_id": "local::lecture15-benchmarking::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This unit defines close-ended tasks and surveys close-ended NLP examples plus standard metrics [ts=535s] [ts=668s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "local_kp_id": "local::lecture15-benchmarking::kp4",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Metric-selection pitfalls are illustrated with spam imbalance and the averaging of incompatible benchmark columns [ts=858s] [ts=894s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "local_kp_id": "local::lecture15-benchmarking::kp5",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The SNLI hypothesis-only shortcut is used as a direct example of artifact-driven performance [ts=980s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "local_kp_id": "local::lecture15-benchmarking::kp6",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment begins by defining open-ended tasks as having many possible correct answers and graded quality [ts=1063s] [ts=1086s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "local_kp_id": "local::lecture15-benchmarking::kp7",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "BLEU and ROUGE occupy the core of the first half of the segment, including their precision/recall contrast and failure cases [ts=1242s] [ts=1321s] [ts=1439s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "local_kp_id": "local::lecture15-benchmarking::kp8",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "BERTScore and BLEURT are introduced as embedding-based and fine-tuned learned metrics [ts=1595s] [ts=1646s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "local_kp_id": "local::lecture15-benchmarking::kp9",
+      "planner_role": "main",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment closes by showing that weak summaries as references degrade ROUGE-human correlation [ts=1754s] [ts=1833s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg4",
+      "local_kp_id": "local::lecture15-benchmarking::kp10",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The entire unit is devoted to human evaluation setup, disagreement, reproducibility, and annotator incentives [ts=2056s] [ts=2210s] [ts=2310s] [ts=2438s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg5",
+      "local_kp_id": "local::lecture15-benchmarking::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Pairwise chatbot comparison and Chatbot Arena with Elo ratings are introduced as the standard human setup [ts=2628s] [ts=2662s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg5",
+      "local_kp_id": "local::lecture15-benchmarking::kp12",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "GPT-4 judging, its agreement properties, its biases, and AlpacaEval's design and cost are central to this unit [ts=2770s] [ts=2878s] [ts=3044s] [ts=3075s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "local_kp_id": "local::lecture15-benchmarking::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment surveys the benchmark ecosystem including HELM, HF Open LLM Leaderboard, GSM8K, MMLU, coding, and agent setups [ts=3370s] [ts=3395s] [ts=3434s] [ts=3512s] [ts=3600s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "local_kp_id": "local::lecture15-benchmarking::kp14",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Perplexity is treated as a practical proxy with strong downstream correlation but important comparability caveats [ts=3691s] [ts=3750s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "local_kp_id": "local::lecture15-benchmarking::kp15",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This unit centers on implementation sensitivity, contamination, overfitting, and mitigation strategies [ts=3843s] [ts=3890s] [ts=4032s] [ts=4153s] [ts=4223s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "local_kp_id": "local::lecture15-benchmarking::kp13",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The MMLU benchmark reappears as the main example through which implementation inconsistency is explained [ts=3878s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg8",
+      "local_kp_id": "local::lecture15-benchmarking::kp16",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit focuses on English-centric benchmarking, neglected dimensions like efficiency and bias, and the incentive structure that preserves flawed metrics [ts=4290s] [ts=4455s] [ts=4647s] [ts=4676s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg8",
+      "local_kp_id": "local::lecture15-benchmarking::kp15",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Bias is broadened from a benchmark-validity issue into a field-wide evaluation concern, especially for LLM judges [ts=4660s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg9",
+      "local_kp_id": "local::lecture15-benchmarking::kp1",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The recap returns to the idea that different evaluation settings want different properties [ts=4722s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg9",
+      "local_kp_id": "local::lecture15-benchmarking::kp12",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The Q&A revisits GPT-4-as-judge and argues for more explicit rubric-based prompting [ts=4940s] [ts=5010s]."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg9",
+      "local_kp_id": "local::lecture15-benchmarking::kp16",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The closing discussion frames judge bias as a monoculture problem and suggests rubric design as a governance response [ts=4899s] [ts=5010s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Foundational framing for the whole lecture; concept-heavy rather than formula-heavy, with no live demo."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Covers standard benchmark types, metric pitfalls, and shortcut artifacts that are strong targets for comprehension questions."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Core treatment of open-ended evaluation methods, including historically important metrics and their failure modes."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Important methodological cautions about human evaluation; dense with examples and caveats but less formulaic."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Central modern content on chatbot evaluation, judge models, and AlpacaEval; very useful for retrieval and assessment."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Surveys the benchmark ecosystem and practical evaluation modes used for current LLMs."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "High-value cautionary material on benchmark instability, contamination, and mitigation strategies."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Synthesizes technical and sociotechnical limitations of current benchmarking, especially multilinguality and incentives."
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg9",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Closing recap plus Q&A clarifies the lecture’s main lessons and proposes rubric-driven judge prompts."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture15-benchmarking"
+}

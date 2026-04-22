@@ -1,0 +1,236 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg8",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Self-attention, I3D inflation, modern video transformers, and downstream video tasks",
+    "description": "Covers nonlocal self-attention blocks, I3D transfer from image networks, transformer progress, video-model visualization, and localization/detection tasks.",
+    "summary": "Because RNNs are hard to parallelize, the lecture turns to self-attention, whose query-key-value alignment can be computed in parallel and extended to video feature maps [ts=3102s] [ts=3128s] [ts=3141s]. A spatio-temporal self-attention or nonlocal block starts from C x T x H x W features, uses 1 x 1 x 1 convolutions to form query, key, and value feature maps, computes attention over query-key pairs, conditions the values, maps back to C, and adds a residual connection [ts=3149s] [ts=3170s] [ts=3201s]. Such nonlocal blocks can be inserted into 3D CNNs to fuse information across both space and time [ts=3221s] [ts=3252s]. The I3D idea asks whether successful 2D image architectures can be reused for video by replacing each 2D K_h x K_w convolution or pooling layer with a 3D K_t x K_h x K_w version, and even copying pretrained 2D weights K_t times while dividing by K_t [ts=3270s] [ts=3295s] [ts=3363s]. This inflation preserves output for a constant-frame video and gives useful image-pretrained initialization for fine-tuning video models [ts=3382s] [ts=3402s] [ts=3485s]. The segment then surveys video transformers, including factorized space-time attention, token pooling, and masked autoencoder pretraining, noting large progress on Kinetics-400 up to around 90% top-1 accuracy [ts=3500s] [ts=3526s] [ts=3550s]. Finally, it describes gradient-ascent visualization of two-stream video models and moves from clip classification to temporal action localization and spatio-temporal detection, where actions must be localized in time and possibly in both space and time [ts=3579s] [ts=3655s] [ts=3676s] [ts=3723s].",
+    "key_points": [
+      {
+        "text": "Self-attention is attractive for video because query-key-value alignment can be computed in parallel.",
+        "timestamp_s": 3102,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A nonlocal video block forms query, key, and value maps from C x T x H x W features using 1 x 1 x 1 3D convolutions.",
+        "timestamp_s": 3149,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Nonlocal blocks can be inserted into 3D CNNs to fuse across both space and time.",
+        "timestamp_s": 3235,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "I3D inflates image CNNs by replacing each 2D K_h x K_w operation with a 3D K_t x K_h x K_w operation.",
+        "timestamp_s": 3295,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Inflated 3D kernels can be initialized by copying a 2D kernel K_t times and dividing by K_t.",
+        "timestamp_s": 3372,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Modern video transformers use ideas such as factorized space-time attention, token pooling, and masked autoencoder pretraining.",
+        "timestamp_s": 3500,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Video models can be visualized by gradient ascent on appearance and flow inputs to maximize a class score.",
+        "timestamp_s": 3579,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Temporal action localization identifies when actions occur; spatio-temporal detection localizes activities in both space and time.",
+        "timestamp_s": 3676,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 3102,
+      "end_s": 3758
+    },
+    "difficulty": 4.0,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:51:42\nBut there's another important model we have learned, I think in the previous lectures,\n\n00:51:56\nself-attention, you have this queries, keys, and values. And you can use self-attention\n\n00:52:08\nAnd one very large advantage of self-attention is highly parallelizable. And all the alignment\n\n00:52:21\nare trying to use self-attention also in videos. So they just pause self-attention directly to 3D.\n\n00:52:31\nmap like C times T times H times W. And then similarly, you can get some query\n\n00:52:41\nchannel dimension to map them to query feature map that is C prime times T times H times W.\n\n00:52:50\nwant to get some attention weights. Basically, you're doing some transpose of this feature map\n\n00:53:07\nfeature pair. And then you can get this attention map and then use it to condition the values.\n\n00:53:21\n1 times 1 convolution to map them back to the same dimension C so that it can\n\n00:53:31\nyou can see that it's very similar to the self-attention operations.\n\n00:53:41\nIt can stand on its own. So you see in this paper, it's called nonlocal neural\n\n00:53:51\na building block for processing videos, to do video understanding.\n\n00:53:59\n3D convolution neural network architectures. And to have some 3D CNN on a nonlocal block,\n\n00:54:12\nis very powerful to fuse across both space and time, and finally, into this classification.\n\n00:54:23\nSo what we should use here? So a very interesting idea that people\n\n00:54:35\nNetwork many successful architectures we have talked about or have learned, directly to 3D.\n\n00:54:48\nSo for this work, it's called I3D architecture. The idea is that they just take a 2D CNN\n\n00:55:05\nBut now, we replace with a 3D version, that is a Kt times Kh times Kw, just inflated basically. And\n\n00:55:28\nyou have an architecture for processing videos, directly just reuse the existing architectures.\n\n00:55:42\nalso in 3D. But taking one step further, people also have been\n\n00:55:54\nthe weights. Because we have already pre-trained a lot of architectures models on image datasets.\n\n00:56:03\nsome good prior information. So one thing you can do is that you can just initialize\n\n00:56:12\nFor example, you have maybe for one-- originally, you have this 2D conv kernel. You just copy the\n\n00:56:29\nNow, you take this video of 3 times Kt times H times w as input because we have divided them\n\n00:56:42\nwill get the same output if you just input a single frame or a video of constant frames.\n\n00:56:59\n2D image understanding. And actually, it works pretty well. So if you look at the performance,\n\n00:57:10\nperformance. And you can also inflate actually not only the appearance frame.\n\n00:57:20\nBasically, this is just like a technique you can do to reuse this kind of independent from\n\n00:57:33\ntrying to say is that we have a lot of 2D convolution neural networks, the weights.\n\n00:57:45\npeople have shown that they can actually copy the weights and reuse their weights,\n\n00:57:58\nAnd after doing this initialization, you can still fine tune on the video data. But you have\n\n00:58:08\nwe can give you some good initialization for training the video models. So this\n\n00:58:20\nSo this is also just one example of this video understanding net model. And there\n\n00:58:34\nfor example, this work, space-time\n\n00:58:42\nAnd also, there are some other methods trying to be more efficient in terms of this transformer\n\n00:58:54\nvideo level pre-training to doing video understanding. So I'm not going to talk them\n\n00:59:02\nare also many progress has been made to have better media understanding models.\n\n00:59:10\nfrom a single-frame model 62.2 on this-- this is another dataset, Kinetics-400.\n\n00:59:22\nit already gets to 90% accuracy. So there are some other-- new transformer model has been proposed.\n\n00:59:39\nin the last class, we can also use similar tricks for visualizing video models. So we can\n\n00:59:51\nand the flow image doing-- we are doing a forward pass, and then compute the score.\n\n01:00:01\nclass and using gradient ascent to maximize the classification score. Just like what we're doing\n\n01:00:15\ncan visualize doing some visualization, interpretation of what has been learned.\n\n01:00:26\nhappening in the visual stream. On the right, it's optimized image for the flow stream. One\n\n01:00:41\ncan capture slow motion. And the other captures right motion. So you can guess what the action is.\n\n01:00:55\ncan see that-- the middle one is doing some bar shaking. And the right one is doing some\n\n01:01:08\nvideo model is actually-- which models are learning something about this motion,\n\n01:01:23\nrunning. But another very important thing is that how we can-- other task is that\n\n01:01:37\nlevel or a classification. Sometimes, we want to localize, just we want to do object detection.\n\n01:01:46\nperson is running. Sometimes, it's jumping. So there is another task. This is another\n\n01:01:57\nR-CNN. You can just generate some temporal proposals and then doing the classification.\n\n01:02:09\nyou want to localize not only in space but also in time. Where the action is happening in space.\n\n01:02:21\nSo so far, I have been talking about the temporal stream and\n\n01:02:33\nspatial-temporal self-attention. And we have already talked about some tools to do that.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg8",
+      "global_kp_id": "kp_spatio_temporal_self_attention_and_nonlocal_blocks",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg8",
+      "global_kp_id": "kp_i3d_inflation_and_weight_transfer",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg8",
+      "global_kp_id": "kp_video_transformers_and_masked_autoencoders",
+      "planner_role": "main",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg8",
+      "global_kp_id": "kp_temporal_localization_and_spatio_temporal_detection",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_spatio_temporal_self_attention_and_nonlocal_blocks",
+      "name": "Spatio-temporal self-attention and nonlocal blocks",
+      "description": "Nonlocal blocks extend self-attention to C x T x H x W video feature maps using query, key, and value projections.",
+      "track_tags": [
+        "attention",
+        "video_architectures"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "research_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because spatio-temporal self-attention and nonlocal blocks formalizes how nonlocal blocks extend self-attention to C x T x H x W video feature maps using query, key, and value projections, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_i3d_inflation_and_weight_transfer",
+      "name": "I3D inflation and weight transfer",
+      "description": "I3D converts 2D image networks to video by inflating kernels and pooling layers to 3D and reusing pretrained image weights.",
+      "track_tags": [
+        "3d_cnn",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because i3D inflation and weight transfer clarifies i3D converts 2D image networks to video by inflating kernels and pooling layers to 3D and reusing pretrained image weights, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_video_transformers_and_masked_autoencoders",
+      "name": "Video transformers and masked autoencoders",
+      "description": "Modern video models use factorized attention, token pooling, and masked-autoencoder pretraining for scalable video understanding.",
+      "track_tags": [
+        "self_supervised_learning",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because video transformers and masked autoencoders clarifies modern video models use factorized attention, token pooling, and masked-autoencoder pretraining for scalable video understanding, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_temporal_localization_and_spatio_temporal_detection",
+      "name": "Temporal localization and spatio-temporal detection",
+      "description": "Beyond clip classification, video understanding can localize actions in time and detect people/actions jointly in space and time.",
+      "track_tags": [
+        "localization",
+        "video_tasks"
+      ],
+      "domain_tags": [
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because temporal localization and spatio-temporal detection synthesizes beyond clip classification, video understanding can localize actions in time and detect people/actions jointly in space and time into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp17"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.85,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

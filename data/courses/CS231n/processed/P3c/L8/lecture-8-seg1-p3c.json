@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_8::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit is suitable for concept checks on the seq2seq bottleneck that motivates attention. The available text clearly supports questions about encoder-decoder RNNs, context vectors, and why fixed-size summaries struggle with longer inputs.",
+  "question_bank": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a basic encoder-decoder RNN for translation, what is the role of the context vector?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It summarizes the input sequence so the decoder can generate the output sequence.",
+        "It stores a separate output probability for every possible target word.",
+        "It replaces the recurrent hidden states inside both encoder and decoder.",
+        "It prevents the decoder from using previously generated tokens."
+      ],
+      "answer_index": 0,
+      "explanation": "The encoder processes the input sequence and compresses its information into a context vector. The decoder then uses that summary, together with its own state and previous outputs, to generate the target sequence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "summarize the entire input sequence",
+          "single vector called the context vector"
+        ],
+        "timestamps": [
+          "00:05:17",
+          "00:05:52"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does a single fixed-size context vector become a bottleneck in sequence-to-sequence translation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "All information from the input must pass through one vector before the decoder can use it.",
+        "It forces the decoder to produce exactly the same number of tokens as the input.",
+        "It prevents the encoder from updating hidden states over time.",
+        "It makes the model use hand-coded word alignments instead of learned parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "A fixed-size summary has limited capacity. As the input grows, it becomes harder for one vector to preserve all details the decoder may need at different output steps.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "through one fixed-length vector",
+          "information bottleneck"
+        ],
+        "timestamps": [
+          "00:07:15",
+          "00:07:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which recurrence best describes the encoder-side update in an RNN sequence model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The next hidden state depends on the current input token and previous hidden state.",
+        "The next hidden state depends only on the final output token.",
+        "Every hidden state is computed independently from all other time steps.",
+        "The context vector is updated by sorting input tokens alphabetically."
+      ],
+      "answer_index": 0,
+      "explanation": "A recurrent encoder carries information forward through hidden states. Each step combines the current token representation with the previous hidden state, allowing sequence history to accumulate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "on two inputs",
+          "next hidden state"
+        ],
+        "timestamps": [
+          "00:04:04",
+          "00:04:20"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    }
+  ]
+}

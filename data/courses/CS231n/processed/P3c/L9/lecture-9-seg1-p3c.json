@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_9::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi củng cố về ViT, class token và các tweak hiện đại của transformer; không cần cắt clip riêng.",
+  "question_bank": [
+    {
+      "item_id": "lecture-9-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao Vision Transformer thường cần positional embedding sau khi tách ảnh thành patch?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì việc chia patch làm mất thông tin vị trí 2D ban đầu của ảnh.",
+        "Vì positional embedding thay thế hoàn toàn self-attention.",
+        "Vì nó biến mọi patch thành class token.",
+        "Vì nó dùng để giảm số lượng tham số của mô hình."
+      ],
+      "answer_index": 0,
+      "explanation": "Khi ảnh bị chia thành các patch rồi biến thành token, mô hình không còn biết patch nào nằm ở đâu trong bố cục gốc. Positional embedding đưa thông tin vị trí trở lại để attention còn phân biệt được cấu trúc không gian.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vit_patch_tokenization_and_positional_encoding",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "losing the position",
+          "add something that we"
+        ],
+        "timestamps": [
+          "00:04:38",
+          "00:04:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong ViT cho phân loại ảnh, vai trò đúng của class token là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Đó là một token học được thêm vào đầu vào để đầu ra của nó dùng cho dự đoán lớp.",
+        "Đó là patch sáng nhất của ảnh được chọn làm đại diện.",
+        "Đó là một mặt nạ buộc token chỉ chú ý về bên trái.",
+        "Đó là vector trung bình cố định của toàn bộ patch, không được học."
+      ],
+      "answer_index": 0,
+      "explanation": "Class token là một tham số học được. Sau khi đi qua các lớp transformer, biểu diễn đầu ra của token này được dùng làm đầu vào cho bộ phân loại.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vit_readout_strategies_for_classification",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "special extra input",
+          "class token"
+        ],
+        "timestamps": [
+          "00:05:54",
+          "00:07:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Lợi ích chính được nhấn mạnh của mixture-of-experts trong transformer là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Tăng số tham số nhanh hơn mức tăng compute bằng cách chỉ kích hoạt một số expert cho mỗi token.",
+        "Loại bỏ hoàn toàn nhu cầu dùng normalization.",
+        "Biến transformer thành mô hình chỉ dùng convolution.",
+        "Bảo đảm mọi token luôn đi qua tất cả expert trong mọi bước."
+      ],
+      "answer_index": 0,
+      "explanation": "Mixture-of-experts thêm nhiều expert song song nhưng mỗi token chỉ được định tuyến tới một số expert hoạt động. Cách này tăng năng lực biểu diễn mà không làm chi phí tính toán tăng tương ứng với toàn bộ số tham số.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_stability_and_capacity_tweaks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "A active experts",
+          "number of parameters"
+        ],
+        "timestamps": [
+          "00:12:05",
+          "00:12:05"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg1-q1",
+      "global_kp_id": "kp_vit_patch_tokenization_and_positional_encoding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg1-q1",
+      "global_kp_id": "kp_vit_readout_strategies_for_classification",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg1-q2",
+      "global_kp_id": "kp_vit_readout_strategies_for_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg1-q2",
+      "global_kp_id": "kp_vit_patch_tokenization_and_positional_encoding",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg1-q3",
+      "global_kp_id": "kp_transformer_stability_and_capacity_tweaks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg1-q3",
+      "global_kp_id": "kp_vit_patch_tokenization_and_positional_encoding",
+      "role": "secondary"
+    }
+  ]
+}

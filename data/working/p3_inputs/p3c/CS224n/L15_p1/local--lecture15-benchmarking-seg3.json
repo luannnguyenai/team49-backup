@@ -1,0 +1,267 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture15-benchmarking",
+    "lecture_title": "Lecture 15 - Benchmarking and Evaluation",
+    "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM"
+  },
+  "unit": {
+    "unit_id": "local::lecture15-benchmarking::seg3",
+    "course_id": "cs224n-2024",
+    "name": "Open-ended evaluation from overlap scores to learned judges",
+    "description": "Introduces open-ended tasks and walks through overlap metrics, embedding-based metrics, BLEURT, and the limitation that references themselves may be poor.",
+    "summary": "Open-ended tasks are contrasted with close-ended tasks by having many valid answers with graded quality, which makes standard right-or-wrong classification metrics inadequate [ts=1063s] [ts=1086s]. The lecture uses summarization, translation, and especially instruction-following as representative open-ended tasks, then categorizes evaluation methods into content overlap, model-based metrics, and human evaluation [ts=1105s] [ts=1199s]. Content-overlap metrics are introduced as word or n-gram comparison against human references; BLEU emphasizes precision with a length penalty, ROUGE emphasizes recall, and both can miss semantic equivalence or reward wrong answers with lexical overlap, as shown by the 'Heck yes!' examples [ts=1242s] [ts=1321s] [ts=1439s]. Learned metrics then move from word embeddings to contextual BERT representations in BERTScore and to fine-tuned evaluators in BLEURT, but the segment closes by arguing that reference-based evaluation is fundamentally bounded by reference quality, illustrated by weak ROUGE-human correlation on ordinary news summaries and improved correlation when experts write stronger references [ts=1595s] [ts=1646s] [ts=1754s] [ts=1833s].",
+    "key_points": [
+      {
+        "text": "Open-ended tasks have many valid answers and multiple levels of correctness.",
+        "timestamp_s": 1065,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Instruction-following can be viewed as a general interface that subsumes classification, summarization, and other tasks.",
+        "timestamp_s": 1155,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Content-overlap metrics compare model output to a human reference using lexical or n-gram overlap.",
+        "timestamp_s": 1242,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "BLEU tracks overlap precision with a length penalty, while ROUGE focuses on recall.",
+        "timestamp_s": 1321,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "BLEU can assign 0 to semantically correct outputs like 'Yup' and a high score to semantically wrong outputs like 'Heck no!'.",
+        "timestamp_s": 1435,
+        "evidence_type": "example"
+      },
+      {
+        "text": "BERTScore compares contextual BERT embeddings rather than raw lexical matches.",
+        "timestamp_s": 1610,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "BLEURT fine-tunes a pretrained BERT model to predict evaluation quality from examples with metric and human supervision.",
+        "timestamp_s": 1666,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Reference-based metrics are limited by the quality of the references themselves, not just by the scoring function.",
+        "timestamp_s": 1794,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+      "start_s": 1053,
+      "end_s": 1979
+    },
+    "difficulty": 0.62,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 15,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Open-ended tasks are contrasted with close-ended tasks by having many valid answers with graded quality, which makes standard right-or-wrong classification metrics inadequate [ts=1063s] [ts=1086s]. The lecture uses summarization, translation, and especially instruction-following as representative open-ended tasks, then categorizes evaluation methods into content overlap, model-based metrics, and human evaluation [ts=1105s] [ts=1199s]. Content-overlap metrics are introduced as word or n-gram comparison against human references; BLEU emphasizes precision with a length penalty, ROUGE emphasizes recall, and both can miss semantic equivalence or reward wrong answers with lexical overlap, as shown by the 'Heck yes!' examples [ts=1242s] [ts=1321s] [ts=1439s]. Learned metrics then move from word embeddings to contextual BERT representations in BERTScore and to fine-tuned evaluators in BLEURT, but the segment closes by arguing that reference-based evaluation is fundamentally bounded by reference quality, illustrated by weak ROUGE-human correlation on ordinary news summaries and improved correlation when experts write stronger references [ts=1595s] [ts=1646s] [ts=1754s] [ts=1833s].",
+  "target_kp_ids": [
+    "kp_open_ended_generation",
+    "kp_reference_based_eval_limitations",
+    "kp_bleu_overlap_metrics"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "video_clip_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "transcript_slice": "00:17:33\nOK.\n\n00:17:34\nI'm going to mostly talk about that because this\n\n00:17:39\nSo open-ended evaluation or open-ended tasks is essentially\n\n00:17:45\nwhich is to say that there are many possible correct answers,\n\n00:17:52\nSo you really can't use standard machine-learning metrics.\n\n00:17:57\nAnd even more than the fact that you cannot enumerate all\n\n00:18:04\nof correctness.\n\n00:18:07\nor if I ask ChatGPT to write a book, it might be a decent book,\n\n00:18:14\nor that another model could write.\n\n00:18:17\nIt's a continuum or--\n\n00:18:22\nSo standard examples for open-ended tasks.\n\n00:18:28\nSo summarization, you have a long piece of text,\n\n00:18:36\nStandard benchmark is the CNN and Daily Mail benchmark.\n\n00:18:45\nis that they took a lot of CNN articles.\n\n00:18:49\nhave bullet points that say what are the most important things\n\n00:18:53\nSo they use this as essentially the gold summary.\n\n00:19:00\nFor translation, you basically have\n\n00:19:03\nand you have to translate from one to the other.\n\n00:19:08\nThe way that people currently do it is--\n\n00:19:13\nis instruction-following.\n\n00:19:18\nof all tasks in the sense that you can view any previous task\n\n00:19:27\nthat you ask to basically ChatGPT.\n\n00:19:30\nI could just ask ChatGPT to do that.\n\n00:19:33\nI could ask ChatGPT to do that.\n\n00:19:37\nas the most general type of task,\n\n00:19:43\nand it should just provide the answer for that task.\n\n00:19:48\nSo as you might think, evaluation\n\n00:19:53\nAnd that's what we'll talk about later,\n\n00:19:58\nOK.\n\n00:20:01\nor open-ended tasks.\n\n00:20:06\nmetrics, which I'll talk about.\n\n00:20:13\nanswer, a gold answer that humans wrote\n\n00:20:18\nThen there are model-based metrics\n\n00:20:25\ninto machine learning.\n\n00:20:29\nan evaluator.\n\n00:20:33\nwhich is usually seen as the gold standard\n\n00:20:40\nSo content overlap metrics.\n\n00:20:44\nby word or group of words between the generated sequence\n\n00:20:51\nSo here, I have the generated sequence being,\n\n00:20:57\nwhich is the reference written by humans.\n\n00:21:02\nBut the reference here is, \"They walked to the grocery store.\"\n\n00:21:06\ncompare the two different sentences\n\n00:21:12\ntexts.\n\n00:21:17\nAnd the way you usually do that is by using n-gram\n\n00:21:20\nSo what I mean by this is that the simplest possible thing\n\n00:21:26\nin the generated sequence, whether it appears\n\n00:21:30\nAnd if it does, then you kind of increment your performance.\n\n00:21:36\nBut instead of looking at a single word,\n\n00:21:45\nnext to one another.\n\n00:21:50\nare BLEU and ROUGE.\n\n00:21:55\nThat's not what they stand for though,\n\n00:21:59\nBut basically BLEU, what it is, is\n\n00:22:05\ntries to look at precision, while ROUGE is what looks\n\n00:22:12\nSo as I said before, as I alluded before,\n\n00:22:18\nclassification, you have to think about whether you\n\n00:22:23\nSo those metrics are not ideal.\n\n00:22:28\nthey were the gold standard for translation and summarization.\n\n00:22:38\nyeah, you really want to-- you basically\n\n00:22:41\nfrom French to English.\n\n00:22:46\nand the actual reference sequence in English.\n\n00:22:54\nor how many of the bigrams that I generated\n\n00:23:02\nThere's one additional thing, which\n\n00:23:05\na very high precision by actually predicting something\n\n00:23:08\nFor example, if you always predicted the word \"the,\" only\n\n00:23:15\nprecision because \"the\" usually appears in every sentence,\n\n00:23:23\nSo there's also some length penalty.\n\n00:23:28\nIt just looks at recall.\n\n00:23:34\nAnd just to illustrate why those are not ideal--\n\n00:23:42\nis that they don't really take into account\n\n00:23:47\nSo imagine that Chris asks you, \"Are you enjoying the CS224N\n\n00:23:53\nOf course, the gold answer is \"Heck yes!\"\n\n00:23:59\nSo now, let's say that the model just generates, \"Yes!\"\n\n00:24:03\nif I look at the BLEU score, I will have 67% essentially BLEU\n\n00:24:11\nor two of the unigrams that I generated, are in the reference,\n\n00:24:17\nIf I generate, \"You know it!\" then I will only have a single\n\n00:24:25\nsequence, which is the exclamation point.\n\n00:24:32\nAnd if I just say, \"Yup,\" then that doesn't appear at all\n\n00:24:38\nSo I get 0 BLEU score, which is a false negative\n\n00:24:45\nyes!\"\n\n00:24:51\nAlso, you can have false positives.\n\n00:24:56\nthen most of the words are the same.\n\n00:25:01\nmeans something completely different.\n\n00:25:06\nAny questions?\n\n00:25:10\nSo very naturally, now that you know everything\n\n00:25:17\nwhy do we look at words if what we could do\n\n00:25:22\nkind of maintained the semantic similarity between words?\n\n00:25:34\nis that they took some--\n\n00:25:41\nThey associated every word in the reference sequence\n\n00:25:52\nto the corresponding word embedding.\n\n00:25:56\nSo a very simple way of comparing word embeddings\n\n00:26:00\nembeddings and the reference sequence,\n\n00:26:03\nand the generated sequence, and you maybe\n\n00:26:07\nI mean, there are smarter ways of doing it.\n\n00:26:11\nSo you can think about averaging.\n\n00:26:16\nAs you know, at this point, word embeddings\n\n00:26:24\nor the context of where the word basically appears.\n\n00:26:33\nis by looking essentially at BERT.\n\n00:26:37\nYou could pass the generated sequence through it.\n\n00:26:42\nAnd then you can take BERT again, the same BERT.\n\n00:26:47\nYou get some other embeddings, and then you\n\n00:26:50\nI mean, this BERTScore, pretty famous paper.\n\n00:26:56\nthat important to understand what exactly they do.\n\n00:27:03\nbetween those words.\n\n00:27:07\nAny questions?\n\n00:27:13\nSo that was the simplest type of learning methods,\n\n00:27:22\nAnother slightly more complicated one\n\n00:27:26\nalso pretty famous-- which is a mix between BLEU and BERT.\n\n00:27:34\ntook a pretrained BERT, and then they\n\n00:27:40\nto predict the BLEU score and some other metrics,\n\n00:27:45\nThat's the important part, is that they fine-tuned\n\n00:27:50\nthat they care about.\n\n00:27:54\nand I have some human annotations of how\n\n00:27:59\nI could just treat that as a normal machine-learning task\n\n00:28:06\nSo this is BLEURT.\n\n00:28:11\nYes.\n\n00:28:13\nIf you pretrained on BLEU, wouldn't it\n\n00:28:18\nif your pretraining has this BLEU,\n\n00:28:22\nto model languages semantically in the first place.\n\n00:28:26\nThat's a very good point.\n\n00:28:29\nSo they did two things.\n\n00:28:34\nand then they do continual pretraining for predicting BLEU.\n\n00:28:39\nsay we have a lot of sequences in our data\n\n00:28:43\nSo we have some reference sequences\n\n00:28:49\ndon't have the human annotation of whether this is good or bad.\n\n00:28:57\nSo what do you use for the unsupervised learning objective?\n\n00:29:02\nand they also use actually BERT score.\n\n00:29:08\ndo multitask learning.\n\n00:29:14\nOK.\n\n00:29:18\nis that, really, they can only be\n\n00:29:22\nAnd in reality, the references are usually not that good.\n\n00:29:33\nSo basically, as I said before, most of the news\n\n00:29:39\ntake the reference summary as being the bullet points\n\n00:29:46\nAnd this is usually not that good.\n\n00:29:50\nsorry, on the left, this is--\n\n00:29:57\nbeing the human rate of--\n\n00:30:03\nAnd on the y-axis, you see the ROUGE-L,\n\n00:30:09\nand you look at whether, basically, these two\n\n00:30:13\nAnd what you see is that they are essentially not correlated,\n\n00:30:21\nis really not correlated to what humans would say\n\n00:30:25\nThat is not to say that ROUGE is a bad score.\n\n00:30:31\nbecause if you look at the exact same thing,\n\n00:30:37\nthen you see that the correlation actually\n\n00:30:40\nIt's still not perfect.\n\n00:30:45\nSo this is to say that the metric itself\n\n00:30:49\nBut not only this, the references\n\n00:30:55\nCool.\n\n00:30:59\ncan we just dump and, yeah, basically move away\n\n00:31:05\nSo as we just said, reference-based evaluations\n\n00:31:10\nto some model outputs using some different type of metrics.\n\n00:31:21\nor the standard benchmark for evaluating NLP tasks,\n\n00:31:27\nRight now, I think papers still have\n\n00:31:34\nin translation because reviewers want those.\n\n00:31:41\nactually uses them.\n\n00:31:45\nSo yeah.\n\n00:31:47\nOh, and I was mostly talking about BLEU and ROUGE.\n\n00:31:52\npretty good.\n\n00:31:54\nSo reference-free evaluation.\n\n00:32:00\nand you ask it to give a score, but there\n\n00:32:04\nSo the way that this used to be done\n\n00:32:10\nBut instead of comparing between a reference\n\n00:32:15\ncould just ask it to take the input and just predict a score.\n\n00:32:21\nThat used to really not work well.\n\n00:32:26\nand GPT-4.\n\n00:32:30\nsuper well-- is that you just ask\n\n00:32:35\nSo you give a very long text, and then\n\n00:32:41\nask how good is it essentially.\n\n00:32:46\nSo common benchmarks here are AlpacaEval and MT-Bench.\n\n00:32:50\nNow, honestly, most people start using these type of techniques,\n\n00:32:59\nGood.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "global_kp_id": "kp_open_ended_generation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "global_kp_id": "kp_bleu_overlap_metrics",
+      "planner_role": "support",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "global_kp_id": "kp_bertscore_and_bleurt",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "global_kp_id": "kp_reference_based_eval_limitations",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_open_ended_generation",
+      "name": "Open-ended generation and evaluation",
+      "description": "A way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness. Open-ended tasks have many valid answers and graded quality, so evaluation must move beyond exact labels.",
+      "track_tags": [
+        "evaluation",
+        "generation",
+        "task_formulation"
+      ],
+      "domain_tags": [
+        "information_theory",
+        "language_models",
+        "nlg",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "applied_science",
+        "nlp_research",
+        "research"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because open-ended generation and evaluation formalizes how a way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp6",
+        "local::lecture14-nlg::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_bleu_overlap_metrics",
+      "name": "BLEU and overlap-based text evaluation",
+      "description": "Automatic MT evaluation based on matching candidate n-grams against one or more reference translations, with a brevity penalty. Reference-based overlap metrics compare generated text to human references using lexical or n-gram overlap.",
+      "track_tags": [
+        "evaluation",
+        "generation",
+        "machine_translation",
+        "metrics"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "nlp",
+        "sequence_models"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "ml_research",
+        "nlp_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because bLEU and overlap-based text evaluation clarifies automatic MT evaluation based on matching candidate n-grams against one or more reference translations, with a brevity penalty, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp7",
+        "local::lecture09-attention::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_bertscore_and_bleurt",
+      "name": "BERTScore and BLEURT",
+      "description": "Embedding-based and learned evaluation metrics use contextual representations or supervised fine-tuning to improve over lexical overlap.",
+      "track_tags": [
+        "generation",
+        "learned_metrics"
+      ],
+      "domain_tags": [
+        "language_models",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "research"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because bERTScore and BLEURT clarifies embedding-based and learned evaluation metrics use contextual representations or supervised fine-tuning to improve over lexical overlap, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reference_based_eval_limitations",
+      "name": "Limitations of reference-based evaluation",
+      "description": "BLEU is useful but imperfect because translation is many-to-many and local string overlap does not fully capture meaning or grammatical role. Even a decent scoring metric can fail if the human references used as gold outputs are weak or noisy.",
+      "track_tags": [
+        "dataset_quality",
+        "evaluation",
+        "generation",
+        "machine_translation"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "dataset_curation",
+        "ml_research",
+        "research"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because limitations of reference-based evaluation clarifies bLEU is useful but imperfect because translation is many-to-many and local string overlap does not fully capture meaning or grammatical role, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp9",
+        "local::lecture09-attention::kp2"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 6,
+  "target_difficulty_range": [
+    0.47,
+    0.77
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture15-benchmarking_transcript.txt"
+  }
+}

@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_13::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript supports reinforcement questions on plain autoencoders, the role of the bottleneck, and why VAEs are introduced to make the latent space sampleable.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does a standard autoencoder need a bottleneck in the latent code z for reconstruction to become meaningful representation learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Without compression, the model can learn an almost identity mapping instead of extracting useful structure.",
+        "Because the bottleneck makes the decoder unnecessary.",
+        "Because reconstruction loss works only when z is larger than x.",
+        "Because the bottleneck turns the problem into supervised learning."
+      ],
+      "answer_index": 0,
+      "explanation": "If the latent space is too wide and the model is too flexible, the autoencoder can copy the input to the output without learning a useful compressed representation. The bottleneck forces the model to preserve only the most important information.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoencoder_bottleneck_representation_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "bottleneck representation",
+          "much smaller than the input"
+        ],
+        "timestamps": [
+          "00:49:52",
+          "00:49:52"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core limitation that keeps a plain autoencoder from being a strong generative model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "We still do not know how to sample z from the correct latent distribution induced by the data.",
+        "It cannot produce any latent vector at all.",
+        "It always requires class labels for every input image.",
+        "It has no decoder and therefore cannot reconstruct inputs."
+      ],
+      "answer_index": 0,
+      "explanation": "A plain autoencoder may learn a useful latent code for representation learning, but it does not tell us how to sample from the latent space in a way that produces realistic new data. That means the generative problem is still unresolved.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_plain_autoencoder_not_yet_generative",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "do not solve generation",
+          "sampling z is still hard"
+        ],
+        "timestamps": [
+          "00:51:23",
+          "00:51:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What key idea does a VAE add beyond a plain autoencoder?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It constrains the latent code to follow a known distribution, usually Gaussian, so the model can sample and decode from it.",
+        "It removes the decoder and keeps only the encoder at generation time.",
+        "It replaces every multiplication with attention.",
+        "It uses only a discriminative loss p(y|x)."
+      ],
+      "answer_index": 0,
+      "explanation": "A VAE introduces an explicit probabilistic structure in latent space. When the latent code is encouraged to stay close to a simple prior such as a Gaussian, we can sample z from that prior and pass it through the decoder to generate new data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vae_motivation_known_latent_prior",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "known distribution",
+          "such as a Gaussian"
+        ],
+        "timestamps": [
+          "00:52:33",
+          "00:52:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "global_kp_id": "kp_autoencoder_bottleneck_representation_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "global_kp_id": "kp_plain_autoencoder_reconstruction",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "global_kp_id": "kp_plain_autoencoder_not_yet_generative",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "global_kp_id": "kp_autoencoder_bottleneck_representation_learning",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "global_kp_id": "kp_vae_motivation_known_latent_prior",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "global_kp_id": "kp_plain_autoencoder_not_yet_generative",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why does a standard autoencoder need a bottleneck in the latent code z for reconstruction to become meaningful representation learning\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the core limitation that keeps a plain autoencoder from being a strong generative model\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What key idea does a VAE add beyond a plain autoencoder\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why does a standard autoencoder need a bottleneck in the latent code z for reconstruction to become meaningful representation learning\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the core limitation that keeps a plain autoencoder from being a strong generative model\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What key idea does a VAE add beyond a plain autoencoder\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

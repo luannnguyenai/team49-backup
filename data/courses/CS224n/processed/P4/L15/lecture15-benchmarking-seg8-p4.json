@@ -1,0 +1,410 @@
+{
+  "unit_id": "local::lecture15-benchmarking::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "Transcript is sufficient for reinforcement questions on this unit's evaluation concepts. The key distinctions, caveats, and examples are stated directly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture15-benchmarking-seg8-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture15-benchmarking-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the central criticism behind the phrase 'benchmark monoculture'?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Too many papers use private benchmarks",
+        "Too much evaluation focuses on English and raw performance while neglecting other important dimensions",
+        "Too many benchmarks are image-based",
+        "Researchers use too many different metrics"
+      ],
+      "answer_index": 1,
+      "explanation": "The unit argues that NLP evaluation often narrows attention to English-only and performance-only leaderboards, leaving multilinguality, fairness, efficiency, and interpretability under-measured.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "only look at English",
+          "only look at accuracy"
+        ],
+        "timestamps": [
+          "01:11:30",
+          "01:11:45"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What problem does MLPerf aim to address in benchmarking?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It measures only annotation agreement",
+        "It incorporates speed-and-accuracy tradeoffs instead of reporting performance alone",
+        "It replaces all multilingual evaluation",
+        "It is a benchmark only for translation quality"
+      ],
+      "answer_index": 1,
+      "explanation": "MLPerf is highlighted as an example of a benchmark that bakes efficiency into evaluation by considering how quickly target performance is reached.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "MLPerf",
+          "how fast a target level of performance can be reached"
+        ],
+        "timestamps": [
+          "01:14:00",
+          "01:14:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are BLEU and ROUGE often described as English-centric?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They assume tokenization and word-boundary conventions that do not transfer cleanly to languages like Thai",
+        "They can only score English references created in the US",
+        "They require English prompts as input",
+        "They use GPT-4 as a judge"
+      ],
+      "answer_index": 0,
+      "explanation": "Overlap metrics are often built around English-like tokenization assumptions. In languages with different segmentation conventions, those assumptions break down.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "languages like Thai",
+          "word tokenization conventions"
+        ],
+        "timestamps": [
+          "01:17:27",
+          "01:17:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the risk of scaling LLM-based evaluation across the field if everyone uses the same judge model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It guarantees better fairness",
+        "It can spread one judge model's biases and preferences as a field-wide monoculture",
+        "It makes benchmarks dynamic by default",
+        "It removes the need for reviewer standards"
+      ],
+      "answer_index": 1,
+      "explanation": "A single widely used judge can propagate its own cultural or demographic preferences across many evaluations, creating uniform but biased incentives.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "single judge model",
+          "keep flawed legacy metrics alive"
+        ],
+        "timestamps": [
+          "01:17:40",
+          "01:17:56"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg8-q1",
+      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q2",
+      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q3",
+      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q4",
+      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture15-benchmarking-seg8-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the central criticism behind the phrase 'benchmark monoculture'\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What problem does MLPerf aim to address in benchmarking\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why are BLEU and ROUGE often described as English-centric\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the risk of scaling LLM-based evaluation across the field if everyone uses the same judge model\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg8-q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the central criticism behind the phrase 'benchmark monoculture'\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What problem does MLPerf aim to address in benchmarking\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why are BLEU and ROUGE often described as English-centric\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg8-q4",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the risk of scaling LLM-based evaluation across the field if everyone uses the same judge model\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

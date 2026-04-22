@@ -1,17 +1,17 @@
 import json
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from src.data_paths import UNITS_FILE
 from src.services.asset_signing import build_signed_asset_url
 
 
 def _first_cs231n_video_asset_path() -> str:
-    units = json.loads(Path("data/course_bootstrap/units.json").read_text(encoding="utf-8"))
+    units = json.loads(UNITS_FILE.read_text(encoding="utf-8"))
     unit = next(unit for unit in units if unit["course_slug"] == "cs231n" and unit.get("video_filename"))
-    return f"CS231n/videos/{unit['video_filename']}"
+    return f"courses/CS231n/videos/{unit['video_filename']}"
 
 
 @pytest.mark.asyncio

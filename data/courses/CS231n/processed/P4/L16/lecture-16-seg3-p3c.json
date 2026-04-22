@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_16::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for two zero-shot CLIP questions focused on text prototypes and prompt design.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_16_seg3_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_16_seg3_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_16_seg3_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does zero-shot CLIP classify a new image without training a new classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It compares the image embedding to text embeddings for candidate classes and picks the nearest one",
+        "It fine-tunes the image encoder on the test set labels",
+        "It generates a caption and then runs beam search over class names",
+        "It clusters images first and then manually assigns a class to each cluster"
+      ],
+      "answer_index": 0,
+      "explanation": "The text encoder can create a representation for each candidate class, and the image is classified by whichever class text vector is most similar in the shared embedding space.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_zero_shot_clip_classification_as_nearest_neighbor_over_text_prototypes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "create class vectors",
+          "nearest text class vector"
+        ],
+        "timestamps": [
+          "00:11:00",
+          "00:11:35"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_16_seg3_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can prompts like \"a photo of a dog\" work better than using the single word \"dog\" in CLIP?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because CLIP was trained on natural language phrases, so template prompts better match its training distribution",
+        "Because CLIP can only encode complete sentences and cannot encode nouns",
+        "Because the image encoder requires the class name to contain a verb",
+        "Because prompt templates increase the dimensionality of the image embedding"
+      ],
+      "answer_index": 0,
+      "explanation": "Natural-language prompt templates often better match the way the model saw text during pretraining, so the class representation becomes a better prototype for matching images.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_prompt_templates_and_prompt_ensembling_for_clip",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a photo of a [category]",
+          "averaging multiple prompt vectors"
+        ],
+        "timestamps": [
+          "00:12:40",
+          "00:13:44"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg3_q1",
+      "global_kp_id": "kp_zero_shot_clip_classification_as_nearest_neighbor_over_text_prototypes",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg3_q2",
+      "global_kp_id": "kp_prompt_templates_and_prompt_ensembling_for_clip",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_16_seg3_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does zero-shot CLIP classify a new image without training a new classifier\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture_16_seg3_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can prompts like \"a photo of a dog\" work better than using the single word \"dog\" in CLIP\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_16_seg3_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does zero-shot CLIP classify a new image without training a new classifier\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture_16_seg3_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can prompts like \"a photo of a dog\" work better than using the single word \"dog\" in CLIP\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

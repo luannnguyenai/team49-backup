@@ -1,0 +1,229 @@
+{
+  "unit_id": "local::lecture20-reasoning-agents::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript evidence is sufficient for reinforcement questions on this unit. The core definitions, examples, and cautions are stated explicitly enough that no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which example best illustrates deductive reasoning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Observing many birds and guessing the next winged creature is probably a bird",
+        "Seeing a puddle under a car and proposing possible causes",
+        "Using the premises that all mammals have kidneys and whales are mammals to conclude whales have kidneys",
+        "Choosing the most common answer from several sampled outputs"
+      ],
+      "answer_index": 2,
+      "explanation": "Deductive reasoning starts from premises and applies logic to reach a conclusion that follows from them. The whales-and-mammals example is exactly this pattern.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "firm conclusion from premises"
+        ],
+        "timestamps": [
+          "00:01:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the purpose of chain-of-thought prompting?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To remove all intermediate steps and answer faster",
+        "To force the model to use only external tools",
+        "To have the model produce intermediate reasoning before the final answer",
+        "To replace probability decoding with nearest-neighbor retrieval"
+      ],
+      "answer_index": 2,
+      "explanation": "Chain-of-thought prompting asks the model to expose intermediate reasoning steps before the answer, which can improve performance on multi-step problems.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "let's think step by step"
+        ],
+        "timestamps": [
+          "00:04:08",
+          "00:04:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In zero-shot chain-of-thought prompting, which cue is used to elicit reasoning without worked examples?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use beam search with temperature 0",
+        "Append the phrase \"let's think step by step\"",
+        "Provide 10 retrieved documents",
+        "Replace the question with a multiple-choice version"
+      ],
+      "answer_index": 1,
+      "explanation": "The zero-shot version does not rely on demonstrations. Instead, a simple cue like \"let's think step by step\" encourages the model to produce a rationale.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "let's think step by step"
+        ],
+        "timestamps": [
+          "00:04:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can self-consistency improve over greedily taking a single rationale?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It guarantees the model will never hallucinate",
+        "It picks the answer that appears most often across multiple sampled rationales",
+        "It always uses a larger model at test time",
+        "It converts reasoning into supervised fine-tuning"
+      ],
+      "answer_index": 1,
+      "explanation": "Self-consistency samples several reasoning paths and then chooses the most common final answer. The assumption is that repeated agreement across diverse rationales is a useful signal of correctness.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_self_consistency_decoding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "majority of the rationales agree"
+        ],
+        "timestamps": [
+          "00:05:05",
+          "00:05:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main sequence of steps in least-to-most prompting?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Sample many answers, rank them, and keep the longest",
+        "Convert the task into retrieval, then vote over retrieved passages",
+        "Decompose the question into sub-problems, solve them, then combine those results into the final answer",
+        "Train a smaller model to imitate a larger one"
+      ],
+      "answer_index": 2,
+      "explanation": "Least-to-most prompting explicitly breaks a hard problem into simpler sub-questions, answers those sub-questions, and uses their answers to build the final solution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_least_to_most_prompting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "decomposition strategy"
+        ],
+        "timestamps": [
+          "00:07:29",
+          "00:07:37",
+          "00:09:22"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q1",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q2",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q3",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q4",
+      "global_kp_id": "kp_self_consistency_decoding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg1-q5",
+      "global_kp_id": "kp_least_to_most_prompting",
+      "role": "primary"
+    }
+  ]
+}

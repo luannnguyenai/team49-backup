@@ -18,6 +18,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from src.data_paths import UNITS_FILE
+
 
 def normalize_legacy_lecture_id(
     raw_lecture_id: str | None,
@@ -36,7 +38,7 @@ def normalize_legacy_lecture_id(
 
 
 def _load_bootstrap_units() -> list[dict[str, Any]]:
-    with Path("data/course_bootstrap/units.json").open(encoding="utf-8") as handle:
+    with UNITS_FILE.open(encoding="utf-8") as handle:
         data = json.load(handle)
     return data if isinstance(data, list) else []
 

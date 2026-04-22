@@ -3,11 +3,11 @@ services/learning_unit_service.py
 ---------------------------------
 Learning-unit payloads for the canonical lecture experience.
 
-US3: Maps legacy lecture data (from `store.py` Lecture model and data/CS231n/)
+US3: Maps legacy lecture data (from `store.py` Lecture model and data/courses/CS231n/)
 to the canonical `LearningUnitResponse` shape defined by the course-platform
 contract.
 
-The mapping uses bootstrap JSON (`data/course_bootstrap/units.json`) to
+The mapping uses bootstrap JSON (`data/bootstrap/units.json`) to
 connect unit slugs to legacy lecture IDs and video files.
 """
 
@@ -19,6 +19,7 @@ from pathlib import Path
 import re
 from typing import Any
 
+from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.schemas.course import (
     LearningUnitContentPayload,
     LearningUnitCourseSummary,
@@ -37,9 +38,9 @@ from src.services.course_bootstrap_service import get_bootstrap_course
 # Bootstrap unit data
 # ---------------------------------------------------------------------------
 
-UNITS_FILE = Path("data/course_bootstrap/units.json")
-TRANSCRIPTS_DIR = Path("data/CS231n/transcripts")
-SLIDES_DIR = Path("data/CS231n/slides")
+UNITS_FILE = BOOTSTRAP_UNITS_FILE
+TRANSCRIPTS_DIR = CS231N_DIR / "transcripts"
+SLIDES_DIR = CS231N_DIR / "slides"
 _LECTURE_NUMBER_RE = re.compile(r"(?:lecture|Lecture)[_ -]?0*(\d+)")
 _LECTURE_AVAILABILITY_CACHE: dict[Path, tuple[int | None, set[int]]] = {}
 
@@ -148,9 +149,9 @@ async def get_learning_unit_payload(
     video_url: str | None = None
     if video_filename:
         # Protected course assets are exposed via short-lived signed URLs.
-        video_path = Path(f"data/CS231n/videos/{video_filename}")
+        video_path = CS231N_DIR / "videos" / video_filename
         if video_path.exists():
-            video_url = build_signed_asset_url(f"CS231n/videos/{video_filename}")
+            video_url = build_signed_asset_url(f"courses/CS231n/videos/{video_filename}")
 
     # Check transcript and slides availability
     lecture_num = unit_row.get("order_index", 0)

@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_5_image_classification_with_cnns::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "The segment gives enough detail for safe questions on convolution as local template matching, activation maps, and layer hyperparameters.",
+  "question_bank": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does a convolutional filter differ from a fully connected class template?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is a small spatial template that spans all input channels and is reused across locations.",
+        "It must have the same full spatial size as the entire input image.",
+        "It stores one label for each training image and copies the nearest label.",
+        "It is chosen manually and never updated during training."
+      ],
+      "answer_index": 0,
+      "explanation": "A convolutional filter looks only at a local spatial neighborhood but covers the full channel depth. Reusing it across locations preserves spatial structure and shares parameters.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_convolution_as_local_template_matching",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "small subset",
+          "span the same"
+        ],
+        "timestamps": [
+          "00:32:48",
+          "00:33:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does one convolutional filter produce when slid over an image?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "One 2D activation map of local template-match scores.",
+        "One scalar score for the entire dataset.",
+        "One new RGB channel for the original image pixels.",
+        "One separate weight matrix for each image class."
+      ],
+      "answer_index": 0,
+      "explanation": "At each spatial location, the filter computes a local dot product. Collecting those values over all locations forms a 2D activation map.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_convolution_as_local_template_matching",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "slide that filter",
+          "two-dimensional plane"
+        ],
+        "timestamps": [
+          "00:34:14",
+          "00:34:40"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which part of a convolution layer is normally a hyperparameter rather than a learned parameter?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The number and spatial size of filters.",
+        "The individual filter weight values after training.",
+        "The gradients flowing through each filter.",
+        "The learned bias values attached to filters."
+      ],
+      "answer_index": 0,
+      "explanation": "Architecture choices such as how many filters to use and how large they are are set by the designer. The actual filter weights and biases are learned from data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "That is a hyperparameter",
+          "set via cross-validation"
+        ],
+        "timestamps": [
+          "00:37:03",
+          "00:37:44"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg4-q1",
+      "global_kp_id": "kp_convolution_as_local_template_matching",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg4-q2",
+      "global_kp_id": "kp_convolution_as_local_template_matching",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg4-q3",
+      "global_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "role": "primary"
+    }
+  ]
+}

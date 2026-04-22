@@ -1,0 +1,219 @@
+{
+  "unit_id": "local::lecture17-convnets::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "review_summary": "The segment clearly supports diagnostic questions about Kim-style text CNNs, max pooling, and embedding fine-tuning failure modes. No visual-only details are required.",
+  "question_bank": [
+    {
+      "item_id": "lecture17-convnets-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A sentence-classification CNN applies width-2, width-3, and width-4 filters, then max-pools each filter. What is the main representation produced before the final classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A fixed-size vector made by concatenating each filter's strongest activation over the sentence.",
+        "A variable-length sequence containing one classifier prediction for every token.",
+        "A parse tree whose leaves are the input word vectors.",
+        "A single embedding for only the final word in the sentence."
+      ],
+      "answer_index": 0,
+      "explanation": "Each filter scans the sentence and max pooling selects one strongest value per filter. Concatenating those values gives a fixed-length sentence representation for classification.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "bigram filters, trigram filters",
+          "one feature out of each filter",
+          "linear classifier"
+        ],
+        "timestamps": [
+          "00:25:29",
+          "00:26:22",
+          "00:26:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can fine-tuning pretrained word embeddings on a small labeled dataset hurt generalization?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Words seen in the small dataset can move while similar unseen words stay fixed, distorting useful semantic neighborhoods.",
+        "Fine-tuning always deletes all information learned during pretraining after one gradient step.",
+        "A small labeled dataset prevents the classifier from using any convolutional filters.",
+        "Unseen words automatically receive the same updated vector as their nearest seen synonym."
+      ],
+      "answer_index": 0,
+      "explanation": "Task-specific updates only affect words that appear in the supervised data. Similar but unseen words may remain in their original positions, so the classifier boundary can become poorly aligned with them.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "these word vectors will move",
+          "stay exactly where",
+          "hurt you"
+        ],
+        "timestamps": [
+          "00:23:00",
+          "00:23:06",
+          "00:24:16"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What problem does a two-channel embedding setup try to solve in a text CNN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It preserves one copy of the pretrained semantic space while allowing another copy to adapt to the supervised task.",
+        "It replaces convolution with a recurrent hidden state update.",
+        "It forces all filters to use only character-level inputs.",
+        "It prevents the model from learning task-specific decision boundaries."
+      ],
+      "answer_index": 0,
+      "explanation": "A frozen channel keeps the broad pretrained geometry intact, while a fine-tuned channel can shift features toward the target task. The classifier can use both sources.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "doubled his number of channels",
+          "kept the original word vectors",
+          "fine tuning"
+        ],
+        "timestamps": [
+          "00:24:36",
+          "00:24:53",
+          "00:25:37"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which diagnostic best explains why max pooling fits the classic sentence-classification CNN architecture?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The classifier often only needs to know whether a useful local feature appears anywhere, not at every exact position.",
+        "The classifier must reconstruct the full sentence in its original order before prediction.",
+        "The filters are designed to output one probability distribution per word.",
+        "Pooling is used only to make gradients vanish during training."
+      ],
+      "answer_index": 0,
+      "explanation": "For many classification tasks, the presence of a strong local cue can be enough evidence. Max pooling converts a variable number of local activations into one robust feature per filter.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "single number coming out",
+          "one vector",
+          "probability of a positive"
+        ],
+        "timestamps": [
+          "00:20:35",
+          "00:26:33",
+          "00:26:49"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture17-convnets-seg2-q1",
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q1",
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q2",
+      "global_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q2",
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q3",
+      "global_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q3",
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q4",
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg2-q4",
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "role": "secondary"
+    }
+  ]
+}

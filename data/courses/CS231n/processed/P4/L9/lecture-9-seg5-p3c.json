@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_9::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This segment is short, but the main ideas of instance segmentation and Mask R-CNN are clear enough for a small grounded question set.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core difference between semantic segmentation and instance segmentation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Instance segmentation separates objects of the same class into distinct individual instances.",
+        "Semantic segmentation always predicts bounding boxes while instance segmentation does not.",
+        "Semantic segmentation works only on medical images.",
+        "Instance segmentation does not need object class information."
+      ],
+      "answer_index": 0,
+      "explanation": "Semantic segmentation only says which class each pixel belongs to, while instance segmentation must also distinguish which individual object that pixel belongs to. Two dogs of the same class therefore still need to be separated into two entities.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "instance segmentation",
+          "different dog"
+        ],
+        "timestamps": [
+          "00:58:10",
+          "00:58:43"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does Mask R-CNN extend the R-CNN pipeline?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It adds a mask-prediction branch alongside the class and bounding-box outputs.",
+        "It removes the region proposal network completely.",
+        "It replaces every convolution with self-attention.",
+        "It keeps only the mask branch and drops object detection."
+      ],
+      "answer_index": 0,
+      "explanation": "Mask R-CNN keeps the familiar object-detection pipeline and adds another output head that predicts a pixel-level mask for each detected region. It therefore localizes, classifies, and segments each object.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "also generates the mask",
+          "more multitask"
+        ],
+        "timestamps": [
+          "00:58:43",
+          "00:59:14"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the mask head in Mask R-CNN predict?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A pixel-level mask for each detected object.",
+        "A separate learning rate for each proposal.",
+        "A positional embedding for each image.",
+        "A class token for whole-image classification."
+      ],
+      "answer_index": 0,
+      "explanation": "The mask head operates at a more detailed spatial level than the classification head. It predicts which pixels belong to each detected object in the corresponding proposal region.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "masks for that object",
+          "pixel level"
+        ],
+        "timestamps": [
+          "00:59:14",
+          "00:59:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "global_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "global_kp_id": "kp_fully_convolutional_segmentation_and_per_pixel_loss",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "global_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "global_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.0,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The semantic-versus-instance distinction is central and medium in difficulty because it requires a precise task comparison."
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.05,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The extension is clear but still requires understanding the multi-head nature of the architecture."
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.15,
+      "discrimination_prior": 0.92,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Once learners know what instance segmentation is, the role of the mask head is relatively accessible."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a concise but important conceptual distinction within segmentation tasks."
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This checks whether the learner can describe the structural extension from detection to instance segmentation."
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a short reinforcement item on what the extra head actually outputs."
+    }
+  ]
+}

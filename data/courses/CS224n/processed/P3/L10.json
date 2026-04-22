@@ -1,0 +1,130 @@
+{
+  "output_filename": "p3a__cs224n__lecture10_transformers.json",
+  "run_id": "<run_id>",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture10-transformers",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main high-importance KP on RNN linear interaction distance plus high item_generation_worthiness motivates why attention replaces recurrence.",
+      "target_kp_ids": [
+        "kp_rnn_linear_interaction_distance",
+        "kp_self_attention"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "motivation",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main gateway KP on Q/K/V equations with formula_heavy score, softmax, and weighted-sum computation supports multiple assessment items.",
+      "target_kp_ids": [
+        "kp_key_query_value_self_attention_equations",
+        "kp_self_attention"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main high-importance positional encoding KP and substantial FFN coverage explain essential fixes to raw self-attention with formula_heavy signals.",
+      "target_kp_ids": [
+        "kp_positional_encoding",
+        "kp_position_wise_feed_forward_network"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main causal self-attention KP with formula_heavy negative-infinity masking and triangular visibility example is central and error-prone.",
+      "target_kp_ids": [
+        "kp_causal_self_attention",
+        "kp_self_attention"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main critical gateway KP on multi-head attention plus formula_heavy matrix attention and scaled dot-product derivations makes this the densest assessment target.",
+      "target_kp_ids": [
+        "kp_multi_head_self_attention",
+        "kp_key_query_value_self_attention_equations",
+        "kp_scaled_dot_product_attention"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the critical capstone transformer architecture KP plus substantial residual and layer norm KPs with formula_heavy block details supports high-value assessment.",
+      "target_kp_ids": [
+        "kp_transformer_architecture",
+        "kp_residual_connections",
+        "kp_layer_normalization"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main high-importance capstone KP on transformer scaling advantages and quadratic bottleneck gives clear application-relevant conceptual value despite medium item_generation_worthiness.",
+      "target_kp_ids": [
+        "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+        "kp_transformer_architecture"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

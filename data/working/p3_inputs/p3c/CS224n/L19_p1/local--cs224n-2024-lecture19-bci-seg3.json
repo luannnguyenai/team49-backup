@@ -1,0 +1,159 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "cs224n-2024-lecture19-bci",
+    "lecture_title": "Lecture 19 - Brain-Computer Interfaces",
+    "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8"
+  },
+  "unit": {
+    "unit_id": "local::cs224n-2024-lecture19-bci::seg3",
+    "course_id": "cs224n-2024",
+    "name": "Neuron basics, spike trains, tuning curves, and noisy movement decoding",
+    "description": "Explains how neurons fire, how motor information appears in spike trains, and how multi-neuron machine learning decoders recover intended movements despite noise.",
+    "summary": "This segment introduces neuron anatomy and action potentials, framing neural recordings as sharp spike events measured near axons and membrane potentials [ts=743s][ts=803s]. The speaker then describes behavioral experiments in which a monkey prepares and executes leftward or rightward movements while a single neuron's spike train is recorded across trials, highlighting that real neurons are noisy even under the same condition [ts=848s][ts=919s][ts=979s]. From repeated experiments across movement directions, scientists observe cosine-like tuning curves: a neuron fires most for a preferred direction and less as movement deviates from it [ts=1003s][ts=1037s]. Because single neurons are ambiguous and noisy, combining multiple neurons and training a classifier yields more accurate decoding of intended movement direction [ts=1110s][ts=1198s]. A short Q&A adds a practical caveat: implanted electrodes can shift in soft tissue, so the assumption that one electrode always measures the same neuron is imperfect [ts=1282s][ts=1319s].",
+    "key_points": [
+      {
+        "text": "Neurons communicate through action potentials, which appear as sharp spikes when measured near the cell.",
+        "timestamp_s": 783,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Spike trains vary across repeated trials, so biological neurons are noisy even under the same experimental condition.",
+        "timestamp_s": 919,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Single-neuron firing rates can be fit by a cosine-like tuning curve over movement direction.",
+        "timestamp_s": 1003,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Population decoding uses multiple neurons and machine learning classification to infer intended movement more accurately than a single neuron can.",
+        "timestamp_s": 1198,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Electrode drift is a practical BCI challenge because the same channel may not always record the same neuron over time.",
+        "timestamp_s": 1310,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=14",
+      "start_s": 743,
+      "end_s": 1325
+    },
+    "difficulty": 0.58,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 10,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "This segment introduces neuron anatomy and action potentials, framing neural recordings as sharp spike events measured near axons and membrane potentials [ts=743s][ts=803s]. The speaker then describes behavioral experiments in which a monkey prepares and executes leftward or rightward movements while a single neuron's spike train is recorded across trials, highlighting that real neurons are noisy even under the same condition [ts=848s][ts=919s][ts=979s]. From repeated experiments across movement directions, scientists observe cosine-like tuning curves: a neuron fires most for a preferred direction and less as movement deviates from it [ts=1003s][ts=1037s]. Because single neurons are ambiguous and noisy, combining multiple neurons and training a classifier yields more accurate decoding of intended movement direction [ts=1110s][ts=1198s]. A short Q&A adds a practical caveat: implanted electrodes can shift in soft tissue, so the assumption that one electrode always measures the same neuron is imperfect [ts=1282s][ts=1319s].",
+  "target_kp_ids": [
+    "kp_population_decoding_from_noisy_motor_cortex_activity",
+    "kp_neural_spikes_as_the_basic_recorded_unit"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "video_clip_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "transcript_slice": "00:12:23\nSo here's some very basic neuroscience.\n\n00:12:33\nright?\n\n00:12:38\nAnd this is the body of the neuron called Soma.\n\n00:12:42\nSo this is another neuron.\n\n00:12:48\nSo if a neuron has one to transfer some information\n\n00:12:54\nyou have some neurons.\n\n00:12:59\nYou can basically-- this neuron will generate some action\n\n00:13:06\nto signal that another neuron that there\n\n00:13:11\nSo if you put a tiny electrodes, say, on the axon of this neuron\n\n00:13:22\nis something like this.\n\n00:13:26\nAnd on the y-axis is the measure, the electric potential.\n\n00:13:37\nAnd then if you Zoom into the spikes,\n\n00:13:42\nsignature of the neuron, which is like the electric,\n\n00:13:49\nSo basically, what you can measure at the neuron\n\n00:13:54\nThat's what you will get by putting electrodes\n\n00:13:57\nSo how do we figure out what kind of information\n\n00:14:08\nWe can perform some behavior tasks here.\n\n00:14:14\nSuppose I was still listening to a single neuron.\n\n00:14:19\nare using a monkey for this experiment right.\n\n00:14:25\nOne thing is basically we are trying\n\n00:14:32\nor to the right.\n\n00:14:37\nof that single neuron, and then see,\n\n00:14:41\nis encoded by that neuron.\n\n00:14:47\nis basically a spike train of that neuron,\n\n00:14:51\nEach vertical line is just a spike of that neuron.\n\n00:14:57\nA trial means that the monkey is just\n\n00:15:06\nThen the vertical-- if you see here that--\n\n00:15:14\nto fire slightly different across trials.\n\n00:15:20\nof a neuron is that it's very noisy.\n\n00:15:25\nIf you put something in, you always get something out.\n\n00:15:31\nthings are really noisy.\n\n00:15:35\nthey fire a bit slower under the same experimental conditions.\n\n00:15:44\nis that if what kind of information\n\n00:15:50\nmoved his limb to the left or limb to the right.\n\n00:16:00\ninto two phases, one is a preparation\n\n00:16:04\nSo for execution-- execution means\n\n00:16:14\nthe preparation means that the monkey is preparing to move,\n\n00:16:21\nat this goal time here.\n\n00:16:30\nto firing a lot during the execution\n\n00:16:36\nAnd it also fires a little bit more\n\n00:16:43\nSo this means that maybe the neuron is encoding some movement\n\n00:16:50\nSo basically, if you can repeat this experiments\n\n00:16:55\nfor a lot of different directions,\n\n00:17:01\nlike if you fit-- like say for a single neuron,\n\n00:17:07\nbasically how many spikes it's generating\n\n00:17:13\nYou can fit this kind of a cosine tuning curve to it.\n\n00:17:19\nis the firing rate.\n\n00:17:23\nSo this neuron prefers to firing the most when the movement is,\n\n00:17:32\nand then the firing gradually goes down.\n\n00:17:39\nhow the single neuron encoding like movement information.\n\n00:17:47\nyou will find that each neuron could encode\n\n00:17:50\nFor example, this green neuron here its tuning curve\n\n00:17:54\nAnd then the magnitude is shifted down.\n\n00:18:01\nNow with two neurons, you can actually decode out more--\n\n00:18:09\nis, right?\n\n00:18:12\nnow, I measure the firing rate is around 30 spikes per second.\n\n00:18:21\nHowever, with second neurons here, you\n\n00:18:26\nsuppose we measure the second neuron fires\n\n00:18:32\ncan exactly pinpoint that it's actually\n\n00:18:43\nHowever, we know that the neurons has some noises.\n\n00:18:52\ndirection by using two neurons here.\n\n00:18:59\nthe actual--\n\n00:19:05\nrate is those gray lines.\n\n00:19:09\nis slightly shifted to those dashed lines.\n\n00:19:14\nOriginally, if we can decode the movement direction is 120.\n\n00:19:19\nbecomes-- that there is four possibilities.\n\n00:19:26\nHowever, you can see that maybe it's still more likely that\n\n00:19:34\nrather than the 1-2 leverages like around 50.\n\n00:19:41\nSo how do we deal with this kind of noisy neuron?\n\n00:19:48\nlike, how can we still accurately decide\n\n00:19:54\nof multiple neuron recordings?\n\n00:20:02\nSo we can treat this as a kind of a classification problem.\n\n00:20:09\neach dot here is basically a firing.\n\n00:20:13\nAnd the color here, basically, represents the intended movement\n\n00:20:19\nAnd then if you somehow train a machine learning classifier\n\n00:20:25\nwe can draw some decision boundaries or say on the right\n\n00:20:33\nthe firing rate somehow drops--\n\n00:20:38\nknow that it's going be the monkey is trying\n\n00:20:46\nOK.\n\n00:20:51\ncan do this kind of a single neuron measurement.\n\n00:20:56\nAnd then by training a machine learning models,\n\n00:21:04\nto infer, what's the likely movement directions?\n\n00:21:11\na brain-computer interface.\n\n00:21:14\nYes?\n\n00:21:15\nYeah.\n\n00:21:19\nHow do you pinpoint which neuron to start measuring?\n\n00:21:22\nSo here, neural one is basically like we are taking--\n\n00:21:27\nthat each tiny electrode here you\n\n00:21:34\nAnd then that electrode will be fixed.\n\n00:21:39\nrates of that neurons.\n\n00:21:42\nBut in the real case, it's not always\n\n00:21:48\nis this kind of a soft structure.\n\n00:21:53\nand measure different neurons.\n\n00:21:59\nis that how you can deal with this kind of neural change,\n\n00:22:03\nYeah.\n\n00:22:05\nLet's go back to here.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs224n-2024-lecture19-bci::seg3",
+      "global_kp_id": "kp_neural_spikes_as_the_basic_recorded_unit",
+      "planner_role": "prereq",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture19-bci::seg3",
+      "global_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_neural_spikes_as_the_basic_recorded_unit",
+      "name": "Neural spikes as the basic recorded unit",
+      "description": "Single-neuron recordings are framed in terms of action potentials and spike trains measured near neurons.",
+      "track_tags": [
+        "neuroscience"
+      ],
+      "domain_tags": [
+        "neurons",
+        "spike_trains"
+      ],
+      "career_path_tags": [
+        "computational_neuroscience"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because neural spikes as the basic recorded unit clarifies single-neuron recordings are framed in terms of action potentials and spike trains measured near neurons, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture19-bci::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "name": "Population decoding from noisy motor-cortex activity",
+      "description": "Movement intent is inferred by combining noisy single-neuron tuning information across multiple channels and learning decision boundaries.",
+      "track_tags": [
+        "ml",
+        "neural_decoding"
+      ],
+      "domain_tags": [
+        "classification",
+        "motor_cortex",
+        "population_coding"
+      ],
+      "career_path_tags": [
+        "computational_neuroscience",
+        "ml_research"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because population decoding from noisy motor-cortex activity formalizes how movement intent is inferred by combining noisy single-neuron tuning information across multiple channels and learning decision boundaries, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture19-bci::kp4"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.43,
+    0.73
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L19_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture19-bci_transcript.txt"
+  }
+}

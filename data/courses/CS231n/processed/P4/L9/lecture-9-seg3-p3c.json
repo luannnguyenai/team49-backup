@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_9::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "The transcript clearly frames detection as classification plus localization and explains the progression from sliding windows to Fast R-CNN, so no clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What must a basic object detector predict in addition to the class label?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Bounding-box coordinates such as x, y, w, and h.",
+        "The attention map of the whole image.",
+        "Only a saliency map for the correct class.",
+        "The Jacobian matrix for every pixel."
+      ],
+      "answer_index": 0,
+      "explanation": "Object detection answers not only what the object is but also where it is. For that reason the model must output location and size parameters along with class scores.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "class scores",
+          "coordinates of the box"
+        ],
+        "timestamps": [
+          "00:34:40",
+          "00:34:52"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the sliding-window approach over all candidate boxes scale poorly in scenes with many objects?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the number of boxes to evaluate becomes extremely large, so computation grows sharply.",
+        "Because sliding windows cannot use CNNs.",
+        "Because the method works only when the image contains exactly one object.",
+        "Because it cannot output class probabilities for each region."
+      ],
+      "answer_index": 0,
+      "explanation": "When many positions, sizes, and aspect ratios are considered, the number of candidate boxes explodes quickly. Running a model on all of them becomes too expensive.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "huge problem here",
+          "many number of bounding boxes"
+        ],
+        "timestamps": [
+          "00:36:35",
+          "00:37:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does Fast R-CNN mainly improve over the original R-CNN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It shares one convolutional computation over the whole image and then reads proposals from the feature map.",
+        "It removes region proposals from the pipeline entirely.",
+        "It uses a transformer decoder with learned object queries.",
+        "It predicts each pixel instead of bounding boxes."
+      ],
+      "answer_index": 0,
+      "explanation": "Original R-CNN had to run a CNN separately on every proposal and was therefore slow. Fast R-CNN reduces the cost by computing convolutional features once over the whole image and extracting proposal features from that shared map.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "feature map",
+          "look at those regions"
+        ],
+        "timestamps": [
+          "00:40:34",
+          "00:40:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "The distinction between classification and localization is a basic detection concept."
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.05,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "This is a medium detection-systems item because it asks for the scaling failure rather than just the method name."
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The item is medium-hard because it asks about the core architectural speedup, not just the family name."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is an early detection-readiness question on the basic task definition."
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item checks whether the learner understands the computational reason the field moved beyond naive sliding windows."
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is useful after the learner has seen the sequence of detection systems and their efficiency improvements."
+    }
+  ]
+}

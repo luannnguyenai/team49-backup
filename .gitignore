@@ -19,10 +19,9 @@ build/
 .ai-log/*.jsonl
 
 
-# Data — ignore large binary/video assets, track JSON configs
-data/CS231n/*
-!data/CS231n/syllabus.json
-data/CS224n/
+# Data — ignore only large video assets
+data/courses/**/videos/*
+data/courses/**/slides/
 
 # Project local files
 app.db
@@ -38,8 +37,6 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
-data/cs231n/
-
 .superpowers
 .claude/settings.local.json
 .claude/settings.local.json

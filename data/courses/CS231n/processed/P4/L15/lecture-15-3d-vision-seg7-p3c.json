@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_15_3d_vision::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about neural implicit fields, NeRF, differentiable volume rendering, and Gaussian splatting. The conceptual dependencies are verbalized clearly, so no clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Compared with earlier deep implicit geometry methods, what extra input does NeRF use to model appearance?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mesh face indices",
+        "Viewing direction along with spatial position",
+        "A voxel occupancy histogram",
+        "Only the object category label"
+      ],
+      "answer_index": 1,
+      "explanation": "Appearance depends on view direction, so NeRF augments the 3D query location with camera-direction information when predicting radiance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "z-coordinate in the 3D space",
+          "also gives you the color"
+        ],
+        "timestamps": [
+          "00:59:26",
+          "01:00:51"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can NeRF be trained from 2D images rather than requiring direct 3D supervision?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because its rendering procedure is differentiable with respect to density and color predictions",
+        "Because it converts every image into a mesh before training",
+        "Because camera direction is ignored during optimization",
+        "Because all rays sample only one 3D point"
+      ],
+      "answer_index": 0,
+      "explanation": "Differentiable volume rendering lets gradients flow from image reconstruction errors back into the neural field’s density and color predictions along sampled rays.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "made differentiable",
+          "learn directly from 2D images"
+        ],
+        "timestamps": [
+          "01:00:42",
+          "01:01:18"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is 3D Gaussian splatting typically much faster to render than NeRF?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It ignores appearance and predicts only occupancy",
+        "It focuses computation on sparse occupied regions instead of sampling many empty points along rays",
+        "It requires no camera parameters",
+        "It replaces 3D geometry with 2D segmentation masks"
+      ],
+      "answer_index": 1,
+      "explanation": "Gaussian splatting represents the scene with sparse blobs where matter exists, so rendering avoids much of the wasted sampling that slows volumetric ray marching.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_3d_gaussian_splatting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "density values",
+          "Gaussian blobs"
+        ],
+        "timestamps": [
+          "00:59:40",
+          "01:04:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q1",
+      "global_kp_id": "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q2",
+      "global_kp_id": "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q3",
+      "global_kp_id": "kp_3d_gaussian_splatting",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Compared with earlier deep implicit geometry methods, what extra input does NeRF use to model appearance\" is a direct reinforcement check and should land on the easier side."
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can NeRF be trained from 2D images rather than requiring direct 3D supervision\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is 3D Gaussian splatting typically much faster to render than NeRF\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Compared with earlier deep implicit geometry methods, what extra input does NeRF use to model appearance\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can NeRF be trained from 2D images rather than requiring direct 3D supervision\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is 3D Gaussian splatting typically much faster to render than NeRF\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

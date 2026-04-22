@@ -1,0 +1,228 @@
+{
+  "unit_id": "local::lecture20-reasoning-agents::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "review_summary": "Transcript evidence is sufficient for reinforcement questions on this unit. The core definitions, examples, and cautions are stated explicitly enough that no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are human few-shot demonstrations not a scalable long-term solution for training agents?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because humans cannot interact with browsers",
+        "Because every new environment or site may require many new demonstrations, making collection too expensive and diverse to cover fully",
+        "Because demonstrations prevent few-shot learning",
+        "Because transformers cannot condition on demonstrations"
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture argues that human demonstrations do not scale because there are too many environments and too many possible interactions to cover with manual examples for every new setting.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "this is not scalable"
+        ],
+        "timestamps": [
+          "00:46:51",
+          "00:47:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the first role of the unconditioned language model in the synthetic-demonstration pipeline?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It grades completed trajectories for stylistic quality",
+        "It randomly explores the environment to generate raw trajectories",
+        "It converts screenshots into HTML",
+        "It produces the final benchmark leaderboard"
+      ],
+      "answer_index": 1,
+      "explanation": "The pipeline begins with exploration. An unconditioned model interacts with the environment to generate raw action trajectories that can later be relabeled.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "explore the environment"
+        ],
+        "timestamps": [
+          "00:48:09"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is a second language model introduced after raw trajectories are collected?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To translate the website into another language",
+        "To relabel each trajectory with a natural-language description of the task it appears to accomplish",
+        "To compress the action space into a smaller tokenizer",
+        "To compute exact environment dynamics"
+      ],
+      "answer_index": 1,
+      "explanation": "The second model interprets what the trajectory seems to have done. That turns unlabeled behavior into instruction-trajectory pairs usable as synthetic supervision.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "description of these trajectories"
+        ],
+        "timestamps": [
+          "00:48:34",
+          "00:49:19"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If a trajectory fails to complete its original task, what is the unit's recommended salvage strategy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Discard it immediately as useless",
+        "Relabel it with the best matching subtask it actually completed",
+        "Send it to a human for hand correction only",
+        "Average it with a successful trajectory"
+      ],
+      "answer_index": 1,
+      "explanation": "Failed trajectories can still be informative. By relabeling them according to what they actually accomplished, the pipeline keeps useful partial successes instead of throwing data away.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "assign it a new label"
+        ],
+        "timestamps": [
+          "00:51:28"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is one reported outcome of using these synthetic demonstrations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They reduce MiniWoB performance because random exploration dominates",
+        "They can replace human in-context examples and improve MiniWoB by about 13 points",
+        "They only help on reasoning benchmarks, not agents",
+        "They remove the need for any filtering step"
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture reports that synthetic demonstrations can serve as training or prompting data and lead to a sizeable MiniWoB gain of roughly 13 points.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "13-point improvement on MiniWoB"
+        ],
+        "timestamps": [
+          "00:52:12",
+          "00:53:24"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q1",
+      "global_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q2",
+      "global_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q3",
+      "global_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q4",
+      "global_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg6-q5",
+      "global_kp_id": "kp_synthetic_demonstrations_through_exploration_and_relabeling",
+      "role": "primary"
+    }
+  ]
+}

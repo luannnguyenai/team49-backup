@@ -1,0 +1,155 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg2",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Single-frame CNNs and late-fusion baselines",
+    "description": "Covers simple per-frame CNN baselines, frame sampling, and late-fusion designs that combine independently extracted frame features.",
+    "summary": "The first baseline treats video as a collection of images: sample frames, run a normal 2D CNN on each frame, and average predicted probabilities, which can work well when frames already reveal the action [ts=509s] [ts=557s]. The instructor stresses this is often a strong baseline and should be run first before building more complex video classifiers [ts=574s] [ts=585s]. Frame sampling is itself important: random sampling may work, but selecting informative frames or adapting the next sample based on earlier samples is an active research area [ts=618s] [ts=651s]. Late fusion improves on per-frame averaging by applying a 2D CNN independently to each key frame, producing T feature maps, then either flattening and concatenating them into a large vector for an MLP or pooling over space and time before a linear classifier [ts=692s] [ts=726s] [ts=819s]. The FC version can explode in parameters because the feature vector scales with T, while pooling keeps the feature dimension D but may discard important temporal information [ts=765s] [ts=841s] [ts=862s]. The central limitation of late fusion is that low-level motion cues, such as feet moving up and down, may be lost after many convolution and pooling layers before temporal comparison happens [ts=892s] [ts=960s].",
+    "key_points": [
+      {
+        "text": "A single-frame CNN runs an image classifier on sampled video frames and averages predictions.",
+        "timestamp_s": 602,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Single-frame CNNs are often a very strong baseline and should be tried first when designing a video classifier.",
+        "timestamp_s": 574,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Frame sampling is a key design question; random sampling is simple but not necessarily the smartest strategy.",
+        "timestamp_s": 618,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Late fusion with FC layers concatenates independently extracted frame features into a large clip feature before an MLP.",
+        "timestamp_s": 726,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Concatenation-based late fusion can introduce many parameters when T is large.",
+        "timestamp_s": 765,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Pooling late fusion keeps feature dimension D but may remove information important for recognition.",
+        "timestamp_s": 819,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Late fusion can miss low-level motion because high-level feature maps may no longer retain frame-to-frame movement cues.",
+        "timestamp_s": 904,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 509,
+      "end_s": 978
+    },
+    "difficulty": 3.0,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:08:29\nAnd then what is a same post, like, video classification model we can use? So I have\n\n00:08:45\none simple thing that we just treat them as images. That's the simplest tool we already\n\n00:08:56\nWe have learned that we can train an image classifier. If we just take our image\n\n00:09:05\nwe can indeed get decent predictions. Especially like a video like this. You\n\n00:09:13\nsome different movements on the body. But generally, it looks pretty similar.\n\n00:09:25\ntell you it's running. And if you average the prediction results from each image,\n\n00:09:34\nSo actually, also, it's usually a very, very strong baseline for this simple image classifier,\n\n00:09:45\nvideos. So if you are trying to design some video classifier, you should always run this\n\n00:09:56\nSo the question is, whether we just run single frame or we run a chunk of frames? So for this, a\n\n00:10:08\nfew frames. And you just use the image classifier to run on those sampled 10 frames and just treat\n\n00:10:18\nSo I think you have some very important question is how to sample the frame?\n\n00:10:26\nwant to sample some frames and we want to run a CNN on the frame. So how to get\n\n00:10:33\nOne simple way is that you do random sampling. You have a one-hour video. I don't know where the\n\n00:10:42\nI sample one frame. And then I run an image classifier. I average the results. But obviously,\n\n00:10:51\nSo there are other methods trying to propose smarter sampling strategy.\n\n00:10:59\nelse to sample. I actually also have some examples later in the later lecture slides.\n\n00:11:10\nimage classifier, a single frame CNN. And similarly, just maybe we take one step\n\n00:11:23\nmaybe we can do some fusion across the features on using the single frame CNNs.\n\n00:11:39\nAnd we have some input, maybe key frames. And for each frame, we use a 2D CNN. And then we extract\n\n00:11:56\nAnd then because we have T frames. Then basically,\n\n00:12:06\nmaps to vectors and then concatenate them. Then we have a giant feature vector that\n\n00:12:16\nAnd then what we can do, we can use tools that we have learned like fully\n\n00:12:25\ndimension. And then we train a classifier on top of it to map it, to class score C.\n\n00:12:37\nwe process them very independently. And then at the very late stage, we concatenate the feature\n\n00:12:45\nSo this is useful. But one drawback that you can already probably tell from this\n\n00:13:00\nof parameters. Because if we concatenate a lot of-- we flatten them across time.\n\n00:13:10\ncan have a giant feature vector. And then you use this giant feature vector. You want\n\n00:13:19\nlayers. And that will introduce a lot of parameters. So it's not very efficient.\n\n00:13:29\nwe don't do concatenation. We don't just use the giant feature vector,\n\n00:13:39\ndo a simple pooling. Doing pooling, you don't increase the length of the feature vector.\n\n00:13:51\nfor these T frames, you're just doing a pooling to do a temporal\n\n00:14:01\nyou just still have a feature vector of time D if you do pooling.\n\n00:14:10\nthen you train the cross-entropy loss on top of it. And that's also late fusion. But now,\n\n00:14:22\nyou don't have to have a very large fully connected layers. But the pooling can also\n\n00:14:34\nSo the reason I'm calling late fusion-- the important part is late. And when it's late,\n\n00:14:46\nnetworks to process images. For example, as shown in these red circles here. So what is\n\n00:14:59\nright. It's moving up and down, up and down. And you can maybe tell that he's running.\n\n00:15:11\n2D image and extract some feature map and maybe up to very late stage of the feature maps,\n\n00:15:25\nthis very late stage. So some information of this feet up and down is showing these red circles,\n\n00:15:35\nThe intuition is that if you extract features from the earlier layers,\n\n00:15:48\nwill contain this low level information, this movement from the video frames. And also,\n\n00:16:00\nBut because we are processing a lot of convolution pooling up to a late stage,\n\n00:16:09\nsemantic information instead of this low level motion information. So that's why",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg2",
+      "global_kp_id": "kp_single_frame_cnn_baseline",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg2",
+      "global_kp_id": "kp_late_fusion",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_single_frame_cnn_baseline",
+      "name": "Single-frame CNN baseline",
+      "description": "A simple video classifier can sample frames, run a 2D CNN independently, and average probabilities.",
+      "track_tags": [
+        "baselines",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because single-frame CNN baseline clarifies a simple video classifier can sample frames, run a 2D CNN independently, and average probabilities, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_late_fusion",
+      "name": "Late fusion",
+      "description": "Late fusion extracts high-level per-frame features independently and combines them near the classifier via concatenation or pooling.",
+      "track_tags": [
+        "fusion",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because late fusion clarifies late fusion extracts high-level per-frame features independently and combines them near the classifier via concatenation or pooling, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    2.85,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

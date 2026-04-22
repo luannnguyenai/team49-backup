@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_15_3d_vision::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about compositional implicit geometry, distance functions, level sets, and voxels. The content is conceptual rather than visually dependent.",
+  "question_bank": [
+    {
+      "item_id": "lecture-15-3d-vision-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are implicit functions attractive for constructive shape modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They make unions, intersections, and differences easy to express",
+        "They always produce triangle meshes directly",
+        "They remove the need for any 3D coordinates",
+        "They guarantee constant memory regardless of resolution"
+      ],
+      "answer_index": 0,
+      "explanation": "Function values can be combined with arithmetic or logical operations, so complex shapes can be built compositionally from simpler ones.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_level_sets_and_voxels",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "easy to compose them",
+          "unions or intersections or differences"
+        ],
+        "timestamps": [
+          "00:21:04",
+          "00:21:39"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What extra benefit does a signed distance function provide over a pure inside-outside indicator?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It guarantees a mesh with fixed topology",
+        "It tells both which side of the surface a point is on and how far away it is",
+        "It stores RGB texture directly in the field value",
+        "It eliminates the need for discretization"
+      ],
+      "answer_index": 1,
+      "explanation": "A signed distance function carries geometric meaning in its value: the sign indicates sidedness and the magnitude indicates distance, which also supports smoother blending.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_level_sets_and_voxels",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "the values actually have meanings",
+          "to the surface of the object"
+        ],
+        "timestamps": [
+          "00:22:36",
+          "00:22:40"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a voxel grid?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A list of oriented surface points with normals",
+        "A binary occupancy field stored on a dense 3D grid",
+        "A parameterized surface patch defined by u and v",
+        "A graph over mesh vertices"
+      ],
+      "answer_index": 1,
+      "explanation": "A voxel grid discretizes 3D space into cells and stores whether each cell is occupied, making it the 3D analogue of a pixel grid.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_level_sets_and_voxels",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "3D matrix",
+          "store all the values"
+        ],
+        "timestamps": [
+          "00:25:05",
+          "00:25:00"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-15-3d-vision-seg3-q1",
+      "global_kp_id": "kp_level_sets_and_voxels",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg3-q2",
+      "global_kp_id": "kp_level_sets_and_voxels",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg3-q3",
+      "global_kp_id": "kp_level_sets_and_voxels",
+      "role": "primary"
+    }
+  ]
+}

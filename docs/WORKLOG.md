@@ -128,3 +128,41 @@ Merge kết quả về `main` bằng merge commit `fe3ea17` để preserve histo
 - Bổ sung lecture-aware scope guard để tutor không vượt ngữ cảnh learning unit đang học.
 
 **Hệ quả:** Hướng migration dài hạn rõ ràng hơn, UI không còn bị khóa vào lecture model cũ. Đổi lại, hệ thống phải duy trì thêm mapping/guard ở tầng adapter trong giai đoạn chuyển tiếp.
+
+---
+
+### [ADR-8] Tách `data/` theo vai trò pipeline: `bootstrap / courses / working / final_artifacts` — 22/04/2026
+
+**Bối cảnh:** Sau khi chạy các prompt pipeline P1→P5 cho CS224n và CS231n, thư mục `data/` bắt đầu lẫn nhiều loại artifact khác nhau:
+- bootstrap fixture cho app runtime,
+- course asset gốc,
+- working inputs/output trung gian cho prompt pipeline,
+- final cross-course artifacts dùng để ingest,
+- experiment outputs cho ModernBERT / SciBERT / GPT review.
+
+Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro:
+- script và test tiếp tục trỏ vào path cũ hoặc nhầm artifact cũ với artifact final,
+- các file P2/P5 cross-course bị đặt sai ngữ nghĩa trong folder của một course đơn lẻ,
+- review/debug sau này khó phân biệt cái nào là canonical, cái nào chỉ là working scratch.
+
+**Các lựa chọn đã xem xét:**
+- **Giữ nguyên layout cũ và chỉ ghi chú bằng README**: ít thay đổi path nhưng không giải quyết được drift và ambiguity trong runtime/test.
+- **Bundle toàn bộ final data thành JSONL export riêng**: rõ ràng cho ingest nhưng thêm một lớp artifact mới, dễ lệch với file source thật của prompt pipeline.
+- **Tổ chức lại `data/` theo vai trò lưu trữ**: giữ file source thật, chỉ đổi vị trí để semantic rõ hơn, rồi patch runtime/test/scripts theo layout mới.
+
+**Quyết định:** Chọn layout vai trò:
+- `data/bootstrap/` cho fixture seed nhẹ của app,
+- `data/courses/CS224n`, `data/courses/CS231n` cho raw + processed per-course assets,
+- `data/working/` cho `p2`, `p3_inputs`, `p5` và các artifact trung gian còn phục vụ validation/rerun,
+- `data/final_artifacts/cs224n_cs231n_v1/` cho canonical cross-course final outputs (`p2`, `p5`, `gpt54`, visualizations, model experiment logs).
+
+Đồng thời:
+- thêm `src/data_paths.py` làm nơi định nghĩa canonical path dùng lại cho scripts/services,
+- sửa `.gitignore` để **chỉ ignore video assets** dưới `data/courses/**/videos/*`,
+- loại bỏ bản `P2` single-course lỗi thời của CS224n vì đã bị supersede bởi bản cross-course final,
+- chuẩn hóa `CS231n/syllabus.json` theo schema của `CS224n/syllabus.json` nhưng vẫn giữ `lecture_id` canonical cũ để không phá compatibility.
+
+**Hệ quả:** 
+- Path runtime/test/script rõ vai trò hơn và ít nhầm artifact hơn.
+- Các final outputs dùng để ingest/review được gom đúng chỗ, không còn lẫn trong tree của từng course.
+- Đổi lại, nhiều file metadata và script mặc định phải được patch lại đồng bộ; việc review path cũ sau refactor trở thành bước bắt buộc.

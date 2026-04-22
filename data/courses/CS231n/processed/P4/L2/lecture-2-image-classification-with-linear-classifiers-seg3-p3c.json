@@ -1,0 +1,334 @@
+{
+  "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript and unit summary support the decision-region behavior of 1-NN and k-NN, plus the L1/L2 geometry comparison. The concepts can be assessed safely without cutting a separate video clip.",
+  "qa_outputs": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item captures the sensitivity of 1-NN to noise and mislabeled points, with distractors that remain plausible but separable.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The stem directly tests why k-NN smooths single-point noise better than 1-NN, and the evidence supports the intended mechanism.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item cleanly compares L1 and L2 geometry, and the distractors reflect realistic misunderstandings about distance metrics.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What problem can a single mislabeled or noisy training point cause in 1-nearest-neighbor classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can create a large incorrect decision region around itself.",
+        "It makes every training example disappear from memory.",
+        "It forces all decision regions to become perfectly circular.",
+        "It prevents the classifier from computing any distance metric."
+      ],
+      "answer_index": 0,
+      "explanation": "With 1-NN, each point controls the region where it is the closest example. A noisy point can therefore dominate a nearby area and cause many wrong predictions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_nearest_neighbor_classification",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a noise",
+          "big yellow region",
+          "only using one nearest neighbor"
+        ],
+        "timestamps": [
+          "00:27:20",
+          "00:27:32",
+          "00:27:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does k-nearest-neighbor usually make the classifier more robust than 1-nearest-neighbor?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It uses several nearby examples and predicts by the majority among them.",
+        "It removes the need for any training labels.",
+        "It guarantees that no ambiguous regions can occur.",
+        "It changes every feature into a class probability before comparing examples."
+      ],
+      "answer_index": 0,
+      "explanation": "Looking at multiple neighbors reduces the influence of a single noisy point. The prediction is based on the local majority rather than one example.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_nearest_neighbor_classification",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "more than one point",
+          "identifying the label",
+          "equal number of samples"
+        ],
+        "timestamps": [
+          "00:27:52",
+          "00:28:04",
+          "00:28:28"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement best captures the geometric difference between L1 and L2 distance in a two-feature space?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "L1 has axis-aligned diamond-like contours, while L2 has circular contours.",
+        "L1 and L2 always produce exactly the same decision boundaries.",
+        "L1 ignores feature axes, while L2 depends only on feature names.",
+        "L2 can only be used for binary features, while L1 requires RGB pixels."
+      ],
+      "answer_index": 0,
+      "explanation": "L1 sums absolute coordinate differences, so its equal-distance sets align with the axes. L2 uses squared differences and square roots, producing rounder contours.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_distance_metrics_for_similarity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "L1 distance",
+          "Manhattan distance",
+          "L2 distance"
+        ],
+        "timestamps": [
+          "00:29:27",
+          "00:29:47",
+          "00:30:22"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q1",
+      "global_kp_id": "kp_nearest_neighbor_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q1",
+      "global_kp_id": "kp_distance_metrics_for_similarity",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q2",
+      "global_kp_id": "kp_nearest_neighbor_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q2",
+      "global_kp_id": "kp_distance_metrics_for_similarity",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q3",
+      "global_kp_id": "kp_distance_metrics_for_similarity",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q3",
+      "global_kp_id": "kp_nearest_neighbor_classification",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "This is a medium reasoning item because learners must infer a robustness failure mode rather than recall a definition."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The item is medium difficulty because it asks for a comparative robustness argument, not mere terminology."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 1.0,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Metric-geometry distinctions are slightly harder because learners must reason about shape as well as formula choice."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is strongest when checking whether learners understand why local decision rules can be brittle."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "It fits bridge-check use because the learner must connect local voting behavior to robustness."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3::q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "final_quiz",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item transfers well because metric choice affects many ML systems beyond nearest-neighbor classifiers."
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "output_filename": "p3a__cs224n__lecture14_nlg.json",
+  "run_id": "unknown",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture14-nlg",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture14-nlg::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main kp_natural_language_generation plus substantial main kp_open_ended_generation makes this gateway framing section item_generation_worthiness=high.",
+      "target_kp_ids": [
+        "kp_natural_language_generation",
+        "kp_open_ended_generation"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of gateway kp_autoregressive_language_modeling with substantial teacher-forcing support makes this core mechanics section item_generation_worthiness=high.",
+      "target_kp_ids": [
+        "kp_autoregressive_language_modeling",
+        "kp_teacher_forcing_and_student_forcing"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of degeneration under maximum-probability decoding and explicit repetition failure analysis make this a high-value motivation section for the decoding toolkit.",
+      "target_kp_ids": [
+        "kp_degeneration_under_maximum_probability_decoding"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "motivation",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of critical kp_sampling_based_decoding_controls plus substantial reranking support makes this the lecture's densest practical decoding section with item_generation_worthiness=high.",
+      "target_kp_ids": [
+        "kp_sampling_based_decoding_controls",
+        "kp_reranking_sampled_candidates"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of gateway kp_exposure_bias with substantial remedies and RLHF context makes this a central training section and item_generation_worthiness=high.",
+      "target_kp_ids": [
+        "kp_exposure_bias",
+        "kp_training_alternatives_to_reduce_exposure_bias",
+        "kp_reinforcement_learning_and_rlhf_for_nlg"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of critical kp_automatic_evaluation_metrics_for_nlg and explicit false-positive/false-negative failure modes make this evaluation section strongly testable.",
+      "target_kp_ids": [
+        "kp_automatic_evaluation_metrics_for_nlg"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of human-centered evaluation and concrete metric-to-human correlation criteria give this section strong instructional value with item_generation_worthiness=high.",
+      "target_kp_ids": [
+        "kp_human_centered_evaluation_and_metric_alignment"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg8",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant main coverage of deployment safeguards, bias, truthfulness, and adversarial robustness makes this an application-oriented keep section, though item_generation_worthiness is only medium.",
+      "target_kp_ids": [
+        "kp_ethical_risks_and_deployment_safeguards_for_nlg"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

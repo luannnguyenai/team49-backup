@@ -1,0 +1,6254 @@
+Title: Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 16: Vision and Language
+URL: https://www.youtube.com/watch?v=mQOK0Mfyrkk
+Video ID: mQOK0Mfyrkk
+============================================================
+
+00:00:05
+Thank you everyone for coming.
+
+00:00:08
+We have another guest lecture.
+
+00:00:10
+And today we have
+Ranjay Krishna.
+
+00:00:12
+Ranjay Krishna is an
+assistant professor
+
+00:00:14
+at the School of Computer
+Science and Engineering
+
+00:00:16
+at the University of Washington,
+and he co-directs the RAIVN lab.
+
+00:00:21
+He has taught previous
+iterations of CS231N
+
+00:00:24
+in 2020 and 2021,
+and his research
+
+00:00:27
+lies at the intersection
+of computer vision,
+
+00:00:30
+natural language processing,
+robotics, and human computer
+
+00:00:33
+interaction.
+
+00:00:34
+In today's lecture, he will
+discuss multimodal foundation
+
+00:00:37
+models.
+
+00:00:37
+And.
+
+00:00:38
+Ranjay, the floor is yours.
+
+00:00:39
+Thank you.
+
+00:00:40
+It's great to be back.
+
+00:00:41
+The first time I ever
+taught this course here
+
+00:00:43
+at Stanford it was 2020 and
+we had about three weeks
+
+00:00:47
+where we had to take all the
+material and move it online.
+
+00:00:51
+Yeah, every year after that
+has been much easier to teach.
+
+00:00:55
+It's great to be back.
+
+00:00:56
+So today, we're going to talk
+about multimodal foundation
+
+00:00:58
+models.
+
+00:00:59
+So a lot of the
+lectures in this class
+
+00:01:01
+so far has really been focused
+on building individual models
+
+00:01:05
+for individual tasks.
+
+00:01:07
+So these usually
+follow a few steps
+
+00:01:09
+that you've seen over and
+over again in lectures.
+
+00:01:12
+You collect a data
+set, usually a training
+
+00:01:13
+set as well as a test set, then
+you train a very specialized
+
+00:01:16
+model for that purpose.
+
+00:01:18
+So that could be an image
+classification model or image
+
+00:01:20
+captioning model, like the ones
+you've seen in your assignments
+
+00:01:22
+as well.
+
+00:01:23
+And then you finally evaluate
+those models on your test set.
+
+00:01:27
+Now, what's been
+different in the field
+
+00:01:29
+so far in the last
+couple of years
+
+00:01:32
+is this shift away from
+these individual models
+
+00:01:34
+into building these
+more foundation models.
+
+00:01:38
+And the way to think
+about foundation models
+
+00:01:40
+is that it really is
+trying to pre-train models
+
+00:01:43
+on a wide variety of skills, a
+wide variety of different tasks,
+
+00:01:46
+and then later on adapt those
+things for individual tasks
+
+00:01:50
+depending on your needs.
+
+00:01:51
+So, for example, one very
+common foundation model
+
+00:01:54
+that you all probably use in
+some form or the other is GPT,
+
+00:01:58
+and GPT was trained on a
+lot of Common Crawl data
+
+00:02:01
+from the internet.
+
+00:02:02
+And then you take that
+model that you get,
+
+00:02:04
+and then you fine tune it
+for different purposes.
+
+00:02:06
+So you fine tune that
+model for math problems
+
+00:02:09
+or symbolic reasoning
+or trivia questions.
+
+00:02:11
+And all of these
+are individual tasks
+
+00:02:13
+that this model can
+quickly adapt to.
+
+00:02:14
+Now, what's nice
+about foundation
+
+00:02:16
+models is that it
+allows you to do
+
+00:02:17
+that update step, that
+adaptation to new tasks
+
+00:02:20
+with very minimal
+data, meaning you
+
+00:02:22
+don't need to collect a large
+amount of training data.
+
+00:02:24
+You can usually get away
+with very, very little.
+
+00:02:27
+Oftentimes, you
+can even get away
+
+00:02:28
+with collecting no
+training data at all.
+
+00:02:31
+And so when you think
+about foundation models,
+
+00:02:34
+there's many different
+classes of foundation models
+
+00:02:36
+that you might care about.
+
+00:02:38
+In language, you've got
+ELMo and BERT that really
+
+00:02:40
+started this entire revolution.
+
+00:02:42
+And then we now have GPT and T5
+and variants of these models.
+
+00:02:46
+These are things we're
+not going to talk
+
+00:02:48
+about in this class, since
+we're mostly going to be talking
+
+00:02:50
+about multimodal models.
+
+00:02:52
+What we will talk
+about is how do you
+
+00:02:54
+build these same foundation
+models for image classification.
+
+00:02:57
+And we'll go into examples
+like CLIP and CoCa today.
+
+00:03:02
+We'll also talk about how do you
+combine language models that you
+
+00:03:05
+might have seen already in class
+with these vision foundation
+
+00:03:08
+models to enable all new
+models, multimodal foundation
+
+00:03:12
+models that can solve a
+wide variety of tasks.
+
+00:03:15
+And then, of course, we
+can do a lot more than just
+
+00:03:17
+solve tasks in language.
+
+00:03:19
+We'll talk about how
+you can build models
+
+00:03:21
+that can output not just
+text, but also masks
+
+00:03:25
+or images that you
+might want to generate.
+
+00:03:28
+And then finally, we'll talk
+about this idea of chaining,
+
+00:03:31
+where you take a bunch
+of foundation models
+
+00:03:33
+and then combine them to
+do all new things together.
+
+00:03:37
+Now, when we talk about
+foundation models,
+
+00:03:38
+there's many different
+ways to classify them.
+
+00:03:41
+And it's hard because
+the definition is often
+
+00:03:43
+disagreed upon.
+
+00:03:46
+But what you typically will
+see in a foundation model
+
+00:03:48
+is that it's robust and general
+to many different tasks.
+
+00:03:52
+So you can apply that same model
+for all different use cases,
+
+00:03:55
+and I'll show you a
+ton of use cases today.
+
+00:03:57
+Also, something else
+that's common in a lot
+
+00:03:59
+of these foundation
+models is that they
+
+00:04:01
+have a lot of parameters.
+
+00:04:02
+They have large numbers
+of amounts of parameters,
+
+00:04:05
+large amounts of training
+data, and usually they're
+
+00:04:07
+trained with some
+self-supervised objective.
+
+00:04:10
+So of course, we're not going to
+talk about the language stuff,
+
+00:04:13
+but we will talk about are
+the ones in green today.
+
+00:04:16
+And so let's get started
+with image classification.
+
+00:04:18
+So how do we actually go about
+building a foundation model that
+
+00:04:22
+can solve image
+classification for any data
+
+00:04:25
+set you might care about.
+
+00:04:26
+Now, if you remember
+from a few lectures ago,
+
+00:04:29
+we were talking about
+self-supervised learning.
+
+00:04:31
+And in self-supervised
+learning, one
+
+00:04:33
+of those methods
+that you saw was
+
+00:04:35
+SimCLR, where you have this
+contrastive objective that
+
+00:04:38
+contrasts against
+dissimilar images
+
+00:04:42
+and pulls closer representations
+of the same image that
+
+00:04:45
+has been transformed in
+some way or the other.
+
+00:04:47
+Now, this idea you can
+think of as pulling together
+
+00:04:51
+similar concepts.
+
+00:04:51
+So different
+augmentations of a cat
+
+00:04:54
+should result in representations
+that are similar to one another,
+
+00:04:57
+but it should push
+away representations
+
+00:04:59
+for other kinds of categories,
+like dogs, for example.
+
+00:05:03
+Now, the hope with training with
+these self-supervised learning
+
+00:05:06
+objectives is that these
+representations become general
+
+00:05:08
+enough so that when you
+see something new, maybe
+
+00:05:11
+a sketch of a cat or a
+sketch of a dog, it's still
+
+00:05:14
+embeds those in the
+space so that it's
+
+00:05:17
+easy to classify exactly
+what those concepts are.
+
+00:05:20
+Now, moving on to multimodal.
+
+00:05:21
+We can take these same ideas,
+the same objective, and then
+
+00:05:25
+start thinking about what
+would happen if we added text
+
+00:05:27
+to that representation space.
+
+00:05:29
+So, for example,
+if we could also
+
+00:05:31
+embed a representation of the
+text that says a cute fluffy cat
+
+00:05:36
+and have that be close to
+the cat representations,
+
+00:05:38
+that would be great,
+because now we
+
+00:05:40
+can query things in both
+images as well as text.
+
+00:05:44
+And similarly, if we can
+also embed the phrase
+
+00:05:47
+my favorite dog is
+a golden retriever
+
+00:05:49
+and ideally that
+representation would
+
+00:05:51
+lie closer to golden retrievers
+than other kinds of dogs.
+
+00:05:55
+So that's the general
+idea behind adapting
+
+00:05:58
+the self-supervised
+learning objectives we've
+
+00:06:00
+been talking about in class
+so far to incorporate text
+
+00:06:03
+and other multimodal inputs.
+
+00:06:06
+So in SimCLR, if you
+remember, the main objective
+
+00:06:08
+was that you want to pull
+together again, transformations
+
+00:06:13
+of the same image.
+
+00:06:14
+So the cat should be closest
+to its other cat augmentation.
+
+00:06:18
+So that green arrow right
+there indicates two things
+
+00:06:20
+that should be pulled together.
+
+00:06:21
+And it should be
+further away from all
+
+00:06:23
+the other augmentations.
+
+00:06:24
+So any other image
+of a dog or a monkey,
+
+00:06:27
+you want those representations
+to be far away.
+
+00:06:29
+Now we can use that
+same idea and now
+
+00:06:32
+think about training
+a CLIP model.
+
+00:06:34
+In CLIP what they do is they
+still have that same image
+
+00:06:37
+encoder that you have
+on the left-hand side,
+
+00:06:40
+but on the right-hand side,
+you now have a text encoder.
+
+00:06:43
+And this text encoder is
+embedding descriptions
+
+00:06:46
+of those individual images.
+
+00:06:47
+So your dog image will
+now hopefully learn
+
+00:06:51
+that it should be closer to a
+representation of a text that
+
+00:06:54
+says, my favorite dog
+is a golden retriever
+
+00:06:56
+and far away from all the
+other representations.
+
+00:06:59
+And because this is
+the same formulation
+
+00:07:01
+that you've seen with
+SimCLR, the objective
+
+00:07:03
+that you use to train
+a model like this
+
+00:07:05
+is just by collecting a
+lot of image text pairs.
+
+00:07:08
+And then once you
+have those pairs,
+
+00:07:10
+feed them into a
+model in a mini-batch,
+
+00:07:12
+and then make sure that you
+have this contrastive objective
+
+00:07:15
+that we use for SimCLR.
+
+00:07:16
+But now we're applying them
+across images and text.
+
+00:07:19
+So we're pulling together,
+here in the numerator,
+
+00:07:22
+the representations
+of similar things
+
+00:07:24
+and pulling apart
+the representations
+
+00:07:26
+in the denominator
+for everything else.
+
+00:07:29
+Now, of course,
+we want that image
+
+00:07:30
+to be closest to its
+corresponding text
+
+00:07:33
+and far away from
+all the other text.
+
+00:07:35
+But we also want the
+inverse to be true as well.
+
+00:07:37
+So we have a second
+objective as well
+
+00:07:39
+that says every text should
+be closest to its image
+
+00:07:42
+and further away from all
+the other image descriptions.
+
+00:07:45
+So it's a complimentary
+symmetric loss
+
+00:07:48
+that you have between the two
+different types of modalities
+
+00:07:51
+that you're feeding into
+this learning objective.
+
+00:07:55
+So of course, what's
+really nice about a CLIP
+
+00:07:58
+like model is that it can be
+trained with just associations
+
+00:08:02
+of images and text.
+
+00:08:03
+And there's a ton of this
+data on the internet.
+
+00:08:06
+So you have a lot of data of
+corresponding images and text
+
+00:08:08
+that you can pull up
+from the internet.
+
+00:08:10
+You can download, and now
+you can train this model
+
+00:08:13
+at a very, very large scale.
+
+00:08:14
+And this is exactly
+what OpenAI did
+
+00:08:16
+a couple of years
+ago in 2021 when
+
+00:08:18
+they released their CLIP model.
+
+00:08:20
+So they collected
+a lot of that data,
+
+00:08:22
+and then they trained it using
+this contrastive objective,
+
+00:08:25
+using all of the
+images and text pairs
+
+00:08:27
+that they found
+from the internet.
+
+00:08:28
+And then once they were
+done training that,
+
+00:08:30
+you follow the same 2-step
+pipeline that you saw
+
+00:08:33
+in the self-supervised
+learning class,
+
+00:08:35
+where in step 1 you
+do that pre-training,
+
+00:08:38
+and then in step 2 you can
+take that image encoder,
+
+00:08:40
+and now you can adapt
+it to a new task.
+
+00:08:43
+So once you have this
+pre-trained image encoder,
+
+00:08:46
+you take it, you
+take its weights,
+
+00:08:47
+and then you tag on an
+additional linear layer on top
+
+00:08:50
+to adapt it to an
+image classification
+
+00:08:52
+task or a detection
+task or you can
+
+00:08:54
+put in something like a
+decoder and decode out
+
+00:08:58
+semantic segmentation maps.
+
+00:09:00
+So a ton of different
+tasks become possible just
+
+00:09:02
+by initializing your model from
+this pre-trained objective.
+
+00:09:07
+What was really exciting
+when this paper came out
+
+00:09:09
+is that linear addition of
+this one linear classifier
+
+00:09:13
+on top of this CLIP encoder led
+to really large improvements
+
+00:09:17
+in performance.
+
+00:09:18
+So here in this
+graph, I'm showing you
+
+00:09:20
+average performance across many
+different image classification
+
+00:09:23
+data sets.
+
+00:09:24
+And the CLIP models,
+the ones in red,
+
+00:09:26
+they're all the way at the top.
+
+00:09:28
+And you can see that as you
+train on more and more images,
+
+00:09:32
+you end up getting better
+and better performance.
+
+00:09:35
+So it was very
+exciting because it
+
+00:09:36
+seemed to indicate that
+there's this really
+
+00:09:38
+nice pre-training objective
+that we've been able to unlock,
+
+00:09:41
+and there's an
+abundance of image text
+
+00:09:43
+data on the internet, which
+means that we can train these
+
+00:09:46
+to be very, very large
+and very, very performant.
+
+00:09:50
+Of course, that's not
+the end of the story.
+
+00:09:52
+What we want to
+do, ideally, is not
+
+00:09:54
+to have to adapt these
+features for something new.
+
+00:09:56
+We would ideally want to be
+able to use a CLIP model out
+
+00:09:59
+of the box.
+
+00:10:00
+So in language models, for
+example, you train a model
+
+00:10:03
+to autocomplete, usually.
+
+00:10:05
+And this autocompletion
+works like this.
+
+00:10:07
+You have a phrase
+that says I love
+
+00:10:09
+and then your model fills in the
+next word, for example, cake.
+
+00:10:13
+And then you train with
+this pre-training objective.
+
+00:10:15
+And what you want to do
+during the second stage
+
+00:10:18
+is to basically
+take that same model
+
+00:10:20
+and adapt it to a new task.
+
+00:10:22
+For language models, you never
+have to retrain that model.
+
+00:10:25
+You never have to retrain
+it on a new downstream task.
+
+00:10:28
+Every task is a language
+task, and so every task
+
+00:10:30
+can be treated as this
+autocomplete process.
+
+00:10:34
+But with CLIP, the
+problem is there
+
+00:10:37
+is no autocomplete process.
+
+00:10:39
+So we've trained this model
+on this contrastive objective,
+
+00:10:42
+but to adapt it to a new task
+we still need training data,
+
+00:10:45
+and we still need a
+linear layer on top
+
+00:10:48
+that we need to train to
+adapt it to new tasks.
+
+00:10:51
+So a lot of people
+started thinking
+
+00:10:52
+about what we can do to adapt
+this model to use it directly
+
+00:10:59
+out of the box.
+
+00:11:00
+And there's this clever trick
+that people came up with.
+
+00:11:02
+And this clever trick is
+basically using the text encoder
+
+00:11:06
+as a way of guiding
+the model to generalize
+
+00:11:11
+to any downstream
+classification task.
+
+00:11:13
+And it works like this.
+
+00:11:14
+So let's say you want to
+classify what this image is
+
+00:11:16
+using a CLIP model but you
+don't want to retrain this model
+
+00:11:20
+or adapt it for any
+downstream task.
+
+00:11:22
+What you can do is you
+can take the text encoder
+
+00:11:26
+and pass in a word
+through that text encoder
+
+00:11:29
+to create a text vector and use
+nearest neighbors to figure out
+
+00:11:33
+what is the right
+classification.
+
+00:11:35
+So the way this works is
+you take all the categories
+
+00:11:38
+in your new data set.
+
+00:11:39
+So for example, let's
+say your new data
+
+00:11:41
+set contains the categories
+plain, dog and bird.
+
+00:11:44
+You're going to embed all
+of them in the text space
+
+00:11:47
+to get a vector for
+plain, a vector for dog,
+
+00:11:50
+and a vector for bird.
+
+00:11:52
+And now when a new image
+comes in, all you have to do
+
+00:11:54
+is embed that image
+using the image encoder
+
+00:11:57
+and then find the
+closest neighbor.
+
+00:11:59
+So in this case, you
+should find that this image
+
+00:12:02
+has the highest similarity
+with the correct class.
+
+00:12:06
+In this case, it should
+be the dog vector.
+
+00:12:09
+And you can see the dog vector
+does have the highest similarity
+
+00:12:11
+score.
+
+00:12:12
+And so because of
+that, you can now
+
+00:12:13
+classify that image as a dog.
+
+00:12:17
+Now, you can think of
+this entire process
+
+00:12:19
+as essentially building
+a one neighbor algorithm.
+
+00:12:23
+So you have a bunch of centers
+that you've or embeddings
+
+00:12:27
+that you've generated
+in the tech space
+
+00:12:30
+and now you can use them as
+your class category labels,
+
+00:12:33
+and you're doing
+one nearest neighbor
+
+00:12:34
+to find the optimal
+classification for any new image
+
+00:12:38
+that comes in.
+
+00:12:40
+Now, of course, a
+single word might not
+
+00:12:43
+be sufficient to get a
+really good word vector.
+
+00:12:47
+Instead, what you might
+want to do is use a phrase.
+
+00:12:49
+And the reason you
+might want to do this
+
+00:12:51
+is because a lot of
+the internet data,
+
+00:12:54
+it usually doesn't have words
+that occur by themselves.
+
+00:12:57
+CLIP was trained from
+just phrases that were
+
+00:13:00
+downloaded from the internet.
+
+00:13:01
+And so ideally, you want to pick
+the right phrase that gives you
+
+00:13:04
+the best representation.
+
+00:13:06
+So instead of just having the
+categories playing dog and bird,
+
+00:13:10
+you might instead want
+to embed a vector that
+
+00:13:12
+represents a photo of a
+plane, a photo of a dog.
+
+00:13:15
+And turns out if you do this
+one small change, you suddenly
+
+00:13:19
+get a large boost on
+ImageNet, where you see
+
+00:13:21
+an improvement of about 1.3%.
+
+00:13:24
+Of course, picking
+that right phrase
+
+00:13:26
+is also something that's
+very difficult to do.
+
+00:13:28
+And so what people typically
+do is they don't just
+
+00:13:30
+pick a single phrase, they
+pick many different phrases.
+
+00:13:33
+So a photo of a dog,
+a drawing of a dog
+
+00:13:35
+or a bunch of different ideas
+for different phrases, and you
+
+00:13:39
+want to create many
+different vectors
+
+00:13:41
+for all of those different
+phrases you might think of.
+
+00:13:44
+And at the end, what you do is
+you just take the mean vector
+
+00:13:48
+representation across all of
+your phrases for each category
+
+00:13:52
+and use that as your mean
+dog vector, your mean plane
+
+00:13:55
+vector, and your mean vector.
+
+00:13:58
+And then now you're back
+to where you started,
+
+00:14:00
+and you can do your same one
+nearest neighbor algorithm
+
+00:14:03
+on this.
+
+00:14:05
+It probably has been
+trained on ImageNet.
+
+00:14:08
+This is, I think, a
+point to show that you
+
+00:14:10
+can adapt it to a new task.
+
+00:14:12
+But I will show you other
+examples of data sets
+
+00:14:14
+where it's definitely
+not been trained on,
+
+00:14:16
+and it does adapt
+to that as well.
+
+00:14:19
+So you get a single
+vector out and it
+
+00:14:21
+depends on the
+architecture you're using.
+
+00:14:23
+If you're using ResNet, you take
+the final vector representation.
+
+00:14:26
+If your text encoder is, let's
+say, a VIT or a transformer,
+
+00:14:29
+then you usually take the CLS
+token of your transformer.
+
+00:14:35
+So that's it for CLIP.
+
+00:14:38
+You can basically adapt this
+for a wide variety of new image
+
+00:14:41
+classification tasks.
+
+00:14:42
+And to your question
+right now, of course,
+
+00:14:45
+it's not that big a deal
+that it performs just as
+
+00:14:48
+well on ImageNet, but it is
+still exciting that it does
+
+00:14:51
+do well on ImageNet at all.
+
+00:14:53
+I think more interesting is
+that when you look at other data
+
+00:14:57
+sets, data sets that were
+collected after CLIP came out.
+
+00:15:00
+So data set like ObjectNet
+which contains objects
+
+00:15:02
+that people took photos
+of in very weird places.
+
+00:15:06
+So they put a banana on the
+ground and took a photo of it,
+
+00:15:08
+or they took a banana
+that was really rotten
+
+00:15:10
+and took a photo of it.
+
+00:15:12
+So things that are
+just not common.
+
+00:15:14
+And so in this data set,
+if you train on ImageNet,
+
+00:15:18
+you don't do very well
+because ImageNet again,
+
+00:15:21
+contains most of
+these categories
+
+00:15:22
+in its most typical form.
+
+00:15:24
+But if you take the CLIP model,
+it performs just as well.
+
+00:15:28
+And that was really, really
+exciting for many people
+
+00:15:31
+because this ability
+to generalize
+
+00:15:33
+to a completely new
+data set that it hasn't
+
+00:15:35
+seen before, that's even out
+of domain to some degree,
+
+00:15:38
+was really great.
+
+00:15:38
+So why do you think this is?
+
+00:15:40
+Why do you think CLIP
+generalizes a lot better
+
+00:15:42
+than training on ImageNet?
+
+00:15:43
+To paraphrase your
+response, because I
+
+00:15:45
+think it's the right
+response, is the text
+
+00:15:49
+that you download
+from the internet,
+
+00:15:51
+it contains a lot more
+than the category labels.
+
+00:15:53
+It contains a lot more
+structural information,
+
+00:15:55
+contains information
+about shape,
+
+00:15:56
+about the colors of
+things and all of that
+
+00:15:59
+adds to the representations.
+
+00:16:02
+And so these models are able to
+adapt a lot better to something
+
+00:16:05
+that maybe is slightly out of
+distribution or an object that
+
+00:16:08
+looks slightly
+different because it
+
+00:16:10
+does have all these other
+things it's looking for as well.
+
+00:16:13
+And so those that additional
+supervision really
+
+00:16:15
+helps quite a lot.
+
+00:16:17
+The other reason it helps quite
+a lot is the scale of data.
+
+00:16:20
+ImageNet is only about
+1.3 million images or so,
+
+00:16:23
+whereas the internet contains
+millions and billions.
+
+00:16:26
+At this point,
+billions of image text
+
+00:16:27
+pairs that we can
+download very easily.
+
+00:16:30
+And so these models have
+just seen so much more data
+
+00:16:33
+that this adaptation
+becomes a lot easier.
+
+00:16:36
+And so people started
+doing these experiments
+
+00:16:38
+on a wide variety of
+generalization tasks.
+
+00:16:41
+So they showed that you
+can generalize these models
+
+00:16:43
+for not just natural
+images but also sketches
+
+00:16:46
+that you can also do this on
+adversarial data sets as well.
+
+00:16:49
+And performance
+across the board seem
+
+00:16:51
+to indicate that these
+models are just really,
+
+00:16:53
+really good and robust to
+many different applications.
+
+00:16:57
+And then here I'm showing you
+the difference between zero shot
+
+00:17:00
+and linear probe.
+
+00:17:01
+And you can see that, of
+course, linear probe, when
+
+00:17:03
+you add that additional
+linear classifier
+
+00:17:05
+and train it and
+adapt it a little bit,
+
+00:17:07
+it does improve
+performance in majority
+
+00:17:09
+of the data sets,
+the ones in green
+
+00:17:13
+but it's not always the case.
+
+00:17:14
+In some cases,
+the CLIP zero shot
+
+00:17:16
+just performs really
+well out of the box.
+
+00:17:19
+And so it just seemed to
+indicate that we finally
+
+00:17:21
+unlocked this
+capability of being
+
+00:17:23
+able to adapt image
+encoders for a wide variety
+
+00:17:27
+of different downstream tasks.
+
+00:17:29
+And this is why I
+think a lot of people
+
+00:17:30
+talk about CLIP as the first
+foundation model for images.
+
+00:17:35
+So let's talk about what
+makes CLIP work so well.
+
+00:17:37
+Of course, there's no real
+labels as such with CLIP.
+
+00:17:40
+We're just downloading any
+text associated with images.
+
+00:17:43
+What makes CLIP
+work so well is what
+
+00:17:45
+I was saying it contained
+when it was first trained,
+
+00:17:47
+it was trained on about
+somewhere between--
+
+00:17:51
+well, the parameters
+were just gigantic.
+
+00:17:53
+They sort of scaled
+up the model and they
+
+00:17:55
+changed the architecture
+from ResNet to a VIT.
+
+00:17:58
+And so you had this
+transformer architecture
+
+00:18:00
+with 307 million parameters that
+was used to train this model.
+
+00:18:05
+And the second thing that
+helped was the amount of data.
+
+00:18:08
+So instead of just 1.2
+million images from ImageNet,
+
+00:18:11
+you suddenly had about 400
+million image text pairs
+
+00:18:14
+from the internet
+that they downloaded
+
+00:18:15
+and used that to train.
+
+00:18:17
+So that scale, both
+in terms of model size
+
+00:18:19
+as well as the amount of data,
+helped improve performance
+
+00:18:23
+quite a lot.
+
+00:18:24
+So immediately
+after CLIP came out,
+
+00:18:26
+people started experimenting
+with this objective.
+
+00:18:28
+And there's many different
+variants of a CLIP
+
+00:18:31
+that have come out
+over the years.
+
+00:18:33
+But one in particular that's
+really stood out, came out
+
+00:18:35
+in 2022, it's called CoCa.
+
+00:18:38
+And CoCa took the CLIP model.
+
+00:18:40
+Here, you can see it's
+the same objective here.
+
+00:18:42
+You've got the image
+being encoded on one side.
+
+00:18:44
+You've got the text being
+encoded on one side.
+
+00:18:46
+And then you have
+that contrastive loss
+
+00:18:47
+between the two.
+
+00:18:48
+But they added one
+additional thing.
+
+00:18:50
+They added a
+decoder as well that
+
+00:18:53
+took the image features
+from the image encoder.
+
+00:18:56
+And then they fed it in
+through cross-attention
+
+00:18:59
+and captioned that image.
+
+00:19:01
+And it turns out this
+captioning process also
+
+00:19:04
+helps the model learn quite
+a lot of rich information.
+
+00:19:07
+So the general
+motivation here is
+
+00:19:09
+that it's not
+sufficient to just be
+
+00:19:11
+able to say that this is an
+image of a cat versus a dog,
+
+00:19:14
+but to describe
+that image in text
+
+00:19:16
+requires a lot more information
+to be learned by the model.
+
+00:19:19
+And so it's-- the hypothesis is
+that it's a stronger learning
+
+00:19:22
+objective.
+
+00:19:23
+And so because of that,
+it learns better features.
+
+00:19:26
+And we found that
+to be true overall.
+
+00:19:29
+When you compare CoCa
+to CLIP, its performance
+
+00:19:32
+improves quite a lot across all
+the different ImageNet variants.
+
+00:19:36
+And overall, there's a
+10% boost in performance
+
+00:19:38
+across all of the data sets.
+
+00:19:41
+And I think this is the first
+time where these foundation
+
+00:19:44
+models actually beat all the
+models that we had trained
+
+00:19:48
+from supervised learning.
+
+00:19:50
+So at this point, we had
+many different models
+
+00:19:52
+that people were putting out
+onto online leaderboards.
+
+00:19:55
+And in those leaderboards
+across the years,
+
+00:19:58
+you can see the
+trend going upwards
+
+00:20:00
+as models are performing
+better and better.
+
+00:20:02
+And this is, I think,
+the turning point
+
+00:20:04
+where people abandoned
+supervised learning objectives
+
+00:20:07
+for image encoders and
+instead focus solely
+
+00:20:09
+on just pre-training
+objectives using
+
+00:20:11
+these self-supervised learning
+methods from the internet data.
+
+00:20:15
+So let's talk about
+some advantages of CLIP.
+
+00:20:17
+CLIP's got a lot of really fun
+things that you can do with it.
+
+00:20:20
+It's super easy to train because
+it's just simple contrastive
+
+00:20:24
+learning objective.
+
+00:20:25
+It's also really fast
+in terms of inference.
+
+00:20:27
+You can embed your entire data
+set into some representation,
+
+00:20:32
+and then all you have
+to do to classify
+
+00:20:34
+is just do retrieval on
+that embedded data set.
+
+00:20:38
+So you can retrieve
+things very easily
+
+00:20:40
+with CLIP's
+representations, which
+
+00:20:41
+makes it really useful for
+not just classification
+
+00:20:44
+tasks but also search and
+retrieval tasks as well.
+
+00:20:47
+Another thing that people
+really liked about CLIP
+
+00:20:49
+is that it's open vocabulary.
+
+00:20:51
+You can feed in any
+text description,
+
+00:20:53
+and it should be
+able to retrieve
+
+00:20:54
+the right images for you.
+
+00:20:56
+And so that also allows
+for its applicability
+
+00:20:58
+across many different domains.
+
+00:21:01
+And of course, we're going
+to talk about this later.
+
+00:21:03
+CLIP is really amenable to
+being chained with other models.
+
+00:21:07
+And this idea of chaining
+started becoming really popular.
+
+00:21:10
+But hold off on that.
+
+00:21:10
+We'll talk about that
+in a few minutes.
+
+00:21:13
+Of course, I'm telling
+you all the good things.
+
+00:21:15
+Turns out there's a
+lot of bad as well.
+
+00:21:18
+CLIP unfortunately
+can distinguish
+
+00:21:20
+between these two images.
+
+00:21:22
+So you have an image
+of a mug in grass
+
+00:21:25
+and you have some
+grass in some mug
+
+00:21:27
+and CLIP just does not know the
+difference between these two
+
+00:21:30
+things.
+
+00:21:33
+The reason it doesn't know is
+because the CLIP's learning
+
+00:21:37
+objective really depends
+on its batch size.
+
+00:21:40
+If your batch size
+is not large enough,
+
+00:21:43
+then all of the
+other batch elements
+
+00:21:45
+are unlikely to provide
+any useful supervision
+
+00:21:48
+for the model.
+
+00:21:49
+If you're always comparing
+a cat versus a truck,
+
+00:21:52
+you're not really going to learn
+a representation for a cat.
+
+00:21:56
+Instead, what you get is
+some representation that's
+
+00:21:59
+OK at some high level, but if
+you increase the batch size,
+
+00:22:02
+you're more likely to
+encounter other animals that
+
+00:22:04
+are similar to the
+cat, and then you
+
+00:22:05
+learn a much better
+representation.
+
+00:22:07
+And then, of course, if you
+increase your batch size
+
+00:22:09
+to let's say 32,000 and you
+train it across many, many GPUs,
+
+00:22:15
+then suddenly you start learning
+really good representations.
+
+00:22:17
+You can actually start
+identifying a Welsh
+
+00:22:19
+Corgi versus another Corgi.
+
+00:22:21
+And this only is possible when
+you have gigantic batch sizes,
+
+00:22:24
+because it requires you to
+have other negative examples
+
+00:22:27
+in your batch that are
+close enough, that are
+
+00:22:29
+hard negatives that forces
+the model to have to learn.
+
+00:22:33
+So that's very
+important for getting
+
+00:22:34
+these models to work well.
+
+00:22:37
+But unfortunately,
+regardless of how much
+
+00:22:39
+people have tried,
+increasing the batch size
+
+00:22:41
+doesn't guarantee that the model
+will learn a good representation
+
+00:22:45
+for things.
+
+00:22:46
+And so you're at the mercy of
+the randomness of your training
+
+00:22:49
+data.
+
+00:22:51
+So increasing the
+batch size does
+
+00:22:52
+help with some amount of
+fine-grained concepts.
+
+00:22:54
+But of course,
+it's still limited.
+
+00:22:56
+And training on 32,000 amounts
+of batch size is just too large
+
+00:23:01
+for most labs to
+even consider doing.
+
+00:23:06
+People have
+identified this error
+
+00:23:08
+across many different
+benchmarks and identify
+
+00:23:11
+that CLIP just doesn't have
+this notion of compositionality.
+
+00:23:14
+So this idea that
+the mug and the grass
+
+00:23:17
+versus grass in the mug.
+
+00:23:18
+It's really about composing
+different concepts,
+
+00:23:21
+like the mug and the
+grass, and the relationship
+
+00:23:24
+in all of those
+individual components
+
+00:23:26
+are not composed well in
+your CLIP representations.
+
+00:23:31
+And there's been a ton
+of different benchmarks
+
+00:23:33
+like Winoground or CREPE or ARO.
+
+00:23:36
+And a lot of these benchmarks
+have actually come from my lab.
+
+00:23:39
+They just keep finding over
+and over again that CLIP
+
+00:23:42
+has a ton of limitations,
+and there's a ton of things
+
+00:23:44
+that they are just unable to do.
+
+00:23:46
+Now, of course, in reaction,
+the community immediately
+
+00:23:49
+started thinking about how do
+I handcraft my batch so that it
+
+00:23:53
+contains the hard negatives,
+so if I have one type of corgi
+
+00:23:57
+that I should hopefully have
+another type of corgi in there.
+
+00:24:00
+So your model really is forced
+to learn good representations.
+
+00:24:03
+And so this idea of
+training with hard negatives
+
+00:24:06
+became really popular in the
+community for a whole one
+
+00:24:10
+year, until we released
+a follow-up paper that
+
+00:24:12
+said that if you train
+with hard negatives,
+
+00:24:14
+you end up actually unlearning
+a lot of things about semantics.
+
+00:24:18
+For whatever reason,
+and this is something
+
+00:24:20
+that we still don't
+theoretically understand,
+
+00:24:22
+we end up actually with
+much worse performance
+
+00:24:25
+in generalization across
+different environments
+
+00:24:28
+and different kind of data sets.
+
+00:24:30
+So there's a lot of
+work to be done still
+
+00:24:32
+in terms of figuring out the
+right way of constructing
+
+00:24:35
+your data set, the right way
+of constructing your batches
+
+00:24:38
+and training signal.
+
+00:24:39
+So we're still really
+far away from that.
+
+00:24:41
+But regardless, people are
+still very excited about CLIP
+
+00:24:44
+in general because it does give
+you some amount of supervision
+
+00:24:48
+regardless.
+
+00:24:49
+Of course, again, image level
+captions are again, not enough.
+
+00:24:54
+Ideally, what we want
+is more than just that.
+
+00:24:57
+We want to be able to
+identify not just that there's
+
+00:24:59
+a person crossing the street,
+but that the person is
+
+00:25:01
+in this location, the car
+is here, the street is here.
+
+00:25:04
+All of that information,
+that grounding information
+
+00:25:07
+is completely missing in CLIP.
+
+00:25:08
+And so ideally, you'd
+want also your data
+
+00:25:11
+set to contain this
+kind of information
+
+00:25:14
+and your model to
+also be able to reason
+
+00:25:16
+about that kind of information.
+
+00:25:18
+Also, the final thing that's
+a big disadvantage for CLIP
+
+00:25:21
+is that regardless of
+how big your data set is,
+
+00:25:24
+even if you collect upwards of,
+let's say, 5 billion images,
+
+00:25:27
+it's still not going
+to be enough to capture
+
+00:25:29
+all of the important things
+that you might care about.
+
+00:25:33
+And so there's been
+a lot of efforts
+
+00:25:34
+that we've been doing
+in data filtering.
+
+00:25:36
+So how do you
+filter the internet
+
+00:25:38
+to find the best training data
+for training these CLIP models?
+
+00:25:41
+I won't go into that
+today, but there
+
+00:25:43
+are all of these mechanisms that
+people are exploring that's now
+
+00:25:47
+become the frontier of
+what today's research looks
+
+00:25:49
+like in this field.
+
+00:25:51
+OK, so that's the first
+branch of foundation models
+
+00:25:54
+we talked about.
+
+00:25:55
+It's about generalizing
+classification
+
+00:25:57
+to a whole host of tasks.
+
+00:25:59
+Now, let's talk about
+vision and language models.
+
+00:26:02
+So there's a new class
+of foundation models,
+
+00:26:05
+which has become popular in
+the last 2, 2 and 1/2 years,
+
+00:26:08
+and we often refer to them as
+multi-modal language models.
+
+00:26:12
+And I'll start off
+with this discussion
+
+00:26:15
+by focusing on LLaVA,
+which is arguably
+
+00:26:17
+one of the first of
+multi-modal language models
+
+00:26:20
+that became very, very popular.
+
+00:26:22
+The motivation here is
+that language models, which
+
+00:26:24
+do this next token prediction,
+this autocomplete process,
+
+00:26:28
+that process is really
+useful for adapting
+
+00:26:31
+to a lot of new tasks.
+
+00:26:33
+And so can we start thinking
+about even image models as well,
+
+00:26:37
+doing the same thing?
+
+00:26:39
+Can we give it an
+image also start
+
+00:26:41
+doing different kinds
+of reasoning that's
+
+00:26:43
+similar to this
+autoregressive process?
+
+00:26:46
+And that gave rise to this class
+of models called vision language
+
+00:26:49
+models or multimodal models.
+
+00:26:51
+But of course, this just
+to be historically correct,
+
+00:26:54
+this idea wasn't
+completely new in 2022.
+
+00:26:58
+In 2019, ViLBERT actually
+introduced this idea.
+
+00:27:02
+There's a paper called
+ViLBERT in 2019 that
+
+00:27:05
+took these image models
+and language models
+
+00:27:08
+and put them all together to
+accomplish a generalization
+
+00:27:12
+across different tasks,
+but they were all
+
+00:27:15
+trained pre-transformers and
+also mostly use LSTMs instead.
+
+00:27:20
+And so the rebirth
+of all of this
+
+00:27:23
+is what's happening right
+now with LLaVA, where
+
+00:27:26
+a lot of these models switched
+over to a better architecture,
+
+00:27:30
+switched over to a
+better set of objectives,
+
+00:27:33
+and now aren't just training
+on individual tasks,
+
+00:27:35
+but are training on a foundation
+of a variety of different tasks,
+
+00:27:39
+using some pre-training
+objective from the internet.
+
+00:27:42
+So how does this work?
+
+00:27:43
+How do you think about LLaVA?
+
+00:27:45
+So to talk about LLaVA,
+let's take a step back
+
+00:27:49
+and think about the transformer
+model or self-attention
+
+00:27:53
+in particular.
+
+00:27:54
+So when we think about language
+models, what they're doing
+
+00:27:58
+is they're attending
+over the past.
+
+00:28:00
+So you have a sequence of
+words that are coming in.
+
+00:28:02
+So for example,
+cats are so and then
+
+00:28:04
+your model to generate
+the next word,
+
+00:28:07
+will attend over that
+historical context
+
+00:28:09
+and then generate what it
+thinks the next word should be.
+
+00:28:12
+So it might think
+that the phrase
+
+00:28:14
+should be cats are so cute.
+
+00:28:16
+And here's another
+way of representing
+
+00:28:18
+that same objective.
+
+00:28:19
+You've got the input text
+coming in at the bottom,
+
+00:28:22
+and your model will generate
+the next word, which is cute.
+
+00:28:25
+So when we think about vision
+language models, what people
+
+00:28:28
+usually are referring to is
+adding in additional context
+
+00:28:32
+by grounding that
+conversation that we're
+
+00:28:34
+having with some image
+that we care about.
+
+00:28:37
+So we might care about
+tokenizing our image somehow
+
+00:28:41
+and feeding those tokens
+into our language model
+
+00:28:44
+along with the historical
+context of cats or so,
+
+00:28:46
+and then using that
+to autocomplete
+
+00:28:49
+the rest of the description.
+
+00:28:51
+So that's the basic
+idea behind LLaVA
+
+00:28:54
+is feed in these image tokens,
+along with the words that
+
+00:28:57
+are being generated to
+continuously generate
+
+00:28:59
+more words about that image.
+
+00:29:02
+So of course, a
+question comes in,
+
+00:29:03
+which is how do you
+define these tokens?
+
+00:29:05
+What should these tokens
+be in the first place?
+
+00:29:08
+And LLaVA, their solution was
+to use the CLIP image encoder.
+
+00:29:12
+So they took the CLIP model,
+they took the image encoder
+
+00:29:16
+and then they basically
+extracted tokens
+
+00:29:19
+from that encoder.
+
+00:29:21
+So the first thing you
+might think about doing
+
+00:29:23
+is just using the CLS token.
+
+00:29:25
+So here you've got--
+
+00:29:26
+let me see if my
+mouse works here.
+
+00:29:28
+Oh, it does.
+
+00:29:29
+So you've got the image
+coming in over here
+
+00:29:31
+and then they're
+getting patched.
+
+00:29:33
+Each patch turns
+into a representation
+
+00:29:35
+that's fed into your transformer
+architecture in CLIP.
+
+00:29:39
+It goes through a bunch
+of layers of processing.
+
+00:29:41
+And then at the end, you get
+a bunch of different tokens
+
+00:29:44
+for each of the patches,
+along with a representation
+
+00:29:47
+for the CLS token.
+
+00:29:48
+And so far, we've only been
+considering the CLS token.
+
+00:29:51
+We've only been doing
+things with the CLS token
+
+00:29:53
+for doing any sort of
+classification task.
+
+00:29:56
+But there are all of these
+other tokens in there as well.
+
+00:29:59
+Now, the problem with
+these other tokens
+
+00:30:01
+is that they're
+never supervised.
+
+00:30:03
+So the CLS token is supervised
+with this contrastive objective
+
+00:30:06
+with text, but the other tokens
+are never used for any purpose.
+
+00:30:10
+So they might not actually
+contain any useful information.
+
+00:30:13
+And empirically, people have
+shown that these features are
+
+00:30:16
+not very useful, but
+what they have shown
+
+00:30:18
+is that if you go one more layer
+back, the penultimate layer
+
+00:30:22
+in your CLIP encoder,
+these features are actually
+
+00:30:26
+very useful.
+
+00:30:27
+So these features are used
+to generate the final CLIP
+
+00:30:30
+embedding in the final layer.
+
+00:30:32
+And they contain a lot
+of spatial information
+
+00:30:35
+about where objects are
+in your entire image.
+
+00:30:39
+And so this is what
+people typically
+
+00:30:40
+use when combining CLIP encoder
+with a transformer LLM-based
+
+00:30:49
+model.
+
+00:30:49
+So this is what the entire
+LLaVA architecture looks like.
+
+00:30:52
+You feed an image
+through your CLIP--
+
+00:30:56
+pretrained CLIP
+encoder, you extract
+
+00:30:58
+a bunch of features from
+it, you take those features
+
+00:31:01
+and you pass it through a linear
+layer that you need to train.
+
+00:31:05
+And what this linear
+layer will train to do
+
+00:31:07
+is convert your CLIP
+representations into something
+
+00:31:11
+that the LLM can understand
+and make sense of.
+
+00:31:14
+And once you have
+these tokens, you now
+
+00:31:16
+basically pass in all of your
+tokens to your language model.
+
+00:31:20
+And it can now
+generate conversations
+
+00:31:22
+about that image itself.
+
+00:31:26
+So LLaVA was one of the
+very first popular models
+
+00:31:28
+that were out there.
+
+00:31:29
+And following up, Google
+quickly released Flamingo,
+
+00:31:33
+and in Flamingo, it followed
+very much the entire LLaVA
+
+00:31:36
+setup of being able to
+combine a vision encoders
+
+00:31:40
+features with a
+large language model,
+
+00:31:42
+but the place where
+they innovated
+
+00:31:44
+is how do you do that fusing
+of these different features.
+
+00:31:48
+So in LLaVA, you had
+the features coming in
+
+00:31:51
+through a linear layer and
+fed in as part of the input.
+
+00:31:54
+In Flamingo, what
+they did instead
+
+00:31:56
+was they basically took
+all the features coming out
+
+00:31:59
+of your vision
+encoder and fed them
+
+00:32:01
+into every layer of your LLM.
+
+00:32:03
+OK.
+
+00:32:04
+So they had made some-- they had
+to make some changes to the LLM
+
+00:32:07
+architecture itself.
+
+00:32:08
+And this is how they
+made those changes.
+
+00:32:10
+So here's an example of
+what Flamingo's training
+
+00:32:13
+data looks like.
+
+00:32:14
+You've got images
+that are encoded.
+
+00:32:15
+So you got this dog and
+you've got this cat,
+
+00:32:18
+they both get embedded.
+
+00:32:19
+And they're both going to be
+fed into every single layer
+
+00:32:22
+of your LLM.
+
+00:32:24
+And down here you've
+got a data that's
+
+00:32:26
+of describing every single
+starts with the image
+
+00:32:30
+and describes that image,
+then the next image
+
+00:32:32
+describes the next image,
+and so on and so forth.
+
+00:32:35
+And they're sort of fed
+in as input to your LLM.
+
+00:32:38
+And your output is going to be
+to autocomplete that last image.
+
+00:32:43
+So you've got one
+image, followed
+
+00:32:44
+by a description of
+the dog, second image
+
+00:32:47
+and you start the
+description and your model
+
+00:32:48
+will be trained on auto
+completing that description
+
+00:32:51
+for that second image.
+
+00:32:53
+So what do they do?
+
+00:32:54
+What do they change
+to the model itself?
+
+00:32:56
+They added this GATED X
+cross-attention attention module
+
+00:33:01
+to every single
+layer of your LLM.
+
+00:33:03
+And they made one other change.
+
+00:33:05
+They also added this
+perceiver sampler
+
+00:33:08
+right here that basically
+samples and downsamples
+
+00:33:12
+your image representations.
+
+00:33:14
+So they're smaller dimensions
+and a fixed number of tokens
+
+00:33:17
+for every single layer.
+
+00:33:18
+So let me go into some details
+with what they look like.
+
+00:33:22
+So this is the full
+architecture, overall.
+
+00:33:24
+Most of the
+components are frozen,
+
+00:33:26
+all the language model
+weights are frozen,
+
+00:33:28
+all the vision model
+parts are frozen.
+
+00:33:30
+The only parts that
+are trained are
+
+00:33:32
+these perceiver
+sampler components
+
+00:33:34
+and this cross-attention
+layer that
+
+00:33:36
+added into every single
+layer of your LLM.
+
+00:33:41
+So let's talk about what this
+cross-attention module looks
+
+00:33:44
+like.
+
+00:33:44
+This is me zooming into
+that cross-attention module.
+
+00:33:47
+So every single LLM layer,
+right before the LLM layer,
+
+00:33:51
+you have this
+cross-attention component.
+
+00:33:53
+And what its purpose is to
+look at the image features
+
+00:33:56
+and then decide what
+parts of the image
+
+00:33:58
+features it wants to keep
+around, and what it thinks
+
+00:34:01
+would be useful for the
+language model to know about.
+
+00:34:04
+And they designed it
+as a set of components
+
+00:34:08
+that you've already seen so far.
+
+00:34:10
+So you attend over
+the image features
+
+00:34:12
+using a cross-attention
+layer and then following
+
+00:34:15
+that cross-attention, they added
+this tanh nonlinear activation.
+
+00:34:19
+And this is basically deciding
+what parts of these components
+
+00:34:21
+do I want to keep around, which
+ones or which parts of the image
+
+00:34:25
+do I want to forget.
+
+00:34:26
+And then it goes through
+this fully connected layer,
+
+00:34:29
+where it adapts those
+representations a little bit,
+
+00:34:32
+and then again a tanh
+nonlinearity to decide again
+
+00:34:35
+which parts it should keep
+and which parts it shouldn't.
+
+00:34:38
+Once it goes through
+those two components
+
+00:34:39
+and each one has a residual
+connection across [INAUDIBLE]
+
+00:34:43
+it then goes to your normal
+language model processing
+
+00:34:46
+and then continues to
+generate the word it needs to.
+
+00:34:49
+So there's additional
+layers are being added just
+
+00:34:52
+as a way for the language
+to incorporate and attend
+
+00:34:56
+over the visual features
+at every single layer.
+
+00:34:59
+OK.
+
+00:34:59
+So the actual
+modification itself,
+
+00:35:01
+if you're interested in what
+this looks like in code,
+
+00:35:03
+is just about two or
+three lines of code,
+
+00:35:06
+where they added this
+cross-attention layer and then
+
+00:35:09
+this tanh non-linearity
+in between.
+
+00:35:11
+And that's really about it.
+
+00:35:12
+So in terms of code, it's
+a very minimal change.
+
+00:35:15
+Although for the model,
+it's a very gigantic change
+
+00:35:17
+because now it can choose
+what parts of the image
+
+00:35:20
+to attend to at every single
+layer of its processing.
+
+00:35:23
+So you give the model
+a lot of ability
+
+00:35:25
+to decide when and how to
+attend over the vision features.
+
+00:35:30
+OK.
+
+00:35:31
+So Flamingo was
+very, very exciting,
+
+00:35:33
+but training it
+was very difficult.
+
+00:35:35
+And they had this really
+ingenious way of training it
+
+00:35:38
+that allowed our models to
+adapt to many different tasks.
+
+00:35:41
+The way they trained it was
+through this concatenation
+
+00:35:45
+of a bunch of different
+images together.
+
+00:35:48
+So you didn't just have one
+image and one description.
+
+00:35:51
+You had a description at the
+beginning that says, here
+
+00:35:55
+are some cute
+pictures of my pets
+
+00:35:57
+and a sentence
+beginning of image,
+
+00:35:59
+and then a description
+of that first image
+
+00:36:01
+and of that first component,
+and then the second image
+
+00:36:06
+and a description
+of the second image.
+
+00:36:08
+So you had the
+training set up so
+
+00:36:10
+that it looks like a long
+sequence of image text-- image
+
+00:36:14
+text interleaved data.
+
+00:36:16
+And of course, when
+describing any single image,
+
+00:36:19
+you don't want the model to
+look at the entire context.
+
+00:36:22
+You want it to only look at
+that one particular image.
+
+00:36:24
+And so they created
+a masking scheme,
+
+00:36:27
+where every single image
+when generating only
+
+00:36:31
+looks at that particular image
+features and not the other ones.
+
+00:36:34
+Meaning that when
+you're generating
+
+00:36:35
+the description for my puppy
+is sitting in the grass,
+
+00:36:38
+you're only looking
+at the features
+
+00:36:40
+that correspond to
+the puppy, only when
+
+00:36:42
+generating those words.
+
+00:36:44
+Similarly, when generating
+the description for the cat,
+
+00:36:47
+you're only looking at the cat
+image and not the other image.
+
+00:36:50
+So there is this of
+distinction where
+
+00:36:53
+they created this
+handcrafted masking
+
+00:36:55
+seam to make sure your
+descriptions are always
+
+00:36:58
+following and looking at
+only that particular image.
+
+00:37:02
+But when trained,
+the model does get
+
+00:37:04
+to see the entire context of
+everything that it's generating.
+
+00:37:08
+So why is that helpful?
+
+00:37:09
+Why is this entire
+process helpful of being
+
+00:37:11
+able to see all of
+this stuff together?
+
+00:37:13
+Well, it's helpful because
+it allows you to do
+
+00:37:15
+these kinds of applications.
+
+00:37:17
+So here are three different
+applications that Flamingo
+
+00:37:19
+was able to showcase.
+
+00:37:21
+And they all center around
+having multiple conversations
+
+00:37:25
+or dealing with multiple images.
+
+00:37:27
+So in the first case, you've
+got an image that's fed in
+
+00:37:30
+and the flamingo model
+describes the image
+
+00:37:33
+by saying that this is a picture
+of two teddy bears on the moon.
+
+00:37:37
+And then what it
+allows people to do
+
+00:37:38
+is then ask another
+question so people
+
+00:37:40
+can ask, what are they doing.
+
+00:37:42
+And because it's already being--
+
+00:37:45
+it's training using an
+existing large language
+
+00:37:48
+model, that large language
+models reasoning capabilities
+
+00:37:50
+are inherited and now
+we can reason and answer
+
+00:37:53
+this particular question.
+
+00:37:54
+It can now answer and
+say the teddy bears
+
+00:37:56
+are having a conversation.
+
+00:37:58
+And then a user might ask,
+what objects are they using.
+
+00:38:01
+And again, Flamingo
+can say that it
+
+00:38:02
+looks like it's a computer,
+and so on and so forth.
+
+00:38:04
+So you can enable this
+multi-turn dialogue
+
+00:38:07
+about an image simply
+by doing two things.
+
+00:38:10
+You train by first
+pre-training the language model
+
+00:38:14
+and then incorporating the
+language model into Flamingo.
+
+00:38:16
+And secondly,
+allowing your model
+
+00:38:18
+to see many different
+images and many different
+
+00:38:20
+turns throughout
+its training data
+
+00:38:23
+so it can adapt to
+longer sequences of text.
+
+00:38:26
+You can also give
+it multiple images
+
+00:38:28
+and ask, what is a common
+thing about these images.
+
+00:38:31
+And now the Flamingo
+model will look
+
+00:38:32
+at each of those different
+components and reason
+
+00:38:35
+and say that they're
+all Flamingos.
+
+00:38:37
+So you can start doing a lot of
+these really cool applications.
+
+00:38:40
+People also showed that you can
+start doing in-context learning.
+
+00:38:43
+I don't know if this is
+something you've seen already
+
+00:38:45
+with language models,
+but I'm sure you've
+
+00:38:48
+used in-context learning with
+GPT, where you tell GPT here's
+
+00:38:51
+an example of what I want,
+give me more things like this.
+
+00:38:55
+And you can do the same
+thing with Flamingo,
+
+00:38:56
+where you can pass in an image
+and a description, an image
+
+00:38:59
+and a description.
+
+00:39:01
+And now when you
+pass in a new image,
+
+00:39:02
+it'll give you a description.
+
+00:39:04
+Or you can say,
+here's some image,
+
+00:39:07
+here's a question and answer.
+
+00:39:09
+Here's an image
+question and answer.
+
+00:39:11
+And then when you pass in a new
+image and just ask the question,
+
+00:39:13
+it'll give you the answer.
+
+00:39:15
+So you're not training it to do
+these different kinds of tasks,
+
+00:39:18
+but you're providing it
+with examples of behaviors
+
+00:39:21
+that it should have,
+and it should just
+
+00:39:22
+generalize to new
+kinds of behaviors
+
+00:39:25
+that you might care about.
+
+00:39:26
+Similarly, you might care
+about just classification.
+
+00:39:29
+And you can use Flamingo to
+do classification as well.
+
+00:39:32
+So you can give it an image
+and say this is underground,
+
+00:39:35
+this is Congress.
+
+00:39:37
+And then you can
+ask, what is this.
+
+00:39:39
+And you can also even teach
+it to do OCR and math,
+
+00:39:43
+where you give it an image and
+say, oh, this should correspond
+
+00:39:45
+to 2 plus 1 equals 3.
+
+00:39:47
+And so eventually, when
+you give it a new image,
+
+00:39:49
+it should be able to
+autocomplete and extract out
+
+00:39:51
+3 times 6 and then also give
+you the output by reasoning
+
+00:39:55
+through this entire process.
+
+00:39:57
+Yeah.
+
+00:39:57
+So this would be an example
+of few shot learning
+
+00:39:59
+where you give it some examples,
+a few examples of things,
+
+00:40:02
+and then you ask it what
+the new thing should be.
+
+00:40:06
+If I were to throw away all
+the in-context examples,
+
+00:40:09
+that would be zero
+shot learning.
+
+00:40:10
+So we're not concatenating them.
+
+00:40:12
+We're technically
+passing the image tokens
+
+00:40:15
+through this perceiver sampler
+into every single layer
+
+00:40:17
+of your LLM instead.
+
+00:40:19
+And so only the text is ever
+concatenated and fed as input
+
+00:40:22
+to your Flamingo
+model and it chooses
+
+00:40:25
+when to attend to which
+parts of the image.
+
+00:40:28
+You give it to it once.
+
+00:40:29
+But behind the
+scenes, of course,
+
+00:40:31
+this is the interface--
+the web interface.
+
+00:40:33
+But behind the scenes,
+what they actually do is
+
+00:40:35
+they cache the model,
+assuming that the user will
+
+00:40:37
+want to continue talking.
+
+00:40:39
+And so the model is cached and
+ready to accept more tokens.
+
+00:40:42
+Yeah, but if they did
+not cache it then yes,
+
+00:40:44
+it would pass in this entire
+conversation as input.
+
+00:40:47
+Yeah.
+
+00:40:49
+OK.
+
+00:40:50
+So Flamingo was super
+cool because they
+
+00:40:52
+have these really big
+tables in their paper
+
+00:40:54
+that you can go check out.
+
+00:40:56
+But what was really
+cool about it is
+
+00:40:57
+there were all of these tasks
+that were very difficult,
+
+00:41:01
+and you had to adapt
+CLIP to do them.
+
+00:41:03
+But Flamingo was just able to do
+it with zero shot or few shot.
+
+00:41:06
+And you start seeing these
+gigantic improvements
+
+00:41:09
+across many
+different benchmarks.
+
+00:41:11
+And this is when,
+I think, the field
+
+00:41:13
+shifted from reporting on a
+few classification benchmarks
+
+00:41:15
+to reporting on any
+understanding task at all.
+
+00:41:18
+As long as you can frame it as
+a question answering process,
+
+00:41:21
+you can build benchmarks for
+a wide variety of skills,
+
+00:41:25
+and we started seeing that
+become the norm in the last two
+
+00:41:28
+years in the computer
+vision field.
+
+00:41:31
+So this is where we were,
+I think, sometime last year
+
+00:41:35
+and seeing the success of
+LLaVA, a lot of companies
+
+00:41:38
+started investing quite
+heavily on these models.
+
+00:41:41
+And so you start seeing
+a lot of API models
+
+00:41:44
+like GPT-40 GPT-4V, Gemini
+1.5 Pro, Gemini 1.5 Flash.
+
+00:41:52
+A lot of these models
+started being released,
+
+00:41:54
+and even Anthropic came into
+the picture with Claude 3 Opus.
+
+00:41:58
+And now of course,
+Claude 4 Opus is out.
+
+00:42:01
+And so you had a lot of
+these models come out,
+
+00:42:03
+and they were
+performing a lot better
+
+00:42:05
+on a bunch of these benchmarks.
+
+00:42:07
+So here I'm showing you the
+average performance across 11
+
+00:42:10
+of the more popular visual
+understanding benchmarks
+
+00:42:13
+in the field.
+
+00:42:14
+And there's this
+gigantic difference.
+
+00:42:16
+So the difference between LLaVA,
+the model we talked about that's
+
+00:42:19
+open source, that's down here at
+about 43% accuracy on average.
+
+00:42:24
+Meanwhile GPT and all of these
+other models are performing
+
+00:42:27
+much, much better at about
+somewhere like 80 or high 70s.
+
+00:42:32
+So a big difference
+in performance
+
+00:42:34
+between these two
+different kinds of models.
+
+00:42:37
+Of course, immediately
+seeing this difference,
+
+00:42:39
+people started
+distilling GPT and Gemini
+
+00:42:43
+into distilled variants and
+trying to release those models.
+
+00:42:48
+So Alibaba, which is
+a company in China,
+
+00:42:50
+they released this
+model called QWEN.
+
+00:42:52
+And then there's
+Intern VL, there's Phi.
+
+00:42:54
+There's all of these different
+models that start coming out.
+
+00:42:57
+And all of them were
+distilled from GPT.
+
+00:43:00
+And if not GPT, then Gemini.
+
+00:43:02
+Now that led to a big
+problem in the field,
+
+00:43:05
+a problem that's become a big
+part of what my own research
+
+00:43:09
+agenda has been trying
+to focus on, which is we
+
+00:43:12
+don't actually know as
+a research community
+
+00:43:14
+how to build really performant
+vision language models.
+
+00:43:17
+The tricks behind
+how to build them,
+
+00:43:20
+they only the people
+in OpenAI and Gemini
+
+00:43:23
+in Google, those teams know how
+to build these kinds of models.
+
+00:43:26
+But the open source
+community, they're down here.
+
+00:43:28
+They're down here.
+
+00:43:29
+This is where the research
+community was as of last year.
+
+00:43:33
+Of course, you can argue these
+are really nice open models,
+
+00:43:36
+but they're not really open.
+
+00:43:37
+Because they're distilled,
+we don't actually
+
+00:43:39
+know how to reproduce
+these models.
+
+00:43:42
+We can only produce them.
+
+00:43:44
+But if GPT exists.
+
+00:43:46
+But if GPT doesn't
+exist, we don't know how
+
+00:43:48
+to create these other models.
+
+00:43:50
+And so when my own
+research agenda
+
+00:43:51
+has been focused on over
+the last couple of years,
+
+00:43:53
+is figuring out how
+do you close this gap,
+
+00:43:55
+how do you build really good
+multi-modal language models
+
+00:43:58
+and disseminate
+that understanding
+
+00:44:01
+to the entire community.
+
+00:44:03
+And so what we've done over the
+last six months or about a year
+
+00:44:08
+now, is we've created
+our own a class of models
+
+00:44:12
+that we called Molmo.
+
+00:44:14
+And I'm showing you Molmo's
+performance up at the top.
+
+00:44:17
+And what sets Molmo apart
+from all the other models out
+
+00:44:20
+there is that it's
+completely open source,
+
+00:44:23
+meaning it's open weights.
+
+00:44:25
+So you can download the model.
+
+00:44:26
+It's open data, meaning you can
+download the training set as
+
+00:44:29
+well as the evaluation set.
+
+00:44:30
+It's also open code,
+meaning you can basically
+
+00:44:32
+train your own Molmo
+in your own home,
+
+00:44:34
+assuming you have enough
+GPUs, and you can also
+
+00:44:37
+evaluate, add on
+new evaluations,
+
+00:44:39
+adapt this model for all kinds
+of new things, and of course,
+
+00:44:42
+start using it for a wide
+variety of different contexts.
+
+00:44:46
+Now, of course, academic
+benchmarks are not enough.
+
+00:44:49
+Because what we care about
+at the end of the day is
+
+00:44:51
+are people going to
+use these models?
+
+00:44:53
+Will people want to use
+these models over GPT?
+
+00:44:56
+And so to make sure we had
+that evaluation properly done,
+
+00:45:00
+we released a
+playground with Molmo,
+
+00:45:02
+and we did a
+gigantic user study,
+
+00:45:05
+where we actually compared
+head to head outputs
+
+00:45:07
+from our models versus outputs
+from all the other models.
+
+00:45:10
+And our model has the
+same Elo rating as GPT.
+
+00:45:14
+It comes in second with
+a difference of 1 in Elo
+
+00:45:17
+rating versus GPT-40.
+
+00:45:19
+This is that same
+graph rotated so that I
+
+00:45:22
+can show you some examples.
+
+00:45:24
+This was a gigantic
+evaluation by the way.
+
+00:45:26
+This is about 870 users that we
+showed these model outputs to.
+
+00:45:31
+And we did about 325,000
+pairwise comparisons,
+
+00:45:34
+where we asked people which
+models output do you prefer.
+
+00:45:36
+Our model, the Moima
+model, ranked again,
+
+00:45:39
+like I said, second,
+more or less a coin
+
+00:45:41
+flip between what
+people preferred
+
+00:45:42
+between GPT and our model.
+
+00:45:44
+But it already beat out
+Gemini 1.5 Pro and Claude 3.5.
+
+00:45:49
+Now, the big difference is
+we are a small research lab,
+
+00:45:52
+and we're beating out
+Google's billions of dollars
+
+00:45:56
+of investment into
+Gemini, as well
+
+00:45:58
+as Anthropic's billions
+of dollars of investment
+
+00:46:00
+and already matching GPT.
+
+00:46:02
+And so we were quite excited
+by this entire process.
+
+00:46:05
+But we also developed a
+7-billion model that comes
+
+00:46:08
+in right after those big models.
+
+00:46:10
+And that 7- billion
+model is really exciting
+
+00:46:12
+because you can put
+it on a single GPU.
+
+00:46:15
+So you can now have
+this model capable
+
+00:46:17
+of doing a wide
+variety of vision tasks
+
+00:46:19
+that works on a single GPU,
+meaning a lot of people
+
+00:46:23
+can now use it and fine tune
+it for all kinds of things.
+
+00:46:25
+We released this
+model in September 25
+
+00:46:28
+and the community was
+very excited by it.
+
+00:46:30
+This is the first time a very
+performant, multimodal vision
+
+00:46:34
+language model was released,
+and a ton of people
+
+00:46:36
+started talking and writing
+articles about all the ways they
+
+00:46:39
+want to use it.
+
+00:46:40
+One of the use cases that
+kept popping up over and over
+
+00:46:42
+again was this idea
+of using Molmo finally
+
+00:46:46
+for robotics applications.
+
+00:46:48
+And I won't talk
+about robotics today
+
+00:46:50
+because you're going to learn
+about it in the next class.
+
+00:46:53
+But I do want to give you
+some examples of things
+
+00:46:55
+that people were excited
+about with robotics.
+
+00:46:59
+But a ton of people,
+even folks at NVIDIA,
+
+00:47:02
+started chatting about
+how this should never
+
+00:47:05
+bet against open
+source, regardless
+
+00:47:06
+of how much model development
+you do in private.
+
+00:47:09
+Eventually, the open source
+community will catch up,
+
+00:47:11
+and we were catching
+up at that point.
+
+00:47:14
+And so seeing our model
+out, Meta quickly released
+
+00:47:17
+in response, their LLaVA 3.2
+model and a lot of people
+
+00:47:22
+did evaluations comparing Molmo
+versus Meta's LLaVA model.
+
+00:47:26
+And again, I'm very happy that
+we came up on top of LLaVA
+
+00:47:29
+as well.
+
+00:47:30
+So let me show you why
+Molmo does so well.
+
+00:47:32
+What was the trick to getting
+these models to work very well?
+
+00:47:36
+The trick was to
+ground its decision
+
+00:47:38
+making in the pixels itself.
+
+00:47:41
+So usually, when you give a
+model a question like count
+
+00:47:44
+how many boats there are,
+it'll give you some number
+
+00:47:47
+and oftentimes, it hallucinates.
+
+00:47:48
+But what sort of
+sets our model apart
+
+00:47:50
+is that it actually
+points to all the things
+
+00:47:52
+that it's counting.
+
+00:47:53
+So it generates points
+to all the boats
+
+00:47:56
+and then it outputs
+a final number.
+
+00:47:58
+So it's decision making is
+grounded in the pixels itself.
+
+00:48:02
+And this allowed us to
+essentially train a model that
+
+00:48:05
+unlike LLaVA for Meta that was
+trained on about six billion
+
+00:48:08
+image taxpayers, our model was
+trained on only 700,000 image
+
+00:48:12
+text pairs.
+
+00:48:13
+The big difference was that we
+hand-curated the 700,000 image
+
+00:48:17
+text pairs, and that was the
+biggest difference between what
+
+00:48:20
+we were able to do versus
+what these models that these
+
+00:48:23
+companies were
+building were doing.
+
+00:48:26
+So a lot of folks are trying to
+currently download these image
+
+00:48:30
+text pairs from the internet.
+
+00:48:32
+That's been the foundation
+of how a lot of people
+
+00:48:34
+train these vision
+language models.
+
+00:48:36
+You collect a lot of
+internet data of images
+
+00:48:39
+with their associated text.
+
+00:48:40
+But the problem with internet
+data is that it's incidental.
+
+00:48:43
+The text that's often
+associated with an image
+
+00:48:45
+describes something
+subjective or something
+
+00:48:47
+that the uploader
+felt about the image.
+
+00:48:50
+It rarely actually
+talks about the contents
+
+00:48:52
+of the image itself.
+
+00:48:54
+And meanwhile, this is
+what our data looks like.
+
+00:48:57
+So for a single image, we
+have a dense description
+
+00:49:01
+of the actual contents
+of that image.
+
+00:49:03
+And we have things
+that people never
+
+00:49:05
+talk about on the internet.
+
+00:49:06
+There's a ton of tasks and
+knowledge about the visual world
+
+00:49:09
+that we just never speak about.
+
+00:49:11
+I will never tell
+you that something
+
+00:49:12
+is to the left of
+something else,
+
+00:49:14
+just because it's unnatural
+for us to do that.
+
+00:49:16
+It's just so obvious
+that something
+
+00:49:18
+is to the left of something.
+
+00:49:19
+Why would you ever
+communicate that information?
+
+00:49:21
+So that's the kind
+of information
+
+00:49:23
+we started eliciting
+from people.
+
+00:49:24
+We started talking about--
+we started getting people
+
+00:49:27
+to talk about how things
+have particular size
+
+00:49:29
+like large or shaped
+like rectangular.
+
+00:49:31
+We talked about material
+like polished and rich
+
+00:49:34
+and its positioning
+across the image,
+
+00:49:36
+like it spans the horizontal
+plane of the image.
+
+00:49:40
+So all of this
+information really
+
+00:49:42
+is what makes these
+models more performant.
+
+00:49:44
+Here's another example
+from the data set.
+
+00:49:46
+Here's a very simple image of a
+phone screen or a tablet screen.
+
+00:49:50
+And we have information here
+that again is completely missing
+
+00:49:53
+from the internet, things that
+people would find helpful.
+
+00:49:56
+Things like this
+is a tablet device.
+
+00:49:58
+The time is this, the amount
+of power left in your device
+
+00:50:02
+is this.
+
+00:50:03
+This is the kind of
+information that would
+
+00:50:04
+help people use these models.
+
+00:50:06
+But this is, again,
+the kind of information
+
+00:50:08
+we never talk about
+on the internet.
+
+00:50:10
+And so to get this
+kind of information,
+
+00:50:12
+we designed a lot of
+different questions.
+
+00:50:14
+We spent two years doing
+different kinds of elicitation
+
+00:50:17
+studies to figure out
+what are the right things
+
+00:50:19
+or pieces of information that
+are missing from the internet,
+
+00:50:22
+and how do we elicit them
+as effectively as possible.
+
+00:50:25
+One thing that
+was very important
+
+00:50:27
+is we had all of our annotators
+not type descriptions,
+
+00:50:31
+but talk about descriptions,
+talking automatically
+
+00:50:34
+breaks a lot of stereotypes
+around [? Gricean ?] maxims.
+
+00:50:39
+And so by getting
+people to talk,
+
+00:50:41
+we got them to speak
+about things that they
+
+00:50:43
+would never usually type.
+
+00:50:46
+The model itself didn't look
+any different from LLaVA.
+
+00:50:48
+We had the same setup of a
+CLIP and coding coming in.
+
+00:50:51
+You had a connector that
+was just a linear layer,
+
+00:50:54
+and then you had a
+large language model
+
+00:50:56
+that would take in all of these
+tokens and then output any thing
+
+00:50:59
+that you care about.
+
+00:51:00
+So the model itself looked very
+similar to existing models.
+
+00:51:03
+The biggest difference
+was in the data
+
+00:51:05
+and the quality and
+density of the data itself.
+
+00:51:08
+And because of
+grounding capability,
+
+00:51:11
+where the model
+grounds its decision
+
+00:51:12
+making in the image
+itself, you could
+
+00:51:14
+get Malmo to do
+things that you can't
+
+00:51:16
+do-- you can't use any of
+the other models to do;
+
+00:51:19
+things like point to the menu.
+
+00:51:20
+It actually tells you
+where that menu item is,
+
+00:51:22
+or you can tell it to point
+to where I can set my search
+
+00:51:26
+options and it'll
+show you, OK, this
+
+00:51:27
+is where you might want to set
+those options or point to where
+
+00:51:31
+the mid-size data sets
+are, and it'll tell you
+
+00:51:33
+what option you need to move.
+
+00:51:35
+And
+
+00:51:36
+I already showed you that
+you can point to count,
+
+00:51:38
+but you can also point to do
+really fine grained things,
+
+00:51:41
+like being able to ask, what is
+the route number on this bus?
+
+00:51:45
+Molmo doesn't just simply
+give you an answer,
+
+00:51:47
+it actually points to
+where in the image.
+
+00:51:49
+In this case, there is
+this area right here
+
+00:51:51
+that contains the bus
+number and then returns
+
+00:51:54
+the bus number to you.
+
+00:51:56
+You can ask it to reason
+about how many cars
+
+00:51:57
+on the left versus how
+many cars are on the right.
+
+00:52:00
+You can ask it to reason over
+depth images or overhead images,
+
+00:52:04
+or even really crowded
+scenes and sports areas.
+
+00:52:08
+What's also really
+exciting, and again,
+
+00:52:10
+we'll talk about this
+in a few minutes,
+
+00:52:11
+is this idea of
+chaining that keeps
+
+00:52:13
+coming up all across
+multimodal models today.
+
+00:52:16
+The idea of chaining Molmo to
+other models, what you can do
+
+00:52:20
+is chain the output
+of Molmo to become
+
+00:52:22
+the input of another
+model like SAM 2,
+
+00:52:25
+and so you can tell Molmo
+to point to the cricket bat.
+
+00:52:28
+And now you take that point, you
+feed it to a model like SAM 2,
+
+00:52:31
+which does segmentation,
+and now you
+
+00:52:33
+can do segmentation of that
+cricket bat across time.
+
+00:52:36
+And so you can start enabling
+all kinds of new applications.
+
+00:52:39
+Here's one that we played around
+with in the office, which again,
+
+00:52:43
+you're going to
+hopefully learn about
+
+00:52:44
+in the next lecture with
+when you hear about robotics.
+
+00:52:48
+But we asked Molmo to point
+to where the water bottle is.
+
+00:52:52
+And then we moved the robot
+using simple motion planners
+
+00:52:55
+to that water bottle.
+
+00:52:56
+Next, we ask it to go
+move that water bottle
+
+00:52:59
+to where the dirty dishes are.
+
+00:53:01
+It points to the dish--
+
+00:53:02
+to the-- sorry-- sink, and
+then moves the robot there.
+
+00:53:05
+And then we tell it
+to go point to where
+
+00:53:07
+the free space is
+in the sink and put
+
+00:53:09
+that bottle in that location.
+
+00:53:11
+So again, you can combine all of
+these capabilities together now
+
+00:53:15
+and chain them to even automate
+a lot of robotics applications.
+
+00:53:19
+This has been a lot of
+focus in my group now
+
+00:53:21
+is adapting a lot of these
+visual language models
+
+00:53:24
+and enabling a lot
+of generalization
+
+00:53:26
+in the actual physical domain.
+
+00:53:28
+So the question is
+around, would these models
+
+00:53:31
+be able to point
+if you were always
+
+00:53:34
+changing the resolution of the
+image to be a fixed resolution?
+
+00:53:38
+Well, it turns out
+that you can actually
+
+00:53:41
+adapt these models to be
+any resolution nowadays.
+
+00:53:43
+There are these mechanisms
+like [INAUDIBLE] that
+
+00:53:47
+is introduced a way of allowing
+for any variable size image
+
+00:53:52
+input and you can adapt them to
+point in that new space instead.
+
+00:53:57
+So your models position
+embeddings basically
+
+00:53:59
+change depending on how
+big your image size is
+
+00:54:03
+and your models-- you typically
+tend to generalize well.
+
+00:54:07
+So that was the conversation
+around adding vision
+
+00:54:10
+and multimodal models together.
+
+00:54:12
+In the last 20 minutes
+that we have left,
+
+00:54:14
+I want to talk about
+generalizing these foundation
+
+00:54:16
+models to not just deal with
+image classification and text,
+
+00:54:19
+but be able to generalize
+to any output space
+
+00:54:22
+you might care about.
+
+00:54:23
+And one of those
+models that's become
+
+00:54:25
+really popular in this space
+is this Segment Anything Model.
+
+00:54:29
+The Segment Anything
+Model or SAM,
+
+00:54:31
+for short, what
+it tries to do is
+
+00:54:34
+it tries to build a
+segmentation model that's
+
+00:54:37
+a foundation model for all
+kinds of segmentation tasks.
+
+00:54:40
+So really what
+they're trying to do
+
+00:54:41
+is allow anybody to point to
+things that they care about
+
+00:54:45
+in the image, and
+then hopefully have
+
+00:54:48
+that thing be something that
+the model can output a mask for.
+
+00:54:53
+So for example, you
+want a model that
+
+00:54:56
+generalizes beyond just a
+fixed number of categories
+
+00:54:58
+to any category you
+might care about.
+
+00:55:00
+And you would ideally
+want these outputs
+
+00:55:03
+to be masks for any category
+that is of interest to the user.
+
+00:55:07
+So those are the
+two goals that we
+
+00:55:09
+want to generalize to any
+category, a huge number
+
+00:55:11
+of categories.
+
+00:55:12
+And we ideally want to be able
+to very specifically output
+
+00:55:15
+something that the user
+really cares about.
+
+00:55:18
+So they're both challenges.
+
+00:55:19
+They're both challenges
+in figuring out
+
+00:55:20
+how do you collect a
+large amount of data that
+
+00:55:22
+spans a wide variety
+of categories,
+
+00:55:24
+as well as how do you
+design an architecture that
+
+00:55:27
+really pinpoints what the
+user really cares about.
+
+00:55:31
+Now, let's start with the
+second question first.
+
+00:55:33
+It's really ambiguous when
+we want a mask for something.
+
+00:55:38
+So imagine a scenario where
+you have two cats in an image
+
+00:55:42
+and a user comes
+in and says, hey, I
+
+00:55:44
+want a segmentation for the
+cat, but it's really not clear
+
+00:55:47
+which cat they want
+a segmentation for.
+
+00:55:50
+Ideally, again, if you had
+more mask pointing capability,
+
+00:55:52
+you could actually point to
+which cat you care about.
+
+00:55:54
+And then depending
+on the point, you
+
+00:55:56
+could create the
+masks that matter.
+
+00:55:59
+Now, of course, these
+are not very good masks.
+
+00:56:01
+And ideally, you
+want these masks
+
+00:56:03
+to be very, very
+good at quality that
+
+00:56:06
+can support a wide variety
+of downstream applications
+
+00:56:09
+like image editing or
+any kinds of other things
+
+00:56:11
+you might think of.
+
+00:56:13
+So to build this architecture
+that allows any user
+
+00:56:16
+to be able to specify
+exactly what they care about,
+
+00:56:19
+we need it to go beyond
+just simply typing
+
+00:56:22
+in text what you care about.
+
+00:56:24
+So what the SAM architecture
+has is two components or three,
+
+00:56:28
+specifically.
+
+00:56:29
+It's got the image
+encoder, which is again,
+
+00:56:31
+it could be a clip encoder.
+
+00:56:33
+And it's got a prompt encoder
+which is something special.
+
+00:56:36
+This prompt encoder really
+tries to encode text or points
+
+00:56:40
+or bounding boxes or any
+way that a user might
+
+00:56:43
+want to specify what
+they care about.
+
+00:56:45
+And then given
+these two things, it
+
+00:56:47
+passes it through this
+really lightweight decoder
+
+00:56:49
+that outputs a mask.
+
+00:56:50
+And the decoder looks very
+similar to the segmentation
+
+00:56:53
+decoders that you've
+already seen in this course.
+
+00:56:56
+So overall, this is what
+the model looks like.
+
+00:56:59
+Given an image, we encode that
+image using an image encoder.
+
+00:57:03
+And then you have a bunch
+of different prompts
+
+00:57:06
+that are going
+through interacting
+
+00:57:09
+with these image encoding
+through a decoder
+
+00:57:12
+and you output a mask.
+
+00:57:13
+So this is the overall
+architecture design.
+
+00:57:16
+Now, there's one big thing that
+is a problem with segmentation.
+
+00:57:20
+So let's say a user does point
+at this particular location
+
+00:57:23
+and says, hey, I want
+a segmentation mask
+
+00:57:25
+for this location.
+
+00:57:26
+Now, the problem with
+that segmentation mask
+
+00:57:28
+is that it's still
+ambiguous even with a point,
+
+00:57:30
+it's still not sufficient
+because that point
+
+00:57:32
+might be referring to
+the entire scissor.
+
+00:57:36
+It might only be looking
+and referring to the parts
+
+00:57:39
+that you can hold, or it can be
+referring to one of the parts
+
+00:57:42
+that you can hold.
+
+00:57:43
+So this ambiguity is really
+difficult to resolve for.
+
+00:57:47
+And you don't want
+to penalize the model
+
+00:57:49
+for picking the wrong one.
+
+00:57:50
+So what the SAM
+architecture does
+
+00:57:52
+is instead of outputting
+one segmentation mask,
+
+00:57:55
+it actually outputs
+three segmentation masks
+
+00:57:57
+at different levels
+of granularity.
+
+00:57:59
+And then it picks the
+one that is the closest
+
+00:58:01
+matching to ground
+truth, and then
+
+00:58:02
+uses that to calculate the loss
+and therefore not penalizing
+
+00:58:06
+the other ones.
+
+00:58:07
+So the hope is that overall,
+over time, this model
+
+00:58:09
+will learn to output all
+different kinds of masks
+
+00:58:12
+and then the user
+gets to choose which
+
+00:58:14
+one is the most appropriate
+for their use cases.
+
+00:58:17
+And if you put all
+of this together,
+
+00:58:19
+the only thing you
+need now is data.
+
+00:58:22
+You need a lot of data across
+many different categories
+
+00:58:25
+to really make this
+model possible.
+
+00:58:28
+Now, the problem with data is
+that until this model came out
+
+00:58:30
+in 2023, this was about a year
+and a half, maybe two years ago.
+
+00:58:34
+When this model came out, most
+of the segmentation data sets
+
+00:58:38
+were extremely small.
+
+00:58:39
+And what the authors of this
+paper did is that they grew
+
+00:58:43
+the amount of segmentation
+data sets that were out there,
+
+00:58:45
+the amount of images by about 6x
+and the number of segmentation
+
+00:58:49
+masks by about 400x.
+
+00:58:51
+So they significantly grew
+and collected a lot of masks
+
+00:58:55
+to make this model as
+performant as possible.
+
+00:58:57
+So again, the message is
+very similar to the message
+
+00:58:59
+we had with Flamingo, the
+message we had with Molmo.
+
+00:59:02
+And the message is you
+really, really good,
+
+00:59:04
+high-quality data to really
+get these models to be
+
+00:59:07
+as performant as possible.
+
+00:59:08
+And for a lot of vision tasks,
+the data is completely missing
+
+00:59:12
+from the internet, and you need
+to go out and find and collect
+
+00:59:15
+that data to get these
+models to work very well.
+
+00:59:18
+And so to make this
+data happen, they
+
+00:59:21
+created this in
+the loop process,
+
+00:59:23
+where they initially had some
+amount of data annotated.
+
+00:59:27
+From that annotation,
+they created
+
+00:59:28
+a training data set,
+they trained a model,
+
+00:59:30
+and they used that model
+to annotate more data.
+
+00:59:32
+And then they
+iteratively refined
+
+00:59:34
+that model generated
+segments using users
+
+00:59:37
+and continued this process.
+
+00:59:39
+So they had this
+human in the loop--
+
+00:59:41
+model in the loop process,
+proposing segments and then
+
+00:59:45
+fixing the segments
+using human annotators.
+
+00:59:47
+This is what an example image
+looks like from their data set.
+
+00:59:50
+You have quite a
+lot of categories.
+
+00:59:52
+Each individual vegetable here
+is annotated with its own mask.
+
+00:59:57
+So they're quite
+expensive to collect.
+
+00:59:59
+And they did this across a lot
+of images, millions of images.
+
+01:00:04
+Here's another example where
+again all the single umbrellas
+
+01:00:07
+are annotated.
+
+01:00:09
+Again, here's another
+one with underwater.
+
+01:00:11
+And of course,
+paintings as well.
+
+01:00:14
+They have segmentations
+of paintings.
+
+01:00:16
+And so all of this
+together is really
+
+01:00:18
+what was foundational to
+making this foundation
+
+01:00:20
+model for segmentation, OK.
+
+01:00:24
+So that's for Segment Anything.
+
+01:00:25
+And I want to use the
+last couple of minutes
+
+01:00:27
+that I have left
+today to really focus
+
+01:00:29
+on chaining, which is the last
+part of multimodal language
+
+01:00:34
+models.
+
+01:00:35
+The idea behind chaining is
+something you've already seen.
+
+01:00:38
+I've given you hints already
+throughout this lecture.
+
+01:00:41
+And the idea is to be able
+to combine different models
+
+01:00:43
+together to enable things that
+a single model can't do alone.
+
+01:00:47
+Here's a fun little exercise
+we can do as a class.
+
+01:00:50
+So I'm giving you four
+images and I'm also
+
+01:00:53
+giving you four categories.
+
+01:00:55
+And these are potentially
+categories that some of you
+
+01:00:59
+have never seen before.
+
+01:01:00
+And there are also categories
+that CLIP hasn't seen.
+
+01:01:03
+And so CLIP actually
+fails at these categories
+
+01:01:05
+because it doesn't
+have any idea which
+
+01:01:07
+ones are associated with what.
+
+01:01:09
+Does anyone here know
+which one is what?
+
+01:01:12
+Marimba, yeah, the
+second one is marimba.
+
+01:01:13
+That's right.
+
+01:01:14
+Yeah there's one
+that's a little easy.
+
+01:01:16
+The viaduct.
+
+01:01:17
+Yeah, I think a lot of you
+know which one that is.
+
+01:01:21
+But, yeah, which one's the
+dog and which one's the bird?
+
+01:01:25
+What if I gave
+you these instead.
+
+01:01:28
+So now I'm giving you
+descriptions of these things,
+
+01:01:31
+and it suddenly becomes
+very easy for you
+
+01:01:33
+to associate each one
+with the right category.
+
+01:01:36
+And that's the basic
+idea behind chaining
+
+01:01:38
+that even if CLIP has
+never seen these images,
+
+01:01:41
+chances are these
+concepts have been talked
+
+01:01:44
+about on the internet
+to some degree,
+
+01:01:46
+and it's likely that GPT
+might be able to describe it.
+
+01:01:49
+And if GPT can create
+those descriptions,
+
+01:01:52
+now those descriptions
+become really good ways
+
+01:01:54
+of classifying exactly
+which category is which one.
+
+01:01:58
+And that's the idea
+behind chaining,
+
+01:01:59
+is that you take the
+strengths of one model,
+
+01:02:01
+and you combine it with the
+capabilities of another,
+
+01:02:03
+and suddenly you get all
+kinds of new capabilities
+
+01:02:06
+that you didn't have before.
+
+01:02:07
+And so you can take a
+ton of categories that
+
+01:02:09
+have no training data in CLIP.
+
+01:02:12
+But if you can
+describe all of them,
+
+01:02:14
+because CLIP has seen a lot
+of descriptions for things,
+
+01:02:16
+it can now start classifying
+all of them very well.
+
+01:02:19
+And you can start getting CLIPS
+to generate classifications
+
+01:02:21
+for individual flowers
+or individual cars
+
+01:02:24
+or individual spaces or even
+different kinds of pets.
+
+01:02:28
+And you start seeing
+these improvements
+
+01:02:30
+on a bunch of different
+data sets that
+
+01:02:32
+are about more fine-grained,
+specialized categories.
+
+01:02:35
+And the only way
+it's able to do that
+
+01:02:36
+is because GPT has
+ingested some ability
+
+01:02:39
+to describe those things.
+
+01:02:42
+And this idea of being able to
+generalize the new capabilities
+
+01:02:45
+is something that was
+extremely popular last year,
+
+01:02:49
+and it still remains
+very popular this year.
+
+01:02:52
+And it's through
+this idea of chaining
+
+01:02:56
+for any question at all.
+
+01:02:58
+So, for example, if I asked
+you how many-- are there
+
+01:03:01
+three people in the boat?
+
+01:03:04
+The way you might want
+to do this is by, again
+
+01:03:07
+asking a multimodal language
+model to answer this question,
+
+01:03:09
+or what you could do is use all
+of the hundreds of specialized
+
+01:03:13
+vision models that
+we've been developing
+
+01:03:15
+over the last few decades.
+
+01:03:17
+So there are object detection
+models that you learned about
+
+01:03:19
+in class.
+
+01:03:20
+If you use an object
+detector, you'd
+
+01:03:21
+be able to get a detection
+for each of the three people.
+
+01:03:24
+And then you could
+just say, oh, they're
+
+01:03:25
+3 people because there
+are three detections.
+
+01:03:27
+So that's a general idea, is you
+can train other models outputs
+
+01:03:32
+together so that you
+can do new capabilities.
+
+01:03:35
+Here's another example.
+
+01:03:37
+If I asked you how
+many total people
+
+01:03:39
+there are across these
+two boats, is it six?
+
+01:03:42
+And again, you can
+do the same thing.
+
+01:03:44
+You can write a program that
+does object detection on 1 one
+
+01:03:47
+and then object
+detection on image 2,
+
+01:03:49
+and then adds up all of
+those components together.
+
+01:03:52
+So this is the basic idea behind
+what we now call chaining.
+
+01:03:57
+And this was popularized
+by a paper that
+
+01:03:59
+won the Best Paper award
+last year called VisProg
+
+01:04:03
+and in this VisProg paper,
+the visual programming paper,
+
+01:04:06
+the idea was that you take any
+image or any sort of question
+
+01:04:10
+and you generate a program.
+
+01:04:13
+You generate a program that says
+answer something about image 1,
+
+01:04:16
+answer something about
+image 2, and then combine
+
+01:04:19
+those answers together to
+give you the final answer.
+
+01:04:22
+So you write a
+function in Python,
+
+01:04:25
+and then in that
+Python function,
+
+01:04:27
+you have individual
+calls to other models
+
+01:04:30
+that we've already
+seen in training.
+
+01:04:32
+So for example, when asking
+this particular question,
+
+01:04:35
+deciding if this
+statement is true or not,
+
+01:04:37
+the left and right
+image contains a total
+
+01:04:39
+of six people and two boats.
+
+01:04:41
+You can ask GPT
+to actually create
+
+01:04:44
+a program that tries to
+answer this question,
+
+01:04:47
+and then you can take the
+answer from its program, OK.
+
+01:04:51
+And you can also get GPT to
+do in-context examples, where
+
+01:04:55
+you give it examples of
+programs that you can
+
+01:04:57
+generate using other functions.
+
+01:04:59
+And we can see that it
+generalizes to new questions
+
+01:05:02
+and starts using all
+of the functionality
+
+01:05:05
+that it has available.
+
+01:05:06
+Of course, the one
+thing you need to do
+
+01:05:08
+is give it the
+functions themselves.
+
+01:05:10
+So you need to tell
+it that, hey, you
+
+01:05:12
+have these capabilities from
+other models that you can use.
+
+01:05:15
+You can localize things
+using an object detector.
+
+01:05:17
+You can localize faces
+using a face detector.
+
+01:05:21
+And you can have all of
+these different capabilities
+
+01:05:24
+across many different other
+models that people have created.
+
+01:05:27
+And you can chain them together
+to do different kinds of tasks.
+
+01:05:30
+Yeah, so there's two
+different ways of doing it.
+
+01:05:32
+One is a static way
+of doing it, where
+
+01:05:34
+you want to give it as
+diverse examples as possible
+
+01:05:36
+and then hopes that
+it generalizes.
+
+01:05:38
+Another one is to
+dynamically choose,
+
+01:05:40
+given this question, what are
+the best in-context examples I
+
+01:05:43
+should use?
+
+01:05:44
+And so you can treat that as
+another retrieval process, where
+
+01:05:48
+you retrieve the best
+examples, and then you
+
+01:05:50
+ask it to generate a program.
+
+01:05:52
+And that tends to
+perform a lot better,
+
+01:05:54
+but only if you have a
+good retrieval system.
+
+01:05:58
+Yes, it would require
+a lot of compute.
+
+01:06:00
+So there's compute in
+terms of calling GPT, which
+
+01:06:04
+you have to do through an API.
+
+01:06:05
+And then you have to load each
+of these individual models
+
+01:06:07
+into your memory and then run
+each of them sequentially.
+
+01:06:10
+So it could actually
+be a lot more costly.
+
+01:06:13
+And so what people are
+trying to do is figure out,
+
+01:06:15
+can we distill
+these capabilities
+
+01:06:17
+into a single model?
+
+01:06:18
+And that's a big
+part of what research
+
+01:06:20
+looks like today in 2025.
+
+01:06:22
+But of course, people
+are also still trying
+
+01:06:24
+to figure out how do you chain
+these things effectively very
+
+01:06:27
+well.
+
+01:06:28
+Yeah, you can think
+of it as an agent.
+
+01:06:29
+Yeah.
+
+01:06:30
+So you have an agent that's
+basically deciding, hey,
+
+01:06:32
+given this question, what are
+the other models I need help
+
+01:06:35
+from and how do I stitch them
+together to do new capabilities.
+
+01:06:39
+So that's what it looks like.
+
+01:06:40
+Yeah.
+
+01:06:41
+Here's another example where you
+might want to do image editing.
+
+01:06:44
+You might care about
+replacing the sand the desert
+
+01:06:47
+with lush green grass.
+
+01:06:48
+Of course, image editing models
+are still in its infancy.
+
+01:06:51
+And so what you might
+want to do instead
+
+01:06:53
+is call a segmentation
+model, identify the desert,
+
+01:06:56
+and then only replace the desert
+parts, those pixels, with grass,
+
+01:07:01
+and then you can composite them
+together to make a new image.
+
+01:07:05
+That's all of the things I
+wanted to talk about in terms
+
+01:07:08
+of different capabilities.
+
+01:07:10
+So you've got here
+some capabilities
+
+01:07:13
+around how to think
+about foundation models.
+
+01:07:16
+It really is, at
+the end of the day,
+
+01:07:18
+an ability to train a
+model for a single task,
+
+01:07:22
+and then from that
+single task generalize
+
+01:07:25
+to many different
+downstream applications.
+
+01:07:28
+And we talked about
+in classification
+
+01:07:30
+how you can create these models
+by just taking a lot of image
+
+01:07:33
+text pairs from the internet,
+training them together
+
+01:07:36
+to do different kinds of tasks.
+
+01:07:37
+And that allows
+you to generalize
+
+01:07:39
+to new kinds of data
+sets that might not even
+
+01:07:41
+exist in the real world
+or have any labels
+
+01:07:44
+for in the real world.
+
+01:07:45
+You can also combine
+them with language models
+
+01:07:48
+and train them to do in-context
+examples like captioning
+
+01:07:51
+or counting or OCR.
+
+01:07:53
+And these are again
+capabilities that enable
+
+01:07:55
+many different applications.
+
+01:07:57
+And then of course, the
+outputs don't always
+
+01:07:58
+have to be language
+or categories.
+
+01:08:00
+They can also be
+segmentation masks,
+
+01:08:02
+where you can take
+different kinds of masks
+
+01:08:04
+depending on
+different user inputs.
+
+01:08:06
+And you can generalize this
+even further by combining many
+
+01:08:09
+of these foundation models
+or even smaller models
+
+01:08:11
+together through programs and
+do all kinds of new things.
+
+01:08:16
+So hallucinations still
+happen all across the board.
+
+01:08:20
+What we're showing
+is that it seems
+
+01:08:22
+like pointing does reduce
+hallucinations quite a bit
+
+01:08:25
+because it does need
+to find some evidence
+
+01:08:27
+for its generations.
+
+01:08:29
+But that being said,
+there's no guarantee
+
+01:08:30
+that it's going to point
+to the right thing at all.
+
+01:08:33
+So there's many different
+ways of fixing for this.
+
+01:08:35
+One is, of course,
+collecting more data
+
+01:08:38
+related to the reasoning
+that you wanted to do.
+
+01:08:41
+But a better one is to even
+have verification methods that
+
+01:08:45
+verify based on the points,
+whether the output is something
+
+01:08:48
+you should trust or not.
+
+01:08:49
+So a lot of the bigger
+models and bigger companies,
+
+01:08:51
+what they typically do when you
+use any of their models is they
+
+01:08:55
+don't have a single model
+that's generating an output.
+
+01:08:58
+You usually take that output and
+pass it through other verifiers
+
+01:09:01
+before it even gets to the user.
+
+01:09:03
+And that mitigates
+some of these problems.
+
+01:09:06
+But it is an active line
+of inquiry right now.
+
+01:09:08
+How do you reduce hallucinations
+and also improve these models
+
+01:09:11
+actual accuracy?
+
+01:09:13
+Yeah.
+
+01:09:14
+So repeating your question, is
+it possible for these models
+
+01:09:17
+to build new tools when a
+capability requires a tool
+
+01:09:21
+that it doesn't have?
+
+01:09:22
+Yes, it can.
+
+01:09:24
+We have a few preliminary
+experiments in those directions
+
+01:09:28
+as well, where you
+can tell a model,
+
+01:09:29
+here's a capability that I want.
+
+01:09:31
+And what you can
+build is a system
+
+01:09:33
+that automatically tries
+to collect training data
+
+01:09:35
+and builds a tool for
+specific use cases.
+
+01:09:39
+But that line of work is
+still again, in its infancy.
+
+01:09:42
+It's one that we're
+actively working on.
+
+01:09:44
+But a lot of folks are
+excited about that direction.

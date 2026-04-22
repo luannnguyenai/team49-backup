@@ -1,0 +1,196 @@
+{
+  "unit_id": "local::lecture16-efficient-training::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture16-efficient-training-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A model almost fits on one GPU, and batch size 1 fits when using mixed precision. What is the recommended next step before escalating to full parameter sharding?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use ZeRO stage 2, because it is treated as a low-cost way to reduce gradient and optimizer-state memory.",
+        "Immediately switch to ZeRO stage 3, because stage 2 is only for inference.",
+        "Disable mixed precision, because full precision always reduces memory.",
+        "Use CPU-only training, because multi-GPU methods cannot help once batch size 1 fits."
+      ],
+      "answer_index": 0,
+      "explanation": "The practical recipe starts with mixed precision. If a batch of one fits, ZeRO stage 2 is the next efficient memory-saving choice before using the more communication-heavy stage 3.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Batch size 1",
+          "ZeRO stage 2"
+        ],
+        "timestamps": [
+          "00:36:56",
+          "00:37:09"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What defines parameter-efficient fine-tuning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Updating only a small subset of parameters instead of all model parameters.",
+        "Training a full model from scratch using fewer examples.",
+        "Using only CPU memory while keeping every parameter trainable.",
+        "Replacing the pretrained model with a smaller hand-written rule system."
+      ],
+      "answer_index": 0,
+      "explanation": "PEFT keeps most pretrained weights fixed and adapts the model through a small number of trainable parameters, reducing memory and storage requirements.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_peft",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "only going to update",
+          "small subset"
+        ],
+        "timestamps": [
+          "00:38:28",
+          "00:38:32"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can PEFT be attractive even when full fine-tuning technically fits in memory?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "On small datasets, constrained updates may reduce overfitting and generalize better than changing every parameter.",
+        "PEFT guarantees higher accuracy on every task by using more parameters than full fine-tuning.",
+        "PEFT removes the need for any labeled data during fine-tuning.",
+        "PEFT is only useful for models that were not pretrained."
+      ],
+      "answer_index": 0,
+      "explanation": "When the task dataset is small relative to the model, limiting the number of trainable parameters can act like regularization while still allowing task adaptation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_peft",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "small data set",
+          "better generalization"
+        ],
+        "timestamps": [
+          "00:39:08",
+          "00:39:14"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which broader concern is used to motivate efficient training besides avoiding out-of-memory errors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Efficiency affects who can participate in model development and reduces compute and environmental costs.",
+        "Efficiency is only relevant because GPUs cannot run neural networks in FP32.",
+        "Efficiency mainly matters for making generated text more creative.",
+        "Efficiency is needed because large models cannot be evaluated automatically."
+      ],
+      "answer_index": 0,
+      "explanation": "Efficient methods make experimentation more accessible and reduce wasted computation, which also matters for environmental impact and concentration of model-building power.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "accuracy instead of efficiency",
+          "kilowatt hours"
+        ],
+        "timestamps": [
+          "00:40:46",
+          "00:42:40"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture16-efficient-training-seg4-q1",
+      "global_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q2",
+      "global_kp_id": "kp_peft",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q3",
+      "global_kp_id": "kp_peft",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q4",
+      "global_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg4-q4",
+      "global_kp_id": "kp_peft",
+      "role": "secondary"
+    }
+  ]
+}

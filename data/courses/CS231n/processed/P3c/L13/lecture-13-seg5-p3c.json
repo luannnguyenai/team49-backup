@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_13::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ để xây câu hỏi củng cố về autoencoder thường, vai trò của bottleneck và động cơ chuyển sang VAE để có latent space có thể lấy mẫu.",
+  "question_bank": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao autoencoder thường cần bottleneck ở latent code z để việc reconstruction có ý nghĩa học biểu diễn?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì nếu không bị nén, mô hình có thể chỉ học gần như identity mà không buộc phải rút trích cấu trúc hữu ích.",
+        "Vì bottleneck làm cho decoder không cần huấn luyện.",
+        "Vì reconstruction loss chỉ áp dụng được khi z lớn hơn x.",
+        "Vì bottleneck biến bài toán thành supervised learning."
+      ],
+      "answer_index": 0,
+      "explanation": "Nếu latent quá rộng và mô hình quá linh hoạt, autoencoder có thể sao chép đầu vào sang đầu ra mà không học biểu diễn nén có ích. Bottleneck ép mô hình phải giữ lại phần thông tin quan trọng nhất của dữ liệu.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoencoder_bottleneck_representation_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "bottleneck representation",
+          "much smaller than the input"
+        ],
+        "timestamps": [
+          "00:49:52",
+          "00:49:52"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Hạn chế cốt lõi khiến plain autoencoder chưa phải là mô hình sinh tốt là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Ta vẫn chưa biết cách lấy mẫu z từ đúng phân phối latent mà dữ liệu tạo ra.",
+        "Nó không thể tạo ra latent vector nào cả.",
+        "Nó luôn yêu cầu nhãn lớp cho mỗi ảnh đầu vào.",
+        "Nó không có decoder nên không thể tái tạo đầu vào."
+      ],
+      "answer_index": 0,
+      "explanation": "Plain autoencoder có thể học một latent code hữu ích cho biểu diễn, nhưng không nói cho ta biết phải lấy mẫu từ đâu trong không gian latent để tạo dữ liệu mới hợp lý. Bài toán sinh mẫu vì thế vẫn chưa được giải quyết.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_plain_autoencoder_not_yet_generative",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "do not solve generation",
+          "sampling z is still hard"
+        ],
+        "timestamps": [
+          "00:51:23",
+          "00:51:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Ý tưởng chính mà VAE thêm vào so với plain autoencoder là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Ép latent code tuân theo một phân phối đã biết, thường là Gaussian, để có thể lấy mẫu và giải mã.",
+        "Bỏ decoder và chỉ giữ lại encoder trong lúc sinh.",
+        "Thay mọi phép nhân bằng attention.",
+        "Dùng duy nhất discriminative loss p(y|x)."
+      ],
+      "answer_index": 0,
+      "explanation": "VAE đưa cấu trúc xác suất rõ ràng vào latent space. Khi latent được ép gần một prior đơn giản như Gaussian, ta có thể lấy mẫu z từ prior đó rồi đưa qua decoder để sinh dữ liệu mới.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vae_motivation_known_latent_prior",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "known distribution",
+          "such as a Gaussian"
+        ],
+        "timestamps": [
+          "00:52:33",
+          "00:52:33"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "global_kp_id": "kp_autoencoder_bottleneck_representation_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q1",
+      "global_kp_id": "kp_plain_autoencoder_reconstruction",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "global_kp_id": "kp_plain_autoencoder_not_yet_generative",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q2",
+      "global_kp_id": "kp_autoencoder_bottleneck_representation_learning",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "global_kp_id": "kp_vae_motivation_known_latent_prior",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg5-q3",
+      "global_kp_id": "kp_plain_autoencoder_not_yet_generative",
+      "role": "secondary"
+    }
+  ]
+}

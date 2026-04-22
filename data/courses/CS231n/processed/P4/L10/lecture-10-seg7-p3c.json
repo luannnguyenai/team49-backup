@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_10::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for diagnostic questions on long-term temporal modeling with RNNs or LSTMs and the recurrence pattern used in recurrent convolutional networks.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_10_seg7_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_10_seg7_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_10_seg7_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why combine CNN features with an RNN or LSTM for long videos?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "CNNs can encode local frame or clip information, while the recurrent model aggregates longer-range temporal structure",
+        "RNNs make all video computation fully parallel",
+        "CNNs cannot produce features for clips at all",
+        "LSTMs remove the need for any training data"
+      ],
+      "answer_index": 0,
+      "explanation": "Short clips may capture only local motion. Feeding a sequence of CNN features into an RNN or LSTM helps the model connect events that are far apart in time.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_long_term_temporal_modeling_with_rnns_lstms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "long-term temporal structure",
+          "process the local features"
+        ],
+        "timestamps": [
+          "00:45:22",
+          "00:46:13"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_10_seg7_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a recurrent convolutional network, what are the two main inputs used to compute a feature map at a given layer and time step?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The same layer from the previous time step and the previous layer from the current time step",
+        "Only the current RGB frame and the final class score",
+        "Only the previous hidden state and no spatial features",
+        "The optical flow map and the audio spectrogram"
+      ],
+      "answer_index": 0,
+      "explanation": "Recurrent convolution organizes computation across both depth and time. Each feature map depends on temporal history from its own layer and new information arriving from the lower layer at the current step.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_recurrent_convolutional_networks",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "depends on two inputs",
+          "previous layer same timestep"
+        ],
+        "timestamps": [
+          "00:48:28",
+          "00:49:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg7_q1",
+      "global_kp_id": "kp_long_term_temporal_modeling_with_rnns_lstms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg7_q2",
+      "global_kp_id": "kp_recurrent_convolutional_networks",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_10_seg7_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Combining CNN features with RNN/LSTM for long videos is a medium sequence-modeling-for-video question."
+    },
+    {
+      "item_id": "lecture_10_seg7_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.9,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The recurrent convolutional-network input structure is a harder architecture-mechanics item."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_10_seg7_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "transfer",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This asks the learner to connect per-frame features to long-range temporal modeling."
+    },
+    {
+      "item_id": "lecture_10_seg7_q2",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "low",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is best when checking whether the learner can reason about recurrence inside feature maps."
+    }
+  ]
+}

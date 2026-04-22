@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about trial-and-error learning, why RL is harder than supervised learning, and how Q-functions guide action selection. The examples and definitions are stated explicitly.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is delayed reward a central difficulty in reinforcement learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It makes the environment deterministic",
+        "It removes the need for exploration",
+        "It creates a credit-assignment problem over earlier actions",
+        "It guarantees that gradients are exact"
+      ],
+      "answer_index": 2,
+      "explanation": "When reward arrives much later, it becomes hard to know which earlier decisions were responsible for success or failure.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_why_rl_is_harder_than_supervised_learning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "credit assignments",
+          "rewards can be delayed"
+        ],
+        "timestamps": [
+          "00:21:23",
+          "00:22:11"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a Q-function estimate in value-based reinforcement learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The probability that a state belongs to the training set",
+        "The discounted expected future reward of taking an action in a state",
+        "The exact next frame produced by the environment",
+        "The gradient of the reward with respect to pixels"
+      ],
+      "answer_index": 1,
+      "explanation": "A Q-value scores a state-action pair by how much long-term reward the agent expects if it takes that action there.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_q_functions_and_value_based_action_selection",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "discounted expected future",
+          "specific state s"
+        ],
+        "timestamps": [
+          "00:24:19",
+          "00:24:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the Atari example, how is the action chosen once the Q-network outputs one value per action?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Average all Q-values and sample uniformly",
+        "Choose the action with the highest predicted Q-value",
+        "Choose the action with the lowest reward estimate",
+        "Always repeat the previous action"
+      ],
+      "answer_index": 1,
+      "explanation": "Greedy value-based action selection picks the action whose Q-value is largest, because that action is predicted to lead to the best future return.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_q_functions_and_value_based_action_selection",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "their Q values",
+          "highest Q values"
+        ],
+        "timestamps": [
+          "00:24:46",
+          "00:25:03"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q1",
+      "global_kp_id": "kp_why_rl_is_harder_than_supervised_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q2",
+      "global_kp_id": "kp_q_functions_and_value_based_action_selection",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q3",
+      "global_kp_id": "kp_q_functions_and_value_based_action_selection",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is delayed reward a central difficulty in reinforcement learning\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does a Q-function estimate in value-based reinforcement learning\" is a direct reinforcement check and should land on the easier side."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"In the Atari example, how is the action chosen once the Q-network outputs one value per action\" is a direct reinforcement check and should land on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is delayed reward a central difficulty in reinforcement learning\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does a Q-function estimate in value-based reinforcement learning\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg4-q3",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In the Atari example, how is the action chosen once the Q-network outputs one value per action\" works best as an early concept check."
+    }
+  ]
+}

@@ -1,0 +1,1098 @@
+{
+  "lecture_title": "Stanford CS231N Lecture 11: Large-Scale Distributed Training",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Motivation, secrecy in modern LLMs, and the Llama3 running example",
+      "start_s": 5,
+      "end_s": 169
+    },
+    {
+      "section_index": 2,
+      "title": "GPU origins and H100 internals",
+      "start_s": 170,
+      "end_s": 712
+    },
+    {
+      "section_index": 3,
+      "title": "Tensor cores, mixed precision, and 1000x device speedup",
+      "start_s": 713,
+      "end_s": 912
+    },
+    {
+      "section_index": 4,
+      "title": "From one GPU to cluster topology: server, rack, pod, cluster",
+      "start_s": 913,
+      "end_s": 1389
+    },
+    {
+      "section_index": 5,
+      "title": "Other accelerators and framing distributed training as split compute plus communication",
+      "start_s": 1390,
+      "end_s": 1739
+    },
+    {
+      "section_index": 6,
+      "title": "Data parallelism and gradient all-reduce",
+      "start_s": 1740,
+      "end_s": 2460
+    },
+    {
+      "section_index": 7,
+      "title": "Fully sharded data parallelism (FSDP)",
+      "start_s": 2461,
+      "end_s": 2930
+    },
+    {
+      "section_index": 8,
+      "title": "Hybrid sharded data parallelism (HSDP)",
+      "start_s": 2931,
+      "end_s": 3149
+    },
+    {
+      "section_index": 9,
+      "title": "Activation checkpointing and practical scaling recipe",
+      "start_s": 3150,
+      "end_s": 3500
+    },
+    {
+      "section_index": 10,
+      "title": "Hardware FLOPs Utilization and Model FLOPs Utilization",
+      "start_s": 3501,
+      "end_s": 3811
+    },
+    {
+      "section_index": 11,
+      "title": "Context and pipeline parallelism",
+      "start_s": 3812,
+      "end_s": 4155
+    },
+    {
+      "section_index": 12,
+      "title": "Tensor parallelism, ND parallelism, and recap",
+      "start_s": 4156,
+      "end_s": 4364
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg1",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Why large-scale distributed training matters",
+      "description": "Motivates the lecture, explains why modern neural networks are trained across many devices, and introduces Llama3-405B as the open case study used throughout.",
+      "summary": "The lecture opens by arguing that large-scale distributed training is now the default way modern neural networks are trained, contrasting the earlier era when a single GPU was common with the present norm of tens to tens of thousands of devices working together [ts=15s] [ts=36s]. Llama3-405B is chosen as the running example not because it is uniquely best, but because Meta published unusually detailed information about its training system, unlike GPT-4-era reports that deliberately withhold architecture, hardware, and training details [ts=49s] [ts=86s]. The segment also frames the lecture structure as a combination of hardware understanding and algorithms for training on many GPUs, then briefly defines the GPU as a graphics processor repurposed into a general parallel processor for deep learning [ts=170s] [ts=188s].",
+      "key_points": [
+        {
+          "text": "Modern deep learning training commonly uses tens to tens of thousands of devices rather than a single GPU.",
+          "timestamp_s": 36,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Llama3-405B is used because its paper shares system and training details that many frontier-model papers omit.",
+          "timestamp_s": 49,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The lecture is organized around two questions: what the hardware is and how to train on lots of GPUs.",
+          "timestamp_s": 170,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "GPU stands for Graphics Processing Unit and is now used as a general parallel processor.",
+          "timestamp_s": 188,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 5,
+        "end_s": 302
+      },
+      "difficulty": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 5,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Inside the H100: memory hierarchy, SMs, tensor cores, and speed scaling",
+      "description": "Explains the internal organization of an H100 GPU, why tensor cores dominate throughput, why mixed precision matters, and how GPU throughput increased over the last decade.",
+      "summary": "This segment dissects the H100 from package level to streaming multiprocessors. The H100 is presented as compute cores surrounded by 80 GB of HBM, with about 3 TB/s of bandwidth between memory and cores, then further broken into 50 MB of L2 cache and 132 enabled streaming multiprocessors after binning [ts=321s] [ts=366s]. Inside an SM, the lecture emphasizes the memory hierarchy from L1/registers to L2 to HBM, 128 FP32 cores that provide 256 FLOP/cycle per SM, and 4 tensor cores that execute fixed matrix-multiply tiles for 4096 FLOP/cycle per SM, making tensor cores the throughput-critical hardware path [ts=463s] [ts=627s]. The instructor then explains mixed precision: tensor cores typically consume 16-bit inputs and accumulate in 32-bit, so forgetting to cast a model to 16-bit can cause it to run on FP32 cores and be about 20x slower [ts=659s] [ts=694s]. The segment closes by connecting tensor-core growth to the roughly 1000x per-device throughput increase from K40-era GPUs to B200-era devices, arguing that this jump is a major driver of deep-learning progress [ts=760s] [ts=808s].",
+      "key_points": [
+        {
+          "text": "An H100 packages compute cores with 80 GB of HBM and roughly 3 TB/s memory bandwidth to the cores.",
+          "timestamp_s": 321,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The H100 exposes a three-level memory hierarchy: L1/registers, 50 MB of L2 cache, and 80 GB of HBM.",
+          "timestamp_s": 463,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Each SM has 128 FP32 cores for 256 FLOP/cycle and 4 tensor cores for 4096 FLOP/cycle, so tensor cores dominate throughput.",
+          "timestamp_s": 527,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Tensor cores use mixed precision with 16-bit inputs and 32-bit accumulation.",
+          "timestamp_s": 659,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "If a PyTorch model is not cast to 16-bit, it can run on FP32 cores and be about 20x slower than expected.",
+          "timestamp_s": 694,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "GPU throughput has increased by roughly 1000x since 2013, largely because newer devices devote much more hardware to tensor cores.",
+          "timestamp_s": 808,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 303,
+        "end_s": 912
+      },
+      "difficulty": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg3",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Cluster hierarchy and alternative training hardware",
+      "description": "Zooms out from one GPU to the full cluster, showing bandwidth declines across hierarchy levels, then surveys TPUs and other training chips before framing the distributed-training problem.",
+      "summary": "After the single-device view, the lecture treats the entire training stack as an extended memory and communication hierarchy: an H100 has about 3 TB/s internally, about 900 GB/s to peer GPUs inside an 8-GPU server, and roughly 50 GB/s across GPUs inside a 3072-GPU Llama3 pod, with even less bandwidth across pods in the 24,576-GPU cluster [ts=950s] [ts=1039s]. The point is that cluster design is shaped by communication bandwidth dropping as distance grows, so algorithm placement must respect topology. The instructor then advocates a mental model of the whole data center as one giant computer, quoting the Llama3 cluster totals of roughly 24k GPUs, petabytes of HBM, millions of tensor cores, and ~24 exaflops [ts=1337s] [ts=1357s]. Finally, the segment notes that NVIDIA GPUs dominate but are not alone: Google TPUs, AMD MI325X, and AWS Trainium are discussed as alternative training accelerators, before the lecture reframes distributed training as the problem of splitting computation and overlapping computation with communication across this hierarchy [ts=1400s] [ts=1594s].",
+      "key_points": [
+        {
+          "text": "Communication bandwidth drops with cluster scale: about 3 TB/s inside one H100, about 900 GB/s within an 8-GPU server, and about 50 GB/s across GPUs inside a Llama3 pod.",
+          "timestamp_s": 950,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Meta's published Llama3 cluster used 8 pods for a total of 24,576 GPUs.",
+          "timestamp_s": 1070,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A useful systems mindset is to treat the full GPU cluster as one giant computer rather than focusing only on individual devices.",
+          "timestamp_s": 1337,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Google TPUs are a major non-NVIDIA training platform and are arranged into large pods.",
+          "timestamp_s": 1404,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Distributed training is fundamentally about splitting computation and overlapping computation with communication across multiple levels of memory hierarchy.",
+          "timestamp_s": 1594,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 913,
+        "end_s": 1739
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 14,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Data parallelism as the baseline distributed-training algorithm",
+      "description": "Introduces the four transformer axes of parallelism and then derives data parallelism as the exact baseline method built on minibatch gradient linearity.",
+      "summary": "The lecture first frames transformer computation as a stack of L layers operating on tensors with batch, sequence, and model-dimension axes, yielding four main ways to split work: batch/data parallelism, sequence/context parallelism, layer/pipeline parallelism, and dim/tensor parallelism [ts=1673s] [ts=1721s]. It then develops data parallelism in detail. Because loss is averaged over minibatch examples and gradients are linear, a macrobatch of M×N examples can be split across M GPUs, each computing a local gradient on N samples, with the average gradient matching the single-device computation exactly rather than approximately [ts=1777s] [ts=1875s]. Operationally, every GPU keeps its own full copy of the model and optimizer, loads a different minibatch, runs forward and backward locally, and then participates in an all-reduce so all devices obtain the same averaged gradient before making identical updates [ts=1900s] [ts=2049s]. A practical nuance is that gradient communication can be overlapped with backward computation layer by layer, so the communication does not have to appear as a separate fully serialized phase [ts=2059s] [ts=2099s].",
+      "key_points": [
+        {
+          "text": "Transformers expose four main split axes: layers for pipeline parallelism, batch for data parallelism, sequence for context parallelism, and hidden dimension for tensor parallelism.",
+          "timestamp_s": 1708,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Data parallelism uses a macrobatch of M×N samples split into N-sample local minibatches across M GPUs.",
+          "timestamp_s": 1777,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Because gradients are linear, averaging per-GPU gradients yields exactly the same gradient as computing over the whole macrobatch on one device.",
+          "timestamp_s": 1797,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Each GPU must load a different minibatch; accidentally duplicating the same minibatch across GPUs is a correctness bug.",
+          "timestamp_s": 1922,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "After local backward passes, GPUs all-reduce gradients so every device can apply the same update to its local weight copy.",
+          "timestamp_s": 1979,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Backward computation for one layer can overlap with all-reduce communication for another layer.",
+          "timestamp_s": 2059,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 1740,
+        "end_s": 2460
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 12,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg5",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Fully sharded data parallelism (FSDP)",
+      "description": "Generalizes data parallelism by sharding parameters, gradients, and optimizer state across GPUs and coordinating weight broadcasts and gradient gathers around each layer.",
+      "summary": "FSDP is introduced as the fix when full model copies no longer fit comfortably on each GPU. Instead of replicating all parameters everywhere, each layer's weights are assigned to an owner GPU, and that owner is also responsible for the optimizer state and aggregated gradients for that weight shard [ts=2466s] [ts=2504s]. During forward, the owner broadcasts the current layer weights to the other GPUs, everyone computes the layer, and non-owners delete that temporary copy to save memory; the next layer's weights can be prefetched while the current layer is executing [ts=2563s] [ts=2643s]. During backward, the same ownership pattern reappears: the owner broadcasts the weights for the layer, each GPU computes local gradients, the gradients are gathered back to the owner rather than all-reduced everywhere, and the owner applies the update [ts=2673s] [ts=2820s]. The instructor emphasizes that weight communication, backward compute, gradient aggregation, and even data loading should all be overlapped aggressively, since the goal is to keep tensor cores busy while communication is hidden behind useful work [ts=2835s] [ts=2921s].",
+      "key_points": [
+        {
+          "text": "FSDP shards model weights across GPUs so each weight matrix has an owner GPU that also manages its optimizer state and full gradient.",
+          "timestamp_s": 2466,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "During forward, the owner of each layer broadcasts its weight matrix, all GPUs run that layer, and non-owners delete the temporary copy to save memory.",
+          "timestamp_s": 2563,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "FSDP can prefetch the next layer's weights while computing the current layer.",
+          "timestamp_s": 2630,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "During backward, the owner broadcasts the layer weights, GPUs compute local gradients, and gradients are gathered back to the owner instead of all-reduced everywhere.",
+          "timestamp_s": 2679,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A common optimization is to keep the last layer's weights in memory after forward because they will be reused immediately by backward.",
+          "timestamp_s": 2692,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Communication of weights, backward compute, gradient aggregation, and updates should be overlapped across neighboring layers.",
+          "timestamp_s": 2848,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 2461,
+        "end_s": 2930
+      },
+      "difficulty": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Hybrid sharded data parallelism, activation checkpointing, and scaling recipe",
+      "description": "Shows how to combine FSDP with outer data-parallel groups, then introduces activation checkpointing as the next memory-saving lever and distills a practical scaling recipe.",
+      "summary": "This segment first presents Hybrid Sharded Data Parallelism (HSDP), which organizes GPUs as a 2D grid: FSDP runs within groups of K GPUs, while ordinary data parallelism runs across M groups that hold replicated sharded setups [ts=2941s] [ts=3044s]. The motivation is topology-aware communication: FSDP communicates about three times the model weights over a forward/backward pass, while outer data parallelism only communicates gradients once, so heavier communication should be placed on faster intra-node or intra-pod links [ts=3064s] [ts=3148s]. The lecture then shifts to activation memory, noting that even when parameters are sharded, activations can dominate memory for large transformers like Llama3-405B [ts=3168s] [ts=3207s]. Activation checkpointing trades memory for recomputation by discarding some activations during forward and recomputing them in backward: full recomputation gives O(N^2) compute and O(1) memory, while checkpointing every C layers gives O(N^2/C) compute and O(C) memory, with C=sqrt(N) yielding the classic O(N√N) compute and O(√N) memory compromise [ts=3209s] [ts=3344s]. The segment ends with a practical scaling recipe: start with plain data parallelism, move to FSDP around billion-parameter scale, add activation checkpointing when activations become the bottleneck, then switch to HSDP and finally to more advanced CP/PP/TP strategies as GPU counts, model size, and sequence length continue to grow [ts=3365s] [ts=3469s].",
+      "key_points": [
+        {
+          "text": "HSDP uses two axes at once: FSDP within K-GPU groups and ordinary data parallelism across M groups.",
+          "timestamp_s": 2941,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "FSDP communicates roughly three times the model weights over a forward/backward pass, while outer data parallelism communicates gradients once.",
+          "timestamp_s": 3064,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A 100B-parameter model can be made feasible by sharding weights, gradients, and optimizer state across many GPUs.",
+          "timestamp_s": 3168,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Activation checkpointing stores fewer activations and recomputes them during backward instead.",
+          "timestamp_s": 3209,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Full recomputation changes an N-layer network from O(N) compute and O(N) memory to O(N^2) compute and O(1) memory.",
+          "timestamp_s": 3301,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Checkpointing every C layers gives O(N^2/C) compute and O(C) memory; choosing C = sqrt(N) gives O(N√N) compute and O(√N) memory.",
+          "timestamp_s": 3330,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A practical recipe is DP first, then FSDP, then activation checkpointing, then HSDP, and finally CP/PP/TP at very large scale.",
+          "timestamp_s": 3365,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 2931,
+        "end_s": 3500
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg7",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "HFU and MFU: the optimization metric for distributed training",
+      "description": "Defines hardware and model FLOPs utilization, shows typical numbers, and motivates MFU as the main knob-selection target.",
+      "summary": "Before introducing the remaining parallelism strategies, the lecture defines two throughput metrics. Hardware FLOPs Utilization (HFU) is the fraction of the device's theoretical dense-matmul throughput achieved by a benchmark, and on a simple H100 matrix-multiply benchmark the number rises to about 80% for large matrices [ts=3503s] [ts=3569s]. Model FLOPs Utilization (MFU) is stricter: it asks what fraction of theoretical device FLOPs are spent on the model's forward/backward work once data loading, communication, activation checkpointing, optimizer steps, and other overheads are included [ts=3589s] [ts=3663s]. The instructor presents MFU as the main guiding metric for tuning distributed training because it compresses many system-level decisions into a single throughput target [ts=3687s] [ts=3697s]. As rough heuristics, MFU above 30% is good, above 40% is excellent, and published Llama3 large-scale runs achieve MFUs in the high-30s to low-40s across 8k-16k GPUs [ts=3700s] [ts=3735s]. The segment also notes a counterintuitive trend: newer GPUs can produce worse MFU because compute throughput is scaling faster than communication bandwidth, making communication increasingly dominant [ts=3742s] [ts=3778s].",
+      "key_points": [
+        {
+          "text": "HFU is the fraction of theoretical dense-matmul throughput that a device actually realizes on a benchmark.",
+          "timestamp_s": 3520,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A straightforward H100 matmul benchmark reaches about 80% HFU for large matrix sizes around 8k by 8k.",
+          "timestamp_s": 3562,
+          "evidence_type": "example"
+        },
+        {
+          "text": "MFU measures what fraction of theoretical FLOPs are used for the model's forward/backward work in the real training loop.",
+          "timestamp_s": 3594,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "MFU can be estimated by comparing theoretical forward/backward time from model FLOPs to measured iteration time.",
+          "timestamp_s": 3606,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "MFU above 30% is good and above 40% is excellent for modern large-scale training.",
+          "timestamp_s": 3700,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Llama3 reports MFUs in roughly the high-30s to low-40s on 8k-16k GPU runs.",
+          "timestamp_s": 3717,
+          "evidence_type": "example"
+        },
+        {
+          "text": "More recent GPUs can show worse MFU because communication bandwidth improves more slowly than compute throughput.",
+          "timestamp_s": 3742,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 3501,
+        "end_s": 3811
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 5,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg8",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Advanced parallelism: context, pipeline, tensor, and ND composition",
+      "description": "Covers the remaining split axes for long-sequence and very large-model training, then shows that frontier systems combine all of them.",
+      "summary": "The final technical segment surveys the remaining split strategies beyond data-parallel variants. Context parallelism divides the sequence across GPUs; many transformer sublayers such as LayerNorm, residuals, and much of the MLP are straightforward to split this way, but attention is difficult because it couples all token pairs, motivating techniques such as ring attention and Ulysses attention [ts=3812s] [ts=3907s]. Llama3 is used again as an example: stage 1 trains at sequence length 8192 with no context parallelism, while a later stage raises sequence length to about 131k and uses 16-way context parallelism [ts=3925s] [ts=3948s]. Pipeline parallelism then splits by layers; the naive version suffers from a bubble where GPUs sit idle, capping useful work at about 1/N for N-way pipelines, but running multiple microbatches simultaneously shrinks the bubble and raises theoretical utilization, with a 4-way/4-microbatch example reaching about 57% MFU [ts=3962s] [ts=4118s]. Tensor parallelism finally splits weight matrices themselves across GPUs using block matrix multiply, and a common transformer trick pairs two consecutive linear layers so communication is only needed every two layers [ts=4156s] [ts=4266s]. The segment closes by arguing that the practical answer to 'which is best?' is ND parallelism: frontier runs compose TP, CP, PP, and DP simultaneously, as in the cited Llama setup using 8-way TP, 16-way CP, 16-way PP, and 8-way DP [ts=4280s] [ts=4306s].",
+      "key_points": [
+        {
+          "text": "Context parallelism splits the sequence dimension across GPUs.",
+          "timestamp_s": 3812,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Attention is the hard part of context parallelism because it requires all-pairs interactions across sequence positions.",
+          "timestamp_s": 3853,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Ring attention and Ulysses attention are two strategies for parallelizing the attention operator across sequences.",
+          "timestamp_s": 3872,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Llama3 stage 2 moved from 8k tokens with no CP to about 131k tokens with 16-way context parallelism.",
+          "timestamp_s": 3925,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Naive N-way pipeline parallelism leaves a bubble and only achieves useful work about 1/N of the time.",
+          "timestamp_s": 4017,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Running multiple microbatches at once shrinks the pipeline bubble; a 4-way example with 4 microbatches reaches about 57% theoretical MFU.",
+          "timestamp_s": 4046,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Tensor parallelism splits a weight matrix across GPUs so each device computes a block-matrix slice of the output.",
+          "timestamp_s": 4162,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A two-layer tensor-parallel trick avoids gathering between consecutive layers by column-splitting the first weight matrix and row-splitting the second.",
+          "timestamp_s": 4211,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "start_s": 3812,
+        "end_s": 4364
+      },
+      "difficulty": 0.81,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 8,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp1",
+      "name": "Large-Scale Distributed Training",
+      "description": "The systems view that modern deep-learning models are trained by splitting one training job across many accelerators and coordinating their computation and communication.",
+      "track_tags": [
+        "distributed_training",
+        "systems"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "training_systems"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer",
+        "systems_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It frames why the lecture moves from single-device thinking to cluster-scale algorithm design.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈22s], the opening slides and narration shift from single-GPU history to the modern norm of thousands of devices training one model."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp2",
+      "name": "GPU Memory Hierarchy",
+      "description": "The layered organization of HBM, L2, L1/registers, and SM-local compute that determines how efficiently data can reach GPU execution units.",
+      "track_tags": [
+        "gpu_hardware",
+        "systems"
+      ],
+      "domain_tags": [
+        "computer_architecture",
+        "deep_learning_systems"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "systems_engineer",
+        "kernel_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Understanding where bandwidth is abundant or scarce explains later bottlenecks and why locality matters.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈307s], the slides zoom from the H100 package to HBM, L2 cache, and individual streaming multiprocessors."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp3",
+      "name": "Tensor Cores and Mixed Precision",
+      "description": "Specialized matrix-multiply units that dominate GPU throughput and typically consume low-precision inputs while accumulating in higher precision.",
+      "track_tags": [
+        "gpu_hardware",
+        "numerics"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "numerical_computing"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "kernel_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the concrete hardware reason modern training throughput is so high and why dtype choices matter in practice.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈562s], the SM diagram highlights tensor-core blocks and annotates their much higher FLOP/cycle compared with FP32 cores."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp4",
+      "name": "Cluster Topology and Bandwidth Hierarchy",
+      "description": "The server-rack-pod-cluster organization of accelerator systems, where communication gets slower as traffic crosses larger topology boundaries.",
+      "track_tags": [
+        "distributed_training",
+        "cluster_systems"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "datacenter_networking"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "distributed_systems_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Later parallelism choices depend directly on where the fast and slow communication boundaries are in the cluster.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈1010s], the slides expand from one H100 to server, rack, pod, and full cluster while bandwidth labels drop at each step."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp5",
+      "name": "Data Parallelism",
+      "description": "A baseline scaling method where each GPU processes a different minibatch shard, computes a local gradient, and synchronizes gradients across replicas.",
+      "track_tags": [
+        "distributed_training",
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer",
+        "distributed_systems_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the baseline exact method from which FSDP, HSDP, and multi-axis combinations are motivated and compared.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈1900s], the slides show multiple GPUs each holding a full model copy and red arrows averaging gradients across them."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp6",
+      "name": "Fully Sharded Data Parallelism (FSDP)",
+      "description": "A memory-saving variant of data parallelism that shards parameters, gradients, and optimizer state across GPUs and materializes weights on demand.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "research_engineer",
+        "systems_engineer"
+      ],
+      "difficulty_level": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the first major extension students need once model replicas stop fitting cleanly in device memory.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈2523s], the animation assigns layer weights to owner GPUs and adds broadcast and gather arrows around each layer."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp7",
+      "name": "Hybrid Sharded Data Parallelism (HSDP)",
+      "description": "A 2D composition of FSDP within groups and ordinary data parallelism across groups, chosen to better match cluster communication hierarchy.",
+      "track_tags": [
+        "distributed_training",
+        "cluster_topology"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "distributed_systems_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It demonstrates the central systems lesson that algorithm choice should match network topology, not just mathematical correctness.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈2945s], the slide arranges GPUs into a 2D grid and labels different communication costs for the two axes."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp8",
+      "name": "Activation Checkpointing",
+      "description": "A memory-compute tradeoff that stores fewer intermediate activations during forward and recomputes them during backward.",
+      "track_tags": [
+        "memory_optimization",
+        "distributed_training"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "training_optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer",
+        "ml_infrastructure_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the main practical answer once activation memory, rather than parameter memory, becomes the bottleneck.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈3269s], the slide traces repeated forward recomputation segments and explicitly contrasts O(N) memory with checkpointed tradeoffs."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp9",
+      "name": "Model FLOPs Utilization (MFU)",
+      "description": "A system-level efficiency metric measuring how much of a device's theoretical compute is turned into useful model forward/backward work in the actual training loop.",
+      "track_tags": [
+        "performance",
+        "distributed_training"
+      ],
+      "domain_tags": [
+        "training_systems",
+        "performance_engineering"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "performance_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly presents MFU as the guiding light for choosing among many distributed-training knobs.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈3532s], the slides first plot HFU for matmul size, then switch to the MFU checklist used to evaluate real training loops."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp10",
+      "name": "Context Parallelism",
+      "description": "A strategy for splitting one long sequence across multiple GPUs, especially useful when sequence length becomes too large for a single device.",
+      "track_tags": [
+        "distributed_training",
+        "transformers"
+      ],
+      "domain_tags": [
+        "long_context_models",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "research_engineer",
+        "ml_engineer",
+        "ml_infrastructure_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It matters mainly once sequence length is very large, so it is crucial at frontier scale but less universal than DP or MFU.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈3925s], the long-sequence slide contrasts Llama training with and without 16-way context parallelism."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp11",
+      "name": "Pipeline Parallelism",
+      "description": "A layer-wise split across GPUs that introduces bubble inefficiency unless multiple microbatches are interleaved through the pipeline.",
+      "track_tags": [
+        "distributed_training",
+        "transformers"
+      ],
+      "domain_tags": [
+        "parallel_algorithms",
+        "training_systems"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "research_engineer",
+        "systems_engineer"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is a standard frontier-scale technique and a clear example of how utilization depends on scheduling, not only partition choice.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈3990s], the pipeline slides show a large white bubble of idle time and then a denser microbatch schedule that shrinks it."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp12",
+      "name": "Tensor Parallelism",
+      "description": "A model-dimension split that partitions weight matrices across GPUs so each device computes a block-matrix slice of the output.",
+      "track_tags": [
+        "distributed_training",
+        "transformers"
+      ],
+      "domain_tags": [
+        "linear_algebra",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "research_engineer",
+        "ml_infrastructure_engineer",
+        "kernel_engineer"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It becomes essential once single layers are themselves too large or too slow for one GPU, especially in giant transformers.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈4174s], the slides split XW=Y into weight blocks and then show the two-layer communication-saving trick."
+    },
+    {
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp13",
+      "name": "ND Parallelism",
+      "description": "The practical composition of several parallelism axes at once, such as TP, CP, PP, and DP, to fit frontier-scale models and clusters.",
+      "track_tags": [
+        "distributed_training",
+        "systems_design"
+      ],
+      "domain_tags": [
+        "training_systems",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "research_engineer",
+        "distributed_systems_engineer"
+      ],
+      "difficulty_level": 0.83,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture ends by showing that state-of-the-art training uses combinations of methods rather than any single one in isolation.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [frame≈4297s], the recap explains that Llama combines 8-way TP, 16-way CP, 16-way PP, and 8-way DP in one training run."
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg1",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp1",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The opening motivation explicitly argues that modern training now happens at large scale and frames the whole lecture around this shift [ts=15s] [ts=36s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg1",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp2",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "GPU hardware is introduced conceptually as the first half of the lecture, but detailed hierarchy comes later [ts=170s] [ts=188s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This unit spends most of its time on HBM, L2, L1/registers, and SM-level organization [ts=321s] [ts=523s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The SM walkthrough centers on FP32 cores versus tensor cores and mixed precision [ts=527s] [ts=705s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg3",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp4",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment repeatedly compares bandwidth across GPU, server, rack, pod, and cluster boundaries [ts=950s] [ts=1086s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg3",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp1",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The 'one big computer' framing reinforces the overall large-scale-training viewpoint [ts=1337s] [ts=1382s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp5",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit defines data parallelism mathematically and operationally, including minibatch splitting and all-reduce [ts=1740s] [ts=2049s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp9",
+      "planner_role": "support",
+      "instruction_role": "support",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Communication/computation overlap is introduced here as an efficiency concern that later becomes formalized through MFU [ts=2059s] [ts=2099s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg5",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp6",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "FSDP ownership, forward broadcasts, backward gathers, and overlap dominate the entire segment [ts=2466s] [ts=2921s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg5",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp5",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "FSDP is repeatedly described as a variant of data parallelism with the same overall training logic but different memory layout [ts=2475s] [ts=2557s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp7",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "HSDP is introduced as the first explicit multidimensional parallelism scheme using a 2D GPU grid [ts=2941s] [ts=3148s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Activation checkpointing gets a full derivation of compute-memory tradeoffs and is then embedded into the scaling recipe [ts=3209s] [ts=3442s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp6",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "HSDP assumes the FSDP communication pattern within each group [ts=2969s] [ts=2994s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp9",
+      "planner_role": "support",
+      "instruction_role": "support",
+      "coverage_level": "mention",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The scaling recipe ends by naming MFU as the knob-selection objective [ts=3487s] [ts=3499s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg7",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "HFU is defined first, but the unit explicitly pivots to MFU and treats it as the tuning target [ts=3503s] [ts=3697s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg8",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp10",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The first third of the unit defines context parallelism and attention-specific implementations [ts=3812s] [ts=3954s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg8",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Pipeline parallelism, bubble inefficiency, and microbatching occupy the next major block [ts=3962s] [ts=4118s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg8",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Tensor parallelism and the two-layer trick are derived in the final technical subsection [ts=4156s] [ts=4266s]."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg8",
+      "local_kp_id": "local::lecture_11_large_scale_distributed_training::kp13",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The recap states that frontier training composes all axes simultaneously in ND parallelism [ts=4280s] [ts=4306s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg1",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Sets up the lecture's motivation and open-model case study, but contains little technical derivation beyond framing the hardware/algorithm split."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Contains the core hardware story—memory hierarchy, SM structure, tensor-core throughput, mixed precision, and the 1000x compute trend—with several concrete numerical comparisons."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Explains the topology and bandwidth hierarchy that later justifies where different parallelism strategies should be placed in the cluster."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Data parallelism is the mathematical and algorithmic baseline for the rest of the lecture, including exact gradient equivalence and the all-reduce pattern."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "FSDP is one of the lecture's main scaling mechanisms and is visually emphasized with step-by-step broadcast, delete, gather, and overlap phases."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Combines topology-aware HSDP with the compute-memory tradeoff of activation checkpointing and ends in a practical scaling recipe."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Defines the efficiency metric the instructor explicitly calls the guiding light for tuning distributed training systems."
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Covers the advanced split axes used at frontier scale and culminates in ND parallelism, the lecture's capstone synthesis."
+    }
+  ],
+  "self_critique_trace": null
+}

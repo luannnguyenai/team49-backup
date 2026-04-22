@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_18_human_centered_ai::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Nội dung transcript đủ rõ để hỏi về scene graphs, quan hệ giữa đối tượng, captioning đa phương thức và vì sao hiểu hoạt động động nhiều tác nhân vẫn còn mở.",
+  "question_bank": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Điểm chính của lập luận “không thể dừng ở việc chỉ gắn nhãn đối tượng” là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Hai cảnh có cùng tập đối tượng vẫn có thể mang ý nghĩa khác nhau vì quan hệ giữa chúng khác nhau.",
+        "Quan hệ giữa đối tượng chỉ quan trọng khi ảnh có hơn 100 vật thể.",
+        "Nếu đã nhận ra đối tượng thì mô tả ngữ nghĩa của cảnh tự động đầy đủ.",
+        "Quan hệ giữa đối tượng chỉ cần cho video, không cần cho ảnh tĩnh."
+      ],
+      "answer_index": 0,
+      "explanation": "Ý nghĩa của một cảnh không chỉ đến từ danh sách vật thể xuất hiện mà còn từ cách chúng tương tác. Cùng một người, một bánh kem và một bàn ăn có thể biểu thị những tình huống hoàn toàn khác nhau.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_scene_graphs_and_relational_perception",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "relationships between objects",
+          "completely different"
+        ],
+        "timestamps": [
+          "00:15:25",
+          "00:15:56"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Scene graph biểu diễn cảnh theo cách nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Đối tượng là node, còn quan hệ và thuộc tính được mã hóa qua liên kết hoặc nhãn liên quan.",
+        "Mỗi cảnh chỉ được lưu dưới dạng một vector duy nhất không có cấu trúc.",
+        "Chỉ lưu các pixel sáng nhất của ảnh để suy ra ngữ nghĩa.",
+        "Thay toàn bộ ảnh bằng một câu văn duy nhất trước khi suy luận."
+      ],
+      "answer_index": 0,
+      "explanation": "Scene graph cho phép giữ lại cấu trúc của cảnh: thực thể nào đang có mặt, chúng có thuộc tính gì và chúng liên hệ với nhau ra sao. Đây là thứ mà gắn nhãn đơn thuần không thể hiện được.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_scene_graphs_and_relational_perception",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "scene graph",
+          "entity nodes"
+        ],
+        "timestamps": [
+          "00:16:27",
+          "00:16:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao hiểu hoạt động trong cảnh động nhiều tác nhân vẫn được xem là bài toán chưa giải xong?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì chuyển động, tương tác và hành vi có nhiều khả năng hơn rất nhiều so với ảnh tĩnh, khiến tổng hợp ngữ cảnh trở nên khó.",
+        "Vì video không thể dùng mạng nơ-ron để xử lý.",
+        "Vì chỉ cần captioning là đủ nên không cần mô hình hoạt động.",
+        "Vì robot không cần hiểu con người hay bối cảnh động."
+      ],
+      "answer_index": 0,
+      "explanation": "Trong cảnh động, nhiều thực thể có thể đồng thời di chuyển, thay đổi vai trò và tác động lẫn nhau. Để robot hay hệ thống trợ lý hoạt động an toàn, mô hình phải hiểu được chuỗi hành vi và bối cảnh chứ không chỉ từng khung hình riêng lẻ.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "dynamic scenes",
+          "unsolved problem"
+        ],
+        "timestamps": [
+          "00:20:34",
+          "00:21:48"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q1",
+      "global_kp_id": "kp_scene_graphs_and_relational_perception",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q1",
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q2",
+      "global_kp_id": "kp_scene_graphs_and_relational_perception",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q2",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q3",
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg3-q3",
+      "global_kp_id": "kp_scene_graphs_and_relational_perception",
+      "role": "secondary"
+    }
+  ]
+}

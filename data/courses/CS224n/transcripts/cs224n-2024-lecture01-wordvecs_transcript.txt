@@ -1,0 +1,5427 @@
+Title: Stanford CS224N: NLP with Deep Learning | Spring 2024 | Lecture 1 - Intro and Word Vectors
+URL: https://www.youtube.com/watch?v=DzpHeXVSC5I
+Video ID: DzpHeXVSC5I
+============================================================
+
+00:00:04
+So the thing that seems
+amazing to me and us
+
+00:00:09
+is the fact that, well,
+actually, this course
+
+00:00:12
+was taught just last quarter.
+
+00:00:15
+And here we are with an
+enormous number of people,
+
+00:00:18
+again, taking this class.
+
+00:00:20
+I guess that says something
+maybe approximately what
+
+00:00:24
+it says is ChatGPT.
+
+00:00:26
+[LAUGHTER]
+
+00:00:30
+But anyway, it's
+great to have you all.
+
+00:00:33
+Lots of exciting content
+to have, and hope you'll
+
+00:00:36
+all enjoy it.
+
+00:00:38
+So let me get started
+and start telling you
+
+00:00:41
+a bit about the
+course before diving
+
+00:00:44
+straight into today's content.
+
+00:00:47
+For people still coming in,
+there are oodles of seats
+
+00:00:51
+still right on either side,
+especially down near the front.
+
+00:00:55
+There are tons of
+seats, so do feel
+
+00:00:59
+empowered to go out
+and seek those seats.
+
+00:01:02
+If people on the
+corridors are really nice,
+
+00:01:06
+they could even move
+towards the edges
+
+00:01:07
+to make it easier for people.
+
+00:01:09
+But one way or another,
+feel free to find a seat.
+
+00:01:12
+So this is the plan for what
+I want to get through today.
+
+00:01:16
+So first of all, I'm
+going to tell you
+
+00:01:18
+about the course
+for a few minutes.
+
+00:01:21
+Then have a few remarks about
+human language and word meaning.
+
+00:01:26
+Then the main technical thing
+we want to get into today
+
+00:01:30
+is start learning about
+the word2vec algorithm.
+
+00:01:33
+So the word2vec algorithm is
+slightly over a decade old now.
+
+00:01:38
+It was introduced in 2013.
+
+00:01:42
+But it was a wildly
+successful simple way
+
+00:01:46
+of learning vector
+representations of words.
+
+00:01:49
+So I want to show you that as
+a sort of a first easy baby
+
+00:01:53
+system for the kind of
+neural representations
+
+00:01:56
+that were going to
+talk about in class.
+
+00:01:59
+We're then going to get
+more concrete with that,
+
+00:02:01
+looking at its objective
+function gradients
+
+00:02:04
+and optimization.
+
+00:02:05
+And then hopefully, if all
+goes, like stick to schedule,
+
+00:02:09
+spend a few minutes just playing
+around an IPython Notebook--
+
+00:02:15
+I'm going to have to
+change computers for that--
+
+00:02:17
+then seeing some of the
+things you can do with this.
+
+00:02:22
+So this is the course
+logistics and brief.
+
+00:02:25
+I'm Christopher Manning.
+
+00:02:27
+Hi, again, everyone.
+
+00:02:29
+The head TA is [MUTED]
+who unfortunately
+
+00:02:32
+has a bit of a health problem
+so he's not actually here today.
+
+00:02:36
+We've got a course
+manager for the course
+
+00:02:38
+who is [MUTED] whom
+is up the back there.
+
+00:02:42
+And then we've got
+a whole lot of TAs.
+
+00:02:46
+If you're a TA who's
+here, you could stand up
+
+00:02:48
+and wave or something
+like that so people
+
+00:02:51
+can see a few of the TAs
+and see some friendly faces.
+
+00:02:56
+We've got some TAs
+and some other ones.
+
+00:02:59
+And so you can look at
+them on the website.
+
+00:03:02
+If you're here, you know
+what time the class is.
+
+00:03:05
+There's an email list.
+
+00:03:07
+But preferably don't use it
+and use the Ed site that you
+
+00:03:12
+can find on the course website.
+
+00:03:14
+So the main place to go
+and look for information
+
+00:03:17
+is the course website,
+which we've got up here.
+
+00:03:19
+And that then links
+in to Ed, which
+
+00:03:22
+is what we're going to use
+as the main discussion board.
+
+00:03:25
+Please use that rather
+than sending emails.
+
+00:03:30
+The first assignment
+for this class,
+
+00:03:33
+it's a sort of an easy one.
+
+00:03:34
+It's the warm up
+assignment, but we
+
+00:03:36
+want to get people busy and
+doing stuff straight away.
+
+00:03:40
+So the first assignment is
+already live on the web page,
+
+00:03:44
+and it's due next
+Tuesday before class.
+
+00:03:47
+So slightly less than
+seven days left to do it.
+
+00:03:51
+So do get started on that.
+
+00:03:54
+And to help with that, we're
+going to be immediately starting
+
+00:03:57
+office hours tomorrow.
+
+00:03:59
+And they're also
+described on the website.
+
+00:04:02
+We also do a few
+tutorials on Friday.
+
+00:04:06
+The first of these tutorials is
+a tutorial on Python and NumPy.
+
+00:04:11
+Many people don't need
+that because they've
+
+00:04:13
+done other classes
+and done this.
+
+00:04:15
+But for some people, we try
+and make this class accessible
+
+00:04:19
+to everybody.
+
+00:04:19
+So if you'd like to
+brush up a bit on Python
+
+00:04:22
+or how to use NumPy, it's a
+great thing to go along to.
+
+00:04:26
+And [MUTED] who's
+right over there
+
+00:04:28
+is going to be
+teaching it on Friday.
+
+00:04:31
+What do we hope to teach?
+
+00:04:34
+At the end of the quarter
+when you get the eval,
+
+00:04:38
+you'll be asked to rate whether
+this class met its learning
+
+00:04:42
+goals.
+
+00:04:43
+These are my learning goals.
+
+00:04:46
+What are they?
+
+00:04:48
+So the first one is to teach
+you about the foundations
+
+00:04:53
+and current methods for
+using deep learning applied
+
+00:04:56
+to natural language processing.
+
+00:04:58
+So this class tries to
+build up from the bottom up.
+
+00:05:02
+So we start off doing simple
+things like word vectors
+
+00:05:05
+and feedforward neural
+networks, recurrent networks
+
+00:05:08
+and attention.
+
+00:05:09
+We then, fairly quickly, move
+into the kind of key methods
+
+00:05:13
+they use for NLP.
+
+00:05:15
+In 2024, I wrote down here
+transformers encoder decoder
+
+00:05:20
+models.
+
+00:05:20
+I probably should have
+written large language models
+
+00:05:23
+somewhere in this list as well.
+
+00:05:25
+But then, pre-training
+and post-training
+
+00:05:27
+of large language
+models, adaptation model,
+
+00:05:30
+interpretability
+agents, et cetera.
+
+00:05:32
+But that's not the only
+thing that we want to do.
+
+00:05:35
+So there are a couple
+of other things
+
+00:05:36
+that we crucially
+want to achieve.
+
+00:05:38
+The second is to give you some
+understanding of human languages
+
+00:05:45
+and the difficulties in
+understanding and producing them
+
+00:05:48
+on computers.
+
+00:05:49
+Now, there are a few
+of you in this class
+
+00:05:51
+who are linguistics majors
+or perhaps a symbolic systems
+
+00:05:55
+majors.
+
+00:05:56
+Yay to the symbolic
+systems majors.
+
+00:05:58
+But for quite a few
+of the rest of you,
+
+00:06:01
+you'll never see any
+linguistics in the sense
+
+00:06:05
+of understanding how language
+works apart from this class.
+
+00:06:09
+So we do want to try and convey
+a little bit of a sense of what
+
+00:06:12
+some of the issues are
+in language structure,
+
+00:06:15
+and why it's proven to be quite
+difficult to get computers
+
+00:06:21
+to understand human
+languages, even though humans
+
+00:06:24
+seem very good at learning
+to understand each other.
+
+00:06:27
+And then the final thing
+that we want to make it onto
+
+00:06:30
+is actually concretely
+building systems.
+
+00:06:34
+So this isn't just
+a theory class,
+
+00:06:37
+that we actually want you to
+leave this class thinking,
+
+00:06:40
+oh, yeah, in my
+first job, wherever
+
+00:06:43
+you go, whether it's a
+startup or a big tech
+
+00:06:46
+or some non-profit,
+there's something
+
+00:06:49
+they want to do
+that they'd like,
+
+00:06:51
+that would be useful if we had
+a text classification system.
+
+00:06:54
+Or we did information
+extraction to get some kind
+
+00:06:57
+of facts out of documents.
+
+00:06:58
+I know how to build that.
+
+00:07:00
+I can build that system
+because I did CS224N.
+
+00:07:05
+Here's how you get graded.
+
+00:07:08
+So we have four assignments,
+mainly one and 1/2 weeks long
+
+00:07:13
+apart from the first one.
+
+00:07:15
+They make up almost
+half the grade.
+
+00:07:17
+The other half of
+the grade is made up
+
+00:07:20
+of a final project, which there
+are two variants of custom
+
+00:07:25
+or a default final
+project, which
+
+00:07:27
+we'll get on to in a minute.
+
+00:07:28
+And then there's a few percent
+that go for participation.
+
+00:07:34
+Six late days.
+
+00:07:36
+Collaboration policy.
+
+00:07:39
+Like all other CS
+classes, we've had issues
+
+00:07:42
+with people not
+doing their own work.
+
+00:07:45
+We really do want you to
+learn things in this class.
+
+00:07:48
+And the way you do that
+is by doing your own work.
+
+00:07:51
+So make sure you
+understand that.
+
+00:07:55
+And so for the
+assignments, everyone
+
+00:07:57
+is expected to do
+their own assignments.
+
+00:08:00
+You can talk to your
+friends, but you're expected
+
+00:08:02
+to do your own assignment.
+
+00:08:04
+For the final project, you
+can do that as a group.
+
+00:08:08
+Then we have the
+issue of AI tools.
+
+00:08:12
+Now, of course, in this class,
+we love large language models.
+
+00:08:16
+But nevertheless,
+we don't want you
+
+00:08:18
+to do your assignments
+by saying, hey, ChatGPT,
+
+00:08:21
+could you answer
+question 3 for me?
+
+00:08:24
+That is not the way
+to learn things.
+
+00:08:26
+If you want to make use of
+AI as a tool to assist you,
+
+00:08:30
+such as for coding
+assistance, go for it.
+
+00:08:34
+But we're wanting
+you to be working out
+
+00:08:37
+how to answer assignment
+questions by yourself.
+
+00:08:41
+So this is what the
+assignments look like.
+
+00:08:43
+So assignment 1 is meant
+to be an easy on ramp,
+
+00:08:47
+and it's done as a
+Jupyter Notebook.
+
+00:08:50
+Assignment 2, then, has people--
+
+00:08:56
+what can I say?
+
+00:08:58
+Here we are at this fine
+liberal arts and engineering
+
+00:09:03
+institution.
+
+00:09:04
+We're not at a coding bootcamp.
+
+00:09:06
+So we hope that people have
+some deep understanding
+
+00:09:10
+of how things work.
+
+00:09:11
+So in assignment 2, we actually
+want you to do some math
+
+00:09:16
+and understand how things
+work in neural networks.
+
+00:09:20
+So for some people, assignment
+2 is the scariest assignment
+
+00:09:24
+in the whole class.
+
+00:09:26
+But then, it's also
+the place where
+
+00:09:28
+we introduce PyTorch, which
+is a software package we use
+
+00:09:31
+for building neural networks.
+
+00:09:33
+And we build a
+dependency parser,
+
+00:09:35
+which we'll get to later as
+something more linguistic.
+
+00:09:39
+Then for assignment
+3 and 4, we move
+
+00:09:42
+on to larger projects
+using PyTorch with GPUs,
+
+00:09:45
+and we'll be making
+use of Google Cloud.
+
+00:09:48
+And for those two
+assignments, we
+
+00:09:51
+look at doing
+machine translation
+
+00:09:54
+and getting information
+out with transformers.
+
+00:09:58
+And then these are the
+two final project options.
+
+00:10:01
+So essentially, we have
+a default final project
+
+00:10:05
+where we give you a
+lot of scaffolding
+
+00:10:07
+and an outline of what to do.
+
+00:10:09
+But it's still an
+open-ended project.
+
+00:10:11
+There are lots of
+different things
+
+00:10:13
+you can try to make
+this system work better,
+
+00:10:16
+and we encourage you to explore.
+
+00:10:18
+But nevertheless, you're given
+a leg up from quite a lot
+
+00:10:22
+of scaffolding.
+
+00:10:24
+We'll talk about this more, but
+you can either do that option,
+
+00:10:27
+or you can just come up with
+totally your own project
+
+00:10:30
+and do that.
+
+00:10:33
+That's the course.
+
+00:10:35
+Any questions on the course?
+
+00:10:37
+Yes?
+
+00:10:38
+In the final project,
+how are mentors assigned?
+
+00:10:42
+So if you can find your
+own mentor, your interest
+
+00:10:48
+in something, and
+there's someone
+
+00:10:49
+that's happy to mentor you,
+that person can be your mentor.
+
+00:10:53
+Otherwise, one of the course
+TAs will be your mentor.
+
+00:10:57
+And how that person
+is assigned is
+
+00:11:01
+one of the TAs, who is in
+charge of final projects,
+
+00:11:04
+assigns people.
+
+00:11:06
+And they do the best
+they can in terms
+
+00:11:08
+of finding people
+with some expertise
+
+00:11:10
+and having to divide all the
+students across the mentors
+
+00:11:13
+roughly equally.
+
+00:11:15
+Any other questions?
+
+00:11:19
+OK, I'll power ahead.
+
+00:11:22
+Human language
+and word meaning--
+
+00:11:26
+so let me just say a little
+bit about the big picture here.
+
+00:11:33
+So we're in the area of
+artificial intelligence,
+
+00:11:36
+and we've got this idea
+that humans are intelligent.
+
+00:11:40
+And then there's the question of
+how does language fit into that?
+
+00:11:47
+And this is something that
+there is some argument about.
+
+00:11:50
+And if you want to, you can
+run off onto social media
+
+00:11:54
+and read some of the
+arguments about these things
+
+00:11:56
+and contribute to
+it if you wish to.
+
+00:12:00
+But here is my perhaps
+biased take as a linguist.
+
+00:12:05
+Well, you can
+compare human beings
+
+00:12:09
+to some of our
+nearest neighbors,
+
+00:12:12
+like chimpanzees, bonobos,
+and things like that.
+
+00:12:15
+And well, one big distinguishing
+thing is we have language,
+
+00:12:21
+and they don't.
+
+00:12:24
+But in most other
+respects, chimps
+
+00:12:28
+are very similar
+to human beings.
+
+00:12:30
+They can use tools.
+
+00:12:34
+They can plan how
+to solve things.
+
+00:12:37
+They've got really good memory.
+
+00:12:39
+Chimps have better short-term
+memory than human beings do.
+
+00:12:43
+So that in most respects, it's
+hard to show an intelligence
+
+00:12:48
+difference between
+chimps and people,
+
+00:12:50
+except for the fact
+that we have language.
+
+00:12:53
+But us having language has been
+this enormous differentiator
+
+00:12:58
+that if you look around,
+what happened on the planet
+
+00:13:03
+that there are creatures
+that are stronger than us,
+
+00:13:06
+faster than us, more
+venomous than us,
+
+00:13:09
+have every possible advantage.
+
+00:13:11
+But human beings took
+over the whole place.
+
+00:13:14
+And how did that happen?
+
+00:13:15
+We had language, so
+we could communicate.
+
+00:13:19
+And that communication allowed
+us to have human ascendancy.
+
+00:13:25
+But so one big role of
+language is the fact
+
+00:13:29
+that it allows communication.
+
+00:13:31
+But I'd like to
+suggest it's actually
+
+00:13:33
+not the only role of language.
+
+00:13:35
+The language has
+also allowed humans,
+
+00:13:40
+I'd argue, to achieve a
+higher level of thought.
+
+00:13:43
+So there are various
+kinds of thoughts
+
+00:13:45
+that you can have without
+any language involved.
+
+00:13:48
+You can think about a scene.
+
+00:13:50
+You can move some bits of
+furniture around in your mind,
+
+00:13:53
+and there's no
+language, and obviously,
+
+00:13:55
+emotional responses of
+feeling scared or excited.
+
+00:13:59
+They happen, and there's
+no language involved.
+
+00:14:02
+But I think most of the time,
+when we're doing higher level
+
+00:14:06
+cognition, if you're
+thinking to yourself,
+
+00:14:10
+oh, gee, my friend seemed upset
+about what I said last night.
+
+00:14:14
+I should probably work out
+how to fix that, or maybe I
+
+00:14:18
+could blah blah blah blah.
+
+00:14:19
+I think we think in language
+and plan out things.
+
+00:14:22
+And so that it's
+given us a scaffolding
+
+00:14:25
+to do much more detailed
+thought and planning.
+
+00:14:29
+Most recently of all,
+of course, human beings
+
+00:14:32
+invented ways to write.
+
+00:14:36
+And so writing is
+really, really recent.
+
+00:14:40
+I mean, no one really knows
+how old human languages are.
+
+00:14:43
+Most people think a
+few 100,000 years,
+
+00:14:46
+not very long by
+evolutionary timescales.
+
+00:14:49
+But writing, we do know.
+
+00:14:51
+Writing is really,
+really recent.
+
+00:14:53
+So writing is about
+5,000 years old.
+
+00:14:57
+But writing proved to be, again,
+this amazing cognitive tool
+
+00:15:05
+that just gave humanity
+an enormous leg up.
+
+00:15:08
+Because suddenly, it's not only
+that you could share information
+
+00:15:11
+and learn from the
+people that were
+
+00:15:13
+standing within 50 feet of you.
+
+00:15:15
+You could then share knowledge
+across time and space.
+
+00:15:20
+So really, having writing
+was enough to take us
+
+00:15:24
+from the Bronze Age,
+very simple metalworking
+
+00:15:28
+to the kind of mobile phones
+and all the other technology
+
+00:15:33
+that we walk around with today
+in just a very short amount
+
+00:15:37
+of time.
+
+00:15:38
+So language is pretty cool.
+
+00:15:42
+But one shouldn't only fixate on
+the knowledge side of language
+
+00:15:50
+and how that's made
+human beings great.
+
+00:15:53
+I mean, there's this
+other side of language
+
+00:15:56
+where language is this
+very flexible system, which
+
+00:16:01
+is used as a social
+tool by human beings
+
+00:16:04
+so that we can speak with a
+lot of imprecision and nuance
+
+00:16:11
+and emotion in language.
+
+00:16:13
+And we can get
+people to understand.
+
+00:16:16
+We can set up new ways
+of thinking about things
+
+00:16:19
+by using words for them.
+
+00:16:21
+And languages aren't static.
+
+00:16:23
+Languages change as
+human beings use them.
+
+00:16:26
+That languages aren't something
+that were delivered down
+
+00:16:29
+on tablets by God.
+
+00:16:31
+Languages are things
+that humans constructed,
+
+00:16:34
+and humans change them with
+each successive generation.
+
+00:16:38
+And indeed, most of the
+innovation in language happens
+
+00:16:42
+among young people, people that
+are either a few years younger
+
+00:16:45
+than most of you are now,
+in their early teens going
+
+00:16:51
+into the 20s.
+
+00:16:52
+That's a big period of
+linguistic innovation,
+
+00:16:54
+where people think
+up cool new phrases
+
+00:16:57
+and ways of saying things.
+
+00:16:58
+And some of those get
+embedded and extended.
+
+00:17:01
+And that then becomes
+the future of language.
+
+00:17:04
+So Herb Clark used to be a
+psychologist at Stanford.
+
+00:17:10
+He's now retired.
+
+00:17:11
+But he had this
+rather nice quote,
+
+00:17:14
+"The common misconception is
+that language use has primarily
+
+00:17:18
+to do with words
+and what they mean.
+
+00:17:20
+It doesn't.
+
+00:17:21
+It has primarily to do with
+people and what they mean."
+
+00:17:25
+So that's language in
+two slides for you.
+
+00:17:29
+So now, we'll skip
+ahead to deep learning.
+
+00:17:31
+So in the last
+decade or so, we've
+
+00:17:35
+been able to make fantastic
+progress in doing more
+
+00:17:39
+with computers understanding
+human languages in using
+
+00:17:44
+deep learning.
+
+00:17:45
+We'll say a bit more about
+the history later on.
+
+00:17:48
+But work on trying to do things
+with human language started
+
+00:17:51
+in the 1950s.
+
+00:17:53
+So it had been going
+for 60 years or so.
+
+00:17:57
+And there was some stuff.
+
+00:17:59
+It's not that nobody
+could do anything.
+
+00:18:01
+But the ability to understand
+and produce language
+
+00:18:06
+had always been questionable.
+
+00:18:09
+Where it's really in the last
+decade with neural networks
+
+00:18:13
+that just enormous strides
+of progress have been made
+
+00:18:16
+that's led into the
+world that we have today.
+
+00:18:19
+So one of the first
+big breakthroughs
+
+00:18:21
+came in the area of
+using neural NLP systems
+
+00:18:27
+for machine translation.
+
+00:18:29
+And so this started about 2014
+and was already deployed live
+
+00:18:34
+on services like Google by 2016.
+
+00:18:37
+It was so good that
+it saw really, really
+
+00:18:40
+rapid commercial deployment.
+
+00:18:42
+And I mean, overall, this
+kind of facility with machine
+
+00:18:48
+translation just
+means that you're
+
+00:18:51
+growing up in such
+a different world
+
+00:18:54
+to people a few
+generations back.
+
+00:18:57
+People a few generations
+back that unless you actually
+
+00:19:02
+knew different languages
+of different people,
+
+00:19:05
+you had no chance to
+communicate with them.
+
+00:19:08
+Where now, we're very close to
+having something like the Babel
+
+00:19:13
+fish from the Hitchhiker's
+Guide to the Galaxy
+
+00:19:16
+for understanding all languages.
+
+00:19:18
+It's just it's not a Babel fish.
+
+00:19:20
+It's a cell phone.
+
+00:19:22
+But can have it out
+between two people
+
+00:19:25
+and have it do
+simultaneous translation.
+
+00:19:27
+And it's not perfect.
+
+00:19:29
+People keep on doing
+research on this.
+
+00:19:31
+But, by and large, it means
+you can pick anything up
+
+00:19:35
+from different
+areas of the world.
+
+00:19:38
+As you can see, this example
+is from a couple of years
+
+00:19:40
+ago since it's still from
+the COVID pandemic era.
+
+00:19:44
+But I can see this
+Swahili from Kenya
+
+00:19:49
+and say, oh, gee, I
+wonder what that means.
+
+00:19:51
+Stick it into Google Translate.
+
+00:19:53
+And I can learn that Malawi lost
+two ministers due to a COVID
+
+00:20:01
+infections, and they died.
+
+00:20:03
+So we're just in
+this different era
+
+00:20:05
+of being able to
+understand stuff.
+
+00:20:08
+And then there are
+lots of other things
+
+00:20:09
+that we can do with modern NLP.
+
+00:20:12
+So until a few years ago,
+we had web search engines.
+
+00:20:17
+And you put in some text.
+
+00:20:19
+You could write it as a
+sentence if you wanted to.
+
+00:20:21
+But it didn't really
+matter whether you
+
+00:20:23
+wrote a sentence or not
+because what you got
+
+00:20:25
+was some key words that were
+then matched against the index.
+
+00:20:29
+And you were shown some
+pages that might have
+
+00:20:31
+the answers to your questions.
+
+00:20:33
+But these days, you can
+put an actual question
+
+00:20:37
+into a modern search engine,
+like when did Kendrick Lamars
+
+00:20:40
+first album come out?
+
+00:20:42
+It can go and find documents
+that have relevant information.
+
+00:20:46
+It can read those documents,
+and it can give you an answer.
+
+00:20:50
+So that it actually can become
+an answer engine, rather than
+
+00:20:54
+just something that
+finds documents
+
+00:20:56
+that might be relevant to
+what you're interested in.
+
+00:20:58
+And the way that that's done
+is with big neural networks.
+
+00:21:02
+So that you might commonly
+have, for your query,
+
+00:21:07
+you've got a retrieval
+neural network
+
+00:21:09
+which can find passages that
+are similar to the query.
+
+00:21:13
+They might then be reranked
+by a second neural network.
+
+00:21:16
+And then there'll be a third
+reading neural network that'll
+
+00:21:19
+read those passages and
+synthesize information
+
+00:21:23
+from them, which it then
+returns as the answer.
+
+00:21:27
+That gets us to about 2018.
+
+00:21:31
+But then, things got
+more advanced again.
+
+00:21:33
+So it was really
+around 2019 that people
+
+00:21:37
+started to see the power
+of large language models.
+
+00:21:41
+And so back in 2019,
+those of us in NLP
+
+00:21:45
+were really excited about GPT-2.
+
+00:21:49
+It didn't make much of an
+impact on the nightly news,
+
+00:21:51
+but it was really
+exciting in NLP land.
+
+00:21:54
+Because GPT-2 already
+for the first time,
+
+00:21:59
+meant here was a large
+language model that could just
+
+00:22:02
+generate fluent text.
+
+00:22:04
+That really, until
+then, NLP systems
+
+00:22:08
+had done a decent job at
+understanding certain facts out
+
+00:22:12
+of text.
+
+00:22:13
+But we'd just never been able
+to generate fluent text that
+
+00:22:16
+was at all good.
+
+00:22:17
+Where here, what you
+could do with GPT-2
+
+00:22:20
+is you could write something
+like the start of a story,
+
+00:22:24
+"A train carriage containing
+controlled nuclear materials
+
+00:22:27
+was stolen in Cincinnati today.
+
+00:22:29
+Its whereabouts are unknown."
+
+00:22:31
+And then GPT-2 would just
+write a continuation.
+
+00:22:36
+"The incident occurred
+on the downtown train
+
+00:22:38
+line, which runs from
+Covington and Ashland stations.
+
+00:22:41
+In an email to
+Ohio news outlets,
+
+00:22:43
+the US Department of Energy said
+it is working with the Federal
+
+00:22:46
+Railroad Administration
+to find the thief."
+
+00:22:48
+Dot dot dot.
+
+00:22:49
+And so the way this is
+working is it's conditioning
+
+00:22:52
+on all the past material.
+
+00:22:54
+And as I show at the very
+bottom line down here,
+
+00:22:58
+it's then generating
+one word at a time
+
+00:23:01
+as to what word
+it thinks would be
+
+00:23:03
+likely to come next after that.
+
+00:23:06
+And so from that simple method
+of so generating words out
+
+00:23:09
+of one after another, it's
+able to produce excellent text.
+
+00:23:14
+And the thing to
+notice is, I mean,
+
+00:23:16
+this text is not only
+formally correct.
+
+00:23:21
+The spelling is correct,
+and the sentences
+
+00:23:23
+are real sentences, not
+disconnected garbage.
+
+00:23:27
+But it actually
+understands a lot.
+
+00:23:30
+So the prompt that
+was written said
+
+00:23:33
+there were stolen nuclear
+materials in Cincinnati.
+
+00:23:37
+But GPT-2 knows a lot of stuff.
+
+00:23:40
+It knows that
+Cincinnati is in Ohio.
+
+00:23:43
+It knows that in
+the United States,
+
+00:23:46
+it's the Department
+of Energy that
+
+00:23:47
+regulates nuclear materials.
+
+00:23:50
+It knows if something is stolen.
+
+00:23:53
+It's a theft.
+
+00:23:54
+And that that would
+make sense that people
+
+00:23:58
+are getting involved with that.
+
+00:24:00
+It talks about there
+was a train carriage.
+
+00:24:04
+So it's talking about the
+train line and where it goes.
+
+00:24:06
+It really knows a lot and can
+write you coherent discourse
+
+00:24:11
+like a real story.
+
+00:24:12
+So that's kind of amazing.
+
+00:24:16
+But things moved on from there.
+
+00:24:19
+And so now, we're in the
+world of ChatGPT and GPT-4.
+
+00:24:22
+And one of the things that
+we will talk about later
+
+00:24:26
+is this was a huge user success.
+
+00:24:30
+Because now, you could ask
+questions or give it commands,
+
+00:24:34
+and it would do what you wanted.
+
+00:24:37
+And that was further amazing.
+
+00:24:39
+So here, I'm saying, "Hey,
+please draft a polite email
+
+00:24:42
+to my boss Jeremy that I
+would not be able to come
+
+00:24:45
+into the office for the next two
+days because my nine-year-old
+
+00:24:48
+song--" that's a
+misspelling for "son,"
+
+00:24:51
+but the system works
+fine despite it--
+
+00:24:53
+"Peter is angry with me that
+I'm not giving him much time,"
+
+00:24:57
+da da da.
+
+00:24:58
+And it writes a nice email.
+
+00:25:01
+It corrects the spelling
+mistake because it knows
+
+00:25:04
+people make spelling mistakes.
+
+00:25:05
+It doesn't talk about songs.
+
+00:25:07
+And everything works
+out beautifully.
+
+00:25:11
+You can get it to
+do other things.
+
+00:25:13
+So you can ask it, what is
+unusual about this image?
+
+00:25:17
+So in thinking
+about meaning, one
+
+00:25:19
+of the things that's interesting
+with these recent models
+
+00:25:23
+is that they're multimodal
+and can operate across modes.
+
+00:25:28
+And so a favorite term
+that we coined at Stanford
+
+00:25:32
+is the term foundation
+models, which
+
+00:25:35
+we use as a generalization
+of large language models
+
+00:25:38
+to have the same kind
+of technology used
+
+00:25:41
+across different modalities--
+
+00:25:43
+images, sound, various kinds
+of bioinformatic things,
+
+00:25:48
+DNA, RNA, things like
+that, seismic waves,
+
+00:25:52
+any kind of signal building
+these same kind of large models.
+
+00:25:57
+Another place that
+you can see that is
+
+00:26:00
+going from text to images.
+
+00:26:05
+So if I ask for a picture of a
+train going over the Golden Gate
+
+00:26:09
+Bridge, this is now Dall-E 2.
+
+00:26:14
+It gives me a picture of a
+train going over the Golden Gate
+
+00:26:17
+Bridge.
+
+00:26:18
+This is a perfect
+time to welcome
+
+00:26:20
+anyone who's watching
+this on Stanford Online.
+
+00:26:24
+If you're on Stanford Online
+and are not in the Bay Area,
+
+00:26:27
+the important thing
+to know is no trains
+
+00:26:31
+go over the Golden Gate Bridge.
+
+00:26:33
+But you might not be completely
+happy with this picture
+
+00:26:37
+because it shows the Golden
+Gate Bridge and a train
+
+00:26:40
+going over it, but it
+doesn't show the bay.
+
+00:26:43
+So maybe I'd like to get with
+the bay in the background.
+
+00:26:47
+And if I ask for
+that, well, look,
+
+00:26:49
+now I've got a train going
+over the Golden Gate Bridge
+
+00:26:52
+with the bay in the background.
+
+00:26:54
+But you still might not be--
+
+00:26:56
+this might not be
+exactly what you want.
+
+00:26:59
+Maybe you'd prefer something
+that's a pencil drawing.
+
+00:27:03
+So I can say a train going
+over the Golden Gate Bridge,
+
+00:27:05
+detailed pencil drawing.
+
+00:27:07
+And I can get a pencil drawing.
+
+00:27:09
+Or maybe it's unrealistic that
+the Golden Gate Bridge only
+
+00:27:13
+has trains going over it now.
+
+00:27:16
+So maybe it'd be good to
+have some cars as well.
+
+00:27:18
+So I could ask for
+a train and cars,
+
+00:27:21
+and we can get a train
+and cars going over it.
+
+00:27:24
+Now, I actually made
+these ones all by myself,
+
+00:27:28
+so you should be impressed
+with my generative AI artwork.
+
+00:27:31
+But these examples are actually
+a bit old now because they
+
+00:27:34
+were done with Dall-E 2.
+
+00:27:35
+And if you keep up with these
+things, that's a few years ago.
+
+00:27:38
+There's now Dall-E 3 and so on.
+
+00:27:39
+So we can now get much
+fancier things again.
+
+00:27:42
+"An illustration
+from a graphic novel.
+
+00:27:45
+A bustling city street under
+the shine of a full moon.
+
+00:27:48
+The sidewalks bustling
+with pedestrians
+
+00:27:50
+enjoying the nightlife.
+
+00:27:52
+At the corner stall, a young
+woman with fiery red hair,
+
+00:27:54
+dressed in a signature
+velvet cloak,
+
+00:27:56
+is haggling with the
+grumpy old vendor.
+
+00:27:59
+The grumpy vendor, a
+tall, sophisticated man,
+
+00:28:01
+is wearing a sharp suit,
+sports a noteworthy mustache,
+
+00:28:04
+is animatedly conversing on
+his steampunk telephone."
+
+00:28:08
+And pretty much, we're
+getting all of that.
+
+00:28:12
+So let's now get on to starting
+to think more about meaning.
+
+00:28:19
+So what can we do for meaning?
+
+00:28:24
+So if you think of
+words and their meaning,
+
+00:28:29
+if you look up a dictionary and
+say, what does meaning mean?
+
+00:28:33
+Meaning is defined
+as the idea that
+
+00:28:35
+is represented by a
+word or phrase, the idea
+
+00:28:38
+that a person wants to express
+by using words, the idea that
+
+00:28:42
+is expressed.
+
+00:28:44
+And in linguistics, if you
+go and do a semantics class
+
+00:28:49
+or something, the commonest
+way of thinking of meaning
+
+00:28:53
+is somewhat like what's
+presented up above there.
+
+00:28:56
+That meaning is thought of as a
+pairing between what's sometimes
+
+00:29:01
+called signifier and signified.
+
+00:29:03
+But it's perhaps easy to think
+of as a symbol, a word, and then
+
+00:29:08
+an idea or thing.
+
+00:29:10
+And so this notion is referred
+to as denotational semantics.
+
+00:29:13
+So the idea or thing is the
+denotation of the symbol.
+
+00:29:18
+And so this same idea of
+denotational semantics
+
+00:29:20
+has also been used for
+programming languages.
+
+00:29:23
+Because in
+programming languages,
+
+00:29:24
+you have symbols like
+while and if and variables.
+
+00:29:29
+And they have a meaning, and
+that could be their denotation.
+
+00:29:34
+So we sort of would say
+that the meaning of tree
+
+00:29:37
+is all the trees you can
+find out around the world.
+
+00:29:41
+That's sort of a OK
+notion of meaning.
+
+00:29:45
+It's a popular one.
+
+00:29:46
+It's never been very obvious.
+
+00:29:49
+Or at least
+traditionally, it wasn't
+
+00:29:51
+very obvious as to what
+we could do with that
+
+00:29:53
+to get it into computers.
+
+00:29:55
+So if you looked in
+the pre-neural world
+
+00:29:58
+when people tried to look at
+meanings inside computers,
+
+00:30:02
+they had to do something
+much more primitive
+
+00:30:06
+of looking at words and
+their relationships.
+
+00:30:09
+So a very common
+traditional solution
+
+00:30:12
+was to make use of WordNet.
+
+00:30:14
+And WordNet was
+a fancy thesaurus
+
+00:30:17
+that showed word relations.
+
+00:30:19
+So it would tell
+you about synonyms
+
+00:30:21
+and is the kind of things.
+
+00:30:24
+So a panda is a
+kind of carnivore,
+
+00:30:26
+which is a placental which is
+a mammal and things like that.
+
+00:30:29
+Good has various meanings.
+
+00:30:31
+It's a trade good or
+the sense of goodness.
+
+00:30:34
+And you could explore with that.
+
+00:30:36
+But systems like
+WordNet were never
+
+00:30:39
+very good for
+computational meaning.
+
+00:30:43
+They missed a lot of nuance.
+
+00:30:44
+WordNet would tell
+you that proficient
+
+00:30:47
+is a synonym for good.
+
+00:30:49
+But if you think
+about all the things
+
+00:30:51
+that you would say were good--
+
+00:30:53
+that was a good shot.
+
+00:30:54
+Would you say that
+was a proficient shot?
+
+00:30:57
+It sounds kind of weird to me.
+
+00:30:59
+There's a lot of color and
+nuance on how words are used.
+
+00:31:03
+WordNet is very incomplete.
+
+00:31:05
+It's missing
+anything that's kind
+
+00:31:07
+of cooler, more modern slang.
+
+00:31:09
+This maybe isn't very
+modern slang now.
+
+00:31:11
+But you won't find more
+modern slang either in it.
+
+00:31:14
+It's sort of very
+human-made, et cetera.
+
+00:31:17
+It's got a lot of issues.
+
+00:31:18
+So this led into
+the idea of, can we
+
+00:31:21
+represent meaning differently?
+
+00:31:24
+And this leads us
+into word vectors.
+
+00:31:27
+So when we have words--
+
+00:31:30
+wicked, badass, nifty, wizard--
+
+00:31:33
+what do they turn into
+when we have computers?
+
+00:31:39
+Well, effectively, words
+are these discrete symbols
+
+00:31:46
+that they're just some
+kind of atom or symbol.
+
+00:31:49
+And if we then turn those into
+something that's closer to math,
+
+00:31:55
+how symbols are
+normally represented
+
+00:31:58
+is you have a
+vocabulary, and your word
+
+00:32:02
+is some item in that vocabulary.
+
+00:32:05
+So motel is that word
+in the vocabulary.
+
+00:32:08
+And hotel is this word
+in the vocabulary.
+
+00:32:11
+And commonly, this is what
+computational systems do.
+
+00:32:14
+You take all your strings.
+
+00:32:15
+And you index them to numbers.
+
+00:32:18
+And that's the sort of position
+in a vector that they belong in.
+
+00:32:23
+And well, we have
+huge numbers of words.
+
+00:32:25
+So we might have
+a huge vocabulary.
+
+00:32:28
+So we'll have very
+big and long vectors.
+
+00:32:30
+And so these get
+referred to as one
+
+00:32:33
+hot vectors for representing
+the meaning of words.
+
+00:32:38
+But representing words
+by one hot vectors
+
+00:32:42
+turns out to not be a very good
+way of computing with them.
+
+00:32:47
+It was used for decades.
+
+00:32:49
+But it turns out to be
+kind of problematic.
+
+00:32:51
+And part of why
+it's problematic is
+
+00:32:54
+it doesn't have any
+natural, inherent sense
+
+00:32:58
+of the meanings of words.
+
+00:32:59
+You just have different words.
+
+00:33:01
+You have hotel and motel
+and house and chair.
+
+00:33:04
+And so if you think about
+it in terms of these vector
+
+00:33:08
+representations, that if
+you have motel and hotel,
+
+00:33:12
+there's no indication
+that they're similar.
+
+00:33:16
+They're just two
+different symbols
+
+00:33:18
+which have ones in different
+positions in the vector.
+
+00:33:21
+Or formally, in
+math terms, if you
+
+00:33:24
+think about taking the dot
+product of these two vectors,
+
+00:33:27
+it's 0.
+
+00:33:29
+The two vectors are orthogonal.
+
+00:33:31
+They have nothing to
+do with each other.
+
+00:33:34
+Now, there are things
+that you can do with that.
+
+00:33:36
+You can start saying,
+oh, let me start
+
+00:33:38
+building up some other
+resource of word similarity.
+
+00:33:42
+And I'll consult that
+resource of word similarity.
+
+00:33:45
+And it'll tell me
+that motels and hotels
+
+00:33:47
+are similar to each other.
+
+00:33:49
+And people did things like that.
+
+00:33:50
+And in web search, it was
+referred to as query expansion
+
+00:33:54
+techniques.
+
+00:33:55
+But still, the point
+is that there's
+
+00:33:58
+no natural notion of
+similarity in one hot vectors.
+
+00:34:03
+And so the idea
+was that maybe we
+
+00:34:08
+could do better
+than that, that we
+
+00:34:10
+could learn to include
+similarity in the vectors
+
+00:34:14
+themselves.
+
+00:34:15
+And so that leads into
+the idea of word vectors.
+
+00:34:18
+But it also leads
+into a different way
+
+00:34:21
+of thinking about semantics.
+
+00:34:24
+I just realized I
+forgot to say one thing.
+
+00:34:26
+Back two slides.
+
+00:34:28
+These kind of
+representations are
+
+00:34:31
+referred to as localist
+representations,
+
+00:34:34
+meaning that there's one
+point in which something
+
+00:34:38
+is represented.
+
+00:34:39
+So that you've got here is
+the representation of motel.
+
+00:34:45
+And here is the
+representation of hotel.
+
+00:34:47
+It's in one place in the vector
+that each word is represented.
+
+00:34:51
+And they'll be different
+to what we do next.
+
+00:34:54
+So there's an alternative
+idea of semantics, which
+
+00:34:59
+goes back quite a long way.
+
+00:35:01
+People commonly quote
+this quote of J.R. Firth,
+
+00:35:05
+who was a British
+linguist who said in 1957,
+
+00:35:08
+"You shall know a word
+by the company it keeps."
+
+00:35:10
+But also goes back
+to philosophical work
+
+00:35:13
+by Wittgenstein and others,
+that what you should do
+
+00:35:16
+is represent a word's meaning by
+the context in which it appears.
+
+00:35:23
+So the words that
+appear around a word
+
+00:35:25
+give information
+about its meaning.
+
+00:35:29
+And so that's the
+idea of what's called
+
+00:35:31
+distributional
+semantics in contrast
+
+00:35:34
+to denotational semantics.
+
+00:35:36
+So if I want to know about
+the word banking, I say,
+
+00:35:40
+give me some sentences
+that use the word banking.
+
+00:35:43
+Here are some sentences
+using the word banking.
+
+00:35:45
+Government debt problems
+turning into banking crises
+
+00:35:49
+as happened in 2009,
+et cetera, et cetera.
+
+00:35:52
+And knowing about that context
+words that occur around banking,
+
+00:35:57
+those will become the
+meaning of banking.
+
+00:36:01
+And so we're going to use
+those statistics about words
+
+00:36:07
+and what other words
+appear around them
+
+00:36:10
+in order to learn a new kind
+of representation of a word.
+
+00:36:17
+So our new
+representation of words
+
+00:36:20
+is we're going to
+represent them now
+
+00:36:23
+as a dense, a shorter,
+dense vector that
+
+00:36:27
+gives the meaning of the words.
+
+00:36:29
+Now, my vectors are
+very short here.
+
+00:36:32
+These are only eight
+dimensional if I counted right
+
+00:36:34
+so I could fit them on my slide.
+
+00:36:36
+They're not that
+short in practice.
+
+00:36:38
+They might be 200, 2,000,
+but reasonably short.
+
+00:36:43
+They're not going to be like
+the half a million of the half
+
+00:36:45
+a million different
+words in our vocabulary.
+
+00:36:48
+And the idea is, if words have
+stuff to do with each other,
+
+00:36:53
+they'll have sort of
+similar vectors, which
+
+00:36:56
+corresponds to their
+dot product being large.
+
+00:37:00
+So for banking and monetary, in
+my example here, both of them
+
+00:37:03
+are positive in the
+first dimension,
+
+00:37:05
+positive in the
+second dimension,
+
+00:37:07
+negative on the third.
+
+00:37:09
+On the fourth, they've
+got opposite signs.
+
+00:37:11
+So if we want to work
+out the dot product,
+
+00:37:13
+we're taking the product
+of the corresponding terms
+
+00:37:17
+and it'll get
+bigger to the extent
+
+00:37:19
+that both of the corresponding
+ones have the same size
+
+00:37:22
+and bigger if they
+have large magnitude.
+
+00:37:26
+So these are what we call
+word vectors, which are also
+
+00:37:31
+known as embeddings or neural
+word representations or phrases
+
+00:37:36
+like that.
+
+00:37:36
+And so the first
+thing we want to do
+
+00:37:38
+is learn good word vectors
+for different words.
+
+00:37:44
+And our word vectors
+will be good word vectors
+
+00:37:47
+if they give us a good sense
+of the meanings of words.
+
+00:37:53
+They know which words are
+similar to other words
+
+00:37:56
+in meaning.
+
+00:37:58
+We refer to them as
+embeddings because we
+
+00:38:02
+can think of this as a vector
+in a high dimensional space,
+
+00:38:06
+and so that we're embedding
+each word as a position
+
+00:38:10
+in that high dimensional space.
+
+00:38:12
+And the dimensionality
+of the space
+
+00:38:15
+will be the length
+of the vector.
+
+00:38:17
+So it might be something
+like a 300 dimensional space.
+
+00:38:21
+Now, that kind of
+gets problematic,
+
+00:38:23
+because human beings can't
+look at 300 dimensional spaces
+
+00:38:28
+and aren't very good at
+understanding or visualizing
+
+00:38:31
+what goes on in them.
+
+00:38:33
+So the only thing
+that I can show you
+
+00:38:36
+is two dimensional spaces.
+
+00:38:39
+But a thing that it's good
+to have somewhat in your head
+
+00:38:46
+is that really high
+dimensional spaces
+
+00:38:50
+behave extremely differently
+to two dimensional spaces.
+
+00:38:54
+In high-dimensional
+spaces, things can--
+
+00:38:58
+in a two-dimensional space,
+you're only near to something
+
+00:39:02
+else if you've got similar
+x and y-coordinates.
+
+00:39:04
+In a high-dimensional
+space, things
+
+00:39:06
+can be very near to all sorts of
+things on different dimensions
+
+00:39:10
+in the space.
+
+00:39:11
+And so we can capture different
+senses of words and ways
+
+00:39:15
+that words are
+similar to each other.
+
+00:39:18
+But here's the picture
+we end up with.
+
+00:39:20
+So what we're going
+to do is learn a way
+
+00:39:23
+to represent all words as
+vectors based on the other words
+
+00:39:30
+that they put here
+within context.
+
+00:39:32
+And we can embed them
+into this vector space.
+
+00:39:35
+And of course, you can't
+read anything there.
+
+00:39:37
+But we can zoom into
+this space further.
+
+00:39:40
+And if we zoom into this space
+and just show a bit of it,
+
+00:39:43
+well, here's a part
+of the space where
+
+00:39:46
+it's showing country words
+and some other location words.
+
+00:39:50
+So we've got sort of
+countries up the top there.
+
+00:39:54
+We've got some
+nationality terms--
+
+00:39:56
+British, Australian, American,
+European further down.
+
+00:40:00
+Or we can go to another
+piece of the space.
+
+00:40:02
+And here's a bit of the
+space where we have verbs.
+
+00:40:06
+And not only have we got
+verbs, but there's actually
+
+00:40:08
+quite a lot of
+fine structure here
+
+00:40:11
+of what's similar that
+represents things about verbs.
+
+00:40:14
+So you've got sort of verbs
+of communication statements
+
+00:40:21
+saying, thinking, expecting,
+grouping together, come and go
+
+00:40:24
+grouped together.
+
+00:40:26
+Down the bottom, you've got
+forms of the verb "have."
+
+00:40:29
+Then you've got forms
+of the verb "to be."
+
+00:40:31
+Above them, you got
+the common "remain,"
+
+00:40:34
+which are actually sort of
+similar to the verb "to be"
+
+00:40:38
+because they take these
+complements of state.
+
+00:40:41
+So just as same as you
+can say, "I am angry."
+
+00:40:45
+You can say, "He
+remained angry."
+
+00:40:49
+Or, "He became angry."
+
+00:40:50
+So those verbs are more
+so than most verbs,
+
+00:40:54
+similar to the verb "to be."
+
+00:40:55
+So we get these
+interesting semantic spaces
+
+00:40:59
+where things that
+have similar meaning
+
+00:41:01
+are close by to each other.
+
+00:41:04
+And so the question is, how
+do we get to those things?
+
+00:41:08
+And how do we get to
+those things is then--
+
+00:41:13
+there are various
+ways of doing it.
+
+00:41:14
+But the one I want
+to get through today
+
+00:41:17
+is showing you about word2vec.
+
+00:41:20
+I'll pause for 30
+seconds for breath.
+
+00:41:24
+Anyone have a question or
+anything they want to know?
+
+00:41:26
+Yes.
+
+00:41:29
+So there's [INAUDIBLE]
+ideas [INAUDIBLE]
+
+00:41:31
+have the contact information.
+
+00:41:33
+But it doesn't seem
+to solve the problem
+
+00:41:36
+where the similar meanings
+might depend on context.
+
+00:41:41
+Let's take your example about
+"proficient" versus "good"
+
+00:41:44
+[INAUDIBLE].
+
+00:41:45
+So those two words have
+their own embeddings,
+
+00:41:49
+but we try to understand the
+similarity with some [INAUDIBLE]
+
+00:41:53
+vectors.
+
+00:41:54
+But if you're looking
+at context, right,
+
+00:41:56
+because if you have
+different contexts,
+
+00:41:57
+then those two words
+may not be similar.
+
+00:42:00
+And this word embedding alone
+does not seem to be a problem.
+
+00:42:04
+Yes, correct.
+
+00:42:05
+So that's a good thought.
+
+00:42:06
+You can keep it for a
+few weeks to some extent.
+
+00:42:09
+Yeah, so for the first
+thing we're going to do,
+
+00:42:11
+we're just going to learn
+one word vector for a string.
+
+00:42:16
+So we can have a word,
+let's say, it's star.
+
+00:42:20
+And we're going to learn
+one word vector for it.
+
+00:42:23
+So that absolutely doesn't
+capture the meaning
+
+00:42:26
+of a word in context.
+
+00:42:28
+So it won't be
+saying whether it's
+
+00:42:30
+meaning a Hollywood star
+or an astronomical star
+
+00:42:34
+or something like that.
+
+00:42:36
+And so later on, we're going
+to get on to contextual meaning
+
+00:42:39
+representation.
+
+00:42:40
+So wait for that.
+
+00:42:41
+But the thing I would like to--
+
+00:42:43
+going along with what I said
+about high dimensional spaces
+
+00:42:46
+being weird.
+
+00:42:48
+But the cool thing that
+we will already find
+
+00:42:51
+is our representation
+for star will
+
+00:42:54
+be very close to
+the representations
+
+00:42:59
+for astronomical
+words like nebula
+
+00:43:03
+and what every other
+astronomical words you know.
+
+00:43:06
+And simultaneously,
+it'll be very
+
+00:43:10
+close to words that mean
+something like a Hollywood star.
+
+00:43:17
+Help me out.
+
+00:43:18
+Know any words that
+mean something similar?
+
+00:43:21
+Celebrity.
+
+00:43:21
+Celebrity, that's a good one.
+
+00:43:23
+OK, yeah.
+
+00:43:24
+How are you reducing the
+embeddings to a lower
+
+00:43:28
+dimensional space to visualize?
+
+00:43:31
+So that pictures
+I was showing, you
+
+00:43:33
+use a particular
+method called t-SNE,
+
+00:43:37
+which is a nonlinear
+dimensionality reduction that
+
+00:43:41
+tends to work better for
+high dimensional neural
+
+00:43:43
+representations than PCA,
+which you might know.
+
+00:43:47
+But I'm not going
+to go into that now.
+
+00:43:49
+Yes?
+
+00:43:50
+How do you know
+how many dimensions
+
+00:43:52
+is optimal to produce like
+a dense enough or, I guess,
+
+00:43:56
+space but not too sparse?
+
+00:43:59
+I mean, that's something
+that people have worked on.
+
+00:44:03
+It depends on how much--
+
+00:44:05
+it depends on how
+much data you've
+
+00:44:07
+got to make your
+representations over.
+
+00:44:10
+So normally, it's worked
+out either empirically
+
+00:44:15
+for what works best
+or practically based
+
+00:44:17
+on how big vectors
+you want to work on.
+
+00:44:20
+I mean, to give you
+some idea, things
+
+00:44:24
+start to work well when you
+get to 100 dimensional space.
+
+00:44:28
+For a long time, people
+used 300 dimensions
+
+00:44:31
+because that seemed
+to work pretty well.
+
+00:44:33
+But as people have started
+building huger and huger models
+
+00:44:37
+with way, way more data, it's
+now become increasingly common
+
+00:44:40
+to use numbers like 1,000 or
+even 2,000 dimensional vectors.
+
+00:44:44
+Yeah?
+
+00:44:46
+[INAUDIBLE]
+
+00:44:47
+OK, [INAUDIBLE].
+
+00:44:49
+So you mentioned that there are
+hidden structures in small areas
+
+00:44:53
+as well as large areas
+of the embedding.
+
+00:44:56
+And as your
+dimensionality increases,
+
+00:44:58
+different structures
+will come up.
+
+00:45:00
+But generally, we
+seem to use distance
+
+00:45:02
+as the single metric for
+closeness, which doesn't
+
+00:45:05
+seem to me that we'll get it.
+
+00:45:06
+Like, distance between this
+and that in space three
+
+00:45:09
+will be the same.
+
+00:45:10
+So how will that--
+
+00:45:11
+We don't only use distance.
+
+00:45:13
+We also use directions
+in the space
+
+00:45:16
+as having semantic meanings.
+
+00:45:18
+And I'll show an
+example of that soon.
+
+00:45:20
+Yeah?
+
+00:45:21
+So I was wondering for the
+entries within the word vector,
+
+00:45:24
+they seem to be between
+negative 1 and 1.
+
+00:45:27
+Is there a reason for
+that, or do we have bounds
+
+00:45:29
+that we can constrain for them?
+
+00:45:32
+So good question.
+
+00:45:34
+I mean, they don't have to be.
+
+00:45:38
+And the way we're going to
+learn them, they're not bounded.
+
+00:45:42
+But you can bound things.
+
+00:45:45
+Sometimes, people length
+normalize so that the vectors
+
+00:45:49
+are of length 1.
+
+00:45:50
+But at any rate,
+normally in this work,
+
+00:45:52
+we use some method
+called regularization
+
+00:45:56
+that tries to keep coefficients
+small so that they're generally
+
+00:46:00
+not getting huge.
+
+00:46:02
+Yeah?
+
+00:46:03
+Given a specific word,
+for example like the bank
+
+00:46:06
+we used as before in
+the previous slides,
+
+00:46:09
+so for the word
+representation, is there
+
+00:46:14
+a single embedding
+for each word,
+
+00:46:16
+or do we have multiple
+embeddings for each word?
+
+00:46:19
+So what we're doing at
+the moment, each word,
+
+00:46:23
+each string of letters does
+has a single embedding.
+
+00:46:27
+And what you can think of that
+embedding as an average over all
+
+00:46:34
+its sensors.
+
+00:46:36
+So for example,
+like bank, it can
+
+00:46:39
+mean like the
+financial institution,
+
+00:46:41
+or it can also mean
+like the river bank.
+
+00:46:43
+Yeah, and then what I said
+before about star applies.
+
+00:46:47
+The interesting
+thing is you'll find
+
+00:46:50
+that we are able to come
+up with a representation
+
+00:46:52
+where our learned
+representation, because it's
+
+00:46:55
+kind of an average
+of those, we'll
+
+00:46:57
+end up similar to words
+that are semantically
+
+00:47:01
+evoked by both senses.
+
+00:47:03
+I think I probably about
+go on at this point.
+
+00:47:07
+Word2vec-- so word2vec
+was this method
+
+00:47:12
+of learning word vectors
+that was thought up
+
+00:47:15
+by Tomas Mikolov and
+colleagues at Google in 2013.
+
+00:47:21
+It wasn't the first method.
+
+00:47:23
+There are other people
+that did methods
+
+00:47:25
+of learning word vectors
+that go back to about
+
+00:47:28
+the turn of the millennium.
+
+00:47:30
+It wasn't the last.
+
+00:47:32
+There were ones that
+come after it as well.
+
+00:47:34
+But it was a particularly simple
+one and a particularly fast
+
+00:47:40
+running one.
+
+00:47:41
+And so it really caught
+people's attention.
+
+00:47:44
+So the idea of it
+is that we start off
+
+00:47:48
+with a large amount of text.
+
+00:47:52
+So that can just be thought
+of as a long list of words.
+
+00:47:55
+And in NLP, we refer
+to that as a corpus.
+
+00:47:59
+Corpus is just Latin for body.
+
+00:48:02
+So it's exactly the
+same as if you have
+
+00:48:04
+a dead person on the floor.
+
+00:48:06
+That's a corpus.
+
+00:48:08
+No.
+
+00:48:09
+Yeah, so it's just a body.
+
+00:48:11
+But we mean a body of
+text, not a live person--
+
+00:48:15
+or sorry, a dead person.
+
+00:48:18
+If you want to know
+more about Latin,
+
+00:48:21
+since there isn't very good
+classical education these days.
+
+00:48:25
+Corpus, despite the US ending,
+is a fourth declension neuter
+
+00:48:31
+noun, and that means the
+plural of corpus is not corpi.
+
+00:48:38
+The plural of corpus is corpora.
+
+00:48:42
+So I'm sure some time
+later in this class,
+
+00:48:46
+I will read a
+project or assignment
+
+00:48:48
+where it refers to
+corpi, and I will
+
+00:48:51
+know that person was not paying
+attention in the first lecture.
+
+00:48:56
+Or else, they should
+have said corpora.
+
+00:48:59
+C-O-R-P-O-R-A is the
+correct form for that.
+
+00:49:03
+I should move on.
+
+00:49:04
+So we have our text.
+
+00:49:07
+Then we know that we're
+going to represent each word.
+
+00:49:13
+So this is each word type.
+
+00:49:15
+So star, or bank, et
+cetera, so for wherever
+
+00:49:19
+it occurs by a single vector.
+
+00:49:22
+And so what we're going
+to do in this algorithm
+
+00:49:25
+is we're going to go through
+each position in the text.
+
+00:49:28
+And so at each position in the
+text, which is a list of words,
+
+00:49:32
+we're going to have a center
+word and words outside it.
+
+00:49:36
+And then what we're
+going to do is
+
+00:49:38
+use the similarity
+of the word vectors
+
+00:49:42
+for C and the outside words
+to calculate the probability
+
+00:49:46
+that they should
+have occurred or not.
+
+00:49:49
+And then we just keep fiddling,
+and we learn word vectors.
+
+00:49:53
+Now, at first sight--
+
+00:49:55
+I'll show you this
+more concretely.
+
+00:49:57
+Maybe I'll just show it
+more concretely first.
+
+00:49:59
+So here's the idea.
+
+00:50:00
+We're going to have a
+vector for each word type.
+
+00:50:05
+So a word type means the word
+problems wherever it occurs,
+
+00:50:09
+which is differentiated
+from a word
+
+00:50:11
+token, which is this instance
+of the word problems.
+
+00:50:15
+So we're going to have a
+vector for each word type.
+
+00:50:18
+And so I'm going to want to
+know, look, in this text,
+
+00:50:24
+the word "turning" occurred
+before the word "into."
+
+00:50:28
+How likely should that
+have been to happen?
+
+00:50:31
+And what I'm going to do
+is calculate a probability
+
+00:50:35
+of the word "turning" occurring
+close to the word "into."
+
+00:50:40
+And I'm going to do that for
+each word in a narrow context.
+
+00:50:44
+In the example here,
+I'm saying, I'm
+
+00:50:46
+using two words to the left
+and two words to the right.
+
+00:50:49
+And what I want to do is make
+those probability estimates
+
+00:50:54
+as good as possible.
+
+00:50:55
+So in particular, I want the
+probability of co-occurrence
+
+00:50:58
+to be high for
+words that actually
+
+00:51:00
+do occur within the nearby
+context of each other.
+
+00:51:04
+And so then the question
+is, how am I going to--
+
+00:51:08
+and once I've done
+it for that word,
+
+00:51:10
+I'm going to go along and
+do exactly the same thing
+
+00:51:13
+for the next word.
+
+00:51:16
+And so I can continue
+through the text in that way.
+
+00:51:20
+And so what we want to
+do is come up with vector
+
+00:51:26
+representations of words that
+will let us predict these
+
+00:51:30
+probabilities, quote
+unquote, "well."
+
+00:51:33
+Now, there's a huge limit to how
+well we can do it because we've
+
+00:51:38
+got a simple model.
+
+00:51:39
+Obviously, when you
+see the word banking,
+
+00:51:42
+I can't tell you that the word
+"into" is going to occur before
+
+00:51:45
+banking.
+
+00:51:46
+But I want to do it
+as well as possible.
+
+00:51:50
+So what I want my model to say
+is, after the word "banking,"
+
+00:51:54
+crises is pretty likely.
+
+00:51:58
+But the word "skillet"
+is not very likely.
+
+00:52:03
+And if I can do that,
+I'm doing a good job.
+
+00:52:07
+And so we turn that
+into a piece of math.
+
+00:52:11
+Here's how we do it, turn
+it into a piece of math.
+
+00:52:14
+So we're going to go
+through our corpus,
+
+00:52:17
+every position in the corpus.
+
+00:52:20
+And we're going to have
+a fixed window size
+
+00:52:22
+m which was 2 in my example.
+
+00:52:25
+And then what we're
+going to want to do
+
+00:52:27
+is have the probability of
+words in the context being
+
+00:52:32
+as high as possible.
+
+00:52:34
+So we want to maximize
+this likelihood
+
+00:52:36
+where we're going through
+every position in the text,
+
+00:52:40
+and then we're going through
+every word in the context
+
+00:52:43
+and sort of wanting
+to make this big.
+
+00:52:48
+So conceptually, that's
+what we're doing.
+
+00:52:52
+But in practice, we
+never quite do that.
+
+00:52:56
+We use two little tricks here.
+
+00:53:00
+The first one is, for
+completely arbitrary reasons,
+
+00:53:05
+it really makes no difference.
+
+00:53:07
+Everyone got into minimizing
+things rather than
+
+00:53:11
+maximizing things.
+
+00:53:12
+And so the algorithms
+that we use get
+
+00:53:14
+referred to as gradient descent,
+as you'll see in a moment.
+
+00:53:18
+So the first thing we do is
+put a minus sign in front
+
+00:53:22
+so that we can minimize it
+rather than maximize it.
+
+00:53:25
+That part's pretty trivial.
+
+00:53:27
+But the second part is, here,
+we have this enormous product.
+
+00:53:30
+And working with
+enormous products
+
+00:53:33
+is more difficult for the math.
+
+00:53:34
+So the second thing that we
+do is introduce a logarithm.
+
+00:53:39
+And so once we take the log
+of the likelihood, that then,
+
+00:53:46
+when we take logs of
+products, they turn into sums.
+
+00:53:50
+And so now, we can sum over
+each word position, the text,
+
+00:53:55
+sum over each word in
+the context window,
+
+00:53:58
+and then sum these
+log probabilities.
+
+00:54:01
+And then we've still got
+the minus sign in front.
+
+00:54:04
+So we want to minimize the
+sum of log probabilities.
+
+00:54:08
+So what we're doing
+is then wanting
+
+00:54:11
+to look at the negative
+log likelihood.
+
+00:54:16
+And then the final
+thing that we do
+
+00:54:18
+is to-- since this
+will get bigger,
+
+00:54:22
+depending on the number
+of words in the corpus,
+
+00:54:25
+we divide through by the
+number of words in the corpus.
+
+00:54:28
+And so our objective function
+is the average negative log
+
+00:54:32
+likelihood.
+
+00:54:34
+So by minimizing this
+objective function,
+
+00:54:37
+we are maximizing
+the probability
+
+00:54:39
+of words in the context.
+
+00:54:42
+We're almost there.
+
+00:54:46
+That's what we want to do.
+
+00:54:48
+We've got a couple more tricks
+that we want to get through.
+
+00:54:52
+The next one is, well,
+I've said we want
+
+00:54:54
+to maximize this probability.
+
+00:54:57
+How do we maximize
+this probability?
+
+00:55:00
+What is this probability?
+
+00:55:02
+We haven't defined
+how are we going
+
+00:55:04
+to calculate this probability.
+
+00:55:06
+And this is where the
+word vectors come in.
+
+00:55:09
+So we're going to
+define this probability
+
+00:55:13
+in terms of the word vector.
+
+00:55:15
+So we're going to say each
+word type is represented
+
+00:55:19
+by a vector of real numbers.
+
+00:55:21
+These are hundreds real numbers.
+
+00:55:22
+And we're going to have
+a formula that works out
+
+00:55:26
+the probability simply in terms
+of the vectors for each word,
+
+00:55:33
+that there are no other
+parameters in this model.
+
+00:55:35
+So, over here I've
+shown this theta,
+
+00:55:38
+which are the
+parameters of our model.
+
+00:55:40
+And all and only, the
+parameters of our model
+
+00:55:44
+are these word vectors for
+each word in the vocabulary.
+
+00:55:49
+That's a lot of parameters
+because we have a lot of words.
+
+00:55:51
+And we've got fairly
+big word vectors.
+
+00:55:54
+But they are the
+only parameters.
+
+00:55:57
+And how we do that is by
+using this little trick here.
+
+00:56:03
+We're going to say the
+probability of an outside word
+
+00:56:06
+given a center
+word is going to be
+
+00:56:09
+defined in terms of the dot
+product of the two word vectors.
+
+00:56:14
+So if things have a high dot
+product, they'll be similar.
+
+00:56:18
+And therefore, they'll
+have a high probability
+
+00:56:21
+of co-occurrence.
+
+00:56:22
+Where I mean similar in
+a kind of a weird sense.
+
+00:56:25
+It is the case that we're
+going to want to say
+
+00:56:27
+hotel and motel are similar.
+
+00:56:30
+But it's also the case that
+we're going to want to have
+
+00:56:34
+the word "the" able to
+appear easily before the word
+
+00:56:38
+"student."
+
+00:56:39
+So in some weird sense,
+"the" also has to be similar
+
+00:56:42
+to student.
+
+00:56:43
+That has to be similar
+to basically any noun.
+
+00:56:46
+So we're going to work
+with dot products.
+
+00:56:51
+And then we do this funky
+little bit of math here,
+
+00:56:54
+and that will give
+us our probabilities
+
+00:56:57
+So let's just go through
+the funky bit of math.
+
+00:57:01
+So here's our formula
+for the probabilities.
+
+00:57:05
+So what we're doing here
+is we're starting off
+
+00:57:09
+with this dot product.
+
+00:57:11
+So the dot product is
+you take the two vectors.
+
+00:57:14
+You multiply each component
+together, and you sum them.
+
+00:57:18
+So if they both the same sign,
+that increases your dot product.
+
+00:57:23
+And if they're both big,
+it increases it a lot.
+
+00:57:26
+So that gives us a similarity
+between two vectors.
+
+00:57:32
+And that's unbounded.
+
+00:57:33
+That's just a real number.
+
+00:57:34
+It can be either
+negative or positive.
+
+00:57:36
+But what we'd like to
+get out is a probability.
+
+00:57:40
+So for our next tricks, we,
+first of all, exponentiate.
+
+00:57:44
+Because if we take e
+to the x for any x,
+
+00:57:49
+we now have to get
+something positive out.
+
+00:57:51
+That's what exponentiation does.
+
+00:57:54
+And then, well, since it's
+meant to be a probability,
+
+00:57:58
+we'd like it to be
+between 0 and 1.
+
+00:58:01
+And so we turn it into
+numbers between 0 and 1
+
+00:58:04
+in the dumbest way possible,
+which is we just normalize,
+
+00:58:08
+so that we work out the
+quantity in the numerator
+
+00:58:12
+for every possible context word.
+
+00:58:16
+And so we get the total
+of all of those numbers
+
+00:58:19
+and divide through by it.
+
+00:58:20
+And then we're getting a
+probability distribution
+
+00:58:23
+of how likely different
+words are in this context.
+
+00:58:27
+So this little trick
+that we're doing here
+
+00:58:33
+is referred to as
+the softmax function.
+
+00:58:36
+So for the softmax function, you
+can take unbounded real numbers,
+
+00:58:42
+put them through this
+little softmax trick
+
+00:58:45
+that we just went
+through the steps of.
+
+00:58:47
+And what you'll get out is
+a probability distribution.
+
+00:58:51
+So I'm now getting,
+in this example,
+
+00:58:54
+a probability distribution
+over context words.
+
+00:58:58
+My probability estimates
+over all the context words
+
+00:59:01
+in my vocabulary will sum
+up to 1, by definition,
+
+00:59:05
+by the way that I've
+constructed this.
+
+00:59:09
+So it's called the
+softmax function
+
+00:59:12
+because it amplifies the
+probabilities of the largest
+
+00:59:16
+things.
+
+00:59:16
+That's because of
+the x function.
+
+00:59:21
+But it's soft because it's
+still assign some probability
+
+00:59:25
+to smaller items.
+
+00:59:27
+But it's sort of a
+funny name because when
+
+00:59:31
+you think about max, I
+mean, max normally picks out
+
+00:59:35
+just one thing.
+
+00:59:37
+Whereas the softmax is turning
+a bunch of real numbers
+
+00:59:41
+into a probability distribution.
+
+00:59:44
+So this softmax is used
+everywhere in deep learning.
+
+00:59:49
+Any time that we're wanting
+to turn things that are just
+
+00:59:52
+vectors in Rn into
+probabilities, we shove them
+
+00:59:55
+through a softmax function.
+
+00:59:59
+So in some sense,
+this part, I think,
+
+01:00:09
+still seems very abstract.
+
+01:00:13
+And I mean, the reason
+it seems very abstract
+
+01:00:17
+is because I've sort of said
+we have vectors for each word.
+
+01:00:24
+And using these vectors, we can
+then calculate probabilities.
+
+01:00:30
+But where do the
+vectors come from?
+
+01:00:33
+And the answer to where the
+vectors are going to come from
+
+01:00:37
+is we're going to turn this
+into an optimization problem.
+
+01:00:40
+We have a large amount of text.
+
+01:00:43
+And so therefore, we can hope
+to find word vectors that
+
+01:00:49
+make the contexts of the words
+in our observed text as big
+
+01:00:54
+as possible.
+
+01:00:55
+So literally what
+we're going to do is
+
+01:00:58
+we're going to start off with
+random vectors for every word.
+
+01:01:02
+And then we want to
+fiddle those vectors
+
+01:01:05
+so that the calculated
+probabilities of words
+
+01:01:09
+in a context go up.
+
+01:01:11
+And we're going to keep fiddling
+until they stop going up
+
+01:01:14
+anymore, and we're getting the
+highest probability estimates
+
+01:01:18
+that we can.
+
+01:01:19
+And the way that we do that
+fiddling is we use calculus.
+
+01:01:25
+So what we're going
+to do is conceptually
+
+01:01:29
+exactly what you do
+if you're in something
+
+01:01:31
+like a two-dimensional space
+like the picture on the right.
+
+01:01:35
+That if you want
+to find the minimum
+
+01:01:37
+in this two-dimensional
+space and you start off
+
+01:01:40
+at the top left, what
+you can do is, say,
+
+01:01:43
+let me work out the derivatives
+of the function at the top left.
+
+01:01:48
+And they point down
+and a bit to the right.
+
+01:01:51
+And so you can walk down
+in a bit to the right.
+
+01:01:54
+And you can say,
+oh, gee, given where
+
+01:01:57
+I am now, let me work
+out the derivatives.
+
+01:02:00
+What direction do they point?
+
+01:02:01
+And they're still pointing down,
+but a bit more to the right.
+
+01:02:04
+So you can walk a
+bit further that way,
+
+01:02:06
+and you can keep on walking.
+
+01:02:08
+And eventually, you'll make it
+to the minimum of the space.
+
+01:02:12
+In our case, we've got a lot
+more than two dimensions.
+
+01:02:17
+So our parameters for our
+model are the concatenation
+
+01:02:22
+of all the word vectors.
+
+01:02:24
+But it's even slightly
+worse than I've
+
+01:02:26
+explained up until now.
+
+01:02:30
+Because actually, for each
+word, we assume two vectors.
+
+01:02:34
+We assume one vector when
+they're the center word,
+
+01:02:37
+and one vector when
+they're the outside word.
+
+01:02:40
+Doing that just
+makes the math a bit
+
+01:02:42
+simpler, which I
+can explain later.
+
+01:02:45
+So if we say had 100
+dimensional vectors,
+
+01:02:48
+we'll have 100 parameters for
+aardvarks and an outside word.
+
+01:02:52
+100 parameters for "a"
+as an outside word,
+
+01:02:57
+all the way through to
+100 parameters for zebras
+
+01:02:59
+and outside word.
+
+01:03:01
+Then we'd have 100 parameters
+for aardvark as a center
+
+01:03:05
+word continuing down.
+
+01:03:08
+So if we had a vocabulary
+of 400,000 words and 100
+
+01:03:13
+dimensional word vectors, that
+means we'd have 400,000 times 2
+
+01:03:18
+is 800,000 times 100.
+
+01:03:21
+We'd have 80 million parameters.
+
+01:03:23
+So that's a lot of parameters
+in our space to try and fiddle
+
+01:03:28
+to optimize things.
+
+01:03:29
+But luckily, we
+have big computers.
+
+01:03:31
+And that's the kind
+of thing that we do.
+
+01:03:34
+So we simply say, gee, this
+is our optimization problem.
+
+01:03:41
+We're going to
+compute the gradients
+
+01:03:45
+of all of these parameters.
+
+01:03:47
+And that will give us the
+answer of what we have.
+
+01:03:54
+And this feels like magic.
+
+01:03:59
+I mean, it doesn't really
+seem like we could just
+
+01:04:03
+start with nothing.
+
+01:04:04
+We could start with random
+word vectors and a pile of text
+
+01:04:08
+and say, do some math, and we
+will get something useful out.
+
+01:04:13
+But the miracle of what happens
+in these deep learning spaces
+
+01:04:18
+is we do get
+something useful out.
+
+01:04:20
+We can just minimize
+all of the parameters,
+
+01:04:24
+and then we'll get
+something useful out.
+
+01:04:29
+So what I wanted to--
+
+01:04:32
+I guess I'm not
+going to quite get
+
+01:04:33
+to the end of what
+I hoped to do today.
+
+01:04:35
+But what I wanted to do is get
+through some of what we do here.
+
+01:04:44
+But I wanted to take a few
+minutes to go through concretely
+
+01:04:49
+how we do the math
+of minimization.
+
+01:04:53
+Now, lots of different people
+take CS224N, and some of way
+
+01:05:02
+more math than I do.
+
+01:05:04
+And so if this next 10 minutes
+might be extremely boring.
+
+01:05:08
+And if that's the
+case, you can either
+
+01:05:10
+catch up on Discord or
+Instagram or something,
+
+01:05:14
+or else you can leave.
+
+01:05:15
+But it turns out there
+are other people that
+
+01:05:17
+do CS224N that can't quite
+remember when they last
+
+01:05:22
+did a math course.
+
+01:05:23
+And we'd like everybody to
+be able to learn something
+
+01:05:27
+about this.
+
+01:05:28
+So I do actually liken the first
+two weeks to go through it a bit
+
+01:05:34
+concretely.
+
+01:05:34
+So let's try to do this.
+
+01:05:36
+So this was our likelihood.
+
+01:05:38
+And then we'd already
+covered the fact
+
+01:05:40
+that what we were going to do
+is have an objective function
+
+01:05:44
+in terms of our parameters, that
+was the average negative log
+
+01:05:49
+likelihood across all the words.
+
+01:05:55
+If I remember the notation
+for this, the sum--
+
+01:06:01
+oops.
+
+01:06:04
+I'll probably have a
+hard time writing this.
+
+01:06:07
+The sum of position m--
+
+01:06:10
+I've got a more neatly
+written out version
+
+01:06:13
+of it that appears on the
+version of the slides that's
+
+01:06:16
+on the website.
+
+01:06:18
+And then we're
+going to be taking
+
+01:06:20
+this log of the probability
+of the word at position t
+
+01:06:29
+plus position j, t plus j.
+
+01:06:42
+Trying to write this on my
+iPad is not working super well,
+
+01:06:46
+I'll confess.
+
+01:06:47
+We'll see how I get on.
+
+01:06:49
+wt.
+
+01:06:51
+And so then we had the
+form of what we wanted
+
+01:07:00
+to use for the probability.
+
+01:07:02
+And the probability of an
+outside word given a context
+
+01:07:06
+word was then this
+softmax equation
+
+01:07:10
+where we're taking the
+exp of the outside vector
+
+01:07:16
+and the center vector over
+the normalization term
+
+01:07:24
+where we sum over
+the vocabulary.
+
+01:07:39
+So to work out how to
+change our parameters.
+
+01:07:47
+So our parameters are
+all of these word vectors
+
+01:07:50
+that we summarize inside theta.
+
+01:07:55
+What we're then
+going to want to do
+
+01:07:58
+is work out the
+partial derivative
+
+01:08:01
+of this objective
+function with respect
+
+01:08:05
+to all the parameters theta.
+
+01:08:07
+But in particular, I'm
+going to just start
+
+01:08:12
+doing here the partial
+derivatives with respect
+
+01:08:16
+to the center word.
+
+01:08:21
+And we can work through the
+outside words separately.
+
+01:08:24
+Well, this partial
+derivative is a big sum.
+
+01:08:29
+And it's a big sum
+of terms like this.
+
+01:08:33
+And so when I have
+a partial derivative
+
+01:08:35
+of a big sum of
+terms, I can work out
+
+01:08:38
+the partial derivatives of
+each term independently,
+
+01:08:42
+and then sum them.
+
+01:08:43
+So what I want to be
+doing is working out
+
+01:08:47
+the partial derivative of the
+log of this probability, which
+
+01:08:54
+equals the log of that with
+respect to the center vector.
+
+01:09:02
+And so at this point, I have a
+log of two things being divided.
+
+01:09:10
+And so that means I
+can separate that out
+
+01:09:13
+of the log of the
+numerator minus the log
+
+01:09:16
+of the denominator.
+
+01:09:18
+And so what I'll be
+doing is working out
+
+01:09:21
+the partial derivative
+with respect
+
+01:09:24
+to the center vector
+of the numerator,
+
+01:09:29
+log exp of uTvc minus the
+partial derivative with respect
+
+01:09:41
+to the denominator, which is
+then the log of the sum of W
+
+01:09:49
+equals 1 to v of exp--
+
+01:09:59
+OK.
+
+01:10:00
+I'm having real
+trouble here writing.
+
+01:10:03
+I look at the slides where
+I wrote it neatly at home.
+
+01:10:06
+So I want to work
+with these two terms.
+
+01:10:12
+Now, at this point, part of it--
+
+01:10:18
+at this point,
+part of it is easy.
+
+01:10:20
+Because here, I just have
+a log of an exponential.
+
+01:10:24
+And so those two functions
+just cancel out and go away.
+
+01:10:29
+And so then, I want to get
+the partial derivative of u
+
+01:10:35
+outside transpose vCenter
+with respect to vCenter.
+
+01:10:41
+And so what you get
+for the answer to that
+
+01:10:45
+is that just comes out as u0.
+
+01:10:50
+And maybe you remember that.
+
+01:10:54
+But if you don't remember that,
+the thing to think about is,
+
+01:10:58
+OK, this is a whole vector.
+
+01:11:01
+And so we've got a vector
+here and a vector here.
+
+01:11:04
+So what this is going
+to be looking like
+
+01:11:07
+is sort of u1v1 plus u2v2
+plus u3v3, et cetera long.
+
+01:11:18
+And so what we're
+going to want to do
+
+01:11:20
+is work out the partial
+derivative with respect
+
+01:11:24
+to each element vi.
+
+01:11:27
+And so if you just think of
+a single element derivative
+
+01:11:32
+with respect to v1,
+well, it's going
+
+01:11:36
+to be just u1 because every
+other term would go to 0.
+
+01:11:41
+And then if you worked it
+out with respect to v2,
+
+01:11:44
+then it would be just u2.
+
+01:11:47
+And every other term goes to 0.
+
+01:11:49
+And so since you keep on doing
+that along the whole vector,
+
+01:11:52
+that what you're
+going to get out
+
+01:11:54
+is the vector u1,
+u2, u3 down the vocab
+
+01:12:01
+for the whole list
+of vocab items.
+
+01:12:04
+So that part is easy.
+
+01:12:07
+But then, we also want to work
+out the partial derivatives
+
+01:12:14
+of that one.
+
+01:12:15
+And at that point, I maybe
+have to go to another slide.
+
+01:12:22
+So we then want to have the
+partial derivative with respect
+
+01:12:32
+to vc of the log of the sum
+equals w equal to 1 to v
+
+01:12:43
+of the exp of uw transpose vc.
+
+01:12:48
+So at this point, things
+aren't quite so easy.
+
+01:12:52
+And we have to remember a
+little bit more calculus.
+
+01:12:55
+So in particular, what we have
+to remember is the chain rule.
+
+01:13:00
+So here, we have
+this inside function.
+
+01:13:03
+So that we've got a function--
+
+01:13:07
+we've got a function g
+of vc, which we might
+
+01:13:13
+say the output of that is z.
+
+01:13:15
+And then we've put outside
+that and an extra function f.
+
+01:13:21
+And so when we have something
+like that, what we get
+
+01:13:25
+is the derivative of
+f with respect to vc.
+
+01:13:30
+We can take the derivative
+of f with respect to z
+
+01:13:34
+times the derivative of
+z with respect to vc.
+
+01:13:40
+That's the chain rule.
+
+01:13:41
+So we are going to
+then apply that here.
+
+01:13:46
+So first of all, we can
+take the derivative of log.
+
+01:13:52
+And so the derivative
+of log is 1 on x.
+
+01:13:55
+You have to remember
+that or look it
+
+01:13:57
+up or get Mathematica to do it
+for you or something like that.
+
+01:14:02
+And so we're going to have
+1 over the inside z part.
+
+01:14:09
+The sum of w equals 1
+to v of the exp uwTvc.
+
+01:14:17
+And then that's going to be
+multiplied by the derivative
+
+01:14:23
+of the inside part.
+
+01:14:27
+So then we're going to have
+the derivative with respect
+
+01:14:32
+to vc of the sum of w
+equals 1 to v of v exp of--
+
+01:14:48
+So that's made us a
+little bit of progress.
+
+01:14:56
+But we've still got
+something to do here.
+
+01:15:00
+And so, well, what
+we're going to do
+
+01:15:02
+here is we're going
+to notice, oh, wait,
+
+01:15:04
+we're again in the space to
+run the chain rule again.
+
+01:15:10
+So now, we've got
+this function-- well,
+
+01:15:12
+so first of all, we can
+move the sum to the outside
+
+01:15:16
+because we've got a sum
+of terms w equals 1 to v.
+
+01:15:19
+And so we want to work out the
+derivatives of the inside piece
+
+01:15:24
+with respect to it.
+
+01:15:25
+Sorry, I'm doing this
+kind of informally
+
+01:15:27
+of just doing this piece now.
+
+01:15:30
+So this, again, gives us
+an f over a function g.
+
+01:15:37
+And so we're going to again
+want to split the pieces up.
+
+01:15:41
+And so use the chain
+rule one more time.
+
+01:15:44
+So we're going to have the
+sum of w equals 1 to v.
+
+01:15:48
+And now, we have to know
+what the derivative of x is.
+
+01:15:51
+And the derivative of x is exp.
+
+01:15:53
+So that will be exp of uxTv0.
+
+01:16:01
+And then we're taking the
+derivative of the inside part
+
+01:16:06
+with respect to vc of uxTvc.
+
+01:16:12
+Well, luckily this was
+the bit that we already
+
+01:16:15
+knew how to do because
+we worked it out before.
+
+01:16:18
+And so this is going to be
+the sum of w equals 1 to v
+
+01:16:22
+of this exp times ux.
+
+01:16:31
+So then, at this point, we
+want to combine these two forms
+
+01:16:37
+together so that
+we want to combine
+
+01:16:41
+this part that we worked out,
+and this piece here that we've
+
+01:16:45
+worked out.
+
+01:16:47
+And if we can
+combine them together
+
+01:16:51
+with what we worked out on the
+first slide for the numerator,
+
+01:16:57
+since we have the u0, which was
+the derivative of the numerator.
+
+01:17:06
+And then for the derivative
+of the denominator,
+
+01:17:11
+we're going to have
+on top this part.
+
+01:17:16
+And then on the bottom, we're
+going to have that part.
+
+01:17:19
+And so we can rewrite that as
+the sum from w equals 1 to v
+
+01:17:26
+of the exp of uxTv0
+times ux over the sum--
+
+01:17:41
+sorry, x equals 1 to v
+sum over w equals 1 to v
+
+01:17:48
+of the exp, this
+part here, of uw.
+
+01:17:56
+So we can rearrange
+things in that form.
+
+01:18:01
+And then lo and behold, we've
+recreated here this form
+
+01:18:07
+of the softmax equation.
+
+01:18:09
+So we end up with u0 minus
+the sum over x equals 1 to v
+
+01:18:17
+of the probability of
+x given c times u of x.
+
+01:18:24
+So what this is saying
+is we're wanting
+
+01:18:28
+to have this quantity, which
+takes the actual observed u
+
+01:18:33
+vector.
+
+01:18:34
+And it's comparing it to
+the weighted prediction.
+
+01:18:40
+So we're taking the weighted
+sum of our current ux vectors
+
+01:18:45
+based on how likely
+they were to occur.
+
+01:18:50
+And so this is a form
+that you see quite a bit
+
+01:18:53
+in these kind of derivatives.
+
+01:18:55
+You get observed minus
+expected, the weighted average.
+
+01:19:00
+And so what you'd like to
+have is your expectation,
+
+01:19:04
+the weighted average, be the
+same as what was observed.
+
+01:19:10
+Because then you'll
+get a derivative
+
+01:19:11
+of 0, which means that
+you've hit a maximum.
+
+01:19:16
+And so that gives us the
+form of the derivative
+
+01:19:24
+that we're having with respect
+to the center vector parameters.
+
+01:19:29
+To finish it off, you'd have
+to then work it out also
+
+01:19:32
+for the outside
+vector parameters.
+
+01:19:34
+But hey, it's officially
+the end of class time.
+
+01:19:37
+So I'd better wrap
+up quickly now.
+
+01:19:39
+But so the deal is
+we're going to work out
+
+01:19:42
+all of these derivatives
+for each parameter.
+
+01:19:47
+And then these derivatives
+will give a direction
+
+01:19:50
+to change numbers, which
+will let us find good word
+
+01:19:54
+vectors automatically.
+
+01:19:57
+I do want you to
+understand how this works.
+
+01:19:59
+But fortunately, you'll find
+out very quickly that computers
+
+01:20:02
+will do this for you.
+
+01:20:04
+And on a regular basis,
+you don't actually
+
+01:20:06
+have to do it yourself.
+
+01:20:07
+More about that on Thursday.
+
+01:20:09
+See you everyone.

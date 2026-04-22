@@ -1,0 +1,157 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Segment này đủ chi tiết để hỏi về gate rules, sigmoid derivative và forward/backward modularization; không cần cắt clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Nếu s = sigmoid(x), biểu thức nào dưới đây đúng cho đạo hàm cục bộ ds/dx?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "s(1 - s)",
+        "1 / s",
+        "s + 1",
+        "x(1 - x)"
+      ],
+      "answer_index": 0,
+      "explanation": "Đạo hàm của sigmoid có thể viết gọn bằng chính đầu ra của nó nhân với một trừ đầu ra đó. Dạng này rất tiện cho backward vì chỉ cần reuse giá trị đã tính ở forward.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "1 minus sigmoid multiplied",
+          "sigmoid of the same x"
+        ],
+        "timestamps": [
+          "00:59:48",
+          "00:59:56"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Quy tắc backward đúng cho một multiply gate là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Gradient theo mỗi đầu vào bằng upstream gradient nhân với đầu vào còn lại.",
+        "Gradient được sao chép y nguyên cho mọi đầu vào.",
+        "Chỉ đầu vào lớn hơn mới nhận gradient.",
+        "Gradient luôn bằng 1 cho cả hai đầu vào."
+      ],
+      "answer_index": 0,
+      "explanation": "Với phép nhân x·y, đạo hàm theo x là y và đạo hàm theo y là x. Vì vậy backward của multiply gate có thể hiểu trực giác là \"swap\" đầu vào còn lại rồi nhân với upstream gradient.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "other variable",
+          "swap function"
+        ],
+        "timestamps": [
+          "00:58:28",
+          "01:01:18"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao nhiều thư viện deep learning lưu lại input hoặc trung gian trong forward để dùng ở backward?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì backward cần các giá trị đó để tính local gradients một cách mô-đun cho từng operator.",
+        "Vì forward không thể tạo output nếu không có Jacobian đầy đủ.",
+        "Vì lưu như vậy sẽ làm loss luôn giảm ở bước sau.",
+        "Vì đây là cách duy nhất để tránh dùng minibatch."
+      ],
+      "answer_index": 0,
+      "explanation": "Nhiều đạo hàm cục bộ phụ thuộc vào các giá trị đã xuất hiện ở bước forward. Lưu lại chúng giúp mỗi operator tự cài được cặp forward/backward riêng mà không phải viết lại toàn bộ mạng như một công thức khổng lồ.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_modular_forward_backward_operators",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "forward and backward",
+          "save them"
+        ],
+        "timestamps": [
+          "01:03:20",
+          "01:03:31"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q1",
+      "global_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q1",
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q2",
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q3",
+      "global_kp_id": "kp_modular_forward_backward_operators",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg6-q3",
+      "global_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "role": "secondary"
+    }
+  ]
+}

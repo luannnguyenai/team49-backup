@@ -1,0 +1,496 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "The transcript is clear enough to generate application questions about observing an RL system as a “new species,” learning latent behavior from state-action pairs, and the limits of interpreting behavioral clusters.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If we apply this mindset to a completely new multi-agent RL system, what starting step is recommended?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Design strong interventions into the policy immediately without first observing behavioral data.",
+        "Treat the system like a “new species,” observe its state-action behavior first, and only later think about controlled interventions.",
+        "Ask the environment designer to label every possible behavior in advance.",
+        "Use saliency maps on every frame to immediately infer strategic concepts."
+      ],
+      "answer_index": 1,
+      "explanation": "This section advocates a process closer to behavioral biology: first observe a new species in the wild, and only then move on to controlled intervention studies.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "study them as if they are a new species",
+          "observational study"
+        ],
+        "timestamps": [
+          "00:35:48",
+          "00:37:53"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the observational method presented, what is the main input data used to discover emergent behavior?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only textual explanations written by humans for each episode.",
+        "Only the final reward of each agent, without states or actions.",
+        "State-action pairs, followed by learning a latent embedding with a generative model to reveal behavioral structure.",
+        "The attention matrices of a policy transformer at each layer."
+      ],
+      "answer_index": 2,
+      "explanation": "This method does not require manual behavior labels. It relies on state-action pairs and a latent-variable generative model to learn embeddings, and then uses the structure of those embeddings to uncover recurring behavior patterns.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "observe state and action pair",
+          "clustering the data"
+        ],
+        "timestamps": [
+          "00:37:57",
+          "00:38:06"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the MuJoCo leg-control example, what do tight embedding mappings across agents suggest?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The agents are coordinating more effectively and exhibiting better running behavior.",
+        "The agents are completely independent and not coordinating at all.",
+        "The environment logging is broken, causing the embeddings to collapse artificially.",
+        "The model is merely memorizing episode order rather than behavior."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture interprets tight correspondences in embedding space as evidence that the agents are operating in a more aligned and coordinated way, consistent with better running performance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "tight cross-agent mappings",
+          "better coordinated running"
+        ],
+        "timestamps": [
+          "00:40:17",
+          "00:40:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When applied to hide-and-seek, why are the learned behavior clusters still not enough to “fully explain” the system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the model fails to separate any behaviors at all, including running or chasing.",
+        "Because every cluster automatically comes with a standard semantic name, so no human interpretation is needed.",
+        "Because the clusters still require humans to explore and interpret them, and they may miss genuinely superhuman concepts.",
+        "Because the method only works for two-player games, not multi-agent settings."
+      ],
+      "answer_index": 2,
+      "explanation": "Embedding clusters are only a starting point for understanding the system. Humans still need to explore them, assign meaning to them, and genuinely novel machine concepts may not appear clearly in this space.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "need human exploration",
+          "cannot by itself name clusters"
+        ],
+        "timestamps": [
+          "00:42:25",
+          "00:43:01"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg4-q1",
+      "global_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q2",
+      "global_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q3",
+      "global_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q4",
+      "global_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg4-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q3",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q4",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If we apply this mindset to a completely new multi-agent RL system, what starting step is recommended?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Design strong interventions into the policy immediately without first observing behavioral data.",
+        "Treat the system like a “new species,” observe its state-action behavior first, and only later think about controlled interventions.",
+        "Ask the environment designer to label every possible behavior in advance.",
+        "Use saliency maps on every frame to immediately infer strategic concepts."
+      ],
+      "answer_index": 1,
+      "explanation": "This section advocates a process closer to behavioral biology: first observe a new species in the wild, and only then move on to controlled intervention studies.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "study them as if they are a new species",
+          "observational study"
+        ],
+        "timestamps": [
+          "00:35:48",
+          "00:37:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the observational method presented, what is the main input data used to discover emergent behavior?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only textual explanations written by humans for each episode.",
+        "Only the final reward of each agent, without states or actions.",
+        "State-action pairs, followed by learning a latent embedding with a generative model to reveal behavioral structure.",
+        "The attention matrices of a policy transformer at each layer."
+      ],
+      "answer_index": 2,
+      "explanation": "This method does not require manual behavior labels. It relies on state-action pairs and a latent-variable generative model to learn embeddings, and then uses the structure of those embeddings to uncover recurring behavior patterns.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "observe state and action pair",
+          "clustering the data"
+        ],
+        "timestamps": [
+          "00:37:57",
+          "00:38:06"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the MuJoCo leg-control example, what do tight embedding mappings across agents suggest?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The agents are coordinating more effectively and exhibiting better running behavior.",
+        "The agents are completely independent and not coordinating at all.",
+        "The environment logging is broken, causing the embeddings to collapse artificially.",
+        "The model is merely memorizing episode order rather than behavior."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture interprets tight correspondences in embedding space as evidence that the agents are operating in a more aligned and coordinated way, consistent with better running performance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "tight cross-agent mappings",
+          "better coordinated running"
+        ],
+        "timestamps": [
+          "00:40:17",
+          "00:40:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When applied to hide-and-seek, why are the learned behavior clusters still not enough to “fully explain” the system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the model fails to separate any behaviors at all, including running or chasing.",
+        "Because every cluster automatically comes with a standard semantic name, so no human interpretation is needed.",
+        "Because the clusters still require humans to explore and interpret them, and they may miss genuinely superhuman concepts.",
+        "Because the method only works for two-player games, not multi-agent settings."
+      ],
+      "answer_index": 2,
+      "explanation": "Embedding clusters are only a starting point for understanding the system. Humans still need to explore them, assign meaning to them, and genuinely novel machine concepts may not appear clearly in this space.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "need human exploration",
+          "cannot by itself name clusters"
+        ],
+        "timestamps": [
+          "00:42:25",
+          "00:43:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg4-q1",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from easy application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q2",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q3",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q4",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg4-q1",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q2",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q3",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg4-q4",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    }
+  ]
+}

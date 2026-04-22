@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture14-nlg::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture14-nlg-seg8-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture14-nlg-seg8-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture14-nlg-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which deployment practice best addresses the ethical risks of NLG systems?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Test for harmful, biased, toxic, and adversarially triggered outputs before deployment.",
+        "Assume fluent outputs are always safe and truthful.",
+        "Remove all safeguards so users can test every possible prompt.",
+        "Evaluate only whether the model can produce long text."
+      ],
+      "answer_index": 0,
+      "explanation": "Safety requires checking more than fluency. A deployed generator should be assessed for harmful content, bias, toxicity, jailbreak vulnerability, and robustness to adversarial prompts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_ethical_risks_and_deployment_safeguards_for_nlg",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not harmful",
+          "robust to trigger"
+        ],
+        "timestamps": [
+          "01:12:21",
+          "01:16:11"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture14-nlg-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is truthfulness a separate concern from fluency in large language models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A model can produce persuasive, well-written text that is factually wrong.",
+        "A fluent model cannot contain stereotypes from its data.",
+        "Truthfulness is guaranteed by sampling-based decoding.",
+        "Factual errors occur only when a model refuses a prompt."
+      ],
+      "answer_index": 0,
+      "explanation": "Fluent wording can make incorrect information sound convincing. Reliability therefore requires explicit factuality checks rather than judging only whether the text reads naturally.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_ethical_risks_and_deployment_safeguards_for_nlg",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "factual error",
+          "talks about"
+        ],
+        "timestamps": [
+          "01:13:27",
+          "01:13:42"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture14-nlg-seg8-q1",
+      "global_kp_id": "kp_ethical_risks_and_deployment_safeguards_for_nlg",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg8-q2",
+      "global_kp_id": "kp_ethical_risks_and_deployment_safeguards_for_nlg",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture14-nlg-seg8-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which deployment practice best addresses the ethical risks of NLG systems\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture14-nlg-seg8-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is truthfulness a separate concern from fluency in large language models\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture14-nlg-seg8-q1",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which deployment practice best addresses the ethical risks of NLG systems\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture14-nlg-seg8-q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is truthfulness a separate concern from fluency in large language models\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

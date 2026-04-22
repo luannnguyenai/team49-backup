@@ -1,0 +1,191 @@
+{
+  "unit_id": "local::lecture10-transformers::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 4 reinforcement questions about why recurrence is replaced by attention without requiring a separate video clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What was the common pre-transformer sequence-to-sequence recipe described in the unit?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A bidirectional LSTM encoder with a unidirectional LSTM decoder, often plus attention",
+        "A convolutional encoder with a graph decoder and no attention",
+        "A bag-of-words encoder with a logistic-regression decoder",
+        "A transformer encoder with a CRF decoder"
+      ],
+      "answer_index": 0,
+      "explanation": "Before transformers, a strong baseline used a bidirectional LSTM to encode the source and a unidirectional LSTM to generate outputs, often with attention to access source information flexibly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_linear_interaction_distance",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "bidirectional LSTM",
+          "uni-directional LSTM"
+        ],
+        "timestamps": [
+          "00:03:01",
+          "00:03:24"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are long-distance dependencies hard for recurrent networks to model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because distant words can only influence each other through many sequential recurrent steps",
+        "Because RNNs cannot represent verbs and nouns in the same state space",
+        "Because LSTMs require fixed-length inputs",
+        "Because recurrence removes all contextual information"
+      ],
+      "answer_index": 0,
+      "explanation": "In an RNN, information must be passed along one step at a time. When related words are far apart, their interaction path becomes long, which makes learning the dependency harder.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_linear_interaction_distance",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "linear interaction distance",
+          "long-distance dependency"
+        ],
+        "timestamps": [
+          "00:04:38",
+          "00:05:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the unit's example, why is the relation between \"chef\" and \"was\" challenging for recurrence?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The gradient must propagate across many intervening words to connect them",
+        "The sentence contains punctuation that disables backpropagation",
+        "The words appear in different languages",
+        "The verb comes before the subject"
+      ],
+      "answer_index": 0,
+      "explanation": "The dependency is long-range, so the model must carry the relevant signal through many intervening steps. That makes the connection harder to learn reliably.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_linear_interaction_distance",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "chef",
+          "was"
+        ],
+        "timestamps": [
+          "00:05:18",
+          "00:06:19"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What key advantage does attention have over recurrence in this comparison?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can connect distant words directly and compute token representations in parallel",
+        "It guarantees linear memory growth with sequence length",
+        "It eliminates the need for learned parameters",
+        "It forces every token to attend only to itself"
+      ],
+      "answer_index": 0,
+      "explanation": "Attention allows each token to look across the whole sequence directly, which shortens interaction paths and removes the strict step-by-step computation bottleneck of recurrence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_self_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "look at the entire sequence",
+          "parallel"
+        ],
+        "timestamps": [
+          "00:07:50",
+          "00:08:58"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "global_kp_id": "kp_self_attention",
+      "role": "primary"
+    }
+  ]
+}

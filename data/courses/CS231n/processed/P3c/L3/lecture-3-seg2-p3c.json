@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_3::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The segment provides clear conceptual and numerical grounding for regularization, lambda, and L1/L2 weight preferences; no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-3-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main purpose of adding regularization to a model's loss?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To discourage overfitting, even if that makes training performance slightly worse, so unseen-data performance can improve.",
+        "To force the model to achieve zero training loss as quickly as possible.",
+        "To remove the data loss term from the objective.",
+        "To make the model depend only on the validation set."
+      ],
+      "answer_index": 0,
+      "explanation": "Regularization adds a preference beyond fitting the training labels. It often trades a less perfect training fit for a simpler solution that can generalize better.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_regularization_and_generalization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "worse on training",
+          "better on the test set"
+        ],
+        "timestamps": [
+          "00:12:02",
+          "00:12:11"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the regularization-strength parameter lambda control?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How strongly the regularization penalty influences the total objective.",
+        "How many training examples are used in each minibatch.",
+        "Which class label receives the largest score.",
+        "Whether the input image is flattened before classification."
+      ],
+      "answer_index": 0,
+      "explanation": "Lambda is a tunable knob on the penalty term. When it is zero, the regularizer has no effect; larger values make the model care more about satisfying the regularization preference.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_l1_l2_elastic_net_and_lambda",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "lambda parameter",
+          "there is no regularization"
+        ],
+        "timestamps": [
+          "00:14:42",
+          "00:15:02"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Suppose two weight vectors give the same data loss: W1 = [1, 0, 0, 0] and W2 = [0.25, 0.25, 0.25, 0.25]. Which statement is correct for the regularization penalties described here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "L2 prefers W2 because its squared-weight sum is smaller; L1 gives equal penalty in this exact case.",
+        "L2 prefers W1 because it has fewer nonzero entries; L1 prefers W2 because the weights are spread out.",
+        "Both L1 and L2 always prefer W1 because sparse vectors are always lower penalty.",
+        "Both L1 and L2 always prefer W2 because distributed weights always have lower absolute sum."
+      ],
+      "answer_index": 0,
+      "explanation": "L2 squares each weight, so spreading weight across small values can greatly reduce the penalty. In this specific example, both vectors have absolute values summing to 1, so L1 ties them.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_weight_preference_effects_of_regularization",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "it's W2",
+          "sum each of the terms"
+        ],
+        "timestamps": [
+          "00:20:16",
+          "00:20:53"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-3-seg2-q1",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg2-q2",
+      "global_kp_id": "kp_l1_l2_elastic_net_and_lambda",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg2-q3",
+      "global_kp_id": "kp_weight_preference_effects_of_regularization",
+      "role": "primary"
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "unit_id": "local::lecture02-python-review::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is clear enough to create reinforcement questions about why Python is used in NLP/deep learning, dynamic typing, and basic syntax rules such as None, ==, and indentation.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the most important reason Python is widely used in NLP and deep learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because Python is easy to read, has strong scientific computing libraries, and works directly with frameworks such as PyTorch and TensorFlow.",
+        "Because Python always runs faster than C and C++ on every low-level operation.",
+        "Because Python requires every variable to have its type declared before use.",
+        "Because Python does not need external libraries for matrix computation."
+      ],
+      "answer_index": 0,
+      "explanation": "Python is popular because it balances readability with a strong scientific ecosystem. Libraries such as NumPy and strong integration with deep learning frameworks make it a very good fit for NLP and deep learning.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_python_for_nlp_and_deep_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "high level language",
+          "interface directly with Python"
+        ],
+        "timestamps": [
+          "00:01:37",
+          "00:02:05"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement correctly describes variable behavior and basic syntax in Python?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A variable can hold a number and later hold a string; use == for comparison and = for assignment.",
+        "Once a variable has an int value, it cannot later change to a string.",
+        "None is the same value as 0, so they can always be used interchangeably.",
+        "Python uses curly braces to define code blocks instead of indentation."
+      ],
+      "answer_index": 0,
+      "explanation": "Python is dynamically typed, so the same variable name can refer to values of different types at different times. Also, = is assignment while == checks equality.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "x is equal to 10",
+          "single equal sign versus two"
+        ],
+        "timestamps": [
+          "00:03:17",
+          "00:06:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "global_kp_id": "kp_python_for_nlp_and_deep_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "global_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "global_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "global_kp_id": "kp_python_truth_values_none_operators_and_indentation",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the most important reason Python is widely used in NLP and deep learning\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which statement correctly describes variable behavior and basic syntax in Python\" is a direct reinforcement check and should be on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the most important reason Python is widely used in NLP and deep learning\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which statement correctly describes variable behavior and basic syntax in Python\" works best as an early concept check."
+    }
+  ]
+}

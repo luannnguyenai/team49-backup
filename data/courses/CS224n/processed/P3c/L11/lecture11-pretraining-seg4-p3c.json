@@ -1,0 +1,245 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is ordinary next-word prediction not a suitable pretraining objective for a bidirectional encoder?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The encoder can attend to both sides, so the target token can leak through the input context.",
+        "The encoder has no token embeddings to update.",
+        "The encoder can only process one token at a time from left to right.",
+        "Next-word prediction requires labeled sentiment examples."
+      ],
+      "answer_index": 0,
+      "explanation": "A bidirectional encoder sees information from both directions. If asked to predict a token that remains visible in its context, the task can become trivial instead of teaching robust representations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_masked_language_modeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "bidirectional context",
+          "I should just know"
+        ],
+        "timestamps": [
+          "00:37:23",
+          "00:37:41"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does masked language modeling train an encoder to do?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Reconstruct selected missing tokens using the surrounding bidirectional context.",
+        "Generate text strictly left to right without seeing future tokens.",
+        "Translate every input sentence into another language.",
+        "Predict only whether two documents have the same author."
+      ],
+      "answer_index": 0,
+      "explanation": "Masked language modeling corrupts some input positions and computes loss on those positions. The encoder must use both left and right context to infer the missing words.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_masked_language_modeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "I mask out words",
+          "loss terms"
+        ],
+        "timestamps": [
+          "00:38:02",
+          "00:38:47"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why did BERT sometimes leave selected tokens unchanged or replace them randomly instead of always using a mask token?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To make the model build useful contextual representations even when explicit mask tokens are absent at test time.",
+        "To prevent the model from learning subword embeddings.",
+        "To make every sentence exactly the same length.",
+        "To convert the encoder into a left-to-right decoder."
+      ],
+      "answer_index": 0,
+      "explanation": "If training only used artificial mask symbols, the model could rely too much on a pattern that does not appear in ordinary downstream inputs. Random and unchanged cases make training closer to real use.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bert_and_encoder_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "take 15%",
+          "not change the word"
+        ],
+        "timestamps": [
+          "00:41:23",
+          "00:41:58"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What was the next-sentence prediction task in BERT-style pretraining?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Given two text segments, predict whether the second is the true continuation of the first.",
+        "Given a prefix, predict only the next subword token.",
+        "Given a sentence, remove all punctuation and predict it back.",
+        "Given two words, predict whether they have the same spelling."
+      ],
+      "answer_index": 0,
+      "explanation": "Next-sentence prediction adds a sentence-level objective: the model must judge whether one segment naturally follows another, using segment information along with token representations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bert_and_encoder_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "next sentence prediction",
+          "segment"
+        ],
+        "timestamps": [
+          "00:43:36",
+          "00:43:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What was a major practical effect of BERT-style encoder pretraining?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A single pretrained encoder could be adapted to many tasks by adding task-specific heads and fine-tuning.",
+        "It eliminated the need for any downstream data.",
+        "It made hand-written linguistic rules mandatory for every task.",
+        "It replaced all tokenization with character-by-character decoding only."
+      ],
+      "answer_index": 0,
+      "explanation": "A pretrained bidirectional encoder provides general contextual representations. Task-specific heads can then map those representations to outputs for classification, QA, or other tasks.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bert_and_encoder_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "download",
+          "builder of representations"
+        ],
+        "timestamps": [
+          "00:41:01",
+          "00:41:13"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg4-q1",
+      "global_kp_id": "kp_masked_language_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q2",
+      "global_kp_id": "kp_masked_language_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q3",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q3",
+      "global_kp_id": "kp_masked_language_modeling",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q4",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q4",
+      "global_kp_id": "kp_masked_language_modeling",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg4-q5",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "role": "primary"
+    }
+  ]
+}

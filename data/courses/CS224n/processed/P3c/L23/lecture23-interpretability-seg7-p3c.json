@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi khái niệm về khả năng chuyển miền của interpretability và vì sao giao diện ngôn ngữ người-máy không thể chỉ dừng ở các khái niệm đã có sẵn của con người.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Phát biểu nào phản ánh đúng quan điểm về việc chuyển kỹ thuật interpretability giữa các miền như vision, NLP và RL?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một khi có chứng minh lý thuyết trong một miền, triển khai ở miền khác không cần chỉnh sửa hay kiểm định thêm.",
+        "Một số lý thuyết và trực giác có thể chuyển miền, nhưng khi dùng trong ứng dụng cụ thể vẫn cần tùy biến và validation theo bối cảnh.",
+        "Mọi kỹ thuật interpretability chỉ dùng được trong đúng miền mà nó được phát minh ra.",
+        "Chỉ fairness mới chuyển miền được, còn interpretability thì hoàn toàn không."
+      ],
+      "answer_index": 1,
+      "explanation": "Bài giảng phân biệt giữa kết quả có tính chất miền-khái quát và triển khai thực tế. Một số ý tưởng có thể áp dụng rộng, nhưng khi đụng tới sản phẩm hoặc hệ thống thật thì vẫn phải xác nhận lại theo ngữ cảnh cụ thể.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "transfer across modalities",
+          "customized validation remains necessary"
+        ],
+        "timestamps": [
+          "01:02:04",
+          "01:02:44"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao chỉ ánh xạ “ngôn ngữ khái niệm của con người” vào không gian biểu diễn của máy vẫn chưa đủ?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì máy hoàn toàn không thể biểu diễn bất kỳ khái niệm nào của con người.",
+        "Vì làm vậy có thể giúp ích, nhưng sẽ bỏ lỡ các khái niệm machine-native quan trọng kiểu Move 37 mà con người chưa có từ để gọi.",
+        "Vì mọi khái niệm của con người đều giống hệt khái niệm của máy nên không cần ánh xạ gì cả.",
+        "Vì chỉ cần tăng số neuron là máy tự nói được tiếng người đầy đủ."
+      ],
+      "answer_index": 1,
+      "explanation": "Diễn giả đồng ý rằng ánh xạ ngôn ngữ người sang máy là hữu ích, nhưng đó chỉ là một nửa con đường. Nếu máy có những khái niệm mới lạ mà con người chưa đặt tên được, ta cần cả cơ chế học ngược lại từ máy.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "helpful but incomplete",
+          "miss machine-native concepts like Move 37"
+        ],
+        "timestamps": [
+          "01:06:21",
+          "01:06:50"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "global_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "role": "primary"
+    }
+  ]
+}

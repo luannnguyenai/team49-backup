@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_6::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript summary and key points are sufficient for a small concept-focused question set, so a separate clip is not needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture_6_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a CNN using LayerNorm, which values are used to compute the normalization statistics for one example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "All channels, heights, and widths of that single example",
+        "One channel at a time across the whole minibatch",
+        "Only the maximum activation in each spatial window",
+        "Only the weights of the current convolution filter"
+      ],
+      "answer_index": 0,
+      "explanation": "LayerNorm computes statistics separately for each sample. For CNN tensors, that means aggregating over the full C×H×W activation tensor of one example before applying the learned scale and shift.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_normalization_layers",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "LayerNorm computes statistics separately",
+          "all channels, heights, widths"
+        ],
+        "timestamps": [
+          "00:05:22",
+          "00:06:59"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_6_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What determines the output depth of a convolution layer?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The number of filters in the layer",
+        "The stride multiplied by the input depth",
+        "The pooling window size",
+        "The image width after padding"
+      ],
+      "answer_index": 0,
+      "explanation": "Each filter produces one activation map, so the number of filters sets the output depth. The filter depth must match the input depth, but it does not determine how many output channels are produced.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cnn_layer_composition",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "output depth equals filters",
+          "filters match input depth"
+        ],
+        "timestamps": [
+          "00:01:17",
+          "00:02:17"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg1_q1",
+      "global_kp_id": "kp_normalization_layers",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg1_q2",
+      "global_kp_id": "kp_cnn_layer_composition",
+      "role": "primary"
+    }
+  ]
+}

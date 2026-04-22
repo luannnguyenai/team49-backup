@@ -1,0 +1,156 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture08-seq2seq",
+    "lecture_title": "Lecture 8 - Sequence to Sequence Models",
+    "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw"
+  },
+  "unit": {
+    "unit_id": "local::lecture08-seq2seq::seg1",
+    "course_id": "cs224n-2024",
+    "name": "Perplexity for evaluating language models",
+    "description": "Defines perplexity, connects it to cross-entropy, and uses historical perplexity numbers to show why neural language models mattered.",
+    "summary": "The lecture finishes the language-model evaluation story by defining perplexity as the standard metric for scoring how well a model predicts held-out human text [ts=199s]. It explicitly links perplexity to the exponential of cross-entropy / per-word negative log-likelihood, while warning that comparisons depend on the log base being used [ts=247s] [ts=275s]. The segment also gives the historical arc from smoothed n-gram models to RNN/LSTM language models: interpolated Kneser-Ney n-grams are described around perplexity 67, early improved neural models around the 40s to 30s, and modern systems in the single digits, emphasizing that lower perplexity means better next-word prediction [ts=441s] [ts=537s].",
+    "key_points": [
+      {
+        "text": "Perplexity is the standard held-out evaluation measure for language models.",
+        "timestamp_s": 199,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Perplexity is the exponential of cross-entropy / per-word negative log-likelihood.",
+        "timestamp_s": 247,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Perplexity values depend on the logarithm base, so numbers are not comparable unless the base matches.",
+        "timestamp_s": 275,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Interpolated Kneser-Ney n-gram models were around perplexity 67, while LSTM language models pushed much lower and modern models reach single digits.",
+        "timestamp_s": 441,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=6",
+      "start_s": 5,
+      "end_s": 552
+    },
+    "difficulty": 0.34,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 9,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture finishes the language-model evaluation story by defining perplexity as the standard metric for scoring how well a model predicts held-out human text [ts=199s]. It explicitly links perplexity to the exponential of cross-entropy / per-word negative log-likelihood, while warning that comparisons depend on the log base being used [ts=247s] [ts=275s]. The segment also gives the historical arc from smoothed n-gram models to RNN/LSTM language models: interpolated Kneser-Ney n-grams are described around perplexity 67, early improved neural models around the 40s to 30s, and modern systems in the single digits, emphasizing that lower perplexity means better next-word prediction [ts=441s] [ts=537s].",
+  "target_kp_ids": [
+    "kp_perplexity_as_a_proxy_metric"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+  "video_clip_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+  "transcript_slice": "00:00:05\nOK, hi, everyone, Back for more CS224N.\n\n00:00:18\nof what we started on Tuesday.\n\n00:00:25\nand more about RNNs, in particular, introducing\n\n00:00:33\nwhich was for a while very dominant.\n\n00:00:38\nAnd then in the latter part, has something\n\n00:00:44\nWe'll start looking at neural machine translation.\n\n00:00:52\nwe introduced language models, a system\n\n00:00:56\nAnd then I introduced recurrent neural networks,\n\n00:01:02\nthat can take sequential input of any length\n\n00:01:09\nand can optionally produce output on each step.\n\n00:01:15\nthough they tend to go together.\n\n00:01:23\non any kinds of sequence, and I'll mention\n\n00:01:28\nAnd language modeling is a traditional component\n\n00:01:34\nwith generating text or estimating\n\n00:01:39\nAnd indeed, in the modern instantiation of large language\n\n00:01:46\nis being done by language models.\n\n00:01:50\nis with a recurrent neural network.\n\n00:01:55\nWe also talked last time about n-gram language models,\n\n00:02:00\nAnd then starting next week, we'll\n\n00:02:05\nthe most widespread way that's used\n\n00:02:10\nSo just to finish off a teeny bit\n\n00:02:15\nmodels, well, one way to evaluate language models is what\n\n00:02:22\ndoesn't this text look good?\n\n00:02:28\nAnd the standard way to evaluate language models\n\n00:02:36\nand says how likely it is.\n\n00:02:44\nis stuff produced by human beings.\n\n00:02:50\nwhich wasn't text that the model was trained on.\n\n00:02:56\nand we show it to a language model,\n\n00:03:02\nto predict the success of words of this text.\n\n00:03:08\nthe better a language model it is,\n\n00:03:15\npiece of text.\n\n00:03:19\nis with this measure that's called perplexity.\n\n00:03:25\nthe probability of a prediction from the language model.\n\n00:03:34\nwe're turning into 500 or something like that.\n\n00:03:43\nWe're taking the product of them at each position in the text,\n\n00:03:51\nSo that's the measure that's normally used.\n\n00:03:57\nto look at negative log likelihoods\n\n00:04:07\nAnd so what perplexity is, is it's just the exponential\n\n00:04:14\nSo if you're already familiar with negative log-likelihood,\n\n00:04:20\nif you just exponentiate that, you then get the perplexity.\n\n00:04:27\nas to what base you use for your logarithms and exponentials.\n\n00:04:35\na lot of the time, people use base 2 for measuring perplexity.\n\n00:04:42\nA lot of the time now, people are using natural logs.\n\n00:04:48\nthey're going to be different depending on what\n\n00:04:53\nSo you need to be aware of this.\n\n00:05:02\nwhy perplexity is used.\n\n00:05:09\nwas in the bad old days of symbolic artificial\n\n00:05:17\nMcCarthy and Ed Feigenbaum were around\n\n00:05:26\nat IBM, including Fred Jelinek, started exploring\n\n00:05:33\nand other similar methods.\n\n00:05:40\nwas, well, at that time--\n\n00:05:46\nthat none of the AI people that he was trying to talk to\n\n00:05:53\nand didn't understand any information theory\n\n00:06:03\nrate.\n\n00:06:05\nthat they could understand.\n\n00:06:10\nthis exponentiated perplexity.\n\n00:06:15\nas being equivalent to how many uniform choices you're choosing\n\n00:06:21\nSo if the perplexity of something is 64,\n\n00:06:29\ntime, and your chance of getting a 1 on that is your chance\n\n00:06:37\nSo that was why perplexity got introduced, but it's stuck.\n\n00:06:44\nyou generally still see perplexities.\n\n00:06:51\nSo here are the kind of numbers and where progress was made\n\n00:06:57\nSo before that, people used n-gram language models,\n\n00:07:04\nthem using methods I vaguely alluded\n\n00:07:11\nActually, people use cleverer methods around the 2000s decade.\n\n00:07:21\nwas this thing called interpolated Kneser-Ney\n\n00:07:25\nAnd so for a big language model using that,\n\n00:07:33\nmeans that you weren't very good at predicting the next word.\n\n00:07:39\nWhen I was a young person doing NLP,\n\n00:07:46\nYou were commonly seeing perplexities of 150\n\n00:07:51\nSo progress was made.\n\n00:07:57\npeople weren't really actually able\n\n00:08:05\nby combining an RNN with something else,\n\n00:08:12\nI'm not going to explain, but those are numbers like that, 51.\n\n00:08:19\nwas when LSTM started to be used as an improved RNN, which is\n\n00:08:25\nSo here are some LSTM models, and now you're\n\n00:08:32\nAnd so for 30, you've halved the perplexity, which\n\n00:08:42\nby about one bit, and so you've made real progress\n\n00:08:49\nNow, by modern standards, these numbers are still really high.\n\n00:08:57\nyou're getting perplexities in the single digits.\n\n00:09:03\nthe right word.\n\n00:09:06\ncan predict what words are going to be said by someone\n\n00:09:12\nOK, so to motivate LSTMs, they wanted",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture08-seq2seq::seg1",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg1",
+      "global_kp_id": "kp_progress_from_n_gram_to_neural_language_models",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "name": "Perplexity as a proxy metric",
+      "description": "Pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient.",
+      "track_tags": [
+        "language_modeling",
+        "metrics",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models",
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure",
+        "research",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because perplexity as a proxy metric clarifies pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp14",
+        "local::lecture08-seq2seq::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_progress_from_n_gram_to_neural_language_models",
+      "name": "Progress from n-gram models to neural language models",
+      "description": "Historical perplexity comparisons show why LSTMs and later models were seen as major advances over smoothed n-gram language models.",
+      "track_tags": [
+        "language_modeling",
+        "history"
+      ],
+      "domain_tags": [
+        "nlp"
+      ],
+      "career_path_tags": [
+        "research"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because Progress from n-gram models to neural language models captures the core idea that Historical perplexity comparisons show why LSTMs and later models were seen as major advances over smoothed n-gram language models.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture08-seq2seq::kp2"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "target_difficulty_range": [
+    0.19,
+    0.49
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L8_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture08-seq2seq_transcript.txt"
+  }
+}

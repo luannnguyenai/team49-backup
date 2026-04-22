@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::lecture21-after-dpo::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=dnF463_Ar9I",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "The transcript and unit summary provide enough detail to generate 5 grounded questions about reward-model evaluation, RewardBench, safety, and the DPO reward caveat without needing a separate video clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture21_after_dpo_seg3_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture21_after_dpo_seg3_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is a benchmark like RewardBench useful for reward-model research?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because waiting for external arena results is too slow, so researchers need a local way to evaluate reward models",
+        "Because reward models can only be trained on benchmark data",
+        "Because Chatbot Arena directly outputs scalar reward heads",
+        "Because reward models do not require human preference data"
+      ],
+      "answer_index": 0,
+      "explanation": "RewardBench supports faster iteration. If evaluation depends only on slow external systems, researchers cannot quickly tell whether a reward model is improving.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "local evaluation tools",
+          "can't wait"
+        ],
+        "timestamps": [
+          "00:25:58",
+          "00:24:51"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the standard training example for a reward model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A prompt with a chosen completion and a rejected completion",
+        "A prompt with only one completion and no comparison",
+        "A sequence of hidden states with no text prompt",
+        "A chain-of-thought trace paired with a gold parse tree"
+      ],
+      "answer_index": 0,
+      "explanation": "Reward models are described as learning from comparisons. The model sees a prompt plus two completions, one preferred and one rejected, and learns scalar scores that favor the chosen completion.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "prompt",
+          "chosen and rejected"
+        ],
+        "timestamps": [
+          "00:27:12",
+          "00:27:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the pairwise reward-model loss try to achieve?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It increases the score gap so the chosen answer is scored above the rejected answer",
+        "It forces both answers to receive the same score",
+        "It removes the need for scalar outputs",
+        "It trains the policy directly without any reward model"
+      ],
+      "answer_index": 0,
+      "explanation": "The loss is designed to create a preference margin. A good reward model should assign a higher scalar value to the chosen completion than to the rejected one.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "preference margin",
+          "scalar scores"
+        ],
+        "timestamps": [
+          "00:27:56",
+          "00:27:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does roughly 70% annotator agreement on preference data imply?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It may partly reflect real disagreement in human preferences rather than only annotation noise",
+        "It proves the benchmark is unusable",
+        "It means reward models should ignore human labels",
+        "It guarantees that all reward models will saturate quickly"
+      ],
+      "answer_index": 0,
+      "explanation": "Preference labels are not always objectively single-correct. Lower agreement can reflect genuine variation in what different people prefer, not just poor labeling.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "70% annotator agreement",
+          "noise part of the signal"
+        ],
+        "timestamps": [
+          "00:28:53",
+          "00:28:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can a released DPO policy not be reliably reused as a reward model by itself?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because DPO's implicit reward depends on a policy/reference log-probability ratio, so the reference model is part of the reward definition",
+        "Because DPO models never learn preferences at all",
+        "Because DPO uses only binary labels and no probabilities",
+        "Because DPO reward models require hidden states from GPT-4"
+      ],
+      "answer_index": 0,
+      "explanation": "In DPO, the reward signal is not just a single scalar head attached to one model. It depends on comparing the policy to a reference model through log-probability ratios, so the reference checkpoint matters.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo_implicit_reward_reference_caveat",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "log-probability ratios",
+          "reference checkpoint matters"
+        ],
+        "timestamps": [
+          "00:36:30",
+          "00:36:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture21_after_dpo_seg3_q1",
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q2",
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q3",
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q4",
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q5",
+      "global_kp_id": "kp_dpo_implicit_reward_reference_caveat",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture21_after_dpo_seg3_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why is a benchmark like RewardBench useful for reward-model research\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the standard training example for a reward model\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does the pairwise reward-model loss try to achieve\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does roughly 70% annotator agreement on preference data imply\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can a released DPO policy not be reliably reused as a reward model by itself\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture21_after_dpo_seg3_q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is a benchmark like RewardBench useful for reward-model research\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the standard training example for a reward model\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does the pairwise reward-model loss try to achieve\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does roughly 70% annotator agreement on preference data imply\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture21_after_dpo_seg3_q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can a released DPO policy not be reliably reused as a reward model by itself\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

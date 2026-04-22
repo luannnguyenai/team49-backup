@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_14::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for concept questions on the original GAN minimax objective and why raw minimax values are poor standalone diagnostics during training.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When the generator G is fixed, what is the discriminator D trained to do in the original GAN minimax objective?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Assign high scores to real samples and low scores to generated samples",
+        "Map real and fake samples to the same constant score",
+        "Predict the latent variable z from each real image",
+        "Minimize the distance between real samples and generated samples directly in pixel space"
+      ],
+      "answer_index": 0,
+      "explanation": "With G fixed, D behaves like a binary classifier. It learns to classify real data as real and generator outputs as fake.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_minimax_objective",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "maximize log D(x)",
+          "log one minus D of G of z"
+        ],
+        "timestamps": [
+          "00:10:15",
+          "00:10:15"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the raw minimax value V(G,D) a poor standalone diagnostic for GAN training progress?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it depends on both the generator and discriminator, so its value does not directly track sample quality",
+        "Because it is always guaranteed to decrease smoothly during training",
+        "Because it only measures the generator and ignores the discriminator",
+        "Because it is undefined whenever the generator produces realistic images"
+      ],
+      "answer_index": 0,
+      "explanation": "The GAN objective is a game between two networks, not a single loss that one model tries to reduce. A lower or higher raw value does not cleanly tell you whether samples are improving.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_instability_diagnostics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not an overall loss",
+          "not a reliable metric"
+        ],
+        "timestamps": [
+          "00:14:09",
+          "00:15:17"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "global_kp_id": "kp_gan_minimax_objective",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"When the generator G is fixed, what is the discriminator D trained to do in the original GAN minimax objective\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is the raw minimax value V(G,D) a poor standalone diagnostic for GAN training progress\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"When the generator G is fixed, what is the discriminator D trained to do in the original GAN minimax objective\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is the raw minimax value V(G,D) a poor standalone diagnostic for GAN training progress\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

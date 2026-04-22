@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_16::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript provides enough evidence for two grounded questions on Molmo’s open recipe and pointing-based reasoning.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What open-source problem is Molmo presented as addressing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Strong open models should be reproducible without depending on distillation from closed API models",
+        "Vision-language models should never use any curated training data",
+        "Open models should avoid benchmarking against closed systems",
+        "All multimodal models should use only robotics data"
+      ],
+      "answer_index": 0,
+      "explanation": "The issue is not only whether an open model exists, but whether the wider community can reproduce the recipe from open weights, data, and code rather than relying on outputs from closed systems.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "distilled from GPT or Gemini",
+          "open-source reproducibility problem"
+        ],
+        "timestamps": [
+          "00:43:02",
+          "00:43:02"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does grounded decision-making help a model like Molmo reduce hallucinations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It requires the model to point to visual evidence before giving the answer",
+        "It removes language generation entirely and outputs only coordinates",
+        "It forces every answer to be retrieved from a fixed database",
+        "It guarantees perfect accuracy by using larger batch sizes"
+      ],
+      "answer_index": 0,
+      "explanation": "Pointing creates a visible link between the answer and the supporting pixels. That does not guarantee correctness, but it makes unsupported guesses less likely and easier to catch.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_grounded_decision_making_through_pointing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "point to visual evidence",
+          "before producing an answer"
+        ],
+        "timestamps": [
+          "00:47:30",
+          "00:47:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "global_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "global_kp_id": "kp_grounded_decision_making_through_pointing",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What open-source problem is Molmo presented as addressing\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does grounded decision-making help a model like Molmo reduce hallucinations\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What open-source problem is Molmo presented as addressing\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does grounded decision-making help a model like Molmo reduce hallucinations\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

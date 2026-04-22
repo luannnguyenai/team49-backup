@@ -12,11 +12,11 @@
     "kg_visualizations"
   ],
   "source_paths_preserved": [
-    "data/CS224n",
-    "data/CS231n",
-    "data/p3_inputs",
-    "data/p2_bundle",
-    "data/p5_inputs"
+    "data/courses/CS224n",
+    "data/courses/CS231n",
+    "data/working/p3_inputs",
+    "data/working/p2",
+    "data/working/p5"
   ],
   "counts": {
     "p2.concepts_kp_global": 470,

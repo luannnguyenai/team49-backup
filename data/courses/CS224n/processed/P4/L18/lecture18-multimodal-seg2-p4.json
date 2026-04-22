@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "The transcript is clear enough to generate questions about early multimodal paradigms: shared embedding spaces, bag of visual words, semantic grounding, encoder-decoder captioning, attention, and text-conditioned GANs.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture18-multimodal-seg2-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What was the core goal of many early multimodal models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Encode images and text separately, then align them in a shared embedding space.",
+        "Remove the image encoder entirely and infer everything from text alone.",
+        "Always generate images directly from text without any intermediate representation.",
+        "Use RLHF to rank image-text pairs."
+      ],
+      "answer_index": 0,
+      "explanation": "A foundational recipe in early multimodal learning was to build separate encoders for images and text, then train them so matched pairs lie close together in a shared representation space while mismatched pairs lie farther apart.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same multimodal space",
+          "align these two"
+        ],
+        "timestamps": [
+          "07:56",
+          "08:11"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In bag of visual words, which step turns local descriptors into a bag-style representation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Sort descriptors by the order in which they appear in the video.",
+        "Cluster descriptors with k-means, then count how often each cluster appears.",
+        "Train an LSTM to generate a caption from each keypoint.",
+        "Use RL to choose a single best descriptor for the whole image."
+      ],
+      "answer_index": 1,
+      "explanation": "Bag of visual words takes local descriptors from salient regions, clusters them with k-means, and uses the frequency of each cluster as a histogram, much like bag of words in text.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cluster them using k means",
+          "count how often they occur"
+        ],
+        "timestamps": [
+          "10:24",
+          "10:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can grounding from images produce richer semantic representations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because images are always more accurate than text in every context.",
+        "Because the model can connect word meaning to perceptual experience instead of relying only on textual definitions.",
+        "Because grounding completely removes the need to learn language embeddings.",
+        "Because only concrete words can be grounded."
+      ],
+      "answer_index": 1,
+      "explanation": "Grounding adds perceptual information to word or sentence representations. Instead of learning only from textual co-occurrence, the model also links concepts to how they appear in the perceptual world, which can yield richer semantics.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "richer grounded semantic representations",
+          "look at pictures of cats"
+        ],
+        "timestamps": [
+          "11:20",
+          "09:04"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In early seq2seq-style image captioning, what replaced the source-language encoder?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A CNN image encoder.",
+        "A reward model trained from pairwise caption comparisons.",
+        "A diffusion module that generates image patches.",
+        "A hand-written rule set that maps objects to words."
+      ],
+      "answer_index": 0,
+      "explanation": "Early image captioning reused the seq2seq intuition: replace the source-language encoder with an image encoder, then let the language decoder generate a caption from the image representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "replace the source-language encoder",
+          "ConvNet image encoder"
+        ],
+        "timestamps": [
+          "13:33",
+          "13:40"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main role of attention in captioning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Force every caption word to look at the same image region.",
+        "Align each generated word with the most relevant image region at that moment.",
+        "Completely replace the language decoder with an object detector.",
+        "Remove the need to learn image representations beforehand."
+      ],
+      "answer_index": 1,
+      "explanation": "Attention lets the model focus on the image region most relevant to the word it is currently generating. For example, when producing a word like 'stop,' it can attend strongly to the stop sign region instead of relying on a single global image representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "align generated words",
+          "relevant image region"
+        ],
+        "timestamps": [
+          "14:33",
+          "14:39"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg2-q1",
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q2",
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q3",
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q4",
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q5",
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture18-multimodal-seg2-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What was the core goal of many early multimodal models\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"In bag of visual words, which step turns local descriptors into a bag-style representation\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can grounding from images produce richer semantic representations\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"In early seq2seq-style image captioning, what replaced the source-language encoder\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the main role of attention in captioning\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture18-multimodal-seg2-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What was the core goal of many early multimodal models\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In bag of visual words, which step turns local descriptors into a bag-style representation\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can grounding from images produce richer semantic representations\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q4",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In early seq2seq-style image captioning, what replaced the source-language encoder\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg2-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the main role of attention in captioning\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

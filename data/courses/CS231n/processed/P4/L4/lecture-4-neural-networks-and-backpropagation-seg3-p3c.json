@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This segment is rich in conceptual content about activation functions and their tradeoffs, and the transcript is enough to support a safe question set.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What happens if you remove the activation function between two weight matrices in a multilayer network?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The network collapses to a linear function equivalent to a linear classifier.",
+        "The network automatically becomes a normalized probabilistic model.",
+        "The number of hidden units effectively increases without changing parameters.",
+        "Backpropagation no longer needs the chain rule."
+      ],
+      "answer_index": 0,
+      "explanation": "The product of linear transformations is still a linear transformation. Removing the activation therefore removes the network's ability to represent nonlinear functions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "becomes just a linear function",
+          "solve non-linear problems"
+        ],
+        "timestamps": [
+          "00:18:27",
+          "00:18:40"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a common drawback of sigmoid and tanh in hidden layers?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They can cause vanishing gradients by compressing values into a narrow range.",
+        "They always produce negative outputs, so they cannot learn positive features.",
+        "They are not differentiable, so they cannot be used with backpropagation.",
+        "They make the network linear."
+      ],
+      "answer_index": 0,
+      "explanation": "When the output is strongly compressed, the derivative can become very small over large regions. That weakens the gradient signal as it propagates backward through many layers.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "few problems",
+          "vanishing gradients"
+        ],
+        "timestamps": [
+          "00:20:48",
+          "00:20:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When starting with a new architecture, what is the most reasonable way to choose an activation function?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Start from the common default used for that architecture family and verify it experimentally.",
+        "Always use sigmoid because it is the most general activation.",
+        "Avoid all nonlinearities and prefer pure matrix multiplication.",
+        "Pick a random activation and keep it fixed for every problem."
+      ],
+      "answer_index": 0,
+      "explanation": "There is no single best activation for every case. In practice, people usually start from the option that has worked well for similar architectures and then validate it on the actual data and task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "mostly empirical",
+          "good default choice"
+        ],
+        "timestamps": [
+          "00:23:21",
+          "00:21:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q1",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q2",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q3",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.5,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Collapsing stacked linear layers into one linear map is a canonical activation-function concept and should be easy."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.92,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Sigmoid/tanh saturation is a common but slightly more technical failure mode, so it is easy-to-medium."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Choosing an activation for a new architecture is a moderate judgment question rather than a pure definition check."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "A learner who misses this likely is not ready to skip basic NN foundations."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item checks whether the learner understands why some activations make optimization harder."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg3-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item transfers beyond one architecture because activation choice is a recurring design decision."
+    }
+  ]
+}

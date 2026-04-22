@@ -1,0 +1,1292 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Why robot learning matters",
+      "start_s": 5,
+      "end_s": 333
+    },
+    {
+      "section_index": 2,
+      "title": "Problem formulation for robot learning",
+      "start_s": 334,
+      "end_s": 757
+    },
+    {
+      "section_index": 3,
+      "title": "Robot perception and the perception-action loop",
+      "start_s": 758,
+      "end_s": 1118
+    },
+    {
+      "section_index": 4,
+      "title": "Reinforcement learning fundamentals and Q-learning intuition",
+      "start_s": 1119,
+      "end_s": 1756
+    },
+    {
+      "section_index": 5,
+      "title": "RL successes, sim-to-real transfer, and model-free limitations",
+      "start_s": 1757,
+      "end_s": 2229
+    },
+    {
+      "section_index": 6,
+      "title": "Model learning and model-based planning",
+      "start_s": 2230,
+      "end_s": 3295
+    },
+    {
+      "section_index": 7,
+      "title": "Imitation learning from demonstrations",
+      "start_s": 3296,
+      "end_s": 3802
+    },
+    {
+      "section_index": 8,
+      "title": "Robotic foundation models",
+      "start_s": 3803,
+      "end_s": 4432
+    },
+    {
+      "section_index": 9,
+      "title": "Evaluation bottlenecks and future directions",
+      "start_s": 4433,
+      "end_s": 4705
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg1",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Why robot learning matters",
+      "description": "Motivates robot learning by contrasting it with supervised and self-supervised learning and by highlighting the recent surge of interest in general-purpose robots.",
+      "summary": "The lecture opens by contrasting supervised learning, which maps inputs to labels, and self-supervised learning, which extracts hidden structure from unlabeled data, with robot learning, where actions change the world and produce new observations and rewards [ts=96s] [ts=121s] [ts=157s]. Li emphasizes that robot learning is about choosing a sequence of actions to maximize reward or minimize cost rather than only predicting outputs [ts=193s]. He also frames the area as a fast-growing field, pointing to startup and industry momentum around robots that can physically interact with the environment [ts=205s] [ts=241s]. The segment ends with a roadmap spanning problem formulation, perception, reinforcement learning, model-based planning, imitation learning, foundation models, and remaining challenges [ts=279s] [ts=322s].",
+      "key_points": [
+        {
+          "text": "Robot learning differs from x-to-y prediction because actions change the environment and future observations.",
+          "timestamp_s": 157,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The objective is to choose a sequence of actions that maximizes reward or minimizes cost.",
+          "timestamp_s": 193,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Recent excitement comes from robots performing complicated physical tasks and attracting heavy investment.",
+          "timestamp_s": 205,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The lecture roadmap covers formulation, perception, RL, model-based planning, imitation learning, foundation models, and challenges.",
+          "timestamp_s": 279,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 5,
+        "end_s": 333
+      },
+      "difficulty": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 5,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Problem formulation for robot learning",
+      "description": "Defines robot learning problems using goals, states, actions, rewards, and physical-world feedback, then grounds the abstraction with examples from control, games, language, chatbots, and cloth folding.",
+      "summary": "Li formalizes robot learning with an agent that receives a task objective, observes state from the physical world, takes an action, and receives both the next state and reward [ts=345s] [ts=373s]. He stresses that, unlike much of computer vision, robotics is framed as optimization under physical constraints: the system must choose actions that improve an objective in the real world [ts=405s] [ts=416s]. The segment walks through cart-pole, robot locomotion, Atari, Go, text generation, chatbots, and cloth folding to show that the same goal-state-action-reward template applies broadly [ts=442s] [ts=476s] [ts=505s] [ts=596s] [ts=631s]. It closes by noting that reward design is application-specific, such as balancing speed versus comfort in driving or compactness versus smoothness in cloth folding [ts=705s] [ts=720s] [ts=742s].",
+      "key_points": [
+        {
+          "text": "A robot learning problem is specified by goal, state, action, reward, and the resulting next state.",
+          "timestamp_s": 386,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Robotics is posed as optimization in a physical world rather than only representation learning from high-dimensional inputs.",
+          "timestamp_s": 405,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Cart-pole uses pole angle and cart state as inputs, horizontal force as action, and uprightness as reward.",
+          "timestamp_s": 442,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Robot locomotion uses joint states, torques, and forward/upright reward.",
+          "timestamp_s": 476,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Chatbots can also be cast as sequential decision making with conversation state, next-sentence action, and human-evaluation reward.",
+          "timestamp_s": 596,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Reward design is nuanced and must match the application, such as comfort in driving or smoothness in cloth folding.",
+          "timestamp_s": 705,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 334,
+        "end_s": 757
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 7,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Robot perception and the perception-action loop",
+      "description": "Explains what makes robot perception different from standard computer vision: multimodal sensing, incomplete and dynamic worlds, affordances, and tight coupling between perception and action.",
+      "summary": "Robot perception is presented as the problem of distilling structured, decision-relevant knowledge from high-dimensional observations such as RGB, RGBD, and tactile signals [ts=775s] [ts=793s]. Li argues that the real world is messy: sensors are partial and noisy, actions can fail, and robots must cope with deformable objects, moving agents, and changing scenes [ts=817s] [ts=836s] [ts=854s]. Because of this, capable systems use multimodal sensing and combine modalities such as vision, touch, audio, and depth so that each compensates for the others [ts=877s] [ts=901s] [ts=923s]. He then contrasts passive computer vision with robot vision, which must reason about affordances and the effects of actions; robot vision is embodied, active, and situated, and should close a task-specific perception-action loop rather than recover the entire world state [ts=938s] [ts=989s] [ts=998s] [ts=1075s].",
+      "key_points": [
+        {
+          "text": "Robot perception turns raw RGB, RGBD, and tactile observations into structured information useful for decision making.",
+          "timestamp_s": 793,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Perception must handle occlusion, sensing errors, failed grasps, and dynamic environments with deformable objects and other agents.",
+          "timestamp_s": 817,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Robotic systems often fuse vision, touch, audio, and depth because the modalities provide complementary information.",
+          "timestamp_s": 877,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Robot vision must understand affordances and the effect of actions, not only segment static images.",
+          "timestamp_s": 938,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Robot vision is embodied, active, and environmentally situated.",
+          "timestamp_s": 998,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Perception should focus on task-relevant local regions, like the area near a shirt button, to close the perception-action loop.",
+          "timestamp_s": 1075,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 758,
+        "end_s": 1118
+      },
+      "difficulty": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 6,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Reinforcement learning fundamentals and Q-learning intuition",
+      "description": "Introduces reinforcement learning as trial-and-error optimization, contrasts it with supervised learning, and gives intuition for value-based control through Q-functions and a DQN-style Atari example.",
+      "summary": "Li defines reinforcement learning as repeated interaction with an environment in order to discover actions that yield higher reward through trial and error [ts=1131s] [ts=1161s]. He highlights four reasons RL is harder than supervised learning: stochastic environments, delayed rewards and credit assignment, non-differentiable dynamics, and nonstationarity because actions alter future states [ts=1234s] [ts=1283s] [ts=1340s] [ts=1389s]. He then introduces value-based RL through the Q-function, which estimates expected discounted future reward for taking action a in state s, and shows how an agent picks the action with the highest Q-value [ts=1456s] [ts=1477s] [ts=1492s]. In the Atari example, the state is a stack of four frames and the Q-function is implemented by a CNN that outputs one value per discrete action [ts=1699s] [ts=1713s] [ts=1746s].",
+      "key_points": [
+        {
+          "text": "Reinforcement learning improves behavior by trial-and-error interaction with the environment.",
+          "timestamp_s": 1161,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "RL must handle stochastic dynamics where the same action can produce different outcomes and rewards.",
+          "timestamp_s": 1234,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Delayed rewards create a difficult credit-assignment problem across long action sequences.",
+          "timestamp_s": 1283,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Many RL environments are not differentiable, so learning may rely on large-scale sampling and zero-order gradient estimates.",
+          "timestamp_s": 1340,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A Q-function estimates discounted expected future reward for a state-action pair.",
+          "timestamp_s": 1456,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In Atari, a CNN can map a stack of four frames to Q-values for discrete actions and choose the action with the largest value.",
+          "timestamp_s": 1699,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 1119,
+        "end_s": 1756
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 11,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "RL successes, sim-to-real transfer, and model-free limitations",
+      "description": "Uses games and robotics case studies to show what model-free reinforcement learning can achieve and why sample efficiency, safety, and interpretability remain major bottlenecks.",
+      "summary": "The segment illustrates RL’s strengths through case studies. In Breakout, the agent first learns reliable control and later discovers a non-obvious tunnel strategy that accelerates scoring [ts=1542s] [ts=1599s] [ts=1615s]. Li then sketches the progression from AlphaGo to AlphaGo Zero, AlphaZero, and MuZero to argue that simple scalable recipes and, later, learned latent dynamics can produce very strong game-playing systems [ts=1757s] [ts=1779s] [ts=1826s]. In robotics, he highlights sim-to-real locomotion results showing that imperfect simulations can still transfer if they are randomized enough, while noting that manipulation remains less mature and often unreliable [ts=1921s] [ts=1957s] [ts=2002s] [ts=2040s]. He closes by identifying model-free RL’s core weaknesses: massive interaction cost, safety issues, limited interpretability, and the absence of the predictive internal models humans use for planning [ts=2110s] [ts=2147s] [ts=2180s] [ts=2199s].",
+      "key_points": [
+        {
+          "text": "Breakout agents can discover a tunnel strategy that outperforms naive play after extended exploration.",
+          "timestamp_s": 1599,
+          "evidence_type": "example"
+        },
+        {
+          "text": "AlphaGo-family systems show the value of scalable RL recipes, with MuZero adding planning through a learned latent dynamics model.",
+          "timestamp_s": 1826,
+          "evidence_type": "example"
+        },
+        {
+          "text": "For locomotion, sim-to-real transfer can work well even when the simulator omits details like bushes or snow.",
+          "timestamp_s": 1957,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Robot locomotion is close to solved by reinforcement learning, but dexterous manipulation is still less reliable and less general.",
+          "timestamp_s": 2002,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Model-free RL needs extensive interaction, can be unsafe on real hardware, and is hard to interpret or correct when it fails.",
+          "timestamp_s": 2110,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Humans rely on predictive internal models of the world, motivating a shift toward learned models for planning.",
+          "timestamp_s": 2199,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 1757,
+        "end_s": 2229
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Model learning and model-based planning",
+      "description": "Shows how robots can learn forward dynamics models and then optimize actions through those models, with examples using pixel, keypoint, and particle-based state representations.",
+      "summary": "Motivated by the limits of model-free RL, Li proposes learning an approximate forward model of the world from robot interaction data and using it for planning [ts=2500s] [ts=2515s] [ts=2535s]. The planning problem is the inverse of prediction: given a current state and target state, the robot optimizes action sequences so the model’s predicted trajectory moves toward the target, usually executing only the first action and then replanning with fresh observations [ts=2561s] [ts=2574s] [ts=2617s]. He notes that GPUs make large-scale parallel sampling and optimization practical [ts=2633s] [ts=2641s]. A major design choice is state representation, illustrated through pixel dynamics (Deep Visual Foresight), keypoint dynamics for rigid pushing, and particle dynamics for granular media and dough manipulation [ts=2666s] [ts=2698s] [ts=2726s] [ts=2772s]. The particle-based examples show letter-shaping with granular materials and a dumpling-making system that chooses tools and actions while recovering from disturbances; in that dough domain, a learned dynamics model from real interactions beat a physics-based deformable simulator [ts=2856s] [ts=2891s] [ts=2950s] [ts=3248s] [ts=3270s].",
+      "key_points": [
+        {
+          "text": "Model learning trains a forward dynamics model from interaction data and uses it for downstream planning.",
+          "timestamp_s": 2515,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Planning solves the inverse problem: choose actions so the predicted future state approaches a target state.",
+          "timestamp_s": 2561,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A common loop is to optimize a trajectory, execute only the first action, observe the new state, and re-optimize.",
+          "timestamp_s": 2617,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "GPU-enabled parallel sampling makes action-sequence optimization efficient enough to use learned models in practice.",
+          "timestamp_s": 2633,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pixel dynamics predicts future images directly from actions.",
+          "timestamp_s": 2698,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Keypoint dynamics tracks 3D keypoints to plan rigid-object pushing.",
+          "timestamp_s": 2726,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Particle dynamics models granular media and dough, enabling tasks like letter rearrangement and dumpling making.",
+          "timestamp_s": 2772,
+          "evidence_type": "example"
+        },
+        {
+          "text": "For deformable dough, the learned model from real interactions was more accurate than the physics-based MPM simulator.",
+          "timestamp_s": 3248,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 2230,
+        "end_s": 3295
+      },
+      "difficulty": 0.82,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 18,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Imitation learning from demonstrations",
+      "description": "Covers the supervised-learning view of policy learning from demonstrations, the cascading-error problem in behavior cloning, reward inference from demonstrations, and newer generative-policy approaches.",
+      "summary": "Li reframes policy learning as supervised learning over demonstration data: instead of learning a world model, the system directly learns a mapping from state or observation to action from expert trajectories [ts=3296s] [ts=3338s]. He introduces behavior cloning as the basic form of this idea and then explains cascading error: small deviations lead the policy into states outside the training distribution, where errors compound over time [ts=3384s] [ts=3405s] [ts=3431s] [ts=3446s]. To mitigate this, practitioners iteratively collect more demonstrations or corrective actions on the policy’s failure cases [ts=3454s] [ts=3471s] [ts=3487s]. He also covers inverse reinforcement learning, which infers reward functions from demonstrations, and newer generative-policy families such as implicit behavior cloning and diffusion policies that handle multimodal actions and rich contact manipulation better than simple one-shot regression [ts=3521s] [ts=3540s] [ts=3587s] [ts=3642s] [ts=3670s]. The section ends by arguing that imitation learning is still the most efficient way to get a useful real-world manipulation policy, although robustness depends on iterative data collection [ts=3740s] [ts=3760s] [ts=3775s].",
+      "key_points": [
+        {
+          "text": "Imitation learning uses a demonstration dataset to train a policy mapping observations or states to actions.",
+          "timestamp_s": 3338,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Behavior cloning is the classic supervised version of imitation learning.",
+          "timestamp_s": 3388,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Cascading error occurs when small early mistakes move the policy off the demonstration distribution and amplify over time.",
+          "timestamp_s": 3405,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A practical workflow is to roll out the policy, observe failures, and add corrective demonstrations.",
+          "timestamp_s": 3457,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Inverse reinforcement learning infers rewards from demonstrations and then uses those rewards for RL.",
+          "timestamp_s": 3524,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Implicit behavior cloning and diffusion policies use more expressive generative modeling ideas to handle multimodal behavior and complex manipulation.",
+          "timestamp_s": 3587,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Imitation learning is currently the most efficient route to a robot policy that does something useful in the real world.",
+          "timestamp_s": 3760,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 3296,
+        "end_s": 3802
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Robotic foundation models",
+      "description": "Defines robotic foundation models as broad, goal-conditioned policies and uses Pi-Zero to illustrate data aggregation, VLM-based pretraining, task-specific post-training, and current limitations.",
+      "summary": "Li defines robotic foundation models as policies that map the current observation or state plus a goal into actions, without explicitly representing states or transition dynamics as a separate model [ts=3825s] [ts=3841s] [ts=3856s]. What makes them “foundation” models is the ambition to generalize broadly, analogous to vision-language models whose outputs are not always perfect but are usually reasonable; for robot policies, the desired behavior is a smooth, sensible trajectory that follows the task specification [ts=3870s] [ts=3895s] [ts=3913s] [ts=3935s]. Li notes rapid empirical progress from RT-1 through RT-2, RT-X, OpenVLA, and Pi-Zero, while warning that evaluation remains noisy and broad generalization is hard to quantify [ts=3961s] [ts=3999s] [ts=4015s] [ts=4029s]. Using Pi-Zero as the main example, he explains that foundation models require large cross-embodiment datasets, start from pretrained vision-language backbones, use co-fine-tuning for action prediction plus VQA-style objectives, and then rely on task-specific post-training for harder in-distribution or unseen tasks [ts=4109s] [ts=4134s] [ts=4153s] [ts=4176s] [ts=4232s]. He also points out current limitations: teleoperated data collection is slow, policies inherit that slowness, and one giant policy may not be enough for broad home-scale tasking without higher-level abstractions [ts=4262s] [ts=4331s] [ts=4374s].",
+      "key_points": [
+        {
+          "text": "A robotic foundation model is a goal-conditioned policy from observation/state to action, without an explicit transition model.",
+          "timestamp_s": 3825,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The target behavior is not always optimal action, but a smooth and reasonable trajectory that respects the instruction.",
+          "timestamp_s": 3913,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Progress is tracked through families such as RT-1, RT-2, RT-X, OpenVLA, and Pi-Zero.",
+          "timestamp_s": 3999,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Foundation models need large aggregated robot datasets across many embodiments as their training fuel.",
+          "timestamp_s": 4112,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pretraining typically starts from a vision-language model and preserves semantic knowledge while adding action prediction.",
+          "timestamp_s": 4134,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Post-training with task-specific robot data is usually required for strong performance on harder tasks.",
+          "timestamp_s": 4176,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Current foundation policies are often slower than humans because teleoperated demonstrations are slower and harder to collect well.",
+          "timestamp_s": 4262,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Li does not expect one monolithic policy alone to solve broad home-scale tasking without higher-level structure.",
+          "timestamp_s": 4374,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 3803,
+        "end_s": 4432
+      },
+      "difficulty": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg9",
+      "course_id": "stanford::cs231n::spring_2025",
+      "name": "Evaluation bottlenecks and future directions",
+      "description": "Summarizes the hardest open problems Li emphasizes at the end of the lecture: evaluation, simulation realism, benchmark design, and the move from foundation policies toward foundation world models.",
+      "summary": "The final segment argues that evaluation is one of the field’s biggest unresolved bottlenecks. Real-world evaluation is still the default, but it is expensive, noisy, slow, and sensitive to factors like initial conditions, lighting, and friction [ts=4439s] [ts=4457s] [ts=4471s] [ts=4484s]. Li stresses that policy training loss often measures only one-step prediction quality and correlates weakly with long-horizon real-world success, which makes model selection difficult [ts=4489s] [ts=4505s] [ts=4516s] [ts=4528s]. Simulation-based evaluation helps but still faces sim-to-real gaps, difficult asset creation, world digitalization, and the need for realistic procedural generation [ts=4546s] [ts=4569s] [ts=4579s] [ts=4593s]. He says the community wants an ImageNet-like embodied benchmark where progress on the benchmark really means progress in robot learning [ts=4602s] [ts=4618s]. He closes by pointing to foundation world models trained from large action-conditioned robot interaction datasets as an important future direction beyond foundation policies alone [ts=4630s] [ts=4649s] [ts=4663s].",
+      "key_points": [
+        {
+          "text": "Real-world evaluation is costly, noisy, and highly sensitive to setup details such as lighting, friction, and initial configuration.",
+          "timestamp_s": 4457,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Low training loss on one-step predictions can fail to predict long-horizon task success.",
+          "timestamp_s": 4489,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Simulation evaluation still struggles with sim-to-real gap, asset generation, digitalization, and realistic procedural scene generation.",
+          "timestamp_s": 4546,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Embodied AI still lacks an ImageNet-like benchmark whose gains reliably transfer to real robot progress.",
+          "timestamp_s": 4602,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A promising direction is to train foundation world models from large action-conditioned robot interaction datasets.",
+          "timestamp_s": 4630,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+        "start_s": 4433,
+        "end_s": 4705
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 5,
+      "ordering_index": 9,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Sets the lecture’s global framing and motivation through contrasts with supervised/self-supervised learning and industry examples [ts=96s] [ts=205s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Introduces the reusable goal-state-action-reward abstraction and several canonical examples that support downstream retrieval and assessment [ts=345s] [ts=442s] [ts=631s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Provides the lecture’s main conceptual distinctions for robot perception, especially multimodal sensing and embodied/active/situated vision [ts=877s] [ts=998s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": true,
+      "rationale": "Contains the core RL definitions and the only detailed walkthrough of Q-learning and DQN-style action selection [ts=1456s] [ts=1699s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Uses visually memorable case studies to show both the power and the practical limits of model-free RL in games and robotics [ts=1599s] [ts=1921s] [ts=2110s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": true,
+      "rationale": "Introduces the transition-function view of world modeling, optimization through learned dynamics, and multiple representation choices with long demos [ts=2553s] [ts=2666s] [ts=2891s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Covers a practically important family of algorithms and names several commonly tested ideas such as behavior cloning, inverse RL, and diffusion policy [ts=3388s] [ts=3524s] [ts=3642s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Surveys a fast-moving topic with many examples and a concrete Pi-Zero pipeline, but the coverage stays intentionally high level [ts=3999s] [ts=4109s] [ts=4176s]."
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The ending distills the field’s hardest open problems—evaluation and simulation realism—and points toward foundation world models [ts=4439s] [ts=4546s] [ts=4630s]."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg1",
+      "global_kp_id": "kp_robot_learning_as_interactive_sequential_decision_making",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg1",
+      "global_kp_id": "kp_goal_state_action_reward_formulation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "global_kp_id": "kp_goal_state_action_reward_formulation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "global_kp_id": "kp_reward_design_and_task_specification",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "global_kp_id": "kp_robot_learning_as_interactive_sequential_decision_making",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "global_kp_id": "kp_multimodal_robot_perception",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "global_kp_id": "kp_embodied_active_and_situated_robot_vision",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "global_kp_id": "kp_perception_action_integration",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+      "global_kp_id": "kp_reinforcement_learning_through_trial_and_error",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+      "global_kp_id": "kp_why_rl_is_harder_than_supervised_learning",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+      "global_kp_id": "kp_q_functions_and_value_based_action_selection",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+      "global_kp_id": "kp_reinforcement_learning_through_trial_and_error",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "global_kp_id": "kp_state_representations_for_learned_world_models",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+      "global_kp_id": "kp_behavior_cloning_and_iterative_correction",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+      "global_kp_id": "kp_inverse_rl_implicit_bc_and_diffusion_policies",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg9",
+      "global_kp_id": "kp_evaluation_bottlenecks_and_foundation_world_models",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg9",
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg9",
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_robot_learning_as_interactive_sequential_decision_making",
+      "name": "Robot learning as interactive sequential decision-making",
+      "description": "Robot learning is distinguished from standard prediction problems because actions change the environment, generate new observations, and must be chosen over time to improve reward.",
+      "track_tags": [
+        "decision_making",
+        "robotics"
+      ],
+      "domain_tags": [
+        "robot_learning",
+        "sequential_decision_making"
+      ],
+      "career_path_tags": [
+        "embodied_ai_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because robot learning as interactive sequential decision-making clarifies robot learning is distinguished from standard prediction problems because actions change the environment, generate new observations, and must be chosen over time to improve reward, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_goal_state_action_reward_formulation",
+      "name": "Goal-state-action-reward formulation",
+      "description": "Robot learning problems are structured around a task goal, current state, action choice, reward signal, and resulting next state.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "control",
+        "problem_formulation",
+        "robot_learning"
+      ],
+      "career_path_tags": [
+        "ml_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.41,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because goal-state-action-reward formulation formalizes how robot learning problems are structured around a task goal, current state, action choice, reward signal, and resulting next state, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_design_and_task_specification",
+      "name": "Reward design and task specification",
+      "description": "Reward functions are not uniquely determined by the task name; they encode the specific preferences and metrics that define success in an application.",
+      "track_tags": [
+        "robotics",
+        "task_design"
+      ],
+      "domain_tags": [
+        "control_objectives",
+        "reward_design"
+      ],
+      "career_path_tags": [
+        "applied_ml_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reward design and task specification clarifies reward functions are not uniquely determined by the task name; they encode the specific preferences and metrics that define success in an application, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_multimodal_robot_perception",
+      "name": "Multimodal robot perception",
+      "description": "Robots need to fuse multiple sensory streams such as vision, depth, touch, and audio to recover task-relevant structure from partial, noisy observations.",
+      "track_tags": [
+        "perception",
+        "robotics"
+      ],
+      "domain_tags": [
+        "multimodal_sensing",
+        "robot_perception"
+      ],
+      "career_path_tags": [
+        "embodied_ai_researcher",
+        "perception_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because multimodal robot perception clarifies robots need to fuse multiple sensory streams such as vision, depth, touch, and audio to recover task-relevant structure from partial, noisy observations, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_embodied_active_and_situated_robot_vision",
+      "name": "Embodied, active, and situated robot vision",
+      "description": "Robot vision differs from passive computer vision because the robot has a body, can choose viewpoints or perturbations, and operates in the here-and-now of a specific physical context.",
+      "track_tags": [
+        "perception",
+        "robotics"
+      ],
+      "domain_tags": [
+        "embodied_ai",
+        "robot_vision"
+      ],
+      "career_path_tags": [
+        "embodied_ai_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because embodied, active, and situated robot vision clarifies robot vision differs from passive computer vision because the robot has a body, can choose viewpoints or perturbations, and operates in the here-and-now of a specific physical context, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_perception_action_integration",
+      "name": "Perception-action integration",
+      "description": "Robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times. Robotics is framed as the closure of the loop between seeing and doing, requiring both perception and action planning.",
+      "track_tags": [
+        "embodied_ai",
+        "perception",
+        "planning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "perception_action_loop",
+        "robotics",
+        "task_conditioned_perception"
+      ],
+      "career_path_tags": [
+        "autonomy_engineer",
+        "ml_engineering",
+        "research",
+        "robotics",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because perception-action integration clarifies robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp6",
+        "local::lecture_18_human_centered_ai::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reinforcement_learning_through_trial_and_error",
+      "name": "Reinforcement learning through trial and error",
+      "description": "Reinforcement learning trains an agent by repeatedly interacting with an environment and shifting behavior toward actions that produce higher return.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "policy_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "rl_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reinforcement learning through trial and error formalizes how reinforcement learning trains an agent by repeatedly interacting with an environment and shifting behavior toward actions that produce higher return, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_why_rl_is_harder_than_supervised_learning",
+      "name": "Why RL is harder than supervised learning",
+      "description": "RL must cope with stochastic dynamics, delayed credit assignment, non-differentiable environments, and nonstationarity caused by the agent’s own actions.",
+      "track_tags": [
+        "learning_theory",
+        "reinforcement_learning"
+      ],
+      "domain_tags": [
+        "credit_assignment",
+        "nonstationarity",
+        "stochastic_dynamics"
+      ],
+      "career_path_tags": [
+        "ml_researcher",
+        "rl_researcher"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because why RL is harder than supervised learning clarifies rL must cope with stochastic dynamics, delayed credit assignment, non-differentiable environments, and nonstationarity caused by the agent’s own actions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_q_functions_and_value_based_action_selection",
+      "name": "Q-functions and value-based action selection",
+      "description": "A Q-function predicts expected discounted future reward for a state-action pair and supports greedy action selection by choosing the highest-value action.",
+      "track_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "domain_tags": [
+        "dqn",
+        "q_learning",
+        "value_functions"
+      ],
+      "career_path_tags": [
+        "rl_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because q-functions and value-based action selection clarifies a Q-function predicts expected discounted future reward for a state-action pair and supports greedy action selection by choosing the highest-value action, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "name": "Model-free RL successes and sim-to-real limitations",
+      "description": "RL has produced dramatic wins in games and locomotion, yet still suffers from sample inefficiency, safety concerns, and limited robustness in many manipulation settings.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "model_free_rl",
+        "robot_locomotion",
+        "sim_to_real"
+      ],
+      "career_path_tags": [
+        "rl_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because model-free RL successes and sim-to-real limitations clarifies rL has produced dramatic wins in games and locomotion, yet still suffers from sample inefficiency, safety concerns, and limited robustness in many manipulation settings, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "name": "Learned forward dynamics for model-based planning",
+      "description": "Instead of directly learning a policy, a robot can learn how actions change the world and use that model to optimize future action sequences.",
+      "track_tags": [
+        "planning",
+        "robotics",
+        "world_models"
+      ],
+      "domain_tags": [
+        "forward_dynamics",
+        "model_based_planning",
+        "model_learning"
+      ],
+      "career_path_tags": [
+        "control_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.83,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because learned forward dynamics for model-based planning formalizes how instead of directly learning a policy, a robot can learn how actions change the world and use that model to optimize future action sequences, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_state_representations_for_learned_world_models",
+      "name": "State representations for learned world models",
+      "description": "World models can represent state at different granularities—pixels, keypoints, or particles—and the right choice depends on the task and object structure.",
+      "track_tags": [
+        "planning",
+        "representation_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "deformable_objects",
+        "state_representation",
+        "world_models"
+      ],
+      "career_path_tags": [
+        "perception_engineer",
+        "robotics_researcher"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because state representations for learned world models clarifies world models can represent state at different granularities—pixels, keypoints, or particles—and the right choice depends on the task and object structure, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_behavior_cloning_and_iterative_correction",
+      "name": "Behavior cloning and iterative correction",
+      "description": "A policy can be supervised on demonstrations, but practical imitation learning usually needs repeated expert correction to counter distribution shift and cascading error.",
+      "track_tags": [
+        "imitation_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "behavior_cloning",
+        "dataset_aggregation",
+        "learning_from_demonstrations"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because behavior cloning and iterative correction clarifies a policy can be supervised on demonstrations, but practical imitation learning usually needs repeated expert correction to counter distribution shift and cascading error, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_inverse_rl_implicit_bc_and_diffusion_policies",
+      "name": "Inverse RL, implicit BC, and diffusion policies",
+      "description": "More expressive imitation-learning methods infer rewards or use generative-policy parameterizations to better capture multimodal demonstrations and rich manipulation behavior.",
+      "track_tags": [
+        "generative_models",
+        "imitation_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "diffusion_policy",
+        "energy_based_models",
+        "inverse_reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "generative_model_researcher",
+        "robotics_researcher"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because inverse RL, implicit BC, and diffusion policies clarifies more expressive imitation-learning methods infer rewards or use generative-policy parameterizations to better capture multimodal demonstrations and rich manipulation behavior, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "name": "Robotic foundation models with pretraining and post-training",
+      "description": "Robotic foundation models aim for broad goal-conditioned action generalization by combining large aggregated robot datasets with pretrained VLMs and task-specific post-training.",
+      "track_tags": [
+        "foundation_models",
+        "robotics"
+      ],
+      "domain_tags": [
+        "pretraining",
+        "robot_foundation_models",
+        "vision_language_action_models"
+      ],
+      "career_path_tags": [
+        "foundation_model_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because robotic foundation models with pretraining and post-training formalizes how robotic foundation models aim for broad goal-conditioned action generalization by combining large aggregated robot datasets with pretrained VLMs and task-specific post-training, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_evaluation_bottlenecks_and_foundation_world_models",
+      "name": "Evaluation bottlenecks and foundation world models",
+      "description": "Robot learning progress is hard to measure because real-world evaluation is expensive and simulation is imperfect, motivating better benchmarks and foundation world models trained from action-conditioned data.",
+      "track_tags": [
+        "evaluation",
+        "robotics",
+        "world_models"
+      ],
+      "domain_tags": [
+        "benchmarking",
+        "foundation_world_models",
+        "sim_to_real"
+      ],
+      "career_path_tags": [
+        "benchmark_engineer",
+        "robotics_researcher"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because evaluation bottlenecks and foundation world models clarifies robot learning progress is hard to measure because real-world evaluation is expensive and simulation is imperfect, motivating better benchmarks and foundation world models trained from action-conditioned data, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp16"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

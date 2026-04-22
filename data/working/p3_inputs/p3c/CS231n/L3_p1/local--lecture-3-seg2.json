@@ -1,0 +1,243 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_3",
+    "lecture_title": "Regularization and Optimization",
+    "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4"
+  },
+  "unit": {
+    "unit_id": "local::lecture_3::seg2",
+    "course_id": "CS231N",
+    "name": "Regularization: intuition, penalties, and weight preferences",
+    "description": "Introduces regularization as the second loss term and explains why L1 and L2 encode different solution preferences.",
+    "summary": "Regularization is introduced as a term that prevents the model from doing too well on the training data, intentionally trading worse training fit for better test or unseen-data performance [ts=714s]. A toy example contrasts f1, which fits every training point, with f2, which does not fit perfectly but is expected to generalize better [ts=787s]. This is connected to Occam's Razor: among competing hypotheses, prefer the simpler one first [ts=854s]. The lambda parameter is the regularization-strength hyperparameter; lambda = 0 gives no regularization and larger values strengthen the penalty [ts=882s]. L2 squares and sums weights, L1 sums absolute values, and elastic net combines L1 and L2 [ts=923s]. L2 tends to prefer many small nonzero weights, while L1 tends to push dispensable weights to zero [ts=976s]. In the W1/W2 class example, W2=[0.25,0.25,0.25,0.25] and W1=[1,0,0,0] give the same score, but L2 prefers W2 because its squared penalty is lower [ts=1185s]. For the same example, L1 gives both weights equal penalty even though L1 often encourages sparsity in practice [ts=1241s].",
+    "key_points": [
+      {
+        "text": "Regularization is added to data loss to reduce overfitting: worse training performance can improve test performance.",
+        "timestamp_s": 714,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A simpler function that does not fit every training point can generalize better than a function that fits all training data perfectly.",
+        "timestamp_s": 787,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Lambda controls regularization strength and is tuned as a hyperparameter.",
+        "timestamp_s": 882,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "L2 regularization squares and sums weights; L1 regularization sums absolute weight values.",
+        "timestamp_s": 923,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "L2 prefers spread-out small weights; L1 tends to encourage sparsity.",
+        "timestamp_s": 976,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "For W1=[1,0,0,0] and W2=[0.25,0.25,0.25,0.25], L2 prefers W2, while L1 gives equal penalty in this exact setup.",
+        "timestamp_s": 1185,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+      "start_s": 714,
+      "end_s": 1474
+    },
+    "difficulty": 3.2,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 13,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "transcript_slice": "00:11:54\nwhich is this regularization term of the loss function.\n\n00:12:02\nto prevent the model from doing too well on the training data.\n\n00:12:07\nbut the goal is to make it do better on new test data\n\n00:12:11\nSo worse on training but better on the test set.\n\n00:12:16\nAnd we'll go over a lot of the intuition\n\n00:12:20\nBut the high-level goal is to do worse on the training data,\n\n00:12:26\nThat's the point of regularization.\n\n00:12:31\non each of the i training examples.\n\n00:12:40\nThat make sense?\n\n00:12:42\nBut this is just saying that i-th lost [INAUDIBLE].\n\n00:12:47\nYeah, you normally don't have a different loss for each i\n\n00:12:51\nYeah, yeah.\n\n00:12:55\nwe described Li as the loss for the i-th training example,\n\n00:12:58\nBut yeah, it could be i.\n\n00:13:05\nhave this intuition when thinking about it,\n\n00:13:09\nAnd the idea is we want to fit some function to these points\n\n00:13:15\nAnd you, say, have two different types of models, f1 and f2.\n\n00:13:23\nSo f1 goes through all of our data points,\n\n00:13:29\nbasically doing it perfectly, whereas f2 doesn't go\n\n00:13:35\nBut intuitively, it feels like, probably, f2\n\n00:13:42\nseen before.\n\n00:13:47\ndon't want to overfit your data so hard,\n\n00:13:51\nthat fits the data less, but is either simpler or has\n\n00:13:59\nAnd so if we ask, OK, how are these models going\n\n00:14:04\nYou'll find that f2 does a much better job at modeling.\n\n00:14:12\nSo I think, there's also an intuition\n\n00:14:17\nwe're preferring simpler models where it's\n\n00:14:23\nand also scientific discovery where\n\n00:14:27\nyou should go with the simplest one first\n\n00:14:31\nthen you can start trying out more complicated ones as you go.\n\n00:14:34\nyou can have for why regularization can be useful.\n\n00:14:42\nthat I didn't touch on yet is this lambda parameter here.\n\n00:14:47\nis another hyperparameter.\n\n00:14:52\nto set what is the optimal lambda here as well.\n\n00:14:57\nto a floating point between, I guess, 0\n\n00:15:02\nthere is no regularization, up to infinity.\n\n00:15:09\nSo it's very much a tunable knob you\n\n00:15:14\nwant to prevent the model from fitting to your training data.\n\n00:15:23\nSo here we have L2 regularization,\n\n00:15:30\nyou square each of the terms in your weight matrix,\n\n00:15:35\nThat gives you your score here that you then multiply by lambda\n\n00:15:40\nThat's L2 regularization.\n\n00:15:44\nbut instead of squaring, you're taking the absolute value.\n\n00:15:48\nbetween how these two regularizations perform\n\n00:15:55\nSo one of the things that happens with L2 regularization,\n\n00:15:59\nwhen you have a really small value, it gets squared, like,\n\n00:16:04\nYou square it, it becomes even smaller.\n\n00:16:09\nclose to 0, because you then square them,\n\n00:16:12\nAnd so your penalty here is very low\n\n00:16:19\nWhereas L1 you're not squaring it.\n\n00:16:23\nIt's not like it's getting smaller\n\n00:16:28\nSo in practice what this leads to is L1 regularization.\n\n00:16:34\nmatrix or very close to 0.\n\n00:16:39\nspread out where you have values that are small but non-zero\n\n00:16:46\nIt seems pretty clear to you why L2 prefers spread out\n\n00:16:51\nBut why does L1 prefer sparse vectors?\n\n00:16:59\nand your performance is roughly the same,\n\n00:17:05\nWhereas for L2 what you might have is the value\n\n00:17:10\nof the squaring.\n\n00:17:14\npushing towards a 0 value mean?\n\n00:17:19\nhow we use this loss term.\n\n00:17:24\nSo we're trying to minimize the loss\n\n00:17:29\nAnd if we have a term here, which\n\n00:17:35\naffecting the model performance and the data loss,\n\n00:17:41\nIt's a trade-off.\n\n00:17:44\nof the regularization term, the data loss term.\n\n00:17:49\nbut you're able to go lower on the regularization term,\n\n00:17:54\nSo it will be preferred based on trying\n\n00:18:00\nSo I think, we'll also touch later\n\n00:18:06\nwhere they're all doing this basic idea of worst\n\n00:18:11\nBut some of them will even change the layers of your model,\n\n00:18:17\nThis is an ongoing research area of how to regularize models.\n\n00:18:24\nWe'll only cover a small subset in this course.\n\n00:18:32\nThe first is it allows us to express some sort of preference\n\n00:18:36\nSo if for some reason in our problem,\n\n00:18:40\nor should contain a lot of sparsity,\n\n00:18:44\nwe might prefer one set of regularization L2 versus L1\n\n00:18:50\nIt also can, depending on how we're regularizing,\n\n00:18:56\nSo it could simplify the model if we're, say,\n\n00:19:02\nfor example in what I showed earlier.\n\n00:19:08\nis especially L2 regularization can actually\n\n00:19:12\nbecause if you imagine this squared is like a parabola.\n\n00:19:20\nAnd these are convex, so you get a lot of nice optimization\n\n00:19:25\nWe won't touch on that in this course.\n\n00:19:28\nBut know that for certain types of optimization,\n\n00:19:36\nI guess I have a question for you all.\n\n00:19:44\nwith your hand if it's W2.\n\n00:19:51\nwould the L2 regularizer prefer?\n\n00:19:57\nWhen you multiply it, you do the dot product with the weights,\n\n00:20:02\nAnd here's where the data loss would be the same.\n\n00:20:08\nwould our regularizer prefer.\n\n00:20:15\nAll right.\n\n00:20:16\nYeah, it's W2 because, as you said, it's more spread out.\n\n00:20:21\nsquare, it becomes 1/16.\n\n00:20:27\nterm here, and then here you square it, so it's 1.\n\n00:20:32\nloss.\n\n00:20:36\nlike, more spread out weights.\n\n00:20:39\nwhich one would L1 prefer now?\n\n00:20:49\nWe got a lot of 1's.\n\n00:20:53\nSo what L1 regularization is you sum each of the terms,\n\n00:20:58\nIn practice, you probably would see this one because,\n\n00:21:01\nBut in terms of a loss standpoint\n\n00:21:07\nbecause 1 is just the sum of these 0.25 four times,\n\n00:21:14\nSo they're both sum to 1.\n\n00:21:21\nYeah, OK.\n\n00:21:24\nis like 0.9, for example?\n\n00:21:32\nAnd we have some way to calculate scores\n\n00:21:38\nis just a linear model.\n\n00:21:43\nThe loss for each of the training examples in the Softmax\n\n00:21:48\nis you exponentiate each of your scores,\n\n00:21:56\nSo you exponentiate to make them all positive.\n\n00:22:01\nSo the final values in this all sum to 1.\n\n00:22:06\nAnd you take the minus log of the correct label.\n\n00:22:12\nwhich is given here.\n\n00:22:16\nthis over each of your training examples,\n\n00:22:21\nThen you add your regularization term here\n\n00:22:27\nWhy do we use Softmax in general?\n\n00:22:32\ndoes as a function is it converts any set of floating\n\n00:22:38\nwhere they will sum to 1.\n\n00:22:43\nthat will translate to the relative probability\n\n00:22:46\nSo if you have a really high positive number\n\n00:22:51\nfor Softmax and 0's almost for the other values.\n\n00:22:59\nnumbers into a list of probabilities based\n\n00:23:05\nThat's the main utility of Softmax.\n\n00:23:10\ntalked about, which is L1, L2, as a way of regularizing\n\n00:23:17\nAnd how does that translate to simpler models?\n\n00:23:22\nbecause if we prefer, say, terms that have a lot of zeros in it,\n\n00:23:30\nSo that one is actually, I think,\n\n00:23:33\nBut I think in general, a regularization\n\n00:23:38\nIt depends on how it's used.\n\n00:23:43\nhere, here you could imagine that you have L2 regularization\n\n00:23:51\nthe higher degree polynomial terms of your function.\n\n00:23:55\nhow you could design regularization\n\n00:23:58\nBut it doesn't always need to be that way.\n\n00:24:03\ndata to do better on the test data,\n\n00:24:07\nAnd in fact, there are many types\n\n00:24:13\nactually make your model more complex\n\n00:24:22\nCool.\n\n00:24:25\nwe can calculate how good a given W is based on the training\n\n00:24:34\nhow do we actually find the best W?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_3::seg2",
+      "global_kp_id": "kp_linear_classifier_scores_and_loss_functions",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg2",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_3::seg2",
+      "global_kp_id": "kp_l1_l2_elastic_net_and_lambda",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg2",
+      "global_kp_id": "kp_weight_preference_effects_of_regularization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_linear_classifier_scores_and_loss_functions",
+      "name": "Linear classifier scores and loss functions",
+      "description": "Linear score functions, Softmax/cross-entropy, and dataset loss as an average of per-example losses.",
+      "track_tags": [
+        "deep_learning",
+        "machine_learning"
+      ],
+      "domain_tags": [
+        "linear_classifier",
+        "loss_functions",
+        "softmax"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because linear classifier scores and loss functions formalizes how linear score functions, Softmax/cross-entropy, and dataset loss as an average of per-example losses, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_regularization_and_generalization",
+      "name": "Regularization and generalization",
+      "description": "The idea that more neurons increase expressive power and overfitting risk, so regularization—not shrinking the architecture by default—should control generalization. The view that very large networks can fit training data closely yet still generalize when regularization is chosen appropriately.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "generalization",
+        "machine_learning",
+        "model_selection"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "generalization",
+        "machine_learning",
+        "overfitting",
+        "regularization"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because regularization and generalization clarifies the idea that more neurons increase expressive power and overfitting risk, so regularization—not shrinking the architecture by default—should control generalization, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical, high, and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp2",
+        "local::lecture_3::kp4",
+        "local::lecture_4_neural_networks_and_backpropagation::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_l1_l2_elastic_net_and_lambda",
+      "name": "L1, L2, elastic net, and lambda",
+      "description": "Common regularization penalties and the lambda hyperparameter controlling penalty strength.",
+      "track_tags": [
+        "machine_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "elastic_net",
+        "hyperparameters",
+        "l1_regularization",
+        "l2_regularization"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because l1, L2, elastic net, and lambda clarifies common regularization penalties and the lambda hyperparameter controlling penalty strength, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_weight_preference_effects_of_regularization",
+      "name": "Weight-preference effects of regularization",
+      "description": "Regularizers encode preferences such as L2 spread-out weights and L1 sparsity.",
+      "track_tags": [
+        "machine_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "model_preferences",
+        "sparsity",
+        "weight_decay"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because weight-preference effects of regularization clarifies regularizers encode preferences such as L2 spread-out weights and L1 sparsity, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.05,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture03-regularization-and-optimization_transcript.txt"
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "unit_id": "local::lecture_5_image_classification_with_cnns::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The segment clearly defines the CNN pattern and places it in historical context, so transcript-only grounding is sufficient.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the usual high-level structure of a convolutional neural network for image classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A feature-extracting body of convolution, pooling, and nonlinear layers followed by prediction layers.",
+        "A single nearest-neighbor lookup table followed by a distance metric.",
+        "A hand-written color histogram with no learned parameters.",
+        "A recurrent-only model that processes one pixel channel at a time."
+      ],
+      "answer_index": 0,
+      "explanation": "CNNs typically use convolutional blocks to build image features and then use prediction layers to turn those features into class scores.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cnn_architecture_pattern_and_historical_role",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "convolution layers",
+          "fully connected layers"
+        ],
+        "timestamps": [
+          "00:23:40",
+          "00:24:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why was AlexNet a turning point for computer vision?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It scaled CNN-style models using large data and GPU compute, making deep learning highly effective for vision.",
+        "It proved convolution was unnecessary for image tasks.",
+        "It replaced training data with manually coded rules.",
+        "It was the first model to use color histograms for classification."
+      ],
+      "answer_index": 0,
+      "explanation": "AlexNet showed that CNNs could become very powerful when combined with enough data, compute, and end-to-end training.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cnn_architecture_pattern_and_historical_role",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "GPUs were available",
+          "because of ImageNet"
+        ],
+        "timestamps": [
+          "00:25:00",
+          "00:25:41"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are CNNs still useful to study even when transformers outperform them on many vision tasks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They provide important intuition about images and still appear in historical and hybrid vision systems.",
+        "They are the only architecture that can process images at all.",
+        "They always outperform transformers on every modern benchmark.",
+        "They avoid learned representations and therefore need less data."
+      ],
+      "answer_index": 0,
+      "explanation": "CNNs encode image-specific ideas such as locality and spatial structure. Those ideas remain valuable for understanding vision models and architectures that mix multiple design patterns.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cnn_architecture_pattern_and_historical_role",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "evolved a lot",
+          "still around"
+        ],
+        "timestamps": [
+          "00:28:28",
+          "00:30:25"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q1",
+      "global_kp_id": "kp_cnn_architecture_pattern_and_historical_role",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q2",
+      "global_kp_id": "kp_cnn_architecture_pattern_and_historical_role",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q3",
+      "global_kp_id": "kp_cnn_architecture_pattern_and_historical_role",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "The high-level CNN stack is a common architecture pattern and should be easy-to-medium."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "AlexNet as a turning point is medium because it blends historical context with methodological change."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.94,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Explaining why CNNs still matter despite transformers requires a moderate comparative judgment."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item checks whether the learner recognizes the usual CNN scaffold."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is most useful when learners summarize why CNNs mattered in practice."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg3-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item transfers well because it tests model-family tradeoff thinking."
+    }
+  ]
+}

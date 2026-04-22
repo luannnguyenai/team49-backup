@@ -1,0 +1,265 @@
+{
+  "unit_id": "local::lecture17-convnets::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "The segment contains concrete sentiment-composition examples and an explicit comparison between tree models and transformers. The transcript is sufficient for application questions without a separate clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture17-convnets-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A sentiment model labels 'slow and repetitive parts' as negative, 'enough spice to keep it interesting' as positive, and the full review as positive. What capability does this illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Composing intermediate phrase judgments into a sentence-level sentiment decision.",
+        "Ignoring all phrase structure and counting only the number of words.",
+        "Using beam search to generate a movie review.",
+        "Replacing all negative words with positive synonyms."
+      ],
+      "answer_index": 0,
+      "explanation": "The model is not just assigning one label at the end. It builds local phrase judgments and combines them structurally to reach an overall decision.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_negation_and_compositional_sentiment",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "different parts of sentences",
+          "That's negative",
+          "positive judgment overall"
+        ],
+        "timestamps": [
+          "01:03:47",
+          "01:04:19",
+          "01:04:48"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should a structure-sensitive sentiment model keep 'incredibly dull' negative even though 'incredible' can be positive by itself?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the modifier intensifies the negative head word rather than overriding it with its own usual polarity.",
+        "Because every adverb must be ignored in sentiment analysis.",
+        "Because 'dull' becomes positive whenever another word precedes it.",
+        "Because the phrase should be classified only by counting syllables."
+      ],
+      "answer_index": 0,
+      "explanation": "The sentiment of a phrase depends on how words compose. In this case, the modifier strengthens the negative meaning of the head word rather than contributing an independent positive label.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_negation_and_compositional_sentiment",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "incredibly dull",
+          "very negative word",
+          "keeps it negative"
+        ],
+        "timestamps": [
+          "01:06:35",
+          "01:06:28",
+          "01:07:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is 'not dull' a harder sentiment case than simply detecting that 'dull' is negative?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The negation should push the phrase toward a more positive interpretation, so the model must compose meanings rather than count negative words.",
+        "The phrase contains no word with sentiment information.",
+        "The correct interpretation always equals the sentiment of the final word.",
+        "The phrase can only be interpreted with image features."
+      ],
+      "answer_index": 0,
+      "explanation": "Negating a negative expression changes the phrase meaning. A structure-aware model must recognize that the combination is more positive than the negative word alone.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_negation_and_compositional_sentiment",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not dull",
+          "two negations",
+          "becomes more positive"
+        ],
+        "timestamps": [
+          "01:07:42",
+          "01:08:21",
+          "01:09:25"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why did tree recursive models become less competitive than transformers for many NLP tasks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Their information flow is constrained by a context-free tree backbone, while transformers allow broad attention across positions.",
+        "They cannot assign labels to intermediate phrases.",
+        "They require every input sentence to be exactly three words long.",
+        "They cannot represent negation or quantifiers at all."
+      ],
+      "answer_index": 0,
+      "explanation": "Tree structure can be linguistically meaningful, but it restricts which pieces can interact directly. Attention gives transformers a more flexible route for information to move across the whole sequence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tree_models_versus_transformers",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "context-free backbone",
+          "attention function",
+          "more general information flow"
+        ],
+        "timestamps": [
+          "01:10:39",
+          "01:10:54",
+          "01:10:59"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In what kind of problem might tree structure still be conceptually useful despite the dominance of transformers?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Problems where phrase structure governs semantic effects such as negation, quantification, or modifier scope.",
+        "Problems where the model must ignore syntax and use only document length.",
+        "Problems where every word independently determines the final answer with no interaction.",
+        "Problems where the only goal is to compress image pixels."
+      ],
+      "answer_index": 0,
+      "explanation": "Some semantic phenomena depend on which phrases combine and what scope they have. Tree structure can make those relationships explicit even if flexible attention is often stronger in practice.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tree_models_versus_transformers",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "semantics of human language",
+          "negation or quantifiers",
+          "structured"
+        ],
+        "timestamps": [
+          "01:11:12",
+          "01:11:21",
+          "01:11:36"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture17-convnets-seg6-q1",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q1",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q2",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q3",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q3",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q4",
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q4",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q5",
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg6-q5",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "secondary"
+    }
+  ]
+}

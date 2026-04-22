@@ -1,0 +1,255 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture05-backprop",
+    "lecture_title": "Lecture 5 - Backpropagation and Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=HnliVHU2g9U"
+  },
+  "unit": {
+    "unit_id": "local::lecture05-backprop::seg3",
+    "course_id": "cs224n-2024",
+    "name": "Vectorized derivatives for a neural-network layer",
+    "description": "Derives Jacobians and parameter gradients for activations, affine layers, and the score function, including delta reuse and shape conventions.",
+    "summary": "The lecture now derives the gradients for specific neural-network building blocks. For an elementwise activation h = f(z), the Jacobian is diagonal because each output coordinate depends only on the matching input coordinate, so the diagonal entries are f'(z_i) and off-diagonal entries are zero [ts=1644s][ts=1715s]. For affine computation z = Wx + b, the derivative with respect to x is W and the derivative with respect to b is the identity matrix [ts=1763s][ts=1809s]. Using the small network example, the score derivative is expanded with the chain rule as ds/db = ds/dh · dh/dz · dz/db [ts=1997s], which simplifies using a Hadamard product for elementwise multiplication [ts=2081s]. The instructor then names the shared upstream gradient/error signal δ so it can be reused across parameter derivatives instead of recomputed [ts=2206s], derives the weight gradient as an outer-product style combination of upstream gradient and local input [ts=2417s], and warns that practical implementations follow a shape convention so gradient tensors match the shapes of the parameters they update [ts=2594s][ts=2620s].",
+    "key_points": [
+      {
+        "text": "The Jacobian of an elementwise activation is diagonal, with f'(z_i) on the diagonal and zeros elsewhere.",
+        "timestamp_s": 1715,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For z = Wx + b, the derivative with respect to x is W.",
+        "timestamp_s": 1763,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For z = Wx + b, the derivative with respect to b is the identity matrix.",
+        "timestamp_s": 1809,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The score derivative with respect to the bias is decomposed as ds/db = ds/dh times dh/dz times dz/db.",
+        "timestamp_s": 1997,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The Hadamard product denotes elementwise multiplication in neural-network gradient formulas.",
+        "timestamp_s": 2081,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The shared upstream gradient delta should be computed once and reused across ds/db and ds/dW calculations.",
+        "timestamp_s": 2206,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The weight gradient is formed from the upstream gradient and the local input in an outer-product pattern.",
+        "timestamp_s": 2417,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The shape convention stores gradients in the same shapes as their corresponding parameter tensors.",
+        "timestamp_s": 2620,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
+      "start_s": 1640,
+      "end_s": 2699
+    },
+    "difficulty": 0.83,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 18,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture now derives the gradients for specific neural-network building blocks. For an elementwise activation h = f(z), the Jacobian is diagonal because each output coordinate depends only on the matching input coordinate, so the diagonal entries are f'(z_i) and off-diagonal entries are zero [ts=1644s][ts=1715s]. For affine computation z = Wx + b, the derivative with respect to x is W and the derivative with respect to b is the identity matrix [ts=1763s][ts=1809s]. Using the small network example, the score derivative is expanded with the chain rule as ds/db = ds/dh · dh/dz · dz/db [ts=1997s], which simplifies using a Hadamard product for elementwise multiplication [ts=2081s]. The instructor then names the shared upstream gradient/error signal δ so it can be reused across parameter derivatives instead of recomputed [ts=2206s], derives the weight gradient as an outer-product style combination of upstream gradient and local input [ts=2417s], and warns that practical implementations follow a shape convention so gradient tensors match the shapes of the parameters they update [ts=2594s][ts=2620s].",
+  "target_kp_ids": [
+    "kp_layer_wise_jacobians_for_activations_and_affine_maps",
+    "kp_upstream_gradient_reuse_and_outer_product_parameter_gradients"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=HnliVHU2g9U",
+  "video_clip_url": "https://www.youtube.com/watch?v=HnliVHU2g9U",
+  "transcript_slice": "00:27:23\nSo let's count.\n\n00:27:28\nSo when we have a vector that's being calculated\n\n00:27:37\nwell, we're computing that componentwise,\n\n00:27:42\nSo hi equals f of zi, where the f\n\n00:27:50\nBut overall, this layer is a function with n outputs and n\n\n00:27:59\nAnd well, what that's going to-- so this is\n\n00:28:05\nBut in this case, this is sort of a special case\n\n00:28:14\ngoing to have the output, the hj, depending on zi.\n\n00:28:26\nbecause for the off-diagonal entries,\n\n00:28:30\nIt's not changing the output because the output only depends\n\n00:28:35\nAnd so what we're going to get for this Jacobian of activation\n\n00:28:43\napart from the diagonal terms that\n\n00:28:50\nfunction.\n\n00:28:53\nto work out how to compute the derivative of our activation\n\n00:28:59\nThat was on assignment one, one of the questions on assignment\n\n00:29:04\nOr was it on assignment two?\n\n00:29:07\nOne of the questions on assignment two.\n\n00:29:10\nOne of the ones on the new assignment is say, hey,\n\n00:29:17\nWell, then we'd be able to plug that straight into f prime.\n\n00:29:23\nOK, so other things that we want to do with Jacobian is,\n\n00:29:34\nwhere we're calculating Wx plus b,\n\n00:29:41\nwith respect to x.\n\n00:29:47\nworks to remember the mantra and say,\n\n00:29:55\nbut with matrices.\n\n00:29:59\nit's just like single-variable calculus, so what\n\n00:30:02\nIt's obviously going to be W, right?\n\n00:30:06\nSimilarly, if we want to do the same thing for Wx, b\n\n00:30:12\nto b, well that would be 1 in terms\n\n00:30:20\nthat becomes an identity matrix.\n\n00:30:25\nBut that's reflecting the fact that b is actually\n\n00:30:31\nas an identity matrix.\n\n00:30:40\nI did this vector dot product of uTh.\n\n00:30:55\nWhat we end up with strictly is we come out with hT.\n\n00:31:06\nwell, we did this in the first class\n\n00:31:11\nthat you kind of get for each individual element,\n\n00:31:17\nyou get the other vector coming out.\n\n00:31:24\nto make sure you really do know the answers\n\n00:31:31\nOK, so let's go back to our little neural net.\n\n00:31:38\nAbove our neural net, there was the nonlinearity.\n\n00:31:47\nSee, I got it wrong.\n\n00:31:49\nBut normally, you'd be calculating\n\n00:31:56\nwith respect to the inputs.\n\n00:32:01\nI'm going to leave that out, and I'm just\n\n00:32:07\nfeeds into the loss function.\n\n00:32:13\nthe nonlinearity, and then we're doing this dot product to work\n\n00:32:20\ninto the logistic function.\n\n00:32:26\nwith respect to the bias first, so the way we do it is we\n\n00:32:35\nthat are composed together.\n\n00:32:39\nSo we first calculate the z equals Wx plus b,\n\n00:32:45\nto the different components.\n\n00:32:53\nis to work out our partial derivatives of s\n\n00:33:05\nis doing the product of the partial derivatives\n\n00:33:11\nSo we're applying the matrix calculus\n\n00:33:17\nSo ds/db equals ds/dh times dh/dz times dz/db,\n\n00:33:28\nare composed together.\n\n00:33:34\nfrom the previous slide, and we can just apply them.\n\n00:33:47\nWell, maybe it's u.\n\n00:33:50\nThere's a fine point on that that I\n\n00:33:56\nOK, then for the dh/dz, that was the activation\n\n00:34:03\nof the derivative of f of z.\n\n00:34:11\nfunction, OK?\n\n00:34:17\nAnd so what that's going to end up\n\n00:34:25\ntimes the vector elementwise derivative of f.\n\n00:34:34\nturn up in your regular math course,\n\n00:34:41\nis referred to as the Hadamard product.\n\n00:34:45\nelementwise multiplication.\n\n00:34:49\nyou put two vectors together, and you\n\n00:34:53\nYou put two vectors together.\n\n00:34:57\nand you're left with another vector of the same type.\n\n00:35:06\nof the partials of ds/db.\n\n00:35:10\nto work out all the other partials, as well.\n\n00:35:23\nand the u.\n\n00:35:29\nto all of those variables, so we can change their values\n\n00:35:37\nSo suppose we now want to calculate ds/dW.\n\n00:35:47\nand say ds/dW equals the product of these three things.\n\n00:35:54\nis that two of those three things\n\n00:35:59\nThe only bit that's different is that at the end,\n\n00:36:07\nAnd so the first central idea that we'll come back\n\n00:36:14\nwe really want to avoid doing repeated work.\n\n00:36:20\nare the same.\n\n00:36:25\ntogether, we can just compute what that part is and reuse it.\n\n00:36:34\nwait, yeah.\n\n00:36:40\nthe part that's the same, this part here,\n\n00:36:46\nSo delta is the upstream gradient or the error signal,\n\n00:36:52\nat the beginning, ds/dh, dh/dz, this sort of shared\n\n00:37:00\nand then we can use it to calculate\n\n00:37:06\nAnd for ds/db, because the dz/db just\n\n00:37:13\nthe answer is just delta.\n\n00:37:22\nbefore we're finished.\n\n00:37:31\nSo one question you might start off with\n\n00:37:36\nyou're doing assignment problems on this\n\n00:37:42\nis, what do things look like?\n\n00:37:49\nWhat size should it be?\n\n00:37:51\nSo for ds/dW, W is an n by m matrix and s is a scalar.\n\n00:38:06\ninputs, the answer, according to math,\n\n00:38:15\nm Jacobian, a big long row vector.\n\n00:38:25\nand there's sort of-- we end up with this weird mess of math\n\n00:38:36\nwanting to do is we're wanting to take\n\n00:38:44\nin the form of matrices, vectors, and so on, that we're\n\n00:38:49\nto want to subtract from them a fraction\n\n00:38:56\nSo what we'd like to do is have our calculated gradients\n\n00:39:05\nbecause then, we can just do subtraction.\n\n00:39:11\nthat's not quite so convenient.\n\n00:39:18\nis using something that gets referred to as the shape\n\n00:39:33\ninto things that are of the same shape as the parameters\n\n00:39:39\nSo we're going to represent ds/dW as an n\n\n00:39:48\nAnd that's a place that people can get confused.\n\n00:39:56\nAnd so that matrix is going to be delta times dz/dW.\n\n00:40:03\nand then we want to know what dz/dW is.\n\n00:40:10\ngoing to come out like this.\n\n00:40:17\nSo it's going to be the product of the upstream gradient, which\n\n00:40:24\nquantities, and then a local input symbol, which is--\n\n00:40:35\nOK.\n\n00:40:41\nwhich it means that we end up calculating\n\n00:40:48\nour gradient.\n\n00:40:54\nWell, it kind of looks convenient\n\n00:40:57\nof the right shape for what I was arguing we want to find out.\n\n00:41:04\nNow, I'm going to rush through this,\n\n00:41:10\nand do this more carefully.\n\n00:41:17\nSo if you think of one weight--\n\n00:41:25\nThe matrix is being represented by all these lines\n\n00:41:28\nSo if you think of one number in the matrix, so here is W23,\n\n00:41:36\nor it's multiplying input 3 to give part of the answer of h2.\n\n00:41:45\nSo for this line here, this weight\n\n00:41:53\nAnd the only thing it's dependent on is x3.\n\n00:42:08\nor z2, sorry.\n\n00:42:13\nYeah, sorry, z2.\n\n00:42:19\nit's depending on these two pieces only,\n\n00:42:27\nthe outer product like that.\n\n00:42:33\nYeah, so let me just come back one more time\n\n00:42:46\nSo I already fudged it when I was talking about,\n\n00:42:55\nand get a row vector versus a column vector?\n\n00:43:05\nhave the Jacobian form, which is what actually makes the chain\n\n00:43:14\nversus the shape convention, which is how we store everything\n\n00:43:23\ndescent, where you're subtracting whatever\n\n00:43:30\nSo this can be a source of confusion.\n\n00:43:38\nfor the answers in the assignment,\n\n00:43:43\nSo if you're working out the derivatives with respect\n\n00:43:51\nwith the same parameters.\n\n00:43:56\nand computing your answers.\n\n00:44:02\nOne way of doing it is to work out all the math\n\n00:44:09\njust to reshape it so it fits into the same shape\n\n00:44:17\nI mean, the other way is to do each stage following the shape\n\n00:44:24\nto reshape things as needed by doing\n\n00:44:33\nOK, that was my attempt to quickly review the math.\n\n00:44:42\nI will now go on to the second half,\n\n00:44:52\nSo most of-- yeah, so the famous thing",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture05-backprop::seg3",
+      "global_kp_id": "kp_chain_rule_for_composed_functions",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05-backprop::seg3",
+      "global_kp_id": "kp_layer_wise_jacobians_for_activations_and_affine_maps",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05-backprop::seg3",
+      "global_kp_id": "kp_upstream_gradient_reuse_and_outer_product_parameter_gradients",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05-backprop::seg3",
+      "global_kp_id": "kp_shape_convention_for_gradients",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_chain_rule_for_composed_functions",
+      "name": "Chain rule for composed functions",
+      "description": "Gradients of composed scalar or vector functions are computed by multiplying derivatives or Jacobians along the computation path.",
+      "track_tags": [
+        "math_for_ml",
+        "optimization"
+      ],
+      "domain_tags": [
+        "backpropagation",
+        "chain_rule"
+      ],
+      "career_path_tags": [
+        "ai_practitioner",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because chain rule for composed functions formalizes how gradients of composed scalar or vector functions are computed by multiplying derivatives or Jacobians along the computation path, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_layer_wise_jacobians_for_activations_and_affine_maps",
+      "name": "Layer-wise Jacobians for activations and affine maps",
+      "description": "Elementwise activations produce diagonal Jacobians, while affine maps such as Wx+b yield simple derivatives with respect to inputs and biases.",
+      "track_tags": [
+        "deep_learning",
+        "math_for_ml"
+      ],
+      "domain_tags": [
+        "matrix_calculus",
+        "neural_network_layers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because layer-wise Jacobians for activations and affine maps clarifies elementwise activations produce diagonal Jacobians, while affine maps such as Wx+b yield simple derivatives with respect to inputs and biases, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_upstream_gradient_reuse_and_outer_product_parameter_gradients",
+      "name": "Upstream gradient reuse and outer-product parameter gradients",
+      "description": "Shared upstream error signals should be reused across parameter derivatives, and weight gradients often combine the upstream signal with the local input in an outer-product form.",
+      "track_tags": [
+        "implementation",
+        "optimization"
+      ],
+      "domain_tags": [
+        "backpropagation",
+        "parameter_gradients"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "software_engineer_ml"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because upstream gradient reuse and outer-product parameter gradients clarifies shared upstream error signals should be reused across parameter derivatives, and weight gradients often combine the upstream signal with the local input in an outer-product form, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_shape_convention_for_gradients",
+      "name": "Shape convention for gradients",
+      "description": "In practice, gradients are stored in the same tensor shapes as the parameters they update, even when raw Jacobian form would have a different layout.",
+      "track_tags": [
+        "implementation",
+        "math_for_ml"
+      ],
+      "domain_tags": [
+        "matrix_calculus",
+        "tensor_shapes"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "software_engineer_ml"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because shape convention for gradients clarifies in practice, gradients are stored in the same tensor shapes as the parameters they update, even when raw Jacobian form would have a different layout, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp8"
+      ]
+    }
+  ],
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.68,
+    0.98
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L5_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture05-backprop_transcript.txt"
+  }
+}

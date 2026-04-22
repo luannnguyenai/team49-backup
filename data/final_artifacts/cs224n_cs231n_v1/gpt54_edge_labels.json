@@ -2,7 +2,7 @@
   "run_id": "p5_cs224n_cs231n",
   "stage_id": "gpt54_edge_audit",
   "summary": {
-    "source_file": "data/p5_output_transitive_pruned.json",
+    "source_file": "data/final_artifacts/cs224n_cs231n_v1/p5_output_transitive_pruned.json",
     "labeler": "gpt-5.4",
     "edge_count": 93,
     "verdict_distribution": {

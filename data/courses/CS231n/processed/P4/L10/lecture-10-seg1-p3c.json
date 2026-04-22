@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_10::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for compact questions on clip-based training and test-time averaging over multiple video clips, so a separate clip is not needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_10_seg1_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_10_seg1_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_10_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do practical video classifiers usually train on short, low-resolution clips instead of full raw videos?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because full raw videos are too large for memory and compute, so clip training makes learning feasible",
+        "Because long videos do not contain useful temporal information",
+        "Because classification losses only work on inputs with exactly 16 frames",
+        "Because lower resolution always improves recognition accuracy"
+      ],
+      "answer_index": 0,
+      "explanation": "Full raw videos create huge input, activation, and storage costs. Training on shorter clips with reduced resolution and frame rate keeps the problem tractable while still exposing the model to meaningful motion patterns.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_based_training_and_test_time_averaging",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "videos are usually very big",
+          "short low-resolution clip"
+        ],
+        "timestamps": [
+          "00:05:50",
+          "00:06:59"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_10_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A model is trained on short clips from a long video. What is a common test-time strategy for producing one prediction for the whole video?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Sample several clips and average their predictions",
+        "Use only the very first frame of the video",
+        "Concatenate every frame into one giant input tensor",
+        "Predict each clip independently and ignore the rest"
+      ],
+      "answer_index": 0,
+      "explanation": "When a full video is too long to process at once, a common approach is to evaluate several clips and combine them. Averaging clip-level predictions gives a practical whole-video estimate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_based_training_and_test_time_averaging",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sampled clips",
+          "average the clip-level predictions"
+        ],
+        "timestamps": [
+          "00:08:16",
+          "00:08:16"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg1_q1",
+      "global_kp_id": "kp_clip_based_training_and_test_time_averaging",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg1_q2",
+      "global_kp_id": "kp_clip_based_training_and_test_time_averaging",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_10_seg1_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Training on short low-resolution clips is a practical easy concept about video efficiency."
+    },
+    {
+      "item_id": "lecture_10_seg1_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.35,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Test-time averaging over clips is a standard practical inference trick and should be easy."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_10_seg1_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a basic systems-for-video question suitable for early screening."
+    },
+    {
+      "item_id": "lecture_10_seg1_q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is concise reinforcement on how clip-based video models aggregate predictions."
+    }
+  ]
+}

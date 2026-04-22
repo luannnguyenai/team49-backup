@@ -1,0 +1,119 @@
+{
+  "unit_id": "local::lecture07-rnns::seg9",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 1,
+  "review_summary": "Transcript is sufficient for application questions about autoregressive rollout generation and RNN variants such as character-level or contextual generation. No separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture07-rnns-seg9-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture07-rnns-seg9-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After training a word-level RNN language model, how do you actually generate a sentence?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Start with a start-of-sequence token, sample a word, feed it back in, and continue until an end-of-sequence token appears",
+        "Choose the single highest-frequency sentence from the corpus",
+        "Run teacher forcing on the training text and copy the outputs",
+        "Average all hidden states from the training set into one sentence"
+      ],
+      "answer_index": 0,
+      "explanation": "Generation is autoregressive: begin from a start symbol and an initial hidden state, sample from the model’s next-word distribution, feed the sampled token back, and stop at an end symbol.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_rollout_and_rnn_variants",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "start-of-sequence token",
+          "feeds that generated token back in"
+        ],
+        "timestamps": [
+          "01:09:29",
+          "01:09:58"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture07-rnns-seg9-q1",
+      "global_kp_id": "kp_autoregressive_rollout_and_rnn_variants",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture07-rnns-seg9-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"After training a word-level RNN language model, how do you actually generate a sentence\" is a direct reinforcement check and should be on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture07-rnns-seg9-q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"After training a word-level RNN language model, how do you actually generate a sentence\" is more useful for contextual reinforcement than for initial placement."
+    }
+  ]
+}

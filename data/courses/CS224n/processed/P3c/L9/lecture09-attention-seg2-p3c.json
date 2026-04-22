@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture09-attention::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit supports concept questions about the sequence-to-sequence bottleneck and the attention procedure used to compute decoder context vectors.",
+  "question_bank": [
+    {
+      "item_id": "lecture09-attention-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What bottleneck does attention address in a basic encoder-decoder translation model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The encoder must compress all source information into one hidden vector before decoding begins.",
+        "The decoder cannot use a softmax to choose output words.",
+        "The source and target sentences must always have the same number of tokens.",
+        "The model can only translate words that already appear in the target vocabulary."
+      ],
+      "answer_index": 0,
+      "explanation": "A single fixed hidden vector can become an information bottleneck, especially for long inputs. Attention reduces this problem by giving the decoder direct access to encoder states during generation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "useful about this sentence",
+          "fit everything"
+        ],
+        "timestamps": [
+          "00:13:33",
+          "00:13:51"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture09-attention-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In decoder-side attention, what is the context vector computed from?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A weighted average of encoder hidden states, using attention weights from a softmax over source positions.",
+        "A random sample of target-language word embeddings.",
+        "The final decoder hidden state copied unchanged at every step.",
+        "A one-hot vector indicating the most frequent source word."
+      ],
+      "answer_index": 0,
+      "explanation": "Attention first scores source positions, normalizes the scores into weights, and then forms a context vector by averaging encoder states according to those weights.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "probability distribution",
+          "weighted average"
+        ],
+        "timestamps": [
+          "00:16:06",
+          "00:16:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture09-attention-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can attention weights be useful for interpreting a translation model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They indicate which source positions the decoder focused on while producing each target word.",
+        "They reveal the exact training examples used to learn every parameter.",
+        "They prove that the model's translation is always grammatically correct.",
+        "They remove the need to evaluate translation quality."
+      ],
+      "answer_index": 0,
+      "explanation": "Attention weights provide a readable alignment-like signal: for each output step, they show which source states contributed most to the prediction.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_benefits_of_attention_performance_gradients_interpretability",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "show the attention weights",
+          "paying attention to"
+        ],
+        "timestamps": [
+          "00:23:44",
+          "00:24:03"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture09-attention-seg2-q1",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture09-attention-seg2-q2",
+      "global_kp_id": "kp_cross_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture09-attention-seg2-q3",
+      "global_kp_id": "kp_benefits_of_attention_performance_gradients_interpretability",
+      "role": "primary"
+    }
+  ]
+}

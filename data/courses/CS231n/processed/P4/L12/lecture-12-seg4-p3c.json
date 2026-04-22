@@ -1,0 +1,306 @@
+{
+  "unit_id": "local::lecture_12::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit clearly supports questions about colorization as automatic cross-channel supervision and about temporal color propagation as a way to learn correspondences.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-12-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-12-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-12-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-12-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In LAB colorization pretraining, what is the model typically asked to predict?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The a and b color channels from the L lightness channel.",
+        "The L lightness channel from manually labeled object masks.",
+        "The class label from a fully colored RGB image.",
+        "The camera pose from a single grayscale pixel."
+      ],
+      "answer_index": 0,
+      "explanation": "LAB separates lightness from color. A colorization pretext task can use the lightness channel as input and the existing color channels as automatically available targets.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_colorization_as_cross_channel_prediction",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Given the L channel",
+          "predict the A and B channels"
+        ],
+        "timestamps": [
+          "00:32:34",
+          "00:32:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-12-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What broader idea does a split-brain autoencoder illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A model can learn representations by predicting one set of channels from another set of channels.",
+        "A model must always predict labels created by humans.",
+        "A decoder is unnecessary because the encoder directly outputs class probabilities.",
+        "Only RGB color channels can ever be used for self-supervised learning."
+      ],
+      "answer_index": 0,
+      "explanation": "Split-brain style tasks generalize colorization into cross-channel prediction. The supervision comes from relationships between parts of the input signal itself.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_colorization_as_cross_channel_prediction",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "given one channel",
+          "predicting the other channel"
+        ],
+        "timestamps": [
+          "00:33:49",
+          "00:56:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-12-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can video colorization lead to tracking-like representations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The model must find corresponding pixels or regions across frames to propagate colors consistently.",
+        "The model is explicitly given keypoint labels for every frame.",
+        "The model ignores temporal consistency and colorizes each frame independently.",
+        "The task only requires predicting the average color of the full video."
+      ],
+      "answer_index": 0,
+      "explanation": "To transfer color from a reference frame to later frames, the model has to match regions across time. That correspondence pressure can induce tracking of pixels, objects, or keypoints.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_colorization_as_cross_channel_prediction",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "track pixels and objects",
+          "identify key points"
+        ],
+        "timestamps": [
+          "00:37:34",
+          "00:40:48"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-12-seg4-q1",
+      "global_kp_id": "kp_colorization_as_cross_channel_prediction",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg4-q2",
+      "global_kp_id": "kp_colorization_as_cross_channel_prediction",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg4-q2",
+      "global_kp_id": "kp_self_supervised_representation_learning",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-12-seg4-q3",
+      "global_kp_id": "kp_colorization_as_cross_channel_prediction",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-12-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Predicting ab channels from L in LAB is a straightforward colorization-task item."
+    },
+    {
+      "item_id": "lecture-12-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The split-brain autoencoder illustrates a broader medium idea about cross-channel prediction."
+    },
+    {
+      "item_id": "lecture-12-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Why video colorization can lead to tracking-like representations is a medium representation-learning insight."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-12-seg4-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a concrete pretext-task formulation check."
+    },
+    {
+      "item_id": "lecture-12-seg4-q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This transfers because it tests the broader lesson rather than one named method."
+    },
+    {
+      "item_id": "lecture-12-seg4-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is strongest when testing whether learners can infer the kind of structure the pretext task encourages."
+    }
+  ]
+}

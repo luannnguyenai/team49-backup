@@ -1,0 +1,529 @@
+{
+  "unit_id": "local::lecture02-python-review::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "review_summary": "The transcript is sufficient to create procedural questions about lists, slicing, copying, tuples, dictionaries, and common Python loop patterns used in notebooks, including one short code question about slicing.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture02-python-review-seg2-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture02-python-review-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a Python list, which elements does the expression nums[1:3] select?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The elements at positions 1 and 2, because the start index is included and the end index is excluded.",
+        "The elements at positions 1, 2, and 3, because both endpoints are included.",
+        "Only the element at position 3, because a Python slice takes the endpoint.",
+        "The entire list except the first element."
+      ],
+      "answer_index": 0,
+      "explanation": "A Python slice starts at the starting index and stops right before the ending index. Therefore, [1:3] contains the elements with indices 1 and 2.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "last element is excluded",
+          "Python's what's called 0 indexed"
+        ],
+        "timestamps": [
+          "00:10:05",
+          "00:08:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is using a full slice like a[:] often useful?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it creates a separate copy in memory, so changing the copy does not change the original list.",
+        "Because it turns the list into an immutable tuple.",
+        "Because it always sorts the list in ascending order.",
+        "Because it removes every None element from the list."
+      ],
+      "answer_index": 0,
+      "explanation": "When you need a copy instead of just another reference to the same object, a full slice is a concise way to create a new list. This helps avoid changing the original data by accident when you modify it elsewhere.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "duplicate in memory",
+          "entirely separate copy"
+        ],
+        "timestamps": [
+          "00:10:49",
+          "00:11:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core difference between a tuple and a list?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A tuple can be indexed but cannot be changed after creation, while a list can be modified.",
+        "A tuple is always faster than a list for every operation, so it should completely replace lists.",
+        "Tuples contain only numbers, while lists contain only strings.",
+        "Tuples allow append, while lists do not."
+      ],
+      "answer_index": 0,
+      "explanation": "Both tuples and lists can store multiple values, but tuples are used when you want an immutable structure. Lists are more suitable when you need to add, remove, or update elements.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tuples_and_immutability",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Tuples are immutable arrays",
+          "cannot be changed"
+        ],
+        "timestamps": [
+          "00:12:07",
+          "00:12:11"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When looping through a list, what is the best way to get both the index and the element?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use enumerate() to get both the index and the value at the same time.",
+        "Use del because it returns both the index and the value.",
+        "Use len() because len() returns each element and its position.",
+        "Use in directly because it always generates (index, value) pairs."
+      ],
+      "answer_index": 0,
+      "explanation": "enumerate() is the most convenient approach when you need both the current position and value during iteration. It helps you avoid managing a separate counter variable.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_python_loops_and_iteration_idioms",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "enumerate will basically pair",
+          "corresponding index"
+        ],
+        "timestamps": [
+          "00:16:18",
+          "00:16:24"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q5",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "What does this Python code print?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "[20, 30]",
+        "[10, 20]",
+        "[20, 30, 40]",
+        "[30, 40]"
+      ],
+      "answer_index": 0,
+      "explanation": "The slice 1:3 starts at index 1 and stops before index 3, so the result contains the second and third elements of the list.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "difficulty": "easy",
+      "code_question_style": "output_prediction",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "nums = [10, 20, 30, 40]\nprint(nums[1:3])",
+        "highlight_lines": [
+          1,
+          2
+        ]
+      },
+      "evidence": {
+        "source": "code",
+        "transcript_quotes": [
+          "nums[1:3]",
+          "slicing"
+        ],
+        "timestamps": [
+          "00:00:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture02-python-review-seg2-q1",
+      "global_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q1",
+      "global_kp_id": "kp_colab_and_notebook_workflow",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q2",
+      "global_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q2",
+      "global_kp_id": "kp_tuples_and_immutability",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q3",
+      "global_kp_id": "kp_tuples_and_immutability",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q3",
+      "global_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q4",
+      "global_kp_id": "kp_python_loops_and_iteration_idioms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q4",
+      "global_kp_id": "kp_dictionaries_for_fast_key_value_mapping",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q5",
+      "global_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture02-python-review-seg2-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"In a Python list, which elements does the expression nums[1:3] select\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is using a full slice like a[:] often useful\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the core difference between a tuple and a list\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"When looping through a list, what is the best way to get both the index and the element\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.92,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does this Python code print\" is a direct reinforcement check and should be on the easier side. The code context nudges the prior slightly upward."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture02-python-review-seg2-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In a Python list, which elements does the expression nums[1:3] select\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is using a full slice like a[:] often useful\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the core difference between a tuple and a list\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q4",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"When looping through a list, what is the best way to get both the index and the element\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture02-python-review-seg2-q5",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does this Python code print\" is best used as guided code practice before later checks."
+    }
+  ]
+}

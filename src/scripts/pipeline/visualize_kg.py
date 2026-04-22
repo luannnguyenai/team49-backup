@@ -10,6 +10,14 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from src.data_paths import (
+    GPT54_EDGE_LABELS_FILE,
+    KG_VISUALIZATIONS_DIR,
+    MODERNBERT_LARGE_MASKED_V2_FILE,
+    P5_INPUT_FILE,
+    P5_TRANSITIVE_PRUNED_FILE,
+)
+
 
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -286,15 +294,15 @@ def build_visualizations(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--p5", type=Path, default=Path("data/p5_output_transitive_pruned.json"))
-    parser.add_argument("--p5-input", type=Path, default=Path("data/p5_inputs/p5_input_cs224n_cs231n.json"))
-    parser.add_argument("--gpt54-labels", type=Path, default=Path("data/gpt54_edge_labels.json"))
+    parser.add_argument("--p5", type=Path, default=P5_TRANSITIVE_PRUNED_FILE)
+    parser.add_argument("--p5-input", type=Path, default=P5_INPUT_FILE)
+    parser.add_argument("--gpt54-labels", type=Path, default=GPT54_EDGE_LABELS_FILE)
     parser.add_argument(
         "--modernbert-large-scores",
         type=Path,
-        default=Path("data/modernbert_large_edge_scores_masked_v2.json"),
+        default=MODERNBERT_LARGE_MASKED_V2_FILE,
     )
-    parser.add_argument("--output-dir", type=Path, default=Path("data/kg_visualizations"))
+    parser.add_argument("--output-dir", type=Path, default=KG_VISUALIZATIONS_DIR)
     args = parser.parse_args()
 
     summary = build_visualizations(

@@ -50,9 +50,9 @@ def test_sanitize_p3a_artifacts_repairs_placeholder_ids_and_urls(tmp_path: Path)
         "kp_catalog": [],
         "course_config": {"included_content_types": ["core_theory"]},
         "source_trace": {
-            "p1_artifact": "data/CS231n/processed_sanitized/L13_p1.json",
-            "p2_output": "data/p2_output_rationale_repaired.json",
-            "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture13-generative-models-1_transcript.txt",
+            "p1_artifact": "data/courses/CS231n/processed_sanitized/L13_p1.json",
+            "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+            "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture13-generative-models-1_transcript.txt",
         },
     }
     _write_json(input_dir / "CS231n" / "L13_p1.json", payload)

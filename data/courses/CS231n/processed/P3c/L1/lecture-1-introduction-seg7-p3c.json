@@ -1,0 +1,168 @@
+{
+  "unit_id": "local::lecture_1_introduction::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript provides enough grounding for reinforcement questions about frontier vision topics and how broad visual applications are turned into concrete modeling tasks. A separate clip is not needed.",
+  "question_bank": [
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the basic generation idea behind diffusion models as described here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They learn to reverse a gradual noising process, turning noise into a generated output.",
+        "They classify an image by assigning exactly one object label.",
+        "They require hand-drawing every output pixel before training.",
+        "They generate images by ignoring both noise and denoising."
+      ],
+      "answer_index": 0,
+      "explanation": "Diffusion generation starts from noise and learns a denoising process. Reversing noise step by step can produce a coherent generated image or visual output.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reverse a gradual noising",
+          "denoised from pure noise",
+          "generates emojis from text"
+        ],
+        "timestamps": [
+          "00:57:33",
+          "00:57:57",
+          "00:57:46"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes embodied visual agents different from models that only classify static images?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They must use perception to support planning and action in an environment.",
+        "They only assign one label to one still image and then stop.",
+        "They avoid using visual information so they can rely only on text.",
+        "They are limited to reconstructing a single 2D pixel grid."
+      ],
+      "answer_index": 0,
+      "explanation": "Embodied agents connect visual perception to behavior. Instead of only recognizing what is in an image, they need visual understanding that can guide decisions and actions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "vision empowers embodied agents",
+          "perceive, plan",
+          "generalizing from human demonstrations"
+        ],
+        "timestamps": [
+          "00:59:20",
+          "00:59:30",
+          "00:59:41"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a computer vision workflow, what does it mean to turn an application into a task?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It means defining a concrete visual problem that a model can be developed, trained, and evaluated on.",
+        "It means avoiding model training and relying only on informal descriptions.",
+        "It means every application must become the same classification benchmark.",
+        "It means ignoring images and videos to focus only on written instructions."
+      ],
+      "answer_index": 0,
+      "explanation": "A task turns a broad application goal into a concrete prediction problem that can be modeled and evaluated. That is what makes it possible to choose data, train a system, and check whether it works.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "applications into tasks",
+          "develop and train vision models",
+          "images, videos"
+        ],
+        "timestamps": [
+          "01:01:27",
+          "01:01:33",
+          "01:01:41"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q1",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q1",
+      "global_kp_id": "kp_cs231n_curriculum_structure_and_learning_objectives",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q2",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q2",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q3",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg7::q3",
+      "global_kp_id": "kp_cs231n_curriculum_structure_and_learning_objectives",
+      "role": "secondary"
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_18_human_centered_ai::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript provides enough support for questions about embodied AI as a perception-action loop, open-world robot generalization, and the role of LLMs and VLMs in motion planning.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is embodied AI described most succinctly?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It closes the loop between perception and action so the system does not just see the world but acts in it.",
+        "It is simply a captioning model for robots.",
+        "It is a new dataset for multilabel segmentation.",
+        "It replaces planning entirely with object recognition."
+      ],
+      "answer_index": 0,
+      "explanation": "The core idea of embodied AI is to perceive the world, decide on actions, and then use the consequences of those actions to update perception again. That is fundamentally different from systems that only analyze static images.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perception_action_integration",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "closes the loop",
+          "perception and action"
+        ],
+        "timestamps": [
+          "00:48:07",
+          "00:48:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What limitation is open-world robot control trying to overcome in this example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It avoids defining a closed set of tasks in advance and training the robot only for those fixed tasks.",
+        "It removes the need to understand natural language at all.",
+        "It optimizes only simulation speed without any need for generalization.",
+        "It turns every robotics problem into static image recognition."
+      ],
+      "answer_index": 0,
+      "explanation": "If a robot learns only a closed list of tasks, it will struggle in the real world. The open-world goal is to accept open-ended instructions and generalize to new situations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perception_action_integration",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "closed world",
+          "without pretraining everything"
+        ],
+        "timestamps": [
+          "00:49:29",
+          "00:49:55"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the example open the drawer but avoid the vase, what is the combined role of the LLM and the VLM?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The LLM turns the instruction into structured substeps, while the VLM localizes relevant objects so the motion planner knows where to go and what to avoid.",
+        "The LLM directly drives the motors, while the VLM only captions the output video.",
+        "Both are used only to recognize text on the robot display.",
+        "The VLM writes control code, while the LLM only detects objects."
+      ],
+      "answer_index": 0,
+      "explanation": "The task needs both language understanding and visual grounding. Language provides the goal and constraints, while vision identifies where those entities are so the planner can construct regions to approach and regions to avoid.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perception_action_integration",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "use LLM and VLM",
+          "watch out for the vase"
+        ],
+        "timestamps": [
+          "00:51:02",
+          "00:52:25"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "global_kp_id": "kp_perception_action_integration",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "global_kp_id": "kp_perception_action_integration",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "global_kp_id": "kp_perception_action_integration",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How is embodied AI described most succinctly\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What limitation is open-world robot control trying to overcome in this example\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"In the example open the drawer but avoid the vase, what is the combined role of the LLM and the VLM\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How is embodied AI described most succinctly\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What limitation is open-world robot control trying to overcome in this example\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In the example open the drawer but avoid the vase, what is the combined role of the LLM and the VLM\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

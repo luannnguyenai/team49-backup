@@ -1,0 +1,152 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript mô tả khá rõ chuyển từ mô hình tuyến tính sang mạng fully connected hai tầng; nội dung đủ để ra câu hỏi mà không cần clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vai trò quan trọng nhất của hàm kích hoạt phi tuyến giữa hai phép biến đổi tuyến tính là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Giúp mô hình biểu diễn được các ranh giới quyết định phi tuyến.",
+        "Đảm bảo mọi hidden unit có cùng trọng số.",
+        "Biến đầu ra cuối cùng thành xác suất.",
+        "Loại bỏ hoàn toàn nhu cầu dùng bias."
+      ],
+      "answer_index": 0,
+      "explanation": "Nếu chỉ xếp chồng các phép biến đổi tuyến tính thì toàn bộ mạng vẫn tương đương một phép biến đổi tuyến tính duy nhất. Phi tuyến là thứ giúp mạng giải các bài toán không phân tách tuyến tính trong không gian gốc.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "create a non-linearity",
+          "very important part"
+        ],
+        "timestamps": [
+          "00:12:07",
+          "00:12:15"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong biểu thức mạng hai tầng, H thường biểu diễn điều gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Số hidden units hoặc hidden neurons.",
+        "Số lớp đầu ra.",
+        "Chiều của mỗi minibatch.",
+        "Số tham số regularization."
+      ],
+      "answer_index": 0,
+      "explanation": "H là kích thước của biểu diễn ẩn, tức số neuron ở hidden layer. Nó quyết định số đặc trưng trung gian mà mạng có thể học.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_feedforward_neural_networks",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "define H",
+          "neurons"
+        ],
+        "timestamps": [
+          "00:11:37",
+          "00:11:49"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Tại sao thêm hidden units có thể hữu ích hơn so với chỉ học một mẫu cho mỗi lớp ở bộ phân loại tuyến tính?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì mạng có thể học các mẫu con hoặc bộ phận dùng chung giữa nhiều lớp.",
+        "Vì hidden units buộc mọi lớp dùng cùng một vector trọng số.",
+        "Vì hidden units làm số lớp đầu ra bằng số mẫu huấn luyện.",
+        "Vì hidden units loại bỏ hoàn toàn nhu cầu tối ưu hóa loss."
+      ],
+      "answer_index": 0,
+      "explanation": "Hidden units có thể học những đặc trưng trung gian như các phần của đối tượng. Các đặc trưng này có thể được tái sử dụng giữa nhiều lớp thay vì mỗi lớp chỉ dựa vào một mẫu tổng quát duy nhất.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_feedforward_neural_networks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "create some more templates",
+          "shared"
+        ],
+        "timestamps": [
+          "00:16:11",
+          "00:17:05"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "role": "primary"
+    }
+  ]
+}

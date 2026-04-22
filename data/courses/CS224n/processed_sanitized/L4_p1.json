@@ -1,0 +1,1405 @@
+{
+  "lecture_title": "Lecture 4 - Word Vectors and Language Models",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Optimization basics, SGD, and word2vec initialization",
+      "start_s": 5,
+      "end_s": 609
+    },
+    {
+      "section_index": 2,
+      "title": "Word2vec parameters, bag-of-words context prediction, and GloVe analogy demo",
+      "start_s": 609,
+      "end_s": 1483
+    },
+    {
+      "section_index": 3,
+      "title": "Word2vec implementation details: two vectors, softmax variants, and negative sampling",
+      "start_s": 1483,
+      "end_s": 2016
+    },
+    {
+      "section_index": 4,
+      "title": "Count-based word vectors, SVD, COALS, and the GloVe objective",
+      "start_s": 2016,
+      "end_s": 2753
+    },
+    {
+      "section_index": 5,
+      "title": "Evaluating word vectors: intrinsic vs extrinsic evaluation",
+      "start_s": 2762,
+      "end_s": 3131
+    },
+    {
+      "section_index": 6,
+      "title": "Word senses, polysemy, and sparse coding",
+      "start_s": 3138,
+      "end_s": 3786
+    },
+    {
+      "section_index": 7,
+      "title": "Neural window classifiers, supervised learning, and cross-entropy loss",
+      "start_s": 3789,
+      "end_s": 4449
+    },
+    {
+      "section_index": 8,
+      "title": "Artificial neurons and multi-layer neural networks",
+      "start_s": 4449,
+      "end_s": 4742
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "course_id": "CS224N",
+      "name": "Optimization basics for learning word vectors",
+      "description": "Connects the previous lecture's word2vec derivative work to gradient descent, stochastic gradient descent, and random initialization.",
+      "summary": "The lecture begins with the plan for finishing word vectors, then shifts from the previous word2vec loss derivatives to the optimization loop: minimize a cost function by computing its gradient, moving a small amount downhill, and repeating [ts=202s]. The update uses a learning rate alpha, typically small, subtracting a scaled gradient from parameters so steps do not overshoot or reach a worse point [ts=294s]. Full-batch gradient descent is described as too expensive because it requires evaluating the objective and gradient on the entire training set before one update [ts=361s]. Stochastic or mini-batch gradient descent instead uses a small subset such as 16 or 32 examples, giving a noisy gradient estimate that is much faster and can improve neural network optimization through useful noise [ts=413s]. The word2vec recap stresses random small-number initialization: all-zero vectors create false symmetries and prevent learning, while gradient updates adjust vectors to predict surrounding words better [ts=508s].",
+      "key_points": [
+        {
+          "text": "Gradient descent minimizes a loss by computing the gradient and repeatedly stepping downhill.",
+          "timestamp_s": 202,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The learning rate alpha scales the gradient step; too large a step can overshoot or worsen the objective.",
+          "timestamp_s": 294,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Full-batch gradient descent is usually impractical for neural nets because it waits for an objective and gradient over all training data.",
+          "timestamp_s": 361,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Stochastic or mini-batch gradient descent uses a small subset such as 16 or 32 items as a noisy gradient estimate.",
+          "timestamp_s": 413,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Word vectors should be initialized with random small numbers; all zeros cause symmetry and prevent learning.",
+          "timestamp_s": 508,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 5,
+        "end_s": 609
+      },
+      "difficulty": 2.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "course_id": "CS224N",
+      "name": "Word2vec mechanics and word-vector analogy behavior",
+      "description": "Explains the bag-of-words word2vec model and demonstrates learned vector similarity and analogies with GloVe embeddings.",
+      "summary": "The word2vec model is summarized as having only word-vector parameters: separate outside-word and center-word vectors whose dot products yield a probability distribution over possible context words, with error coming from comparison to the true outside word [ts=618s]. The lecturer emphasizes that this is a bag-of-words model: it does not model sentence structure or left-versus-right position, but predicts what kinds of words appear around a center word [ts=660s]. A Jupyter demo loads 100-dimensional GloVe vectors and shows that semantically related words such as bread and croissant have similar vector components, while nearest-neighbor queries for USA, banana, and croissant return sensible related words [ts=748s]. Taking the negative of a single word vector is not useful for antonyms and tends to return odd tokens [ts=894s]. The important property is linear semantic components: vector arithmetic such as King minus man plus woman finds Queen, motivating analogy tasks [ts=966s]. Additional examples show cultural and syntactic regularities, such as Australia:beer::Russia:vodka and tall:tallest::long:longest, illustrating that even a simple bag-of-words model captures word meaning and some world knowledge [ts=1140s]. Q&A clarifies that vector differences can represent relation directions, that the two word2vec vectors for a word are commonly averaged, and that analogy chaining can fail [ts=1287s].",
+      "key_points": [
+        {
+          "text": "Word2vec uses center and outside word vectors; dot products define probabilities for outside words, and error comes from the actual context word.",
+          "timestamp_s": 618,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The skip-gram setup described here is a bag-of-words model that ignores sentence structure and left/right context position.",
+          "timestamp_s": 660,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Nearest-neighbor search over GloVe vectors returns semantically related words such as banana with coconut, mango, and fruit.",
+          "timestamp_s": 837,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A negative single word vector is not an antonym finder; negative banana returns odd or unhelpful tokens.",
+          "timestamp_s": 900,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Word-vector analogies work by adding and subtracting semantic directions, as in King - man + woman ≈ Queen.",
+          "timestamp_s": 966,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Analogy examples show both semantic/cultural and syntactic regularities, but the method has failures.",
+          "timestamp_s": 1260,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 609,
+        "end_s": 1483
+      },
+      "difficulty": 2.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "course_id": "CS224N",
+      "name": "Word2vec variants and negative sampling",
+      "description": "Covers why word2vec keeps two vectors, the skip-gram and CBOW family, naive softmax, and negative sampling with sigmoid losses.",
+      "summary": "After warning students not to follow an old assignment that asked for a from-scratch word2vec implementation, the lecturer answers why word2vec uses two vector sets: using the same vector for center and outside words creates a quadratic self-term when the center word appears in the normalization, making the math messier; disjoint vectors keep the derivation simple and are usually averaged afterward [ts=1537s]. The original Mikolov family is framed as two model structures: skip-gram predicts surrounding words from an inside word, while continuous bag of words predicts the center word from its context [ts=1622s]. The training objective previously presented is naive softmax, which sums over every vocabulary word, requiring many dot products and exponentiations for large vocabularies [ts=1662s]. Negative sampling replaces full softmax with simple logistic regressions: make the true context word high probability and a few randomly sampled words low probability [ts=1741s]. The sigmoid/logistic function maps real-valued dot products to probabilities from 0 to 1, making positive dot products favorable for real outside words and unfavorable for negative samples [ts=1810s]. Negative examples are not sampled uniformly; word2vec uses unigram probabilities raised to the 3/4 power, which increases the relative chance of less frequent words while still favoring common words [ts=1924s].",
+      "key_points": [
+        {
+          "text": "Using separate center and outside vectors avoids a messy quadratic self-term in the softmax normalization.",
+          "timestamp_s": 1537,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The word2vec family includes skip-gram, which predicts context from center, and CBOW, which predicts center from context.",
+          "timestamp_s": 1622,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Naive softmax sums over every vocabulary word, which is expensive for vocabularies with hundreds of thousands of words.",
+          "timestamp_s": 1662,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Negative sampling trains the model to like the true context word and dislike a small number of sampled non-context words.",
+          "timestamp_s": 1741,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The logistic sigmoid maps any real dot product to a probability between 0 and 1.",
+          "timestamp_s": 1810,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Negative samples are drawn from unigram probability raised to the 3/4 power, partially flattening the frequency distribution.",
+          "timestamp_s": 1945,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 1483,
+        "end_s": 2016
+      },
+      "difficulty": 3.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "course_id": "CS224N",
+      "name": "Count-based vectors, SVD, and GloVe",
+      "description": "Compares predictive word2vec-style embeddings with count-based co-occurrence methods and derives the intuition behind GloVe.",
+      "summary": "The lecture asks whether a more direct route to word vectors is possible by counting how often words occur in each other's contexts, using a context window to form a co-occurrence count matrix [ts=2023s]. A toy corpus produces a word-by-word matrix whose rows can be treated as vectors, but raw count vectors are huge: with a 400,000-word vocabulary, the matrix is 400,000 by 400,000 rather than vocabulary size by a modest embedding dimension [ts=2153s]. Dimensionality reduction via singular value decomposition is introduced as a way to rewrite any matrix as U, singular values, and V, then truncate smaller singular values to obtain lower-dimensional word representations [ts=2213s]. Earlier methods such as latent semantic analysis and COALS partly worked; COALS improved raw SVD by using log frequencies, ramped windows that weight closer context more, and Pearson correlations, and it also discovered linear semantic components before word2vec became famous [ts=2329s]. GloVe is introduced as Stanford's count-based model aimed at obtaining linear meaning components from count matrices [ts=2481s]. Its key intuition is that ratios of co-occurrence probabilities encode meaning differences: comparing contexts of ice and steam makes solid versus gas directions emerge, while unrelated words remain near ratio 1 [ts=2521s]. By taking logs, ratios become differences, so a log-bilinear dot-product model can make vector differences correspond to log ratios of co-occurrence probabilities, with bias and threshold details treated as secondary [ts=2648s].",
+      "key_points": [
+        {
+          "text": "A co-occurrence matrix counts how often each word appears in the context window of other words.",
+          "timestamp_s": 2095,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Raw co-occurrence vectors are ungainly because a large vocabulary creates a massive square matrix.",
+          "timestamp_s": 2161,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "SVD factorizes a matrix into U, singular values, and V, and truncating small singular values yields low-dimensional representations.",
+          "timestamp_s": 2224,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "COALS improved count-based vectors with log frequencies, ramped context windows, and correlations.",
+          "timestamp_s": 2369,
+          "evidence_type": "example"
+        },
+        {
+          "text": "GloVe seeks vector-space linear components by using ratios of co-occurrence probabilities.",
+          "timestamp_s": 2521,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Taking logs turns probability ratios into differences, enabling a log-bilinear dot-product model.",
+          "timestamp_s": 2648,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 2016,
+        "end_s": 2753
+      },
+      "difficulty": 3.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "course_id": "CS224N",
+      "name": "Intrinsic and extrinsic evaluation of word vectors",
+      "description": "Defines evaluation strategies for embeddings and illustrates them with analogy, word similarity, and named entity recognition tasks.",
+      "summary": "After the GloVe demo, the lecturer emphasizes that NLP systems need evaluation to determine what is better or worse [ts=2766s]. Intrinsic evaluation is defined as scoring a specific internal subtask; it is fast and helps understand the component, but may be distant from the downstream task and may not translate to end performance [ts=2793s]. Extrinsic evaluation tests whether a modeling component helps a real downstream task such as question answering, summarization, machine translation, or web search, although running the full system can make effects harder to diagnose [ts=2825s]. For word vectors, intrinsic evaluations include analogies and word similarity judgments: analogy sets count the percentage of successful vector arithmetic cases, while similarity tasks compare model scores to averaged human judgments such as tiger/tiger, book/paper, plane/car, and stock/jaguar [ts=2898s]. The table discussed shows plain SVD performing poorly, log-count SVD improving, and word2vec/GloVe variants getting stronger scores [ts=3031s]. As an extrinsic example, named entity recognition labels strings like Chris Manning as a person and Palo Alto as a place; adding word vectors to a baseline symbolic probabilistic NER system substantially improves performance [ts=3075s].",
+      "key_points": [
+        {
+          "text": "Intrinsic evaluation scores a specific internal subtask and is usually fast but may not predict downstream impact.",
+          "timestamp_s": 2793,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Extrinsic evaluation runs a real downstream task to test whether a model component helps final task accuracy.",
+          "timestamp_s": 2825,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Word-vector analogy evaluation measures what percentage of analogy questions are solved correctly.",
+          "timestamp_s": 2898,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Word-similarity evaluation correlates model similarity scores with averaged human judgments.",
+          "timestamp_s": 2955,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Named entity recognition can serve as a downstream task where adding GloVe vectors improves a baseline system.",
+          "timestamp_s": 3075,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 2762,
+        "end_s": 3131
+      },
+      "difficulty": 2.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "course_id": "CS224N",
+      "name": "Polysemy, word senses, and sparse recovery from embeddings",
+      "description": "Explains why single word vectors are problematic for ambiguous words and how sense clustering and sparse coding address polysemy.",
+      "summary": "The lecturer moves to polysemy, emphasizing that most words have multiple meanings, with bank, star, and pike as examples [ts=3145s]. Audience examples for pike include fish, spear, road/turnpike, fraternity name, diving position, verb use, idioms like coming down the pike, and an Australian sense meaning to chicken out [ts=3182s]. One approach is multi-prototype embeddings: cluster word tokens by similarity of occurrence, treat each cluster as a sense, and learn word vectors for those sense clusters [ts=3319s]. The 2012 example shown separates senses such as bank 1/bank 2 and multiple Jaguar senses: car, Apple software, keyboard, and animal [ts=3358s]. However, the lecturer explains that modern practice usually keeps one vector per word because discrete sense boundaries are often artificial; dictionaries disagree on the number of senses, and words like field have related but not cleanly separated uses such as crop field, rock/ice field, sporting field, and mathematical field [ts=3543s]. A single word vector can be understood as an average over contexts, a view that connects to later contextual word vectors [ts=3635s]. Although ordinary linear algebra would suggest individual sense vectors cannot be recovered from a single summed vector, high-dimensional sparse spaces allow sparse coding methods to reconstruct sense vectors; Arora et al. examples recover multiple senses of tie [ts=3677s].",
+      "key_points": [
+        {
+          "text": "Most words have multiple meanings; pike illustrates polysemy across fish, weapon, road, diving, verb, idiom, and dialect uses.",
+          "timestamp_s": 3145,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A multi-sense embedding approach clusters word tokens by occurrence similarity, then learns vectors for each sense cluster.",
+          "timestamp_s": 3319,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Sense-cluster examples separate Jaguar into car, software, keyboard, and animal senses.",
+          "timestamp_s": 3358,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Discrete word senses can be artificial because many meanings overlap and dictionaries disagree on sense counts.",
+          "timestamp_s": 3543,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A single word vector can be interpreted as an average of all contexts for that word.",
+          "timestamp_s": 3635,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Sparse coding can reconstruct sense vectors from a high-dimensional sparse whole-word vector.",
+          "timestamp_s": 3677,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 3138,
+        "end_s": 3786
+      },
+      "difficulty": 3.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "course_id": "CS224N",
+      "name": "Neural window classifiers and cross-entropy loss",
+      "description": "Introduces supervised neural classification with word-vector windows, nonlinear hidden representations, and cross-entropy loss.",
+      "summary": "The final technical arc starts by framing word2vec as already a simple classifier because it predicts which words are likely in a context [ts=3806s]. The main example is named entity recognition: words are assigned classes such as person, location, or not-a-named-entity, and the same surface words can have different classes depending on context, as in Paris Hilton versus a location use of Paris [ts=3824s]. The proposed model is a window classifier: take a target word plus context words on both sides, represent each with word vectors, concatenate the window, and feed it to a classifier that predicts location versus not-location [ts=3927s]. This is supervised learning: training data consists of inputs x_i and labels y_i, such as negative Paris Hilton and positive I visit Paris every spring [ts=3992s]. Traditional classifiers such as logistic regression, softmax classifiers, SVMs, and Naive Bayes are described as mostly linear classifiers over fixed inputs, whereas neural classifiers also learn distributed representations and can be nonlinear relative to the original input space [ts=4085s]. The concrete neural architecture concatenates five word embeddings into a high-dimensional vector, applies a matrix plus bias and a nonlinearity to form a hidden representation, then maps that hidden representation to a score and sigmoid probability for the location class [ts=4196s]. Cross-entropy loss is introduced as the PyTorch loss students will use; for one-hot target labels, all incorrect terms vanish and cross entropy becomes the log probability assigned to the correct class, used as negative log likelihood [ts=4354s].",
+      "key_points": [
+        {
+          "text": "Word2vec can be viewed as a simple classifier because it predicts likely context words.",
+          "timestamp_s": 3806,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Named entity recognition labels words with classes such as person, location, or not a named entity, using context to resolve ambiguity.",
+          "timestamp_s": 3824,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A window classifier uses a target word plus surrounding context words represented by their word vectors.",
+          "timestamp_s": 3927,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Supervised classification uses labeled input examples x_i with class labels y_i.",
+          "timestamp_s": 3992,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Neural classifiers learn both weights and distributed word representations, making nonlinear classification possible in the original space.",
+          "timestamp_s": 4139,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A five-word window with 100-dimensional embeddings becomes a 500-dimensional concatenated input.",
+          "timestamp_s": 4224,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A hidden layer computes matrix times input plus bias, then applies a nonlinearity before output scoring.",
+          "timestamp_s": 4231,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "For one-hot targets, cross entropy reduces to the log probability assigned to the correct class and is used as negative log likelihood.",
+          "timestamp_s": 4354,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 3789,
+        "end_s": 4449
+      },
+      "difficulty": 3.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "course_id": "CS224N",
+      "name": "Artificial neurons and why depth helps",
+      "description": "Connects biological neuron inspiration to logistic regression units and multi-layer neural networks that learn hidden features.",
+      "summary": "The lecture ends with the biological inspiration for neural networks: human neurons have outputs along axons, connections through synapses, many inputs from other neurons, and a combined activation process that sends spikes when enough positive input arrives [ts=4454s]. Artificial neural networks simplify spike rates into real-valued activation levels [ts=4533s]. Binary logistic regression is presented as a simple artificial neuron: multiple inputs may have positive excitatory or negative inhibitory weights, are combined into an excitation value, and are passed through a nonlinearity [ts=4560s]. The lecturer cautions that human neurons are much more complex, but modern neural networks generally use the simplified model because it becomes convenient linear algebra [ts=4602s]. A single logistic-function neuron is identical to logistic regression, but neural networks stack many such units and feed them into further logistic regressions [ts=4632s]. The important learning claim is that intermediate units do not need human-defined meanings; by training toward an eventual output such as location versus not-location, hidden layers learn useful internal features themselves [ts=4662s]. More layers let networks build up functions and representations that make data easier to classify or interpret downstream [ts=4700s].",
+      "key_points": [
+        {
+          "text": "Biological neurons inspired neural networks through many inputs, synapses, axon outputs, and activation/spiking behavior.",
+          "timestamp_s": 4454,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Artificial neural networks simplify neural spike rates into real-valued activation levels.",
+          "timestamp_s": 4533,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Binary logistic regression resembles a neuron that combines positive and negative weighted inputs and applies a nonlinearity.",
+          "timestamp_s": 4560,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A single logistic-function neuron is identical to logistic regression.",
+          "timestamp_s": 4632,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Neural networks stack many logistic-regression-like units and let intermediate units learn useful functions automatically.",
+          "timestamp_s": 4650,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "More layers allow models to learn representations that make classification or downstream interpretation easier.",
+          "timestamp_s": 4700,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+        "start_s": 4449,
+        "end_s": 4742
+      },
+      "difficulty": 2.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 5,
+      "ordering_index": 8,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp1",
+      "name": "Gradient descent and learning rate",
+      "description": "Gradient-based optimization updates parameters by subtracting a scaled gradient, with the learning rate controlling step size.",
+      "track_tags": [
+        "optimization"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.3,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is the first optimization mechanism needed to understand training word vectors and later neural networks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp2",
+      "name": "Stochastic gradient descent and mini-batches",
+      "description": "SGD estimates gradients from small data subsets, trading exactness for speed and useful optimization noise.",
+      "track_tags": [
+        "optimization"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "SGD is repeatedly emphasized as what neural networks actually use for training at scale.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp3",
+      "name": "Random initialization and symmetry breaking",
+      "description": "Word-vector parameters must start as small random values rather than all zeros to avoid false symmetries.",
+      "track_tags": [
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is a practical diagnostic point for implementing embedding and neural-network models.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp4",
+      "name": "Word2vec skip-gram bag-of-words objective",
+      "description": "The skip-gram model predicts context words from a center word using dot products between center and outside vectors.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is the central word-vector training objective continued from the previous lecture.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp5",
+      "name": "Word vector nearest-neighbor similarity",
+      "description": "Semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The demo uses this as immediate evidence that learned embeddings encode meaning.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp6",
+      "name": "Linear semantic components and analogies",
+      "description": "Vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.1,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecturer calls analogies the celebrated property of word vectors and uses them repeatedly to motivate embeddings.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp7",
+      "name": "Two-vector word2vec parameterization",
+      "description": "Word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This explains a design detail that affects derivations and implementations but is not the main conceptual arc.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp8",
+      "name": "Naive softmax vs word2vec model variants",
+      "description": "Word2vec includes skip-gram and CBOW structures, and naive softmax computes a full vocabulary normalization.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.2,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It clarifies the family of word2vec methods and why efficiency alternatives are useful.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp9",
+      "name": "Negative sampling with sigmoid objectives",
+      "description": "Negative sampling replaces full softmax with logistic decisions that distinguish true context words from sampled noise words.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is a major practical training variant for scalable word2vec embeddings.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp10",
+      "name": "Unigram distribution to the 3/4 power",
+      "description": "The negative-sampling distribution uses unigram probabilities raised to 3/4 to upweight less frequent words relative to raw frequency.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is a concrete implementation detail that explains why negative sampling works better than uniform or raw-frequency sampling.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp11",
+      "name": "Co-occurrence matrix word representations",
+      "description": "Count-based embeddings start by counting how often words occur in each other's context windows.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This provides the main alternative to predictive word2vec-style training.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp12",
+      "name": "SVD dimensionality reduction for word vectors",
+      "description": "SVD can reduce a large co-occurrence matrix into lower-dimensional word representations by truncating smaller singular values.",
+      "track_tags": [
+        "linear_algebra"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "SVD links linear algebra to count-based embeddings and explains older LSA/COALS approaches.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp13",
+      "name": "GloVe log-bilinear co-occurrence-ratio model",
+      "description": "GloVe uses log co-occurrence ratios so vector differences correspond to meaning differences.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is the lecture's main bridge from count statistics to linear semantic components in embeddings.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp14",
+      "name": "Intrinsic versus extrinsic evaluation",
+      "description": "Intrinsic evaluation tests internal subtasks, while extrinsic evaluation measures effects on real downstream systems.",
+      "track_tags": [
+        "evaluation"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecturer says evaluation will recur throughout the course, making the distinction broadly reusable.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp15",
+      "name": "Word-vector analogy and similarity benchmarks",
+      "description": "Embedding quality can be measured by analogy accuracy or correlation with human word-similarity judgments.",
+      "track_tags": [
+        "evaluation"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "These are the concrete intrinsic tests used to evaluate word vectors in this lecture.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp16",
+      "name": "Named entity recognition as an extrinsic embedding task",
+      "description": "NER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "NER is used both as an evaluation example and the setup for the neural window classifier.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp17",
+      "name": "Polysemy and multi-sense embeddings",
+      "description": "Words often have multiple related or unrelated meanings, and one approach clusters token occurrences into sense-specific embeddings.",
+      "track_tags": [
+        "semantics"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecturer spends a dedicated segment on word senses and examples such as pike, bank, field, and Jaguar.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp18",
+      "name": "Single-vector averages and sparse coding for senses",
+      "description": "A single word vector can average contexts, while sparse coding can sometimes recover sense vectors from high-dimensional sparse embeddings.",
+      "track_tags": [
+        "semantics"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is an advanced extension that connects current single-vector practice to later contextual vectors and sparse coding theory.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp19",
+      "name": "Supervised window classification",
+      "description": "A window classifier predicts a label for a target word using its surrounding context and word-vector features.",
+      "track_tags": [
+        "classification"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "This introduces the supervised classification pattern used for neural NLP tasks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp20",
+      "name": "Neural classifiers as learned nonlinear representations",
+      "description": "Neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is the key transition from word vectors into neural networks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp21",
+      "name": "Feed-forward neural network layer",
+      "description": "A neural layer concatenates embeddings, applies an affine transformation plus nonlinearity, and maps hidden features to output scores.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is the concrete architecture the lecturer says will be reused in the next lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp22",
+      "name": "Cross-entropy loss and negative log likelihood",
+      "description": "For one-hot targets, cross entropy reduces to the model's log probability of the correct class and is optimized as negative log likelihood.",
+      "track_tags": [
+        "loss_functions"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.2,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecturer explicitly flags cross entropy as the PyTorch loss students will soon use.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp23",
+      "name": "Artificial neuron as logistic regression",
+      "description": "A simplified neuron combines weighted inputs, applies a nonlinearity, and with logistic activation is equivalent to logistic regression.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 2.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This links biological inspiration to the mathematical unit used in neural networks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp24",
+      "name": "Depth and hidden feature learning",
+      "description": "Multi-layer neural networks stack many simple units so intermediate layers learn useful representations automatically.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 3.1,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "The final conceptual takeaway explains why deeper neural networks can build useful functions for downstream tasks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp1",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Gradient descent is introduced as computing a gradient and stepping downhill, with alpha as the step size [ts=202s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "SGD is described as using small mini-batches such as 16 or 32 examples for noisy but faster gradient estimates [ts=413s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp3",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Random initialization is highlighted as necessary because all-zero vectors create false symmetries [ts=508s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp4",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The segment reviews how word2vec uses gradient updates to make vectors predict surrounding words better [ts=533s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp4",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecturer explains word2vec parameters, dot products, probability distribution over context words, and bag-of-words assumptions [ts=618s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp5",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The demo queries nearest neighbors such as USA, banana, and croissant to show semantic similarity [ts=832s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp6",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment centers on vector arithmetic analogies like King - man + woman and many follow-up examples [ts=966s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp7",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Q&A asks how the two U/V vectors become one vector, and the answer says they are commonly averaged [ts=1354s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp7",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecturer explains that two disjoint vectors simplify the math by avoiding a quadratic self-term [ts=1537s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Skip-gram, CBOW, and naive softmax are contrasted as members of the word2vec family [ts=1622s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Negative sampling is introduced as training logistic regressions for true and sampled context words [ts=1741s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp10",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment specifies unigram probability to the 3/4 power for sampling negative words [ts=1945s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp11",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecturer motivates co-occurrence matrices by directly counting how often words occur in context windows [ts=2023s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "SVD is introduced as the classic way to reduce a co-occurrence matrix to low-dimensional word vectors [ts=2213s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "GloVe is explained via ratios of co-occurrence probabilities and log-bilinear dot products [ts=2521s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp6",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "COALS and GloVe are tied to the same linear semantic component property highlighted for word2vec analogies [ts=2414s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp14",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecturer defines intrinsic and extrinsic evaluation and says evaluation will recur across the course [ts=2793s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp15",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Analogy and word-similarity datasets are presented as intrinsic word-vector evaluations [ts=2898s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp16",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "NER is introduced as a downstream task where adding GloVe vectors improves performance [ts=3075s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp17",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment states that most words have many meanings and demonstrates this with pike and multi-sense embeddings [ts=3145s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp18",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecturer argues one vector can average contexts and then describes sparse coding recovery of sense vectors [ts=3635s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp6",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The sense discussion builds on vector-space meaning components and their recoverability in high-dimensional spaces [ts=3677s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp16",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "NER is reused as the running example for person/location/not-entity classification [ts=3824s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp19",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The window classifier is defined as using a target word and surrounding word vectors to predict a class [ts=3927s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp20",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Neural classifiers are contrasted with mostly linear classifiers because they learn distributed representations [ts=4139s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp21",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The concrete network uses concatenated embeddings, affine transformation, nonlinearity, hidden representation, and sigmoid output [ts=4196s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp22",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Cross entropy is introduced as the PyTorch loss and reduced to log probability of the correct class for one-hot targets [ts=4354s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp23",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecturer compares binary logistic regression to a simplified neuron with weighted inputs and a nonlinearity [ts=4560s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp24",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment explains that stacked intermediate logistic-regression-like units learn useful internal functions by themselves [ts=4650s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "local_kp_id": "local::lecture04-wordvecs-lm::kp21",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The final discussion connects the earlier neural-network layer idea to stacked units and downstream classification [ts=4720s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Foundational training mechanics for word2vec and neural networks; includes learning-rate and initialization diagnostics [ts=294s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Live Jupyter/GloVe demo of nearest neighbors and analogies provides strong examples for retrieval and assessment [ts=711s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Negative sampling, sigmoid probabilities, and unigram^3/4 distribution are formula-centered word2vec variants [ts=1741s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Co-occurrence matrices, SVD, and GloVe log-ratio modeling are mathematically central alternatives to word2vec [ts=2213s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Intrinsic/extrinsic evaluation is explicitly said to recur throughout the course, with concrete word-vector benchmarks [ts=2766s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Polysemy and sparse coding are conceptually important but less central than core training and evaluation mechanics [ts=3145s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Introduces supervised neural classification, window models, affine hidden layers, sigmoid output, and cross entropy [ts=4196s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Provides the conceptual bridge from logistic regression to multi-layer neural networks and hidden feature learning [ts=4632s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture04-wordvecs-lm"
+}

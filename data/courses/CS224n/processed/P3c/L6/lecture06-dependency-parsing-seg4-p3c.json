@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture06-dependency-parsing::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=KVKvde-_MYc",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "The transcript gives enough detail on parsing cues and projectivity to support five grounded conceptual questions with no separate clip needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which cue would most directly help decide whether a candidate head-dependent arc is plausible?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Whether the two words make lexical sense together in that relation",
+        "Whether the sentence contains the letter z",
+        "Whether the dependent is the longest word in the sentence",
+        "Whether the head appears in alphabetical order"
+      ],
+      "answer_index": 0,
+      "explanation": "A parser can use lexical plausibility: some word pairs make natural dependency relations, while others are semantically implausible.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dependency_trees_and_projectivity",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "whether they are plausible",
+          "makes no sense at all"
+        ],
+        "timestamps": [
+          "00:46:46",
+          "00:47:10"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does dependency distance matter in parsing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because most dependencies are short, and long spans over verbs or punctuation are less likely",
+        "Because the farthest possible head is always correct",
+        "Because dependency parsers only allow adjacent words to connect",
+        "Because distance replaces all lexical information"
+      ],
+      "answer_index": 0,
+      "explanation": "Most real dependencies are local. Distance and the material between words therefore provide useful structural evidence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dependency_trees_and_projectivity",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "most dependencies are short-distance",
+          "span verbs or punctuation"
+        ],
+        "timestamps": [
+          "00:47:20",
+          "00:47:40"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does valency describe for a head such as a verb?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How many arguments it tends to take and where they tend to appear",
+        "Its spelling length in characters",
+        "Its probability of being the ROOT token",
+        "How many dependency labels exist in the treebank"
+      ],
+      "answer_index": 0,
+      "explanation": "Valency captures a head's tendency to combine with a certain number and arrangement of arguments.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dependency_trees_and_projectivity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "valency of heads",
+          "something to the left"
+        ],
+        "timestamps": [
+          "00:47:55",
+          "00:48:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes a dependency structure nonprojective?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "At least one dependency arc crosses another when drawn over the sentence",
+        "The sentence contains no verb",
+        "All dependents attach directly to ROOT",
+        "The parse has more than one noun phrase"
+      ],
+      "answer_index": 0,
+      "explanation": "Nonprojective structures arise when dependencies cross rather than nest cleanly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dependency_trees_and_projectivity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "crossing dependencies",
+          "nonprojective dependencies"
+        ],
+        "timestamps": [
+          "00:52:12",
+          "00:52:42"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What simplification does the lecture make for the assignment parser?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It handles only projective dependency parsing",
+        "It ignores all dependency labels",
+        "It uses no stack or buffer",
+        "It allows unrestricted crossing arcs"
+      ],
+      "answer_index": 0,
+      "explanation": "To keep the parser simpler, the lecture restricts the assignment setup to projective parses rather than full nonprojective parsing.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dependency_trees_and_projectivity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "only going to do projective",
+          "dependency parsing"
+        ],
+        "timestamps": [
+          "00:53:20",
+          "00:53:32"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q1",
+      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q2",
+      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q3",
+      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q4",
+      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg4_q5",
+      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "role": "primary"
+    }
+  ]
+}

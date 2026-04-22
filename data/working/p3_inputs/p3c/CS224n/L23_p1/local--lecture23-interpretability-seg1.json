@@ -1,0 +1,155 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture23-interpretability",
+    "lecture_title": "Lecture 23 - Model Interpretability and Editing",
+    "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs"
+  },
+  "unit": {
+    "unit_id": "local::lecture23-interpretability::seg1",
+    "course_id": "cs224n-2024",
+    "name": "Motivation: communicate with machines to benefit humanity",
+    "description": "Frames interpretability as the problem of building shared representations so humans can learn from, align with, and safely collaborate with powerful models.",
+    "summary": "Been Kim frames modern AI systems as impressive but potentially frightening colleagues whose capabilities could either help humanity or go catastrophically wrong, so she argues we should directly optimize for human benefit rather than wait [ts=118s] [ts=184s]. She uses AlphaGo’s Move 37 against Lee Sedol as the emblem of machine knowledge that humans do not yet have language for, then argues that meaningful conversation requires overlap between human and machine representational spaces [ts=291s] [ts=419s]. She also positions this as an AI-safety problem, since understanding a system’s true goals and reasoning is necessary for avoiding reward hacking, and sets up the rest of the lecture as a search for tools that can estimate what machines actually know [ts=368s] [ts=551s].",
+    "key_points": [
+      {
+        "text": "AI systems can be treated as colleagues that are useful but may have very different values, experiences, and goals from humans.",
+        "timestamp_s": 198,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Move 37 in AlphaGo is presented as an example of a strong machine concept or strategy humans could not readily fathom.",
+        "timestamp_s": 291,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A shared vocabulary or overlapping representational space is necessary for humans and machines to exchange meaning.",
+        "timestamp_s": 389,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Meaningful communication with models is described as a superset of solving AI-safety issues like reward hacking.",
+        "timestamp_s": 368,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+      "start_s": 101,
+      "end_s": 596
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Been Kim frames modern AI systems as impressive but potentially frightening colleagues whose capabilities could either help humanity or go catastrophically wrong, so she argues we should directly optimize for human benefit rather than wait [ts=118s] [ts=184s]. She uses AlphaGo’s Move 37 against Lee Sedol as the emblem of machine knowledge that humans do not yet have language for, then argues that meaningful conversation requires overlap between human and machine representational spaces [ts=291s] [ts=419s]. She also positions this as an AI-safety problem, since understanding a system’s true goals and reasoning is necessary for avoiding reward hacking, and sets up the rest of the lecture as a search for tools that can estimate what machines actually know [ts=368s] [ts=551s].",
+  "target_kp_ids": [
+    "kp_shared_representational_overlap",
+    "kp_move_37_as_a_superhuman_concept_exemplar"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "video_clip_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "transcript_slice": "00:01:45\n\"Chasing my dreams to communicate with machines.\"\n\n00:01:52\nyou don't have to-- that large language models and generative\n\n00:01:57\nThey're impressive.\n\n00:02:01\nfrightening.\n\n00:02:04\nthey're doing a really good job, but also, we're\n\n00:02:11\nIn 10 years out, we will look back and say,\n\n00:02:16\nOr we will say, ah, that was catastrophic.\n\n00:02:22\nUltimately, what I would like to do\n\n00:02:28\nis to have this technology benefit us humans.\n\n00:02:34\nwell, 20 years or earlier, he's going to ask me.\n\n00:02:41\nI watched some of your talks.\n\n00:02:46\nchange our lives?\n\n00:02:51\nAnd I have to answer that question.\n\n00:02:59\nSo my initial thought and still so or current thought\n\n00:03:08\nwhy not directly optimize for it?\n\n00:03:13\nSo how can we benefit?\n\n00:03:18\nBut one way we can benefit is to treat\n\n00:03:23\nare really good at something.\n\n00:03:28\ngood at something enough that you want\n\n00:03:32\nOne difference is, though, in this case\n\n00:03:37\nThis colleague might have very different values.\n\n00:03:44\nIt may not care about surviving as much as we do.\n\n00:03:52\nSo you have to navigate that in our conversation.\n\n00:03:59\nThere's someone so different.\n\n00:04:01\nYou try to have a conversation to figure out how do you\n\n00:04:09\nfolding problem?\n\n00:04:17\nAre you using the same language, the science language\n\n00:04:23\nOr do you think about the world in a very different way?\n\n00:04:32\nI have one area that I really want to talk to.\n\n00:04:36\nSo AlphaGo beat world Go champion Lee Sedol in 2016.\n\n00:04:42\nI'm from South Korea.\n\n00:04:44\nIt was such a big deal in South Korea and worldwide, I hope.\n\n00:04:51\nplayed this move called Move 37.\n\n00:04:57\nand how many people remember Move 37?\n\n00:05:02\nAnd I remember the 9-dan commentator\n\n00:05:07\ngot really quiet.\n\n00:05:14\nAnd I knew then that something really interesting\n\n00:05:19\nthat this is going to change something,\n\n00:05:23\ngoing to remember forever.\n\n00:05:27\nthe game for AlphaGo and leading AlphaGo\n\n00:05:32\nSo Go players today continue to analyze this move\n\n00:05:37\nPeople talk about, this is not the move a human would fathom.\n\n00:05:44\nknow this is a good move?\n\n00:05:52\nby communicating the machine with machines\n\n00:05:57\nwill gain some new angle to our important problems\n\n00:06:04\nAnd this is not just about discovering new things.\n\n00:06:10\nyou have to have a meaningful conversation with somebody\n\n00:06:17\nSo in a way, solving this problem\n\n00:06:26\nSo how do we have this conversation?\n\n00:06:32\nbetween to exchange meaning and ultimately the knowledge.\n\n00:06:39\nin this conversation.\n\n00:06:43\nWe say, this is a representational space\n\n00:06:47\nOn the right, what machines know.\n\n00:06:52\nlike, this dog is fluffy.\n\n00:06:56\nsomewhat similar vocabulary.\n\n00:07:02\nwhere we humans yet to have a representation for.\n\n00:07:12\nOur representation space needs overlap.\n\n00:07:17\nwe're going to have.\n\n00:07:21\nLike, here everyone is learning something new.\n\n00:07:27\nand vocabularies.\n\n00:07:32\nus to build machines that can better align\n\n00:07:39\nSo this is the talk that I gave.\n\n00:07:42\nwe're doing towards this direction, I highly recommend.\n\n00:07:45\nICLR Keynote, half an hour.\n\n00:07:50\nBut today I'm going to talk more about my hopes and dreams.\n\n00:07:58\nSo first of all, I'm just going to set the expectation.\n\n00:08:05\ndon't know how the Move 37 is made, OK?\n\n00:08:12\nIn fact, the first part of this talk\n\n00:08:18\nin this progress in terms of making\n\n00:08:25\nsmall portion of our entire journey towards understanding\n\n00:08:31\nAnd, of course, this journey wouldn't\n\n00:08:34\nThere will be lots of different branches coming in.\n\n00:08:42\nThere will be similar here.\n\n00:08:46\nsome of our work on understanding\n\n00:08:51\nAnd all of the techniques that I'm going to talk about\n\n00:08:59\nSo coming back to our hopes and dreams, Move 37--\n\n00:09:09\nAnd taking a step back, we have to ask,\n\n00:09:14\nwhat even machines know?\n\n00:09:20\nnow to develop tools to understand and estimate\n\n00:09:26\nSo is that accurate?\n\n00:09:30\nshowed that there is a huge gap between what machines actually\n\n00:09:39\nAnd identifying and bridging this gap\n\n00:09:45\nfor understanding that Move 37.\n\n00:09:51\nHow many people are familiar with saliency maps?\n\n00:09:55\nBut if you don't I'll have to explain what it is.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture23-interpretability::seg1",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg1",
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_shared_representational_overlap",
+      "name": "Shared representational overlap",
+      "description": "Humans and machines need partially overlapping representations or vocabulary to exchange meaning and collaborate effectively.",
+      "track_tags": [
+        "alignment",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "ml",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ai_safety",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because shared representational overlap formalizes how humans and machines need partially overlapping representations or vocabulary to exchange meaning and collaborate effectively, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "name": "Move 37 as a superhuman concept exemplar",
+      "description": "AlphaGo’s Move 37 is used as a concrete case of a machine-discovered strategy that humans could recognize as important without yet being able to explain it.",
+      "track_tags": [
+        "alignment",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "games",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "ai_safety",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because move 37 as a superhuman concept exemplar clarifies alphaGo’s Move 37 is used as a concrete case of a machine-discovered strategy that humans could recognize as important without yet being able to explain it, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp2"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L23_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture23-interpretability_transcript.txt"
+  }
+}

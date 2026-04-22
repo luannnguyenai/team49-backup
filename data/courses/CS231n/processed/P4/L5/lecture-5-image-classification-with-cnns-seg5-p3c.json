@@ -1,0 +1,301 @@
+{
+  "unit_id": "local::lecture_5_image_classification_with_cnns::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "The segment supports procedural questions about why nonlinearities are needed, how filters specialize, and how convolution changes spatial size.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do stacked convolution layers need nonlinear activations between them?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Without nonlinearities, a stack of linear convolutions is still just a linear operator.",
+        "Without nonlinearities, filters cannot span all input channels.",
+        "Without nonlinearities, padding cannot preserve spatial size.",
+        "Without nonlinearities, the batch dimension disappears."
+      ],
+      "answer_index": 0,
+      "explanation": "Composing linear operations alone does not create a more expressive nonlinear model. Adding activations such as ReLU lets stacked layers model more complex functions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "linear operator",
+          "activation function"
+        ],
+        "timestamps": [
+          "00:44:54",
+          "00:45:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should convolution filters usually be initialized differently from one another?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Different random initializations break symmetry so filters can learn different features.",
+        "Identical initialization guarantees lower loss after one update.",
+        "Different initialization prevents filters from receiving gradients.",
+        "Identical initialization makes each filter specialize in a different class automatically."
+      ],
+      "answer_index": 0,
+      "explanation": "If filters start identical, they receive the same updates and remain identical. Random differences let training push filters toward different useful patterns.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_convolution_as_local_template_matching",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "random initialization",
+          "break the symmetry"
+        ],
+        "timestamps": [
+          "00:48:56",
+          "00:49:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a stride-1 convolution with no padding, what is the output width from input width w and kernel size k?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "w - k + 1",
+        "w + k - 1",
+        "w / k",
+        "k - w + 1"
+      ],
+      "answer_index": 0,
+      "explanation": "With no padding, the kernel can be placed only where it fully fits inside the input. That gives w - k + 1 valid spatial positions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "without padding",
+          "w-k+1"
+        ],
+        "timestamps": [
+          "00:49:58",
+          "00:50:35"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q1",
+      "global_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q2",
+      "global_kp_id": "kp_convolution_as_local_template_matching",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q3",
+      "global_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Nonlinearities between convolutions mirror the same medium-difficulty reasoning as in fully connected networks."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Different filter initialization to avoid symmetry is a medium optimization-and-representation question."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.45,
+      "discrimination_prior": 1.02,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Output-width computation is one of the harder procedural CNN items and should be calibrated above medium."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item checks whether the learner understands why stacked convolutions need nonlinearity to add expressivity."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "review",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item reinforces why identical filters would learn redundantly."
+    },
+    {
+      "item_id": "lecture-5-image-classification-with-cnns-seg5-q3",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This fits later assessment because it tests formula-level shape reasoning."
+    }
+  ]
+}

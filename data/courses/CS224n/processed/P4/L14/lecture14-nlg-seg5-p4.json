@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::lecture14-nlg::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture14-nlg-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture14-nlg-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is exposure bias in autoregressive generation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A train-test mismatch where training uses gold prefixes but generation uses the model's own imperfect prefixes.",
+        "A decoding rule that removes all low-probability tokens.",
+        "A metric failure caused only by lexical overlap.",
+        "A bias that appears only when the vocabulary has no rare words."
+      ],
+      "answer_index": 0,
+      "explanation": "During training, the model sees clean human prefixes. During generation, small model mistakes can become part of the context, causing future predictions to drift.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_exposure_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "gold context tokens",
+          "model's input"
+        ],
+        "timestamps": [
+          "00:41:58",
+          "00:42:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does scheduled sampling try to reduce exposure bias?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It gradually mixes model-generated tokens into the training context instead of always using gold tokens.",
+        "It removes the loss on all generated tokens.",
+        "It uses only human evaluation as a reward signal.",
+        "It restricts decoding to the top p probability mass."
+      ],
+      "answer_index": 0,
+      "explanation": "Scheduled sampling exposes the model to the kind of imperfect contexts it will encounter at generation time, narrowing the gap between training and inference.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "probability p",
+          "increase p"
+        ],
+        "timestamps": [
+          "00:42:44",
+          "00:43:03"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does DAgger contribute in the NLG training setting?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It augments training with model-generated sequences so training states resemble test-time states.",
+        "It computes lexical overlap between a generation and a reference.",
+        "It always decodes by maximizing the model probability.",
+        "It freezes the language model and changes only the tokenizer."
+      ],
+      "answer_index": 0,
+      "explanation": "DAgger collects examples from the model's own behavior and adds them to training. This teaches the model to recover from states it is likely to create.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "generate a sequence",
+          "training data"
+        ],
+        "timestamps": [
+          "00:43:25",
+          "00:43:42"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can retrieval-augmented generation reduce exposure bias?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It starts from a retrieved prototype and edits it instead of generating every token from scratch left to right.",
+        "It removes the need for any training objective.",
+        "It forces the model to repeat the retrieved text exactly.",
+        "It uses only BLEU as the generation policy."
+      ],
+      "answer_index": 0,
+      "explanation": "Starting from a retrieved prototype gives the system a structured initial sequence. Editing that sequence changes the generation dynamics and reduces dependence on a fragile left-to-right prefix.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "retrieve a sequence",
+          "not generating from left to right"
+        ],
+        "timestamps": [
+          "00:44:18",
+          "00:44:48"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is directly optimizing automatic metrics with reinforcement learning risky?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The model may game proxy rewards such as BLEU or ROUGE without improving true generation quality.",
+        "Automatic metrics cannot be represented as rewards.",
+        "Reinforcement learning prevents any human preference modeling.",
+        "BLEU and ROUGE always perfectly match human judgment."
+      ],
+      "answer_index": 0,
+      "explanation": "A reward is only a proxy for the desired behavior. If the proxy is imperfect, the model can learn to exploit it while producing text that humans judge as no better or worse.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reinforcement_learning_and_rlhf_for_nlg",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "proxy",
+          "human evaluations"
+        ],
+        "timestamps": [
+          "00:46:06",
+          "00:46:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture14-nlg-seg5-q1",
+      "global_kp_id": "kp_exposure_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q2",
+      "global_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q3",
+      "global_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q4",
+      "global_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q5",
+      "global_kp_id": "kp_reinforcement_learning_and_rlhf_for_nlg",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture14-nlg-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is exposure bias in autoregressive generation\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does scheduled sampling try to reduce exposure bias\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does DAgger contribute in the NLG training setting\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can retrieval-augmented generation reduce exposure bias\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is directly optimizing automatic metrics with reinforcement learning risky\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture14-nlg-seg5-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is exposure bias in autoregressive generation\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does scheduled sampling try to reduce exposure bias\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does DAgger contribute in the NLG training setting\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can retrieval-augmented generation reduce exposure bias\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture14-nlg-seg5-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is directly optimizing automatic metrics with reinforcement learning risky\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

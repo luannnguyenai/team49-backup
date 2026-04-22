@@ -1,0 +1,532 @@
+{
+  "unit_id": "local::lecture02-python-review::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "The transcript is strong enough to create conceptual questions about the role of NumPy, the difference between lists and arrays, shape conventions, tensors, and reshape.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core benefit of NumPy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It performs large-scale numerical operations more efficiently through optimized low-level implementations underneath Python.",
+        "It completely replaces all deep learning frameworks and GPUs.",
+        "It allows Python to completely ignore memory management.",
+        "It turns every Python list into a matrix without any conversion."
+      ],
+      "answer_index": 0,
+      "explanation": "NumPy is powerful because it provides very fast numerical and matrix operations through optimized implementations underneath. That becomes especially important when NLP data or co-occurrence matrices get large.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "optimized library",
+          "written in a different language"
+        ],
+        "timestamps": [
+          "00:17:41",
+          "00:18:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If you have a regular Python list and want to apply NumPy operations to it, what should you do first?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Convert the list into a NumPy array, usually with np.array(...).",
+        "Use the list directly, because NumPy automatically understands every list without conversion.",
+        "Convert the list into a tuple, because NumPy only works with tuples.",
+        "Convert the list into a dictionary so NumPy can optimize it better."
+      ],
+      "answer_index": 0,
+      "explanation": "NumPy operations work on NumPy array objects. Therefore, data in list form usually needs to be converted into an array before those operations are applied.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "operate only on NumPy arrays",
+          "first have to convert"
+        ],
+        "timestamps": [
+          "00:19:30",
+          "00:19:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement correctly describes the matrix, vector, and tensor convention in this section?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A matrix is usually a two-dimensional structure, a vector is usually treated as one-dimensional, and a tensor typically refers to an object with more than two dimensions.",
+        "Matrix, vector, and tensor are three completely interchangeable names in NumPy.",
+        "A vector must always be a 2x2 matrix, and a tensor can only be three-dimensional.",
+        "Tensor is just another name for a dictionary in PyTorch."
+      ],
+      "answer_index": 0,
+      "explanation": "These names help us think about the number of dimensions and how the data is organized. A vector is usually a single axis of values, a matrix is two-dimensional, and a tensor extends that idea to more dimensions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two dimensional",
+          "higher dimensional object"
+        ],
+        "timestamps": [
+          "00:21:19",
+          "00:21:25"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which shape best corresponds to 'one row with 3 elements' rather than 'one column with 3 elements'?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "(1, 3)",
+        "(3, 1)",
+        "(3, 3)",
+        "(3,) is always a two-dimensional row matrix"
+      ],
+      "answer_index": 0,
+      "explanation": "Shape (1, 3) means 1 row and 3 columns. By contrast, (3, 1) means 3 rows and 1 column, while (3,) is a one-dimensional representation rather than a full two-dimensional row matrix.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "one row of three elements",
+          "3 comma versus like 1"
+        ],
+        "timestamps": [
+          "00:24:06",
+          "00:22:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "You have an array with 10 elements. Which reshape is invalid?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "reshape to (3, 5)",
+        "reshape to (5, 2)",
+        "reshape to (2, 5)",
+        "reshape to (1, 10)"
+      ],
+      "answer_index": 0,
+      "explanation": "A reshape is valid only when the product of the new dimensions equals the original number of elements. Since 3×5 = 15, it cannot be used for an array with 10 elements.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reshape_and_indexing",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "list of 10",
+          "reshape"
+        ],
+        "timestamps": [
+          "00:25:53",
+          "00:23:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the core benefit of NumPy\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"If you have a regular Python list and want to apply NumPy operations to it, what should you do first\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which statement correctly describes the matrix, vector, and tensor convention in this section\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which shape best corresponds to 'one row with 3 elements' rather than 'one column with 3 elements'\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"You have an array with 10 elements. Which reshape is invalid\" is a direct reinforcement check and should be on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the core benefit of NumPy\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"If you have a regular Python list and want to apply NumPy operations to it, what should you do first\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which statement correctly describes the matrix, vector, and tensor convention in this section\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which shape best corresponds to 'one row with 3 elements' rather than 'one column with 3 elements'\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"You have an array with 10 elements. Which reshape is invalid\" works best as an early concept check."
+    }
+  ]
+}

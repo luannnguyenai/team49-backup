@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture08-seq2seq::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 2 conceptual reinforcement questions about from early machine translation to statistical mt without needing a separate video clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture08_seq2seq_seg6_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How did phrase-based statistical machine translation decompose the translation problem?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Into a translation model and a target-language model using Bayes' rule",
+        "Into an encoder, a decoder, and a reward model",
+        "Into only a bilingual dictionary lookup",
+        "Into a parser and a sentiment classifier"
+      ],
+      "answer_index": 0,
+      "explanation": "Phrase-based SMT used Bayes' rule to separate modeling of source-to-target correspondences from modeling of fluent target-language output. That made the full problem easier to engineer and estimate from data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_statistical_machine_translation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "using Bayes' rule",
+          "probability of the translation"
+        ],
+        "timestamps": [
+          "01:00:07",
+          "01:00:13"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg6_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What major weakness of phrase-based statistical MT did the lecture emphasize with the Chinese example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It often lost long-range modification and reordering structure",
+        "It could not use any language model at all",
+        "It required no parallel data",
+        "It always produced ungrammatical target sentences"
+      ],
+      "answer_index": 0,
+      "explanation": "Phrase-based systems could produce locally plausible fragments but still miss the true structure of who modifies what and how phrases should be reordered. That weakness becomes especially visible in longer, structurally complex sentences.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_statistical_machine_translation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reordering of words",
+          "favorite example machine"
+        ],
+        "timestamps": [
+          "01:01:46",
+          "01:01:56"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture08_seq2seq_seg6_q1",
+      "global_kp_id": "kp_statistical_machine_translation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg6_q2",
+      "global_kp_id": "kp_statistical_machine_translation",
+      "role": "primary"
+    }
+  ]
+}

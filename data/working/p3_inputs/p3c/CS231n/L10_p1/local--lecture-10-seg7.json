@@ -1,0 +1,156 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg7",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Long-term temporal structure with RNNs and recurrent convolution",
+    "description": "Explains how RNN/LSTM-style models can aggregate frame or clip features over long videos and how recurrence can be combined with convolution.",
+    "summary": "The instructor distinguishes short-term clip modeling from long-term temporal structure, where the model must recognize relationships across distant times in long videos [ts=2722s] [ts=2739s]. A practical strategy is to extract local features with a single-frame CNN or 3D CNN and feed the feature sequence into RNNs or LSTMs, producing either a many-to-one video-level prediction at the final timestep or one prediction per frame [ts=2773s] [ts=2794s] [ts=2800s] [ts=2821s]. Training can be difficult end-to-end because the recurrent and convolutional parts form a huge network, so CNNs may be pretrained or frozen and used as feature extractors before training the recurrent module [ts=2855s] [ts=2882s]. The lecture then introduces recurrent convolutional networks: each feature map at a layer/time depends both on the same layer at the previous timestep and the previous layer at the current timestep, making a grid over time and depth [ts=2908s] [ts=2960s]. Instead of RNN matrix multiplications, recurrent convolution replaces those operations with 2D convolutions over feature maps, adds the transformed inputs, and applies tanh; the same idea can be adapted to GRUs and LSTMs [ts=3000s] [ts=3043s] [ts=3062s]. The major limitation is that RNNs are slow and hard to parallelize over long video sequences [ts=3082s] [ts=3095s].",
+    "key_points": [
+      {
+        "text": "Long videos require modeling temporal structure beyond the short clips handled by earlier models.",
+        "timestamp_s": 2722,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Frame or clip features from CNNs can be fed into RNNs or LSTMs to model long-term temporal structure.",
+        "timestamp_s": 2773,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "RNN video models can be many-to-one for video-level classification or one-to-one for per-frame predictions.",
+        "timestamp_s": 2800,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "For recurrent video models, CNNs are often pretrained or frozen as feature extractors because full end-to-end training is hard.",
+        "timestamp_s": 2855,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A recurrent convolutional feature map depends on the same layer at the previous timestep and the previous layer at the same timestep.",
+        "timestamp_s": 2908,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Recurrent convolution replaces RNN matrix multiplications with 2D convolutions over feature maps.",
+        "timestamp_s": 3000,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "RNN-based video processing is slow and difficult to parallelize for long sequences.",
+        "timestamp_s": 3082,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 2722,
+      "end_s": 3101
+    },
+    "difficulty": 3.7,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 6,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:45:32\nI think folks asking about how many frames we should use actually to do\n\n00:45:42\nlong-term temporal structure to recognize more distant in time.\n\n00:45:58\nto use recurrent networks, to process a sequence of words to doing some caption\n\n00:46:13\nWe just have a convolutional neural networks. No matter whether it's a single frame convolutional\n\n00:46:26\na clip. But you have a much longer video. We can get a feature vector, and then we just use\n\n00:46:40\nWe just process the local features using this recurrent networks and make a final prediction\n\n00:46:53\nwhere we're just doing a many to one output at the end of the video. And we can also do\n\n00:47:04\nSo for each frame, we can make a prediction. Maybe there are some predictions we want to make\n\n00:47:16\nAnd actually, this kind of idea has already been explored in 2011. Actually, that's way ahead of\n\n00:47:35\nSo if you want to train this kind of recurrent architectures for modeling\n\n00:47:48\nyou can fuse the CNNs. You can pre-train them on some clips,\n\n00:47:57\nthis convolution part. It's very hard to train them end to end. So you can just use\n\n00:48:07\nAnd we have already seen two approaches to model the temporal structure. How about we can combine\n\n00:48:19\nBoth of them has some advantages. So we can maybe just combine them in a single\n\n00:48:28\nSo indeed, we can take some inspiration from this multi-layer recurrent neural networks we\n\n00:48:38\nlayer, and also the output from the same timestep from the previous\n\n00:48:44\nBut similarly, we can just do it for videos. Now, we introduce this recurrent convolution\n\n00:48:59\na three-dimensional vector. Like two spatial dimension, and the one is a channel dimension.\n\n00:49:12\nSo each depends on two inputs for each vector. For each feature map,\n\n00:49:20\nit also depends on the feature map from the previous layer but the same timestep.\n\n00:49:33\nsome input feature to an output feature. But here for this recurrent convolution network,\n\n00:49:48\nand one from the previous layer at the same timestep.\n\n00:50:00\nht minus 1. It takes the input of this current timestep, have some function with some parameter\n\n00:50:13\nSo now, instead, we just change these vectors forms of RNN. We just replace\n\n00:50:25\nwe get this recurrent convolution neural networks. So we have the feature map.\n\n00:50:32\nfeature map. And also for features from the previous layer, the same timestep,\n\n00:50:43\nuse another tanh layer, and then we get the feature map for the current hidden layer.\n\n00:50:54\ncan combine convolution operations and recurrent\n\n00:51:02\nvariants like GRUs and LSTMs, maybe you have already learned from previous class.\n\n00:51:14\nspatial and temporal fusion inside this recurrent convolution neural network. But this model was not\n\n00:51:29\nlearned that RNNs are very slow for processing non-sequence. And videos are usually very, very,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg7",
+      "global_kp_id": "kp_long_term_temporal_modeling_with_rnns_lstms",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg7",
+      "global_kp_id": "kp_recurrent_convolutional_networks",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_long_term_temporal_modeling_with_rnns_lstms",
+      "name": "Long-term temporal modeling with RNNs/LSTMs",
+      "description": "Frame or clip features can be fed to recurrent models to capture long-range dependencies and produce video-level or frame-level outputs.",
+      "track_tags": [
+        "sequence_models",
+        "video_understanding"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because long-term temporal modeling with RNNs/LSTMs clarifies frame or clip features can be fed to recurrent models to capture long-range dependencies and produce video-level or frame-level outputs, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_recurrent_convolutional_networks",
+      "name": "Recurrent convolutional networks",
+      "description": "Recurrent convolutional networks combine recurrence with spatial feature maps by replacing recurrent matrix operations with convolutions.",
+      "track_tags": [
+        "convolution",
+        "recurrent_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "research_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because recurrent convolutional networks clarifies recurrent convolutional networks combine recurrence with spatial feature maps by replacing recurrent matrix operations with convolutions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp13"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.55,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

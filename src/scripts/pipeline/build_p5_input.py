@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from src.data_paths import P2_BUNDLE_FILE, P2_OUTPUT_FILE, P5_INPUT_FILE
 
 ADJUDICATION_CONFIDENCE = {"low", "medium"}
 
@@ -95,13 +96,13 @@ def build_p5_input(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--p2-output", type=Path, default=Path("data/p2_output_rationale_repaired.json"))
-    parser.add_argument("--p2-input-bundle", type=Path, default=Path("data/p2_bundle/p2_input_bundle.json"))
-    parser.add_argument("--output", type=Path, default=Path("data/p5_inputs/p5_input_cs224n_cs231n.json"))
+    parser.add_argument("--p2-output", type=Path, default=P2_OUTPUT_FILE)
+    parser.add_argument("--p2-input-bundle", type=Path, default=P2_BUNDLE_FILE)
+    parser.add_argument("--output", type=Path, default=P5_INPUT_FILE)
     parser.add_argument("--run-id", default="p5_cs224n_cs231n")
     parser.add_argument(
         "--p5-output-file-path",
-        default="data/p5_outputs/p5_adjudication_cs224n_cs231n.json",
+        default="data/working/p5_outputs/p5_adjudication_cs224n_cs231n.json",
     )
     args = parser.parse_args()
 

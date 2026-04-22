@@ -1,0 +1,157 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_12",
+    "lecture_title": "Lecture 12: Self-Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_12::seg3",
+    "course_id": "cs231n_spring_2025",
+    "name": "Patch rearrangement and inpainting pretext tasks",
+    "description": "Covers relative-patch and jigsaw-style rearrangement objectives, then moves to inpainting as masked reconstruction with optional adversarial refinement.",
+    "summary": "The lecture first revisits patch-based spatial reasoning tasks: predicting relative patch location in a 3x3 grid is framed as 8-way classification, while the jigsaw-puzzle variant predicts a permutation index instead of a single offset [ts=1401s] [ts=1465s]. Because 9! permutations are too many, the jigsaw method restricts training to a lookup table of 64 plausible permutations, making the problem a 64-class classification task [ts=1513s] [ts=1548s]. The segment then introduces inpainting: mask part of an image, encode the visible context, and decode the missing region so the model reconstructs missing pixels using the original image as supervision [ts=1590s] [ts=1634s]. It notes a key limitation of pure reconstruction—blurry outputs—and explains that an added adversarial objective can encourage more realistic completions, though detailed GAN mechanics are deferred to the next lecture [ts=1706s] [ts=1802s].",
+    "key_points": [
+      {
+        "text": "Relative patch prediction uses a 3x3 grid with the center patch as reference and predicts one of 8 relative positions.",
+        "timestamp_s": 1401,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The jigsaw formulation predicts a permutation index for shuffled image patches rather than a single patch offset.",
+        "timestamp_s": 1465,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A practical jigsaw setup restricts the permutation space to 64 selected permutations, yielding a 64-way classification task.",
+        "timestamp_s": 1513,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Inpainting masks part of the image and trains an encoder-decoder to reconstruct the missing pixels from context.",
+        "timestamp_s": 1590,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Pure reconstruction tends to produce overly smooth outputs, so an adversarial loss can be added to make inpainted regions look more realistic.",
+        "timestamp_s": 1706,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+      "start_s": 1396,
+      "end_s": 1874
+    },
+    "difficulty": 0.5,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "transcript_slice": "00:23:16\nAnother one, another popular pretext task\n\n00:23:26\nand then use networks to predict the location of each\n\n00:23:36\nSo for this patch, which is from here,\n\n00:23:46\nThis is 3 by 3, and the center patch is the reference.\n\n00:23:56\nIt's getting any of these patches,\n\n00:24:04\nis with respect to the center patch.\n\n00:24:18\nBut this other follow-up paper, paper publication,\n\n00:24:29\nwas instead of asking the model to just predict\n\n00:24:37\nit tried to predict the exact permutation,\n\n00:24:42\nSo what they've done was they used the same three by three\n\n00:24:50\nask the neural network to say which one should\n\n00:25:01\nSo they basically predict the correct permutations.\n\n00:25:06\nyou can have for this setup?\n\n00:25:13\n9 factorial.\n\n00:25:14\nSo it's a huge number, right?\n\n00:25:19\nBut what they've done was they've\n\n00:25:32\npermutations.\n\n00:25:38\nAnd then they're shuffling that, they do the shuffling\n\n00:25:43\nAnd then the output will also be just the 60, 64 sized vector.\n\n00:25:52\ntask with 64 output classes.\n\n00:25:59\nfor solving to define as a pretext task,\n\n00:26:09\nthat I talked about and how the supervision is done.\n\n00:26:17\nsome of the more previous models, previous frameworks.\n\n00:26:30\nSo next pretext task is just inpainting\n\n00:26:38\nSo what they have done here was a simple masking strategy,\n\n00:26:47\nask the model to inpaint those parts that are masked.\n\n00:26:57\nBut because we have all of the images,\n\n00:27:02\nSo an encoder turns this into a feature space,\n\n00:27:08\nthere are some fully connected layers in the middle,\n\n00:27:14\nthe parts that is missing.\n\n00:27:22\nwith what the ground truth was.\n\n00:27:32\npixels.\n\n00:27:38\nbefore, and this is also some form of an autoencoder that\n\n00:27:47\nthat you want to decode the output.\n\n00:27:57\nobjective.\n\n00:28:03\nthe inpainting evaluations are a little bit\n\n00:28:10\nthere are so many different ways of inpainting this image, right?\n\n00:28:26\nReconstruction-based frameworks, earlier\n\n00:28:31\ncreating a lot of fuzzy and very smooth outputs.\n\n00:28:49\nwas actually using an additional adversarial objective\n\n00:28:56\nis a topic of discussion for the next lecture, generative models.\n\n00:29:05\nwe have a reconstruction loss.\n\n00:29:09\ncalculating the difference between the patch,\n\n00:29:18\npassed through the encoder.\n\n00:29:33\nAnd we also have this mask here because we\n\n00:29:38\nthe objective function, only on the masked area.\n\n00:29:45\nas well.\n\n00:29:51\nfor that part of the mask that we had.\n\n00:29:59\nwith an adversarial objective adversarial learning loss\n\n00:30:09\nare real looking.\n\n00:30:17\nthe parts that are reconstructed to look a little bit better.\n\n00:30:31\nSo this reconstruction framework was actually\n\n00:30:39\nis the same, provide additional benefit when\n\n00:30:46\nand segmentation task on same set of data sets.\n\n00:30:56\nand masking in a bit because it's\n\n00:31:05\nare used for pre-training.\n\n00:31:10\nBut before that, let me introduce this other pretext",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_12::seg3",
+      "global_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_12::seg3",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "name": "Rearrangement and inpainting pretext tasks",
+      "description": "Patch-ordering and masked-reconstruction objectives supply automatic supervision from image structure and context.",
+      "track_tags": [
+        "pretext_tasks",
+        "reconstruction"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rearrangement and inpainting pretext tasks clarifies patch-ordering and masked-reconstruction objectives supply automatic supervision from image structure and context, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "name": "Downstream transfer and extrinsic evaluation",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
+      "track_tags": [
+        "computer_vision",
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "downstream_adaptation",
+        "linear_probe",
+        "machine_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp14",
+        "local::lecture_12::kp3",
+        "local::lecture_16::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.35,
+    0.65
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L12_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture12-self-supervised-learning_transcript.txt"
+  }
+}

@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::lecture15-benchmarking::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "Transcript is sufficient for reinforcement questions on this unit's evaluation concepts. The key distinctions, caveats, and examples are stated directly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture15-benchmarking-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture15-benchmarking-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main lesson of the MMLU implementation example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Benchmark scores can change substantially because of seemingly minor prompting or scoring decisions",
+        "All MMLU implementations give identical rankings",
+        "Multiple-choice tasks are always robust to formatting",
+        "Constrained decoding is always the best method"
+      ],
+      "answer_index": 0,
+      "explanation": "The point is that benchmark scores are not purely properties of the model. Formatting, prompting, and scoring conventions can materially change results.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "different prompts",
+          "different scores"
+        ],
+        "timestamps": [
+          "01:04:50",
+          "01:04:56"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why might relabeling answer options or changing formatting alter rankings on a multiple-choice benchmark?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because multiple-choice tasks are actually open-ended",
+        "Because generation and answer selection are sensitive to the exact surface form of the choices",
+        "Because accuracy cannot be computed after relabeling",
+        "Because only humans can score such tasks"
+      ],
+      "answer_index": 1,
+      "explanation": "Even for simple-looking multiple-choice tasks, models can respond differently depending on how choices are formatted or constrained, which changes final scores.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "change A, B, C, D",
+          "different"
+        ],
+        "timestamps": [
+          "01:04:03",
+          "01:04:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What kind of evidence would most strongly raise suspicion of benchmark contamination from pretraining?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A model performs similarly on old and newly created items",
+        "A model does far better on older public problems than on newer analogous ones",
+        "A model uses chain-of-thought prompting",
+        "A model has low perplexity on validation data"
+      ],
+      "answer_index": 1,
+      "explanation": "If a model performs unusually well on older public items but drops on newer comparable ones, that pattern suggests it may have seen benchmark content or close variants during training.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "old to new benchmark items",
+          "Codeforces"
+        ],
+        "timestamps": [
+          "01:07:12",
+          "01:07:43"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which mitigation is most directly aimed at keeping public benchmark tuning from exhausting the test set?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use only BLEU and ROUGE",
+        "Use private, regenerated, or dynamic test sets",
+        "Average more public leaderboards together",
+        "Remove all multiple-choice tasks"
+      ],
+      "answer_index": 1,
+      "explanation": "Private, refreshed, or dynamic evaluation sets make it harder for systems to overfit a fixed public test set through repeated tuning or leakage.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "private or regenerated test sets",
+          "dynamic benchmarks like Dynabench"
+        ],
+        "timestamps": [
+          "01:09:13",
+          "01:09:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which heuristic is mentioned as a possible leakage check?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Whether the model answer is very short",
+        "Whether the model is unusually overconfident or drops when example order is scrambled",
+        "Whether the model uses beam search",
+        "Whether the benchmark includes images"
+      ],
+      "answer_index": 1,
+      "explanation": "Leakage can sometimes show up as suspiciously confident answers or brittleness when the original presentation order is disrupted.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "overconfident answer probabilities",
+          "order is scrambled"
+        ],
+        "timestamps": [
+          "01:10:23",
+          "01:10:28"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg7-q1",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q2",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q3",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q4",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q5",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture15-benchmarking-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the main lesson of the MMLU implementation example\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why might relabeling answer options or changing formatting alter rankings on a multiple-choice benchmark\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What kind of evidence would most strongly raise suspicion of benchmark contamination from pretraining\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which mitigation is most directly aimed at keeping public benchmark tuning from exhausting the test set\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which heuristic is mentioned as a possible leakage check\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg7-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the main lesson of the MMLU implementation example\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why might relabeling answer options or changing formatting alter rankings on a multiple-choice benchmark\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What kind of evidence would most strongly raise suspicion of benchmark contamination from pretraining\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q4",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which mitigation is most directly aimed at keeping public benchmark tuning from exhausting the test set\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg7-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which heuristic is mentioned as a possible leakage check\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_3::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "The segment is sufficiently grounded for learning-rate diagnostics, warmup, and second-order optimization limitations; no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-3-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a typical symptom of a learning rate that is too high?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The optimization can bounce around or even explode instead of settling into a lower-loss region.",
+        "The model must always converge more slowly but more safely.",
+        "The regularization term becomes exactly zero.",
+        "The optimizer stops using gradients."
+      ],
+      "answer_index": 0,
+      "explanation": "A step size that is too large can overshoot useful directions and prevent stable convergence. A very low rate has the opposite issue: slow progress.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_learning_rate_schedules_warmup_and_batch_size_scaling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "converge very slowly",
+          "change your learning rate"
+        ],
+        "timestamps": [
+          "00:59:34",
+          "01:00:09"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the purpose of learning-rate warmup?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Gradually ramp the learning rate from near zero to a target value before using the main schedule.",
+        "Keep the learning rate fixed at zero for the entire training run.",
+        "Use the Hessian instead of the gradient for all updates.",
+        "Increase the number of output classes during training."
+      ],
+      "answer_index": 0,
+      "explanation": "Warmup starts cautiously and increases the learning rate over an initial period. It is often paired with another schedule such as cosine or inverse-square-root decay.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_learning_rate_schedules_warmup_and_batch_size_scaling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "linear warm up",
+          "fixed number of iterations"
+        ],
+        "timestamps": [
+          "01:02:09",
+          "01:02:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are Hessian-based second-order methods rarely used for very large neural networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Computing and storing second-derivative matrices becomes too expensive in memory and computation.",
+        "They cannot be applied to small full-batch problems.",
+        "They only work when the learning rate is exactly zero.",
+        "They require every class label to be represented as an image."
+      ],
+      "answer_index": 0,
+      "explanation": "Second-order methods can be powerful because they model curvature, but the Hessian grows with the number of parameters. Large networks make that memory and compute cost impractical.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_second_order_optimization_and_hessian_limitations",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "mixed derivative of all",
+          "run out of memory"
+        ],
+        "timestamps": [
+          "01:05:05",
+          "01:05:25"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-3-seg7-q1",
+      "global_kp_id": "kp_learning_rate_schedules_warmup_and_batch_size_scaling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg7-q2",
+      "global_kp_id": "kp_learning_rate_schedules_warmup_and_batch_size_scaling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg7-q3",
+      "global_kp_id": "kp_second_order_optimization_and_hessian_limitations",
+      "role": "primary"
+    }
+  ]
+}

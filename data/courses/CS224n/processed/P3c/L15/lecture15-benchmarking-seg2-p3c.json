@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture15-benchmarking::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "Transcript is sufficient for reinforcement questions on this unit's evaluation concepts. The key distinctions, caveats, and examples are stated directly, so no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture15-benchmarking-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What most directly makes a task close-ended?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It involves long outputs",
+        "It has a small answer space with only a few valid labels",
+        "It always requires human judgment",
+        "It is evaluated only with ROUGE"
+      ],
+      "answer_index": 1,
+      "explanation": "A close-ended task has a limited set of candidate answers, often just a few labels, so standard classification-style evaluation is possible.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_close_ended_nlp_evaluation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "limited answer space",
+          "less than 10"
+        ],
+        "timestamps": [
+          "00:09:01",
+          "00:09:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can accuracy be a poor metric for spam detection on a highly imbalanced dataset?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Accuracy ignores all correct predictions",
+        "A model can predict the majority class every time and still look strong",
+        "Accuracy cannot be computed for binary tasks",
+        "Accuracy always equals F1"
+      ],
+      "answer_index": 1,
+      "explanation": "When one class dominates, always predicting that class can produce high accuracy while failing on the minority class the application actually cares about.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "predicting 'not spam' always",
+          "90% accuracy"
+        ],
+        "timestamps": [
+          "00:14:18",
+          "00:14:18"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main problem with averaging benchmark columns that mix metrics like accuracy, F1, and correlation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They become computationally expensive to calculate",
+        "The resulting score may combine incompatible quantities and hide what actually improved",
+        "The average always favors recall over precision",
+        "It prevents reproducibility"
+      ],
+      "answer_index": 1,
+      "explanation": "Different metrics measure different things on different scales, so averaging them can produce a single number that is hard to interpret and can mask meaningful differences.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "averaging heterogeneous benchmark columns",
+          "many of them concurrently"
+        ],
+        "timestamps": [
+          "00:14:54",
+          "00:11:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What shortcut problem in SNLI serves as a warning about dataset artifacts?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Models can solve it by counting sentence length only",
+        "Negation in the hypothesis alone can predict non-entailment surprisingly well",
+        "The premise is always longer than the hypothesis",
+        "The labels are generated by a language model"
+      ],
+      "answer_index": 1,
+      "explanation": "If annotators create non-entailment examples in stereotyped ways, models can exploit those patterns instead of learning the intended reasoning task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_spurious_correlations_from_dataset_construction",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "negation alone predicts non-entailment",
+          "hypothesis alone"
+        ],
+        "timestamps": [
+          "00:16:20",
+          "00:16:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If a benchmark has only a few labels but severe class imbalance, which evaluation habit becomes especially important?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use only raw accuracy because the task is close-ended",
+        "Check multiple metrics such as precision, recall, and F1 rather than accuracy alone",
+        "Avoid evaluating the task automatically",
+        "Replace labels with free-form generation"
+      ],
+      "answer_index": 1,
+      "explanation": "Close-ended tasks can often use standard metrics, but imbalance means you should examine metrics beyond accuracy to understand the real behavior of the system.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_close_ended_nlp_evaluation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "precision, recall, and F1",
+          "standard machine learning does not mean easy"
+        ],
+        "timestamps": [
+          "00:11:13",
+          "00:11:42"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg2-q1",
+      "global_kp_id": "kp_close_ended_nlp_evaluation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q2",
+      "global_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q3",
+      "global_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q4",
+      "global_kp_id": "kp_spurious_correlations_from_dataset_construction",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg2-q5",
+      "global_kp_id": "kp_close_ended_nlp_evaluation",
+      "role": "primary"
+    }
+  ]
+}

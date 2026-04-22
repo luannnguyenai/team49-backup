@@ -1,0 +1,410 @@
+{
+  "unit_id": "local::lecture10-transformers::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 4 reinforcement questions about why recurrence is replaced by attention without requiring a separate video clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What was the common pre-transformer sequence-to-sequence recipe described in the unit?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A bidirectional LSTM encoder with a unidirectional LSTM decoder, often plus attention",
+        "A convolutional encoder with a graph decoder and no attention",
+        "A bag-of-words encoder with a logistic-regression decoder",
+        "A transformer encoder with a CRF decoder"
+      ],
+      "answer_index": 0,
+      "explanation": "Before transformers, a strong baseline used a bidirectional LSTM to encode the source and a unidirectional LSTM to generate outputs, often with attention to access source information flexibly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_linear_interaction_distance",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "bidirectional LSTM",
+          "uni-directional LSTM"
+        ],
+        "timestamps": [
+          "00:03:01",
+          "00:03:24"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are long-distance dependencies hard for recurrent networks to model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because distant words can only influence each other through many sequential recurrent steps",
+        "Because RNNs cannot represent verbs and nouns in the same state space",
+        "Because LSTMs require fixed-length inputs",
+        "Because recurrence removes all contextual information"
+      ],
+      "answer_index": 0,
+      "explanation": "In an RNN, information must be passed along one step at a time. When related words are far apart, their interaction path becomes long, which makes learning the dependency harder.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_linear_interaction_distance",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "linear interaction distance",
+          "long-distance dependency"
+        ],
+        "timestamps": [
+          "00:04:38",
+          "00:05:55"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the unit's example, why is the relation between \"chef\" and \"was\" challenging for recurrence?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The gradient must propagate across many intervening words to connect them",
+        "The sentence contains punctuation that disables backpropagation",
+        "The words appear in different languages",
+        "The verb comes before the subject"
+      ],
+      "answer_index": 0,
+      "explanation": "The dependency is long-range, so the model must carry the relevant signal through many intervening steps. That makes the connection harder to learn reliably.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_linear_interaction_distance",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "chef",
+          "was"
+        ],
+        "timestamps": [
+          "00:05:18",
+          "00:06:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What key advantage does attention have over recurrence in this comparison?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can connect distant words directly and compute token representations in parallel",
+        "It guarantees linear memory growth with sequence length",
+        "It eliminates the need for learned parameters",
+        "It forces every token to attend only to itself"
+      ],
+      "answer_index": 0,
+      "explanation": "Attention allows each token to look across the whole sequence directly, which shortens interaction paths and removes the strict step-by-step computation bottleneck of recurrence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_self_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "look at the entire sequence",
+          "parallel"
+        ],
+        "timestamps": [
+          "00:07:50",
+          "00:08:58"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "global_kp_id": "kp_self_attention",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What was the common pre-transformer sequence-to-sequence recipe described in the unit\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why are long-distance dependencies hard for recurrent networks to model\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"In the unit's example, why is the relation between \"chef\" and \"was\" challenging for recurrence\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What key advantage does attention have over recurrence in this comparison\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture10_transformers_seg1_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What was the common pre-transformer sequence-to-sequence recipe described in the unit\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why are long-distance dependencies hard for recurrent networks to model\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In the unit's example, why is the relation between \"chef\" and \"was\" challenging for recurrence\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture10_transformers_seg1_q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What key advantage does attention have over recurrence in this comparison\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

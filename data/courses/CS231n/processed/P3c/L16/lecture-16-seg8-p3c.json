@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_16::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript provides enough evidence for two grounded questions on Molmo’s open recipe and pointing-based reasoning.",
+  "question_bank": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What open-source problem is Molmo presented as addressing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Strong open models should be reproducible without depending on distillation from closed API models",
+        "Vision-language models should never use any curated training data",
+        "Open models should avoid benchmarking against closed systems",
+        "All multimodal models should use only robotics data"
+      ],
+      "answer_index": 0,
+      "explanation": "The issue is not only whether an open model exists, but whether the wider community can reproduce the recipe from open weights, data, and code rather than relying on outputs from closed systems.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "distilled from GPT or Gemini",
+          "open-source reproducibility problem"
+        ],
+        "timestamps": [
+          "00:43:02",
+          "00:43:02"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does grounded decision-making help a model like Molmo reduce hallucinations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It requires the model to point to visual evidence before giving the answer",
+        "It removes language generation entirely and outputs only coordinates",
+        "It forces every answer to be retrieved from a fixed database",
+        "It guarantees perfect accuracy by using larger batch sizes"
+      ],
+      "answer_index": 0,
+      "explanation": "Pointing creates a visible link between the answer and the supporting pixels. That does not guarantee correctness, but it makes unsupported guesses less likely and easier to catch.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_grounded_decision_making_through_pointing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "point to visual evidence",
+          "before producing an answer"
+        ],
+        "timestamps": [
+          "00:47:30",
+          "00:47:30"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg8_q1",
+      "global_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg8_q2",
+      "global_kp_id": "kp_grounded_decision_making_through_pointing",
+      "role": "primary"
+    }
+  ]
+}

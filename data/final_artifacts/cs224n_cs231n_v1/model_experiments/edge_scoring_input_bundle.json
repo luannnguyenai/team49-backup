@@ -2,9 +2,9 @@
   "run_id": "p5_cs224n_cs231n",
   "stage_id": "edge_scoring_input_bundle",
   "source_files": {
-    "p5_output_transitive_pruned": "data/p5_output_transitive_pruned.json",
-    "p5_input": "data/p5_inputs/p5_input_cs224n_cs231n.json",
-    "gpt54_edge_labels": "data/gpt54_edge_labels.json"
+    "p5_output_transitive_pruned": "data/final_artifacts/cs224n_cs231n_v1/p5_output_transitive_pruned.json",
+    "p5_input": "data/working/p5/p5_input_cs224n_cs231n.json",
+    "gpt54_edge_labels": "data/final_artifacts/cs224n_cs231n_v1/gpt54_edge_labels.json"
   },
   "clean_candidate_edges": [
     {

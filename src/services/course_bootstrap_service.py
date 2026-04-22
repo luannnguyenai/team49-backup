@@ -7,12 +7,9 @@ These files seed the canonical contracts until database-backed ingestion lands.
 
 import json
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
-BOOTSTRAP_DIR = Path("data/course_bootstrap")
-COURSES_FILE = BOOTSTRAP_DIR / "courses.json"
-OVERVIEWS_FILE = BOOTSTRAP_DIR / "overviews.json"
+from src.data_paths import COURSES_FILE, OVERVIEWS_FILE
 
 
 def _read_json(path: Path) -> Any:

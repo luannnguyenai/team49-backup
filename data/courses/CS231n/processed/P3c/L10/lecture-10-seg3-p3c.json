@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_10::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for concept questions on early fusion reshaping and why 3D CNNs can be interpreted as a form of slow temporal fusion.",
+  "question_bank": [
+    {
+      "item_id": "lecture_10_seg3_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In early fusion, how are T RGB video frames typically reshaped before the first 2D convolution?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Into a tensor with 3T channels, shape 3T x H x W",
+        "Into T separate grayscale images of shape 1 x H x W",
+        "Into a single vector of length H x W",
+        "Into a batch of D-dimensional feature vectors"
+      ],
+      "answer_index": 0,
+      "explanation": "Early fusion stacks the RGB channels from multiple frames together along the channel axis. That lets the first 2D convolution combine information across time immediately.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_early_fusion",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reshape them to 3T",
+          "map the channel dimension"
+        ],
+        "timestamps": [
+          "00:16:28",
+          "00:16:42"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_10_seg3_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is a 3D CNN described as slow fusion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it combines temporal information gradually across layers with 3D convolutions and pooling",
+        "Because it processes frames one at a time with an RNN",
+        "Because it delays all temporal reasoning until the classifier head",
+        "Because it only uses a single large convolution at the input"
+      ],
+      "answer_index": 0,
+      "explanation": "A 3D CNN does not collapse time at the start or the end. Instead, it builds temporal and spatial structure progressively through the network.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "slowly fuse the information",
+          "3D convolution neural network"
+        ],
+        "timestamps": [
+          "00:18:23",
+          "00:18:23"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg3_q1",
+      "global_kp_id": "kp_early_fusion",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg3_q2",
+      "global_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "role": "primary"
+    }
+  ]
+}

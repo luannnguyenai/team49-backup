@@ -4,9 +4,9 @@ scripts/seed.py
 Seed curriculum data from JSON files into the PostgreSQL database.
 
 Data files (relative to project root):
-    data/modules.json       — Module definitions
-    data/topics.json        — Topic definitions (with KnowledgeComponents)
-    data/question_bank.json — MCQ questions
+    data/bootstrap/modules.json       — Module definitions
+    data/bootstrap/topics.json        — Topic definitions (with KnowledgeComponents)
+    data/bootstrap/question_bank.json — MCQ questions
 
 Run from project root:
     python scripts/seed.py                   # seed everything
@@ -33,6 +33,7 @@ from sqlalchemy import delete, select, text  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 from src.config import settings  # noqa: E402
+from src.data_paths import MODULES_FILE, QUESTION_BANK_FILE, TOPICS_FILE  # noqa: E402
 from src.database import async_session  # noqa: E402
 from src.models.content import (  # noqa: E402
     BloomLevel,
@@ -48,10 +49,7 @@ from src.models.content import (  # noqa: E402
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-DATA_DIR = PROJECT_ROOT / "data"
-MODULES_FILE = DATA_DIR / "modules.json"
-TOPICS_FILE = DATA_DIR / "topics.json"
-QUESTIONS_FILE = DATA_DIR / "question_bank.json"
+QUESTIONS_FILE = QUESTION_BANK_FILE
 
 
 # ===========================================================================

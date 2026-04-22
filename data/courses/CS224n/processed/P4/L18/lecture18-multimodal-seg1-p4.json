@@ -1,0 +1,218 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is clear enough to generate questions about the definition of multimodality, key motivations for multimodal learning, and representative tasks such as retrieval, captioning, and VQA.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which of the following is NOT one of the main motivations for studying multimodality?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Humans perceive the world through multiple information channels at once.",
+        "Internet data often combines text with images or other media.",
+        "Scaling language models may require additional non-text data sources.",
+        "Multimodality completely removes the need to evaluate models on benchmarks."
+      ],
+      "answer_index": 3,
+      "explanation": "The three main motivations mentioned are that human understanding is inherently multimodal, web data is naturally multimodal, and future model scaling may require data beyond text. Eliminating benchmark evaluation is not one of the motivations for multimodality.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "human understanding is intrinsically multimodal",
+          "internet data is naturally multimodal",
+          "adding non-text data"
+        ],
+        "timestamps": [
+          "02:55",
+          "03:15",
+          "03:32"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the McGurk effect mainly used to illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Audio is always more important than vision in every task.",
+        "Perception can change when signals from different modalities interact.",
+        "Speech recognition only needs image data to work well.",
+        "Every multimodal task must generate a new image."
+      ],
+      "answer_index": 1,
+      "explanation": "The McGurk effect shows that the same sound can be perceived differently when the visible mouth movement changes. This highlights that modalities do not operate in isolation but interact in perception.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "McGurk effect",
+          "cross-modal interaction"
+        ],
+        "timestamps": [
+          "04:15",
+          "05:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "global_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "global_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which of the following is NOT one of the main motivations for studying multimodality\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the McGurk effect mainly used to illustrate\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which of the following is NOT one of the main motivations for studying multimodality\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the McGurk effect mainly used to illustrate\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

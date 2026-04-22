@@ -1,0 +1,226 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture04-wordvecs-lm",
+    "lecture_title": "Lecture 4 - Word Vectors and Language Models",
+    "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture04-wordvecs-lm::seg1",
+    "course_id": "CS224N",
+    "name": "Optimization basics for learning word vectors",
+    "description": "Connects the previous lecture's word2vec derivative work to gradient descent, stochastic gradient descent, and random initialization.",
+    "summary": "The lecture begins with the plan for finishing word vectors, then shifts from the previous word2vec loss derivatives to the optimization loop: minimize a cost function by computing its gradient, moving a small amount downhill, and repeating [ts=202s]. The update uses a learning rate alpha, typically small, subtracting a scaled gradient from parameters so steps do not overshoot or reach a worse point [ts=294s]. Full-batch gradient descent is described as too expensive because it requires evaluating the objective and gradient on the entire training set before one update [ts=361s]. Stochastic or mini-batch gradient descent instead uses a small subset such as 16 or 32 examples, giving a noisy gradient estimate that is much faster and can improve neural network optimization through useful noise [ts=413s]. The word2vec recap stresses random small-number initialization: all-zero vectors create false symmetries and prevent learning, while gradient updates adjust vectors to predict surrounding words better [ts=508s].",
+    "key_points": [
+      {
+        "text": "Gradient descent minimizes a loss by computing the gradient and repeatedly stepping downhill.",
+        "timestamp_s": 202,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The learning rate alpha scales the gradient step; too large a step can overshoot or worsen the objective.",
+        "timestamp_s": 294,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Full-batch gradient descent is usually impractical for neural nets because it waits for an objective and gradient over all training data.",
+        "timestamp_s": 361,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Stochastic or mini-batch gradient descent uses a small subset such as 16 or 32 items as a noisy gradient estimate.",
+        "timestamp_s": 413,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Word vectors should be initialized with random small numbers; all zeros cause symmetry and prevent learning.",
+        "timestamp_s": 508,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+      "start_s": 5,
+      "end_s": 609
+    },
+    "difficulty": 2.4,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture begins with the plan for finishing word vectors, then shifts from the previous word2vec loss derivatives to the optimization loop: minimize a cost function by computing its gradient, moving a small amount downhill, and repeating [ts=202s]. The update uses a learning rate alpha, typically small, subtracting a scaled gradient from parameters so steps do not overshoot or reach a worse point [ts=294s]. Full-batch gradient descent is described as too expensive because it requires evaluating the objective and gradient on the entire training set before one update [ts=361s]. Stochastic or mini-batch gradient descent instead uses a small subset such as 16 or 32 examples, giving a noisy gradient estimate that is much faster and can improve neural network optimization through useful noise [ts=413s]. The word2vec recap stresses random small-number initialization: all-zero vectors create false symmetries and prevent learning, while gradient updates adjust vectors to predict surrounding words better [ts=508s].",
+  "target_kp_ids": [
+    "kp_gradient_descent_and_sgd",
+    "kp_parameter_initialization",
+    "kp_word2vec_skipgram_objective"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "transcript_slice": "00:00:05\nOK, I should try and get started.\n\n00:00:12\nwe're going to try and do everything else that you need\n\n00:00:19\na teeny bit about neural nets.\n\n00:00:26\nof neural nets next week.\n\n00:00:30\nSo I'm going to finish up from where\n\n00:00:37\nthen look a little bit more about word2vec and word vectors,\n\n00:00:44\nAnd then I'm going to briefly consider alternatives,\n\n00:00:50\nwords in different ways.\n\n00:00:54\nabout the evaluation of word vectors, the topic of word\n\n00:01:04\npeople were asking questions, and then towards the end,\n\n00:01:11\ndoing neural classification, and what neural networks are about,\n\n00:01:18\non more in the second week.\n\n00:01:26\nSo remember, the first assignment is already out\n\n00:01:34\nSo then our Python review session is going to be taught\n\n00:01:42\nIt's not going to be taught here.\n\n00:01:47\nI encourage everyone again to come to office hours\n\n00:01:52\nThey've already started.\n\n00:01:55\nWe're having these sort of offers our help\n\n00:02:03\nSo just turn up if you're on campus and you can be helped.\n\n00:02:10\nThough we do also have a Zoom option\n\n00:02:17\nAnd finally, I have office hours,\n\n00:02:24\nThey're going to be on Monday afternoons.\n\n00:02:28\nnot everyone can make it into my office hours.\n\n00:02:33\nSo they're by 15 minute appointments on Calendly.\n\n00:02:41\nAnd I put this little note at the end saying,\n\n00:02:47\nSome people think it would be a really good idea if they really\n\n00:02:54\nwith me.\n\n00:02:58\nSo think about that.\n\n00:03:05\nof bad job of trying to write on slides of working out\n\n00:03:14\nAnd hopefully, you could read it much more clearly\n\n00:03:20\nat home more carefully.\n\n00:03:26\nand our job was to work out its derivatives, which\n\n00:03:35\nAnd so I didn't really quite finish the loop here.\n\n00:03:42\nAnd then we work out the gradient of that function\n\n00:03:50\nAnd then the simplest algorithm is then\n\n00:03:57\nwe walk a little bit in that direction, and then we repeat.\n\n00:04:04\nwe walk downhill a little bit, and we keep on going,\n\n00:04:09\nAnd with a sort of a one dimensional function like this,\n\n00:04:14\nWe're just walking downhill.\n\n00:04:19\nwhen we calculate the gradient at different points,\n\n00:04:26\nAnd so that's why we need to do calculus and have gradients.\n\n00:04:35\nAnd so under the gradient descent\n\n00:04:42\ngot our loss function J. We're working out its gradient.\n\n00:04:54\nSo that alpha is our step size or learning rate.\n\n00:04:59\nsomething like 10 to the minus 3 or 10 to the minus 4\n\n00:05:04\nSo we're taking a really little bit of the gradient,\n\n00:05:12\nto get new parameters.\n\n00:05:17\nAnd the reason why we want to have a small learning rate\n\n00:05:22\nSo if from here, we worked out the gradient and said,\n\n00:05:29\nWe might end up way over here.\n\n00:05:34\nwe might even end up at a worse point than we started with.\n\n00:05:40\nAnd so that's the very basic gradient descent algorithm.\n\n00:05:50\nWhat we actually use is the next thing up,\n\n00:05:56\nSo the problem is for the basic gradient descent algorithm,\n\n00:06:05\nof data, what the objective function is\n\n00:06:15\nAnd in general, we've got a lot of data in which we're\n\n00:06:23\nSo simply trying to calculate our objective function over all\n\n00:06:32\nwould take us a very, very long time.\n\n00:06:39\nAnd so we'd wait a very long time\n\n00:06:45\nSo for neural nets, what you're always doing\n\n00:06:50\ndescent.\n\n00:06:53\nwhat that means is we pick a very small subset of our data,\n\n00:07:01\nand we pretend that's all of our data,\n\n00:07:08\nand work out the gradient based on that small subset.\n\n00:07:14\nAnd we use that to be the direction in which we walk.\n\n00:07:23\nas having mini batches or mini batch gradient descent.\n\n00:07:32\nbased on this small subset is an approximation.\n\n00:07:39\nin the way things have emerged in neural network land\n\n00:07:46\nbetter when you throw some noise into the system\n\n00:07:52\ngives you jiggle and moves things around.\n\n00:07:58\nnot only is way, way, way faster,\n\n00:08:04\nof neural networks.\n\n00:08:12\nthe idea was we started by just saying\n\n00:08:20\nSo we will literally sort of just get random small numbers\n\n00:08:27\nThere's an important point there,\n\n00:08:32\nwith random small numbers.\n\n00:08:37\nthen nothing works.\n\n00:08:43\nyou get these false symmetries, which\n\n00:08:48\nSo you always do want to be initializing your vectors\n\n00:08:53\nAnd then we're going to go through each position\n\n00:08:56\nUsing our estimates, we're going to try and predict\n\n00:09:02\nas we talked about last time.\n\n00:09:09\nlook at our errors, look at our gradient,\n\n00:09:16\nsurrounding words better.\n\n00:09:21\ncan do no more than that, and we end up\n\n00:09:27\nquite a lot of the semantics, the meaning and relationships\n\n00:09:34\nSo, when this was first discovered for these algorithms,\n\n00:09:43\nthat you can just do this simple math over a lot of text\n\n00:09:53\nthat it's just so surprising that something so simple\n\n00:09:57\nBut as time has gone on, this same recipe\n\n00:10:03\nabout the behavior of language from neural networks.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_parameter_initialization",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "name": "Gradient descent and stochastic gradient descent",
+      "description": "Neural networks are trained by computing the gradient of an objective and updating parameters with stochastic gradient descent. Gradient-based optimization updates parameters by subtracting a scaled gradient, with the learning rate controlling step size.",
+      "track_tags": [
+        "deep_learning",
+        "optimization",
+        "training"
+      ],
+      "domain_tags": [
+        "gradient_descent",
+        "gradients",
+        "learning_rate",
+        "machine_learning",
+        "minibatch",
+        "sgd"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gradient descent and stochastic gradient descent formalizes how neural networks are trained by computing the gradient of an objective and updating parameters with stochastic gradient descent, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp1",
+        "local::lecture04-wordvecs-lm::kp2",
+        "local::lecture05-backprop::kp3",
+        "local::lecture_3::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_parameter_initialization",
+      "name": "Parameter initialization and symmetry breaking",
+      "description": "Word-vector parameters must start as small random values rather than all zeros to avoid false symmetries. Choosing non-constant initial weights so learning can break symmetry and remain numerically stable.",
+      "track_tags": [
+        "deep_learning_fundamentals",
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "neural_network_training",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because parameter initialization and symmetry breaking clarifies word-vector parameters must start as small random values rather than all zeros to avoid false symmetries, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp3",
+        "local::lecture07-rnns::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "name": "Word2vec skip-gram objective",
+      "description": "Word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus. The skip-gram model predicts context words from a center word using dot products between center and outside vectors.",
+      "track_tags": [
+        "nlp",
+        "word2vec"
+      ],
+      "domain_tags": [
+        "natural_language_processing",
+        "nlp",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because word2vec skip-gram objective formalizes how word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture01-wordvecs::kp9",
+        "local::lecture04-wordvecs-lm::kp4"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "target_difficulty_range": [
+    2.25,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture04-wordvecs-lm_transcript.txt"
+  }
+}

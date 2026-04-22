@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture04-wordvecs-lm::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about gradient descent, learning-rate choice, SGD versus full-batch updates, and why random initialization matters for word vectors. The concepts are stated directly, so no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why must the learning rate in gradient descent usually be kept small?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A large step always finds the global minimum faster",
+        "A large step can overshoot and even move to a worse point",
+        "A small step removes the need to compute gradients",
+        "A small step guarantees zero training error in one update"
+      ],
+      "answer_index": 1,
+      "explanation": "The learning rate scales the update. If it is too large, the optimization step can jump past a good region and increase the objective instead of decreasing it.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "step size or learning rate",
+          "worse point than we started"
+        ],
+        "timestamps": [
+          "00:04:54",
+          "00:05:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main reason full-batch gradient descent is usually impractical for neural networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It cannot use vector operations",
+        "It requires evaluating the objective and gradient on the whole training set before each update",
+        "It only works for convex losses",
+        "It prevents any randomness in initialization"
+      ],
+      "answer_index": 1,
+      "explanation": "Full-batch gradient descent waits for a gradient over the entire training set before making one update, which is expensive for large datasets and large models.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "problem for the basic gradient descent",
+          "whole training set"
+        ],
+        "timestamps": [
+          "00:05:56",
+          "00:06:01"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is initializing all word vectors to zero a bad idea?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Zero vectors make the loss undefined",
+        "Zero vectors create symmetry so words receive the same updates",
+        "Zero vectors force the model to use full-batch training",
+        "Zero vectors make the vocabulary too large"
+      ],
+      "answer_index": 1,
+      "explanation": "If every vector starts identically, the model cannot break symmetry: many words behave the same way and receive the same gradients, so useful distinctions never emerge.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_parameter_initialization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "all-zero vectors create false symmetries",
+          "random small numbers"
+        ],
+        "timestamps": [
+          "00:08:28",
+          "00:08:42"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "global_kp_id": "kp_parameter_initialization",
+      "role": "primary"
+    }
+  ]
+}

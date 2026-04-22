@@ -1,0 +1,410 @@
+{
+  "unit_id": "local::cs224n-2024-lecture19-bci::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "The transcript and summary support 4 grounded questions about recording modalities and practical movement-based BCI applications without requiring video-only evidence.",
+  "qa_outputs": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which recording setup is described as ideal for high-performance BCI decoding?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "High spatial resolution and high temporal resolution",
+        "Low spatial resolution and slow time averaging",
+        "Only scalp-level coverage with no implants",
+        "High spatial resolution but no timing information"
+      ],
+      "answer_index": 0,
+      "explanation": "Fine BCI control benefits from recordings that capture local neural events quickly, so both spatial and temporal resolution matter.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bci_recording_modalities",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "high spatial resolution",
+          "temporal resolution"
+        ],
+        "timestamps": [
+          "00:23:02",
+          "00:24:05"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a microelectrode array?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A small implant with many tiny penetrating electrodes that record nearby neural activity",
+        "A wearable headset that records EEG from the scalp",
+        "A software-only filter for spike detection",
+        "A stimulation device placed in the spinal cord"
+      ],
+      "answer_index": 0,
+      "explanation": "The unit describes a fingernail-sized array whose tiny electrodes penetrate cortex and sample local neural signals from many nearby neurons.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bci_recording_modalities",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "tiny needle",
+          "measure maybe on the order"
+        ],
+        "timestamps": [
+          "00:25:04",
+          "00:25:28"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does a movement-based intracortical BCI enable cursor or robotic-arm control?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It decodes intended motor-cortex activity in real time and maps it to movement commands",
+        "It asks the user to blink to choose each movement",
+        "It predicts words first and then converts them into arm motion",
+        "It uses only language-planning cortex without motor signals"
+      ],
+      "answer_index": 0,
+      "explanation": "The system calibrates how neural activity relates to intended movement directions, then uses those decoded intentions to drive external devices online.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_movement_based_bci_applications",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "decode those signals",
+          "in real time"
+        ],
+        "timestamps": [
+          "00:27:38",
+          "00:28:32"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which comparison best captures why handwriting BCIs are exciting for communication?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They were described as faster than 2D cursor control, with handwriting around 18 words per minute versus cursor around 8",
+        "They remove the need for any training data",
+        "They work only for robotic grasping, not communication",
+        "They are slower than sip-and-puff systems but easier to implant"
+      ],
+      "answer_index": 0,
+      "explanation": "The unit highlights handwriting BCIs because they can communicate substantially faster than standard cursor-based spelling, though still below natural conversation speed.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_movement_based_bci_applications",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "handwriting around 18",
+          "cursor around 8"
+        ],
+        "timestamps": [
+          "00:34:46",
+          "00:36:02"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q1",
+      "global_kp_id": "kp_bci_recording_modalities",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q2",
+      "global_kp_id": "kp_bci_recording_modalities",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q3",
+      "global_kp_id": "kp_movement_based_bci_applications",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q4",
+      "global_kp_id": "kp_movement_based_bci_applications",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which recording setup is described as ideal for high-performance BCI decoding\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is a microelectrode array\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does a movement-based intracortical BCI enable cursor or robotic-arm control\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which comparison best captures why handwriting BCIs are exciting for communication\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which recording setup is described as ideal for high-performance BCI decoding\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q2",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is a microelectrode array\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does a movement-based intracortical BCI enable cursor or robotic-arm control\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg4_q4",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which comparison best captures why handwriting BCIs are exciting for communication\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture07-rnns::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for questions about fixed-window neural language models, what they improve over count tables, and why they still motivate RNNs. No separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture07-rnns-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core architecture of the fixed-window neural language model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Concatenate embeddings from a local context, pass through a hidden layer, then predict the next word with softmax",
+        "Count all observed n-grams and renormalize them at inference time",
+        "Update a recurrent hidden state with shared weights across time",
+        "Sample random negative words and train only sigmoid classifiers"
+      ],
+      "answer_index": 0,
+      "explanation": "The model forms a next-word distribution by taking a fixed context window of embeddings, combining them in a feedforward network, and applying softmax over the vocabulary.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fixed_window_neural_language_models",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "concatenate embeddings from a fixed context window",
+          "softmax over the vocabulary"
+        ],
+        "timestamps": [
+          "00:46:10",
+          "00:46:33"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture07-rnns-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What problem did this early neural language model remove compared with plain count-based n-grams?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The need to represent words as vectors",
+        "The need to store every observed n-gram explicitly",
+        "The need to predict the next word",
+        "The need to use any parameters"
+      ],
+      "answer_index": 1,
+      "explanation": "Instead of storing all observed n-grams, the neural model stores learned parameters that generalize across contexts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fixed_window_neural_language_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "no longer have to store all observed n-grams",
+          "stores learned parameters"
+        ],
+        "timestamps": [
+          "00:48:23",
+          "00:48:33"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture07-rnns-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does this model still fall short of the full language-modeling problem?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It cannot output a probability distribution",
+        "It still throws away far-back context and handles each position with different weights",
+        "It requires teacher forcing to train",
+        "It can only be used for character-level text"
+      ],
+      "answer_index": 1,
+      "explanation": "The model still makes a fixed-window Markov assumption and also treats the same word differently depending on which input slot it occupies.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fixed_window_neural_language_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "fixed window",
+          "same word differently depending on where it appears"
+        ],
+        "timestamps": [
+          "00:48:43",
+          "00:49:09"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture07-rnns-seg6-q1",
+      "global_kp_id": "kp_fixed_window_neural_language_models",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg6-q2",
+      "global_kp_id": "kp_fixed_window_neural_language_models",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg6-q3",
+      "global_kp_id": "kp_fixed_window_neural_language_models",
+      "role": "primary"
+    }
+  ]
+}

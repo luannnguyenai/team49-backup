@@ -1,0 +1,13 @@
+{
+  "unit_id": "local::lecture21-after-dpo::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=dnF463_Ar9I",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
+  "review_summary": "This unit is mostly historical context and adoption narrative, so it is not a strong fit for grounded assessment items in this p3c format.",
+  "question_bank": [],
+  "item_kp_map": []
+}

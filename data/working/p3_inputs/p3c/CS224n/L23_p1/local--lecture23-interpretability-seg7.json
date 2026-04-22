@@ -1,0 +1,204 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture23-interpretability",
+    "lecture_title": "Lecture 23 - Model Interpretability and Editing",
+    "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs"
+  },
+  "unit": {
+    "unit_id": "local::lecture23-interpretability::seg7",
+    "course_id": "cs224n-2024",
+    "name": "Broader discussion: transfer, deployment, language interfaces, and neuroscience",
+    "description": "Uses audience questions to generalize the lecture’s themes across modalities, safety-critical deployment, human-language interfaces, and links to neuroscience.",
+    "summary": "In discussion, Kim distinguishes between domain-general interpretability theory and application-specific deployment work: proofs about tools like SHAP and IG may transfer across modalities, but practical systems still require customized validation in context [ts=3739s] [ts=3770s]. She argues that interpretability tools are especially valuable for surfacing unexpected failure modes before deployment, since real risk often comes from surprises rather than known test cases [ts=3892s] [ts=3938s]. On human-language interfaces, she says mapping only human concepts into machine space can help but will inevitably miss machine-native concepts like Move 37, so progress likely requires both translating existing human language and learning new vocabulary from machines [ts=3979s] [ts=4014s] [ts=4073s]. Finally, she connects interpretability to neuroscience while warning that brain-inspired neuron-wise thinking may reflect tooling limits rather than the right abstraction for neural networks, where whole embeddings and transformations can be probed directly [ts=4169s] [ts=4230s] [ts=4243s].",
+    "key_points": [
+      {
+        "text": "Some interpretability theory transfers across modalities, but application-specific validation remains necessary.",
+        "timestamp_s": 3739,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A major deployment goal is discovering surprises before real users are harmed.",
+        "timestamp_s": 3920,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Mapping human concepts into machine space is helpful but incomplete because machines may have important concepts humans lack words for.",
+        "timestamp_s": 3990,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Neuroscience may bias interpretability toward single-neuron explanations because biological probing tools are limited.",
+        "timestamp_s": 4181,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In artificial networks, whole embeddings and transformations can be intervened on directly, not just individual neurons.",
+        "timestamp_s": 4241,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+      "start_s": 3722,
+      "end_s": 4261
+    },
+    "difficulty": 0.58,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 9,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "In discussion, Kim distinguishes between domain-general interpretability theory and application-specific deployment work: proofs about tools like SHAP and IG may transfer across modalities, but practical systems still require customized validation in context [ts=3739s] [ts=3770s]. She argues that interpretability tools are especially valuable for surfacing unexpected failure modes before deployment, since real risk often comes from surprises rather than known test cases [ts=3892s] [ts=3938s]. On human-language interfaces, she says mapping only human concepts into machine space can help but will inevitably miss machine-native concepts like Move 37, so progress likely requires both translating existing human language and learning new vocabulary from machines [ts=3979s] [ts=4014s] [ts=4073s]. Finally, she connects interpretability to neuroscience while warning that brain-inspired neuron-wise thinking may reflect tooling limits rather than the right abstraction for neural networks, where whole embeddings and transformations can be probed directly [ts=4169s] [ts=4230s] [ts=4243s].",
+  "target_kp_ids": [
+    "kp_cross_domain_transfer_and_human_language_interfaces",
+    "kp_limits_of_attribution_methods_for_behavioral_inference",
+    "kp_shared_representational_overlap"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "video_clip_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "transcript_slice": "01:02:04\nin NLP vision and RL.\n\n01:02:09\ncertain interpretability techniques from one modality\n\n01:02:13\nAnd if so, what [INAUDIBLE]?\n\n01:02:22\nLike, think about fairness research,\n\n01:02:28\nand that's like applicable for any questions around fairness\n\n01:02:33\nBut then once you--\n\n01:02:40\nfor somebody, the real person in the world,\n\n01:02:44\nYou would have to customize it for a particular application.\n\n01:02:48\nAnd I think similar is true in interpretability.\n\n01:02:52\nSHAP and IG are used across domains like vision, text,\n\n01:03:00\nThings like RL and the way that we build that generative model,\n\n01:03:06\nto make sure that this works in NLP.\n\n01:03:12\nso we'll need a little bit of tweaking.\n\n01:03:20\n[INAUDIBLE]\n\n01:03:27\nplayers found a very tricky strategy to trick up--\n\n01:03:32\nAnd that seemed like a concept that humans\n\n01:03:38\ntalk about that.\n\n01:03:42\nLisa can beat AlphaZero pretty easily.\n\n01:03:48\nif you kind of know what are the most unseen out-of-distribution\n\n01:03:53\nAnd she can break AlphaZero pretty easily.\n\n01:03:59\nabout AI, then maybe he would have tried to confuse AlphaGo.\n\n01:04:06\nLike, Lee Sedol is like the famous star worldwide,\n\n01:04:12\nwould be seen as a complete mistake,\n\n01:04:17\nago that got on the newsfeed everywhere,\n\n01:04:21\nAnd that probably hurts.\n\n01:04:28\n[INAUDIBLE] AlphaZero, for example,\n\n01:04:37\nmodels that can play these games really well.\n\n01:04:43\nthese are being applied towards applications [INAUDIBLE]..\n\n01:04:49\nare in the works [INAUDIBLE]?\n\n01:04:56\nBut there has been a bit of discussion in the robotics,\n\n01:05:01\nAnd, of course, I can't talk about details.\n\n01:05:10\nworry about are some of the surprises, right?\n\n01:05:15\nhave a unique test for it, you're\n\n01:05:18\nto test before you deploy.\n\n01:05:23\nis the surprises that you didn't expect.\n\n01:05:30\naim to help you with that.\n\n01:05:36\nbut here's a tool that help you better\n\n01:05:41\nor someone else gets harmed.\n\n01:05:49\nThanks so much for the talk.\n\n01:05:53\nWe're talking about a lot of ways\n\n01:05:59\nwhat's going on in the representation\n\n01:06:02\nBut I was wondering whether we could turn it around and try\n\n01:06:08\nusing our language, what they're doing in their representations,\n\n01:06:13\nand then get the machine to do the translation for us\n\n01:06:19\nYeah, great question.\n\n01:06:21\nbecause that's something that I kind of tried\n\n01:06:29\nactivation vectors.\n\n01:06:34\nso that they can only speak our language because I understand\n\n01:06:39\nThe challenge is that how would you\n\n01:06:44\nLike, we don't have a vocabulary for it like Move 37.\n\n01:06:50\nvaluable knowledge that we might not get from the machine.\n\n01:06:57\nWe should leverage as much as we can.\n\n01:07:03\ntrying to map our language to machines\n\n01:07:08\na kind of proxy for what we think like a penguin is.\n\n01:07:13\neveryone thinks very differently about what penguin is.\n\n01:07:19\nEveryone is thinking of a different penguin\n\n01:07:22\nAustralia has the cutest penguin, the fairy penguin.\n\n01:07:26\nBut I don't know how many people are thinking that.\n\n01:07:30\nMachines are going to think something else.\n\n01:07:34\nExtend that to a hundred concepts\n\n01:07:38\ngoing to go out into the wild very soon.\n\n01:07:41\nI'm into both of them.\n\n01:07:48\nhuman concepts are still very helpful.\n\n01:07:53\nBut my ambition is that we shouldn't stop there.\n\n01:07:59\nthem teach us new things that we didn't know before.\n\n01:08:05\nSo in the second thing, you talked about ROME.\n\n01:08:11\nsuper correlated [INAUDIBLE] change that knowledge?\n\n01:08:17\nstuff you talked about, lie [INAUDIBLE],, or, I don't know--\n\n01:08:24\nin the embedding space, like might not be as helpful or--\n\n01:08:30\nI guess I don't know the alternatives\n\n01:08:35\nThat's possible.\n\n01:08:38\nof our embedding space in AlphaZero.\n\n01:08:44\nSo thinking about that as a raw vector is a dead end.\n\n01:08:50\nWe'll see how this chess project goes in a couple of months.\n\n01:08:57\nYeah?\n\n01:09:01\nstuff [INAUDIBLE]--\n\n01:09:05\nhow our brains work.\n\n01:09:10\nwould there be stuff that you use\n\n01:09:15\nAnd on the contrary, do you think\n\n01:09:18\nof neural networks help us understand\n\n01:09:22\nYeah.\n\n01:09:25\nHe would really like this.\n\n01:09:28\nknow about this history.\n\n01:09:31\nThe whole neural network is to understand human brain.\n\n01:09:39\nInteresting, however, in my view,\n\n01:09:44\nin neuroscience because of the limitations of tools,\n\n01:09:50\nthat you can poke in.\n\n01:09:54\nAnd I'll give you an example of what I mean.\n\n01:09:59\nline and vertical line neuron in cat brains.\n\n01:10:04\ndetects vertical lines.\n\n01:10:06\nIt's really cool if you look at the video.\n\n01:10:10\nYeah, what is it?\n\n01:10:12\nYes, Yes, yes.\n\n01:10:15\nWell, because you had one cat and--\n\n01:10:20\nAnd you had-- we can only probe a few neurons at a time, right?\n\n01:10:28\nactually looked at--\n\n01:10:32\nLike, this one neuron must be very special.\n\n01:10:36\nThat was limited by our ability, like physical ability\n\n01:10:41\nBut in your network, you don't have to do that.\n\n01:10:44\nYou can change the whole embedding to something else.\n\n01:10:47\nSo that kind of is actually a obstacle in our thinking\n\n01:11:01\nOK, maybe we should call it there.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture23-interpretability::seg7",
+      "global_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg7",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg7",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "name": "Cross-domain transfer and human-language interfaces",
+      "description": "Interpretability methods mix domain-general theory with domain-specific deployment, and human-language interfaces help but cannot fully capture machine-native concepts.",
+      "track_tags": [
+        "human_ai_interaction",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "neuroscience",
+        "nlp",
+        "reinforcement_learning",
+        "vision"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "responsible_ai"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cross-domain transfer and human-language interfaces clarifies interpretability methods mix domain-general theory with domain-specific deployment, and human-language interfaces help but cannot fully capture machine-native concepts, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "name": "Limits of attribution methods for behavioral inference",
+      "description": "Saliency, IG, and SHAP may look plausible but often do not justify conclusions about what a model actually uses or how it will behave.",
+      "track_tags": [
+        "evaluation",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "ml",
+        "nlp",
+        "vision"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "responsible_ai"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because limits of attribution methods for behavioral inference formalizes how saliency, IG, and SHAP may look plausible but often do not justify conclusions about what a model actually uses or how it will behave, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_shared_representational_overlap",
+      "name": "Shared representational overlap",
+      "description": "Humans and machines need partially overlapping representations or vocabulary to exchange meaning and collaborate effectively.",
+      "track_tags": [
+        "alignment",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "ml",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ai_safety",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because shared representational overlap formalizes how humans and machines need partially overlapping representations or vocabulary to exchange meaning and collaborate effectively, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp1"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "target_difficulty_range": [
+    0.43,
+    0.73
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L23_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture23-interpretability_transcript.txt"
+  }
+}

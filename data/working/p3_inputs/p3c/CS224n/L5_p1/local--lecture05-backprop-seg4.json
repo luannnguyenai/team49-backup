@@ -1,0 +1,222 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture05-backprop",
+    "lecture_title": "Lecture 5 - Backpropagation and Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=HnliVHU2g9U"
+  },
+  "unit": {
+    "unit_id": "local::lecture05-backprop::seg4",
+    "course_id": "cs224n-2024",
+    "name": "Backpropagation on computation graphs",
+    "description": "Recasts neural networks as computation graphs and derives backward-pass rules from local gradients and branch structure.",
+    "summary": "Backpropagation is distilled to two ideas: apply the chain rule and store intermediate results so repeated work is avoided [ts=2711s][ts=2733s]. The network is redrawn as a computation graph whose forward pass computes values node by node—for example x to Wx to z to h to s [ts=2776s][ts=2811s]. The backward pass starts from ds/ds = 1 and sends gradients backward by multiplying each node's upstream gradient by its local gradient [ts=2867s][ts=2947s]. The instructor then uses a toy graph f(x,y,z) = (x + y) * max(y,z) with x = 1, y = 2, z = 0 to show how forward values are computed [ts=3044s][ts=3083s], how local derivatives are assigned for plus, max, and multiply [ts=3125s][ts=3191s], and why branch outputs require summing incoming gradient contributions at shared variables [ts=3379s][ts=3412s].",
+    "key_points": [
+      {
+        "text": "Backpropagation is just the chain rule plus caching of intermediate results.",
+        "timestamp_s": 2711,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A neural network can be represented as a computation graph whose source nodes are inputs and whose interior nodes are operations.",
+        "timestamp_s": 2776,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The backward pass starts from ds/ds = 1 and computes downstream gradients as upstream gradient times local gradient.",
+        "timestamp_s": 2947,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For nodes with multiple inputs, a separate local gradient is taken with respect to each input.",
+        "timestamp_s": 2992,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In the toy graph example, the forward pass evaluates f(x,y,z) = (x + y) * max(y,z) to 6 when x=1, y=2, z=0.",
+        "timestamp_s": 3044,
+        "evidence_type": "example"
+      },
+      {
+        "text": "At graph branches, gradient contributions from different paths are summed at the shared variable.",
+        "timestamp_s": 3379,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
+      "start_s": 2700,
+      "end_s": 3599
+    },
+    "difficulty": 0.72,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 15,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Backpropagation is distilled to two ideas: apply the chain rule and store intermediate results so repeated work is avoided [ts=2711s][ts=2733s]. The network is redrawn as a computation graph whose forward pass computes values node by node—for example x to Wx to z to h to s [ts=2776s][ts=2811s]. The backward pass starts from ds/ds = 1 and sends gradients backward by multiplying each node's upstream gradient by its local gradient [ts=2867s][ts=2947s]. The instructor then uses a toy graph f(x,y,z) = (x + y) * max(y,z) with x = 1, y = 2, z = 0 to show how forward values are computed [ts=3044s][ts=3083s], how local derivatives are assigned for plus, max, and multiply [ts=3125s][ts=3191s], and why branch outputs require summing incoming gradient contributions at shared variables [ts=3379s][ts=3412s].",
+  "target_kp_ids": [
+    "kp_computation_graphs_and_backprop",
+    "kp_gradient_routing_and_accumulation"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=HnliVHU2g9U",
+  "video_clip_url": "https://www.youtube.com/watch?v=HnliVHU2g9U",
+  "transcript_slice": "00:45:00\nSo the back propagation algorithm\n\n00:45:06\nIts invention made people famous because it\n\n00:45:11\nBut at a fundamental level, the back propagation algorithm\n\n00:45:18\nThing one is you use the chain rule.\n\n00:45:24\nAnd thing two is you store intermediate results,\n\n00:45:33\nThat's all there is to the back propagation algorithm.\n\n00:45:40\nSo if we're computationally wanting to deal with functions\n\n00:45:50\nas being represented as a graph.\n\n00:45:57\nis being used inside your neural network framework.\n\n00:46:06\nfor finding whether the word at the center is a location.\n\n00:46:13\nI'm multiplying it by W. I'm adding b to it.\n\n00:46:19\nand then I'm doing the dot product with my vector u.\n\n00:46:25\nAnd so the source nodes, the inputs\n\n00:46:35\nAnd so then the edges that connect those together then\n\n00:46:44\nSo I pass along Wx to the addition function\n\n00:46:51\npass through the nonlinearity, which\n\n00:46:58\nOK, so I do precisely this computation,\n\n00:47:05\npropagation or the forward pass of a neural network.\n\n00:47:13\nOK, but then once we've done that, what we want to do\n\n00:47:22\nSo we can do gradient-based learning.\n\n00:47:27\nto as back propagation or the backward pass,\n\n00:47:34\nSo if we're running things backward,\n\n00:47:38\nand we're going to backwards pass along at gradients.\n\n00:47:45\nand we have Ds/ds So ds/ds is just 1 because if you change s\n\n00:47:52\nAnd then what we want to do is then work further back\n\n00:48:05\nas we work back.\n\n00:48:14\nAnd so how are we going to do that?\n\n00:48:20\nour nonlinearity node, but any node\n\n00:48:27\nis an upstream gradient, ds/dh.\n\n00:48:35\nthe downstream gradient of the next variable down, the ds/dz.\n\n00:48:42\nthat is we're going to say, well, let's look at f.\n\n00:48:50\nAnd that's going to be our local gradient.\n\n00:48:55\ngives us the chain rule, that ds/dz\n\n00:49:03\nds/dh, times the dh/dz, the local gradient\n\n00:49:10\nSo downstream gradient equals upstream gradient\n\n00:49:22\nWell, yeah, that's what it says when I press that again.\n\n00:49:34\nthough those inputs might be vectors or matrices or something\n\n00:49:38\nWe then have more complex graph cases.\n\n00:49:47\nYeah, so it's still--\n\n00:49:49\nSo the next case is for our node,\n\n00:49:54\nSo this is where we're calculating Wx.\n\n00:50:01\na single upstream gradient.\n\n00:50:06\nwe want to calculate the downstream gradient with respect\n\n00:50:12\nAnd the way we're going to do that is we're\n\n00:50:18\nto each input, and then we're going\n\n00:50:22\nof upstream gradient times local gradient\n\n00:50:29\nAgain, chain rule.\n\n00:50:37\nSo this isn't really the kind of thing\n\n00:50:42\nbut it's an easy example.\n\n00:50:51\nAnd we've got current values of x, y, and z\n\n00:50:57\nSo here's our little computation graph.\n\n00:51:05\nWe're going to do this max function.\n\n00:51:09\nand that gives us the value of f.\n\n00:51:17\nand this is what we get.\n\n00:51:23\nThe answer is 6.\n\n00:51:28\nwe run the backward propagation.\n\n00:51:33\nnot actually special to neural networks, right?\n\n00:51:37\nif you want to just run your math on PyTorch rather\n\n00:51:45\nOK, so now we work out backwards.\n\n00:51:52\nSo da/dz is going to be 1--\n\n00:51:59\nDa/dx is going to be 1.\n\n00:52:02\nDa/dy equals 1.\n\n00:52:07\nto depend on which of the two is larger\n\n00:52:14\nthe biggest and 0 for the one that's the smallest.\n\n00:52:21\nwe saw with vectors, that df/da is going to be b and df/db\n\n00:52:28\nSo those are all our local gradients.\n\n00:52:36\nSo df/df is 1.\n\n00:52:45\nthat are calculated.\n\n00:52:53\n2 and 3, where you're swapping over the numbers.\n\n00:53:05\nwe're taking the upstream times 1, so it gets 3.\n\n00:53:12\nAnd then for the plus, we're just sending the gradient down\n\n00:53:22\nAnd so that gives us df/dx.\n\n00:53:28\nDf/dy, we're taking the 3 and adding the 2,\n\n00:53:36\nAnd then df/dz is 0.\n\n00:53:44\ncheck that we've got this right.\n\n00:53:54\nas you change z a little-- so z is 0.\n\n00:54:02\nto what the computed function value is.\n\n00:54:07\nThat's correct.\n\n00:54:15\nif I change x to 1.1, then I'll be calculating 1.1 plus 2\n\n00:54:25\nAnd then I'll be taking the max, which is 2,\n\n00:54:34\nAnd so-- right, I did that wrong.\n\n00:54:43\nI didn't do the multiplication right.\n\n00:54:47\nYeah, so we get the 3.1 that's multiplied\n\n00:54:54\nSo a change of 0.1 in the x has moved things up by 0.2.\n\n00:55:02\nAnd so then the final case is, well, what if we change y to--\n\n00:55:14\nThen we're going to get 2.1 multiplied by 1 is 2.1.\n\n00:55:24\nRight.\n\n00:55:30\nSorry, I keep doing this wrong.\n\n00:55:34\nAnd then we've got 2.1 is the max.\n\n00:55:45\nSo it's approximately gone up by--\n\n00:55:53\nThat's just an estimate.\n\n00:55:59\nWe get this five times multiplication of our changes.\n\n00:56:09\nis when you have outward branches in your computation\n\n00:56:19\nthat what you do is you sum the gradients, right?\n\n00:56:30\ny is sort of going into these two different things\n\n00:56:35\nSo once we've worked out the upstream gradients,\n\n00:56:41\nAnd so that's what we did back here.\n\n00:56:45\ntook these calculated upstream gradients and 2 and 3,\n\n00:56:51\nand that gave the right answer.\n\n00:57:00\nAnd so you can think about that for the just generally how--\n\n00:57:10\nmove around in these pictures so that when\n\n00:57:20\ngradients.\n\n00:57:24\ngoes to each input.\n\n00:57:31\nSo the max is going to send the gradient to one of the inputs\n\n00:57:40\nAnd when you have a multiplication,\n\n00:57:46\ndoing this sort of switching of the forward coefficients.\n\n00:57:52\nby the opposite forward coefficient gives you\n\n00:58:01\nOK.\n\n00:58:08\ncalculate the values of functions,\n\n00:58:17\nthe network.\n\n00:58:24\nis just that we want to do this efficiently.\n\n00:58:29\nto say, well, gee, I want to calculate the ds/db,\n\n00:58:39\nand when I've done them all, I will stop,\n\n00:58:46\nyou do all of the part that's in blue.\n\n00:58:54\nyou'd be calculating all the part in red.\n\n00:59:00\nwhen we were doing it as math, these parts\n\n00:59:06\nYou're doing exactly the same computations,\n\n00:59:13\nthis upstream gradient or error signal that\n\n00:59:21\nSo the picture that we want to have\n\n00:59:27\nand then you're only doing separately the little bits\n\n00:59:33\nOK.\n\n00:59:37\nand I'm going to actually end early, unless anyone\n\n00:59:41\nBut I do have just a few more slides to go through.\n\n00:59:52\nis in the general case--",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture05-backprop::seg4",
+      "global_kp_id": "kp_upstream_gradient_reuse_and_outer_product_parameter_gradients",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05-backprop::seg4",
+      "global_kp_id": "kp_computation_graphs_and_backprop",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05-backprop::seg4",
+      "global_kp_id": "kp_gradient_routing_and_accumulation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_upstream_gradient_reuse_and_outer_product_parameter_gradients",
+      "name": "Upstream gradient reuse and outer-product parameter gradients",
+      "description": "Shared upstream error signals should be reused across parameter derivatives, and weight gradients often combine the upstream signal with the local input in an outer-product form.",
+      "track_tags": [
+        "implementation",
+        "optimization"
+      ],
+      "domain_tags": [
+        "backpropagation",
+        "parameter_gradients"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "software_engineer_ml"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because upstream gradient reuse and outer-product parameter gradients clarifies shared upstream error signals should be reused across parameter derivatives, and weight gradients often combine the upstream signal with the local input in an outer-product form, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_computation_graphs_and_backprop",
+      "name": "Computational graphs and automatic differentiation",
+      "description": "General reverse-mode autodiff runs forward in topological order on a DAG and backward in reverse topological order, which is how modern frameworks implement backpropagation. A neural network can be understood as a directed acyclic graph of operations whose forward pass computes values and whose backward pass computes gradients.",
+      "track_tags": [
+        "automatic_differentiation",
+        "deep_learning",
+        "deep_learning_basics",
+        "implementation",
+        "neural_networks",
+        "optimization",
+        "systems_for_ml"
+      ],
+      "domain_tags": [
+        "automatic_differentiation",
+        "backpropagation",
+        "computation_graphs",
+        "deep_learning",
+        "pytorch",
+        "software_engineering"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "research_engineer",
+        "research_scientist",
+        "software_engineer_ml"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because computational graphs and automatic differentiation formalizes how general reverse-mode autodiff runs forward in topological order on a DAG and backward in reverse topological order, which is how modern frameworks implement backpropagation, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp9",
+        "local::lecture05-backprop::kp11",
+        "local::lecture03-pytorch::kp5",
+        "local::lecture_4_neural_networks_and_backpropagation::kp7",
+        "local::lecture_5_image_classification_with_cnns::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gradient_routing_and_accumulation",
+      "name": "Gradient routing and accumulation",
+      "description": "Different node types route gradients differently: addition copies the upstream gradient, max routes it to the argmax input, multiplication swaps forward coefficients, and branches require summing contributions.",
+      "track_tags": [
+        "implementation",
+        "optimization"
+      ],
+      "domain_tags": [
+        "backpropagation",
+        "local_gradients"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "software_engineer_ml"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gradient routing and accumulation clarifies different node types route gradients differently: addition copies the upstream gradient, max routes it to the argmax input, multiplication swaps forward coefficients, and branches require summing contributions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-backprop::kp10"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.57,
+    0.87
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L5_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture05-backprop_transcript.txt"
+  }
+}

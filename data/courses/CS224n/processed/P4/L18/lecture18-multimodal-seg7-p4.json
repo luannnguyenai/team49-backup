@@ -1,0 +1,119 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 1,
+  "review_summary": "The transcript is clear enough to generate an application question about expanding multimodality beyond image-text settings, especially toward embodied learning and future foundation models that integrate more modalities.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture18-multimodal-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If the goal is to learn language grounding in a way that is closer to how humans learn, which direction is presented as especially promising?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only increase the size of static image datasets while keeping everything else unchanged.",
+        "Use simulated environments or embodied settings where an agent both observes and acts based on language instructions.",
+        "Remove every modality other than text to avoid noise.",
+        "Learn only smell embeddings without linking them to the physical world."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture emphasizes that humans do not learn language only by reading descriptions. They also interact with environments and connect words to actions, observations, and changing viewpoints. That is why embodied or simulated environments are presented as a particularly promising direction for deeper grounding.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_beyond_images_audio_video_embodied_learning_and_new_modalities",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "simulated environments",
+          "humans ground language by acting"
+        ],
+        "timestamps": [
+          "74:55",
+          "75:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg7-q1",
+      "global_kp_id": "kp_beyond_images_audio_video_embodied_learning_and_new_modalities",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture18-multimodal-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"If the goal is to learn language grounding in a way that is closer to how humans learn, which direction is presented as especially promising\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture18-multimodal-seg7-q1",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"If the goal is to learn language grounding in a way that is closer to how humans learn, which direction is presented as especially promising\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

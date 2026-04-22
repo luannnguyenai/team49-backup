@@ -1,0 +1,124 @@
+{
+    "output_filename": "p3a__cs231n__lecture_1_introduction.json",
+    "run_id": "<run_id>",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_1_introduction",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_1_introduction::seg1",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of the main KP on CS231n's deep-learning-plus-vision scope, a critical gateway concept, plus high item_generation_worthiness makes this framing worth assessment.",
+            "target_kp_ids": [
+                "kp_cs231n_focuses_on_the_intersection_of_deep_learning_and_computer_vision"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "motivation",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 2,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_1_introduction::seg2",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of the main KP on visual intelligence and recognition, a critical gateway concept, gives this motivational segment assessment value despite its evolutionary and historical examples.",
+            "target_kp_ids": [
+                "kp_visual_intelligence_and_recognition"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "motivation",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 2,
+            "salience_confidence": "low",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_1_introduction::seg3",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main gateway KP on hierarchical receptive fields, plus substantial treatment of ill-posed 3D inference, makes this dense foundational theory highly assessment-worthy.",
+            "target_kp_ids": [
+                "kp_hierarchical_receptive_fields_in_biological_vision",
+                "kp_3d_vision_is_fundamentally_ill_posed_from_2d_images"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_1_introduction::seg4",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of the main KP on fast contextual human recognition, with substantial classical-CV comparison and high item_generation_worthiness, supports assessment despite the historical setup.",
+            "target_kp_ids": [
+                "kp_human_recognition_is_fast_contextual_and_specialized",
+                "kp_classical_cv_features"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_1_introduction::seg5",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main critical gateway KP on deep learning resurgence, reinforced by substantial modern applications and societal implications, makes this a high-salience synthesis unit.",
+            "target_kp_ids": [
+                "kp_deep_learning_resurgence",
+                "kp_modern_vision_extends_beyond_classification",
+                "kp_human_centered_ai"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_1_introduction::seg6",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of the main critical gateway KP that modern vision extends beyond classification, plus a broad model-and-task roadmap, gives this survey clear assessment value.",
+            "target_kp_ids": [
+                "kp_modern_vision_extends_beyond_classification",
+                "kp_cs231n_curriculum_structure_and_learning_objectives"
+            ],
+            "question_intent": "application",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_1_introduction::seg7",
+            "is_worth_learning": false,
+            "salience_score": "skip",
+            "rationale": "Mostly logistics, course structure, and preview material, so despite a dominant curriculum KP it is administrative rather than item-worthy technical content.",
+            "target_kp_ids": [],
+            "question_intent": "conceptual",
+            "content_type": "administrative",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 0,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

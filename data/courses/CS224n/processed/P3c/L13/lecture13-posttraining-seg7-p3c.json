@@ -1,0 +1,269 @@
+{
+  "unit_id": "local::lecture13-posttraining::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 6,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về động cơ của DPO, cách viết reward bằng log-ratio xác suất, partition function, và việc DPO quy preference optimization về một loss phân loại trực tiếp.",
+  "question_bank": [
+    {
+      "item_id": "lecture13-posttraining-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Động cơ chính để giới thiệu DPO là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Để thay thế một pipeline RLHF phức tạp bằng mục tiêu đơn giản hơn mà vẫn dùng dữ liệu preference.",
+        "Để loại bỏ hoàn toàn nhu cầu thu thập preference data từ con người.",
+        "Để quay lại tối ưu next-token prediction thuần túy như pretraining.",
+        "Để biến mọi mô hình decoder-only thành encoder-decoder."
+      ],
+      "answer_index": 0,
+      "explanation": "DPO được đưa ra vì RLHF đầy đủ tốn mẫu, nhạy siêu tham số và khó triển khai. Mục tiêu của DPO là đi thẳng từ dữ liệu sở thích đến loss huấn luyện policy.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "DPO is motivated as a simpler alternative to complex RLHF."
+        ],
+        "timestamps": [
+          "00:56:49"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Ý tưởng trung tâm của DPO là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Biểu diễn reward bằng xác suất của language model so với một mô hình tham chiếu.",
+        "Huấn luyện riêng reward model lớn hơn policy để chấm điểm tuyệt đối.",
+        "Bỏ hoàn toàn ràng buộc KL để policy tự do tối ưu reward.",
+        "Chỉ dùng prompt engineering chứ không cập nhật tham số mô hình."
+      ],
+      "answer_index": 0,
+      "explanation": "DPO dựa trên quan sát rằng khi policy dịch xác suất về phía câu trả lời được ưa thích, thông tin về sở thích có thể được viết trực tiếp bằng tỉ số xác suất giữa policy hiện tại và policy tham chiếu.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "DPO writes the reward model in terms of language-model probabilities.",
+          "Reward can be expressed as a beta-scaled log-ratio between optimized and reference"
+        ],
+        "timestamps": [
+          "00:58:10",
+          "01:02:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Nghiệm tối ưu đóng của mục tiêu KL-regularized trong DPO có dạng nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mô hình tham chiếu được tái trọng số bởi reward mũ hóa rồi chuẩn hóa lại.",
+        "Trung bình cộng đơn giản giữa policy mới và reward model.",
+        "Một mô hình tuyến tính trên embedding của prompt.",
+        "Một quy tắc lấy mẫu top-k cố định cho mọi đầu vào."
+      ],
+      "answer_index": 0,
+      "explanation": "Nghiệm tối ưu có dạng kiểu Boltzmann: lấy phân phối tham chiếu, nhân với số mũ của reward chia beta, rồi chuẩn hóa để thành phân phối xác suất hợp lệ.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "The KL-regularized objective has a closed-form optimum that reweights the reference model"
+        ],
+        "timestamps": [
+          "01:00:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao partition function Z(x) là một vấn đề trong DPO?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì nó đòi hỏi cộng trên toàn bộ không gian completion có thể có cho cùng một input.",
+        "Vì nó chỉ tồn tại khi dùng encoder-decoder chứ không tồn tại với decoder-only.",
+        "Vì nó luôn bằng 1 nên không mang thông tin gì.",
+        "Vì nó phụ thuộc vào batch size chứ không phụ thuộc vào input x."
+      ],
+      "answer_index": 0,
+      "explanation": "Để chuẩn hóa phân phối, Z(x) phải xét tất cả completion có thể. Với không gian đầu ra ngôn ngữ rất lớn và độ dài tùy ý, đại lượng này không thể tính trực tiếp trong thực tế.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "The partition function Z(x) is intractable because it sums over all possible"
+        ],
+        "timestamps": [
+          "01:01:33"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Khi đưa reward vào Bradley-Terry objective, vì sao Z(x) triệt tiêu?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì completion thắng và thua chia sẻ cùng input x nên cùng một hằng chuẩn hóa xuất hiện ở cả hai phía của hiệu reward.",
+        "Vì DPO giả định mọi completion có cùng độ dài token.",
+        "Vì sigmoid tự động chuẩn hóa mọi hằng số đầu vào về 0.",
+        "Vì reward model trong DPO không bao giờ dùng policy tham chiếu."
+      ],
+      "answer_index": 0,
+      "explanation": "Ở cặp preference cho cùng prompt x, reward của hai completion đều chứa cùng partition function. Khi lấy hiệu reward, hằng số chung đó biến mất, giúp mục tiêu trở nên tính được.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "The partition function cancels in Bradley-Terry reward differences for the same input."
+        ],
+        "timestamps": [
+          "01:06:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q6",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Kết quả cuối cùng của DPO về mặt tối ưu là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một loss dạng phân loại nhị phân trực tiếp trên cặp câu trả lời được thích và không được thích, không cần RL loop.",
+        "Một thuật toán Q-learning đầy đủ với value network và exploration bonus.",
+        "Một phiên bản SFT chuẩn chỉ thay đổi learning rate.",
+        "Một quy trình ba bước gồm SFT, reward model và PPO như RLHF cổ điển."
+      ],
+      "answer_index": 0,
+      "explanation": "Đây là sức hấp dẫn lớn nhất của DPO: biến preference optimization thành một bài toán huấn luyện trực tiếp, tránh vòng lặp reinforcement learning phức tạp.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dpo",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "DPO becomes a binary classification loss over preference pairs."
+        ],
+        "timestamps": [
+          "01:07:52"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture13-posttraining-seg7-q1",
+      "global_kp_id": "kp_dpo",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q2",
+      "global_kp_id": "kp_dpo",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q3",
+      "global_kp_id": "kp_dpo",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q4",
+      "global_kp_id": "kp_dpo",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q5",
+      "global_kp_id": "kp_dpo",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg7-q6",
+      "global_kp_id": "kp_dpo",
+      "role": "primary"
+    }
+  ]
+}

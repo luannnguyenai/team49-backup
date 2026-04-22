@@ -1,0 +1,500 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "The transcript is clear enough to generate application questions about the project of teaching humans superhuman strategies from AlphaZero, generating puzzles from embeddings, and evaluating success by whether humans can learn from them.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What aspect of AlphaZero is used to suggest that the model may hold strategic concepts beyond human knowledge?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It merely copied the opening book of strong human players.",
+        "Its opening preferences differ substantially from humans despite being stronger, suggesting that unfamiliar strategies may exist.",
+        "It is only strong in the endgame, so it says nothing about new strategic concepts.",
+        "It was not self-trained and only fine-tuned from Stockfish."
+      ],
+      "answer_index": 1,
+      "explanation": "If a system exceeds human skill and also prefers openings different from those humans choose, that suggests it may rely on strategic structures humans are not yet used to thinking about or describing clearly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "opening repertoire differs substantially",
+          "suggesting there may be superhuman concepts"
+        ],
+        "timestamps": [
+          "00:56:37",
+          "00:57:07"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the ambitious evaluation goal of the new project described here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To prove that Magnus Carlsen always defeats AlphaZero in every test game.",
+        "To teach a world champion at least one new chess strategy discovered by the machine and test whether he can apply it.",
+        "Only to create harder puzzles for Stockfish without involving humans.",
+        "To compress AlphaZero into a smaller model that can run on a laptop."
+      ],
+      "answer_index": 1,
+      "explanation": "The interesting goal of the project is not just a stronger engine, but testing whether machine-discovered knowledge can be turned into knowledge that can actually be taught back to expert humans.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "teach a world champion",
+          "new superhuman chess strategy"
+        ],
+        "timestamps": [
+          "00:57:27",
+          "00:57:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "According to the described pipeline, which step is part of discovering a new strategy to teach humans?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intentionally forget known strategies, learn a concept graph, and then generate board positions corresponding to new concepts in order to create puzzles.",
+        "Collect language captions for each move and fine-tune a general chatbot.",
+        "Only take games Magnus once lost and memorize all the moves.",
+        "Use saliency maps on chessboard images to highlight the most important piece."
+      ],
+      "answer_index": 0,
+      "explanation": "The project tries to turn the big question into a more concrete one: filter out familiar strategies, learn conceptual relations, and then generate board positions or puzzles to test whether humans can learn a new concept.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "forgetting existing chess strategy",
+          "learn a graph",
+          "board positions"
+        ],
+        "timestamps": [
+          "00:57:51",
+          "00:58:01",
+          "00:59:22"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is ultimate success for the project defined most closely?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Another engine solves the puzzle faster than AlphaZero.",
+        "A human expert can learn and apply at least part of the concepts discovered by the machine.",
+        "Every generated chess position is entirely novel relative to the history of chess.",
+        "AlphaZero’s embeddings can be visualized beautifully in two dimensions."
+      ],
+      "answer_index": 1,
+      "explanation": "The goal is not to add one more win for an engine, but to create knowledge that can transfer to human experts. If a human can understand and apply even part of a new concept, that already counts as major success.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Success is defined as a human expert",
+          "learn and apply"
+        ],
+        "timestamps": [
+          "01:00:01",
+          "01:00:08"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What aspect of AlphaZero is used to suggest that the model may hold strategic concepts beyond human knowledge?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It merely copied the opening book of strong human players.",
+        "Its opening preferences differ substantially from humans despite being stronger, suggesting that unfamiliar strategies may exist.",
+        "It is only strong in the endgame, so it says nothing about new strategic concepts.",
+        "It was not self-trained and only fine-tuned from Stockfish."
+      ],
+      "answer_index": 1,
+      "explanation": "If a system exceeds human skill and also prefers openings different from those humans choose, that suggests it may rely on strategic structures humans are not yet used to thinking about or describing clearly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "opening repertoire differs substantially",
+          "suggesting there may be superhuman concepts"
+        ],
+        "timestamps": [
+          "00:56:37",
+          "00:57:07"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the ambitious evaluation goal of the new project described here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To prove that Magnus Carlsen always defeats AlphaZero in every test game.",
+        "To teach a world champion at least one new chess strategy discovered by the machine and test whether he can apply it.",
+        "Only to create harder puzzles for Stockfish without involving humans.",
+        "To compress AlphaZero into a smaller model that can run on a laptop."
+      ],
+      "answer_index": 1,
+      "explanation": "The interesting goal of the project is not just a stronger engine, but testing whether machine-discovered knowledge can be turned into knowledge that can actually be taught back to expert humans.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "teach a world champion",
+          "new superhuman chess strategy"
+        ],
+        "timestamps": [
+          "00:57:27",
+          "00:57:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "According to the described pipeline, which step is part of discovering a new strategy to teach humans?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intentionally forget known strategies, learn a concept graph, and then generate board positions corresponding to new concepts in order to create puzzles.",
+        "Collect language captions for each move and fine-tune a general chatbot.",
+        "Only take games Magnus once lost and memorize all the moves.",
+        "Use saliency maps on chessboard images to highlight the most important piece."
+      ],
+      "answer_index": 0,
+      "explanation": "The project tries to turn the big question into a more concrete one: filter out familiar strategies, learn conceptual relations, and then generate board positions or puzzles to test whether humans can learn a new concept.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "forgetting existing chess strategy",
+          "learn a graph",
+          "board positions"
+        ],
+        "timestamps": [
+          "00:57:51",
+          "00:58:01",
+          "00:59:22"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is ultimate success for the project defined most closely?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Another engine solves the puzzle faster than AlphaZero.",
+        "A human expert can learn and apply at least part of the concepts discovered by the machine.",
+        "Every generated chess position is entirely novel relative to the history of chess.",
+        "AlphaZero’s embeddings can be visualized beautifully in two dimensions."
+      ],
+      "answer_index": 1,
+      "explanation": "The goal is not to add one more win for an engine, but to create knowledge that can transfer to human experts. If a human can understand and apply even part of a new concept, that already counts as major success.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Success is defined as a human expert",
+          "learn and apply"
+        ],
+        "timestamps": [
+          "01:00:01",
+          "01:00:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from hard application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    }
+  ]
+}

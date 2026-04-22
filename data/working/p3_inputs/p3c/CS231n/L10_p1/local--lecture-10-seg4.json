@@ -1,0 +1,188 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg4",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Receptive-field analysis, temporal shift invariance, and 3D filter visualization",
+    "description": "Compares late fusion, early fusion, and 3D CNNs through toy receptive-field examples and explains temporal shift invariance.",
+    "summary": "The instructor uses toy architectures to compare how temporal receptive fields develop in late fusion, early fusion, and 3D CNNs [ts=1306s] [ts=1333s]. In late fusion, 2D layers keep the temporal dimension unchanged while building spatial receptive fields, then a global average pool collapses all time at the end [ts=1340s] [ts=1403s] [ts=1422s]. In early fusion, time is collapsed at the very beginning by treating 3 x 20 channels as one enlarged channel axis, then the network builds spatial receptive fields like a 2D CNN [ts=1440s] [ts=1466s]. In contrast, a 3D CNN builds both spatial and temporal receptive fields gradually through 3D convolutions and 3D pooling, which is why it is described as slow fusion [ts=1498s] [ts=1561s]. A deeper comparison explains that early-fusion 2D filters extend fully over time, so they lack temporal shift invariance: the same transition occurring at different time steps would need separate filters [ts=1605s] [ts=1635s] [ts=1684s]. 3D filters span only a local temporal window and slide over time, so they can reuse filters to recognize the same motion pattern at any moment, and learned 3D kernels can be visualized as video clips showing colors, edges, and motion directions [ts=1739s] [ts=1789s] [ts=1813s] [ts=1883s].",
+    "key_points": [
+      {
+        "text": "Late fusion builds spatial receptive field gradually but builds temporal receptive field all at once at the final global pooling layer.",
+        "timestamp_s": 1403,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Early fusion builds temporal receptive field all at once in the first layer, then builds space gradually.",
+        "timestamp_s": 1466,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "3D CNNs build receptive fields gradually in both space and time, which motivates the term slow fusion.",
+        "timestamp_s": 1498,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Early-fusion 2D convolution is local in space but extends fully in time, causing no temporal shift invariance.",
+        "timestamp_s": 1615,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "3D convolution uses a local temporal window that slides over time, enabling temporal shift invariance and filter reuse.",
+        "timestamp_s": 1754,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Learned 3D filters can be visualized as video clips, revealing color, edge, and motion-sensitive kernels.",
+        "timestamp_s": 1813,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 1323,
+      "end_s": 1920
+    },
+    "difficulty": 3.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:22:07\nI'm just trying to show that a toy example to walk through the size of\n\n00:22:16\nthe difference between early fusion and late fusion and 3D convolution neural networks.\n\n00:22:25\nmaybe originally the input is 3 times 20. 20, the temporal dimension. And 64,\n\n00:22:40\nfusion. We don't do anything over the temporal dimension initially. We just keep the 20,\n\n00:22:49\nNow, we have a convolution 2D layer to map the channel dimension from 3 to 12,\n\n00:22:58\npooling layers. Still, we didn't do anything with the temporal dimension. So it's still 20.\n\n00:23:08\nAnd then gradually, we maybe use another 2D layer. And now, the feature map is 24\n\n00:23:19\nstill keep the temporal dimension 20. So we didn't do anything over the temporal dimension.\n\n00:23:28\nmaps 20 times 16 times 16. So we pull over both time in the spatial dimension. And now,\n\n00:23:39\nwe collapse everything in the final single layer. And we build\n\n00:23:47\nSo then for early fusion, what's the difference? So now,\n\n00:23:54\nnow, we are building slowly in space and all at once in time at the very beginning. So the\n\n00:24:07\nNow, we just treat this 3 times 20 as a single-- the channel dimension. We just\n\n00:24:16\nand then map them to 12. So basically, we use a single convolution layer, 2D convolution layer,\n\n00:24:26\nSo we build the temporal receptive field in the first layer. So now, the temporal\n\n00:24:36\nup. And we use pooling and conv 2D to build up the spatial dimension just as late fusion.\n\n00:24:46\nis only just trying to doing the averaging, doing the pooling across space. So we build\n\n00:24:58\nSo then, what is the 3D convolution neural networks? So for 3D convolution layer, basically\n\n00:25:08\ninput can still be the same 3-- times 20 times 64 times 64. But now, we are using 3D convolutions.\n\n00:25:27\ndimension in this case. And then we build up a little bit temporal receptive field\n\n00:25:36\n4 times 4 for pooling layer. And then we pull a little bit of this temporal feature and also\n\n00:25:46\nAnd we have another conv 3D layer, and then to further build up the spatial and\n\n00:25:55\nwe're pooling over these 4 times 16 times 16 feature map, and then to further increase the\n\n00:26:06\nSo that's the difference between early fusion, late fusion, and 3D convolution neural networks.\n\n00:26:18\nbuilds receptive fields over time. But what's the actual difference? So let's look at it\n\n00:26:36\nso the common filter, if it's a 2D convolution, for this grid point,\n\n00:26:55\nSo it is local in space but extends fully in time. That's the filter in 2D convolution\n\n00:27:10\nall the way through time dimension in this 2D convolution, what problem is going to happen?\n\n00:27:22\nthe 2D, the filter, now extends fully in time. So if we want to learn some global\n\n00:27:33\nbecause it's a video. It's something that we want to recognize temporal information.\n\n00:27:43\nmaybe there is some change that is happening at time step 4. There's another same change\n\n00:27:56\nIf we go all the way through time, the filter extends fully in time, then if we want to learn\n\n00:28:09\nlearn this. So we have to learn a different-- this kernel in order to learn these different\n\n00:28:22\nSo how to recognize this kind of blue to orange transition just anywhere in space and time? Just\n\n00:28:35\nbe able to recognize the image contains a cat. No matter where the cat is on the right corner left\n\n00:28:49\nHere, we want to be able to learn these different types of motion,\n\n00:28:59\nthen, that's exactly the benefit of 3D convolution neural networks. Right now,\n\n00:29:10\nearly version T, extends all the way in the temporal dimension T is equal to 16.\n\n00:29:19\nlike we learned spatial invariance using filter and local regions. Now,\n\n00:29:29\nSo then, the benefit is that now, we can have some temporal shift invariance. Because each filter\n\n00:29:42\ndimensions. So the transition from blue to orange can now be recognized at every moment in time.\n\n00:29:55\nrepresentation efficient. We don't need to learn separate filters anymore. So that's basically\n\n00:30:08\nAnd also, in the last lecture, I think, you have already also\n\n00:30:20\nconvolution neural networks. Similarly, we can also visualize filters just for this 3D\n\n00:30:35\nThe learned filters from the 3D convolution neural networks, because now the filter extends both in\n\n00:30:52\nsome of them are just like those filters you have seen for image classifier.\n\n00:31:03\nsee that there are some other filters. There are some temporal transition from one corner\n\n00:31:16\nand some maybe focus on just the color patterns. But some learns motion in different directions.\n\n00:31:30\ntwo difference-- one is this slow fusion. In terms of convolution operation, yeah,\n\n00:31:39\nAnd 2D convolution, they are totally different. You have another dimension of convolution. You\n\n00:31:47\ndimension in the convolution operation. But practically, you use 3D convolution neural",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg4",
+      "global_kp_id": "kp_early_fusion",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg4",
+      "global_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg4",
+      "global_kp_id": "kp_temporal_receptive_field_and_shift_invariance",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_early_fusion",
+      "name": "Early fusion",
+      "description": "Early fusion stacks frames along channels so the first 2D convolution compares frames and collapses time.",
+      "track_tags": [
+        "fusion",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because early fusion clarifies early fusion stacks frames along channels so the first 2D convolution compares frames and collapses time, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "name": "3D CNN and slow fusion",
+      "description": "3D CNNs use 3D convolution and pooling to gradually fuse spatial and temporal information across layers.",
+      "track_tags": [
+        "3d_cnn",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because 3D CNN and slow fusion formalizes how 3D CNNs use 3D convolution and pooling to gradually fuse spatial and temporal information across layers, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_temporal_receptive_field_and_shift_invariance",
+      "name": "Temporal receptive field and shift invariance",
+      "description": "3D convolution uses local temporal filters that slide over time, enabling temporal shift invariance unlike early fusion.",
+      "track_tags": [
+        "convolution",
+        "representation"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "research_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because temporal receptive field and shift invariance formalizes how 3D convolution uses local temporal filters that slide over time, enabling temporal shift invariance unlike early fusion, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.65,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

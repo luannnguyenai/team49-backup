@@ -10,10 +10,12 @@ Content management API:
 """
 
 import uuid
+import json
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.data_paths import MODULES_FILE, TOPICS_FILE
 from src.database import get_async_db
 from src.schemas.content import (
     ModuleDetailResponse,
@@ -124,13 +126,10 @@ async def api_get_topic_content(
 )
 async def api_seed_data(db: AsyncSession = Depends(get_async_db)):
     """Load modules and topics from JSON files into database."""
-    import json
-    from pathlib import Path
-
     from sqlalchemy import text
 
-    modules_file = Path("data/modules.json")
-    topics_file = Path("data/topics.json")
+    modules_file = MODULES_FILE
+    topics_file = TOPICS_FILE
 
     if not modules_file.exists() or not topics_file.exists():
         raise HTTPException(status_code=400, detail="data/*.json files not found")

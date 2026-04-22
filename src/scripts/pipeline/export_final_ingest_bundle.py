@@ -9,6 +9,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from src.data_paths import (
+    GPT54_EDGE_LABELS_FILE,
+    P2_OUTPUT_FILE,
+    P5_TRANSITIVE_PRUNED_FILE,
+)
+
 
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -242,10 +248,10 @@ def export_bundle(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=Path("data/final/cs224n_cs231n_v1"))
-    parser.add_argument("--p2", type=Path, default=Path("data/p2_output_rationale_repaired.json"))
-    parser.add_argument("--p5", type=Path, default=Path("data/p5_output_transitive_pruned.json"))
-    parser.add_argument("--gpt54", type=Path, default=Path("data/gpt54_edge_labels.json"))
+    parser.add_argument("--output-dir", type=Path, default=Path("data/final_artifacts_export/cs224n_cs231n_v1"))
+    parser.add_argument("--p2", type=Path, default=P2_OUTPUT_FILE)
+    parser.add_argument("--p5", type=Path, default=P5_TRANSITIVE_PRUNED_FILE)
+    parser.add_argument("--gpt54", type=Path, default=GPT54_EDGE_LABELS_FILE)
     parser.add_argument("--courses", nargs="+", default=["CS224n", "CS231n"])
     args = parser.parse_args()
 

@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture07-rnns::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript is sufficient for reinforcement questions about L2 regularization, the modern view of generalization, and how dropout behaves in training versus test time. No separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture07-rnns-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does L2 regularization add to the training objective?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A reward for using larger weights",
+        "A squared-parameter penalty that favors smaller weights",
+        "A rule that deletes random hidden units",
+        "A requirement that training loss reach zero"
+      ],
+      "answer_index": 1,
+      "explanation": "L2 regularization augments the loss with a penalty on parameter magnitude, which biases learning toward smaller weights.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_regularization_and_generalization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "prefer smaller weights",
+          "squared term at the end"
+        ],
+        "timestamps": [
+          "00:08:49",
+          "00:08:42"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the segment say the old textbook picture of overfitting is incomplete for modern deep learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Modern models never overfit at all",
+        "Modern networks are too small to memorize data",
+        "Very large models can fit the training set extremely well and still generalize with good regularization",
+        "Validation loss is no longer measured in deep learning"
+      ],
+      "answer_index": 2,
+      "explanation": "The segment argues that large networks can nearly memorize training data yet still generalize if the learning setup and regularization are good.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_regularization_and_generalization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "This is not a picture",
+          "you can essentially train them to get 0 loss"
+        ],
+        "timestamps": [
+          "00:11:00",
+          "00:12:42"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What happens during dropout training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "All hidden units are kept and gradients are averaged",
+        "A random mask zeros part of an internal representation",
+        "The vocabulary is randomly reduced each epoch",
+        "The output layer is replaced by nearest-neighbor search"
+      ],
+      "answer_index": 1,
+      "explanation": "Dropout multiplies hidden representations by a random binary mask during training so the model cannot rely on the same features every time.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "random mask of zeros and ones",
+          "applies it to hidden representations"
+        ],
+        "timestamps": [
+          "00:15:28",
+          "00:15:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is dropout handled at test time in the version emphasized here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Units are still randomly removed on every forward pass",
+        "All units stay active and activations are rescaled",
+        "The hidden state is reset to zeros",
+        "The model switches from SGD to Adam"
+      ],
+      "answer_index": 1,
+      "explanation": "At test time the network keeps all units instead of randomly dropping them, and rescales activations to match training-time expectations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "At test time dropout keeps all units",
+          "rescales instead"
+        ],
+        "timestamps": [
+          "00:17:04",
+          "00:17:13"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is one intuition for why dropout can improve generalization?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It forces every feature to be useful without depending too much on specific partners",
+        "It guarantees the model will use fewer parameters overall",
+        "It prevents gradients from ever becoming noisy",
+        "It makes every hidden unit represent the same feature"
+      ],
+      "answer_index": 0,
+      "explanation": "By randomly removing features during training, dropout discourages fragile co-adaptation and pushes the model toward more robust representations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "preventing feature co-adaptation",
+          "approximating a large model ensemble"
+        ],
+        "timestamps": [
+          "00:17:34",
+          "00:17:34"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture07-rnns-seg2-q1",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q2",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q3",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q4",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg2-q5",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    }
+  ]
+}

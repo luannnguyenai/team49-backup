@@ -75,12 +75,12 @@ fi
 log_ok "GEMINI_API_KEY đã cấu hình"
 
 # Kiểm tra data
-if [ -d "data/CS231n" ]; then
-  VIDEO_COUNT=$(find data/CS231n/videos -name "*.mp4" 2>/dev/null | wc -l)
-  TRANSCRIPT_COUNT=$(find data/CS231n/transcripts -name "*.txt" -o -name "*.json" 2>/dev/null | wc -l)
+if [ -d "data/courses/CS231n" ]; then
+  VIDEO_COUNT=$(find data/courses/CS231n/videos -name "*.mp4" 2>/dev/null | wc -l)
+  TRANSCRIPT_COUNT=$(find data/courses/CS231n/transcripts -name "*.txt" -o -name "*.json" 2>/dev/null | wc -l)
   log_ok "Data CS231n: ${VIDEO_COUNT} videos, ${TRANSCRIPT_COUNT} transcripts"
 else
-  log_warn "Không tìm thấy data/CS231n/ — AI Tutor sẽ không có bài giảng để truy vấn"
+  log_warn "Không tìm thấy data/courses/CS231n/ — AI Tutor sẽ không có bài giảng để truy vấn"
 fi
 
 # =============================================================================
@@ -223,7 +223,7 @@ LECTURE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "
 if [ "$LECTURE_COUNT" = "0" ]; then
   log_info "Seed bài giảng CS231n..."
   docker compose exec -T backend uv run python scripts/seed_lectures.py 2>&1 && log_ok "Seed bài giảng hoàn tất" \
-    || log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/CS231n/)"
+    || log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/courses/CS231n/)"
 else
   log_ok "Lectures đã có sẵn (${LECTURE_COUNT} bài) — bỏ qua seed"
 fi
@@ -238,7 +238,7 @@ docker compose exec -T backend python - <<'EOF'
 import os, json
 
 data_path = "/app/data"
-cs231n_path = "/app/data/CS231n"
+cs231n_path = "/app/data/courses/CS231n"
 
 print(f"  data/ exists: {os.path.exists(data_path)}")
 
@@ -250,10 +250,10 @@ if os.path.exists(cs231n_path):
     print(f"  CS231n/transcripts: {len(transcripts)} files")
     print(f"  CS231n/ToC_Summary: {len(toc)} files")
 else:
-    print("  [WARN] CS231n/ không tồn tại trong container")
+    print("  [WARN] courses/CS231n/ không tồn tại trong container")
 
 for f in ["modules.json", "topics.json", "question_bank.json"]:
-    path = f"{data_path}/{f}"
+    path = f"{data_path}/bootstrap/{f}"
     if os.path.exists(path):
         data = json.load(open(path))
         print(f"  {f}: {len(data)} records")

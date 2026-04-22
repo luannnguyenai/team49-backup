@@ -1,0 +1,128 @@
+{
+    "output_filename": "p3a__cs231n__lecture_5_image_classification_with_cnns.json",
+    "run_id": "",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_5_image_classification_with_cnns",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg1",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "override_critical_kp: this recap has dominant main coverage of the pipeline and loss setup plus substantial coverage of gateway backprop, and it is marked formula_heavy with item_generation_worthiness=high.",
+            "target_kp_ids": [
+                "kp_tensorized_image_classification_pipeline",
+                "kp_optimization_objective_and_loss",
+                "kp_limits_of_linear_classifiers",
+                "kp_computation_graphs_and_backprop"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "recap",
+            "content_type_confidence": "high",
+            "override_critical_kp": true,
+            "expected_item_count": 2,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg2",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant main coverage of classical features and end-to-end learning gives clear motivational value for CNNs, and item_generation_worthiness is medium even though the unit is mostly conceptual.",
+            "target_kp_ids": [
+                "kp_classical_cv_features",
+                "kp_end_to_end_learning_for_images"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "motivation",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 2,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg3",
+            "is_worth_learning": false,
+            "salience_score": "skip",
+            "rationale": "Dominant coverage centers on the historical role of CNNs from LeNet to AlexNet, so despite a brief architecture overview this unit is mostly historical_context excluded by course_config.",
+            "target_kp_ids": [
+                "kp_cnn_architecture_pattern_and_historical_role"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "historical_context",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 0,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg4",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "This unit gives dominant main coverage of the gateway concept convolution as local template matching, adds substantial tensor-shape detail, and is marked formula_heavy with item_generation_worthiness=high.",
+            "target_kp_ids": [
+                "kp_convolution_as_local_template_matching",
+                "kp_convolution_hyperparameters_and_tensor_shapes"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg5",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "A dominant main KP on convolution hyperparameters is paired with error-prone ideas about missing nonlinearities, symmetry breaking, and padding formulas, and the section is formula_heavy with high item_generation_worthiness.",
+            "target_kp_ids": [
+                "kp_convolution_hyperparameters_and_tensor_shapes",
+                "kp_convolution_as_local_template_matching"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg6",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "This formula-heavy section has dominant main coverage of receptive fields and substantial convolution-shape coverage, plus a concrete worked example for output size, parameter count, and compute with item_generation_worthiness=high.",
+            "target_kp_ids": [
+                "kp_receptive_fields_and_strided_downsampling",
+                "kp_convolution_hyperparameters_and_tensor_shapes"
+            ],
+            "question_intent": "procedural",
+            "content_type": "worked_example",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_5_image_classification_with_cnns::seg7",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "The unit introduces a new main KP with dominant coverage of pooling and translation equivariance, and high item_generation_worthiness outweighs the brief wrap-up framing.",
+            "target_kp_ids": [
+                "kp_pooling_and_translation_equivariance"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

@@ -1,0 +1,178 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_7",
+    "lecture_title": "Lecture 7: Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA"
+  },
+  "unit": {
+    "unit_id": "local::lecture_7::seg5",
+    "course_id": "cs231n_spring_2025",
+    "name": "Shared-weight computational graphs and BPTT",
+    "description": "Explains how gradients are computed in unrolled RNNs and why truncated BPTT is used.",
+    "summary": "The lecture then explains gradient computation when an RNN has multiple time steps and possibly losses at each step [ts=1321s] [ts=1446s]. In the computational graph, every time step uses the same weight matrices; for intuition, gradients can be computed as if each time step had a copy of W, then summed because W is actually shared [ts=1453s] [ts=1523s] [ts=1551s]. Many-to-many models may sum per-step losses, while many-to-one models may use the final hidden state or pooled hidden states [ts=1475s] [ts=1578s]. Backpropagation through time is this gradient computation through repeated applications of the same weights, but long sequences require storing activations and gradients at many steps, creating GPU memory pressure [ts=1667s] [ts=1691s]. Truncated BPTT fixes a time window, passes the final hidden state forward as the next window’s initialization, and stops gradients across window boundaries [ts=1704s] [ts=1740s] [ts=1751s]. Single-output RNNs still backpropagate through earlier hidden states via upstream gradients from the final loss [ts=1782s] [ts=1819s].",
+    "key_points": [
+      {
+        "text": "RNN computational graphs reuse the same weights at every time step.",
+        "timestamp_s": 1453,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Many-to-many losses can be summed across time steps.",
+        "timestamp_s": 1475,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Gradients from different time steps are summed into one update for the shared W.",
+        "timestamp_s": 1523,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Backpropagation through time computes gradients through repeated time-step uses of the same weights.",
+        "timestamp_s": 1691,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Truncated BPTT carries hidden states forward but cuts gradients between fixed windows.",
+        "timestamp_s": 1704,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=7",
+      "start_s": 1323,
+      "end_s": 2165
+    },
+    "difficulty": 3.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 14,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "transcript_slice": "00:22:03\nyou have multiple time steps, and maybe you\n\n00:22:07\nSo that'll be a lot of what we go into right next.\n\n00:22:13\nSo this is just an example, so you\n\n00:22:20\nBasically, if you were trying to change--\n\n00:22:24\nand then train it to do another task,\n\n00:22:29\nthe weights with this.\n\n00:22:35\nbecause your hidden state is really small\n\n00:22:40\nI just wanted to do something that I could fit in the slide\n\n00:22:43\nYeah, OK, I'll go over the second row again.\n\n00:22:51\nwhen you do the matrix multiply, to get the value of the left\n\n00:22:59\nthe value, and then you're rotating it and doing the dot\n\n00:23:04\nSo for the second row that gets calculated,\n\n00:23:12\nSo this is how we move the current down to the previous\n\n00:23:17\nSo the end result of this matrix multiply\n\n00:23:27\nfrom t minus 1.\n\n00:23:33\nand so the second row of this operation and this operation\n\n00:23:40\nAnd so we're adding them together.\n\n00:23:45\nand the right is doing the current.\n\n00:23:51\nbeyond this toy example, where this weight matrix is being\n\n00:23:57\nis being multiplied by the previous hidden state.\n\n00:24:03\nthan the specific problem as well.\n\n00:24:11\nLet's look at the computational graph.\n\n00:24:16\nwe have these x1 coming in and x2,\n\n00:24:20\nWe're calculating a hidden state at each time step,\n\n00:24:27\nmatrices for each of these calculations as well.\n\n00:24:31\nwhen we're thinking about how we're computing the gradients,\n\n00:24:37\nSo we have an output for each input.\n\n00:24:43\na loss for each output, which is how correct\n\n00:24:47\nSo if we're doing this setting you have a loss at each step,\n\n00:24:55\nAnd this would be your loss across the entire input\n\n00:24:59\nAnd when we do backprop basically,\n\n00:25:08\ncan then calculate the loss per time step\n\n00:25:14\nSo if we're calculating a loss per time step,\n\n00:25:18\nSometimes you have an overall loss based\n\n00:25:23\nWe can also get basically the final gradients for each\n\n00:25:29\nYou can calculate the gradient for each time step separately,\n\n00:25:34\nSo this is how it works in practice.\n\n00:25:39\nYou could pretty probably easily see how the computational graph\n\n00:25:46\ngradient for each of these different W's.\n\n00:25:51\nfor computational purposes as a set of different W's, but then\n\n00:25:59\nbecause it's just the same weight\n\n00:26:02\nSo conceptually, you can think of it as you're just calculating\n\n00:26:08\nlike it's a different W being used,\n\n00:26:12\nyou just need to sum all the gradients that you calculate\n\n00:26:18\nIn the many to one scenario, you'll\n\n00:26:24\nAnd sometimes you'll only use the final hidden state\n\n00:26:30\nSay you're trying to do video classification,\n\n00:26:35\nbecause you might have information about the video\n\n00:26:40\nYou're going to do some pooling, like average pooling or max\n\n00:26:46\nAnd then if you have this one to many mapping like in image\n\n00:26:56\nthere was a question about how you could incorporate\n\n00:26:59\nSo you still need to have an input to your f,w\n\n00:27:07\none that's expecting input vector x,\n\n00:27:14\nstate.\n\n00:27:19\nYou could just put zeros or you could put the previous output\n\n00:27:26\nSo I explained at a high level how you do the back propagation.\n\n00:27:32\nthat you'll run into when you're trying this conceptual--\n\n00:27:37\nare very practical in terms of running out of GPU memory, which\n\n00:27:43\ntrying to train a neural network that and,\n\n00:27:47\nSo when you're computing, say, a loss at each time step,\n\n00:27:56\nit's really easy to understand.\n\n00:28:00\nat each time step in memory and then summing them all together.\n\n00:28:07\nincreases.\n\n00:28:11\nThis is called backpropagation through time,\n\n00:28:16\nbeing applied in multiple different time steps,\n\n00:28:21\ntogether.\n\n00:28:24\ntruncated back propagation through time.\n\n00:28:28\nand you can look at basically pretending\n\n00:28:35\nWe start with our h,0.\n\n00:28:41\nand our previous h value.\n\n00:28:47\nand then we can use that to calculate our output.\n\n00:28:50\nAnd we can run this for each of our examples.\n\n00:28:54\nit's relatively easy to see how you just treat the beginning\n\n00:29:00\nAnd moving to the next block, now essentially,\n\n00:29:06\nof your previous step here.\n\n00:29:11\nwas in our final step, but the gradients\n\n00:29:14\nSo we're basically batching the computational graph such\n\n00:29:19\nof these time steps at a time.\n\n00:29:23\nSo this is how you get around this relatively, I would say,\n\n00:29:32\nsequences.\n\n00:29:37\nand you can just keep doing this for the entire input sequence.\n\n00:29:46\nhow does this work, if we have just a single output\n\n00:29:50\nSo you can still calculate the gradients at each time step,\n\n00:29:59\ndependent on the time step itself,\n\n00:30:04\nrather you'll be relying on upstream gradients.\n\n00:30:09\nhere, and we have our loss that we\n\n00:30:13\nWe can calculate what is the gradient with respect\n\n00:30:19\nAnd then we have our Whh matrix to help us understand\n\n00:30:27\nto the final hidden state.\n\n00:30:34\nand understanding based on the previous hidden state\n\n00:30:37\nHow can we change this transformation matrix Whh such\n\n00:30:44\nAnd then basically just applying the gradient rule to Whh\n\n00:30:50\nAnd you're only looking at how the hidden state changed\n\n00:30:56\nSo you look at the final example here.\n\n00:31:01\ndepends on the loss, and then how the previous hidden states,\n\n00:31:06\nthe current hidden state which is given by this Whh matrix.\n\n00:31:14\nwould essentially mean that you're no longer modeling it\n\n00:31:18\nSo basically you can think of it as one layer\n\n00:31:24\nSo you would probably see worse performance\n\n00:31:33\nrecursively, you're just--\n\n00:31:37\nwhere you have a series of inputs,\n\n00:31:40\nIndependently.\n\n00:31:42\nThat would make sense for a problem\n\n00:31:45\nyou just have a set of things that you want to classify.\n\n00:31:52\nSo I think it could work if it's not a sequence,\n\n00:31:59\nI think it would not work very well because you're--\n\n00:32:06\nbut it's like you're just training\n\n00:32:10\nso it's not the way to formulate it.\n\n00:32:15\nSo we have our--\n\n00:32:21\nright here where the red dot, we can calculate\n\n00:32:27\nto our final hidden state?\n\n00:32:32\nof our loss with respect to our second to final hidden state.\n\n00:32:37\nis dependent on our previous hidden state times this weight\n\n00:32:42\nSo we can do this and we can go back and forth until here.\n\n00:32:50\nSo what is the gradient of this very final or finals--\n\n00:32:57\nBut what is the gradient of this initial hidden state\n\n00:33:05\nAnd then when we're calculating backwards,\n\n00:33:10\nsteps.\n\n00:33:13\nYou're only looking at how the hidden state transforms\n\n00:33:19\nthat's getting updated here.\n\n00:33:28\nSo you're looking at two values, both how the input affects it,\n\n00:33:33\nand the previous hidden state.\n\n00:33:38\nSo the learning still occurs for all the batches.\n\n00:33:44\nto each of your parameters in W here.\n\n00:33:53\nyou basically keep this one value.\n\n00:33:59\nhow does that change the loss?\n\n00:34:01\ncan see how all the variables feeding into this, namely\n\n00:34:06\nstep, how will that affect the variable?\n\n00:34:11\nyou only need to look at how does this hidden state here\n\n00:34:17\nSo you're looking at this division boundary.\n\n00:34:21\nis what is the gradient of the hidden state that\n\n00:34:27\nAnd then you can use that to calculate\n\n00:34:31\nis dependent on the input x and the previous.\n\n00:34:35\nbut you can imagine we just apply\n\n00:34:41\nThe only thing we're tracking is this gradient right here.\n\n00:34:49\nwhere you apply all the gradients to the weights\n\n00:34:53\nthis stuff.\n\n00:34:56\nSo the reason why this isn't a perfect calculation\n\n00:35:03\nall at once.\n\n00:35:07\njust one update at a time, but it should be--\n\n00:35:14\nYou keep one thing in memory, which\n\n00:35:22\nHow can you update the hidden state here\n\n00:35:26\nAnd we throw out all the other ones.\n\n00:35:31\nYou can apply the gradient, you do your learning rate multiply\n\n00:35:36\nYou'll also see a similar thing if you do distributed learning.\n\n00:35:43\nseparately, they will apply them all to the same set of weights\n\n00:35:49\nSo I think we have a lecture on distributed learning coming up.\n\n00:35:55\nall in the same memory at the same time,\n\n00:36:01\nYeah, it would be better if you could fit it all in memory.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_7::seg5",
+      "global_kp_id": "kp_shared_weight_computational_graph",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_7::seg5",
+      "global_kp_id": "kp_backpropagation_through_time",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_7::seg5",
+      "global_kp_id": "kp_truncated_bptt",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_shared_weight_computational_graph",
+      "name": "Shared-weight computational graph",
+      "description": "Unrolling an RNN while reusing the same parameters at every time step.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because shared-weight computational graph formalizes how unrolling an RNN while reusing the same parameters at every time step, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_backpropagation_through_time",
+      "name": "Backpropagation through time",
+      "description": "Computing gradients through the unrolled RNN and summing contributions to shared weights.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because backpropagation through time formalizes how computing gradients through the unrolled RNN and summing contributions to shared weights, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_truncated_bptt",
+      "name": "Truncated BPTT",
+      "description": "A fixed-window training approximation that passes hidden states forward but cuts gradient history.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because truncated BPTT clarifies a fixed-window training approximation that passes hidden states forward but cuts gradient history, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp8"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.65,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture07-recurrent-neural-networks_transcript.txt"
+  }
+}

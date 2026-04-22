@@ -2416,7 +2416,7 @@
     }
   ],
   "transitive_prune_summary": {
-    "source_file": "data/p5_output.json",
+    "source_file": "data/final_artifacts/cs224n_cs231n_v1/p5_output.json",
     "input_clean_edges": 94,
     "transitive_pruned_edges": 1,
     "output_clean_edges": 93,

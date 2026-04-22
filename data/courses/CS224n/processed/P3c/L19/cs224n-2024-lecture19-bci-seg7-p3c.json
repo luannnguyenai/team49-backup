@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::cs224n-2024-lecture19-bci::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "The transcript provides enough grounded evidence to generate 2 reinforcement questions about future BCIs, inner-speech decoding, and neuroethics.",
+  "question_bank": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is inner-speech decoding highlighted as an important future direction?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Attempted-speech systems are still slower than natural conversation, so inner speech could support more effortless communication",
+        "Inner speech removes every ethical concern from BCIs",
+        "Inner speech needs no brain recordings",
+        "Attempted-speech systems already exceed natural speaking speed"
+      ],
+      "answer_index": 0,
+      "explanation": "The motivation is speed and naturalness: current attempted-speech BCIs are impressive but still slower than ordinary conversation, so decoding inner speech could reduce effort and improve communication rate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "60 to 70 words per minute",
+          "150 words per minute"
+        ],
+        "timestamps": [
+          "01:07:29",
+          "01:07:31"
+        ]
+      }
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which concern is presented as a major ethical challenge for future inner-speech BCIs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They could reveal thoughts or memories that a person did not intend to express",
+        "They can work only with 3D avatars",
+        "They eliminate the need for consent procedures",
+        "They guarantee zero word error rate"
+      ],
+      "answer_index": 0,
+      "explanation": "Inner-speech decoding raises special privacy and consent issues because the boundary between intended communication and private thought becomes much harder to protect.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "private memories",
+          "ethical questions"
+        ],
+        "timestamps": [
+          "01:10:00",
+          "01:11:40"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "global_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "global_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "role": "primary"
+    }
+  ]
+}

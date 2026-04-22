@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_7::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for distinguishing sequence-modeling regimes and RNN motivation. The concepts are explicitly described in words, so no clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-7-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which task is a one-to-many sequence modeling example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "An image mapped to a variable-length caption",
+        "A video mapped to one class label",
+        "A fixed vector mapped to another fixed vector",
+        "A set of frames mapped to one average embedding"
+      ],
+      "answer_index": 0,
+      "explanation": "One-to-many starts from one fixed input and generates a sequence as output, such as turning an image into a caption.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sequence_modeling_regimes",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "image captioning",
+          "variable length caption"
+        ],
+        "timestamps": [
+          "00:05:56",
+          "00:06:11"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-7-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which scenario is many-to-one sequence modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "One image produces one caption token at a time",
+        "Multiple video frames produce one class label",
+        "Each frame produces one label at the same time step",
+        "A word sequence produces an equally long tag sequence"
+      ],
+      "answer_index": 1,
+      "explanation": "Many-to-one uses a sequence as input and collapses it into one output, such as classifying an entire video from multiple frames.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sequence_modeling_regimes",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "many to one",
+          "what is this a video of"
+        ],
+        "timestamps": [
+          "00:06:17",
+          "00:06:25"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-7-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the aligned many-to-many setting often used first to explain RNN mechanics?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It guarantees the shortest possible sequences.",
+        "It makes every hidden state independent.",
+        "Each input step has a corresponding output step.",
+        "It removes the need for hidden states."
+      ],
+      "answer_index": 2,
+      "explanation": "Aligned many-to-many is easier to reason about because the model produces one output for each input time step.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sequence_modeling_regimes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "for every single input",
+          "you have one output"
+        ],
+        "timestamps": [
+          "00:06:59",
+          "00:07:04"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-7-seg2-q1",
+      "global_kp_id": "kp_sequence_modeling_regimes",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg2-q2",
+      "global_kp_id": "kp_sequence_modeling_regimes",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg2-q3",
+      "global_kp_id": "kp_sequence_modeling_regimes",
+      "role": "primary"
+    }
+  ]
+}

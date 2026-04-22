@@ -1,0 +1,278 @@
+{
+  "unit_id": "local::lecture14-nlg::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 6,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture14-nlg-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why introduce sampling into open-ended decoding?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To avoid always following a single highest-probability continuation.",
+        "To make the model ignore its next-token distribution.",
+        "To force every generated sequence to match a reference exactly.",
+        "To remove all randomness from generation."
+      ],
+      "answer_index": 0,
+      "explanation": "Open-ended text often has many valid continuations. Sampling lets the model choose among plausible options instead of always taking the same argmax path.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sampling_based_decoding_controls",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "stochasticity to decoding",
+          "sample"
+        ],
+        "timestamps": [
+          "00:22:39",
+          "00:22:49"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can vanilla sampling from the full vocabulary produce bad tokens?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Language distributions are heavy-tailed, so many low-probability bad tokens can have substantial total mass.",
+        "The top token always has probability zero.",
+        "The model cannot assign probabilities to rare tokens.",
+        "Vanilla sampling only chooses tokens not in the vocabulary."
+      ],
+      "answer_index": 0,
+      "explanation": "Even if each bad token is unlikely, there may be many of them. Their combined probability can be large enough that unconstrained sampling sometimes picks one.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sampling_based_decoding_controls",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "longtails",
+          "high chance"
+        ],
+        "timestamps": [
+          "00:23:30",
+          "00:24:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does top-k sampling do?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It samples only from the k highest-probability tokens after zeroing out the rest.",
+        "It always picks the kth most likely token.",
+        "It samples from all tokens whose cumulative probability exceeds k.",
+        "It reranks complete sequences using a separate classifier."
+      ],
+      "answer_index": 0,
+      "explanation": "Top-k truncates the next-token distribution to a fixed-size candidate set. This reduces tail risk but can be too restrictive or too permissive depending on the distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sampling_based_decoding_controls",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "top-k sampling",
+          "top-k tokens"
+        ],
+        "timestamps": [
+          "00:24:16",
+          "00:24:22"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is top-p, or nucleus, sampling often more adaptive than fixed top-k sampling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It chooses the smallest candidate set whose cumulative probability mass passes a threshold.",
+        "It always uses exactly the same number of candidate tokens.",
+        "It bans the most likely token whenever the distribution is sharp.",
+        "It replaces probabilities with uniform scores across the vocabulary."
+      ],
+      "answer_index": 0,
+      "explanation": "Top-p adapts the number of options to the shape of the distribution. A sharp distribution may need few tokens, while a flatter distribution may need more viable candidates.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sampling_based_decoding_controls",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "top-p",
+          "adaptive k"
+        ],
+        "timestamps": [
+          "00:29:09",
+          "00:29:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does temperature affect a next-token distribution?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Higher temperature flattens the distribution, while lower temperature sharpens it toward greedy decoding.",
+        "Higher temperature removes all low-probability tokens from consideration.",
+        "Lower temperature makes every token equally likely.",
+        "Temperature changes only the length of the output, not token probabilities."
+      ],
+      "answer_index": 0,
+      "explanation": "Temperature rescales logits before softmax. Increasing it spreads probability mass across more tokens, while decreasing it concentrates mass on the most likely tokens.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sampling_based_decoding_controls",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "temperature",
+          "flattens the distribution"
+        ],
+        "timestamps": [
+          "00:33:29"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q6",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the basic idea of reranking sampled candidates?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Generate multiple candidates, score them with quality criteria, and choose the best-scoring one.",
+        "Generate one token greedily and never revise the sequence.",
+        "Replace the language model with a fixed n-gram blocking rule.",
+        "Choose the shortest candidate regardless of quality."
+      ],
+      "answer_index": 0,
+      "explanation": "Reranking separates generation from selection. Sampling creates diverse candidates, and additional scoring functions can prefer outputs with better coherence, style, factuality, or consistency.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reranking_sampled_candidates",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reranking",
+          "sample multiple candidates"
+        ],
+        "timestamps": [
+          "00:35:50",
+          "00:36:58"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture14-nlg-seg4-q1",
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q2",
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q3",
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q4",
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q5",
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg4-q6",
+      "global_kp_id": "kp_reranking_sampled_candidates",
+      "role": "primary"
+    }
+  ]
+}

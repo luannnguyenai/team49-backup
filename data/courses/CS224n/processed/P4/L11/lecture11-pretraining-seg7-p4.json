@@ -1,0 +1,517 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is in-context learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Solving a task from demonstrations in the prompt without updating model parameters.",
+        "Fine-tuning all parameters on a labeled dataset for many epochs.",
+        "Training a tokenizer by merging frequent character pairs.",
+        "Masking spans and training a decoder to reconstruct them."
+      ],
+      "answer_index": 0,
+      "explanation": "In-context learning happens at inference time. The prompt provides examples or instructions, and the model continues the pattern without a gradient update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_in_context_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "in-context learning",
+          "without any sort of fine-tuning"
+        ],
+        "timestamps": [
+          "01:07:32",
+          "01:07:14"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the mechanism behind in-context learning still an open question?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is unclear how much comes from memorized training patterns versus genuine adaptation to the current prompt.",
+        "It has been proven to use no information from the prompt.",
+        "It only occurs in models that have never seen language data.",
+        "It always requires updating the model weights secretly."
+      ],
+      "answer_index": 0,
+      "explanation": "A large model may recognize familiar patterns from pretraining, but it may also infer a new mapping from examples in the current context. Separating those explanations is difficult.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_in_context_learning",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not totally sure",
+          "from the context"
+        ],
+        "timestamps": [
+          "01:10:14",
+          "01:10:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What lesson is illustrated by the Chinchilla-style scaling discussion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Better performance can require balancing model size with enough training tokens, not simply maximizing parameters.",
+        "The largest parameter count is always optimal regardless of data.",
+        "Training data matters only for small models, not large models.",
+        "A model's tokenizer determines all scaling behavior."
+      ],
+      "answer_index": 0,
+      "explanation": "Compute is spent on both parameters and training data. A model with fewer parameters but many more training tokens can outperform a larger, undertrained model.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "less than half the size",
+          "works better"
+        ],
+        "timestamps": [
+          "01:11:27",
+          "01:11:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can chain-of-thought prompting improve performance on reasoning tasks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It encourages the model to generate intermediate steps that act like a scratchpad before the final answer.",
+        "It changes the model's weights so it no longer needs a prompt.",
+        "It removes all examples from the prompt to reduce context length.",
+        "It forces the model to output only a single token."
+      ],
+      "answer_index": 0,
+      "explanation": "Generating intermediate steps gives the model more tokens over which to represent partial computations. That can make multi-step problems easier than jumping directly to an answer.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sequence of steps",
+          "answer is"
+        ],
+        "timestamps": [
+          "01:12:51",
+          "01:12:59"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the practical motivation for continuing pretraining on in-domain unlabeled text before supervised fine-tuning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can adapt the model's general language knowledge toward the target domain before labels are used.",
+        "It replaces the need for a task-specific objective in all cases.",
+        "It guarantees the model will forget all biases from pretraining.",
+        "It turns a decoder-only model into a bidirectional encoder without changing architecture."
+      ],
+      "answer_index": 0,
+      "explanation": "Domain-adaptive pretraining uses raw text from the target area to shift the model toward that distribution. Fine-tuning can then specialize on the labeled task from a better domain-specific initialization.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Don’t Stop Pretraining",
+          "biases"
+        ],
+        "timestamps": [
+          "01:16:49",
+          "01:14:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "global_kp_id": "kp_in_context_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "global_kp_id": "kp_in_context_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "global_kp_id": "kp_in_context_learning",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is in-context learning\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is the mechanism behind in-context learning still an open question\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What lesson is illustrated by the Chinchilla-style scaling discussion\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can chain-of-thought prompting improve performance on reasoning tasks\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the practical motivation for continuing pretraining on in-domain unlabeled text before supervised fine-tuning\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is in-context learning\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is the mechanism behind in-context learning still an open question\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What lesson is illustrated by the Chinchilla-style scaling discussion\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can chain-of-thought prompting improve performance on reasoning tasks\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the practical motivation for continuing pretraining on in-domain unlabeled text before supervised fine-tuning\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

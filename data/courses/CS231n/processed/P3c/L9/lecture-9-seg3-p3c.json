@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_9::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "Phần transcript nêu rõ detection là bài toán phân loại cộng định vị và giải thích progression từ sliding window tới Fast R-CNN; không cần clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Một bộ phát hiện đối tượng cơ bản cần dự đoán gì ngoài nhãn lớp?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Các tọa độ bounding box như x, y, w, h.",
+        "Bản đồ attention của toàn bộ ảnh.",
+        "Chỉ một saliency map cho lớp đúng.",
+        "Ma trận Jacobian của từng pixel."
+      ],
+      "answer_index": 0,
+      "explanation": "Object detection không chỉ trả lời vật thể là gì mà còn ở đâu. Vì vậy mô hình phải xuất cả điểm số lớp lẫn tham số vị trí và kích thước của hộp bao.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "class scores",
+          "coordinates of the box"
+        ],
+        "timestamps": [
+          "00:34:40",
+          "00:34:52"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao cách quét sliding window trên mọi bounding box ứng viên không mở rộng tốt cho cảnh nhiều đối tượng?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì số lượng hộp cần kiểm tra rất lớn nên chi phí tính toán tăng mạnh.",
+        "Vì sliding window không thể dùng CNN.",
+        "Vì phương pháp này chỉ hoạt động khi ảnh có đúng một đối tượng.",
+        "Vì nó không thể xuất xác suất lớp cho từng vùng."
+      ],
+      "answer_index": 0,
+      "explanation": "Khi xét nhiều vị trí, nhiều kích thước và nhiều tỷ lệ, số hộp ứng viên bùng nổ rất nhanh. Điều đó làm việc chạy mô hình trên mọi hộp trở nên quá tốn kém.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "huge problem here",
+          "many number of bounding boxes"
+        ],
+        "timestamps": [
+          "00:36:35",
+          "00:37:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Fast R-CNN cải thiện R-CNN chủ yếu bằng cách nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chia sẻ một lần tính convolution trên toàn ảnh rồi đọc proposal từ feature map.",
+        "Loại bỏ hoàn toàn region proposals khỏi pipeline.",
+        "Dùng transformer decoder với learned object queries.",
+        "Dự đoán từng pixel thay cho bounding box."
+      ],
+      "answer_index": 0,
+      "explanation": "R-CNN gốc phải chạy CNN cho từng proposal nên rất chậm. Fast R-CNN giảm chi phí bằng cách tính đặc trưng convolution một lần trên toàn ảnh rồi trích vùng proposal từ feature map đó.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "feature map",
+          "look at those regions"
+        ],
+        "timestamps": [
+          "00:40:34",
+          "00:40:34"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q1",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q2",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg3-q3",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    }
+  ]
+}

@@ -1,0 +1,5869 @@
+Title: Stanford CS224N NLP with Deep Learning | 2023 | Lec. 19 - Model Interpretability & Editing, Been Kim
+URL: https://www.youtube.com/watch?v=cd3pRpEtjLs
+Video ID: cd3pRpEtjLs
+============================================================
+
+00:00:05
+Today I'm delighted to introduce
+as our final guest speaker Been
+
+00:00:10
+Kim.
+
+00:00:11
+Been Kim is a staff research
+scientist at Google Brain.
+
+00:00:15
+If you're really
+into Googleology--
+
+00:00:18
+those funny words at the
+beginning like staff,
+
+00:00:20
+sort of says how
+senior you are--
+
+00:00:22
+then that means that Been's
+a good research scientist.
+
+00:00:27
+So I discovered at lunch
+today that Been's started out
+
+00:00:32
+studying mechanical engineering
+at Seoul National University,
+
+00:00:36
+but she moved on to--
+
+00:00:38
+I don't know if it's
+better things or not.
+
+00:00:40
+But she moved on to computer
+science and did her PhD at MIT.
+
+00:00:45
+And there, she started working
+on the interpretability
+
+00:00:48
+and explainability of
+machine learning models.
+
+00:00:52
+I think she'll be talking
+about some different parts
+
+00:00:55
+of her work.
+
+00:00:56
+But a theme that she's had in
+some of her recent work that I
+
+00:01:00
+find especially appealing
+as an NLP person
+
+00:01:04
+is the idea that
+we should be using
+
+00:01:07
+higher level human interpretable
+languages for communication
+
+00:01:12
+between people and machines.
+
+00:01:15
+So welcome, Been.
+
+00:01:16
+Looking forward to your talk.
+
+00:01:18
+And go for it.
+
+00:01:20
+Thank you.
+
+00:01:21
+Thank you.
+
+00:01:22
+[APPLAUSE]
+
+00:01:25
+Thanks for having me.
+
+00:01:26
+It's an honor to be here.
+
+00:01:28
+It's the rainiest Stanford
+I've ever seen last night.
+
+00:01:32
+I got here last night.
+
+00:01:33
+But then I live in Seattle,
+so this is pretty common.
+
+00:01:36
+So I still was able to
+see the blue sky today.
+
+00:01:39
+And I was like, this works.
+
+00:01:40
+I really like it here.
+
+00:01:41
+So today I'm going to
+share some of my dreams,
+
+00:01:45
+"Chasing my dreams to
+communicate with machines."
+
+00:01:48
+So if you're in this
+class, you probably agree--
+
+00:01:52
+you don't have to-- that large
+language models and generative
+
+00:01:55
+models are pretty cool.
+
+00:01:57
+They're impressive.
+
+00:01:58
+But you may also agree
+that they're a little bit
+
+00:02:01
+frightening.
+
+00:02:02
+Not just because
+they're impressive,
+
+00:02:04
+they're doing a really
+good job, but also, we're
+
+00:02:07
+not quite sure where we're
+going with this technology.
+
+00:02:11
+In 10 years out, we
+will look back and say,
+
+00:02:14
+that technology
+was net positive?
+
+00:02:16
+Or we will say, ah,
+that was catastrophic.
+
+00:02:19
+We didn't know that
+that would happen.
+
+00:02:22
+Ultimately, what
+I would like to do
+
+00:02:25
+or maybe hopefully
+what we all want to do
+
+00:02:28
+is to have this technology
+benefit us humans.
+
+00:02:32
+I know in 10 years'
+time or maybe--
+
+00:02:34
+well, 20 years or earlier,
+he's going to ask me.
+
+00:02:37
+He's going to be like, mom,
+did you work on this AI stuff?
+
+00:02:41
+I watched some of your talks.
+
+00:02:43
+And did you know that
+how this will profoundly
+
+00:02:46
+change our lives?
+
+00:02:48
+And what did you do about that?
+
+00:02:51
+And I have to answer
+that question.
+
+00:02:53
+And I really hope that I have
+some good things to say to him.
+
+00:02:59
+So my initial thought and
+still so or current thought
+
+00:03:04
+is that if we want our ultimate
+goal to benefit humanity,
+
+00:03:08
+why not directly
+optimize for it?
+
+00:03:10
+Why wait?
+
+00:03:13
+So how can we benefit?
+
+00:03:15
+There's lots of different
+ways we can benefit.
+
+00:03:18
+But one way we can
+benefit is to treat
+
+00:03:20
+this like a colleague,
+a colleague who
+
+00:03:23
+are really good at something.
+
+00:03:26
+This colleague is
+not perfect, but it's
+
+00:03:28
+good at something
+enough that you want
+
+00:03:30
+to learn something from them.
+
+00:03:32
+One difference is,
+though, in this case
+
+00:03:34
+is that this colleague
+is kind of weird.
+
+00:03:37
+This colleague might have
+very different values.
+
+00:03:40
+It might have very different
+experiences in the world.
+
+00:03:44
+It may not care about
+surviving as much as we do.
+
+00:03:47
+Maybe mortality isn't really
+a thing for this colleague.
+
+00:03:52
+So you have to navigate
+that in our conversation.
+
+00:03:57
+So what do you do when
+you first meet somebody?
+
+00:03:59
+There's someone so different.
+
+00:04:00
+What do you do?
+
+00:04:01
+You try to have a conversation
+to figure out how do you
+
+00:04:05
+do what you do, how are you
+solving decades-old protein
+
+00:04:09
+folding problem?
+
+00:04:12
+How are you beating the world
+Go champion so easily it seems?
+
+00:04:17
+Are you using the same
+language, the science language
+
+00:04:20
+that we use, atoms, molecules?
+
+00:04:23
+Or do you think about the
+world in a very different way?
+
+00:04:27
+And more importantly,
+how can we work together?
+
+00:04:32
+I have one area that I
+really want to talk to.
+
+00:04:35
+And it's AlphaGo.
+
+00:04:36
+So AlphaGo beat world Go
+champion Lee Sedol in 2016.
+
+00:04:40
+Lee Sedol is from South Korea.
+
+00:04:42
+I'm from South Korea.
+
+00:04:43
+I watched every single match.
+
+00:04:44
+It was such a big deal in South
+Korea and worldwide, I hope.
+
+00:04:48
+And in one of the
+matches, AlphaGo
+
+00:04:51
+played this move called Move 37.
+
+00:04:53
+How many people watched
+AlphaGo matches,
+
+00:04:57
+and how many people
+remember Move 37?
+
+00:05:00
+Yeah, a few people, right?
+
+00:05:02
+And I remember the
+9-dan commentator
+
+00:05:05
+who's been talking a lot
+throughout the matches suddenly
+
+00:05:07
+got really quiet.
+
+00:05:09
+And he said, hm, that's
+a very strange move.
+
+00:05:14
+And I knew then that
+something really interesting
+
+00:05:17
+has just happened
+in front of my eyes,
+
+00:05:19
+that this is going
+to change something,
+
+00:05:21
+this AlphaGo has made
+something that we're
+
+00:05:23
+going to remember forever.
+
+00:05:25
+And sure enough, this
+move turned around
+
+00:05:27
+the game for AlphaGo
+and leading AlphaGo
+
+00:05:29
+to winning one of the matches.
+
+00:05:32
+So Go players today continue
+to analyze this move
+
+00:05:36
+and still discuss.
+
+00:05:37
+People talk about, this is not
+the move a human would fathom.
+
+00:05:41
+So the question
+is, how did AlphaGo
+
+00:05:44
+know this is a good move?
+
+00:05:49
+My dream is to
+learn something new
+
+00:05:52
+by communicating the
+machine with machines
+
+00:05:54
+and having a conversation
+and such that humanity
+
+00:05:57
+will gain some new angle
+to our important problems
+
+00:06:01
+like medicine and
+science and many others.
+
+00:06:04
+And this is not just about
+discovering new things.
+
+00:06:08
+If you think about
+reward hacking,
+
+00:06:10
+you have to have a meaningful
+conversation with somebody
+
+00:06:14
+to truly figure out
+what their true goal is.
+
+00:06:17
+So in a way,
+solving this problem
+
+00:06:20
+is a superset of
+solving AI safety too.
+
+00:06:26
+So how do we have
+this conversation?
+
+00:06:29
+Conversation assumes that we
+share some common vocabulary
+
+00:06:32
+between to exchange meaning
+and ultimately the knowledge.
+
+00:06:36
+And naturally, a
+representation plays a key role
+
+00:06:39
+in this conversation.
+
+00:06:40
+On the left-- and we can
+visualize this on the left.
+
+00:06:43
+We say, this is a
+representational space
+
+00:06:46
+of what humans know.
+
+00:06:47
+On the right, what
+machines know.
+
+00:06:49
+Here in the left circle,
+there will be something
+
+00:06:52
+like, this dog is fluffy.
+
+00:06:53
+And you know what that
+means because we all share
+
+00:06:56
+somewhat similar vocabulary.
+
+00:06:59
+But on the right, we have
+something like Move 37,
+
+00:07:02
+where we humans yet to
+have a representation for.
+
+00:07:10
+So how do we have
+this conversation?
+
+00:07:12
+Our representation
+space needs overlap.
+
+00:07:14
+And the more overlap we
+have, the better conversation
+
+00:07:17
+we're going to have.
+
+00:07:19
+Humans are all good at
+learning new things.
+
+00:07:21
+Like, here everyone is
+learning something new.
+
+00:07:24
+So we can expand what we
+know by learning new concepts
+
+00:07:27
+and vocabularies.
+
+00:07:29
+And doing so, I
+believe, will help
+
+00:07:32
+us to build machines
+that can better align
+
+00:07:34
+with our values and our goals.
+
+00:07:39
+So this is the talk that I gave.
+
+00:07:40
+If you're curious
+about some of the work
+
+00:07:42
+we're doing towards this
+direction, I highly recommend.
+
+00:07:44
+It's a YouTube video.
+
+00:07:45
+ICLR Keynote, half an hour.
+
+00:07:47
+You can fast-- do a fast speed.
+
+00:07:50
+But today I'm going to talk
+more about my hopes and dreams.
+
+00:07:54
+And hopefully, at the end of the
+day, your hopes and dreams too.
+
+00:07:58
+So first of all, I'm just
+going to set the expectation.
+
+00:08:03
+So at the end of
+this talk, we still
+
+00:08:05
+don't know how the
+Move 37 is made, OK?
+
+00:08:08
+Sorry, that's going
+to take a while.
+
+00:08:12
+In fact, the first
+part of this talk
+
+00:08:15
+is going to be about
+how we moved backwards
+
+00:08:18
+in this progress
+in terms of making
+
+00:08:22
+this progress in our
+journey and still very, very
+
+00:08:25
+small portion of our entire
+journey towards understanding
+
+00:08:28
+Move 37.
+
+00:08:31
+And, of course, this
+journey wouldn't
+
+00:08:33
+be like a singular path.
+
+00:08:34
+There will be lots of
+different branches coming in.
+
+00:08:38
+Core ideas like transformer
+helped many domains across.
+
+00:08:42
+There will be similar here.
+
+00:08:43
+So I'm going to
+talk in the part two
+
+00:08:46
+some of our work
+on understanding
+
+00:08:48
+emerging behaviors in
+reinforcement learning.
+
+00:08:51
+And all of the techniques
+that I'm going to talk about
+
+00:08:54
+is going to be in principle
+applicable to NLP.
+
+00:08:59
+So coming back to our
+hopes and dreams, Move 37--
+
+00:09:04
+so let's first think about how
+we might realize this dream.
+
+00:09:09
+And taking a step
+back, we have to ask,
+
+00:09:11
+do we have tools
+to first estimate
+
+00:09:14
+what even machines know?
+
+00:09:17
+There has been many developments
+in machine learning last decade
+
+00:09:20
+now to develop tools to
+understand and estimate
+
+00:09:24
+this purple circle.
+
+00:09:26
+So is that accurate?
+
+00:09:28
+Unfortunately, many
+recent research
+
+00:09:30
+showed that there is a huge gap
+between what machines actually
+
+00:09:35
+know and what we think
+the machines know.
+
+00:09:39
+And identifying and
+bridging this gap
+
+00:09:42
+is important because these
+tools will form a basis
+
+00:09:45
+for understanding that Move 37.
+
+00:09:50
+So what are these tools?
+
+00:09:51
+How many people are
+familiar with saliency maps?
+
+00:09:55
+A lot.
+
+00:09:55
+But if you don't I'll have
+to explain what it is.
+
+00:09:57
+So saliency map is one of
+the popular interpretability
+
+00:10:01
+methods.
+
+00:10:02
+For simplicity, let's
+say on ImageNet, you
+
+00:10:04
+have an image like this.
+
+00:10:06
+You have a bird.
+
+00:10:06
+The explanation is going to
+take a form of the same image
+
+00:10:10
+but where each pixel is
+num with-- associated
+
+00:10:13
+with a number that
+is supposed to imply
+
+00:10:18
+some importance of that pixel
+for prediction of this image.
+
+00:10:23
+And one definition
+of that importance
+
+00:10:25
+is that that number indicates
+how the function looks
+
+00:10:29
+like around this pixel.
+
+00:10:30
+So for example, if I have
+a pixel ixj maybe around xj
+
+00:10:35
+the function moves up
+like the yellow curve.
+
+00:10:38
+Or function is flat, or
+function is going down
+
+00:10:40
+like the green curve.
+
+00:10:43
+And so if it's flat like a
+blue curve or a red curve,
+
+00:10:47
+maybe that feature is
+irrelevant to predicting bird.
+
+00:10:50
+Maybe it's going up.
+
+00:10:51
+Then it's maybe more
+important because the value
+
+00:10:54
+of x increases and the
+function value goes up,
+
+00:10:56
+function value here
+like a prediction value.
+
+00:11:01
+So let's think about
+what are the few ways why
+
+00:11:04
+this gap might exist.
+
+00:11:06
+There are a few
+ways not exhaustive.
+
+00:11:07
+They overlap a little bit but
+helpful for us to think about.
+
+00:11:11
+Maybe assumptions are wrong.
+
+00:11:12
+So this alien, again--
+
+00:11:14
+these machines that we train--
+
+00:11:16
+works in a completely
+different-- perhaps completely
+
+00:11:18
+different representational
+space, very different
+
+00:11:20
+experiences about the world.
+
+00:11:22
+So assuming that
+it sees the world
+
+00:11:25
+that we do just like we do, like
+having the Gestalt phenomenon,
+
+00:11:28
+there are few thoughts, humans
+have tendency to connect them.
+
+00:11:32
+Maybe machines have that too.
+
+00:11:34
+Maybe not.
+
+00:11:35
+So maybe our assumptions about
+these machines are wrong.
+
+00:11:39
+Maybe our expectations
+are mismatched.
+
+00:11:41
+We thought it was doing x,
+but it was actually doing y.
+
+00:11:45
+Or maybe it's beyond us.
+
+00:11:48
+Maybe it's showing something
+superhuman that humans just
+
+00:11:51
+can't understand.
+
+00:11:55
+I'm going to dig
+deeper into one of--
+
+00:11:57
+some of these are our work.
+
+00:11:59
+This is more recent work.
+
+00:12:01
+So again, coming back
+to the earlier story
+
+00:12:03
+about saliency map,
+we're going to play
+
+00:12:05
+with some of these methods.
+
+00:12:08
+Now, in 2018, we stumbled
+upon this phenomenon
+
+00:12:14
+that was quite
+shocking, which was
+
+00:12:16
+that we were actually trying
+to write some different paper.
+
+00:12:18
+Again, paper of
+Chris Yan's here.
+
+00:12:20
+But we were testing
+something, and we
+
+00:12:23
+realized that trained
+network and untrained network
+
+00:12:26
+has the same very
+similar saliency map.
+
+00:12:29
+In other words,
+random prediction
+
+00:12:31
+and meaningful prediction were
+giving me the same explanation.
+
+00:12:35
+So that was puzzling.
+
+00:12:37
+We thought we had a bug,
+but it turned out we didn't.
+
+00:12:40
+It actually is
+indistinguishable qualitatively
+
+00:12:44
+and quantitatively.
+
+00:12:45
+So that was shocking.
+
+00:12:47
+But then we wondered,
+maybe this is one-off case.
+
+00:12:51
+Maybe it still works
+somehow in practice.
+
+00:12:56
+So we tested that in
+a follow-up paper.
+
+00:12:58
+OK, what if the model had an
+error, one of these errors?
+
+00:13:02
+Maybe it has a labeling error.
+
+00:13:04
+Maybe it has a
+spurious correlation.
+
+00:13:06
+Maybe it had out-of-distribution
+at test time.
+
+00:13:09
+If we intentionally
+insert these bugs,
+
+00:13:12
+can explanation
+tell us that there's
+
+00:13:14
+something wrong with the model?
+
+00:13:17
+It turns out that that's
+also not quite true.
+
+00:13:21
+You might think that, oh, maybe
+it's a spurious correlation.
+
+00:13:24
+Another follow-up also showed
+that this is also not the case.
+
+00:13:28
+So we were disappointed.
+
+00:13:31
+But then still we
+say, maybe there's
+
+00:13:36
+no theoretical proof of this.
+
+00:13:38
+Maybe this is again
+a lab-setting test.
+
+00:13:40
+We had grad students
+to test this system.
+
+00:13:44
+Maybe there's still some hope.
+
+00:13:48
+So this is more recent work
+where we theoretically prove
+
+00:13:51
+that some of these methods,
+very popular methods,
+
+00:13:54
+cannot do better than random.
+
+00:13:56
+So I'm going to talk a
+little bit about that.
+
+00:14:00
+I'm missing one person--
+
+00:14:01
+I'm missing Pang Wei in the
+author list, I just realized.
+
+00:14:04
+This is also work with Pang Wei.
+
+00:14:07
+So let's first talk
+about our expectation.
+
+00:14:10
+What is our expectation
+about this tool?
+
+00:14:13
+Now, the original paper that
+developed this method, IG
+
+00:14:17
+and SHAP, talks
+about how IG can be
+
+00:14:21
+used for accounting the
+contributions of each feature.
+
+00:14:25
+So what that means is
+that when the tool assigns
+
+00:14:27
+zero attribution to a pixel,
+we're going to say, OK, well,
+
+00:14:30
+pixel is unused by the function.
+
+00:14:33
+And that means that
+f will be insensitive
+
+00:14:36
+if I perturb this x.
+
+00:14:40
+And in fact, this is how
+it's been used in practice.
+
+00:14:43
+This is a paper
+published in Nature.
+
+00:14:45
+They use a SHAP to figure
+out the eligibility
+
+00:14:49
+criteria in a medical trial.
+
+00:14:53
+What we show in this
+work is that none
+
+00:14:55
+of these inferences that seemed
+pretty natural were true.
+
+00:15:00
+And in fact, just because
+popular attribution methods
+
+00:15:03
+tell you anything
+about attribution is x,
+
+00:15:06
+you cannot conclude anything
+about the actual model
+
+00:15:10
+behavior.
+
+00:15:12
+So how does that work?
+
+00:15:15
+How many people here
+do theory proof?
+
+00:15:20
+A few.
+
+00:15:21
+Great.
+
+00:15:21
+I'll tell you, I learned
+about theory proving
+
+00:15:24
+from this project as well.
+
+00:15:25
+So I'll tell you
+like the way that we
+
+00:15:28
+pursued this particular
+work is that first,
+
+00:15:30
+think about this problem.
+
+00:15:31
+And we're going to formulate
+into some other problem
+
+00:15:34
+that we know how to solve.
+
+00:15:36
+So in this case, we formulate
+this as hypothesis testing
+
+00:15:40
+because once you formulated
+the hypothesis testing
+
+00:15:43
+yes or no, there are lots
+of tools in statistics
+
+00:15:45
+you can use to prove this.
+
+00:15:47
+So what is hypothesis?
+
+00:15:49
+The hypothesis is
+that I'm a user.
+
+00:15:52
+I got an attribution value
+from one of these tools.
+
+00:15:55
+And I have a mental
+model of, ah,
+
+00:15:58
+this feature is important
+or maybe not important.
+
+00:16:01
+Then the hypothesis is that,
+whether that's true or not.
+
+00:16:05
+And what we showed is that given
+whatever hypothesis you may
+
+00:16:09
+have, you cannot do better than
+random guessing in validating
+
+00:16:15
+or invalidating this
+hypothesis testing.
+
+00:16:17
+And that means yes,
+sometimes it's right.
+
+00:16:20
+But you don't do hypothesis
+testing if you cannot validate
+
+00:16:24
+yes or no.
+
+00:16:24
+You just don't.
+
+00:16:25
+Because like, what's
+the point of doing it
+
+00:16:27
+if you just don't know if it's
+as good as random guessing,
+
+00:16:30
+right?
+
+00:16:32
+And the result is that yes--
+
+00:16:35
+for this graph, it's just a
+visualization of our result
+
+00:16:38
+if you plot true negative
+and true positive.
+
+00:16:41
+And the line is random
+guessing because this
+
+00:16:43
+is the worst method.
+
+00:16:44
+That's the best method.
+
+00:16:45
+All the equal
+distance is this line.
+
+00:16:47
+Methods that we know,
+SHAP and IG, all
+
+00:16:50
+falls under this line
+of random guessing.
+
+00:16:55
+Oh, it's bad news.
+
+00:16:56
+But maybe this still works
+in practice for some reason.
+
+00:17:02
+Maybe there were
+some assumptions
+
+00:17:03
+that we had that didn't
+quite meet in the practice.
+
+00:17:07
+So does this phenomenon
+hold in practice?
+
+00:17:11
+The answer is yes.
+
+00:17:13
+We now have more image graphs
+and more bigger models,
+
+00:17:16
+but here we test two
+concrete end tasks
+
+00:17:19
+that people care about
+in interpretability
+
+00:17:21
+or use these methods
+to do, recourse
+
+00:17:24
+or spurious correlation.
+
+00:17:25
+So recourse, for those
+who are not familiar,
+
+00:17:28
+is you're getting
+a loan, and you
+
+00:17:30
+wonder whether if
+I'm older, I would
+
+00:17:32
+have a high chance
+of getting a loan.
+
+00:17:34
+So I tweak this
+one feature and see
+
+00:17:37
+if my value goes up or down.
+
+00:17:39
+Very reasonable task that
+people do all the time,
+
+00:17:41
+pretty significant
+implications socially.
+
+00:17:45
+So for two of these concrete
+end tasks, both of them
+
+00:17:50
+boil down to this
+hypothesis testing framework
+
+00:17:53
+that I talked about.
+
+00:17:54
+They are all all around
+the random guessing line
+
+00:17:57
+or worse than random guessing.
+
+00:18:01
+So you might say, oh, no.
+
+00:18:02
+[CHUCKLES] This is not good.
+
+00:18:03
+A lot of people are using
+these tools, so what do we do?
+
+00:18:06
+We have very simple
+idea about this.
+
+00:18:10
+So people like
+developing complex tools.
+
+00:18:15
+And I really hope you're
+not one of those people
+
+00:18:18
+because a lot of times simple
+methods work, Occam's razor.
+
+00:18:23
+But also, simple
+methods are elegant.
+
+00:18:25
+There is a reason perhaps a
+lot of times why they work.
+
+00:18:28
+They're simple, that
+you can understand them,
+
+00:18:31
+they make sense.
+
+00:18:32
+So let's try that idea here.
+
+00:18:35
+So again, your goal is to
+estimate a function shape.
+
+00:18:38
+What do you do?
+
+00:18:39
+Well, the simplest
+thing you do is
+
+00:18:41
+you have a point of interest,
+you sample around that point,
+
+00:18:45
+and evaluate the function
+around that point.
+
+00:18:48
+If it goes up, maybe
+function is going up.
+
+00:18:50
+If it goes down, maybe
+function is coming down, right?
+
+00:18:54
+So that's the simplest way you
+can kind of brute force it.
+
+00:18:58
+But then the question is,
+how many samples do we need?
+
+00:19:01
+So here, this is the equation
+that you're boosting.
+
+00:19:05
+You're lifting this
+line upwards that way
+
+00:19:07
+by adding that additional term.
+
+00:19:10
+It's proportional to
+the number of samples.
+
+00:19:12
+The more samples you have, the
+better estimation you have.
+
+00:19:14
+Makes sense.
+
+00:19:15
+And differences in output.
+
+00:19:17
+How much resolution do you care?
+
+00:19:18
+Do you care 0.1 to
+0.2, or do you only
+
+00:19:23
+care 0 slope 2 like slope 1?
+
+00:19:26
+That's resolution
+that you care about.
+
+00:19:28
+And number of
+features, of course.
+
+00:19:31
+So if you worry about
+making some conclusion based
+
+00:19:35
+on function shape, sample.
+
+00:19:38
+Easy.
+
+00:19:42
+So can we infer
+the model behavior
+
+00:19:45
+using these popular methods?
+
+00:19:47
+The answer is no.
+
+00:19:49
+And this holds both
+theory and practice.
+
+00:19:53
+We're currently working
+on even bigger models
+
+00:19:55
+to show just, like, again
+and again, empirical evidence
+
+00:19:59
+that, yes, it just
+really doesn't work.
+
+00:20:01
+Please think twice
+and three times
+
+00:20:03
+before using these methods.
+
+00:20:05
+And also, model-dependent
+sample complexity.
+
+00:20:09
+If your function is kind
+of crazy, of course,
+
+00:20:11
+you're going to
+need more samples.
+
+00:20:13
+So what is the definition?
+
+00:20:14
+How do we characterize
+these functions?
+
+00:20:17
+And finally, we haven't
+quite given up yet
+
+00:20:20
+because these methods
+have a pretty good root
+
+00:20:22
+in economics and Shapley
+values and all that.
+
+00:20:25
+So maybe there are a
+lot narrower conditions
+
+00:20:29
+where these methods work.
+
+00:20:31
+And we believe such
+condition does exist.
+
+00:20:34
+We just have to figure out when.
+
+00:20:36
+Once we figure out what
+that condition is, then
+
+00:20:40
+in a given function,
+I can test it
+
+00:20:42
+and say, yes, I
+can use SHAP here.
+
+00:20:44
+Yes, I can use IG here.
+
+00:20:45
+Or no, I can't.
+
+00:20:47
+And that would be
+still very useful.
+
+00:20:49
+So ongoing work.
+
+00:20:51
+Before I go to the next
+one, any questions?
+
+00:20:54
+Yes?
+
+00:20:56
+Do the findings you
+have about these models,
+
+00:20:59
+does it only apply to
+computer vision models,
+
+00:21:01
+or does it apply to
+NLP language models?
+
+00:21:04
+Any model that has a function.
+
+00:21:07
+OK.
+
+00:21:07
+[CHUCKLES] Yeah, very simple.
+
+00:21:10
+Actually, simplest proof that
+can show simply any function,
+
+00:21:14
+this holds.
+
+00:21:16
+Any other questions?
+
+00:21:21
+Wonderful.
+
+00:21:21
+Yeah, Chris?
+
+00:21:22
+Maybe this relates
+to your last bullet.
+
+00:21:24
+But it sort of seems like
+for the last couple of years,
+
+00:21:28
+there have been at least
+dozens, maybe hundreds of people
+
+00:21:32
+writing papers using
+Shapley values.
+
+00:21:35
+I mean, it's your guess that
+most of that work is invalid,
+
+00:21:42
+or that a lot of it might be OK
+because the whatever conditions
+
+00:21:47
+as to whether it's all
+right might often be met?
+
+00:21:51
+So two answers to that question.
+
+00:21:53
+My hypothesis testing results
+shows that it's random, right?
+
+00:21:57
+So maybe in the optimistic
+case, 50% of those papers--
+
+00:22:02
+[LAUGHTER]
+
+00:22:04
+--you hit it.
+
+00:22:05
+[CHUCKLES] And on
+the other side--
+
+00:22:08
+on the second note even if--
+maybe SHAP wasn't perfect.
+
+00:22:12
+Maybe it was kind of wrong.
+
+00:22:13
+But even if it helped
+human at the end task,
+
+00:22:17
+whatever that might be-- help
+doctors to be more efficient,
+
+00:22:19
+identifying bugs and whatnot--
+
+00:22:21
+and if they did the
+validation correctly
+
+00:22:23
+with the right control testing
+setup, then I think it's good.
+
+00:22:28
+You figured out somehow how to
+make these noisy tools together
+
+00:22:31
+work with human
+in the loop maybe.
+
+00:22:33
+And that's also good.
+
+00:22:34
+And I personally
+really like SHAP paper.
+
+00:22:37
+And I'm a good
+friend with Scott.
+
+00:22:39
+And I love all his work.
+
+00:22:40
+It's just that I think
+we need to narrow down
+
+00:22:43
+our expectations so that
+our expectations are better
+
+00:22:45
+aligned.
+
+00:22:49
+All right.
+
+00:22:50
+I'm going to talk about
+another work that's
+
+00:22:52
+kind of similar flavor.
+
+00:22:53
+Now it's in NLP.
+
+00:22:56
+So this is one of those papers
+just like the many other papers
+
+00:23:00
+that we ended up writing, one
+of those serendipity paper.
+
+00:23:04
+So initially, Peter
+came up as an intern,
+
+00:23:07
+and we thought we're going
+to locate ethical knowledge
+
+00:23:10
+in these large language models.
+
+00:23:12
+And then maybe we're
+going to edit them to make
+
+00:23:14
+them a little more ethical.
+
+00:23:15
+So that was the goal.
+
+00:23:16
+And then we thought, oh, the
+wrong paper from David Bao.
+
+00:23:19
+And I also love David's work.
+
+00:23:21
+And let's use that.
+
+00:23:22
+That's the start of this work.
+
+00:23:24
+But then we start digging into
+and implementing the ROME,
+
+00:23:28
+and like, things
+didn't quite line up.
+
+00:23:30
+So we do like a sanity check
+experiment after sanity check,
+
+00:23:34
+and we ended up writing
+completely different paper,
+
+00:23:36
+which I'm about to
+talk to you about.
+
+00:23:39
+So this paper, the ROME--
+
+00:23:43
+for those who are
+not familiar, which
+
+00:23:45
+I'm going into detail-- a
+little more detail in a bit,
+
+00:23:47
+is about editing a model.
+
+00:23:49
+So you first locate a
+knowledge in a model.
+
+00:23:52
+Like, the Space
+Needle is in Seattle.
+
+00:23:54
+That's a fact or knowledge.
+
+00:23:56
+You locate them.
+
+00:23:57
+You edit them.
+
+00:23:58
+Because you can locate
+them, you can mess with it
+
+00:24:02
+to edit that fact.
+
+00:24:03
+That's like the
+whole promise of it.
+
+00:24:04
+In fact, that's a lot of times
+how localization or editing
+
+00:24:08
+methods were motivated
+in the literature.
+
+00:24:11
+But what we show is that this
+assumption is actually not
+
+00:24:14
+true.
+
+00:24:16
+And to be quite honest with
+you, like, I still don't quite
+
+00:24:19
+get why this is not related.
+
+00:24:22
+And I'll talk more
+about this because this
+
+00:24:24
+is like a big question to us.
+
+00:24:26
+This is a pretty active work.
+
+00:24:29
+So substantial fraction
+of factual knowledge
+
+00:24:33
+is stored outside of
+layers that are identified
+
+00:24:37
+as having the knowledge.
+
+00:24:39
+And you will see this in a
+little more detail in a bit.
+
+00:24:44
+In fact, the correlation
+between where the location--
+
+00:24:48
+where the facts are
+located and how well
+
+00:24:51
+you will edit if you
+edit that location
+
+00:24:54
+is completely uncorrelated.
+
+00:24:57
+So they have nothing
+to do with each other.
+
+00:25:00
+So we thought, well,
+maybe it's the problem
+
+00:25:04
+with the definition of editing.
+
+00:25:06
+What we mean by editing can
+mean a lot of different things.
+
+00:25:08
+So let's think about different
+ways to edit a thing.
+
+00:25:12
+So we tried a bunch of
+things with little success.
+
+00:25:16
+We couldn't find an
+editing definition
+
+00:25:18
+that actually relates really
+well with localization methods
+
+00:25:22
+like in particular with ROME.
+
+00:25:26
+So let's talk a
+little bit about ROME,
+
+00:25:28
+how ROME works, super briefly.
+
+00:25:30
+There's a lot of details
+missed out on this slide,
+
+00:25:32
+but roughly, you
+will get the idea.
+
+00:25:34
+So ROME is Meng et al., 2022.
+
+00:25:38
+They have what's called
+causal tracing algorithm.
+
+00:25:41
+And the way it
+works is that you're
+
+00:25:43
+going to run a model on
+this particular data set
+
+00:25:46
+or counter effect data set that
+has this tuple subject relation
+
+00:25:51
+and object.
+
+00:25:52
+The Space Needle is
+located in Seattle.
+
+00:25:55
+And so you're going to have a
+clean run of the Space Needle
+
+00:25:59
+is in Seattle one time.
+
+00:26:01
+You stole every single module,
+every single value activations.
+
+00:26:05
+And then in the second run,
+which they call corrupted run,
+
+00:26:09
+you're going to add noise
+in the Space Needle is--
+
+00:26:13
+or the space.
+
+00:26:15
+Then you're going to
+intervene at every single one
+
+00:26:20
+of those modules as if from--
+
+00:26:23
+by copying this module
+to the corrupted run.
+
+00:26:26
+So as if that particular
+model was never interrupted,
+
+00:26:31
+noise was never
+added to that module.
+
+00:26:34
+So there's a typical
+intervention case
+
+00:26:36
+where you pretend
+everything else being equal,
+
+00:26:40
+if I change just
+this one module, what
+
+00:26:43
+is the probability of
+having the right answer?
+
+00:26:46
+So in this case, probability
+of the right answer's Seattle,
+
+00:26:49
+given that I know is the
+model and I intervened on it.
+
+00:26:54
+So at the end of the day,
+you will find a graph
+
+00:26:57
+like that where each
+layer and each token
+
+00:27:01
+has a score, how likely it is
+if I intervene on that token,
+
+00:27:05
+in that layer, how
+likely is it that I
+
+00:27:08
+will recover the right answer.
+
+00:27:10
+Because if I recover the right
+answer, that's the model.
+
+00:27:13
+That's the model that
+stored the knowledge.
+
+00:27:15
+Really reasonable algorithm.
+
+00:27:17
+I couldn't find a technical
+flaw in this algorithm.
+
+00:27:20
+I quite like it actually.
+
+00:27:24
+But when we start looking at
+this using the same model that
+
+00:27:28
+they use GPT, GPT-J, we realize
+that a lot of these facts--
+
+00:27:34
+so ROME uses just
+layer 6 to edit
+
+00:27:37
+because that was supposedly the
+best layer across this data set
+
+00:27:42
+to edit most of the factual
+knowledge stored in layer 6.
+
+00:27:45
+And they showed editing
+success and whatnot.
+
+00:27:48
+But we realized the truth looks
+like the graph on the right.
+
+00:27:52
+So the red line is the layer 6.
+
+00:27:55
+Their extension
+paper called MEMIT,
+
+00:27:57
+and it's multiple layers.
+
+00:27:58
+That's the blue region.
+
+00:28:01
+The black bars are
+histogram of where
+
+00:28:03
+the knowledge was
+actually peaked
+
+00:28:05
+if you test every single layer.
+
+00:28:08
+And as you can see, not a lot
+of facts fall into that region.
+
+00:28:11
+So in fact, every single fact
+has like different region
+
+00:28:15
+where it peaked.
+
+00:28:16
+So layer 6, for a lot of facts,
+[? weren't ?] the best layer.
+
+00:28:20
+But the editing really worked.
+
+00:28:21
+It really works.
+
+00:28:23
+And we were able to
+duplicate the results.
+
+00:28:25
+So we thought, what do we do
+to find this ethical knowledge?
+
+00:28:30
+How do we find the
+best layer to edit?
+
+00:28:32
+So that's where we started.
+
+00:28:34
+But then we thought,
+you know what?
+
+00:28:36
+Take a step back.
+
+00:28:37
+We're going to actually
+do a sanity check first
+
+00:28:40
+to make sure that
+tracing effect--
+
+00:28:42
+the tracing effect
+is the localization--
+
+00:28:46
+implies better editing results.
+
+00:28:49
+And that's when everything
+started falling apart.
+
+00:28:53
+So let's define
+some metrics first.
+
+00:28:55
+The edit success, this
+is the rewrite score,
+
+00:28:59
+same score as ROME paper used.
+
+00:29:01
+That's what we use.
+
+00:29:02
+And the tracing effect,
+this is localization, is--
+
+00:29:07
+you can read the slide.
+
+00:29:09
+So when we plotted the
+relation between tracing effect
+
+00:29:13
+and rewrite score, the
+editing method, red line
+
+00:29:18
+implies the perfect correlation.
+
+00:29:21
+And that was our
+assumption, that they
+
+00:29:23
+will be perfectly
+correlated, which
+
+00:29:25
+is why we do localization
+to begin with.
+
+00:29:28
+The actual line was yellow.
+
+00:29:30
+It's close to 0.
+
+00:29:32
+It's actually negative in
+this particular data set
+
+00:29:36
+that is not even uncorrelated.
+
+00:29:37
+It's anti-correlated.
+
+00:29:39
+And we didn't stop there.
+
+00:29:40
+We were like-- we
+were so puzzled.
+
+00:29:42
+We're going to do this
+for every single layer,
+
+00:29:44
+and we're going to
+find R-squared value.
+
+00:29:46
+So how much of the
+choice of layer
+
+00:29:50
+versus the localization,
+the tracing effect,
+
+00:29:52
+explains the variance
+of successful edits.
+
+00:29:57
+If you're not familiar
+with R-squared,
+
+00:29:58
+R-squared is like a--
+
+00:29:59
+think about it as an
+importance of a factor.
+
+00:30:02
+And it turns out
+that layer takes 94%.
+
+00:30:06
+Tracing effect is 0.016.
+
+00:30:10
+And so we were really puzzled.
+
+00:30:11
+We were like
+scratching our head.
+
+00:30:13
+Why is this true?
+
+00:30:15
+But it was-- a cross-layer.
+
+00:30:17
+We tried all sorts
+of different things.
+
+00:30:19
+We tried different model.
+
+00:30:20
+We tried different data set.
+
+00:30:22
+It was all like
+roughly the case.
+
+00:30:24
+So we were-- at this
+point, we contacted David.
+
+00:30:28
+And we start talking about--
+
+00:30:29
+and we resolved them,
+the knowledge that this
+
+00:30:32
+is a phenomenon that exists.
+
+00:30:34
+Question?
+
+00:30:36
+So apart from the
+layer, the other way
+
+00:30:38
+in which localization
+can happen is,
+
+00:30:41
+are you looking at
+the correct token?
+
+00:30:42
+Is that the other
+like corresponding--
+
+00:30:44
+Yeah.
+
+00:30:45
+Yeah.
+
+00:30:45
+In this graph, the
+token is in it.
+
+00:30:48
+So the added benefit of the
+rest of the localization
+
+00:30:52
+could only help
+you look at which
+
+00:30:54
+is the correct subword token.
+
+00:30:55
+Is that it?
+
+00:30:55
+Yeah, yeah.
+
+00:30:56
+And so looking at any
+of the subword tokens
+
+00:30:58
+is sort of fine is
+what I should think of?
+
+00:30:59
+Yeah, yeah.
+
+00:31:00
+Just layer-- layer is
+the most biggest thing.
+
+00:31:02
+That's the only thing
+you should care.
+
+00:31:04
+If you care about
+editing, layers.
+
+00:31:06
+In fact, don't worry
+about localization at all.
+
+00:31:08
+It's extra wasted
+carbon climate effect.
+
+00:31:13
+Yeah, so that was
+our conclusion.
+
+00:31:16
+But then we thought, maybe
+the particular definition
+
+00:31:20
+of edit that they used in
+the room was maybe different.
+
+00:31:24
+Maybe there exists a
+definition of editing
+
+00:31:26
+that correlates a lot
+better with localization
+
+00:31:30
+because there must be.
+
+00:31:31
+I'm still puzzled.
+
+00:31:32
+Why is this not correlated?
+
+00:31:34
+So we tried a bunch of
+different definitions of edits.
+
+00:31:38
+You might inject an error.
+
+00:31:42
+You might reverse the tracing.
+
+00:31:46
+You might want to erase effect.
+
+00:31:47
+You might want to amplify
+effact, all these things.
+
+00:31:49
+Like, maybe.
+
+00:31:50
+One of these will work.
+
+00:31:52
+It didn't.
+
+00:31:53
+So the graph that
+you're seeing down here
+
+00:31:55
+is R-squared value for
+four different methods.
+
+00:31:59
+And this wasn't just the
+case for ROME and MEMIT.
+
+00:32:01
+It was also the case
+for fine-tuning methods,
+
+00:32:04
+that you want to look at the
+difference between-- blue
+
+00:32:07
+and orange bar
+represents how much
+
+00:32:10
+the tracing effect influenced
+the R-squared value
+
+00:32:13
+of the tracing effect.
+
+00:32:14
+As you can see, it's ignorable.
+
+00:32:16
+They're all the same.
+
+00:32:17
+You might feel effact
+forcing the last one has
+
+00:32:20
+a little bit of hope,
+but still, compared
+
+00:32:24
+to the impact of layer, choice
+of layer, it's ignorable.
+
+00:32:28
+So at this point, we said, OK.
+
+00:32:31
+Well, we can't locate the
+ethics-- the ethical knowledge
+
+00:32:34
+at this project.
+
+00:32:35
+We're going to have to
+switch the direction,
+
+00:32:37
+and we ended up doing a lot
+more in-depth analysis on this.
+
+00:32:43
+So in summary, does
+localization help editing?
+
+00:32:47
+No.
+
+00:32:49
+The relationship is actually
+0 for this particular editing
+
+00:32:52
+method from what I know is
+pretty state of the art.
+
+00:32:56
+And the counter effect
+data, it's not true.
+
+00:33:00
+Are there any other editing
+method that correlate better?
+
+00:33:02
+No.
+
+00:33:03
+But if somebody can answer
+this question, for me,
+
+00:33:05
+that would be very satisfying.
+
+00:33:07
+Like, I feel like there
+should something still--
+
+00:33:09
+be something there
+that we're missing.
+
+00:33:12
+But causal tracing--
+
+00:33:13
+I think what it
+does is it reveals
+
+00:33:16
+the factual information when the
+transformer is passing forward.
+
+00:33:21
+I think it represents
+where is the fact when
+
+00:33:24
+you are doing that.
+
+00:33:26
+But what we found here
+is that it has nothing
+
+00:33:28
+to do with editing success.
+
+00:33:30
+Those two things are
+different, and we
+
+00:33:32
+have to resolve that somehow.
+
+00:33:34
+But a lot of insights that
+they found in their paper
+
+00:33:37
+is still useful, like
+the early to midrange NLP
+
+00:33:40
+representation, last token.
+
+00:33:42
+They represent the
+factual, something
+
+00:33:44
+we didn't know before.
+
+00:33:45
+But it is important that, to
+validate localization methods,
+
+00:33:50
+using the editing method.
+
+00:33:51
+Now we know.
+
+00:33:52
+And maybe not to motivate
+editing methods using
+
+00:33:56
+via localization.
+
+00:33:58
+Those are the two
+things now we know
+
+00:34:00
+that we shouldn't do because we
+couldn't find a relationship.
+
+00:34:04
+Any questions on this one before
+I move on to the next one?
+
+00:34:15
+You're not shocked by this?
+
+00:34:17
+I am shocked by this.
+
+00:34:18
+I'm still so puzzled.
+
+00:34:20
+Like, it should be--
+there should be something.
+
+00:34:22
+I don't know.
+
+00:34:26
+All right.
+
+00:34:28
+So in summary of
+this first part,
+
+00:34:32
+we talked about why
+the gap might exist,
+
+00:34:35
+what machines know versus
+what we think machines know.
+
+00:34:38
+There are three hypotheses.
+
+00:34:39
+There are three ideas.
+
+00:34:40
+Assumptions are wrong.
+
+00:34:41
+Maybe our expectations
+are wrong.
+
+00:34:43
+Maybe it's beyond us.
+
+00:34:45
+There's a good quote that
+says good artists steal.
+
+00:34:48
+I think good researchers doubt.
+
+00:34:50
+We have to be really suspicious
+of everything that we do.
+
+00:34:53
+And that's maybe
+the biggest lesson
+
+00:34:55
+that I've learned
+over many years
+
+00:34:57
+that once you like your results
+so much, that's a bad sign.
+
+00:35:02
+Like, come back.
+
+00:35:02
+Like, go home.
+
+00:35:03
+Have a beer.
+
+00:35:04
+Go to sleep.
+
+00:35:05
+And the next day, you
+come back and like
+
+00:35:07
+put your paper on your
+desk and think, OK, now
+
+00:35:10
+I'm going to review this paper.
+
+00:35:12
+How do I criticize this?
+
+00:35:13
+What do I not like
+about this paper?
+
+00:35:15
+Right?
+
+00:35:16
+That's one way to look at it.
+
+00:35:17
+Criticize your own
+research, and that will
+
+00:35:19
+improve your thinking a lot.
+
+00:35:26
+So let's bring our attention
+back to our hopes and dreams
+
+00:35:29
+keeps coming back.
+
+00:35:31
+So here, I came to realize maybe
+instead of just building tools
+
+00:35:36
+to understand, perhaps we
+need to do some groundwork.
+
+00:35:40
+What do I mean?
+
+00:35:41
+Well, this alien that
+we've been dealing
+
+00:35:43
+with trying to
+generate explanations
+
+00:35:46
+seems to be a different kind.
+
+00:35:48
+So maybe we should
+study them as if they're
+
+00:35:51
+like new species in the wild.
+
+00:35:54
+So what do you do
+when you observe
+
+00:35:56
+a new species in the wild?
+
+00:35:57
+You have a couple of ways.
+
+00:35:59
+But one of the ways is
+observational study.
+
+00:36:01
+So you saw some species
+in the wild far away.
+
+00:36:04
+First, you just
+kind of watch them.
+
+00:36:07
+You watch them and
+see what are they
+
+00:36:08
+like, what are
+their habitat, what
+
+00:36:12
+are their values and whatnot.
+
+00:36:14
+And second way, you can
+actually intervene and do
+
+00:36:17
+a controlled study.
+
+00:36:18
+So we did something like
+this with reinforcement
+
+00:36:21
+learning setup.
+
+00:36:25
+I'm going to talk
+about these two papers.
+
+00:36:27
+First paper-- emergent
+behaviors in multi-agent systems
+
+00:36:31
+has been so cool.
+
+00:36:32
+Who saw this hide and
+seek video by OpenAI?
+
+00:36:36
+Yeah, it's so cool.
+
+00:36:37
+If you haven't seen it,
+just google it and watch it.
+
+00:36:39
+It's so fascinating.
+
+00:36:40
+I'm only covering the tip
+of an iceberg in this,
+
+00:36:42
+but at the end of this hide and
+seek episode, at some point,
+
+00:36:47
+the agents reveal or discover
+a bug in this physical system
+
+00:36:52
+and start like antigravity
+flying in the air
+
+00:36:55
+and like shooting
+hiders everywhere.
+
+00:36:58
+Super interesting video.
+
+00:36:59
+You must watch.
+
+00:37:00
+So lots of that.
+
+00:37:02
+And also humanoid football and
+capture the flag from DeepMind.
+
+00:37:05
+Lots of interesting behaviors
+emerging that we observed.
+
+00:37:11
+Here's my favorite one.
+
+00:37:12
+But these labels--
+so here, these
+
+00:37:15
+are labels that are provided
+by OpenAI, running and chasing
+
+00:37:18
+and fort building and ramp use.
+
+00:37:21
+And these ones were that--
+
+00:37:23
+Human or humans went
+painstakingly, one by one,
+
+00:37:27
+watched all these videos
+and label them manually.
+
+00:37:31
+So our question is,
+is there a better way
+
+00:37:34
+to discover this
+emergent behaviors?
+
+00:37:37
+Perhaps some nice
+visualization can
+
+00:37:39
+help us explore this complex
+domain a little better.
+
+00:37:44
+So that's our goal.
+
+00:37:47
+So in this work, we're
+going to again treat
+
+00:37:50
+the agents like an observational
+study, like a new species.
+
+00:37:53
+And we're going to do
+observational study.
+
+00:37:55
+And what that means
+is that we only
+
+00:37:57
+get to observe state and
+action pair, so where they are,
+
+00:38:00
+what are they doing or--
+
+00:38:02
+yeah, what are they doing?
+
+00:38:03
+And we're going to
+discover agent behavior
+
+00:38:06
+by basically kind of
+like clustering the data.
+
+00:38:10
+That's all we're going to do.
+
+00:38:12
+And how do we do it?
+
+00:38:13
+Pretty simple.
+
+00:38:15
+Generative model-- have you
+covered the Bayesian generative
+
+00:38:18
+model, graphical-- no?
+
+00:38:19
+Gotcha.
+
+00:38:20
+OK.
+
+00:38:20
+[CHUCKLES] So think about--
+
+00:38:22
+[INAUDIBLE]
+
+00:38:23
+Hi.
+
+00:38:24
+Is that also what you teach?
+
+00:38:25
+[CHUCKLES] Yeah, so this
+is a graphical model.
+
+00:38:29
+Think about this as a fake or
+hypothetical data generation
+
+00:38:34
+process.
+
+00:38:34
+So how does this work?
+
+00:38:36
+Like, I'm generating the data.
+
+00:38:37
+I created the system.
+
+00:38:39
+I'm going to first generate
+a joint latent embedding
+
+00:38:42
+space that represents
+numbers that represents all
+
+00:38:45
+the behaviors in the system.
+
+00:38:47
+And then I'm going
+to-- for each agent,
+
+00:38:48
+I'm going to generate
+another embedding.
+
+00:38:51
+And each embedding when
+it's conditioned with state,
+
+00:38:55
+it's going to generate policy.
+
+00:38:57
+It's going to decide what it's
+going to do, what action is,
+
+00:38:59
+given the state and
+the embedding pair.
+
+00:39:02
+And then what that whole thing
+generates is what you see,
+
+00:39:06
+the state and action pair.
+
+00:39:08
+So how does this work?
+
+00:39:09
+And then given this,
+you build a model,
+
+00:39:11
+and you do inference to
+learn all these parameters.
+
+00:39:15
+Kind of same business
+as neural network.
+
+00:39:16
+But it just has a
+little more structure.
+
+00:39:20
+So this is completely
+made-up, right?
+
+00:39:21
+So this is like my idea of how
+these new species might work.
+
+00:39:26
+And our goal is we're
+going to try this and see
+
+00:39:28
+if anything useful comes up.
+
+00:39:30
+And the way you do this
+is-- one of the ways
+
+00:39:32
+you do this is you optimize
+for variational lower bound.
+
+00:39:36
+You need to know that.
+
+00:39:36
+It's very cool
+actually if one gets
+
+00:39:39
+into this exponential
+family business, very cool.
+
+00:39:44
+CS 228-- OK.
+
+00:39:47
+So here's one of the
+results that we had.
+
+00:39:49
+It's a domain called MuJoCo.
+
+00:39:51
+Here, we're going
+to pretend that we
+
+00:39:53
+have two agents, one controlling
+back leg and one controlling
+
+00:39:56
+the front leg.
+
+00:39:57
+And on the right, we're showing
+that joint embedding space Z
+
+00:40:00
+omega and Z alpha.
+
+00:40:03
+While video is
+running, I'm going
+
+00:40:05
+to try to put the video back.
+
+00:40:09
+Whoop.
+
+00:40:10
+OK.
+
+00:40:11
+So now I'm going to select--
+this is a visualization that we
+
+00:40:14
+built online.
+
+00:40:16
+You can go check it out.
+
+00:40:17
+You can select a little
+space in Agent 1 space.
+
+00:40:21
+And you see it maps to pretty
+tight space in Agent 0.
+
+00:40:24
+And it shows pretty
+decent running ability,
+
+00:40:27
+so that's cool.
+
+00:40:28
+And now I'm going to select
+somewhere else in Agent 1
+
+00:40:32
+that maps to kind of
+dispersed area in Agent 0.
+
+00:40:35
+It looks like it's
+not doing as well.
+
+00:40:38
+And this is just an insight
+that we gain for this data only,
+
+00:40:42
+but I was quickly
+able to identify, ah,
+
+00:40:45
+this tight mapping business kind
+of represents the good running
+
+00:40:50
+behavior and bad
+running behaviors.
+
+00:40:52
+So that's something that you
+can do pretty efficiently.
+
+00:40:54
+And now I'm going to show you
+something more interesting.
+
+00:40:58
+So, of course, we have to do
+this because we have the data.
+
+00:41:00
+It's here.
+
+00:41:01
+It's so cool.
+
+00:41:02
+So we applied this framework
+in the OpenAI's hide and seek.
+
+00:41:06
+This is 4 agent.
+
+00:41:08
+It looks like a
+simple game, but it
+
+00:41:10
+has pretty complex structure,
+100-dimensional observations,
+
+00:41:13
+5-dimensional action space.
+
+00:41:15
+So in this work,
+remember that we
+
+00:41:18
+pretend that we don't know
+the labels given by OpenAI.
+
+00:41:21
+We just shuffle them in the mix.
+
+00:41:24
+But we can color them
+our results with respect
+
+00:41:27
+to their labels.
+
+00:41:28
+So again, this is
+the result of Z omega
+
+00:41:31
+and Z alpha, the
+individual agents.
+
+00:41:34
+But the coloring is something
+that we didn't know before.
+
+00:41:36
+We just did it after the fact.
+
+00:41:39
+You can see in the Z omega
+this nice kind of pattern
+
+00:41:43
+that we can roughly separate
+what makes sense to humans
+
+00:41:47
+and what makes sense to us.
+
+00:41:48
+But remember, the green and
+gray kind of everywhere,
+
+00:41:53
+they're mixed.
+
+00:41:54
+So in this particular run
+of OpenAI's hide and seek,
+
+00:41:58
+it seemed that those
+two representations
+
+00:42:00
+were kind of entangled.
+
+00:42:03
+The running and
+chasing the blue dots,
+
+00:42:05
+it seems to be pretty
+separate and distinguishable
+
+00:42:08
+from all the other colors.
+
+00:42:09
+And that kind of makes
+sense because that's
+
+00:42:11
+the basis of playing this game.
+
+00:42:13
+So if you don't have
+that representation,
+
+00:42:15
+you have a big trouble.
+
+00:42:17
+But in case of like orange,
+which is fort building,
+
+00:42:22
+it's a lot more
+distinguishable in hiders.
+
+00:42:26
+And that makes
+sense because hiders
+
+00:42:28
+are the ones building the fort.
+
+00:42:30
+Then seekers don't
+build the fort.
+
+00:42:31
+So orange is a little
+more entangled in seekers.
+
+00:42:34
+Perhaps if seekers had built
+more separate fort building
+
+00:42:38
+representation, maybe they
+would have win this game.
+
+00:42:44
+So this work-- can we
+learn something interesting
+
+00:42:47
+emerging behaviors by just
+simply observing the system?
+
+00:42:51
+The answer seems to be yes,
+at least for the domains
+
+00:42:54
+that we tested.
+
+00:42:55
+A lot more complex
+domains should be tested.
+
+00:42:57
+But these are the ones we had.
+
+00:43:01
+But remember, that these
+methods don't give you
+
+00:43:03
+names of these
+clusters, so you would
+
+00:43:05
+have to go and investigate
+and click through and explore.
+
+00:43:10
+And if the cluster represents
+superhuman concept,
+
+00:43:14
+this is not going to help you.
+
+00:43:16
+And I'll talk a little
+more about the work
+
+00:43:17
+that we do try to help them.
+
+00:43:19
+But this is not for you.
+
+00:43:20
+This is not going
+to help you there.
+
+00:43:23
+And also, if you have access
+to the model and the reward
+
+00:43:27
+signal, you should use it.
+
+00:43:29
+Why dump it?
+
+00:43:30
+So next work, we do use it.
+
+00:43:33
+I'm going to talk about this
+work with Niko and Natasha
+
+00:43:36
+and Shayegan.
+
+00:43:39
+So here, this time,
+we're going to intervene.
+
+00:43:42
+We're going to be
+a little intrusive,
+
+00:43:43
+but hopefully, we'll
+learn a little more.
+
+00:43:46
+So problem is that
+we're going to build
+
+00:43:48
+a new multi-agent system.
+
+00:43:49
+We're going to build
+it from scratch such
+
+00:43:51
+that we can do control testing.
+
+00:43:53
+But at the same
+time, we shouldn't
+
+00:43:54
+sacrifice the performance.
+
+00:43:56
+So we're going to try
+to match the performance
+
+00:43:59
+of the overall system.
+
+00:44:00
+And we do succeed.
+
+00:44:03
+I had this paper
+collaboration with folks
+
+00:44:05
+at Stanford actually
+here in 2020,
+
+00:44:08
+where we propose this
+pretty simple idea, which
+
+00:44:10
+is you have a neural network.
+
+00:44:12
+Why don't we embed concepts in
+the middle of the bottleneck,
+
+00:44:16
+where one neuron represents
+trees, the other represents
+
+00:44:20
+stripes, and just train
+the model end to end?
+
+00:44:23
+And why are we doing this?
+
+00:44:25
+Well, because then
+at inference time,
+
+00:44:27
+you can actually intervene.
+
+00:44:29
+You can pretend
+predicting zebra,
+
+00:44:32
+I don't think trees
+should matter.
+
+00:44:33
+So I'm going to
+zero out this neuron
+
+00:44:35
+and feed forward and
+see what happens.
+
+00:44:37
+So it was particularly useful
+in the medical setting,
+
+00:44:39
+where there are some features
+that doctors don't want.
+
+00:44:41
+We can cancel out and test.
+
+00:44:44
+So this is the work to
+extend this to RL setting.
+
+00:44:48
+It's actually not as simple
+extension then as we thought.
+
+00:44:53
+It came out to be
+pretty complex.
+
+00:44:54
+But essentially,
+we're doing that.
+
+00:44:57
+And we're building each
+of the concept bottleneck
+
+00:44:59
+for each agent.
+
+00:45:01
+And at the end of the day,
+what you optimize is what
+
+00:45:04
+you usually do, typical PPO.
+
+00:45:06
+Just think about this
+as make RL system work,
+
+00:45:09
+plus minimizing the difference
+between the true concept
+
+00:45:13
+and estimated concept.
+
+00:45:14
+That's all you do.
+
+00:45:17
+Why are we doing this?
+
+00:45:18
+You can intervene.
+
+00:45:19
+You can pretend,
+now Agent 2, pretend
+
+00:45:22
+that you can't see Agent 1.
+
+00:45:24
+What happens now?
+
+00:45:25
+That's what we're doing here.
+
+00:45:29
+We're going to do
+this in two domains.
+
+00:45:31
+First domain, how many people
+saw this cooking game before?
+
+00:45:37
+Yeah, it's a pretty
+commonly used cooking domain
+
+00:45:41
+in reinforcement
+learning, very simple.
+
+00:45:43
+We have two agents,
+yellow and blue,
+
+00:45:46
+and they're going to make soup.
+
+00:45:47
+They can bring three tomatoes.
+
+00:45:49
+They get a reward.
+
+00:45:50
+They wait for the
+tomato and bring a dish
+
+00:45:53
+to the cooking pot.
+
+00:45:54
+They get a reward finally.
+
+00:45:56
+The goal is to deliver as
+many soups as possible, given
+
+00:45:59
+some time.
+
+00:46:01
+And here, concepts
+that we use are
+
+00:46:03
+agent position, orientation,
+agent has tomato,
+
+00:46:06
+has dish, et cetera, et cetera,
+something that's immediately
+
+00:46:09
+available to you already.
+
+00:46:10
+And you can, of course,
+tweak the environment
+
+00:46:13
+to make it more fun.
+
+00:46:14
+So you can make it that
+they have to collaborate.
+
+00:46:17
+Like, you can build
+a wall between them
+
+00:46:19
+so that they have to
+work together in order
+
+00:46:21
+to serve any tomato soup, or you
+can make them freely available.
+
+00:46:25
+You can work independently or
+together, whatever your choice.
+
+00:46:31
+First-- just kind
+of sanity check--
+
+00:46:33
+was that you can
+detect the emerging
+
+00:46:38
+behavior of coordination
+versus noncoordination.
+
+00:46:41
+So when the impassable
+environment,
+
+00:46:43
+when we made up
+that environment--
+
+00:46:45
+and suppose that RL system
+that we trained worked.
+
+00:46:48
+They were able to
+deliver some soups.
+
+00:46:50
+Then you see that when we
+intervene-- oh, this graph.
+
+00:46:53
+Let me explain.
+
+00:46:54
+This is a reward
+of an agent 1 when
+
+00:46:57
+there is a no intervention.
+
+00:46:59
+So this is perfectly good world.
+
+00:47:01
+And when there was
+an intervention.
+
+00:47:04
+This is the average value of
+intervening on all concepts,
+
+00:47:07
+but I'm also going to show
+you each concept soon.
+
+00:47:10
+If you compare
+left and right, you
+
+00:47:12
+can tell that in the
+right, when we intervene,
+
+00:47:15
+reward deteriorated quite
+a lot for both of them.
+
+00:47:19
+And that's one way
+to see, ah, they
+
+00:47:21
+are coordinating because
+somehow intervening
+
+00:47:24
+at this concept impacted a
+lot of their performance.
+
+00:47:30
+But this is what was
+really interesting to me,
+
+00:47:33
+and I'm curious.
+
+00:47:34
+Anyone can guess.
+
+00:47:35
+So this is the same graph
+as the one you saw before,
+
+00:47:39
+but except I'm plotting for
+intervention for each concept.
+
+00:47:43
+So I'm intervening team
+position, team orientation,
+
+00:47:46
+team has tomato, et
+cetera, et cetera.
+
+00:47:49
+It turns out that
+they're using--
+
+00:47:52
+or rather when we intervene
+on team orientation,
+
+00:47:55
+the degradation of performance
+was the biggest to the extent
+
+00:47:59
+that we believe that orientation
+had to do with subcoordination.
+
+00:48:03
+Does anyone guess
+why this might be?
+
+00:48:12
+It's not the position
+but it's orientation.
+
+00:48:19
+Yes?
+
+00:48:20
+Just a clarification
+question on orientation.
+
+00:48:22
+Is that like the direction
+that the [INAUDIBLE]??
+
+00:48:24
+Yes.
+
+00:48:24
+So it seems like
+orientation would
+
+00:48:27
+let you predict where
+they would be next.
+
+00:48:30
+Yes, yes, that's right.
+
+00:48:31
+Yes.
+
+00:48:32
+Where were you
+when I was pulling
+
+00:48:34
+my hair over this question?
+
+00:48:36
+Yes, that's exactly right.
+
+00:48:37
+And initially, I
+was really puzzled.
+
+00:48:39
+Like, why not position?
+
+00:48:40
+Because I expect
+it to be position.
+
+00:48:42
+But exactly.
+
+00:48:43
+That's exactly right.
+
+00:48:43
+So the orientation
+is the first signal
+
+00:48:47
+that an agent can get about the
+next move of the other agent.
+
+00:48:51
+If they're facing the pot,
+they're going to the pot.
+
+00:48:53
+If they're facing
+the tomato, they're
+
+00:48:55
+going to get the tomato.
+
+00:48:57
+Really interesting intuition.
+
+00:49:00
+Obvious to some, but I needed
+this graph to work that out.
+
+00:49:05
+And, of course, you can use
+this to identify lazy agents.
+
+00:49:09
+If you look at the rightmost--
+
+00:49:11
+yellow agent, our friend just
+chilling in the background.
+
+00:49:16
+And he's lazy.
+
+00:49:18
+And if you train RL agent,
+there's always some agents
+
+00:49:20
+just hanging out.
+
+00:49:21
+They're just not doing anything.
+
+00:49:23
+And you can easily identify
+this by using this graph.
+
+00:49:27
+If I intervene, it just doesn't
+impact any of their rewards.
+
+00:49:31
+That one's mean.
+
+00:49:32
+[LAUGHS]
+
+00:49:35
+So the second
+domain, we're going
+
+00:49:36
+to look at a little
+more complex domain.
+
+00:49:39
+So this is-- it's studying
+inter-agent social dynamics.
+
+00:49:42
+So in this domain, there
+is a little bit of tension.
+
+00:49:45
+This is called the clean up.
+
+00:49:47
+We have four agents.
+
+00:49:48
+They only get rewards if they
+eat apples, this yellow things
+
+00:49:52
+or green things are apples.
+
+00:49:54
+But if you don't
+clean the river,
+
+00:49:56
+then apple stops to grow.
+
+00:49:58
+So somebody has to
+clean the river.
+
+00:50:01
+And you can see if you are
+four people trying to collect
+
+00:50:05
+apples, you can just stay.
+
+00:50:06
+Someone else has to wait until
+someone else to clean the river
+
+00:50:09
+and then collect the apples.
+
+00:50:11
+And in fact, that's
+sometimes what happens.
+
+00:50:15
+And concepts here again
+are pretty common things,
+
+00:50:20
+position, orientation,
+and pollution, positions,
+
+00:50:24
+et cetera.
+
+00:50:26
+So when we first
+plotted the same graph
+
+00:50:30
+as the previous domain,
+it tells a story.
+
+00:50:36
+So the story here is that
+when I intervene on Agent 1,
+
+00:50:41
+it seems to influence
+Agent 2 quite a lot
+
+00:50:45
+if you look at these three
+different graphs of reward--
+
+00:50:49
+how reward was impacted
+when I intervene on Agent 1.
+
+00:50:53
+It's Agent 3 and 4 or 5, but
+it seems that only Agent 2
+
+00:50:56
+is influenced.
+
+00:50:57
+Same with idle time.
+
+00:50:58
+Same with the
+inter-agent distance.
+
+00:51:00
+So we were like, oh,
+maybe that's true.
+
+00:51:03
+But we keep wondering.
+
+00:51:04
+There's like a lot
+going on in this domain.
+
+00:51:06
+Like, how do we know
+this is the case?
+
+00:51:09
+So we decided to
+take another step.
+
+00:51:13
+So we're going to do a little
+more work here but not a lot.
+
+00:51:18
+We're going to build
+the graph to discover
+
+00:51:21
+inter-agent relationships.
+
+00:51:22
+This is the simplest dumbest
+way to build a graph.
+
+00:51:25
+But again, I like simple things.
+
+00:51:27
+So how do you build a graph?
+
+00:51:28
+Well, suppose that
+you're building
+
+00:51:30
+a graph between movies.
+
+00:51:31
+This is not what we do
+but just to describe
+
+00:51:34
+what we're trying to do.
+
+00:51:35
+We have each row.
+
+00:51:37
+We're going to build a matrix.
+
+00:51:39
+Each row is a movie,
+and each column
+
+00:51:42
+consists of features
+of these movies.
+
+00:51:44
+So length, genre of
+the movie, and so on.
+
+00:51:47
+And the simplest way to build
+a graph is to do a regression.
+
+00:51:51
+So exclude I-th
+row, and then we're
+
+00:51:56
+going to regress
+over everyone else.
+
+00:51:58
+And that gives me beta, which
+is the kind of coefficients
+
+00:52:02
+for each of these.
+
+00:52:03
+And that beta represents
+the strength between--
+
+00:52:07
+strengths of the edges.
+
+00:52:08
+So this movie is more
+related to this movie
+
+00:52:10
+and not the other movie.
+
+00:52:11
+And ta-da, you have a graph.
+
+00:52:12
+It's the dumbest way.
+
+00:52:14
+There's a lot of
+caveats to you shouldn't
+
+00:52:15
+do this in a lot
+of times, but this
+
+00:52:17
+is the simplest way to do it.
+
+00:52:20
+So we did the same thing here.
+
+00:52:22
+Instead of movie, we're
+going to use intervention
+
+00:52:26
+on concept C on
+Agent N as our node.
+
+00:52:31
+And to build this
+matrix, we're going
+
+00:52:34
+to use intervention
+outcome, which
+
+00:52:36
+wouldn't have been available
+without our framework
+
+00:52:39
+for reward, resource collected,
+and many other things.
+
+00:52:44
+And when you build this
+graph, at the end of the day,
+
+00:52:47
+you get betas that
+represent relationship
+
+00:52:49
+between these interventions, OK?
+
+00:52:53
+So I had a graph of that matrix.
+
+00:52:57
+Apparently, I removed
+before I came over.
+
+00:53:00
+But imagine there was a matrix.
+
+00:53:01
+[CHUCKLES] There is
+a nicely highlighted
+
+00:53:04
+between Agent 1 and
+4 and that only,
+
+00:53:07
+contradicting the original
+hypothesis that we had.
+
+00:53:10
+And this is the video of it.
+
+00:53:13
+So when we stared
+at the matrix, it
+
+00:53:15
+turns out that there is
+no high edge, strong edges
+
+00:53:20
+between Agent 1 and 2.
+
+00:53:22
+So we were like, that's weird.
+
+00:53:23
+But there is strong edges
+between Agent 1 and 4.
+
+00:53:26
+So we like dig deeper into
+it, watched a lot of sessions
+
+00:53:30
+to validate what's happening.
+
+00:53:31
+And it turns out that the story
+was a lot more complicated.
+
+00:53:35
+The 1's orientation
+was important for 4.
+
+00:53:38
+But when that fails, Agent 1
+and 2 kind of gets cornered in.
+
+00:53:43
+And you can see
+that in the graph.
+
+00:53:44
+Agent 4 kind of get--
+
+00:53:46
+Agent 1 and 4--
+
+00:53:48
+sorry, 1 and 2, blue
+and yellow agent,
+
+00:53:50
+kind of gets in the
+corner together.
+
+00:53:51
+They kind of get stuck.
+
+00:53:53
+And this is simply just
+accidental because of the way
+
+00:53:56
+that we built this environment.
+
+00:53:58
+It just happened.
+
+00:54:00
+But the raw statistics
+wouldn't have
+
+00:54:03
+told us this story, that this
+was completely accidental.
+
+00:54:06
+In fact, there was no
+correlation, no coordination
+
+00:54:08
+between Agent 1 and 2.
+
+00:54:10
+But only after the graph, we
+realized this was the case.
+
+00:54:14
+Now this might be one-off case.
+
+00:54:16
+But you know what?
+
+00:54:17
+A lot of emerging
+behaviors that we
+
+00:54:19
+want to detect, a lot of
+them will be one-off case.
+
+00:54:22
+And we really want to
+get the truth of that
+
+00:54:25
+rather than having some
+surface-level statistics.
+
+00:54:30
+So can we build
+multi-agent system
+
+00:54:34
+that enables intervention
+and performs as well?
+
+00:54:37
+The answer is yes.
+
+00:54:38
+There's a graph that shows the
+red line and blue line, roughly
+
+00:54:41
+a line.
+
+00:54:41
+That's good news.
+
+00:54:42
+We are performing as well.
+
+00:54:45
+But remember these concepts.
+
+00:54:46
+You need to label
+them, or you need
+
+00:54:48
+to have some way of getting
+those concepts, positions,
+
+00:54:50
+and orientation.
+
+00:54:52
+There might be
+something that we would
+
+00:54:53
+love to extend in the future.
+
+00:54:56
+Before I go on, any questions?
+
+00:55:03
+Are you shy?
+
+00:55:05
+Little shy?
+
+00:55:10
+Cool.
+
+00:55:11
+All right.
+
+00:55:13
+So I did tell you that we're
+not going to know the solution
+
+00:55:17
+to Move 37.
+
+00:55:18
+I still don't, OK?
+
+00:55:19
+I still don't.
+
+00:55:20
+But I'll tell you a
+little bit of work
+
+00:55:23
+that I'm currently
+doing I'm really
+
+00:55:25
+excited about, that we started
+thinking, you know what?
+
+00:55:29
+Will this understanding
+Move 37 happen before
+
+00:55:32
+within my lifetime?
+
+00:55:34
+And I was like, oh, maybe not.
+
+00:55:35
+But I kind of want it to happen.
+
+00:55:37
+So we start-- this is all
+about research, right?
+
+00:55:40
+You started carving out a space
+where things are a little bit
+
+00:55:43
+solvable, and you try
+to attack that problem.
+
+00:55:46
+So this is our attempt
+to do exactly that,
+
+00:55:48
+to get a little closer
+to our ultimate goal
+
+00:55:51
+or my ultimate goal of
+understanding that Move 37.
+
+00:55:55
+So before that, how
+many people here know
+
+00:55:57
+AlphaZero from DeepMind?
+
+00:55:59
+Yes.
+
+00:55:59
+[CHUCKLES] AlphaZero is a
+self-trained chess-playing
+
+00:56:05
+machine that has higher Elo
+rating than any other humans
+
+00:56:10
+and beats Stockfish
+which is-- arguably,
+
+00:56:12
+no existing human
+can beat Stockfish.
+
+00:56:14
+So in a previous paper, we
+try to discover human chess
+
+00:56:19
+concepts in this network.
+
+00:56:21
+So when does concept
+like material imbalance
+
+00:56:26
+appear in its network, which
+layer, and when in the training
+
+00:56:30
+time?
+
+00:56:31
+And which we call what,
+when, and where plots.
+
+00:56:34
+And we also compare
+the evolution
+
+00:56:37
+of opening moves between
+humans and AlphaZero.
+
+00:56:40
+These are the first
+couple of moves that you
+
+00:56:42
+make when you play chess.
+
+00:56:43
+And as you can see, there's
+a pretty huge difference.
+
+00:56:46
+Left is human.
+
+00:56:47
+Right is AlphaZero.
+
+00:56:49
+It turns out that AlphaZero
+can master or supposedly master
+
+00:56:54
+a lot of variety of
+different types of openings.
+
+00:56:57
+Openings can be very aggressive.
+
+00:56:59
+Openings can be very boring,
+could be very long-range,
+
+00:57:03
+targeting for long-range
+strategy or short-range, very
+
+00:57:06
+different.
+
+00:57:07
+So that begs the question,
+what does AlphaZero
+
+00:57:10
+know that humans don't know?
+
+00:57:12
+Don't you want to learn
+what that might be?
+
+00:57:16
+So that's what we
+are doing right now.
+
+00:57:17
+We're actually almost--
+we're about to evaluate.
+
+00:57:21
+So the goal of this work is
+teach the world chess champion
+
+00:57:27
+a new superhuman chess strategy.
+
+00:57:30
+And we just got yes
+from Magnus Carlsen, who
+
+00:57:34
+is the world chess champion.
+
+00:57:36
+He just lost the match, I know.
+
+00:57:38
+But he's still
+champion in my mind.
+
+00:57:41
+He's still champion in
+two categories actually.
+
+00:57:44
+So the way that
+we're doing this is
+
+00:57:46
+we're going to discover new
+chess strategy by explicitly
+
+00:57:51
+forgetting existing
+chess strategy, which
+
+00:57:54
+we have a lot of data for.
+
+00:57:56
+And then we're going
+to learn a graph--
+
+00:57:58
+this time a little more
+complicated graph--
+
+00:58:01
+by using the existing
+relationships
+
+00:58:05
+between existing
+concepts so that we
+
+00:58:07
+can get a little bit
+of more idea of what
+
+00:58:10
+the new concept might look like.
+
+00:58:11
+And Magnus Carlsen-- so my
+favorite part about this work--
+
+00:58:15
+I talk about carving out.
+
+00:58:16
+My favorite part about this
+work is that the evaluation
+
+00:58:19
+is going to be pretty clear.
+
+00:58:21
+So it's not just
+like Magnus coming in
+
+00:58:23
+and say, oh, your work
+is a kind of nice,
+
+00:58:25
+and say nice things
+about our work.
+
+00:58:26
+No, Magnus actually has
+to solve some puzzles.
+
+00:58:29
+And we will be able to evaluate
+him whether he did it or not.
+
+00:58:33
+So it's like a kind
+of success and fail.
+
+00:58:35
+But I'm extremely excited.
+
+00:58:36
+This kind of work, I
+can only do because
+
+00:58:39
+of Lisa, who is a champion
+herself but also a PhD
+
+00:58:43
+student at Oxford.
+
+00:58:45
+And she played against Magnus
+in the past and many other chess
+
+00:58:48
+players in the world.
+
+00:58:49
+And she's going to be the
+ultimate pre-superhuman
+
+00:58:53
+filtering to filter out these
+concepts that will eventually
+
+00:58:57
+get to Magnus.
+
+00:58:59
+So I'm super excited about this.
+
+00:59:00
+I have no results.
+
+00:59:01
+But it's coming up.
+
+00:59:02
+I'm excited.
+
+00:59:03
+Yes?
+
+00:59:05
+[INAUDIBLE] how are
+the puzzles generated?
+
+00:59:07
+Because there's already
+so many puzzles out there.
+
+00:59:10
+So I'm assuming that there's
+probably something new
+
+00:59:13
+that you're trying
+[INAUDIBLE] like,
+
+00:59:15
+what are the puzzles about?
+
+00:59:16
+And how are they generated?
+
+00:59:17
+Puzzles are actually
+pretty simple.
+
+00:59:19
+So the way that we
+generate concepts
+
+00:59:22
+are within the embedding
+space of AlphaZero.
+
+00:59:25
+And given that,
+because AlphaZero
+
+00:59:27
+has really weird architecture,
+so every single latent layer
+
+00:59:31
+in AlphaZero has the exact
+same position as a chess board.
+
+00:59:33
+That's just the way that
+they decide to do it.
+
+00:59:35
+So because of that, we can
+actually identify or generate
+
+00:59:39
+the board positions that
+corresponds to that concept.
+
+00:59:42
+And because we have
+MCTS, we can predict
+
+00:59:46
+what move it's going to make,
+given that board position.
+
+00:59:50
+Because at inference time,
+it's actually deterministic,
+
+00:59:52
+the whole AlphaZero thing.
+
+00:59:53
+So we have a lot
+of board positions.
+
+00:59:56
+And that's all you
+need for puzzles.
+
+00:59:58
+You give a board position and
+then ask Magnus to make a move.
+
+01:00:01
+We explain the concept
+and then give Magnus
+
+01:00:04
+more board positions and see
+if he can apply that concept
+
+01:00:08
+that he just learned.
+
+01:00:09
+So are we trying to emulate
+human behavior [INAUDIBLE]
+
+01:00:13
+Stockfish on [INAUDIBLE] right?
+
+01:00:16
+But it seems like
+you're kind of emulating
+
+01:00:17
+human behavior [INAUDIBLE].
+
+01:00:21
+Yeah, so if I were
+to ask Stockfish
+
+01:00:25
+to solve those puzzles, that
+would be a different question
+
+01:00:28
+because we are interested in
+whether we can teach human, not
+
+01:00:32
+Stockfish.
+
+01:00:32
+Stockfish might be
+able to do that.
+
+01:00:34
+That's actually
+interesting thing
+
+01:00:36
+that we could do now
+I think about it.
+
+01:00:37
+But our goal is to just
+teach one superhuman.
+
+01:00:41
+Like, if I have, for example,
+10,000 superhuman concepts
+
+01:00:45
+and only three of them
+are digestible by Magnus,
+
+01:00:48
+that's a win.
+
+01:00:50
+That will be a big win
+for this type of research.
+
+01:00:56
+Questions?
+
+01:00:59
+All right Yeah, so--
+
+01:01:02
+oh.
+
+01:01:02
+So wrap up-- small steps
+towards our hopes and dreams.
+
+01:01:06
+We talked about the gap
+between what machines know
+
+01:01:09
+versus what we
+think machines know.
+
+01:01:11
+Three ideas, why
+that might be true.
+
+01:01:14
+There's three
+different maybe angles
+
+01:01:16
+we can try to attack and
+answer those questions
+
+01:01:19
+and bridge that gap.
+
+01:01:21
+We talked about studying
+aliens, these machines,
+
+01:01:24
+in observation study
+or control study.
+
+01:01:27
+There are many other
+ways to study a species.
+
+01:01:30
+And I'm not an expert,
+but anthropology
+
+01:01:32
+and other humanities studies
+would know a lot better-- more
+
+01:01:34
+about this.
+
+01:01:36
+And maybe, just maybe, we
+can try to understand Move 37
+
+01:01:41
+at some point, hopefully, within
+my lifetime through this chess
+
+01:01:45
+project that I'm
+very excited about.
+
+01:01:48
+Thank you.
+
+01:01:49
+[APPLAUSE]
+
+01:01:56
+OK, thank you very--
+
+01:01:58
+questions?
+
+01:02:00
+Yeah.
+
+01:02:02
+You talked about
+interpretability research costs
+
+01:02:04
+in NLP vision and RL.
+
+01:02:07
+Do you think there's
+much hope for taking
+
+01:02:09
+certain interpretability
+techniques from one modality
+
+01:02:12
+into other modalities?
+
+01:02:13
+And if so, what [INAUDIBLE]?
+
+01:02:19
+So it depends on your goal.
+
+01:02:22
+Like, think about
+fairness research,
+
+01:02:24
+which builds on strong
+mathematical foundation
+
+01:02:28
+and that's like applicable for
+any questions around fairness
+
+01:02:32
+or hopefully applicable.
+
+01:02:33
+But then once you--
+
+01:02:35
+if your goal is to actually
+solve a fairness issue at hand
+
+01:02:40
+for somebody, the real
+person in the world,
+
+01:02:42
+that's completely a
+different question.
+
+01:02:44
+You would have to customize it
+for a particular application.
+
+01:02:47
+So there are two venues.
+
+01:02:48
+And I think similar is
+true in interpretability.
+
+01:02:50
+Like, the theory work
+that I talked about.
+
+01:02:52
+SHAP and IG are used across
+domains like vision, text,
+
+01:02:57
+so that theory paper would be
+applicable across the domain.
+
+01:03:00
+Things like RL and the way that
+we build that generative model,
+
+01:03:04
+you would need to
+test a little bit more
+
+01:03:06
+to make sure that
+this works in NLP.
+
+01:03:09
+I don't even know how to
+think about agents in NLP yet,
+
+01:03:12
+so we'll need a little
+bit of tweaking.
+
+01:03:14
+But both directions
+are fruitful.
+
+01:03:20
+[INAUDIBLE]
+
+01:03:22
+So I saw the recent work
+in which some amateur Go
+
+01:03:27
+players found a very tricky
+strategy to trick up--
+
+01:03:30
+I think it was AlphaGo.
+
+01:03:32
+And that seemed like
+a concept that humans
+
+01:03:35
+know that machines don't and
+that Venn diagram [INAUDIBLE]
+
+01:03:38
+talk about that.
+
+01:03:39
+Yeah, actually, it's
+funny you mentioned that.
+
+01:03:42
+Lisa can beat AlphaZero
+pretty easily.
+
+01:03:46
+And it's a similar
+idea because--
+
+01:03:48
+if you kind of know what are the
+most unseen out-of-distribution
+
+01:03:53
+moves are.
+
+01:03:53
+And she can break
+AlphaZero pretty easily.
+
+01:03:56
+And Lisa guess that if Lee
+Sedol had known something more
+
+01:03:59
+about AI, then maybe he would
+have tried to confuse AlphaGo.
+
+01:04:03
+But the truth is it takes
+a-- it's a high-stake game.
+
+01:04:06
+Like, Lee Sedol is like
+the famous star worldwide,
+
+01:04:10
+so he wouldn't want
+to make a move that
+
+01:04:12
+would be seen as a
+complete mistake,
+
+01:04:15
+like the one that Magnus
+made a couple of days
+
+01:04:17
+ago that got on the
+newsfeed everywhere,
+
+01:04:19
+that he made this
+century-wide mistake.
+
+01:04:21
+And that probably hurts.
+
+01:04:26
+Any other questions?
+
+01:04:28
+[INAUDIBLE] AlphaZero,
+for example,
+
+01:04:35
+are just building
+machine learning
+
+01:04:37
+models that can play
+these games really well.
+
+01:04:41
+But I'm wondering,
+also curious about how
+
+01:04:43
+these are being applied towards
+applications [INAUDIBLE]..
+
+01:04:46
+Do you have any
+applications that currently
+
+01:04:49
+are in the works [INAUDIBLE]?
+
+01:04:52
+These work that I
+presented are pretty new.
+
+01:04:56
+But there has been a bit of
+discussion in the robotics,
+
+01:04:59
+applying potentially
+this to robotics.
+
+01:05:01
+And, of course, I can't
+talk about details.
+
+01:05:03
+But things that reinforcement
+learning in the wild people
+
+01:05:10
+worry about are some of
+the surprises, right?
+
+01:05:13
+If you have a test
+for it, like if you
+
+01:05:15
+have a unique test
+for it, you're
+
+01:05:16
+never going to fail
+because you're going
+
+01:05:18
+to test before you deploy.
+
+01:05:20
+I think the biggest risk for
+any of these deployment systems
+
+01:05:23
+is the surprises that
+you didn't expect.
+
+01:05:27
+So my work around the
+visualization and others
+
+01:05:30
+aim to help you with that.
+
+01:05:33
+So we may not know names
+of these surprises,
+
+01:05:36
+but here's a tool
+that help you better
+
+01:05:38
+discover those surprises
+before someone else does
+
+01:05:41
+or someone else gets harmed.
+
+01:05:48
+[INAUDIBLE]
+
+01:05:49
+Thanks so much for the talk.
+
+01:05:50
+This is kind of an open-ended
+question, but I was wondering.
+
+01:05:53
+We're talking
+about a lot of ways
+
+01:05:55
+in which we try to kind
+of visualize or understand
+
+01:05:59
+what's going on in
+the representation
+
+01:06:00
+inside the machine.
+
+01:06:02
+But I was wondering whether we
+could turn it around and try
+
+01:06:05
+to teach machines to
+tell us like what's
+
+01:06:08
+using our language, what they're
+doing in their representations,
+
+01:06:11
+like if you build
+representations of ours
+
+01:06:13
+and then get the machine to
+do the translation for us
+
+01:06:16
+instead of us going
+into the [INAUDIBLE]..
+
+01:06:19
+Yeah, great question.
+
+01:06:20
+So it's a really
+interesting question
+
+01:06:21
+because that's something
+that I kind of tried
+
+01:06:26
+in my work, previous work,
+testing with the concept
+
+01:06:29
+activation vectors.
+
+01:06:30
+So that was to map human
+language into machine space
+
+01:06:34
+so that they can only speak our
+language because I understand
+
+01:06:36
+my language and just talk
+to me in my language.
+
+01:06:39
+The challenge is
+that how would you
+
+01:06:41
+do that for something
+like AlphaZero.
+
+01:06:44
+Like, we don't have a
+vocabulary for it like Move 37.
+
+01:06:48
+Then there's going to
+be a lot of missing
+
+01:06:50
+valuable knowledge that we
+might not get from the machine.
+
+01:06:54
+So I think the approach
+has to be both ways.
+
+01:06:57
+We should leverage
+as much as we can.
+
+01:06:59
+But acknowledging that
+even that mapping, that
+
+01:07:03
+trying to map our
+language to machines
+
+01:07:05
+is not going to be
+perfect because it's
+
+01:07:08
+a kind of proxy for what
+we think like a penguin is.
+
+01:07:11
+There's a psychology
+research that says,
+
+01:07:13
+everyone thinks very differently
+about what penguin is.
+
+01:07:16
+Like, if I-- like
+picture of penguin.
+
+01:07:19
+Everyone is thinking
+of a different penguin
+
+01:07:21
+right now, right?
+
+01:07:22
+Australia has the cutest
+penguin, the fairy penguin.
+
+01:07:25
+I'm thinking that, right?
+
+01:07:26
+But I don't know how many
+people are thinking that.
+
+01:07:28
+So given that-- we
+are so different.
+
+01:07:30
+Machines are going to
+think something else.
+
+01:07:32
+So how do you bridge that gap?
+
+01:07:34
+Extend that to a
+hundred concepts
+
+01:07:36
+and composing those
+concepts, it's
+
+01:07:38
+going to go out into
+the wild very soon.
+
+01:07:40
+So there's pros and cons.
+
+01:07:41
+I'm into both of them.
+
+01:07:43
+I think some applications
+exclusively just using
+
+01:07:48
+human concepts are
+still very helpful.
+
+01:07:50
+It gets you halfway.
+
+01:07:53
+But my ambition is that
+we shouldn't stop there.
+
+01:07:56
+We should benefit
+from them by having
+
+01:07:59
+them teach us new things
+that we didn't know before.
+
+01:08:04
+Yeah?
+
+01:08:05
+So in the second thing,
+you talked about ROME.
+
+01:08:07
+You said that where
+knowledge is [INAUDIBLE],,
+
+01:08:11
+super correlated [INAUDIBLE]
+change that knowledge?
+
+01:08:15
+Do you think that has any
+implications for the later
+
+01:08:17
+stuff you talked about, lie
+[INAUDIBLE],, or, I don't know--
+
+01:08:21
+like trying to locate
+like specific strategies
+
+01:08:24
+in the embedding space, like
+might not be as helpful or--
+
+01:08:27
+Ooh, what are the alternatives?
+
+01:08:30
+I guess I don't know
+the alternatives
+
+01:08:31
+just because I feel like
+the ROME thing [INAUDIBLE]..
+
+01:08:35
+That's possible.
+
+01:08:36
+So like, it's like
+some transformed space
+
+01:08:38
+of our embedding
+space in AlphaZero.
+
+01:08:40
+Maybe it's a function applied
+to that embedding space.
+
+01:08:44
+So thinking about that as
+a raw vector is a dead end.
+
+01:08:49
+Could be.
+
+01:08:50
+We'll see how this chess project
+goes in a couple of months.
+
+01:08:54
+I might rethink my strategy
+but interesting thought.
+
+01:08:57
+Yeah?
+
+01:08:58
+So I'm a psychology major, and
+I do realized that a lot of this
+
+01:09:01
+stuff [INAUDIBLE]--
+
+01:09:02
+[INAUDIBLE] parts of the
+brains is how we figure out
+
+01:09:05
+how our brains work.
+
+01:09:07
+And so do you think that this--
+
+01:09:10
+would there be
+stuff that you use
+
+01:09:13
+that's applicable
+to neural networks?
+
+01:09:15
+And on the contrary,
+do you think
+
+01:09:16
+that these interpretability
+[INAUDIBLE] studies
+
+01:09:18
+of neural networks
+help us understand
+
+01:09:20
+the stuff in our own brain?
+
+01:09:22
+Yeah.
+
+01:09:23
+I talk to Geoffrey Hinton.
+
+01:09:25
+He would really like this.
+
+01:09:26
+So I believe-- I
+mean, you probably
+
+01:09:28
+know about this history.
+
+01:09:29
+I think that's how it
+all started, right?
+
+01:09:31
+The whole neural network is
+to understand human brain.
+
+01:09:37
+So that's the answer
+to your question.
+
+01:09:39
+Interesting,
+however, in my view,
+
+01:09:41
+there is some
+biases that we have
+
+01:09:44
+in neuroscience because of
+the limitations of tools,
+
+01:09:48
+like physical tools and
+availability of humans
+
+01:09:50
+that you can poke in.
+
+01:09:52
+I think that influences
+interpretability research.
+
+01:09:54
+And I'll give you an
+example of what I mean.
+
+01:09:56
+So in cat the line--
+or is it horizontal
+
+01:09:59
+line and vertical line
+neuron in cat brains.
+
+01:10:01
+So they put the probe in and
+figure out this one neuron
+
+01:10:04
+detects vertical lines.
+
+01:10:05
+And you can validate.
+
+01:10:06
+It's really cool if
+you look at the video.
+
+01:10:08
+The video is still online.
+
+01:10:10
+Yeah, what is it?
+
+01:10:11
+[INAUDIBLE]
+
+01:10:12
+Yes, Yes, yes.
+
+01:10:13
+So why did they do that?
+
+01:10:15
+Well, because you
+had one cat and--
+
+01:10:18
+poor cat.
+
+01:10:20
+And you had-- we can only probe
+a few neurons at a time, right?
+
+01:10:25
+So that implies like a lot-- so
+a few interpretability research
+
+01:10:28
+actually looked at--
+
+01:10:30
+are very focused on
+neuron-wise representation.
+
+01:10:32
+Like, this one neuron
+must be very special.
+
+01:10:35
+I actually think
+that's not true.
+
+01:10:36
+That was limited by our
+ability, like physical ability
+
+01:10:40
+to probe organisms.
+
+01:10:41
+But in your network, you
+don't have to do that.
+
+01:10:43
+You can apply functions
+to embeddings.
+
+01:10:44
+You can change the whole
+embedding to something else.
+
+01:10:47
+Over right.
+
+01:10:47
+So that kind of is actually
+a obstacle in our thinking
+
+01:10:54
+rather than helping.
+
+01:11:01
+OK, maybe we should
+call it there.
+
+01:11:03
+So for Thursday, we're not
+having a lecture on Thursday.
+
+01:11:08
+There'll be TAs and me here.
+
+01:11:11
+So if you have any last minute
+panics on your project--
+
+01:11:14
+so I think we might have some
+great insight to help you.
+
+01:11:18
+We probably won't [INAUDIBLE].
+
+01:11:21
+So do come along, and
+you can [INAUDIBLE]
+
+01:11:24
+on your final projects
+if you need help.
+
+01:11:27
+That means that
+Been actually got
+
+01:11:29
+to give the final
+lecture of CS224N today.
+
+01:11:33
+So a fond farewel to you.
+
+01:11:34
+[APPLAUSE]

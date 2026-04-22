@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_14::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for concept questions on the original GAN minimax objective and why raw minimax values are poor standalone diagnostics during training.",
+  "question_bank": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When the generator G is fixed, what is the discriminator D trained to do in the original GAN minimax objective?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Assign high scores to real samples and low scores to generated samples",
+        "Map real and fake samples to the same constant score",
+        "Predict the latent variable z from each real image",
+        "Minimize the distance between real samples and generated samples directly in pixel space"
+      ],
+      "answer_index": 0,
+      "explanation": "With G fixed, D behaves like a binary classifier. It learns to classify real data as real and generator outputs as fake.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_minimax_objective",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "maximize log D(x)",
+          "log one minus D of G of z"
+        ],
+        "timestamps": [
+          "00:10:15",
+          "00:10:15"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the raw minimax value V(G,D) a poor standalone diagnostic for GAN training progress?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it depends on both the generator and discriminator, so its value does not directly track sample quality",
+        "Because it is always guaranteed to decrease smoothly during training",
+        "Because it only measures the generator and ignores the discriminator",
+        "Because it is undefined whenever the generator produces realistic images"
+      ],
+      "answer_index": 0,
+      "explanation": "The GAN objective is a game between two networks, not a single loss that one model tries to reduce. A lower or higher raw value does not cleanly tell you whether samples are improving.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_instability_diagnostics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not an overall loss",
+          "not a reliable metric"
+        ],
+        "timestamps": [
+          "00:14:09",
+          "00:15:17"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_14_seg2_q1",
+      "global_kp_id": "kp_gan_minimax_objective",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_14_seg2_q2",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "role": "primary"
+    }
+  ]
+}

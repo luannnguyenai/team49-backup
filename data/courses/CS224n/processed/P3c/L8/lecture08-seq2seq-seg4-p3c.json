@@ -1,0 +1,191 @@
+{
+  "unit_id": "local::lecture08-seq2seq::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 4 conceptual reinforcement questions about why lstms help gradient flow without needing a separate video clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture08_seq2seq_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What architectural feature most directly explains why LSTMs improve gradient flow?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The cell state includes an additive update path",
+        "They remove all nonlinearities from recurrence",
+        "They force every gate to equal 1",
+        "They train with beam search instead of SGD"
+      ],
+      "answer_index": 0,
+      "explanation": "The core idea is not just gating by itself, but the additive memory path. Addition creates a more direct route for information and gradients than repeatedly multiplying everything through the same recurrence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "additive",
+          "fixes the problem of gradient flow"
+        ],
+        "timestamps": [
+          "00:42:19",
+          "00:42:59"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why was the forget gate an important addition to the original LSTM idea?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because pure accumulation without forgetting becomes dysfunctional on long sequences",
+        "Because it makes the model exactly equivalent to a CNN",
+        "Because it guarantees perfect recall of every token forever",
+        "Because it removes the need for any hidden state"
+      ],
+      "answer_index": 0,
+      "explanation": "A purely additive memory that only keeps accumulating content eventually becomes overloaded. The forget gate lets the model clear or reduce stale information so memory remains useful over long sequences.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "purely additive mechanism",
+          "dysfunctional"
+        ],
+        "timestamps": [
+          "00:42:32",
+          "00:42:48"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg4_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What happens in the special case where the forget gate is 1 and the input gate is 0?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The cell state is copied forward unchanged",
+        "The hidden state becomes all zeros",
+        "The model is forced to forget everything",
+        "The decoder switches into bidirectional mode"
+      ],
+      "answer_index": 0,
+      "explanation": "If the model fully keeps old memory and writes in no new content, the cell state simply passes forward as it was. That is the cleanest illustration of long-distance information preservation in an LSTM.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "forget gate to 1",
+          "input gate to 0"
+        ],
+        "timestamps": [
+          "00:43:22",
+          "00:43:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg4_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which later neural-network idea was presented as following the same direct-path intuition as LSTMs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Residual networks with skip connections",
+        "Bag-of-words averaging",
+        "Naive Bayes classifiers",
+        "Word2vec negative sampling"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture connected LSTM memory paths to residual-style architectures. In both cases, direct connections help information and gradients move more easily through the model.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "add more direct connections",
+          "residual network"
+        ],
+        "timestamps": [
+          "00:45:49",
+          "00:46:51"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture08_seq2seq_seg4_q1",
+      "global_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg4_q2",
+      "global_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg4_q3",
+      "global_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg4_q4",
+      "global_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "role": "primary"
+    }
+  ]
+}

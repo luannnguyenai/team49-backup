@@ -1,0 +1,227 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture03-pytorch",
+    "lecture_title": "Lecture 3 - PyTorch Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg"
+  },
+  "unit": {
+    "unit_id": "local::lecture03-pytorch::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Tensor shapes, reshaping, reduction, and indexing",
+    "description": "Covers shape inspection as a debugging strategy, reshaping/view operations, vectorized reductions such as sum and mean, and NumPy-like indexing and slicing semantics for higher-dimensional tensors.",
+    "summary": "This segment begins by stressing that printing tensor shapes is one of the most useful debugging practices in PyTorch, especially once operations are stacked and internal reshaping can obscure the real source of an error [ts=683s] [ts=727s]. It then introduces reshape as a way to reorganize data for batching or sequence modeling, such as turning a flat list into batched examples or tensors with batch, sequence, and embedding dimensions [ts=770s] [ts=823s]. The instructor notes a distinction between view and reshape, describing view as producing a view of underlying storage and reshape as modifying the tensor layout more directly [ts=845s] [ts=855s]. The segment next motivates tensors through vectorized operations and demonstrates reductions such as sum over a chosen dimension, explaining that the specified dimension is the one being collapsed [ts=904s] [ts=967s]. That same intuition is extended to averages: preserving rows means reducing over dim=1, while preserving columns means reducing over dim=0 [ts=1140s] [ts=1208s]. The latter half walks through indexing on a 3x2x2 tensor, showing that selecting x[0] collapses the first dimension to a 2x2 tensor and that more elaborate slicing or list indexing can select ranges or multiple rows at once [ts=1266s] [ts=1499s]. The segment ends with a practical scalar-conversion reminder: some operations expect Python scalars rather than tensors, and .item() extracts a scalar from a 1x1 tensor [ts=1572s] [ts=1618s].",
+    "key_points": [
+      {
+        "text": "Printing tensor shapes is a primary debugging strategy because stacked operations and PyTorch internals can obscure shape mistakes.",
+        "timestamp_s": 697,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "reshape reorganizes tensors to support batching or other downstream operations on differently structured data.",
+        "timestamp_s": 770,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The reduction dimension in operations like sum is the dimension being collapsed.",
+        "timestamp_s": 960,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "For a 2x3 tensor, row averages use dim=1 and column averages use dim=0.",
+        "timestamp_s": 1140,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Indexing x[0] into a 3x2x2 tensor yields a 2x2 tensor because the first dimension is selected away.",
+        "timestamp_s": 1266,
+        "evidence_type": "example"
+      },
+      {
+        "text": "List indexing can retrieve multiple selected rows at once by indexing with a list of row indices.",
+        "timestamp_s": 1468,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Calling .item() converts a 1x1 tensor into a Python scalar when downstream code expects a scalar value.",
+        "timestamp_s": 1572,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+      "start_s": 683,
+      "end_s": 1620
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 16,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "This segment begins by stressing that printing tensor shapes is one of the most useful debugging practices in PyTorch, especially once operations are stacked and internal reshaping can obscure the real source of an error [ts=683s] [ts=727s]. It then introduces reshape as a way to reorganize data for batching or sequence modeling, such as turning a flat list into batched examples or tensors with batch, sequence, and embedding dimensions [ts=770s] [ts=823s]. The instructor notes a distinction between view and reshape, describing view as producing a view of underlying storage and reshape as modifying the tensor layout more directly [ts=845s] [ts=855s]. The segment next motivates tensors through vectorized operations and demonstrates reductions such as sum over a chosen dimension, explaining that the specified dimension is the one being collapsed [ts=904s] [ts=967s]. That same intuition is extended to averages: preserving rows means reducing over dim=1, while preserving columns means reducing over dim=0 [ts=1140s] [ts=1208s]. The latter half walks through indexing on a 3x2x2 tensor, showing that selecting x[0] collapses the first dimension to a 2x2 tensor and that more elaborate slicing or list indexing can select ranges or multiple rows at once [ts=1266s] [ts=1499s]. The segment ends with a practical scalar-conversion reminder: some operations expect Python scalars rather than tensors, and .item() extracts a scalar from a 1x1 tensor [ts=1572s] [ts=1618s].",
+  "target_kp_ids": [
+    "kp_reshape_and_indexing",
+    "kp_shape_based_debugging",
+    "kp_tensor_shapes_and_broadcasting"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg",
+  "video_clip_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg",
+  "transcript_slice": "00:11:26\nSo in this case, we just have a 1D tensor of length 3.\n\n00:11:34\nIn general, this is one of the key debugging steps\n\n00:11:39\na lot throughout this session, which\n\n00:11:43\nis probably your best resource when it comes to debugging.\n\n00:11:50\nwhat's going on once you start stacking\n\n00:11:55\nSo printing out the shapes at each point and seeing\n\n00:12:01\nAnd it's better to rely on that than just on the error message\n\n00:12:07\nPyTorch might implement certain optimizations\n\n00:12:14\nSo you may not see the numbers you expect.\n\n00:12:23\nSo again, we can always print out the shape\n\n00:12:30\nin this case a 3-dimensional tensor, which is 3x2x4.\n\n00:12:37\nsee all of the dimensions here.\n\n00:12:42\nWe have tensors.\n\n00:12:44\nBut what do we actually do with them?\n\n00:12:48\nare the operations that we can apply to these tensors.\n\n00:12:59\nSo in this case, we're creating this 15-dimensional tensor\n\n00:13:06\nAnd now we're reshaping it.\n\n00:13:11\nAnd so you might wonder, well, what's the point of that?\n\n00:13:18\nwe are doing machine learning, we actually\n\n00:13:23\nAnd so we might take our data and we might reshape it.\n\n00:13:29\nwe actually have a set of batches.\n\n00:13:35\nof a set of sentences or sequences\n\n00:13:41\nin that sequence has an embedding\n\n00:13:44\nAnd so based on the types of operations\n\n00:13:49\nneed to reshape those tensors.\n\n00:13:54\nparticularly sometimes transpose dimensions,\n\n00:14:00\nSo that's another operation to keep in mind.\n\n00:14:10\ncreate a view of the underlying tensor.\n\n00:14:14\nhave this same shape.\n\n00:14:22\nAll right.\n\n00:14:26\nyour intuition about PyTorch tensors\n\n00:14:32\nto work with NumPy arrays, but they have\n\n00:14:36\nLike, now we can essentially use them with GPUs\n\n00:14:41\nAnd we can also compute gradients quickly.\n\n00:14:47\nif you have some NumPy code and you\n\n00:14:51\ncan directly convert them into PyTorch sensors\n\n00:14:56\nAnd you can also take those tensors\n\n00:15:04\nAll right.\n\n00:15:07\nis, why do we care about tensors?\n\n00:15:11\nAnd one of the great things about them\n\n00:15:17\nEssentially we can parallelize a lot of different computations\n\n00:15:24\nall at once.\n\n00:15:28\nis a sum.\n\n00:15:34\nis shape 5x7 and--\n\n00:15:42\nYou can take a tensor that shaped 5x7.\n\n00:15:48\nthat essentially collapse the dimensionality.\n\n00:15:53\nAnd so you can take it and you can\n\n00:15:57\nAnd so one way I like to think about this to kind of keep them\n\n00:16:05\nis the dimension you're collapsing.\n\n00:16:11\nbecause you know the shape of the underlying tensor is 5x7\n\n00:16:19\nSo you should be left with something that's just shape 7.\n\n00:16:27\nyou get this tensor, which is shape 7.\n\n00:16:32\nyou're kind of summing across the rows\n\n00:16:36\nBut it's not just sum.\n\n00:16:40\nYou can compute standard deviations.\n\n00:16:43\nYou can do other operations, which essentially batch\n\n00:16:49\nAnd not only do these apply over 1 dimension,\n\n00:16:55\nany dimensions, then by default, the operation actually\n\n00:16:59\nSo here we end up just taking the sum of the entire thing.\n\n00:17:05\nis the number of rows.\n\n00:17:09\nSo if we sum out the rows, then we're\n\n00:17:17\nAnd so now we only have seven values.\n\n00:17:21\nin terms of the dimensions to keep it straight,\n\n00:17:26\nIf you're summing out dimension 0,\n\n00:17:30\nwhich has some shape that's dimension 0 by dimension 1\n\n00:17:36\nAnd then from there you can kind of\n\n00:17:40\nsum to check if you were right.\n\n00:17:45\nAnd I believe in the homework that you have right now,\n\n00:17:51\na lot of these things.\n\n00:17:55\nis that essentially, it's optimized\n\n00:17:59\nWhen we actually start building out\n\n00:18:05\nwe're going to be doing a lot of these matrix multiplication\n\n00:18:11\nif we can make use of the GPU.\n\n00:18:15\ncomes in handy in addition to also defining\n\n00:18:21\nas we'll see later for you.\n\n00:18:25\nfor instance, implementing a basic linear layer\n\n00:18:32\nAll of those things will be built in.\n\n00:18:37\nto make use of them.\n\n00:18:40\nhave to do a lot of that coding yourself.\n\n00:18:47\nAll right.\n\n00:18:54\nSo this is a quiz, except I think\n\n00:19:00\nBut what would you do if now I told you\n\n00:19:08\nI want you to compute the average?\n\n00:19:12\nyou could compute the average.\n\n00:19:16\nor across the columns.\n\n00:19:23\nwhich dimension am I actually going to reduce over?\n\n00:19:29\nthen we need to actually sum over the second dimension--\n\n00:19:36\n0-th and first.\n\n00:19:39\nhave to sum over because we want to preserve the 0-th dimension.\n\n00:19:45\nyou see the dim equals 1.\n\n00:19:50\nis why you see the dim equals 0.\n\n00:19:56\nsee what are the shapes that we expect.\n\n00:20:02\nthen an object that's 2x3, should just\n\n00:20:07\nIt's just a 1-dimensional almost vector you can think of.\n\n00:20:14\nthere's three columns.\n\n00:20:18\nAnd so now we're left with a 1-dimensional tensor\n\n00:20:25\nSo does that kind of make sense, I guess,\n\n00:20:30\nand how some of these operations manipulate shapes.\n\n00:20:35\nThis can get a little bit tricky,\n\n00:20:42\nvery similar to NumPy.\n\n00:20:48\nis that you can take these NumPy arrays\n\n00:20:53\nYou can create copies of them.\n\n00:20:58\nto select out different elements, different rows\n\n00:21:03\nAnd so in this case, let's take this example tensor,\n\n00:21:10\nAnd first thing you always want to do\n\n00:21:15\nUnderstand what you're working with.\n\n00:21:25\nwill x bracket 0 print out?\n\n00:21:31\nWhat's the shape of this?\n\n00:21:36\nSPEAKER: Yeah.\n\n00:21:37\nBecause if you think about it, our tensor\n\n00:21:43\nhappens to also be a 2X2 tensor.\n\n00:21:50\n4.\n\n00:21:54\na colon in a particular dimension,\n\n00:22:00\nSo if we do x bracket 0, implicitly we're\n\n00:22:07\nSo it's saying grab the first thing along the 0-th dimension.\n\n00:22:15\nIf we now take just the 0-th element\n\n00:22:26\nWell, ultimately, we're going to get.\n\n00:22:32\nthe kind of first dimension where\n\n00:22:36\nis now each of these two rows within those things.\n\n00:22:45\nSo if we index into the second dimension--\n\n00:22:52\nthen we're going to end up with 1, 2, 5, 6, and 9, 10.\n\n00:23:01\nyou can kind of go back to the trick\n\n00:23:05\nacross the first dimension.\n\n00:23:12\nIf we collapse the first dimension,\n\n00:23:18\nSo it might seem a little bit trivial kind\n\n00:23:23\nBut I think it's important because it can get tricky\n\n00:23:29\nto actually reason about this.\n\n00:23:33\nsince a lot of them kind of reinforce the same thing,\n\n00:23:39\nJust like NumPy, you can choose to get a range of elements.\n\n00:23:50\nwhich is 1 through 15 rearranged as a 5x3 tensor.\n\n00:24:00\nwe'll get the first three rows.\n\n00:24:05\nwith slicing across multiple dimensions.\n\n00:24:13\nis list indexing.\n\n00:24:18\nAnd it's a very clever shorthand for being\n\n00:24:26\nSo in this case, what you can do is\n\n00:24:34\nof our matrix, you can just instead of\n\n00:24:41\nwith a list of indices.\n\n00:24:48\nif we take out the 0-th, the second, and the fourth,\n\n00:24:54\nAnd that's what we end up getting.\n\n00:25:00\nAgain, these are kind of a lot of examples to just reiterate\n\n00:25:08\nin multiple ways.\n\n00:25:12\nSo being familiar with the shapes that you understand\n\n00:25:20\nIn this case, for instance, we're\n\n00:25:24\nand we're keeping the 0-th.\n\n00:25:32\nof top left element of each of those three things\n\n00:25:39\nWe'll get this 1, we'll get this 5,\n\n00:25:45\nof the 0-th dimension.\n\n00:25:48\nwe only take the 0-th element in both of those positions.\n\n00:26:01\nAlso, of course, you can apply all of the colons\n\n00:26:12\nOK.\n\n00:26:16\nis conversions.\n\n00:26:21\nultimately, we're going to process\n\n00:26:27\nAnd that loss needs to be a scalar.\n\n00:26:31\nwith respect to that loss.\n\n00:26:37\nmight have an operation and it fails because it was actually\n\n00:26:42\nAnd so you can extract out the scalar from this 1x1 tensor\n\n00:26:51\nSo in this case, if you have a tensor, which\n\n00:26:56\nget the Python scalar that corresponds\n\n00:27:00\nSo now we can get into the more interesting stuff.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture03-pytorch::seg2",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture03-pytorch::seg2",
+      "global_kp_id": "kp_shape_based_debugging",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture03-pytorch::seg2",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_reshape_and_indexing",
+      "name": "Reshaping and indexing",
+      "description": "PyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures. How (3,), (1,3), and (3,1) differ, and how reshape changes array dimensions when element counts match.",
+      "track_tags": [
+        "array_shapes",
+        "data_manipulation",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "array_ops",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reshaping and indexing clarifies pyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp11",
+        "local::lecture03-pytorch::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_shape_based_debugging",
+      "name": "Shape-based debugging",
+      "description": "Printing and checking tensor shapes is a core debugging habit for understanding errors and verifying that operations behave as intended.",
+      "track_tags": [
+        "debugging",
+        "engineering_practice"
+      ],
+      "domain_tags": [
+        "pytorch",
+        "software_engineering"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.22,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because shape-based debugging clarifies printing and checking tensor shapes is a core debugging habit for understanding errors and verifying that operations behave as intended, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture03-pytorch::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "name": "Tensor shapes and broadcasting",
+      "description": "Reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication. Core shape vocabulary for rectangular matrices, one-dimensional vectors, higher-dimensional tensors, and NumPy shape notation.",
+      "track_tags": [
+        "broadcasting",
+        "debugging",
+        "deep_learning",
+        "linear_algebra",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "linear_algebra",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because tensor shapes and broadcasting formalizes how reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp10",
+        "local::lecture02-python-review::kp15",
+        "local::lecture03-pytorch::kp2"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture03-pytorch_transcript.txt"
+  }
+}

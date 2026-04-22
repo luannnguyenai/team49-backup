@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_8::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit supports mastery questions on scaled dot-product attention, matrix-vectorized attention, and the separation of keys and values. No visual-only details are needed to assess the core ideas.",
+  "question_bank": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does scaled dot-product attention divide dot products by the square root of the vector dimension?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To keep softmax inputs from becoming too large as dimension grows, preserving useful gradients.",
+        "To force every query to attend uniformly to all keys.",
+        "To remove the need for learned key and value projections.",
+        "To make the output sequence shorter than the input sequence."
+      ],
+      "answer_index": 0,
+      "explanation": "Dot products tend to grow in magnitude with dimension. Scaling keeps the values entering softmax in a healthier range, which helps avoid saturated probabilities and weak gradients.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_scaled_dot_product_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "scaled dot product",
+          "preventing vanishing gradients"
+        ],
+        "timestamps": [
+          "00:33:30",
+          "00:34:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the key-value view of attention, what is the difference between keys and values?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Keys are used to match queries; values are the vectors combined to form the output.",
+        "Keys are the final outputs; values are discarded after softmax.",
+        "Keys store token positions; values store only punctuation marks.",
+        "Keys are fixed constants; values are the only learned parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "Attention separates lookup from retrieval. Queries compare against keys to decide attention weights, and those weights are then applied to values to construct the output representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_keys_and_values",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "key vectors",
+          "compute linear combinations"
+        ],
+        "timestamps": [
+          "00:39:21",
+          "00:39:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes cross-attention different from self-attention?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The queries and the data being attended to can come from different sources.",
+        "It never uses softmax to compute attention weights.",
+        "It requires all input vectors to be identical before projection.",
+        "It only works when the input sequence has length one."
+      ],
+      "answer_index": 0,
+      "explanation": "Cross-attention is useful when one representation needs to look up information from another representation, such as output tokens attending to source tokens or text attending to image features.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two different sets of things",
+          "image and tokens"
+        ],
+        "timestamps": [
+          "00:49:48",
+          "00:50:08"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "global_kp_id": "kp_scaled_dot_product_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "global_kp_id": "kp_keys_and_values",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "global_kp_id": "kp_cross_attention",
+      "role": "primary"
+    }
+  ]
+}

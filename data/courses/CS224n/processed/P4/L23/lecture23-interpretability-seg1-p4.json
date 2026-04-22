@@ -1,0 +1,504 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "The transcript is clear enough to generate questions about the motivation for interpretability, the meaning of Move 37, the need for overlapping representational space, and the connection to AI safety.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which perspective best describes the desired role of a highly capable AI system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is merely a pure automation tool, so its values or goals do not matter.",
+        "It is a useful “colleague” that may nevertheless have values, experiences, and goals very different from those of humans.",
+        "It is only a fact-storage memory system, so two-way interaction is unnecessary.",
+        "It is a system that should be used only after all AI safety problems have already been solved."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture frames AI as a highly capable and useful colleague, but one that may differ from humans in values, experiences, and goals. So the challenge is not just using it, but understanding and coordinating with it safely.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "useful but may have very different values",
+          "treat AI systems as colleagues"
+        ],
+        "timestamps": [
+          "00:03:18",
+          "00:03:37"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is AlphaGo’s Move 37 used to illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The machine merely repeated Go tactics that humans had long known.",
+        "The machine may possess a powerful strategy that humans do not yet have the language or intuition to clearly express.",
+        "The model was strong only because a human suggested each move during play.",
+        "AlphaGo’s performance mainly came from memorizing the full history of past games."
+      ],
+      "answer_index": 1,
+      "explanation": "Move 37 is presented as a canonical example of a superhuman machine concept: humans recognize that it matters, but it is not easy for them to explain or name.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Move 37",
+          "not the move a human would fathom"
+        ],
+        "timestamps": [
+          "00:04:51",
+          "00:05:37"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What condition is necessary for humans and machines to “exchange meaning” with each other?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The machine must use exactly the same natural language as humans at every level of representation.",
+        "The two sides need some overlap in representational space or conceptual vocabulary.",
+        "Humans must first understand every individual neuron in the model.",
+        "It is enough for the model to achieve high benchmark accuracy."
+      ],
+      "answer_index": 1,
+      "explanation": "The central argument is that meaningful communication requires some shared or overlapping representation. The two sides need not be identical, but they need enough overlap to map concepts and learn from each other.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "overlap between human and machine",
+          "representational space"
+        ],
+        "timestamps": [
+          "00:06:32",
+          "00:07:12"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can communication with machines be treated as an AI safety problem?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because reward hacking disappears only when model size is reduced.",
+        "Because to avoid failures such as reward hacking, we need to understand what objective the system is pursuing and how it is reasoning.",
+        "Because every AI safety problem can be solved with image saliency maps.",
+        "Because AI safety is only about optimizing benchmarks and has nothing to do with interpretability."
+      ],
+      "answer_index": 1,
+      "explanation": "If we do not understand what the system is actually optimizing for or what direction its reasoning is taking, it is very hard to detect or prevent goal-misaligned behavior such as reward hacking. Communication and understanding are therefore foundational for safety.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "AI-safety problem",
+          "avoiding reward hacking"
+        ],
+        "timestamps": [
+          "00:06:10",
+          "00:06:17"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg1-q1",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q2",
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q3",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q4",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg1-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q3",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q4",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which perspective best describes the desired role of a highly capable AI system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is merely a pure automation tool, so its values or goals do not matter.",
+        "It is a useful “colleague” that may nevertheless have values, experiences, and goals very different from those of humans.",
+        "It is only a fact-storage memory system, so two-way interaction is unnecessary.",
+        "It is a system that should be used only after all AI safety problems have already been solved."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture frames AI as a highly capable and useful colleague, but one that may differ from humans in values, experiences, and goals. So the challenge is not just using it, but understanding and coordinating with it safely.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "useful but may have very different values",
+          "treat AI systems as colleagues"
+        ],
+        "timestamps": [
+          "00:03:18",
+          "00:03:37"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is AlphaGo’s Move 37 used to illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The machine merely repeated Go tactics that humans had long known.",
+        "The machine may possess a powerful strategy that humans do not yet have the language or intuition to clearly express.",
+        "The model was strong only because a human suggested each move during play.",
+        "AlphaGo’s performance mainly came from memorizing the full history of past games."
+      ],
+      "answer_index": 1,
+      "explanation": "Move 37 is presented as a canonical example of a superhuman machine concept: humans recognize that it matters, but it is not easy for them to explain or name.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Move 37",
+          "not the move a human would fathom"
+        ],
+        "timestamps": [
+          "00:04:51",
+          "00:05:37"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What condition is necessary for humans and machines to “exchange meaning” with each other?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The machine must use exactly the same natural language as humans at every level of representation.",
+        "The two sides need some overlap in representational space or conceptual vocabulary.",
+        "Humans must first understand every individual neuron in the model.",
+        "It is enough for the model to achieve high benchmark accuracy."
+      ],
+      "answer_index": 1,
+      "explanation": "The central argument is that meaningful communication requires some shared or overlapping representation. The two sides need not be identical, but they need enough overlap to map concepts and learn from each other.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "overlap between human and machine",
+          "representational space"
+        ],
+        "timestamps": [
+          "00:06:32",
+          "00:07:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can communication with machines be treated as an AI safety problem?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because reward hacking disappears only when model size is reduced.",
+        "Because to avoid failures such as reward hacking, we need to understand what objective the system is pursuing and how it is reasoning.",
+        "Because every AI safety problem can be solved with image saliency maps.",
+        "Because AI safety is only about optimizing benchmarks and has nothing to do with interpretability."
+      ],
+      "answer_index": 1,
+      "explanation": "If we do not understand what the system is actually optimizing for or what direction its reasoning is taking, it is very hard to detect or prevent goal-misaligned behavior such as reward hacking. Communication and understanding are therefore foundational for safety.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "AI-safety problem",
+          "avoiding reward hacking"
+        ],
+        "timestamps": [
+          "00:06:10",
+          "00:06:17"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg1-q1",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from easy conceptual MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q2",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium conceptual MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q3",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium conceptual MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q4",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium conceptual MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg1-q1",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q2",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q3",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg1-q4",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "review": 0.7
+      }
+    }
+  ]
+}

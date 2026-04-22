@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture22-nlp-linguistics::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "Transcript slice and summary provide sufficient evidence for a compact two-item set on the mixed capabilities and limits of GPT-4-class systems; no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a model's ability to satisfy many constraints in a generated sonnet best illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Current language models can be astonishingly capable while their underlying understanding remains hard to interpret.",
+        "Next-token prediction is too weak to capture any stylistic structure.",
+        "A generated poem proves the model has expert human creativity.",
+        "Stylistic constraints are unrelated to language modeling."
+      ],
+      "answer_index": 0,
+      "explanation": "A single output can show impressive coordination of style, content, and form, but that does not by itself explain the mechanism or prove human-like creative understanding.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_the_capability_limitation_duality_of_llms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "begins with the letter T",
+          "kind of blows my mind"
+        ],
+        "timestamps": [
+          "00:17:27",
+          "00:20:02"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement best captures the capability-limitation duality of GPT-4-class systems?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They can be highly useful productivity tools while still falling short of expert human performance in some domains.",
+        "They are either useless toys or fully human-equivalent reasoners.",
+        "They only help already strong workers and never weaker workers.",
+        "They are mainly limited by the absence of next-token training."
+      ],
+      "answer_index": 0,
+      "explanation": "A balanced view separates practical usefulness from complete mastery. A system can raise productivity in many tasks and still be clearly weaker than expert humans on difficult creative work.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_the_capability_limitation_duality_of_llms",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "very usable",
+          "much worse"
+        ],
+        "timestamps": [
+          "00:20:14",
+          "00:23:22"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg3-q1",
+      "global_kp_id": "kp_the_capability_limitation_duality_of_llms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg3-q2",
+      "global_kp_id": "kp_the_capability_limitation_duality_of_llms",
+      "role": "primary"
+    }
+  ]
+}

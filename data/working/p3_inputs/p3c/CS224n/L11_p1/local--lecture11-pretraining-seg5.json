@@ -1,0 +1,206 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture11-pretraining",
+    "lecture_title": "Lecture 11 - Pretraining",
+    "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w"
+  },
+  "unit": {
+    "unit_id": "local::lecture11-pretraining::seg5",
+    "course_id": "<course_id>",
+    "name": "Fine-tuning pretrained encoders and lightweight adaptation",
+    "description": "Shows how encoder representations are turned into downstream predictions, when BERT is appropriate, and how RoBERTa and parameter-efficient tuning refine the recipe.",
+    "summary": "After pretraining, an encoder yields one contextual vector per input token; to solve a downstream task, the pretraining prediction head is removed and a task-specific classifier is attached to one or more hidden states, then the model is fine-tuned end to end [ts=3056s] [ts=3133s]. The segment notes BERT model sizes and emphasizes the practical separation between expensive pretraining and relatively cheap downstream fine-tuning, which can often be done on modest hardware [ts=3141s] [ts=3189s]. It also clarifies where BERT fits best: because its objective is fill-in-the-blank reconstruction rather than left-to-right generation, it is strong for document or sentence representation tasks such as classification, but less natural for free-form text generation [ts=3211s] [ts=3247s]. Several improvements are then sketched: span masking can be harder and more useful than masking isolated subwords, and RoBERTa improves on BERT by dropping next-sentence prediction and training on more data [ts=3253s] [ts=3319s]. The lecture closes with parameter-efficient fine-tuning ideas such as prefix tuning, prompt tuning, and low-rank weight updates, all motivated by preserving strong pretrained weights while adapting cheaply to a new task [ts=3353s] [ts=3497s].",
+    "key_points": [
+      {
+        "text": "For downstream tasks, remove the masked-token prediction head and add a task-specific classifier on top of encoder states.",
+        "timestamp_s": 3100,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "BERT is better suited to classification and representation tasks than to open-ended generation.",
+        "timestamp_s": 3218,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Masking whole spans can be harder and more effective than masking isolated subwords.",
+        "timestamp_s": 3258,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "RoBERTa improves BERT mainly by removing next-sentence prediction and training on more text.",
+        "timestamp_s": 3305,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Prefix tuning freezes the pretrained network and learns a small set of prepended pseudo-token parameters instead.",
+        "timestamp_s": 3385,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Low-rank adaptation learns a small low-rank update added to frozen weight matrices.",
+        "timestamp_s": 3482,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=9",
+      "start_s": 3023,
+      "end_s": 3518
+    },
+    "difficulty": 0.61,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "After pretraining, an encoder yields one contextual vector per input token; to solve a downstream task, the pretraining prediction head is removed and a task-specific classifier is attached to one or more hidden states, then the model is fine-tuned end to end [ts=3056s] [ts=3133s]. The segment notes BERT model sizes and emphasizes the practical separation between expensive pretraining and relatively cheap downstream fine-tuning, which can often be done on modest hardware [ts=3141s] [ts=3189s]. It also clarifies where BERT fits best: because its objective is fill-in-the-blank reconstruction rather than left-to-right generation, it is strong for document or sentence representation tasks such as classification, but less natural for free-form text generation [ts=3211s] [ts=3247s]. Several improvements are then sketched: span masking can be harder and more useful than masking isolated subwords, and RoBERTa improves on BERT by dropping next-sentence prediction and training on more data [ts=3253s] [ts=3319s]. The lecture closes with parameter-efficient fine-tuning ideas such as prefix tuning, prompt tuning, and low-rank weight updates, all motivated by preserving strong pretrained weights while adapting cheaply to a new task [ts=3353s] [ts=3497s].",
+  "target_kp_ids": [],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "video_clip_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "transcript_slice": "00:50:28\nduring the encoder pretraining stage,\n\n00:50:36\nHow do we correlate those to words\n\n00:50:41\nSo the question is, the encoder output\n\n00:50:47\nAnd how do we actually correlate those values to stuff\n\n00:50:52\nI'm going to move on to the next slide\n\n00:50:56\nSo the encoder gives us, for each input word token,\n\n00:51:02\nthe token in context.\n\n00:51:07\nand turn them into answers for the tasks that we care about?\n\n00:51:38\nI'm not sure.\n\n00:51:40\nwe had the transformer that was giving us our representations.\n\n00:51:48\ntransformation that moved us from the encoder's hidden state\n\n00:51:54\nAnd we just remove this last prediction layer here.\n\n00:52:03\nthe sentiment of the sentence.\n\n00:52:08\nAnd we stick a linear classifier on top\n\n00:52:13\nand then fine-tune the whole thing.\n\n00:52:17\nSo yeah, the BERT model had two different models.\n\n00:52:22\nOne was 340 million.\n\n00:52:26\nof percolating as we talk about models with many, many\n\n00:52:30\nIt was trained on 800 billion words plus\n\n00:52:40\nMaybe 25 million words.\n\n00:52:45\nQuite a bit still.\n\n00:52:50\nto be a whole lot of compute.\n\n00:52:55\nand we were like, oh, who has that kind of compute\n\n00:52:58\nAlthough, nowadays, it's not considered to be very much.\n\n00:53:04\nSo you could take the BERT model that they\n\n00:53:09\non your task on even a very small GPU.\n\n00:53:21\nSo one question is, well, this seems really great.\n\n00:53:30\nYeah.\n\n00:53:34\nWhat's the structure of the pretrained model good for?\n\n00:53:41\nbut it's much less naturally used\n\n00:53:46\nSo I wouldn't want to use BERT to generate\n\n00:53:52\nIt's not.\n\n00:53:56\ngiven all the words that came before it.\n\n00:54:01\nof, say, a document, to classify it,\n\n00:54:05\njust say it's toxic or non-toxic or whatever.\n\n00:54:13\nOK, some extensions of BERT-- so we had a question earlier of\n\n00:54:18\nOne thing that seems to work better\n\n00:54:26\nbecause the difficulty of this problem\n\n00:54:33\nbe because this is part of irresistibly,\n\n00:54:39\ncame before it.\n\n00:54:45\nBut this might be a harder problem,\n\n00:54:51\nthan random masking, and that might\n\n00:54:56\nyou mask out just one subword of a word\n\n00:55:02\nSo this ends up doing much better.\n\n00:55:07\nwhich showed that the next sentence prediction wasn't\n\n00:55:11\nThey also showed that they really should have trained it\n\n00:55:16\nSo RoBERTa is a drop-in replacement for BERT.\n\n00:55:21\nIt's better.\n\n00:55:24\ndon't know a whole lot about the best practices for training\n\n00:55:27\nYou sort of train it for as long as you're willing to,\n\n00:55:33\nSo this is very--\n\n00:55:37\non these models because they're big.\n\n00:55:42\nAnother thing that you should know for your final projects\n\n00:55:46\nof fine-tuning all parameters of the network\n\n00:55:50\nSo what we've talked about so far\n\n00:55:54\nand then you fine-tune all of them as well.\n\n00:55:58\nAn alternative, which you call parameter efficient or\n\n00:56:05\nof parameters, or you choose some very smart way\n\n00:56:09\nfine-tuning others.\n\n00:56:14\nwere really good.\n\n00:56:18\nfrom the pretrained model to the model that\n\n00:56:22\nsome of the generality, some of the goodness\n\n00:56:25\nSo one way that this is done is called prefix tuning.\n\n00:56:30\n--where you actually freeze all the parameters of the network.\n\n00:56:36\nAnd I never change any of the parameter values.\n\n00:56:44\nthat I prepend to the very beginning of the sequence.\n\n00:56:50\nIt's like these would have been like inputs to the network,\n\n00:56:55\nand I'm training everything to do my sentiment analysis\n\n00:57:02\nAnd this is nice because I get to keep all the good pretrained\n\n00:57:12\nends up generalizing better.\n\n00:57:17\nBut this is also cheaper because I\n\n00:57:21\nor I don't have to store the gradients and all the optimizer\n\n00:57:27\nI'm only training a very small number of parameters.\n\n00:57:31\nDoes it it make any difference to put these state parameters\n\n00:57:37\nIt doesn't make any difference to put these\n\n00:57:40\nIn a decoder, you have to put them at the beginning\n\n00:57:46\nprocess the whole sequence.\n\n00:57:49\nCan we just attach new layers and only train\n\n00:57:53\nThe question is, can we just attach the new layers\n\n00:57:57\nAbsolutely.\n\n00:58:00\nAnother thing that works well, sorry we're\n\n00:58:06\nSo I have a bunch of weight matrices in my transformer,\n\n00:58:12\na very low-rank little diff.\n\n00:58:17\nto be the original value plus my very low-rank diff\n\n00:58:24\nAnd this ends up being a very similarly useful technique.\n\n00:58:31\nlearning way fewer parameters than I\n\n00:58:37\nparameters.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_peft",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_masked_language_modeling",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "name": "BERT and encoder transfer",
+      "description": "Using a pretrained bidirectional encoder such as BERT for downstream tasks by attaching lightweight prediction heads and fine-tuning.",
+      "track_tags": [
+        "encoder_models",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "ml_engineering"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because bERT and encoder transfer clarifies using a pretrained bidirectional encoder such as BERT for downstream tasks by attaching lightweight prediction heads and fine-tuning, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_peft",
+      "name": "Parameter-efficient fine-tuning",
+      "description": "Fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk. Adapting pretrained models by changing only a small number of parameters, such as prefixes, prompts, or low-rank weight updates.",
+      "track_tags": [
+        "adaptation",
+        "model_adaptation",
+        "training_efficiency",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "efficient_ml",
+        "nlp",
+        "transfer_learning"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because parameter-efficient fine-tuning formalizes how fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between high and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16-efficient-training::kp10",
+        "local::lecture11-pretraining::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_masked_language_modeling",
+      "name": "Masked language modeling",
+      "description": "Corrupting input text and training an encoder to reconstruct masked tokens using bidirectional context.",
+      "track_tags": [
+        "encoder_models",
+        "self_supervision"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because masked language modeling clarifies corrupting input text and training an encoder to reconstruct masked tokens using bidirectional context, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp5"
+      ]
+    }
+  ],
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "target_difficulty_range": [
+    0.46,
+    0.76
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L11_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture11-pretraining_transcript.txt"
+  }
+}

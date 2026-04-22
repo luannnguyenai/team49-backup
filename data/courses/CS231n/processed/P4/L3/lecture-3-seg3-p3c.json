@@ -1,0 +1,301 @@
+{
+  "unit_id": "local::lecture_3::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The segment gives enough transcript grounding for optimization intuition, gradient direction, and gradient-checking practice; no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-3-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item remains well aligned, grounded, and does not need further repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-3-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item remains well aligned, grounded, and does not need further repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-3-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item remains well aligned, grounded, and does not need further repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-3-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the loss-landscape analogy, what is the optimizer trying to do?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Find parameter values that move toward lower loss using local information such as slope.",
+        "Find the highest point in the landscape because higher loss means better accuracy.",
+        "Choose labels directly without changing the model parameters.",
+        "Store every training example and compare test examples to it."
+      ],
+      "answer_index": 0,
+      "explanation": "Optimization is about choosing parameters that reduce the objective. Since the optimizer generally relies on local slope information, it uses that signal to decide how to move through parameter space.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_optimization_objective_and_loss",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "loss landscape",
+          "trying to minimize"
+        ],
+        "timestamps": [
+          "00:24:45",
+          "00:24:56"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-3-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the negative gradient used for steepest descent?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The gradient points in the direction of steepest increase, so the negative gradient points toward steepest local decrease.",
+        "The gradient is always negative, so multiplying by minus one makes it positive.",
+        "The negative gradient gives a random direction that avoids overfitting.",
+        "The negative gradient removes the need to compute the loss."
+      ],
+      "answer_index": 0,
+      "explanation": "The gradient indicates how to increase the function most quickly. To minimize loss, the update should move in the opposite direction.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_optimization_objective_and_loss",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "gradient points up the hill",
+          "direction we should"
+        ],
+        "timestamps": [
+          "00:28:40",
+          "00:28:43"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-3-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the practical relationship between numerical and analytic gradients?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Analytic gradients are used for efficient training, while numerical gradients are useful for checking whether the analytic implementation is correct.",
+        "Numerical gradients are exact and fast, so analytic gradients are rarely used.",
+        "Analytic gradients require trying many random W values, while numerical gradients use calculus.",
+        "Both methods avoid computing the loss function."
+      ],
+      "answer_index": 0,
+      "explanation": "Finite differences are easy to understand but slow and approximate. Calculus-based gradients are efficient for training, and finite-difference checks can catch implementation mistakes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_checking",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "approximation",
+          "gradient checking"
+        ],
+        "timestamps": [
+          "00:29:07",
+          "00:31:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-3-seg3-q1",
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg3-q2",
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg3-q3",
+      "global_kp_id": "kp_gradient_checking",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-3-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.65,
+      "discrimination_prior": 0.82,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "This is a basic optimization-goal item with very low ambiguity."
+    },
+    {
+      "item_id": "lecture-3-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The negative-gradient direction requires a medium level of geometric understanding, not just vocabulary recall."
+    },
+    {
+      "item_id": "lecture-3-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Gradient checking is a practical diagnostic idea that is moderately technical and should discriminate well."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-3-seg3-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "It serves as an early check on whether the learner understands what optimization is trying to achieve."
+    },
+    {
+      "item_id": "lecture-3-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item bridges landscape intuition to the actual update rule."
+    },
+    {
+      "item_id": "lecture-3-seg3-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This transfers to many debugging contexts, not just one optimizer lecture."
+    }
+  ]
+}

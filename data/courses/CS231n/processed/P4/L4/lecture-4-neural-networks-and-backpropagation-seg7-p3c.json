@@ -1,0 +1,323 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "The transcript is sufficient for questions about Jacobians, gradient shape, and why practical matrix backprop avoids explicit Jacobians, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is an important shape principle of backpropagation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The gradient of the loss with respect to a variable has the same shape as that variable.",
+        "The gradient is always a scalar no matter what the original variable is.",
+        "The gradient always has the same shape as the previous layer's Jacobian.",
+        "Gradients exist only for vectors and not for matrices."
+      ],
+      "answer_index": 0,
+      "explanation": "Backprop returns how sensitive the loss is to each element of the original variable. Therefore, the gradient tensor must match the shape of the tensor with respect to which the derivative is taken.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same dimensionality",
+          "the original variable"
+        ],
+        "timestamps": [
+          "01:08:48",
+          "01:08:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the backward pass of an elementwise ReLU, what is the practical implementation strategy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use a 0/1 mask rule instead of materializing the full Jacobian.",
+        "Always build the full dense Jacobian and then multiply matrices.",
+        "Use softmax to approximate the derivative of ReLU.",
+        "Ignore gradients for negative and positive elements equally."
+      ],
+      "answer_index": 0,
+      "explanation": "Elementwise ReLU creates a sparse diagonal Jacobian with entries of 0 or 1. In practice, it is enough and much cheaper to apply a mask rule to the upstream gradient.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sparse matrix",
+          "rule-based calculation"
+        ],
+        "timestamps": [
+          "01:09:48",
+          "01:10:44"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does practical backpropagation for matrix multiplication avoid building an explicit Jacobian?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the Jacobian can be enormous in memory, so efficient backward formulas are derived directly with matrix operations.",
+        "Because an explicit Jacobian is not differentiable.",
+        "Because an explicit Jacobian only works for linear networks.",
+        "Because the learning rate will automatically fix any error caused by dropping the Jacobian."
+      ],
+      "answer_index": 0,
+      "explanation": "For large tensors, the Jacobian of matrix multiplication can blow up in size and become impractical to store. Instead, direct gradient formulas for each operand are derived using matrix algebra.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_efficient_matrix_backprop_without_explicit_jacobians",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "huge Jacobian",
+          "256 gigabytes"
+        ],
+        "timestamps": [
+          "01:11:49",
+          "01:12:52"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "global_kp_id": "kp_efficient_matrix_backprop_without_explicit_jacobians",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Gradient-shape consistency is an important but still introductory matrix-backprop principle."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Elementwise ReLU backward is a medium item because learners must connect local behavior to vectorized implementation."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.35,
+      "discrimination_prior": 1.0,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Avoiding explicit Jacobians in matrix backprop is a deeper efficiency idea and should be one of the harder items in the lecture."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item helps reinforce shape reasoning before more advanced Jacobian discussions."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a practical backprop mechanics check rather than a mere definition item."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "transfer",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is best used when learners are expected to understand why practical backprop is efficient."
+    }
+  ]
+}

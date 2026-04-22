@@ -1,0 +1,68 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Lecture 13: Generative Models (part 1)",
+    "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg3",
+    "course_id": "<course_id>",
+    "name": "Why generative models and how the model family tree is organized",
+    "description": "Motivates conditional generation through ambiguity and then classifies major generative-model families by density access and sampling behavior.",
+    "summary": "The main practical motivation for generative modeling is ambiguity: when one input y can correspond to many valid outputs x, a model should represent a whole conditional distribution rather than a single deterministic answer [ts=1637s] [ts=1671s]. The lecture uses language modeling, text-to-image generation, and image-to-video prediction to make this concrete, stressing that the value of p(x|y) is that it captures many plausible poems, images, or futures for the same prompt or starting frame [ts=1694s] [ts=1737s] [ts=1757s]. It then introduces a taxonomy of generative models by asking whether the model gives explicit density values or only sampling procedures: explicit-density models compute p(x), implicit-density models can sample without exposing p(x), and the tree further splits into tractable exact-density models, approximate-density models, direct samplers, and iterative samplers [ts=1820s] [ts=1843s] [ts=1912s] [ts=1940s]. Within that taxonomy, autoregressive models are the main exact explicit method covered today, variational autoencoders are explicit but approximate, GANs are direct implicit models, and diffusion models are indirect iterative samplers deferred to the next lecture; the instructor also warns that subsequent notation will often omit the conditioning variable y for simplicity even when the intended model is conditional [ts=1918s] [ts=1931s] [ts=1951s] [ts=1983s] [ts=1996s].",
+    "key_points": [
+      {
+        "text": "Generative models are especially useful when there are many plausible outputs x for the same input y.",
+        "timestamp_s": 1637,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Language modeling, text-to-image, and image-to-video are examples where p(x|y) captures output ambiguity.",
+        "timestamp_s": 1694,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Explicit-density models let you compute p(x), while implicit-density models let you sample without directly reading out p(x).",
+        "timestamp_s": 1826,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Autoregressive models are explicit tractable-density models, while VAEs are explicit approximate-density models.",
+        "timestamp_s": 1918,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "GANs are direct implicit models and diffusion models are iterative implicit models.",
+        "timestamp_s": 1951,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13",
+      "start_s": 1632,
+      "end_s": 2098
+    },
+    "difficulty": 0.56,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "transcript_slice": "00:27:15\nThe main reason you want to build generative models\n\n00:27:19\ntrying to model.\n\n00:27:25\nis that it's probabilistic.\n\n00:27:30\non that input label y.\n\n00:27:34\nsometimes there's just a deterministic mapping.\n\n00:27:37\nhow many cats are in the image.\n\n00:27:40\nThere's just one answer.\n\n00:27:43\nIf I ask for a picture of a dog wearing a hot dog hat,\n\n00:27:47\nthat could exist based on that query.\n\n00:27:51\nAnd that's exactly what generative models\n\n00:27:53\nThey model a whole distribution of outputs conditioned\n\n00:27:57\nSo anytime that there's ambiguity in the output\n\n00:28:01\non the input, that's where you want\n\n00:28:04\nAnd this is why--\n\n00:28:08\nthis has gotten used a lot in the last couple of years.\n\n00:28:12\nSomeone asked about ChatGPT a moment ago.\n\n00:28:16\nis predict output text x from input text y.\n\n00:28:23\non this example.\n\n00:28:29\nThe input is write me a short rhyming\n\n00:28:32\nAnd wow, it actually works.\n\n00:28:34\nThis didn't work at all when we first taught this class.\n\n00:28:38\nThat would be embarrassing.\n\n00:28:41\nNow, this is a conditional generative model.\n\n00:28:45\npoems about generative models that one might write,\n\n00:28:49\nAnd the beauty of a generative model\n\n00:28:53\nover possible outputs conditioned on that input.\n\n00:28:58\nMake me an image showing a person\n\n00:29:02\nYou're looking at one example through your eyes.\n\n00:29:06\nThere's a whole different space of possible images\n\n00:29:11\nAnd a generative model allows you\n\n00:29:14\ndepending on what you want.\n\n00:29:18\nInput an image, what happens next?\n\n00:29:24\nMaybe I'm going to drop it.\n\n00:29:26\nMaybe I'm going to move my hand and the AirPods\n\n00:29:31\nThere's all things that could happen.\n\n00:29:34\nlets you model and sample from these possible futures.\n\n00:29:42\nAnytime there's ambiguity in the output, that's\n\n00:29:48\nAnd someone asked about what are the inputs and outputs.\n\n00:29:52\nAnd this is surprisingly one field of deep learning\n\n00:29:57\nthinking about what are different ways to model\n\n00:30:01\nHow can we write down loss functions\n\n00:30:05\nSo this is one area where when you\n\n00:30:08\nthere may be a lot of equations.\n\n00:30:12\npretty carefully to understand what's going on.\n\n00:30:17\nand more equations, which I think is fun--\n\n00:30:20\nSo there's this whole taxonomy of different kinds\n\n00:30:24\nSo on the one hand, you can imagine\n\n00:30:30\nmethods.\n\n00:30:33\nthe whole thing is we're trying to model\n\n00:30:36\nAnd with these explicit density methods,\n\n00:30:40\np of x, for any sample x.\n\n00:30:46\nThese are ones where you can't actually\n\n00:30:50\nget that density value p of x out from the model,\n\n00:30:56\nSo the difference here is that in an implicit model,\n\n00:31:03\nbut you can sample from the underlying density function\n\n00:31:06\nSo the model has implicitly learned\n\n00:31:10\nAnd on the explicit density side,\n\n00:31:15\nyou can get that explicit density value out,\n\n00:31:21\nwith these explicit density methods.\n\n00:31:25\nAnd the reason why you might turn to implicit models\n\n00:31:29\ncare about knowing what exactly was the density\n\n00:31:33\nMaybe all you care about is generating samples\n\n00:31:39\nSo if the thing you really care about is sampling,\n\n00:31:43\nto explicitly be able to see the value\n\n00:31:48\nAnd then things break down and cascade\n\n00:31:52\nSo inside explicit density methods,\n\n00:31:55\nyou can really compute the real p of x that's being modeled.\n\n00:32:01\nOr another version of explicit density methods\n\n00:32:07\nbut it's not the real one.\n\n00:32:11\nAnd variational autoencoders are one example\n\n00:32:16\nthat we'll see.\n\n00:32:20\nwe can think about direct methods for implicit density.\n\n00:32:25\nevaluation to just draw a sample from the underlying distribution\n\n00:32:31\nAnd a generative adversarial network\n\n00:32:35\ntree.\n\n00:32:36\nI don't know if it has a good name, I called it indirect.\n\n00:32:41\nso please feel free to correct me if there's\n\n00:32:44\nBut these indirect ones are ones where\n\n00:32:50\np of x that's being modeled, but it requires\n\n00:32:54\nThere's no feed forward function that you can input and get\n\n00:32:58\nThere's some iterative method that you\n\n00:33:01\nfrom the underlying density that's being modeled.\n\n00:33:05\nof this that we'll see next time.\n\n00:33:08\nare sloppy with notation and drop the y,\n\n00:33:12\nso that someone would ask me that question,\n\n00:33:15\nSo yes, exactly.\n\n00:33:18\nand actually all the rest of the slides this lecture--\n\n00:33:22\nbut you should always imagine an additional conditioned on y\n\n00:33:28\nSo thank you for asking that.\n\n00:33:34\nthat indirect iterative procedure as a black box\n\n00:33:39\nIn principle, yes.\n\n00:33:43\nend up approximate depending on exactly the method.\n\n00:33:49\nneed to take an infinite number of steps\n\n00:33:54\nwith a finite number of steps.\n\n00:33:57\nDiffusion models are the most common for this today.\n\n00:34:03\nmight have also had this property where there\n\n00:34:06\nBut if you want to draw an exact sample from the distribution\n\n00:34:10\nto converge.\n\n00:34:16\nAnd I was pretty proud of this taxonomy\n\n00:34:22\nThere's four leaves.\n\n00:34:26\nAnd we're going to cover half the tree today and half the tree\n\n00:34:29\nSo I thought that was a pretty nice pretty nice breakdown.\n\n00:34:33\nbetween the approximate density and directly sampling\n\n00:34:38\nThe difference is that in an indirect but implicit method,\n\n00:34:44\nYou can't compute one at all, but you can still\n\n00:34:47\nWith an approximate density method,\n\n00:34:52\nvalue out, that's going to be some approximate or bound",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.41,
+    0.71
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture13-generative-models-1_transcript.txt"
+  }
+}

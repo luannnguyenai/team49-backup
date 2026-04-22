@@ -1,0 +1,237 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi chẩn đoán về saliency map, giới hạn của IG/SHAP, vì sao lời giải thích đẹp mắt chưa đủ cho suy luận hành vi và vì sao local sampling được đề xuất như phương án thay thế thực dụng hơn.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Saliency map cố gắng ước lượng điều gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Tần suất xuất hiện của mỗi đặc trưng trong tập huấn luyện.",
+        "Mức thay đổi cục bộ của đầu ra dự đoán khi thay đổi từng đặc trưng quanh điểm đầu vào đang xét.",
+        "Xác suất đặc trưng đó đúng về mặt ngữ nghĩa theo đánh giá của con người.",
+        "Số lượng tham số trong lớp gần nhất có liên quan đến đặc trưng."
+      ],
+      "answer_index": 1,
+      "explanation": "Saliency map được mô tả như một ước lượng hình dạng cục bộ của hàm dự đoán quanh dữ liệu đang xét: nếu thay đổi một đặc trưng thì đầu ra đổi mạnh hay yếu.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same image with a number",
+          "local shape of the prediction function"
+        ],
+        "timestamps": [
+          "00:10:06",
+          "00:10:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Phát hiện rằng mạng đã huấn luyện và mạng chưa huấn luyện có thể cho saliency map rất giống nhau chủ yếu cảnh báo điều gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Saliency map luôn đo được tri thức nhân quả sâu của mô hình.",
+        "Những bản đồ giải thích trông hợp lý chưa chắc phân biệt được mô hình học thật với mô hình gần như ngẫu nhiên.",
+        "Mạng chưa huấn luyện thường chính xác hơn mạng đã huấn luyện trên ImageNet.",
+        "Ta chỉ cần tăng độ phân giải ảnh là vấn đề giải thích sẽ biến mất."
+      ],
+      "answer_index": 1,
+      "explanation": "Nếu mô hình có ý nghĩa và mô hình gần ngẫu nhiên vẫn cho lời giải thích giống nhau, thì hình ảnh giải thích đẹp mắt chưa đủ để kết luận mô hình đang dùng tri thức đúng mà con người kỳ vọng.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same very similar saliency map",
+          "meaningful prediction"
+        ],
+        "timestamps": [
+          "00:12:20",
+          "00:12:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Loại vấn đề nào KHÔNG được các attribution method phổ biến phát hiện một cách đáng tin cậy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Lỗi gán nhãn, tương quan giả và phân phối ngoài miền.",
+        "Chỉ lỗi gán nhãn, còn hai loại kia luôn được phát hiện tốt.",
+        "Chỉ out-of-distribution shift, còn lỗi gán nhãn thì luôn lộ ra rõ ràng.",
+        "Không loại nào trong số này từng được nhắc đến như một thách thức."
+      ],
+      "answer_index": 0,
+      "explanation": "Bài giảng nhấn mạnh rằng nhiều lỗi mô hình quan trọng như label noise, spurious correlation và OOD shift đều không được các lời giải thích kiểu attribution lộ ra một cách ổn định.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "labeling error",
+          "out-of-distribution at test time",
+          "spurious correlation"
+        ],
+        "timestamps": [
+          "00:13:02",
+          "00:13:06",
+          "00:17:19"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Khi nhìn Integrated Gradients hay SHAP như công cụ “kiểm định giả thuyết” về hành vi mô hình, kết luận chính là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chúng luôn xác nhận đúng giả thuyết nếu người dùng đủ kinh nghiệm.",
+        "Chúng có thể kiểm định giả thuyết tốt hơn ngẫu nhiên trên hầu hết tác vụ thực tế.",
+        "Chúng không thể xác nhận các giả thuyết đó tốt hơn đoán ngẫu nhiên một cách đáng tin.",
+        "Chúng chỉ thất bại với ảnh nhưng luôn đúng với văn bản."
+      ],
+      "answer_index": 2,
+      "explanation": "Lập luận của bài giảng là từ góc nhìn hypothesis testing, các attribution method phổ biến như IG và SHAP không cung cấp bằng chứng đủ tin cậy để xác minh kết luận hành vi mà người dùng muốn rút ra.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cannot do better than random guessing",
+          "SHAP and IG"
+        ],
+        "timestamps": [
+          "00:16:09",
+          "00:16:47"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Nếu mục tiêu là hiểu hình dạng cục bộ của hàm dự đoán quanh một điểm dữ liệu, phương án thay thế thực tế nào được đề xuất?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chỉ tăng số lớp attention rồi vẽ heatmap chi tiết hơn.",
+        "Lấy mẫu trực tiếp xung quanh điểm quan tâm để ước lượng hàm cục bộ, rồi kiểm chứng cẩn thận trước khi dùng trong bối cảnh rủi ro cao.",
+        "Bỏ hoàn toàn mọi đánh giá định lượng và chỉ dùng trực giác con người.",
+        "Ép mọi mô hình thành CNN để saliency map ổn định hơn."
+      ],
+      "answer_index": 1,
+      "explanation": "Bài giảng đề xuất cách đơn giản hơn là sampling trực tiếp quanh điểm đang xét. Độ hữu ích phụ thuộc số mẫu, độ phân giải đầu ra và số đặc trưng, đồng thời cần validation nghiêm túc trước khi triển khai thực tế.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "direct sampling strategy",
+          "careful validation"
+        ],
+        "timestamps": [
+          "00:18:35",
+          "00:20:40"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "global_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "global_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "role": "primary"
+    }
+  ]
+}

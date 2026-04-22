@@ -1,0 +1,4338 @@
+Title: Stanford CS224N NLP with Deep Learning | 2023 | Python Tutorial, Manasi Sharma
+URL: https://www.youtube.com/watch?v=8j4wpU98Q74
+Video ID: 8j4wpU98Q74
+============================================================
+
+00:00:04
+SPEAKER: All right.
+
+00:00:06
+Hi, everyone.
+
+00:00:07
+Welcome to the 224N
+Python review session.
+
+00:00:10
+The goal of the
+session really will
+
+00:00:12
+be to give you the basics of
+Python and NumPy in particular
+
+00:00:18
+that you'll be using a lot
+in your second homework
+
+00:00:20
+and the homeworks that will
+come after that as well.
+
+00:00:23
+We're sort of
+taking this tutorial
+
+00:00:25
+from the background of anyone
+who hasn't touched programming
+
+00:00:29
+languages to some extent,
+but also for people who have.
+
+00:00:32
+We'll be sort of going
+through a lot of that material
+
+00:00:34
+very quickly, and we'll be
+progressing to NumPy as well.
+
+00:00:37
+And as I mentioned, first
+and foremost, the session
+
+00:00:39
+is really meant for the
+people who are here in person.
+
+00:00:41
+So if you'd like me to slow
+down, speed up at any point,
+
+00:00:44
+need time for clarifications,
+feel free to ask.
+
+00:00:47
+It's really meant
+for you first here.
+
+00:00:49
+And I really would like it to be
+sort of an interactive session
+
+00:00:52
+as well.
+
+00:00:53
+All right.
+
+00:00:54
+So this is a topic--
+these are the topics
+
+00:00:55
+we'll be covering today.
+
+00:00:57
+Going through, first
+of all, why Python
+
+00:00:58
+is a language, why
+we have chosen it
+
+00:01:00
+for sort of this course and
+in general, why do people
+
+00:01:02
+prefer it to some extent
+for machine learning
+
+00:01:04
+and natural language processing.
+
+00:01:06
+Some basics of the
+language itself--
+
+00:01:08
+common data structures and
+then getting to the meat of it
+
+00:01:12
+through NumPy which
+as I mentioned,
+
+00:01:14
+you'll be extensively using in
+your homeworks going forward.
+
+00:01:16
+And then some practical
+tips about how
+
+00:01:17
+to use things in Python.
+
+00:01:21
+All right.
+
+00:01:21
+So first thing, why Python?
+
+00:01:23
+So a lot of you who might
+have been first introduced
+
+00:01:27
+to programming might
+have done Java before.
+
+00:01:29
+A lot of people use Matlab
+in other fields as well.
+
+00:01:34
+So why Python?
+
+00:01:35
+Python is generally
+used for one,
+
+00:01:37
+because it's a very
+high level language.
+
+00:01:39
+It can look very, very
+English like and so
+
+00:01:41
+it's really easy to work
+with for people, especially
+
+00:01:43
+when they get started out.
+
+00:01:44
+It has a lot of scientific
+computational functionality
+
+00:01:47
+as well, similar to Matlab.
+
+00:01:48
+So when you talk
+about NumPy, you'll
+
+00:01:50
+see that it has a lot of
+frameworks that are very, very
+
+00:01:52
+quick and efficient operations
+involving math or matrices.
+
+00:01:55
+And that's very, very
+useful in applications
+
+00:01:58
+such as deep learning.
+
+00:01:59
+And for deep learning
+in particular,
+
+00:02:00
+a lot of frameworks that
+people use, particularly
+
+00:02:02
+for example, PyTorch
+and TensorFlow,
+
+00:02:05
+interface directly with Python.
+
+00:02:06
+And so for those main
+reasons, people generally
+
+00:02:08
+tend to use Python
+than deep learning.
+
+00:02:12
+OK.
+
+00:02:12
+So the setup information
+is in the slides
+
+00:02:15
+if you'd like to
+look at them offline.
+
+00:02:17
+I will be sort of
+jumping over that for now
+
+00:02:19
+because I want to get
+to the introduction
+
+00:02:21
+to the language itself and
+then if we have time, come back
+
+00:02:23
+to the setup information.
+
+00:02:25
+A lot of it's pretty direct.
+
+00:02:26
+You can walk through it.
+
+00:02:27
+It gives you steps for how
+to install packages, what
+
+00:02:31
+is a Conda environment,
+for example,
+
+00:02:33
+and gets you set up with
+your first working Python
+
+00:02:35
+environment.
+
+00:02:36
+So you can sort of run
+simple and basic commands
+
+00:02:38
+to get used to the language.
+
+00:02:39
+But for now, I'm going
+to be skipping over this
+
+00:02:41
+and coming back to
+it if we have time.
+
+00:02:44
+All right.
+
+00:02:45
+Language basics.
+
+00:02:46
+So in Python, you have
+variables and these variables
+
+00:02:50
+can take on multiple values.
+
+00:02:52
+The assignment operation
+or the equal sign
+
+00:02:54
+will allow you to assign a
+particular value to a variable.
+
+00:02:57
+A nice thing with
+Python is you don't
+
+00:02:59
+have to instantiate the
+type of the variable
+
+00:03:01
+to begin with, and
+then only instantiate--
+
+00:03:03
+and only assign
+values of that type.
+
+00:03:05
+So for example, in
+certain languages,
+
+00:03:07
+we first say that this
+variable x is only
+
+00:03:09
+going to be of type
+int and any value
+
+00:03:12
+aside from that that's assigned
+to it will throw an error.
+
+00:03:14
+Python is pretty flexible.
+
+00:03:15
+So if I want to,
+I can reassign--
+
+00:03:17
+I can start with
+x is equal to 10.
+
+00:03:18
+And then later on--
+five lines later,
+
+00:03:20
+I can say x is equal
+to high as a string
+
+00:03:23
+and there would be no issue.
+
+00:03:25
+You can do simple mathematical
+operations such as the plus
+
+00:03:29
+and division signs.
+
+00:03:30
+You can do exponentiation
+which is raising
+
+00:03:33
+one value to another value.
+
+00:03:35
+So x to the power
+of y for example,
+
+00:03:37
+using the double asterisk.
+
+00:03:39
+You can do type casting
+for float division.
+
+00:03:42
+So if you want to ensure that
+your values are being divided
+
+00:03:44
+resulting in a float value and
+not just dividing two integers,
+
+00:03:47
+you can cast two different
+types like float.
+
+00:03:49
+If you want something
+to be explicitly an int,
+
+00:03:51
+you can also just
+put an int instead
+
+00:03:53
+of the float with
+brackets around the result
+
+00:03:55
+and that will give
+you an integer value.
+
+00:03:58
+And then you can also do
+type casting to, for example,
+
+00:04:01
+convert from
+integers to strings.
+
+00:04:03
+So in this case, if I wanted
+to instead of doing 10 plus 3
+
+00:04:07
+as a mathematical
+operation, I just
+
+00:04:09
+want to write out
+10 plus 3, then
+
+00:04:11
+I can convert the
+x and y values,
+
+00:04:13
+for example, to
+strings and then add
+
+00:04:15
+the plus sign as a character
+as well to create a string.
+
+00:04:19
+And so a lot of these common
+operations you can look online
+
+00:04:22
+as well-- people
+have lists for them--
+
+00:04:24
+and just see how they're
+sort of done in Python.
+
+00:04:27
+All right.
+
+00:04:28
+Some other quick things.
+
+00:04:29
+So Boolean values, the
+true and the false,
+
+00:04:32
+they're always used
+with capital letters
+
+00:04:34
+and some other languages,
+they might be lowercase
+
+00:04:36
+so just one thing to know.
+
+00:04:37
+Python also doesn't
+have a null value.
+
+00:04:39
+The equivalent of a
+null value is none.
+
+00:04:41
+So sometimes when you want
+to say that this value--
+
+00:04:44
+you want to return none
+saying that I'm not really
+
+00:04:46
+doing anything here.
+
+00:04:47
+You want to do checks, for
+example, in if statements
+
+00:04:51
+to say that this
+doesn't have a value,
+
+00:04:53
+then you can assign it to none.
+
+00:04:55
+So none, sort of, functions
+as a null equivalent.
+
+00:04:58
+So you're not really
+returning anything.
+
+00:05:00
+It doesn't have a value.
+
+00:05:02
+Not the same as 0.
+
+00:05:03
+And another nice
+thing about Python
+
+00:05:05
+is lists which are,
+sort of, mutable--
+
+00:05:08
+we'll come to that
+a little bit later--
+
+00:05:09
+but sort of mutable lists
+of objects and means
+
+00:05:13
+that you can change them.
+
+00:05:14
+They can be of any type.
+
+00:05:16
+So you can have a mixture
+of integers, non- values
+
+00:05:19
+strings, et cetera.
+
+00:05:22
+And yeah, functions can
+return the non-value as well.
+
+00:05:26
+And another quick
+thing, instead of using
+
+00:05:28
+the double and, and in some
+other languages as people
+
+00:05:31
+might do, with Python,
+I mentioned earlier,
+
+00:05:33
+it's very English like so you
+can actually just write out
+
+00:05:36
+if x is equal to 3
+and, and in English y
+
+00:05:40
+is equal to 4 then
+return true or something.
+
+00:05:43
+It's quite nice that way.
+
+00:05:45
+So you can use and/or and not.
+
+00:05:47
+And then just the comparison,
+operators of equal
+
+00:05:49
+equals to and not
+equals to will check
+
+00:05:52
+for equality and inequality.
+
+00:05:54
+This one is pretty standard,
+I feel, across many languages
+
+00:05:56
+and you can use them
+in Python as well.
+
+00:05:59
+And yeah, remember
+just a quick thing.
+
+00:06:01
+The equal, equal to sine is
+different from the assignment
+
+00:06:02
+operator.
+
+00:06:03
+This one checks for equality.
+
+00:06:04
+That one is just
+assigning a value.
+
+00:06:06
+So a single equal sign
+versus two of them.
+
+00:06:10
+All right.
+
+00:06:10
+And then also in Python,
+you don't use brackets.
+
+00:06:13
+So Python-- you can use
+basically spaces or tabs.
+
+00:06:17
+So either indents
+of 2 or 4 to be
+
+00:06:20
+able to break up what is
+contained within the function
+
+00:06:23
+or contained within like an
+if statement, a for statement
+
+00:06:26
+or any loops for example.
+
+00:06:28
+And so the main thing is you
+can choose whether to do 2 or 4.
+
+00:06:30
+You just have to be consistent
+throughout your entire code
+
+00:06:34
+base.
+
+00:06:35
+Otherwise, they
+will throw an error.
+
+00:06:37
+Now go to some common
+data structures,
+
+00:06:39
+and for this, we'll
+transition to the Colab.
+
+00:06:43
+So this one will sort of
+show you in real time.
+
+00:06:46
+This is by the way, a Colab.
+
+00:06:47
+A Colab is basically a Jupyter
+Notebook for those of you
+
+00:06:51
+who are familiar with those
+that you can use that it's
+
+00:06:53
+hosted on Google's servers.
+
+00:06:55
+The really nice thing
+about Jupyter Notebooks
+
+00:06:57
+is you don't have to run
+an entire file altogether.
+
+00:07:00
+You can run it step by step into
+what are these called cells.
+
+00:07:04
+So if you want to see
+an intermediate output,
+
+00:07:05
+you can see that pretty
+easily, and that way-- and you
+
+00:07:09
+can also write, for example, a
+lot of descriptions pertaining
+
+00:07:13
+to cells, which is really,
+really nice to have as well.
+
+00:07:15
+So a lot of people tend
+to use these when they're
+
+00:07:17
+sort of starting out
+with their project
+
+00:07:18
+and want to debug things.
+
+00:07:19
+And Colab allows you to use
+these Jupyter Notebook type
+
+00:07:24
+applications hosted on their
+servers for free basically.
+
+00:07:27
+So anyone can create one of
+these and run their code.
+
+00:07:32
+All right.
+
+00:07:32
+So lists are mutable arrays.
+
+00:07:35
+Mutable means that
+you can change them
+
+00:07:36
+so that once you declare
+them, you can add to them,
+
+00:07:39
+you can delete them and they're
+optimized for that purpose.
+
+00:07:41
+So they expect to be
+changed very often.
+
+00:07:43
+We'll come to what are
+called NumPy arrays later
+
+00:07:45
+and those tend to be
+pretty much fixed.
+
+00:07:47
+When you create a new one, you'd
+have-- when you change one,
+
+00:07:50
+you actually have to create
+a new array, which will have
+
+00:07:52
+the additional information.
+
+00:07:53
+So this is highly optimized
+for changing things.
+
+00:07:55
+If you know, for example,
+if you're in a loop,
+
+00:07:58
+you're adding
+different elements to,
+
+00:08:00
+let's say, a bigger
+entity, you'd
+
+00:08:01
+want to use
+something like a list
+
+00:08:03
+because you're going to be
+changing that very often.
+
+00:08:05
+So let's see how they work.
+
+00:08:07
+So we start off with a
+names array with Zach and J.
+
+00:08:11
+You can index into the list by--
+
+00:08:14
+so what is this?
+
+00:08:15
+Index into the list
+by index, which
+
+00:08:16
+means that you can list out
+the elements in the list
+
+00:08:20
+depending on what's
+called the index.
+
+00:08:22
+So it's what place that
+value is at within the list.
+
+00:08:25
+So 0 refers to
+the first element.
+
+00:08:27
+So Python's what's
+called 0 indexed which
+
+00:08:29
+means it starts with 0
+and then it goes to 1.
+
+00:08:31
+So here, 0 will be Zach.
+
+00:08:34
+And then let's say I want to
+append something to the end.
+
+00:08:37
+So to add something to
+the end of the list,
+
+00:08:39
+the term is append not add.
+
+00:08:42
+And so if I want to
+append, I can now
+
+00:08:45
+create a separate list which
+is the original list itself
+
+00:08:47
+with the added last element.
+
+00:08:49
+And what would currently
+be the length of this?
+
+00:08:52
+It would be 3 because
+you have three elements.
+
+00:08:54
+And you can just quickly get
+that by using the len function.
+
+00:08:56
+Not length.
+
+00:08:57
+Just three letters--
+
+00:08:58
+L-E-N. All right.
+
+00:09:01
+It's also really
+nice because Python
+
+00:09:03
+has overloaded the
+plus operation to be
+
+00:09:07
+able to concatenate lists.
+
+00:09:09
+So here, I have a
+separate list, right?
+
+00:09:11
+And all you need for a list
+definition is just brackets.
+
+00:09:13
+So this is a separate
+list altogether,
+
+00:09:15
+even though I haven't
+saved it in a variable.
+
+00:09:17
+Just Abby and Kevin.
+
+00:09:19
+And I can just do
+a plus equal to,
+
+00:09:21
+which means that names is equal
+to names plus Abby and Kevin
+
+00:09:23
+and this should
+output this full list.
+
+00:09:27
+You can create lists by just
+putting the plain brackets
+
+00:09:30
+or an existing list.
+
+00:09:32
+And then as I mentioned
+earlier, your list
+
+00:09:34
+can have a variety
+of types within them.
+
+00:09:36
+So here this list contains an
+integer value, a list value--
+
+00:09:39
+so you can have a list of lists,
+as many sort of sublists as you
+
+00:09:42
+like--
+
+00:09:43
+a float value and a none value.
+
+00:09:45
+And this is completely
+valid within Python.
+
+00:09:49
+Slicing refers to how you can
+access only parts of the list.
+
+00:09:52
+So if I only want, for
+example, in this numbers array,
+
+00:09:56
+I only want 0, 1, 2, slicing is
+a way that you can extract only
+
+00:10:01
+those parts.
+
+00:10:01
+So the way slicing works is
+the first element is included,
+
+00:10:05
+and the last
+element is excluded.
+
+00:10:07
+So here I start with 0, 1, 2, 3.
+
+00:10:10
+So 3 is not included.
+
+00:10:11
+And so 0, 1, 2 will
+be printed out.
+
+00:10:14
+There's also shorthands.
+
+00:10:15
+So if you know that
+you're going to be
+
+00:10:17
+starting with the first element
+of the array so if you know--
+
+00:10:20
+I want 0, 1, 2 and
+it starts with 0,
+
+00:10:22
+then you don't need to even
+include the first index.
+
+00:10:25
+You can just leave that
+and include the last index
+
+00:10:27
+that would be excluded.
+
+00:10:28
+So that would be blank semicolon
+3 and same deal with the end.
+
+00:10:34
+If you know that you want
+to take everything, let's
+
+00:10:36
+say, from like 5 and 6
+till the end of the array,
+
+00:10:40
+you can start with
+what you would like.
+
+00:10:42
+So 0, 1, 2, 3, 4, 5 till
+the end and leave that.
+
+00:10:49
+Fun fact-- so this
+semicolon, when
+
+00:10:51
+you take just the semicolon,
+it will take everything
+
+00:10:53
+in the list, but it will also
+create a duplicate in memory.
+
+00:10:56
+That's a very slight,
+very useful thing
+
+00:10:59
+to know, because sometimes
+when you pass lists an array--
+
+00:11:04
+in Python, which is out
+of scope of this tutorial,
+
+00:11:06
+you can only pass
+the reference to it.
+
+00:11:08
+So if you change the
+array, that gets changed.
+
+00:11:10
+This will create an entirely
+separate copy in memory
+
+00:11:12
+of the exact same array.
+
+00:11:13
+So if you make
+any changes to it,
+
+00:11:15
+it won't affect
+your original array.
+
+00:11:17
+So this is a very-- pretty
+neat way to do that.
+
+00:11:20
+And then another fun
+thing that Python
+
+00:11:21
+has which is pretty unique
+is you can index negatively.
+
+00:11:24
+So negative indexing
+means you index
+
+00:11:26
+from the back of the array.
+
+00:11:28
+So minus 1 refers to the
+last element of the array.
+
+00:11:31
+Minus 3 will refer to
+the third last element.
+
+00:11:35
+And so what minus 1 will give
+you will be 6 in this case.
+
+00:11:38
+1 minus 3 will give
+you-- will be everything
+
+00:11:40
+because you're starting
+with the minus 3 elements.
+
+00:11:42
+So minus 1, minus 2,
+minus 3 till the end.
+
+00:11:46
+And then this one seems
+kind of confusing, right?
+
+00:11:48
+3 to minus 2.
+
+00:11:49
+So what this will do is
+it'll give you 0, 1, 2, 3.
+
+00:11:52
+So you start with 3.
+
+00:11:53
+And then minus 1, minus 2.
+
+00:11:55
+So you leave off the last--
+
+00:11:58
+because you exclude
+it within the list,
+
+00:12:01
+you would only get 3 and 4.
+
+00:12:02
+So that's what this is.
+
+00:12:04
+OK.
+
+00:12:05
+That's about lists.
+
+00:12:07
+Tuples are immutable arrays.
+
+00:12:09
+So once you declare
+the values of these,
+
+00:12:11
+they cannot be changed.
+
+00:12:12
+So I start with-- you
+remember we started
+
+00:12:13
+with the list of Zach and Jay.
+
+00:12:16
+Tuples, you start
+with Zach and J
+
+00:12:19
+and you can still access them.
+
+00:12:20
+I can still print out names,
+zero, same as I did with lists.
+
+00:12:24
+But if I try to change
+it, in this case,
+
+00:12:26
+it'll throw an error.
+
+00:12:27
+So tuples, once you've
+instantiated them,
+
+00:12:29
+they cannot be changed.
+
+00:12:31
+And to create an
+empty tuple, you just
+
+00:12:33
+create-- you can either
+use just a tuple sign
+
+00:12:35
+or oftentimes, you can just
+use the parentheses, brackets.
+
+00:12:38
+So you can just
+say, for example,
+
+00:12:40
+as you did here,
+just parentheses
+
+00:12:42
+to instantiate something.
+
+00:12:45
+All right.
+
+00:12:46
+And yeah, this one we'll
+come to a little bit later in
+
+00:12:49
+shapes, but you can also have
+a tuple of a single value.
+
+00:12:52
+And all you have to do
+there is just put the value
+
+00:12:54
+and put a comma.
+
+00:12:55
+So that just shows that have
+a tuple which is basically
+
+00:12:58
+like an immutable array.
+
+00:12:59
+So you can't change it.
+
+00:13:00
+It's a list but
+only of one item.
+
+00:13:02
+And that's here.
+
+00:13:04
+OK.
+
+00:13:04
+I'll quickly move
+to dictionaries.
+
+00:13:06
+For those of you who might be
+familiar with other languages,
+
+00:13:09
+this is the equivalent of like
+a hash map or a hash table.
+
+00:13:13
+What this is useful
+for essentially
+
+00:13:14
+is mapping one value to another
+in a really, really quick way.
+
+00:13:18
+So if I want to
+map, for example,
+
+00:13:19
+a string to an index,
+which you will happen
+
+00:13:21
+to do a lot of in
+your homeworks,
+
+00:13:23
+this is a really, really
+useful way to do that.
+
+00:13:25
+And so what it does is you can
+instantiate this dictionary,
+
+00:13:29
+and it says,
+corresponding, that Zach
+
+00:13:31
+is going to correspond to this
+string value, whatever it is.
+
+00:13:34
+And so anytime I want to
+retrieve the string value,
+
+00:13:37
+I just use this dictionary.
+
+00:13:39
+I index by it, which
+is what I do here,
+
+00:13:42
+and then it outputs the
+corresponding value.
+
+00:13:44
+And it does that
+really, really quickly.
+
+00:13:47
+And yeah, it's really useful.
+
+00:13:49
+Very, very commonly
+used, especially
+
+00:13:52
+when you, for example, you
+have a list of strings,
+
+00:13:54
+or a list of items and you want
+to have a corresponding index
+
+00:13:58
+for them, because and
+as you'll see in NLP,
+
+00:14:01
+oftentimes you're working
+with indices and numbers
+
+00:14:04
+in particular.
+
+00:14:04
+So it's a really
+great way to, sort of,
+
+00:14:07
+move from like string formats
+to just like numerical index
+
+00:14:10
+values.
+
+00:14:12
+There's some other things
+you can do for dictionaries.
+
+00:14:14
+You can check whether certain
+elements are in there.
+
+00:14:16
+So if you, for example,
+try to index phonebook
+
+00:14:18
+is equal to Muncy,
+it'll throw an error
+
+00:14:20
+because there's no string that
+says Muncy in that phonebook
+
+00:14:23
+dictionary.
+
+00:14:23
+And so sometimes you might
+be wanting to do checks
+
+00:14:26
+before you extract a value.
+
+00:14:28
+And so this will just
+check, for example,
+
+00:14:29
+if I do print Muncy in
+phonebook, it should say false.
+
+00:14:32
+Or for example here, Kevin in
+phonebook, it should say false.
+
+00:14:34
+While something that's
+actually in that dictionary,
+
+00:14:37
+Zach will be true.
+
+00:14:38
+OK.
+
+00:14:40
+And then if you'd like to delete
+an entry from the dictionary,
+
+00:14:43
+you can just do that
+using the del command.
+
+00:14:47
+All right.
+
+00:14:48
+Let's move to loops quickly.
+
+00:14:51
+So loops are a really great way
+to optimize for the same kind
+
+00:14:56
+of operation you're doing.
+
+00:14:58
+It's also a great way to
+start to sequentially go over
+
+00:15:03
+those list type or
+array type objects
+
+00:15:04
+we were talking about earlier.
+
+00:15:05
+You have a list of names, right?
+
+00:15:08
+How do you access all of them?
+
+00:15:10
+So loops are a really
+great way to do that.
+
+00:15:12
+In Python, they've
+abstracted away
+
+00:15:14
+a lot of the confusing parts and
+other languages that might be.
+
+00:15:18
+You can really, for example,
+first index on numbers.
+
+00:15:21
+So what you do is you have a
+range function that you call.
+
+00:15:24
+So here you say range.
+
+00:15:26
+And the range of the
+last number you'd want.
+
+00:15:28
+So what this range function
+will return is 0, 1, 2, 3, 4.
+
+00:15:31
+And that's what will be
+stored in this i value.
+
+00:15:33
+And here it's just
+printing out that i value.
+
+00:15:36
+So if I want to,
+for example, loop
+
+00:15:37
+over the length of
+a list of size 10,
+
+00:15:40
+I just have to do for i
+in range 10 and then index
+
+00:15:43
+that corresponding
+part of the list.
+
+00:15:45
+You technically
+don't even have to do
+
+00:15:47
+that because in Python,
+you can just directly get
+
+00:15:49
+the element of the list.
+
+00:15:51
+So here I have a
+list of names where
+
+00:15:54
+I have Zach, J and Richard.
+
+00:15:56
+Instead of saying first
+the length of the list,
+
+00:15:58
+and then doing this
+range operation,
+
+00:16:00
+I can just directly
+say for name in names
+
+00:16:03
+and then print out the names,
+and it will just directly get
+
+00:16:05
+the element in each list.
+
+00:16:07
+But sometimes you
+might want both.
+
+00:16:09
+You might both want this element
+Zach as well as its position
+
+00:16:13
+in the array.
+
+00:16:14
+And for that, you can actually
+use this really helpful
+
+00:16:17
+function called enumerate.
+
+00:16:18
+And so enumerate will basically
+pair those two values,
+
+00:16:21
+and it'll give you both the
+value, which is here in name,
+
+00:16:24
+for example, and its
+corresponding index
+
+00:16:26
+within the array--
+
+00:16:28
+both together so that's
+really, really convenient.
+
+00:16:30
+Versus, for example,
+having to do
+
+00:16:32
+this a little bit more
+complicated range operation
+
+00:16:34
+where you first take the range,
+and then you index the list.
+
+00:16:38
+How do you iterate
+over a dictionary?
+
+00:16:40
+So for dictionaries, if
+you want to iterate over
+
+00:16:44
+what's called the keys, so
+all of these first items
+
+00:16:46
+that you first put
+into the dictionary,
+
+00:16:49
+you can just iterate the
+same way you would a list.
+
+00:16:51
+You just say for name and
+for example, phonebook
+
+00:16:53
+and you can output the keys.
+
+00:16:55
+If you want to iterate over what
+is stored in the list, which
+
+00:16:58
+is called a value, you'd have
+to do the dictionary dot values.
+
+00:17:02
+And if you want both, you
+use the dot items function.
+
+00:17:05
+And so that will print
+out both of these.
+
+00:17:09
+All right.
+
+00:17:11
+So this is sort of covering
+the overarching, most commonly
+
+00:17:15
+used sort of structures lists,
+dictionaries and then loops
+
+00:17:20
+and how to efficiently
+use them within your code.
+
+00:17:23
+We'll quickly be moving to the
+meat of what is really, really
+
+00:17:27
+strong about Python
+and what you'll
+
+00:17:28
+be using a lot for
+your coming homeworks,
+
+00:17:30
+especially homework
+2 which is NumPy.
+
+00:17:34
+OK.
+
+00:17:34
+So for NumPy, also, I'm going
+to be going to the Colab
+
+00:17:38
+but just quickly wanted
+to mention what NumPy is.
+
+00:17:41
+So NumPy is basically
+an optimized library
+
+00:17:44
+for mathematical operations.
+
+00:17:45
+People tend to like Matlab
+because it's very, very
+
+00:17:48
+useful for these mathematical
+operations which people use
+
+00:17:50
+in their research.
+
+00:17:51
+Python's sort of solution to
+that is to have a separate
+
+00:17:54
+library entirely where they make
+use of subroutines which are,
+
+00:17:59
+sort of, like
+sublanguages-- sorry,
+
+00:18:01
+subscripts that are written in
+a different language called C
+
+00:18:03
+or C++ that are highly
+optimized for efficiency.
+
+00:18:08
+So the reason C and C++ are
+much faster than Python is
+
+00:18:10
+because they're closer to
+what's called machine language,
+
+00:18:13
+which is what the
+computer will read.
+
+00:18:14
+I mentioned earlier, one of
+the nice things about Python
+
+00:18:17
+is it's kind of high level.
+
+00:18:18
+It looks like English
+to some extent.
+
+00:18:19
+We say, literally, like if x is
+equal to 1, or x is equal to 2,
+
+00:18:24
+right?
+
+00:18:24
+But that also means that there's
+a lot more translation required
+
+00:18:28
+on the computer's part before
+it understands what you mean.
+
+00:18:31
+And that's useful
+when we're writing out
+
+00:18:33
+code, where we want
+to understand it,
+
+00:18:34
+but it's a little
+bit less useful
+
+00:18:36
+when you're sort of
+running a lot of operations
+
+00:18:38
+on a lot of data.
+
+00:18:39
+So the real benefit of
+something like NumPy
+
+00:18:41
+is that if you have your
+memory and your data
+
+00:18:44
+in a particular format, it will
+call these basically scripts
+
+00:18:47
+or what are called subroutines
+in a different language,
+
+00:18:50
+and it'll make them
+very, very fast.
+
+00:18:51
+And so that's the real
+benefit of using NumPy.
+
+00:18:53
+And almost everyone
+in sort of NLP
+
+00:18:56
+is very, very familiar
+with this because you'll
+
+00:18:58
+be running a lot of
+operations on, for example,
+
+00:19:00
+a co-occurrence matrices,
+which are really, really big
+
+00:19:02
+and it's very useful to have
+them optimized for time.
+
+00:19:05
+So that's really the
+benefit of using NumPy.
+
+00:19:08
+And NumPy, basically,
+it's involved
+
+00:19:10
+for all these math and matrix
+and vector calculations.
+
+00:19:13
+And it's different than a list.
+
+00:19:14
+Although you can
+easily translate
+
+00:19:16
+between a list
+and a NumPy array,
+
+00:19:17
+NumPy arrays are
+specifically, as I
+
+00:19:19
+mentioned, designed to be
+used in these subroutines.
+
+00:19:22
+So they have a specific format.
+
+00:19:23
+They're instantiated
+differently,
+
+00:19:25
+and you can translate
+between this and sort
+
+00:19:27
+of your standard list
+easily but to know
+
+00:19:30
+that you can only do NumPy
+operations on NumPy arrays.
+
+00:19:32
+You can't do NumPy
+operations on lists directly.
+
+00:19:34
+You first have to convert
+them, which is really simple.
+
+00:19:37
+You just use this
+NumPy.array function.
+
+00:19:39
+But just know that they
+operate only on NumPy arrays.
+
+00:19:42
+OK.
+
+00:19:43
+So for NumPy, we're going to
+be going back to the Colab.
+
+00:19:47
+And then as I mentioned earlier,
+the real strength of NumPy
+
+00:19:50
+is it supports these large
+multi-dimensional arrays
+
+00:19:52
+and matrices for
+very, very optimized
+
+00:19:55
+high level
+mathematical functions.
+
+00:19:57
+And just to go step back for a
+quick second, what is a matrix?
+
+00:20:01
+Matrices are basically
+like rectangular structures
+
+00:20:05
+of numbers that are used,
+and you can treat them
+
+00:20:08
+with specific rules
+for operations
+
+00:20:10
+between different
+kinds of things.
+
+00:20:12
+So if you have a lot of
+data, instead of individually
+
+00:20:15
+potentially multiplying
+things, if you can store them
+
+00:20:17
+in this rectangular format,
+you have specific rules
+
+00:20:20
+about how this
+matrix for example
+
+00:20:22
+will interact with
+the different one.
+
+00:20:23
+And by doing that, which is
+matrix multiplication or matrix
+
+00:20:26
+math, you can do a wide variety
+of mathematical operations.
+
+00:20:31
+A vector is generally--
+this is conventional.
+
+00:20:34
+None of these are
+hard and fast rules.
+
+00:20:35
+But conventionally, a vector
+is a matrix in one dimension.
+
+00:20:39
+So it's usually like a
+row vector or a column
+
+00:20:41
+vector, which usually just
+means that it's a list of values
+
+00:20:46
+in only one dimension.
+
+00:20:47
+So it's like, for example, here,
+when I come down to x is equal
+
+00:20:51
+to NumPy array of 1, 2, 3,
+that's a list in only one
+
+00:20:54
+dimension versus, for example,
+Z-- when this is Z down here--
+
+00:20:59
+that is what's called
+a two dimensional
+
+00:21:02
+array, because you have both
+rows, for example, like 6, 7
+
+00:21:06
+and then you have 8, 9.
+
+00:21:09
+Versus, in this
+first one, you only
+
+00:21:11
+have three values
+in one dimension.
+
+00:21:14
+So that's the conventional
+difference between the two.
+
+00:21:16
+Another convention is
+matrices generally referred
+
+00:21:18
+to two dimensional objects.
+
+00:21:19
+So as I mentioned, is like
+Z, this is two dimensional.
+
+00:21:23
+You might have heard
+the word tensor also.
+
+00:21:25
+Tensor is by convention,
+usually like higher
+
+00:21:27
+dimensional objects.
+
+00:21:28
+So instead of having two
+dimensions, 2 comma 2,
+
+00:21:31
+you can have n dimensions.
+
+00:21:33
+You can have 2, comma 2,
+comma 2, comma 2, comma 2,
+
+00:21:35
+comma 2 for like five
+or six dimensions.
+
+00:21:38
+And those are very valid to
+do mathematical operations on.
+
+00:21:41
+And those are often
+colloquially called tensors.
+
+00:21:45
+In addition, and this will be
+covered in the next tutorial,
+
+00:21:48
+in PyTorch, those
+larger, sort of, tensors
+
+00:21:52
+are also optimized for
+efficiency to be used on GPUs
+
+00:21:55
+and so they're called tensor
+in a more concrete way
+
+00:21:58
+because you're using
+these tensors with PyTorch
+
+00:22:00
+and other sort of packages to
+directly do those quicker GPU
+
+00:22:04
+operations on for deep learning.
+
+00:22:05
+So those are, sort of--
+that's a quick, sort of,
+
+00:22:07
+terminology difference
+between the three.
+
+00:22:10
+OK.
+
+00:22:11
+So now let's start off
+with just some quick sort
+
+00:22:14
+of representations of how are
+these matrices and vectors
+
+00:22:16
+represented in NumPy.
+
+00:22:18
+This, sort of, goes
+back to your question
+
+00:22:19
+about what is the difference
+between 3 comma versus like 1,
+
+00:22:24
+3.
+
+00:22:25
+So usually 3 comma
+in NumPy arrays
+
+00:22:28
+usually just means that you have
+one list of 1 to 3 for example,
+
+00:22:33
+or three values.
+
+00:22:34
+Versus if you add another
+list on top of that, this one
+
+00:22:38
+comma 3 essentially
+refers to the fact
+
+00:22:40
+that there's a list of lists.
+
+00:22:42
+So any time you
+have two dimensions,
+
+00:22:44
+it always means that
+there's a list of lists
+
+00:22:47
+and that being like a list of
+lists or for example, a row.
+
+00:22:49
+So here, 1, 3 means that there's
+one row and then three columns.
+
+00:22:54
+So it's saying there's one
+row of 3, 4, 5, essentially,
+
+00:22:58
+and then each of those is
+like a column separately.
+
+00:23:01
+You can easily reshape them.
+
+00:23:03
+So these are basically
+the same format
+
+00:23:05
+but from NumPy's perspective,
+you'll see a little bit later
+
+00:23:08
+for operations such
+as broadcasting,
+
+00:23:10
+you need to have it, for
+example, sometimes in this 1,
+
+00:23:12
+3 format or 3, 1 format.
+
+00:23:15
+And also like as I
+said, 3 is basically
+
+00:23:18
+just like it represents
+three numbers.
+
+00:23:20
+1, 3 means like one
+row of three elements.
+
+00:23:23
+3, 1 will mean you have--
+essentially in each column,
+
+00:23:27
+you'll have a separate array.
+
+00:23:28
+So you'll see boxes
+around each of them.
+
+00:23:30
+There's an example
+that comes a little bit
+
+00:23:32
+later in this Colab which
+will make it a little bit more
+
+00:23:34
+clearer.
+
+00:23:34
+So here, if you can see the
+difference between x and y,
+
+00:23:37
+one of them has
+only one bracket,
+
+00:23:39
+which just says it's one list,
+only one list of 1, 2, 3.
+
+00:23:44
+The second one is
+two brackets, which
+
+00:23:46
+says it's a list with
+only one list in it.
+
+00:23:49
+So it's a list of a list.
+
+00:23:50
+That's really the main
+difference between these sort
+
+00:23:53
+of two representations.
+
+00:23:54
+So I could have, let's
+say, a separate one.
+
+00:23:59
+I'm going to call this
+a and I just do this.
+
+00:24:03
+So it's the same
+sort of elements
+
+00:24:06
+but this will be 1, 3 because
+it's showing that there's
+
+00:24:09
+one outer list
+which shows the rows
+
+00:24:12
+and then one inner list which
+will have each of those values.
+
+00:24:16
+So the benefit
+will come when I'm
+
+00:24:17
+coming to, a little bit
+later, which is broadcasting.
+
+00:24:20
+And so essentially it
+will help you determine
+
+00:24:22
+what dimensions you want to
+match against because sometimes
+
+00:24:25
+you'd want to have 1, 3--
+like, 1, 2, 3 applied only
+
+00:24:30
+to rows in some other matrix.
+
+00:24:32
+We'll come to that
+a little bit later.
+
+00:24:34
+But sometimes you might want to
+have it only apply to columns.
+
+00:24:36
+And so if I have a separate
+matrix, for example,
+
+00:24:39
+of 00000000 and I want the
+resulting matrix to be,
+
+00:24:44
+for example, 123123123
+along the rows--
+
+00:24:46
+let me actually draw this out.
+
+00:24:48
+It might be easier.
+
+00:24:49
+So let's say I have the 00000000
+and if I want to have a matrix
+
+00:24:59
+that does 123123123
+versus 123123123,
+
+00:25:10
+the difference in how to
+generate these two will be
+
+00:25:14
+the difference in how you
+represent their shape.
+
+00:25:16
+It's the same 123 but
+the resulting array
+
+00:25:19
+you're generating by
+repeating the 1, 2, 3 values
+
+00:25:23
+requires a difference in shape.
+
+00:25:24
+And so we'll come
+to that a little bit
+
+00:25:25
+later, because
+this process of how
+
+00:25:26
+do you generate these arrays
+is called broadcasting.
+
+00:25:28
+But that's the real
+benefit of having
+
+00:25:30
+an understanding of the shapes.
+
+00:25:31
+The same 1, 2, 3
+values are the same.
+
+00:25:33
+It's just how they're
+sort of used with regards
+
+00:25:35
+to other arrays.
+
+00:25:36
+All right.
+
+00:25:37
+So yeah, vectors can be
+represented as, sort of-- this
+
+00:25:40
+is what I talked about earlier,
+as like n dimensions, n by 1,
+
+00:25:42
+or 1 by n dimensions,
+and they can
+
+00:25:44
+result in this different
+behavior kind of like this
+
+00:25:46
+that I talked about.
+
+00:25:48
+Matrices are usually in two
+dimensions represented as m
+
+00:25:50
+by n.
+
+00:25:51
+These are just two examples.
+
+00:25:53
+For example, I generate, let's
+say-- and you can also reshape.
+
+00:25:55
+So I start with, for
+example, this array,
+
+00:25:58
+which is a list of 10.
+
+00:25:59
+Oh, sorry.
+
+00:26:00
+Let me import NumPy quickly.
+
+00:26:04
+So I started off
+with this matrix a
+
+00:26:06
+which is basically a one
+dimensional list of 10 values.
+
+00:26:09
+I can reshape it
+into a 5 by 2 matrix.
+
+00:26:11
+So you just have to make sure
+that your dimensions match,
+
+00:26:14
+which means that you can
+multiply them together and get
+
+00:26:17
+the original size.
+
+00:26:19
+So if I start off with the
+10 matrix, I can make a 2
+
+00:26:21
+by 5 matrix.
+
+00:26:21
+I can make a 5 by 2 matrix.
+
+00:26:23
+I can make a 10 by 1, 1 by 10.
+
+00:26:25
+I can't make a, for
+example, 3 and 5
+
+00:26:27
+because it wouldn't fit
+into the original size.
+
+00:26:29
+And for that, this
+operation called
+
+00:26:31
+reshape is really useful.
+
+00:26:33
+You might be wondering, why
+is there two parentheses?
+
+00:26:35
+The way that reshape
+works is essentially it
+
+00:26:37
+will take in a tuple.
+
+00:26:39
+So remember what I talked
+about earlier with tuples
+
+00:26:41
+is that these-- they
+are immutable objects
+
+00:26:43
+and they're defined
+by parentheses.
+
+00:26:44
+So the outer parentheses
+is representing
+
+00:26:46
+what you're inputting
+to the function
+
+00:26:48
+and what you're
+inputting is a tuple.
+
+00:26:50
+So it uses a second
+set of parentheses.
+
+00:26:53
+So now let's go to
+some array operations.
+
+00:26:56
+So I started off
+with this array x.
+
+00:26:59
+When you apply
+simple operations,
+
+00:27:01
+for example, a max
+operation, sometimes you
+
+00:27:03
+might want the max
+of the entire array.
+
+00:27:05
+So if I do the max of
+an the entire array--
+
+00:27:07
+what's the max value of the
+entire array by the way?
+
+00:27:09
+Just the entire thing.
+
+00:27:10
+Yes, 6, right?
+
+00:27:11
+So if I just do np.max of
+x, it'll return one value.
+
+00:27:15
+It'll return 6.
+
+00:27:16
+Well, let's say I want
+the max of every row.
+
+00:27:19
+In each of these rows,
+I say I want, let's say,
+
+00:27:22
+the max of each row.
+
+00:27:22
+I want 2 and then 4 and then 6.
+
+00:27:24
+How do you do that?
+
+00:27:25
+And so NumPy always
+has, like usually
+
+00:27:28
+in most of their functions,
+an axis variable.
+
+00:27:31
+And what the axis
+variable will do
+
+00:27:32
+is it'll tell you which
+of these dimensions
+
+00:27:35
+do you want to
+take the max over.
+
+00:27:37
+And the way to
+think about it is--
+
+00:27:38
+this is going to be
+a little bit tricky,
+
+00:27:40
+but the way people
+describe it is the axis
+
+00:27:43
+is what you want to
+apply your function over.
+
+00:27:46
+What you want to reduce over.
+
+00:27:48
+And what that means
+is I print out
+
+00:27:49
+the shape of the original array.
+
+00:27:51
+It's 3 by 2.
+
+00:27:52
+I want to apply axis 1.
+
+00:27:55
+As I remember, NumPy is 0 index.
+
+00:27:57
+It'll be 0, 1.
+
+00:27:58
+So I want to apply the max
+over the second dimension.
+
+00:28:01
+The second dimension means that
+for each of these, essentially,
+
+00:28:07
+the row dimension is
+the first dimension.
+
+00:28:09
+So it's all along the rows.
+
+00:28:10
+I'm going to be
+comparing columns.
+
+00:28:12
+And so compare this entire
+column to this entire column.
+
+00:28:16
+And so just remember for
+axes, usually the axis 0
+
+00:28:20
+refers to the row axis
+and the axis 1 refers
+
+00:28:23
+to the column axis.
+
+00:28:24
+If you don't even
+want to remember that,
+
+00:28:25
+you can just remember that from
+the original dimension, which
+
+00:28:28
+of these it's referring to and
+that's the dimension you want
+
+00:28:32
+to compare over or reduce over.
+
+00:28:35
+So it can be a little bit
+harder to grasp around it.
+
+00:28:38
+Usually the best
+way to get around
+
+00:28:39
+is to just play with a bunch
+of operations of min, max
+
+00:28:43
+and things like that.
+
+00:28:44
+But just remember
+like the axis is
+
+00:28:46
+what you want to compare
+over not the resulting thing.
+
+00:28:49
+So axis 1 means your column.
+
+00:28:51
+I want to compare
+between the columns.
+
+00:28:52
+I want to get-- for example,
+compare 1 to 2, 3 to 4, 5 to 6.
+
+00:28:57
+Does that make sense?
+
+00:29:00
+OK.
+
+00:29:01
+And what this will do is
+if I just do np.axis axis,
+
+00:29:05
+it'll just return--
+
+00:29:06
+basically since I'm
+comparing these columns,
+
+00:29:07
+it'll just return
+a result in column.
+
+00:29:10
+And so as I mentioned,
+for over the axis 1,
+
+00:29:12
+you get three values,
+because you're
+
+00:29:14
+comparing over these
+columns, and each column
+
+00:29:16
+has three values.
+
+00:29:17
+I'm comparing over
+rows, as we mentioned,
+
+00:29:19
+I get two values, right?
+
+00:29:20
+And so this will just
+be the tuple comma
+
+00:29:23
+which is just indicating
+that it's just a list.
+
+00:29:25
+It's not a list of lists.
+
+00:29:26
+It's just a list.
+
+00:29:27
+But let's say I want
+a list of lists.
+
+00:29:28
+Maybe I want to do
+those operations
+
+00:29:30
+I talked about earlier.
+
+00:29:31
+Instead of reshaping
+which is always there,
+
+00:29:33
+it's always an
+option, you can also
+
+00:29:35
+use this feature
+called keepdims.
+
+00:29:38
+And what that will do is it'll
+take the original dimensions,
+
+00:29:41
+which is two dimensions
+because you have 3, 2,
+
+00:29:44
+there's two of them, and
+it'll keep that consistent.
+
+00:29:46
+So it'll be 3, 1.
+
+00:29:49
+But it just means that
+instead of returning
+
+00:29:51
+just the extracted column,
+which is just a list,
+
+00:29:54
+it'll basically keep the
+column in the context
+
+00:29:57
+of the original
+sort of x and it'll
+
+00:30:00
+keep it as like a two
+dimensional value.
+
+00:30:04
+All right.
+
+00:30:06
+Now these are just
+some operations.
+
+00:30:08
+So in NumPy, you can use
+an asterisk as an element
+
+00:30:12
+wise multiplication.
+
+00:30:13
+So an asterisk
+means that I'm going
+
+00:30:15
+to be comparing
+every single value
+
+00:30:17
+to every single corresponding
+value in another matrix
+
+00:30:20
+and you need your
+matrices to also
+
+00:30:22
+be the same size for this one.
+
+00:30:23
+So this one, it's basically
+an element wise matrix.
+
+00:30:25
+It's not a matrix
+multiplication so you
+
+00:30:27
+need to have them be
+the exact same size.
+
+00:30:28
+So this will compare, for
+example, 1 into 3, 2 into 3,
+
+00:30:31
+3 into 3 and 4 into 3.
+
+00:30:34
+All right.
+
+00:30:35
+You can also do
+matrix multiplication,
+
+00:30:37
+which is a different
+operation entirely.
+
+00:30:40
+For those of you who
+aren't familiar with matrix
+
+00:30:42
+multiplication,
+you would basically
+
+00:30:44
+be multiplying a
+row of one matrix
+
+00:30:47
+with a column of another matrix
+and for that to be necessary,
+
+00:30:50
+you need to have the second
+dimension of the first array
+
+00:30:53
+be equal to the first
+dimension of the second array.
+
+00:30:55
+So for matrix multiplication
+if I have an A into B, B
+
+00:31:04
+into C shaped
+matrices, these two
+
+00:31:08
+have to be equal for
+matrix multiplication.
+
+00:31:10
+Just something to keep in
+mind because oftentimes
+
+00:31:12
+if you're doing matrix
+multiplication, you need--
+
+00:31:15
+you have to make sure that these
+dimensions are the same, which
+
+00:31:18
+means that, for example,
+this is a valid operation,
+
+00:31:26
+but this can sometimes
+throw an error.
+
+00:31:31
+Sometimes.
+
+00:31:32
+So it's just
+important to make sure
+
+00:31:33
+that sometimes you
+want to make sure
+
+00:31:35
+that these are exactly equal.
+
+00:31:36
+You can actually just
+print out the shapes
+
+00:31:37
+and make sure that
+these are equal to be
+
+00:31:38
+doing matrix multiplication.
+
+00:31:40
+And then for matrix
+multiplication,
+
+00:31:43
+there's a couple of
+functions you can use.
+
+00:31:46
+The first one is just np.matmul
+which is NP dot matrix
+
+00:31:49
+multiplication.
+
+00:31:50
+You can also just use
+the add operation.
+
+00:31:53
+And both of those
+are overloaded.
+
+00:31:55
+You can choose whichever one.
+
+00:31:56
+They'll result in the
+same exact operation.
+
+00:31:58
+And just a quick
+search-- let me show.
+
+00:32:00
+You can-- to show what this will
+do is it'll multiply 1 into 2,
+
+00:32:04
+so it'll come like
+1, 2 versus 3, 4.
+
+00:32:07
+So it'll do 1 into 3, 2 into
+3 and add those two values.
+
+00:32:11
+So that's what matrix
+multiplication will do.
+
+00:32:15
+OK.
+
+00:32:16
+And then dot products will--
+
+00:32:17
+what a dot product is
+that it takes two vectors.
+
+00:32:20
+So usually it
+operates on vectors.
+
+00:32:22
+And a vector, as I
+mentioned, is just
+
+00:32:23
+like a one dimensional matrix.
+
+00:32:26
+So it's just basically 3 cross
+1 for example or 4 cross 1.
+
+00:32:29
+It'll element wise multiply
+between two different vectors,
+
+00:32:31
+and it'll sum up those values.
+
+00:32:33
+And so here, what a
+dot product would do
+
+00:32:35
+would be like 1 into 1 plus
+2 into 10 plus 3 into 100.
+
+00:32:39
+And for a NumPy, you can
+just do NP dot and then
+
+00:32:42
+both of those vectors.
+
+00:32:45
+This one is just
+a side on how you
+
+00:32:47
+would want the structure
+of the dot product to be.
+
+00:32:51
+For arrays that are more--
+
+00:32:53
+OK.
+
+00:32:54
+So to phrase this the best way.
+
+00:32:56
+For single dimensional vectors,
+this operation works directly.
+
+00:33:01
+Anytime it's a multiple
+dimensional matrix,
+
+00:33:05
+then it treats it as a
+matrix multiplication.
+
+00:33:07
+The NP dot, dot function.
+
+00:33:09
+So for 2 by 2 matrix versus
+a 2 by 2 matrix dot product,
+
+00:33:12
+it's not going to
+return the sum.
+
+00:33:14
+It's going to return the
+matrix multiplication.
+
+00:33:17
+That's just something
+to keep in mind.
+
+00:33:19
+If you want to make sure that
+your dot product is happening
+
+00:33:23
+in the correct
+way, you would want
+
+00:33:26
+to make sure that
+sort of similar
+
+00:33:27
+to what I was talking
+about earlier, that--
+
+00:33:31
+here.
+
+00:33:33
+I think the best way to show it.
+
+00:33:36
+OK.
+
+00:33:37
+So you would want the second,
+like what I mentioned,
+
+00:33:40
+like the last dimension
+of the first one
+
+00:33:43
+to match with the first
+dimension of the next one
+
+00:33:45
+because it's treating it
+as a matrix multiplication.
+
+00:33:48
+Here, the error
+that it's throwing
+
+00:33:50
+is 3, 2 combined with 3 and
+so the way to sort of like fix
+
+00:33:55
+that would be to have
+this be like, for example,
+
+00:33:59
+switch the two so you'd
+have 2, 3 and then 3 comma.
+
+00:34:03
+It's really a dimension
+matching thing at this point.
+
+00:34:06
+So it can be a little bit
+confusing, but when you--
+
+00:34:09
+the main thing to keep in mind
+is like for single dimensional
+
+00:34:12
+vectors, you can just do np..
+
+00:34:14
+directly and it'll give
+you the dot product value.
+
+00:34:16
+For higher dimensional
+matrices, it treats it
+
+00:34:18
+as a matrix multiplication.
+
+00:34:20
+And so if you still want to--
+for those higher dimensional
+
+00:34:23
+values to ensure that you're
+getting a dot product,
+
+00:34:26
+you'd have to make sure
+that the dimensions are
+
+00:34:28
+aligned similar to these.
+
+00:34:30
+So anything that's 2
+by 2 plus for both--
+
+00:34:34
+any matrix that doesn't have
+a single dimension in any
+
+00:34:37
+of them, yes, it would
+treat it as matrix matmul.
+
+00:34:40
+The same thing.
+
+00:34:43
+OK.
+
+00:34:45
+All right.
+
+00:34:46
+OK.
+
+00:34:46
+I'm going to move to indexing.
+
+00:34:48
+So similar to what I was
+talking about earlier, remember
+
+00:34:50
+with lists I was saying if
+you just do the semicolon,
+
+00:34:52
+it'll create the same array?
+
+00:34:55
+Same deal here.
+
+00:34:55
+The semicolon just means
+you take everything
+
+00:34:57
+from the original array.
+
+00:34:58
+In fact, it returns a copy.
+
+00:35:00
+So it returns a deep copy.
+
+00:35:01
+Means you have a complete
+separate copy in memory.
+
+00:35:04
+OK.
+
+00:35:05
+Now I'm going to sort of
+more details about how
+
+00:35:07
+do you want to index quickly.
+
+00:35:09
+So if I, for example, have,
+let's say, this 3 by 4 matrix
+
+00:35:13
+and I only want to select
+the 0 and the second rows,
+
+00:35:16
+how would I do that?
+
+00:35:17
+So what's useful is that you
+can sort of treat a NumPy,
+
+00:35:20
+you can treat different
+dimensions differently
+
+00:35:22
+for indexing.
+
+00:35:23
+So a semicolon means
+you select everything
+
+00:35:25
+in that dimension, which
+for example, here there's
+
+00:35:28
+a semicolon in the
+second dimension, which
+
+00:35:29
+means I'm taking all
+of the column values.
+
+00:35:33
+Versus what's in the
+first dimension here
+
+00:35:35
+it's saying a NumPy
+array of 0 and 2.
+
+00:35:38
+So it's saying only the 0
+index and only the 2 index,
+
+00:35:41
+which means only the zeroth
+row and only the second row.
+
+00:35:44
+So what this would look
+like would be something
+
+00:35:47
+like I have a matrix.
+
+00:35:55
+OK.
+
+00:35:55
+I have a matrix and I only
+want to select the zeroth row
+
+00:35:58
+and I only want to select
+the column-- the second row.
+
+00:36:01
+Zero and second.
+
+00:36:02
+And everything in the columns.
+
+00:36:07
+All right.
+
+00:36:09
+And then similarly,
+for example, if I
+
+00:36:10
+want to select in
+the column dimension,
+
+00:36:12
+I want to select the first
+and second rows and only
+
+00:36:16
+the first row, I can do that.
+
+00:36:17
+So you can basically
+treat them separately.
+
+00:36:18
+You can think, how
+many columns do I want?
+
+00:36:20
+How many rows do I want?
+
+00:36:21
+And then index those separately.
+
+00:36:23
+And that goes for
+as many dimensions
+
+00:36:24
+as you want in
+your entire tensor.
+
+00:36:27
+Some nice things also, if I
+wanted, for example, take--
+
+00:36:31
+I have this-- let me print
+that actually x here.
+
+00:36:34
+I'll just generate the x.
+
+00:36:37
+OK.
+
+00:36:37
+So this is x.
+
+00:36:38
+So if I want to take
+all the values of x
+
+00:36:40
+that are above
+0.5, for example, I
+
+00:36:43
+can do that by using what's
+called Boolean indexing.
+
+00:36:46
+So I just basically will
+say x indexed by everything
+
+00:36:51
+in x that's bigger than 0.5.
+
+00:36:53
+So it's pretty direct and it'll
+just output all the values
+
+00:36:55
+in this entire array
+that are bigger than 0.5.
+
+00:37:00
+All right.
+
+00:37:01
+This one is also another
+way to do reshaping.
+
+00:37:04
+So I kind of mentioned
+earlier, sometimes you
+
+00:37:06
+have this list of three elements
+and you want to reshape it
+
+00:37:09
+to a 3 by 1 array, for example.
+
+00:37:12
+You can also use what's
+called NumPy.mulaxis.
+
+00:37:15
+This will essentially
+add another axis
+
+00:37:18
+in whatever dimension you want.
+
+00:37:20
+So if I want to go from like
+this 3 by 4 array to a 3
+
+00:37:24
+by 4 to 3 by 4 by 1, then I can
+just add a NumPy.mulaxis there.
+
+00:37:31
+An even simpler way
+to think about it
+
+00:37:33
+would be like a 2
+comma to a 2, 1.
+
+00:37:38
+And so it's just--
+it's another way
+
+00:37:39
+to do what
+essentially what would
+
+00:37:40
+be the reshaping operation.
+
+00:37:45
+Does that make sense?
+
+00:37:46
+Also what this would
+look like for example--
+
+00:37:47
+let me just make it a
+little bit more concrete.
+
+00:37:58
+So you see, I have this list.
+
+00:38:00
+I have a singular list
+and then in that list,
+
+00:38:03
+I have a list of lists.
+
+00:38:04
+So I have a list with element
+1 and list of element 2.
+
+00:38:07
+So this is what that
+reshape operation will do.
+
+00:38:10
+And what NumPy.mulaxis will
+enable you to do as well.
+
+00:38:15
+All right.
+
+00:38:16
+I think we are good for time.
+
+00:38:19
+So the last main topic we'll
+be covering is broadcasting.
+
+00:38:24
+And what's really great
+about broadcasting
+
+00:38:26
+is it'll allow you to operate
+with NumPy arrays that
+
+00:38:30
+are of different shapes,
+but can be, sort of--
+
+00:38:33
+if many operations in
+them can be repeated,
+
+00:38:35
+it allows for that in a
+very efficient manner.
+
+00:38:37
+And this is actually one
+of the most, I would say,
+
+00:38:39
+useful things about NumPy and
+one of its defining features.
+
+00:38:41
+And what that means is if for
+example in this case, right?
+
+00:38:46
+If we go back to this
+example that I had with--
+
+00:38:49
+I start off with the 000 array.
+
+00:38:51
+How do I generate this
+array versus how do
+
+00:38:55
+I generate this array, right?
+
+00:38:57
+Instead of me saying,
+OK, element 00 plus 1,
+
+00:39:02
+element 01 plus 2, all
+of that stuff, right?
+
+00:39:05
+Instead of doing that one by
+one, what broadcasting allows
+
+00:39:09
+me to do is I can have only
+one vector of size 1, 2,
+
+00:39:13
+3 and depending on how I do the
+broadcasting which I'll come to
+
+00:39:17
+in a second, I can duplicate
+it along the row dimension
+
+00:39:21
+or I can duplicate it
+along the column dimension.
+
+00:39:24
+And NumPy allows for that.
+
+00:39:25
+It'll do that on its
+own in the back end.
+
+00:39:27
+And so that's really
+what broadcasting means
+
+00:39:29
+is I don't need to, for
+example, create a new array
+
+00:39:33
+saying I want to create a
+new array to begin with,
+
+00:39:36
+which is already like this and
+then add those two together.
+
+00:39:38
+I can just duplicate
+this and get this.
+
+00:39:41
+All right.
+
+00:39:41
+So now some rules
+for broadcasting.
+
+00:39:43
+And let me just quickly
+visually also just show
+
+00:39:45
+what broadcasting will do.
+
+00:39:47
+Oh, sorry.
+
+00:39:50
+So broadcasting-- this is a
+pretty good visual analogy.
+
+00:39:54
+I have this 1 by 1 1,
+2, 3 vector, right,
+
+00:39:58
+and I want to basically
+add, let's say,
+
+00:40:02
+only the columns with
+this 1, 2, 3 vector.
+
+00:40:06
+So what broadcasting
+allows you to do
+
+00:40:07
+is you only pass these two
+values in and on the back end,
+
+00:40:11
+it will duplicate this
+along the column dimension.
+
+00:40:13
+So let's say, I have 123123123
+and then it'll do the addition.
+
+00:40:18
+Similarly, if I pass
+it a vector 1, 2, 3, 4
+
+00:40:23
+and I want it to be added
+to each of the rows instead
+
+00:40:25
+of each of the columns,
+it'll be able to do that
+
+00:40:27
+by sort of duplicating
+it on the back end.
+
+00:40:29
+So this is visually what's
+happening with broadcasting.
+
+00:40:33
+All right.
+
+00:40:34
+Now some rules.
+
+00:40:36
+So how does NumPy know when
+and how to do broadcasting?
+
+00:40:39
+So the main two rules to keep
+in mind for broadcasting is one,
+
+00:40:44
+it can only happen if
+all of the dimensions,
+
+00:40:46
+every single dimension between
+two arrays are compatible.
+
+00:40:49
+And when they say
+what is compatible?
+
+00:40:52
+Either the dimension values
+are equal or one of them
+
+00:40:55
+is equal to 1.
+
+00:40:56
+And that is the
+only rule required.
+
+00:40:58
+So for example, I start
+off with this x array.
+
+00:41:02
+I have this 3 by 4 x array.
+
+00:41:05
+Will y is equal to 3
+comma 1 be compatible?
+
+00:41:09
+Yes, it will be.
+
+00:41:10
+Why?
+
+00:41:10
+Because you have 3 in the first
+dimension between the two,
+
+00:41:13
+which are the same and in the
+second dimension, you have 4
+
+00:41:15
+and you have 1.
+
+00:41:16
+So those are compatible values.
+
+00:41:18
+And so what this tells
+NumPy on the back end
+
+00:41:20
+is I'm doing, for example, an
+addition operation x plus y.
+
+00:41:23
+It knows that OK, 3
+and 3 are the same
+
+00:41:26
+but 4 and 1 are not the same.
+
+00:41:28
+One of them has one dimension.
+
+00:41:30
+So I need to duplicate this
+y along the second dimension,
+
+00:41:34
+which means I need to duplicate
+it along the column dimension.
+
+00:41:37
+And once it does that,
+it duplicates it.
+
+00:41:39
+It'll get 3 comma 4 an array
+and then it can do the addition.
+
+00:41:42
+And it does that really fast.
+
+00:41:44
+So it's better to use
+broadcasting in this way
+
+00:41:46
+then for you to create
+a separate array already
+
+00:41:48
+duplicated and then add them.
+
+00:41:51
+Similarly, I have this
+z array, which is 1, 4.
+
+00:41:55
+What x into z will do is
+first it'll check OK, 3, 1.
+
+00:42:00
+OK, is that compatible?
+
+00:42:01
+Yes, because you have
+3 in one dimension,
+
+00:42:03
+and you have one in the second
+and 4 and 4 are compatible.
+
+00:42:06
+OK.
+
+00:42:06
+So let's say I know that
+these two are compatible.
+
+00:42:08
+In the second dimension, I
+don't need to change anything.
+
+00:42:10
+In the first
+dimension, it'll know
+
+00:42:11
+to duplicate them, basically.
+
+00:42:13
+So it'll know to
+duplicate z and so
+
+00:42:16
+add it three times
+in the row dimension.
+
+00:42:18
+Create a separate array and
+then multiply those two.
+
+00:42:22
+So this is giving you an example
+of saying I started off with x.
+
+00:42:25
+I have y and then the
+final shape will be 3, 4.
+
+00:42:28
+So a lot of times
+in deep learning you
+
+00:42:31
+will have the same--
+
+00:42:33
+you'll have different batches
+of different images coming in,
+
+00:42:37
+but you want to
+apply, let's say,
+
+00:42:38
+the same weight
+matrix to all of them.
+
+00:42:41
+And instead of duplicating that
+weight matrix a hundred or even
+
+00:42:44
+like potentially, depending
+on the size of your batch size
+
+00:42:47
+like 1,000 times and then
+adding those together,
+
+00:42:50
+you use the same
+matrix, and it'll
+
+00:42:51
+know OK, if I'm going to be
+duplicating over the batch
+
+00:42:54
+dimension, it'll do that
+for you on the back end.
+
+00:42:56
+So it's used a lot of times in
+deep learning because of this.
+
+00:42:58
+And basically in
+your second homework,
+
+00:43:00
+that's basically
+what you'll be doing.
+
+00:43:02
+You'll be implementing a
+feed forward network in NumPy
+
+00:43:05
+and it'll say you
+have this W matrix,
+
+00:43:07
+you have this B matrix
+which is a bias--
+
+00:43:09
+we'll come to those in class--
+
+00:43:11
+and it'll ask you to
+implement that in NumPy
+
+00:43:13
+because that's basically
+what you're doing.
+
+00:43:14
+Is that you have
+this input image,
+
+00:43:16
+you have a weight matrix,
+which will somehow scale it
+
+00:43:18
+to an output and
+that weight matrix
+
+00:43:21
+will be applied to multiple
+images in your batch.
+
+00:43:23
+And those images
+can be different,
+
+00:43:24
+but their sizes will be the same
+and it's optimized for that.
+
+00:43:29
+OK.
+
+00:43:31
+So this is just more
+examples of the same thing.
+
+00:43:33
+Your final thing that you'll be
+coming to is the size of 3, 4.
+
+00:43:37
+Let's see.
+
+00:43:38
+This one's the
+example that I showed
+
+00:43:40
+right here, which is that I have
+this array of let's say zeros.
+
+00:43:44
+I have this NumPy,
+this B array of size--
+
+00:43:47
+what size would this be?
+
+00:43:48
+Yes, good.
+
+00:43:49
+Because you have one outer
+list and inside this,
+
+00:43:52
+you have one inner list.
+
+00:43:53
+So it's just basically one row
+and then three values inside
+
+00:43:56
+so yes.
+
+00:43:57
+And so would this be compatible?
+
+00:43:59
+Yes, and so it'll know basically
+to duplicate over the row
+
+00:44:03
+dimension.
+
+00:44:03
+And so you're going
+to get duplicates
+
+00:44:04
+in the row dimensions.
+
+00:44:05
+You're going to get
+123123123, and that's
+
+00:44:08
+what's happening here.
+
+00:44:10
+So these are, for example,
+a little bit-- sometimes
+
+00:44:12
+it says more complex behavior.
+
+00:44:15
+What this basically
+just means is
+
+00:44:16
+that if I have this B
+vector, which is 3, 1.
+
+00:44:20
+If I'm doing this B plus B
+dot transpose-- by the way,
+
+00:44:24
+transpose is just
+changing the dimensions.
+
+00:44:25
+It's switching them.
+
+00:44:26
+So if I have a 2 by 3 matrix,
+a transpose will be a 3
+
+00:44:29
+by 2 matrix.
+
+00:44:30
+What that means
+visually is something
+
+00:44:32
+like your row and rows
+and like column dimensions
+
+00:44:36
+will get switched.
+
+00:44:38
+6 goes to, I believe, it's
+like 1, 2, 3, 4, 5, 6.
+
+00:44:44
+So like three rows versus
+like three columns.
+
+00:44:49
+And what this is just saying
+is that a 3 by 1 and a 1 by 3--
+
+00:44:54
+both of those vectors
+will be compatible
+
+00:44:56
+because remember
+in each dimension,
+
+00:44:57
+it's either the same or a 1.
+
+00:44:59
+And so it knows to duplicate
+over both of those dimensions,
+
+00:45:03
+and that's what's
+happening here.
+
+00:45:06
+OK.
+
+00:45:07
+So I think we are right at time.
+
+00:45:09
+And what I would
+recommend is basically
+
+00:45:11
+playing with variations of this
+for broadcasting and see-- just
+
+00:45:14
+remember, the two
+rules for broadcasting
+
+00:45:16
+is just if it's compatible,
+it's either the same value
+
+00:45:19
+or it's 1.
+
+00:45:20
+And whatever is
+the 1 dimension is
+
+00:45:22
+what's going to be duplicated
+over on the back end.
+
+00:45:24
+So yeah, it's not going to
+be compatible if they're
+
+00:45:26
+divisible for example.
+
+00:45:27
+So if you have let's say 6
+and 3, that's not compatible.
+
+00:45:31
+You can reshape it and then see
+if you would like to have 1--
+
+00:45:34
+there's tricks you
+can use where you're
+
+00:45:37
+thinking like on the
+back end, how do I want
+
+00:45:39
+this data to be multiplied?
+
+00:45:40
+You can maybe reshape
+everything into a 1 by 18 matrix
+
+00:45:44
+and then multiply everything
+and then reshape it back.
+
+00:45:46
+That's what you can do, but
+you can never just directly,
+
+00:45:48
+for example, 6 by 3--
+make that compatible.
+
+00:45:51
+OK.
+
+00:45:52
+So I think let's wrap up.
+
+00:45:54
+This was just a quick example of
+another use of efficient NumPy
+
+00:45:57
+code.
+
+00:45:58
+Quick note, never--
+preferably, don't use loops
+
+00:46:02
+whenever you're dealing
+with large data matrices.
+
+00:46:05
+Mostly because loops are almost
+always about 100 times slower.
+
+00:46:10
+NumPy is usually
+very, very efficient.
+
+00:46:11
+And so this is just
+an example of what
+
+00:46:13
+you can accomplish with NumPy
+and the same thing using loops.
+
+00:46:16
+So what this is saying is that
+I have an x matrix of size 1,000
+
+00:46:20
+by 1,000 and I want to apply--
+
+00:46:22
+let's say, I want to add
+everything from row 100 onwards
+
+00:46:26
+with plus 5.
+
+00:46:28
+So visually what that will
+look like is something
+
+00:46:30
+like I have this full matrix
+and I want everything here
+
+00:46:36
+basically to be add with
+plus-- added with plus 5.
+
+00:46:41
+Then in a loop format,
+I can basically
+
+00:46:43
+loop over the first
+dimension of 100 plus
+
+00:46:46
+and do that or in
+NumPy, I can basically
+
+00:46:48
+do what's called NumPy.arrange,
+which will generate integers
+
+00:46:51
+in basically 1, 2, 3,
+4, 5, 6, all the way up
+
+00:46:54
+to that 100 value.
+
+00:46:55
+In this case, it's
+between 100 and 1,000.
+
+00:46:57
+So it'll start with 100,
+101, 102 all the way
+
+00:46:58
+to 1,000 in the first dimension,
+and then just add that with 5.
+
+00:47:02
+So this is just
+an example of how
+
+00:47:04
+you would switch from
+using loops to using NumPy
+
+00:47:06
+and it's a lot, lot faster.

@@ -1,0 +1,227 @@
+{
+  "unit_id": "local::lecture20-reasoning-agents::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript evidence is sufficient for reinforcement questions on this unit. The core definitions, examples, and cautions are stated explicitly enough that no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the unit factorize a goal-conditioned trajectory?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Into a prompt template and a benchmark score",
+        "Into environment transition dynamics and an agent policy over the next action",
+        "Into a semantic parser and a chain-of-thought rationale",
+        "Into human preferences and a reward model"
+      ],
+      "answer_index": 1,
+      "explanation": "The factorization separates what the environment does from what the agent chooses. One term models state transitions, and the other models the action policy conditioned on state and goal.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_trajectory_modeling_and_prompting_in_a_loop",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "factorize that into two terms"
+        ],
+        "timestamps": [
+          "00:39:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main modeling claim behind autoregressive trajectory modeling for agents?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Action selection can be treated like next-token prediction conditioned on task, state, and history",
+        "The environment should always be modeled with symbolic logic only",
+        "The agent must generate the whole trajectory in one decoding step",
+        "Policy learning becomes identical to supervised text classification"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture argues that decision-making can be cast as a generative modeling problem. A transformer can condition on past actions, current state, and task description to predict the next action autoregressively.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_trajectory_modeling_and_prompting_in_a_loop",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "predict what's the next action"
+        ],
+        "timestamps": [
+          "00:40:08",
+          "00:40:44"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which information is included in the simple prompting-loop agent prompt?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only the reward function and final target answer",
+        "The action space description, the instruction, and the action-observation history so far",
+        "Only a screenshot and no prior steps",
+        "A hidden plan plus ground-truth future states"
+      ],
+      "answer_index": 1,
+      "explanation": "The simple prompting-loop agent is given the available actions, the user goal, and the interaction history, and it is repeatedly asked for the next action.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_trajectory_modeling_and_prompting_in_a_loop",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "specify the action space in text"
+        ],
+        "timestamps": [
+          "00:41:57"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is MiniWoB mainly intended to provide?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A large real-world multilingual web benchmark",
+        "A short-horizon sandbox benchmark for simple browser tasks",
+        "A dataset of human-written logical forms",
+        "A contamination-resistant coding benchmark"
+      ],
+      "answer_index": 1,
+      "explanation": "MiniWoB is described as a sandbox environment for short browser tasks. It is useful for testing agent behaviors in simplified settings.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_agent_benchmarks_and_evaluation_environments",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sandbox environment"
+        ],
+        "timestamps": [
+          "00:43:06"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What distinguishes WebArena and WebLINX from MiniWoB?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They remove web actions and use only text classification",
+        "They use more realistic or real websites, and WebLINX additionally supports communicating back to the user",
+        "They are built only for image captioning",
+        "They require symbolic planning but no language model"
+      ],
+      "answer_index": 1,
+      "explanation": "WebArena moves closer to realistic websites with more complex browsing, while WebLINX uses real sites and can include communication back to the user. Both are harder and more realistic than MiniWoB.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_agent_benchmarks_and_evaluation_environments",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "real websites"
+        ],
+        "timestamps": [
+          "00:44:03",
+          "00:46:13"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q1",
+      "global_kp_id": "kp_autoregressive_trajectory_modeling_and_prompting_in_a_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q2",
+      "global_kp_id": "kp_autoregressive_trajectory_modeling_and_prompting_in_a_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q3",
+      "global_kp_id": "kp_autoregressive_trajectory_modeling_and_prompting_in_a_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q4",
+      "global_kp_id": "kp_agent_benchmarks_and_evaluation_environments",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture20-reasoning-agents-seg5-q5",
+      "global_kp_id": "kp_agent_benchmarks_and_evaluation_environments",
+      "role": "primary"
+    }
+  ]
+}

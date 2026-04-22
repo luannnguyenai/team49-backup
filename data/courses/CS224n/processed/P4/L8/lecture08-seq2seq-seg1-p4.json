@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture08-seq2seq::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 2 conceptual reinforcement questions about perplexity for evaluating language models without needing a separate video clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture08_seq2seq_seg1_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg1_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture08_seq2seq_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does perplexity measure for a language model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How well it predicts held-out human text",
+        "How many parameters it has",
+        "How quickly it trains on a GPU",
+        "How often it generates grammatical sentences during decoding"
+      ],
+      "answer_index": 0,
+      "explanation": "Perplexity is used on held-out text to summarize next-word prediction quality. Lower perplexity means the model assigns higher probability to the observed text.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "measure that's called perplexity",
+          "better a language model"
+        ],
+        "timestamps": [
+          "00:03:19",
+          "00:03:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should two perplexity numbers only be compared carefully?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because perplexity depends on the logarithm base used",
+        "Because perplexity can only be computed for n-gram models",
+        "Because perplexity ignores probabilities and uses only ranks",
+        "Because perplexity is meaningful only on training data"
+      ],
+      "answer_index": 0,
+      "explanation": "Perplexity is an exponentiated log-loss, so the numerical value depends on which log base is used. Two reported values are only directly comparable when they use the same convention.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "what base you use",
+          "need to be aware"
+        ],
+        "timestamps": [
+          "00:04:27",
+          "00:04:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture08_seq2seq_seg1_q1",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg1_q2",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture08_seq2seq_seg1_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does perplexity measure for a language model\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg1_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why should two perplexity numbers only be compared carefully\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture08_seq2seq_seg1_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does perplexity measure for a language model\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg1_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why should two perplexity numbers only be compared carefully\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

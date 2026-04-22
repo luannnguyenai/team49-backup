@@ -1,0 +1,205 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture15-benchmarking",
+    "lecture_title": "Lecture 15 - Benchmarking and Evaluation",
+    "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM"
+  },
+  "unit": {
+    "unit_id": "local::lecture15-benchmarking::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Close-ended tasks and the traps inside standard metrics",
+    "description": "Covers close-ended NLP tasks, standard classification metrics, benchmark aggregation, and the risk of spurious dataset artifacts.",
+    "summary": "Close-ended tasks are defined as tasks with a small answer space, often one or a few correct labels, so they can usually be evaluated with standard classification tools such as accuracy, precision, recall, and F1 [ts=535s] [ts=668s]. The lecture surveys sentiment analysis, entailment, part-of-speech tagging, named entity recognition, coreference, question answering, and multi-task benchmarks such as SuperGLUE [ts=576s] [ts=702s]. Yann then emphasizes that 'standard ML' does not mean 'easy': metric choice changes model behavior, accuracy can be misleading under class imbalance as in spam filtering, averaging heterogeneous benchmark columns is often ill-posed, and label collection can introduce spurious correlations, illustrated by SNLI hypotheses where negation alone predicts non-entailment surprisingly well [ts=858s] [ts=894s] [ts=980s].",
+    "key_points": [
+      {
+        "text": "A close-ended NLP task has a limited answer space, often fewer than 10 options.",
+        "timestamp_s": 541,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Typical close-ended benchmarks include IMDb/SST for sentiment and SNLI for entailment.",
+        "timestamp_s": 590,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Close-ended evaluation typically uses accuracy, precision, recall, and F1.",
+        "timestamp_s": 673,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Accuracy can be deceptive on imbalanced data; a classifier predicting 'not spam' always could score 90% accuracy without solving the task.",
+        "timestamp_s": 858,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Averaging columns that mix accuracy, F1, and correlation can yield misleading aggregate benchmark scores.",
+        "timestamp_s": 894,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "In SNLI, humans often wrote non-entailment hypotheses by inserting negation, creating a shortcut where models can do well from the hypothesis alone.",
+        "timestamp_s": 980,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+      "start_s": 479,
+      "end_s": 1052
+    },
+    "difficulty": 0.5,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Close-ended tasks are defined as tasks with a small answer space, often one or a few correct labels, so they can usually be evaluated with standard classification tools such as accuracy, precision, recall, and F1 [ts=535s] [ts=668s]. The lecture surveys sentiment analysis, entailment, part-of-speech tagging, named entity recognition, coreference, question answering, and multi-task benchmarks such as SuperGLUE [ts=576s] [ts=702s]. Yann then emphasizes that 'standard ML' does not mean 'easy': metric choice changes model behavior, accuracy can be misleading under class imbalance as in spam filtering, averaging heterogeneous benchmark columns is often ill-posed, and label collection can introduce spurious correlations, illustrated by SNLI hypotheses where negation alone predicts non-entailment surprisingly well [ts=858s] [ts=894s] [ts=980s].",
+  "target_kp_ids": [
+    "kp_close_ended_nlp_evaluation",
+    "kp_spurious_correlations_from_dataset_construction",
+    "kp_metric_choice_and_aggregation_pitfalls"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "video_clip_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "transcript_slice": "00:08:02\nof tasks in NLP.\n\n00:08:09\nBut essentially, you can think about classification\n\n00:08:17\nthat you're performing.\n\n00:08:20\nwhere you're asked to say whether a sentence has\n\n00:08:26\nSo the text is, \"Read the book, forget the movie!\"\n\n00:08:31\nSo here, it's basically negative.\n\n00:08:36\nSo think about ChatGPT.\n\n00:08:39\nWhere really, there's no correct answer.\n\n00:08:44\nanswers, and they all have different qualities.\n\n00:08:52\nSo close-ended evaluation.\n\n00:08:59\nit's basically defined as the task\n\n00:09:04\nThink less than 10.\n\n00:09:09\na few correct possible answers.\n\n00:09:16\nIf you think about standard classification,\n\n00:09:19\nYou can look at your precision, your recalls.\n\n00:09:24\nThat is not to say that it's simple.\n\n00:09:30\nSo some close-ended tasks.\n\n00:09:36\nSo usually, this is a binary classification task,\n\n00:09:41\npositive or whether it's negative.\n\n00:09:46\nAlso, for sentiment analysis, the typical benchmarks--\n\n00:09:50\nis IMDb and SST from Stanford.\n\n00:09:56\nhave some text.\n\n00:10:01\nAnd then you have a hypothesis, \"Some men are playing sport.\"\n\n00:10:06\nor entailed by the text.\n\n00:10:11\nOther tasks.\n\n00:10:16\nAnd name entity recognition, which is a CoNLL benchmark.\n\n00:10:23\nYou don't need to know all of them,\n\n00:10:27\nCoreference resolution, so this is actually a pretty challenging\n\n00:10:35\npronoun refers to what noun.\n\n00:10:40\nabout himself, which Pete included in his book.\n\n00:10:46\nAnd now you have to say, what does \"He\" refer to?\n\n00:10:53\nAnd then this question answering,\n\n00:10:58\nand--\n\n00:11:00\nsupposed to provide an answer based on the text\n\n00:11:04\nSo those are some examples of close-ended tasks.\n\n00:11:12\nis just standard machine learning.\n\n00:11:17\nHopefully, you all know about these type of metrics.\n\n00:11:25\nI think it's CS224U.\n\n00:11:29\nIt's actually really good on different metrics.\n\n00:11:38\nis usually by looking at many of them concurrently.\n\n00:11:46\nis called SuperGLUE.\n\n00:11:53\nyou have all the different tasks in SuperGLUE.\n\n00:11:58\nAnd then you really just look at the average performance\n\n00:12:05\nAnd that is kind of an attempt to measure general language\n\n00:12:10\nThis is what people used to do, I would say,\n\n00:12:16\nI will tell you about what people do now\n\n00:12:21\nBut yeah, SuperGLUE is definitely\n\n00:12:25\nAn example of tasks that are in SuperGLUE.\n\n00:12:33\nyou have some question, and you have\n\n00:12:37\nSo that's very easy to evaluate.\n\n00:12:42\nEntailment, we already talked about.\n\n00:12:47\nwhich we also talked about, and meaning\n\n00:12:50\nyou have two sentences with the same words\n\n00:12:55\nmean the same thing in this sentence.\n\n00:13:01\nand bank like money.\n\n00:13:04\nthey refer to the same concept.\n\n00:13:11\nSo this is about SuperGLUE.\n\n00:13:17\nNo?\n\n00:13:20\nSo again, although I said many times that this is essentially\n\n00:13:26\nwant to emphasize that it doesn't mean that it's simple.\n\n00:13:30\nabout what you do when you use those type of close-ended tasks.\n\n00:13:35\nto choose whether you look at accuracies, precision, recall,\n\n00:13:41\nIf you don't know these names, you\n\n00:13:45\nor the lecture from Chris Piech that I linked above,\n\n00:13:51\nBut depending on which metric you will choose,\n\n00:13:57\nAnd the usual example is that if, let's say, you look at spam,\n\n00:14:08\nmost emails are not spam, thankfully-- at least, I hope.\n\n00:14:16\nand only 10% of them are spam.\n\n00:14:21\nthat predicts the most likely label will get 90% accuracy.\n\n00:14:28\n90% accuracy seems good.\n\n00:14:31\nclassifying anything.\n\n00:14:36\nscore.\n\n00:14:40\nthat because, again, this is not specific to NLP,\n\n00:14:44\nAnother issue is that once you have multiple different tasks,\n\n00:14:50\nSo right before, I told you, oh, you just\n\n00:14:55\nThis, honestly, is a really terrible thing to do,\n\n00:15:01\nBut these columns actually mean very different things.\n\n00:15:05\nOthers are F1 score.\n\n00:15:09\nAnd you just average everything.\n\n00:15:12\nbut I remember, a few years ago, there\n\n00:15:16\nwas you were better--\n\n00:15:20\nif the value was lower, and you still\n\n00:15:24\nuntil someone realized that maybe we\n\n00:15:29\nSo yeah, be careful.\n\n00:15:35\nyeah, that what people do is correct.\n\n00:15:41\nThen there are some other questions\n\n00:15:44\nWhere do those labels come from?\n\n00:15:48\nbut how you actually get those labels is unclear.\n\n00:15:57\nAnd also, related to that, there might\n\n00:16:00\nAnd that's what we're going to talk about right now.\n\n00:16:08\nSo here, you have, again, your premise,\n\n00:16:14\n\"The economy has never been better.\"\n\n00:16:18\nimplied by the premise.\n\n00:16:23\nis that, actually, all the different models\n\n00:16:27\nBut if you looked-- if you just classified\n\n00:16:33\nSo even if you did not look at the premise, which\n\n00:16:37\nto take into account because it's part of the task,\n\n00:16:40\nAnd the reason why is because they\n\n00:16:48\nthey were asked to write a hypothesis which\n\n00:16:52\nAnd how humans usually do that is by adding a negation.\n\n00:16:58\nand you see that there is a negation,\n\n00:17:03\nSo again, even though this is standard machine learning,\n\n00:17:10\nand where do the labels come from.\n\n00:17:16\nuse what people do, thinking that if there was an issue,\n\n00:17:22\nSo yeah.\n\n00:17:26\nAny questions on close-ended tasks?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "global_kp_id": "kp_close_ended_nlp_evaluation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "global_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "global_kp_id": "kp_spurious_correlations_from_dataset_construction",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_close_ended_nlp_evaluation",
+      "name": "Close-ended NLP evaluation",
+      "description": "Tasks with a small answer space can often be evaluated with standard classification metrics.",
+      "track_tags": [
+        "classification",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "nlp",
+        "supervised_learning"
+      ],
+      "career_path_tags": [
+        "applied_ml",
+        "research"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because close-ended NLP evaluation formalizes how tasks with a small answer space can often be evaluated with standard classification metrics, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "name": "Metric choice and aggregation pitfalls",
+      "description": "Accuracy, precision, recall, F1, and aggregate leaderboard averages can mislead when class balance or metric semantics differ.",
+      "track_tags": [
+        "benchmarking",
+        "metrics"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "applied_ml",
+        "data_science",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because metric choice and aggregation pitfalls clarifies accuracy, precision, recall, F1, and aggregate leaderboard averages can mislead when class balance or metric semantics differ, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_spurious_correlations_from_dataset_construction",
+      "name": "Spurious correlations from dataset construction",
+      "description": "Benchmarks can contain shortcuts that let models exploit artifacts rather than solve the intended task.",
+      "track_tags": [
+        "dataset_quality",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "nlp",
+        "robustness"
+      ],
+      "career_path_tags": [
+        "dataset_curation",
+        "research"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because spurious correlations from dataset construction clarifies benchmarks can contain shortcuts that let models exploit artifacts rather than solve the intended task, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp5"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.35,
+    0.65
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture15-benchmarking_transcript.txt"
+  }
+}

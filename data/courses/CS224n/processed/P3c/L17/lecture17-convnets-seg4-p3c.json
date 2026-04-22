@@ -1,0 +1,265 @@
+{
+  "unit_id": "local::lecture17-convnets::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "review_summary": "The segment gives a clear procedural account of tree composition and greedy constituent merging, with enough support for five step-oriented items. No separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture17-convnets-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does compositionality imply for a tree-based sentence representation model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Larger phrase meanings should be built from child meanings plus the rule used to combine them.",
+        "Every sentence should be represented only by the average of its word vectors.",
+        "The model should ignore word meanings and use only phrase length.",
+        "All words in a sentence must be combined in strictly left-to-right order."
+      ],
+      "answer_index": 0,
+      "explanation": "Compositional modeling treats a phrase as more than a bag of words: the child meanings and the way they are structurally combined determine the parent representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_compositional_tree_semantics",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "meaning of a phrase",
+          "word vectors",
+          "rules that combine"
+        ],
+        "timestamps": [
+          "00:47:57",
+          "00:48:02",
+          "00:48:02"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the simplest recursive neural network composition step, how is a parent phrase vector formed from two child vectors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Concatenate the two child vectors, apply a learned affine transform, and pass it through a nonlinearity.",
+        "Choose the longer child vector and discard the shorter one.",
+        "Average all remaining word vectors in the sentence before combining them.",
+        "Translate both children into SQL and execute them against a database."
+      ],
+      "answer_index": 0,
+      "explanation": "The basic tree-RNN composition rule maps a pair of child representations into a new parent representation using shared learned parameters and a nonlinearity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_compositional_tree_semantics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two child vectors",
+          "concatenating the two children",
+          "non-linearity"
+        ],
+        "timestamps": [
+          "00:50:26",
+          "00:50:34",
+          "00:50:41"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the role of the separate learned scoring function in the simple greedy recursive parser?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It estimates whether a proposed pair of adjacent children forms a plausible constituent to merge.",
+        "It assigns part-of-speech tags before word vectors are created.",
+        "It decides which convolutional filter width to use for each token.",
+        "It freezes pretrained embeddings to preserve semantic neighborhoods."
+      ],
+      "answer_index": 0,
+      "explanation": "The model needs not only a way to build parent vectors, but also a way to choose which adjacent pair should be merged next. The score supports that parsing decision.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "score whether",
+          "good constituent",
+          "include in your parse tree"
+        ],
+        "timestamps": [
+          "00:50:46",
+          "00:51:03",
+          "00:51:03"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does greedy parsing proceed in the simple recursive neural parser?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It scores adjacent pairs, merges the best-scoring pair, then repeats until a binary tree is built.",
+        "It enumerates every possible parse tree and averages their sentence vectors.",
+        "It applies a width-3 convolution over the full sentence and then max-pools.",
+        "It starts from the final word and recursively predicts previous words."
+      ],
+      "answer_index": 0,
+      "explanation": "Greedy parsing makes one local merge decision at a time. After each merge, the new constituent participates in later merge decisions until the sentence tree is complete.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "greedily decide",
+          "best pair to combine",
+          "binary parse"
+        ],
+        "timestamps": [
+          "00:51:46",
+          "00:52:15",
+          "00:52:33"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is using a single shared composition matrix everywhere a limitation for tree recursive neural networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Different phrase types can require different semantic interactions, but one matrix treats all combinations similarly.",
+        "It prevents the model from constructing parent phrase vectors at all.",
+        "It forces every sentence to have no more than two words.",
+        "It makes the model equivalent to a bag-of-words classifier."
+      ],
+      "answer_index": 0,
+      "explanation": "A single composition rule is too rigid for the variety of semantic relationships in language. Modifier, predicate, and argument structures may need different interaction patterns.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_recursive_neural_tensor_networks",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same way",
+          "different ways",
+          "calculate meanings"
+        ],
+        "timestamps": [
+          "00:51:10",
+          "00:55:14",
+          "00:55:39"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture17-convnets-seg4-q1",
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q2",
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q2",
+      "global_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q3",
+      "global_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q3",
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q4",
+      "global_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q4",
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q5",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg4-q5",
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "role": "secondary"
+    }
+  ]
+}

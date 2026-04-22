@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_9::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "Transcript giải thích khá trực tiếp về saliency, CAM, Grad-CAM và attention visualization trong ViT; có thể dùng transcript-only an toàn.",
+  "question_bank": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Saliency map được định nghĩa gần đúng là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Gradient của class score theo các pixel đầu vào.",
+        "Trọng số của lớp cuối cùng theo các tham số mô hình.",
+        "Bản đồ các bounding box sau non-maximum suppression.",
+        "Ma trận attention giữa mọi patch trong ViT."
+      ],
+      "answer_index": 0,
+      "explanation": "Saliency hỏi rằng nếu thay đổi từng pixel một lượng rất nhỏ thì class score sẽ đổi nhiều hay ít. Vì vậy đạo hàm theo đầu vào cho biết pixel nào ảnh hưởng mạnh nhất tới dự đoán của lớp đang xét.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_saliency_via_input_gradients",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "which pixel matters",
+          "pixel values"
+        ],
+        "timestamps": [
+          "01:04:41",
+          "01:06:19"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Điểm khác chính của Grad-CAM so với CAM trong phần này là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Grad-CAM dùng trọng số suy ra từ gradient và giữ bằng chứng dương qua ReLU.",
+        "Grad-CAM chỉ áp dụng cho linear classifier và không dùng CNN.",
+        "CAM luôn chính xác hơn vì không cần đặc trưng không gian.",
+        "CAM và Grad-CAM là cùng một phép tính, chỉ khác cách vẽ màu."
+      ],
+      "answer_index": 0,
+      "explanation": "CAM dựa vào các trọng số gắn trực tiếp với lớp, còn Grad-CAM suy ra mức quan trọng của đặc trưng từ gradient đối với lớp đang xét. ReLU thường được dùng để giữ phần đóng góp dương cho bằng chứng của lớp đó.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cam_and_grad_cam",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "used instead of the weights",
+          "use ReLU"
+        ],
+        "timestamps": [
+          "01:10:34",
+          "01:11:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao ViT được mô tả là cho trực quan hóa dễ hơn trong phần này?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì attention maps có thể được hiển thị trực tiếp trên patch hoặc không gian ảnh.",
+        "Vì ViT không cần gradient nên giải thích luôn chính xác.",
+        "Vì mọi filter của ViT luôn chỉ có 3 kênh nên dễ vẽ.",
+        "Vì ViT tự sinh ra ground-truth mask cho mọi lớp."
+      ],
+      "answer_index": 0,
+      "explanation": "Trong ViT, attention đã tạo sẵn các trọng số tương tác giữa token, nên ta có thể nhìn trực tiếp xem mô hình đang chú ý tới vùng nào. Điều này cung cấp một con đường trực quan hóa tự nhiên hơn so với việc chỉ nhìn filter của CNN sâu.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vit_attention_visualization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "much better way",
+          "pixel space"
+        ],
+        "timestamps": [
+          "01:12:32",
+          "01:13:01"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "global_kp_id": "kp_cam_and_grad_cam",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "global_kp_id": "kp_cam_and_grad_cam",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "global_kp_id": "kp_vit_attention_visualization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "global_kp_id": "kp_cam_and_grad_cam",
+      "role": "secondary"
+    }
+  ]
+}

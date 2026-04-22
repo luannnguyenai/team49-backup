@@ -2,8 +2,8 @@
   "run_id": "p5_cs224n_cs231n",
   "stage_id": "edge_scoring_input_no_gpt_bundle",
   "source_files": {
-    "p5_output_transitive_pruned": "data/p5_output_transitive_pruned.json",
-    "p5_input": "data/p5_inputs/p5_input_cs224n_cs231n.json"
+    "p5_output_transitive_pruned": "data/final_artifacts/cs224n_cs231n_v1/p5_output_transitive_pruned.json",
+    "p5_input": "data/working/p5/p5_input_cs224n_cs231n.json"
   },
   "clean_candidate_edges": [
     {

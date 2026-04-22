@@ -1,0 +1,317 @@
+{
+  "unit_id": "local::lecture03-pytorch::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "The transcript cleanly supports module-composition and training-loop questions, including one code-style shape check, so no extra clip is required.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture03_pytorch_seg4_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture03_pytorch_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A tensor with shape 2x3x4 is passed into nn.Linear with input size 4 and output size 2. What output shape should you expect?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "2x3x2",
+        "2x4x2",
+        "2x3x4",
+        "3x2"
+      ],
+      "answer_index": 0,
+      "explanation": "nn.Linear transforms the last dimension of the input from the input size to the output size while keeping the earlier dimensions the same. So 2x3x4 becomes 2x3x2.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_network_modules_and_composition",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "output is 2x3x2",
+          "input size of 4"
+        ],
+        "timestamps": [
+          "00:37:10",
+          "00:36:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which sequence matches the standard PyTorch training loop?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "optimizer.zero_grad() -> forward pass -> compute loss -> loss.backward() -> optimizer.step()",
+        "optimizer.step() -> forward pass -> zero_grad() -> compute loss -> backward()",
+        "compute loss -> optimizer.step() -> backward() -> zero_grad() -> forward pass",
+        "forward pass -> optimizer.step() -> zero_grad() -> backward() -> compute loss"
+      ],
+      "answer_index": 0,
+      "explanation": "The loop first clears old gradients, then computes predictions and loss, then backpropagates, and finally updates parameters with the optimizer.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pytorch_training_loop",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "zero out the gradient",
+          "call loss.backward"
+        ],
+        "timestamps": [
+          "00:45:11",
+          "00:45:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q3",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "What output shape should this PyTorch module call produce?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "torch.Size([2, 3, 2])",
+        "torch.Size([2, 4, 2])",
+        "torch.Size([2, 3, 4])",
+        "torch.Size([3, 2])"
+      ],
+      "answer_index": 0,
+      "explanation": "nn.Linear acts on the last dimension only, so the leading dimensions stay the same while the feature size changes from 4 to 2.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_network_modules_and_composition",
+      "difficulty": "medium",
+      "code_question_style": "output_prediction",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "import torch\nimport torch.nn as nn\nlayer = nn.Linear(4, 2)\nx = torch.randn(2, 3, 4)\nprint(layer(x).shape)",
+        "highlight_lines": [
+          3,
+          4,
+          5
+        ]
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "input size of 4",
+          "output is 2x3x2"
+        ],
+        "timestamps": [
+          "00:36:31",
+          "00:37:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture03_pytorch_seg4_q1",
+      "global_kp_id": "kp_neural_network_modules_and_composition",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q2",
+      "global_kp_id": "kp_pytorch_training_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q3",
+      "global_kp_id": "kp_neural_network_modules_and_composition",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture03_pytorch_seg4_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"A tensor with shape 2x3x4 is passed into nn.Linear with input size 4 and output size 2. What output shape should you expect\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which sequence matches the standard PyTorch training loop\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.25,
+      "discrimination_prior": 0.99,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What output shape should this PyTorch module call produce\" asks for applied understanding rather than pure recall, so a medium prior fits. The code context nudges the prior slightly upward."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture03_pytorch_seg4_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"A tensor with shape 2x3x4 is passed into nn.Linear with input size 4 and output size 2. What output shape should you expect\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which sequence matches the standard PyTorch training loop\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture03_pytorch_seg4_q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What output shape should this PyTorch module call produce\" is well suited to checking whether the learner can reason through code rather than just recall facts."
+    }
+  ]
+}

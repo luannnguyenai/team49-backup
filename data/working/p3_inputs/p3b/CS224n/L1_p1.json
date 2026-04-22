@@ -1,0 +1,364 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture01-wordvecs",
+    "lecture_title": "Lecture 1 - Intro and Word Vectors",
+    "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture01-wordvecs::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Course logistics, goals, and assessment structure",
+      "description": "Introduces the course organization, learning goals, grading, assignments, project options, and expectations around collaboration and AI tool use.",
+      "summary": "Manning opens by previewing the lecture arc—course logistics, remarks on language and meaning, then word2vec, gradients, and possibly a notebook demo [ts=72s] [ts=119s]. He explains the course goals as threefold: teach foundations and current deep-learning methods for NLP, convey something about human language and why it is hard for computers, and leave students able to build practical systems such as text classification and information extraction systems [ts=288s] [ts=388s]. He then walks through grading, noting four assignments plus a final project and participation, distinguishes default versus custom final projects, and emphasizes that while students may discuss assignments, they must do their own work [ts=425s] [ts=600s]. He also addresses AI tools directly: using them for assistance such as coding help is acceptable, but outsourcing assignment answers to ChatGPT is not the intended way to learn [ts=492s] [ts=504s].",
+      "key_points": [
+        {
+          "text": "The lecture plan is course logistics, remarks about language and meaning, then word2vec, gradients, optimization, and possibly a notebook demo.",
+          "timestamp_s": 72,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The course aims to teach deep learning methods for NLP, linguistic foundations of language understanding, and how to build concrete NLP systems.",
+          "timestamp_s": 288,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The course grade is split across four assignments, a final project, and participation.",
+          "timestamp_s": 425,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Students are expected to do their own assignments even if they discuss ideas with friends.",
+          "timestamp_s": 475,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "AI tools may be used for assistance such as coding help, but not to answer assignment questions for the student.",
+          "timestamp_s": 492,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 4,
+        "end_s": 681
+      },
+      "difficulty": 0.18,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 11,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Language as communication, cognition, and a driver of modern NLP",
+      "description": "Frames language as central to human intelligence and surveys recent neural NLP breakthroughs, including translation, answer engines, large language models, and multimodal foundation models.",
+      "summary": "This segment argues that language is a key differentiator of human intelligence: beyond enabling communication, it scaffolds higher-level planning and thought, and writing further extends knowledge across time and space [ts=795s] [ts=853s] [ts=905s]. Manning also stresses that language is a social, evolving human tool rather than a static formal artifact, citing nuance, imprecision, and generational change as core properties of language use [ts=955s] [ts=1024s]. He then pivots to the modern NLP story, claiming the last decade of neural methods produced enormous gains in understanding and generation, with machine translation as an early commercial breakthrough and answer engines built from retrieval, reranking, and reading networks as another milestone [ts=1051s] [ts=1287s]. The segment closes by highlighting GPT-2, ChatGPT, and multimodal foundation models as systems that generate fluent text, follow commands, and operate across modalities such as text and images [ts=1311s] [ts=1517s] [ts=1597s].",
+      "key_points": [
+        {
+          "text": "Language is presented as a major differentiator between humans and closely related primates because it enables communication and collective coordination.",
+          "timestamp_s": 795,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Language is also argued to scaffold higher-level cognition and planning, not just external communication.",
+          "timestamp_s": 842,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Writing is described as a recent but transformative cognitive technology that allows knowledge sharing across time and space.",
+          "timestamp_s": 893,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Modern neural NLP enabled fast progress in machine translation and practical answer engines built from multiple neural components.",
+          "timestamp_s": 1101,
+          "evidence_type": "example"
+        },
+        {
+          "text": "GPT-2 is presented as a breakthrough because it could generate fluent, coherent continuation text one word at a time.",
+          "timestamp_s": 1314,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Foundation models generalize large language model ideas across modalities such as images, sound, and biological signals.",
+          "timestamp_s": 1532,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 682,
+        "end_s": 1698
+      },
+      "difficulty": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 17,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Meaning representations: denotation, one-hot vectors, and dense embeddings",
+      "description": "Contrasts denotational semantics with distributional semantics and motivates the shift from one-hot word representations to dense word vectors and embedding spaces.",
+      "summary": "Manning begins with the classical semantics view that meaning is a pairing between a symbol and its denotation, but notes that this notion did not translate cleanly into computational systems [ts=1704s] [ts=1795s]. He uses WordNet as the main pre-neural example of a hand-built relational resource, then critiques it for missing nuance, missing modern slang, and failing to capture actual usage differences such as why “good shot” sounds natural while “proficient shot” sounds odd [ts=1812s] [ts=1863s]. He then motivates word vectors by showing that standard one-hot or localist representations only mark vocabulary identity; words like hotel and motel are orthogonal under dot product, so their mathematical representation contains no natural similarity signal [ts=1928s] [ts=2004s]. The lecture replaces this with distributional semantics—“you shall know a word by the company it keeps”—and introduces dense embeddings in which semantically related words have similar vectors, large dot products, and structured neighborhoods in a high-dimensional space [ts=2105s] [ts=2177s] [ts=2359s].",
+      "key_points": [
+        {
+          "text": "Denotational semantics treats meaning as the pairing between a symbol and what it denotes.",
+          "timestamp_s": 1730,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "WordNet is presented as a traditional computational resource for word relations, but it misses nuance and modern usage.",
+          "timestamp_s": 1812,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "One-hot vectors are localist representations in which words like hotel and motel are orthogonal, so similarity is not encoded naturally.",
+          "timestamp_s": 1943,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Distributional semantics says a word’s meaning can be inferred from the contexts in which it appears.",
+          "timestamp_s": 2108,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Word vectors are dense embeddings whose dot products capture similarity and whose geometry organizes semantic neighborhoods.",
+          "timestamp_s": 2186,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "High-dimensional embedding spaces can capture multiple kinds of similarity that are not visible in a simple 2D plot.",
+          "timestamp_s": 2319,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 1699,
+        "end_s": 2480
+      },
+      "difficulty": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 13,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Embedding Q&A: context, dimensionality, geometry, and polysemy",
+      "description": "Answers student questions about what static embeddings can and cannot capture, how they are visualized, and how dimensionality affects their behavior.",
+      "summary": "In Q&A, Manning explicitly acknowledges a limitation of the first embedding model: each word string gets one vector, so the representation is not contextual and cannot directly separate senses such as Hollywood star versus astronomical star [ts=2529s] [ts=2556s]. He adds that even static embeddings can still position a polysemous word near neighborhoods evoked by its different senses in high-dimensional space [ts=2561s] [ts=2586s]. He also explains that 2D visualizations shown earlier are produced by nonlinear dimensionality reduction such as t-SNE rather than by the raw embedding space itself [ts=2604s] [ts=2623s]. Finally, he notes that dimensionality is usually chosen empirically and that semantic structure is expressed not only by distance but also by directions in the space; individual vector entries need not be bounded, though regularization often keeps them small [ts=2640s] [ts=2711s] [ts=2732s].",
+      "key_points": [
+        {
+          "text": "The initial model learns one embedding per word string, so it does not represent context-specific meaning directly.",
+          "timestamp_s": 2531,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A single static embedding can behave like an average over a word’s senses, as in star or bank.",
+          "timestamp_s": 2783,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The 2D plots shown for embeddings are obtained with t-SNE rather than reading the high-dimensional vectors directly.",
+          "timestamp_s": 2613,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Embedding dimensionality is usually selected empirically based on data scale and practical performance.",
+          "timestamp_s": 2643,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Semantic structure can be encoded by directions in the space, not only pairwise distance.",
+          "timestamp_s": 2711,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Vector entries are not inherently bounded to [-1, 1], though regularization may keep them from becoming very large.",
+          "timestamp_s": 2732,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 2481,
+        "end_s": 2826
+      },
+      "difficulty": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Word2vec training setup and likelihood objective",
+      "description": "Introduces word2vec as a simple, fast method for learning word vectors from corpora by predicting nearby context words from a center word.",
+      "summary": "This segment introduces word2vec as Mikolov et al.’s 2013 method, notable not for being the first or last embedding method but for being especially simple and fast [ts=2827s] [ts=2861s]. Manning defines the training data as a corpus, briefly clarifies corpus versus corpora, and explains that the model assigns one vector to each word type rather than each token occurrence [ts=2875s] [ts=2940s] [ts=3000s]. He then describes the core skip-gram-style setup: move through the text position by position, treat each word as a center word, gather a narrow context window of outside words, and learn vectors that make the observed nearby words probable [ts=2964s] [ts=3044s]. The intuitive target is that words like crises should receive higher probability near banking than unrelated words like skillet, and this is formalized as maximizing context-word likelihood across the corpus, or equivalently minimizing average negative log likelihood after applying a minus sign and a log [ts=3110s] [ts=3131s] [ts=3234s].",
+      "key_points": [
+        {
+          "text": "Word2vec was introduced in 2013 by Tomas Mikolov and colleagues at Google and stood out for being simple and fast.",
+          "timestamp_s": 2827,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A corpus is the body of text from which the model learns; the correct plural is corpora.",
+          "timestamp_s": 2875,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The model assigns vectors to word types rather than to individual word tokens.",
+          "timestamp_s": 3000,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Training uses a center word and nearby outside words within a fixed context window.",
+          "timestamp_s": 2972,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A good model should assign higher probability to plausible neighbors like crises near banking than to unrelated words like skillet.",
+          "timestamp_s": 3110,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The objective becomes average negative log likelihood over observed context words in the corpus.",
+          "timestamp_s": 3234,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 2827,
+        "end_s": 3300
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Softmax parameterization and optimization intuition",
+      "description": "Defines the word2vec probability model with dot products and softmax, then explains how training starts from random vectors and uses gradient-based optimization.",
+      "summary": "Manning next defines the probability of an outside word given a center word using the dot product of their vectors, then exponentiates and normalizes across the vocabulary to obtain a legal probability distribution [ts=3366s] [ts=3460s] [ts=3507s]. He names this normalization the softmax function and notes that it is ubiquitous in deep learning whenever unconstrained scores must become probabilities [ts=3513s] [ts=3590s]. He then addresses the natural question of where the vectors come from: training starts with random vectors and treats the corpus objective as an optimization problem, adjusting vectors so the probabilities of observed contexts go up [ts=3618s] [ts=3660s]. To make the setup concrete, he explains gradient descent geometrically as following derivatives downhill in parameter space, and also reveals an important modeling detail: each vocabulary item actually has two vectors, one when serving as a center word and one when serving as an outside word, which greatly increases parameter count [ts=3679s] [ts=3750s] [ts=3810s].",
+      "key_points": [
+        {
+          "text": "The model defines P(outside word | center word) using the dot product of the two word vectors.",
+          "timestamp_s": 3366,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Exponentiation and normalization convert unbounded similarity scores into a probability distribution via softmax.",
+          "timestamp_s": 3464,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Softmax is a general deep-learning tool for turning real-valued scores into probabilities.",
+          "timestamp_s": 3513,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Training begins from random vectors and adjusts them so observed context probabilities become larger.",
+          "timestamp_s": 3618,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Gradient descent is explained as repeatedly following derivatives toward a minimum in parameter space.",
+          "timestamp_s": 3685,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Each word has two learned vectors in this formulation: a center-word vector and an outside-word vector.",
+          "timestamp_s": 3750,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 3301,
+        "end_s": 3898
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg7",
+      "course_id": "cs224n-2024",
+      "name": "Chain-rule derivation of the word2vec gradient",
+      "description": "Works through the derivative of the log-softmax objective with respect to the center vector and interprets the result as observed minus expected.",
+      "summary": "The final segment is a board-style derivation of the gradient of the average negative log-likelihood objective with respect to the center-word vector [ts=3936s] [ts=4057s]. Manning expands the log softmax into a numerator term and denominator term, showing that the numerator derivative is straightforward because log and exp cancel, leaving the observed outside-word vector u_o [ts=4140s] [ts=4250s]. He then applies the chain rule to the denominator, first to the outer log and then again to the inner exponential sum, eventually rewriting the result in terms of a softmax-weighted sum over vocabulary outside vectors [ts=4372s] [ts=4525s] [ts=4687s]. The resulting gradient has the important observed-minus-expected form, where the expected part is the model’s current weighted average prediction; when observed and expected match, the derivative is zero [ts=4698s] [ts=4750s]. He ends by emphasizing that computing these derivatives for all parameters gives the update directions that automatically learn useful word vectors, even though in practice computers handle the routine calculus [ts=4780s] [ts=4804s].",
+      "key_points": [
+        {
+          "text": "The objective being differentiated is the average negative log likelihood of observed context words.",
+          "timestamp_s": 3938,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "For the numerator term, log and exp cancel, and the derivative with respect to the center vector becomes the observed outside vector u_o.",
+          "timestamp_s": 4140,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The denominator derivative requires repeated use of the chain rule.",
+          "timestamp_s": 4372,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The denominator can be rewritten as a softmax-weighted sum over outside-word vectors across the vocabulary.",
+          "timestamp_s": 4687,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The center-vector gradient has the observed-minus-expected form: observed outside vector minus predicted weighted average.",
+          "timestamp_s": 4698,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "When observed and expected match, the derivative is zero, indicating an optimum for that direction.",
+          "timestamp_s": 4743,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "start_s": 3899,
+        "end_s": 4809
+      },
+      "difficulty": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L1_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture01-wordvecs_transcript.txt"
+  }
+}

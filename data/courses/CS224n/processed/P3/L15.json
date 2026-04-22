@@ -1,0 +1,160 @@
+{
+  "output_filename": "p3a__cs224n__lecture15_benchmarking.json",
+  "run_id": "",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture15-benchmarking",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_evaluation_objectives_by_lifecycle_stage, which is critical and gateway, plus high item_generation_worthiness makes this foundational theory worth assessing.",
+      "target_kp_ids": [
+        "kp_evaluation_objectives_by_lifecycle_stage",
+        "kp_academic_benchmark_design_tradeoffs"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of close-ended evaluation plus substantial main coverage of spurious correlations and high item_generation_worthiness support strong conceptual/diagnostic assessment value.",
+      "target_kp_ids": [
+        "kp_close_ended_nlp_evaluation",
+        "kp_spurious_correlations_from_dataset_construction",
+        "kp_metric_choice_and_aggregation_pitfalls"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of open-ended generation with substantial main coverage of reference-based limitations and high item_generation_worthiness makes this central lecture theory.",
+      "target_kp_ids": [
+        "kp_open_ended_generation",
+        "kp_reference_based_eval_limitations",
+        "kp_bleu_overlap_metrics"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg4",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of the main KP on human-evaluation design and disagreement, with concrete failure modes and medium item_generation_worthiness, gives clear instructional value without being the lecture’s most central segment.",
+      "target_kp_ids": [
+        "kp_human_evaluation_design_and_disagreement"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_llm_as_a_judge_and_alpacaeval, which is critical and gateway, together with substantial pairwise-evaluation coverage and high item_generation_worthiness supports heavy assessment.",
+      "target_kp_ids": [
+        "kp_llm_as_a_judge_and_alpacaeval",
+        "kp_pairwise_chatbot_evaluation_and_elo_ranking"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of current benchmark suites plus substantial perplexity-proxy discussion and high item_generation_worthiness make this a strong assessment target on present-day practice.",
+      "target_kp_ids": [
+        "kp_current_llm_benchmark_suites_and_task_coverage",
+        "kp_perplexity_as_a_proxy_metric"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of benchmark contamination, a critical KP, with multiple concrete instability and mitigation signals plus high item_generation_worthiness makes this highly assessable.",
+      "target_kp_ids": [
+        "kp_benchmark_contamination"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg8",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of a critical capstone KP on monoculture, multilinguality, fairness, efficiency, and incentives gives this synthesis segment strong application value despite only medium item_generation_worthiness.",
+      "target_kp_ids": [
+        "kp_monoculture_multilinguality_fairness_efficiency_and_incentives"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg9",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Although partly recap/Q&A, substantial main coverage of the critical capstone KP and the concrete rubric-driven judge-model takeaway justify keeping it as a motivational synthesis segment.",
+      "target_kp_ids": [
+        "kp_monoculture_multilinguality_fairness_efficiency_and_incentives"
+      ],
+      "question_intent": "application",
+      "content_type": "motivation",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

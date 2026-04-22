@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_11_large_scale_distributed_training::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions on FSDP ownership, forward/backward communication, and memory-saving behavior. No separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does Fully Sharded Data Parallelism change relative to ordinary data parallelism?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It removes minibatches entirely",
+        "It shards model weights, gradients, and optimizer state across GPUs instead of fully replicating them everywhere",
+        "It keeps all weights on every GPU but shards the dataset only",
+        "It replaces backward passes with only forward recomputation"
+      ],
+      "answer_index": 1,
+      "explanation": "FSDP reduces memory pressure by distributing ownership of parameter shards and their associated states instead of storing full copies on every device.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fsdp",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "across the different GPUs.",
+          "And the fix for this is actually relatively easy."
+        ],
+        "timestamps": [
+          "00:41:07",
+          "00:41:03"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can a non-owner GPU delete a layer's weight copy after the forward pass in FSDP?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because that temporary copy was only needed to execute the layer and keeping it would waste memory",
+        "Because backward never needs those weights again",
+        "Because only activations, not weights, participate in backward",
+        "Because deleting the copy automatically updates the owner GPU"
+      ],
+      "answer_index": 0,
+      "explanation": "The non-owner only needs a transient copy to compute the layer. Releasing it after use saves memory, which is one of the main goals of sharding.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fsdp",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So when you're doing fully sharded data",
+          "now because the model weights are split up."
+        ],
+        "timestamps": [
+          "00:42:43",
+          "00:42:39"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How are gradients typically combined in FSDP during backward?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are discarded on non-owner GPUs and never collected",
+        "They are all-reduced to every GPU exactly like ordinary data parallelism",
+        "They are gathered back to the owner GPU for that shard, which then applies the update",
+        "They are averaged only over activations, not parameters"
+      ],
+      "answer_index": 2,
+      "explanation": "Since each shard has an owner, the natural destination for full gradients and optimizer updates is the owning GPU rather than every GPU in the group.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fsdp",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "will broadcast it to all the devices.",
+          "So at the beginning of the backward pass"
+        ],
+        "timestamps": [
+          "00:44:42",
+          "00:44:36"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg5-q1",
+      "global_kp_id": "kp_fsdp",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg5-q2",
+      "global_kp_id": "kp_fsdp",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg5-q3",
+      "global_kp_id": "kp_fsdp",
+      "role": "primary"
+    }
+  ]
+}

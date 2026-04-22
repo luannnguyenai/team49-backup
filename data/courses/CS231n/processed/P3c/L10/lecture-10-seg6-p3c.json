@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_10::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for diagnostic questions on optical flow and why the temporal stream in two-stream video models can remain surprisingly strong.",
+  "question_bank": [
+    {
+      "item_id": "lecture_10_seg6_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does optical flow represent in video understanding?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "An estimate of how each pixel moves from one frame to the next",
+        "The probability that a frame belongs to a class",
+        "A set of object bounding boxes over time",
+        "A compressed audio representation for the video"
+      ],
+      "answer_index": 0,
+      "explanation": "Optical flow is an explicit motion representation. For each pixel or location, it estimates a displacement vector showing where that content moves in the next frame.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_optical_flow",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "measure motion of the pixels",
+          "F(x, y)"
+        ],
+        "timestamps": [
+          "00:41:43",
+          "00:42:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_10_seg6_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can the temporal stream in a two-stream network perform surprisingly well?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Motion cues highlight the action itself while removing some distracting appearance and background information",
+        "It directly uses the ground-truth labels of adjacent frames",
+        "It has access to future test videos during training",
+        "It always contains more channels than the RGB stream"
+      ],
+      "answer_index": 0,
+      "explanation": "Motion representations emphasize how things move rather than what the background looks like. That can make the action signal easier to learn and less prone to overfitting to appearance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_two_stream_networks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "using only motion",
+          "works very well"
+        ],
+        "timestamps": [
+          "00:44:22",
+          "00:44:22"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg6_q1",
+      "global_kp_id": "kp_optical_flow",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg6_q2",
+      "global_kp_id": "kp_two_stream_networks",
+      "role": "primary"
+    }
+  ]
+}

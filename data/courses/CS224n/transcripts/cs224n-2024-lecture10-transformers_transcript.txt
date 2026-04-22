@@ -1,0 +1,6328 @@
+Title: Stanford CS224N NLP with Deep Learning | 2023 | Lecture 8 - Self-Attention and Transformers
+URL: https://www.youtube.com/watch?v=LWMzyfvuehA
+Video ID: LWMzyfvuehA
+============================================================
+
+00:00:05
+Hi, everyone.
+
+00:00:07
+Welcome to CS224N we're
+about two minutes in.
+
+00:00:10
+So let's get started.
+
+00:00:12
+So today, we've got what I think
+is quite an exciting lecture
+
+00:00:16
+topic.
+
+00:00:17
+We're going to talk
+about self-attention
+
+00:00:19
+and transformers.
+
+00:00:21
+So these are some ideas that
+are the foundation of most
+
+00:00:26
+of the modern advances in
+natural language processing
+
+00:00:29
+and actually AI systems in
+a broad range of fields.
+
+00:00:34
+So it's a very, very fun topic
+Before we get into that--
+
+00:00:45
+OK, before we get
+into that, we're
+
+00:00:46
+going to have a
+couple of reminders.
+
+00:00:49
+So there are brand
+new lecture notes.
+
+00:00:51
+Woo, thanks, thank you.
+
+00:00:54
+Yeah, I'm very
+excited about them.
+
+00:00:59
+They go into-- they
+pretty much follow along
+
+00:01:02
+with what I'll be
+talking about today
+
+00:01:05
+but go into considerably
+more detail.
+
+00:01:07
+Assignment four is
+due a week from today.
+
+00:01:11
+Yeah, so the issues
+with Azure continue.
+
+00:01:15
+Thankfully, thankfully,
+our TAs especially
+
+00:01:22
+has tested that
+this works on Colab,
+
+00:01:24
+and the amount of
+training is such
+
+00:01:26
+that a Colab session will
+allow you to train your machine
+
+00:01:31
+translation system.
+
+00:01:33
+So if you don't have
+a GPU, use Colab.
+
+00:01:35
+We're continuing to
+work on getting access
+
+00:01:37
+to more GPUs for assignment
+five and the final project.
+
+00:01:41
+We'll continue to update
+you as we're able to,
+
+00:01:44
+but the usual systems
+this year are no longer
+
+00:01:49
+holding because
+companies are changing
+
+00:01:51
+their minds about things.
+
+00:01:52
+OK, so our final
+project proposal,
+
+00:01:55
+you have a proposal of
+what you want to work on
+
+00:01:58
+for your final project.
+
+00:02:00
+We will give you
+feedback on whether we
+
+00:02:03
+think it's a feasible
+idea or how to change it.
+
+00:02:05
+So this is very
+important because we
+
+00:02:07
+want you to work on
+something that we
+
+00:02:08
+think has a good
+chance of success
+
+00:02:09
+for the rest of the quarter.
+
+00:02:11
+That's going to be out tonight.
+
+00:02:12
+We'll have Ed announcement
+when it is out,
+
+00:02:15
+and we want to get
+you feedback on that
+
+00:02:17
+pretty quickly because
+you'll be working on this.
+
+00:02:20
+After assignment five is
+done, really the major core
+
+00:02:23
+component of the course after
+that is the final project.
+
+00:02:29
+OK, any questions?
+
+00:02:32
+Cool, OK, OK, so
+let's take a look
+
+00:02:38
+back into what we've done
+so far in this course
+
+00:02:41
+and see what we were doing in
+natural language processing.
+
+00:02:47
+What was our strategy?
+
+00:02:48
+If you had a natural
+language processing problem,
+
+00:02:50
+and you wanted to say, take
+your best effort attempt at it
+
+00:02:52
+without doing anything too
+fancy, you would have said,
+
+00:02:55
+OK, I'm going to have a
+bidirectional LSTM instead
+
+00:02:59
+of a simple RNN.
+
+00:03:01
+I'm going to use an LSTM
+to encode my sentences.
+
+00:03:04
+I get bidirectional
+context, and if I
+
+00:03:07
+have an output that
+I'm trying to generate,
+
+00:03:09
+I'll have a unidirectional
+LSTM that I was
+
+00:03:12
+going to generate one by one.
+
+00:03:13
+So you have a translation
+or a parse or whatever.
+
+00:03:17
+And so maybe I've encoded in a
+bidirectional LSTM, the source
+
+00:03:19
+sentence, and I'm one by
+one decoding out the target
+
+00:03:24
+with my uni-directional LSTM.
+
+00:03:26
+And then, also, I was going to
+use something like attention
+
+00:03:30
+to give flexible access to
+memory if I felt like I needed
+
+00:03:35
+to do this look back and see
+where I want to translate from.
+
+00:03:38
+OK, and this was just
+working exceptionally well,
+
+00:03:41
+and we motivated
+attention through wanting
+
+00:03:44
+to do machine translation.
+
+00:03:46
+And you have this
+bottleneck where
+
+00:03:47
+you don't want to have to
+encode the whole source
+
+00:03:50
+sentence in a single vector.
+
+00:03:52
+OK, and in this lecture,
+we have the same goal.
+
+00:03:54
+So we're to be looking at
+a lot of the same problems
+
+00:03:56
+that we did
+previously, but we're
+
+00:03:58
+going to use different
+building blocks.
+
+00:04:00
+So we're going to
+say if 2014 to 2017
+
+00:04:05
+ish, I was using recurrence
+through lots of trial
+
+00:04:08
+and error, years later, we
+had these brand new building
+
+00:04:12
+blocks that we could plug-in
+direct replacement for LSTMs,
+
+00:04:17
+and they're going to allow for
+just a huge range of much more
+
+00:04:21
+successful applications.
+
+00:04:24
+And so what are the issues
+with recurrent neural networks
+
+00:04:28
+we used to use, and
+what are the new systems
+
+00:04:30
+that we're going to use from
+this point moving forward.
+
+00:04:34
+OK, so one of the issues with
+a recurrent neural network
+
+00:04:38
+is what we're going to call
+linear interaction distance.
+
+00:04:41
+So as we know, RNNs are unrolled
+left to right or right to left
+
+00:04:47
+depending on the language
+and the direction.
+
+00:04:49
+OK, but it encodes
+this sort of notion
+
+00:04:51
+of linear locality,
+which is useful
+
+00:04:53
+because if two words occur
+right next to each other,
+
+00:04:55
+sometimes they're
+actually quite related.
+
+00:04:57
+So tasty pizza.
+
+00:04:58
+They're nearby, and in the
+recurrent neural network,
+
+00:05:01
+you sort of encode tasty, and
+then you sort of walk one step,
+
+00:05:05
+and you encode pizza.
+
+00:05:08
+So nearby words do often
+affect each other's meanings,
+
+00:05:12
+but you have this problem where
+very long distance dependencies
+
+00:05:17
+can take a very long
+time to interact.
+
+00:05:18
+So if I have this sentence,
+the chef, so those are nearby.
+
+00:05:22
+Those interact with
+each other, and then who
+
+00:05:27
+and then a bunch of stuff.
+
+00:05:28
+Like, the chef who
+went to the stores
+
+00:05:30
+and picked up the ingredients
+and loves garlic and then was--
+
+00:05:37
+I actually have an RNN step.
+
+00:05:40
+This application of the
+recurrent weight matrix
+
+00:05:42
+and some element wise
+non-linearities once, twice,
+
+00:05:45
+three times, right,
+as many times
+
+00:05:48
+as there is potentially
+the length of the sequence
+
+00:05:50
+between chef and what's, right?
+
+00:05:53
+And it's the chef
+who was so this
+
+00:05:55
+is a long-distance
+dependency, should
+
+00:05:57
+feel kind of
+related to the stuff
+
+00:05:59
+that we did in
+dependency syntax.
+
+00:06:00
+But it's quite difficult
+to learn potentially
+
+00:06:06
+that these words
+should be related.
+
+00:06:08
+So if you have a lot
+of steps between words,
+
+00:06:19
+it can be difficult to learn
+the dependencies between them.
+
+00:06:22
+We talked about all
+these gradient problems.
+
+00:06:23
+LSTMs do a lot better at
+modeling the gradients
+
+00:06:28
+across long distances than
+simple recurrent neural
+
+00:06:30
+networks, but it's not perfect.
+
+00:06:33
+And we already know
+that this linear order
+
+00:06:36
+isn't the right way to
+think about sentences.
+
+00:06:40
+So if I wanted to learn
+that it's the chef who was,
+
+00:06:46
+then I might have a
+hard time doing it
+
+00:06:50
+because the gradients have to
+propagate from was to chef,
+
+00:06:53
+and really, I'd like more
+direct connection between words
+
+00:06:57
+that might be related in the
+sentence or in a document,
+
+00:06:59
+right, even if these are
+going to get much longer.
+
+00:07:04
+So this linear interaction
+distance problem.
+
+00:07:06
+We would like words
+that might be related
+
+00:07:08
+to be able to interact with each
+other in the neural networks
+
+00:07:11
+computation sort of graph
+more easily than sort of being
+
+00:07:17
+linearly far away
+so that we can learn
+
+00:07:20
+these long-distance
+dependencies better.
+
+00:07:22
+And there's a
+related problem too
+
+00:07:24
+that, again, comes back to
+the recurrent neural networks
+
+00:07:26
+dependence on the
+index, on the index
+
+00:07:29
+into the sequence, often
+called a dependence on time.
+
+00:07:32
+So in a recurrent
+neural network,
+
+00:07:35
+the forward and backward passes
+have O of sequence length many.
+
+00:07:39
+So that means just
+roughly sequence--
+
+00:07:41
+in this case, just
+sequence length
+
+00:07:42
+many unparallelizable
+operations.
+
+00:07:45
+So we know GPUs are great.
+
+00:07:47
+They can do a lot
+of operations at
+
+00:07:50
+once as long as
+there's no dependency
+
+00:07:52
+between the operations
+in terms of time,
+
+00:07:54
+but you have to compute one
+and then compute the other.
+
+00:07:57
+But in a recurrent
+neural network,
+
+00:07:59
+you can't actually compute the
+RNN hidden state for time step
+
+00:08:03
+five before you compute the RNN
+hidden state for time step four
+
+00:08:06
+or time step three, right?
+
+00:08:08
+And so you get this graph
+that looks very similar where
+
+00:08:11
+if I want to compute this hidden
+state, so I've got some word,
+
+00:08:14
+I have zero operations
+I need to do before I
+
+00:08:17
+can compute this state.
+
+00:08:18
+I have one operation
+I can do before I
+
+00:08:20
+can compute this state.
+
+00:08:22
+And as my sequence length
+grows, I've got, OK, here,
+
+00:08:26
+I've got three operations I
+need to do before I can compute
+
+00:08:28
+the state with the number
+three because I need to compute
+
+00:08:31
+this and this and that.
+
+00:08:33
+So there's three
+unparallelizable operations
+
+00:08:37
+that I'm sort of glomming
+all the matrix multiplies
+
+00:08:39
+and stuff into a single one.
+
+00:08:40
+So one, two, three,
+and of course,
+
+00:08:43
+this grows with the
+sequence length as well.
+
+00:08:45
+So down over here, so as
+the sequence length grows,
+
+00:08:48
+I can't parallelize--
+
+00:08:50
+I can't just have a big GPU
+just kachunk with the matrix
+
+00:08:54
+multiply to compute this state
+because I need to compute all
+
+00:08:58
+the previous states beforehand.
+
+00:09:02
+OK, any questions about that?
+
+00:09:03
+So those are these
+two related problems
+
+00:09:06
+both with the
+dependence on time.
+
+00:09:08
+Yeah.
+
+00:09:08
+Yeah, so I have a question on
+the linear interaction issues.
+
+00:09:11
+I thought that was the whole
+point of the attention network
+
+00:09:13
+and then how maybe you want--
+
+00:09:17
+during the training
+of the actual cells
+
+00:09:19
+that depend more on each other.
+
+00:09:21
+Can't we do something
+like the attention
+
+00:09:22
+and then work our
+way around that?
+
+00:09:26
+So the question is with the
+linear interaction distance,
+
+00:09:28
+wasn't this the
+point of attention
+
+00:09:30
+that it gets around that?
+
+00:09:31
+Can't we use something
+with attention
+
+00:09:33
+to help or does that just help?
+
+00:09:34
+So it won't solve the
+parallelizability problem.
+
+00:09:37
+And in fact, everything we do
+in the rest of this lecture
+
+00:09:39
+will be attention based, but
+we'll get rid of the recurrence
+
+00:09:42
+and just do attention
+more or less.
+
+00:09:44
+So, yeah, it's a
+great intuition.
+
+00:09:48
+Any other questions?
+
+00:09:52
+OK, cool, so if not recurrence,
+what about attention,
+
+00:09:58
+just a slide a slide back.
+
+00:09:59
+And so we're going to get
+deep into attention today,
+
+00:10:04
+but just for the
+second, attention
+
+00:10:06
+treats each word's
+representation
+
+00:10:08
+as a query to access and
+incorporate information
+
+00:10:11
+from a set of values.
+
+00:10:12
+So previously, we
+were in a decoder.
+
+00:10:14
+We were decoding out a
+translation of a sentence,
+
+00:10:17
+and we attended
+to the encoder so
+
+00:10:19
+that we didn't have to store
+the entire representation
+
+00:10:21
+of the source sentence
+into a single vector.
+
+00:10:24
+And here, today, we'll
+think about attention
+
+00:10:26
+within a single sentence.
+
+00:10:27
+So I've got this sentence
+written out here with word one
+
+00:10:31
+through word T, in
+this case, and right
+
+00:10:34
+on these integers
+in the boxes, I'm
+
+00:10:36
+writing out the number of
+unparallelizable operations
+
+00:10:38
+that you need to do before
+you can compute these.
+
+00:10:41
+So for each word,
+you can independently
+
+00:10:43
+compute its embedding without
+doing anything else previously
+
+00:10:46
+because the embedding just
+depends on the word identity.
+
+00:10:50
+And then with
+attention, if I wanted
+
+00:10:53
+to build an attention
+representation of this word
+
+00:10:55
+by looking at all the other
+words in the sequence,
+
+00:10:57
+that's one big operation.
+
+00:10:59
+And I can do them in
+parallel for all the words.
+
+00:11:02
+So the attention
+for this word I can
+
+00:11:04
+do for the attention
+for this word.
+
+00:11:06
+I don't need to walk left to
+right like I did for an RNN.
+
+00:11:09
+Again, we'll get much
+deeper into this,
+
+00:11:10
+but this, you should
+have the intuition
+
+00:11:13
+that it solves the
+linear interaction
+
+00:11:16
+problem and the
+non-parallelizability problem
+
+00:11:18
+because now, no matter how far
+away words are from each other,
+
+00:11:22
+I am potentially interacting.
+
+00:11:24
+I might just attend to you even
+if you're very, very far away
+
+00:11:28
+independent of how
+far away you are,
+
+00:11:29
+and I also don't
+need to walk along
+
+00:11:32
+the sequence linearly long.
+
+00:11:34
+So I'm treating the
+whole sequence at once.
+
+00:11:38
+So the intuition
+is that attention
+
+00:11:40
+allows you to look
+very far away at once,
+
+00:11:42
+and it doesn't have this
+dependence on the sequence
+
+00:11:44
+index that keeps us from
+parallelizing operations.
+
+00:11:47
+And so now the rest
+of the lecture,
+
+00:11:48
+we'll talk in great
+depth about attention.
+
+00:11:51
+So maybe let's just move on.
+
+00:11:55
+OK, so let's think more
+deeply about attention.
+
+00:11:59
+One thing that you might
+think of with attention
+
+00:12:02
+is that it's performing a fuzzy
+lookup in a key value store.
+
+00:12:07
+So you have a bunch of
+keys, a bunch of values,
+
+00:12:09
+and it's going to
+help you access that.
+
+00:12:12
+So in an actual
+lookup table, just
+
+00:12:14
+like a dictionary in Python,
+for example, right, very simple.
+
+00:12:18
+You have a table of keys that
+each key maps to a value,
+
+00:12:22
+and then you give it a query.
+
+00:12:23
+And the query matches
+one of the keys,
+
+00:12:26
+and then you return
+the value, right?
+
+00:12:27
+So I've got a
+bunch of keys here,
+
+00:12:31
+and my query matches the key.
+
+00:12:33
+So I return the value.
+
+00:12:34
+Simple, fair, easy.
+
+00:12:36
+OK, good.
+
+00:12:39
+And in attention, so
+just like we saw before,
+
+00:12:44
+the query matches
+all keys softly.
+
+00:12:46
+There's no exact match.
+
+00:12:48
+You compute some
+similarity between the key
+
+00:12:51
+and all of the-- sorry, the
+query and all of the keys,
+
+00:12:54
+and then you weight the results.
+
+00:12:56
+So you've got a query again.
+
+00:12:57
+You've got a bunch of keys.
+
+00:12:59
+The query to different extents
+is similar to each of the keys,
+
+00:13:04
+and you will sort of measure
+that similarity between 0 and 1
+
+00:13:08
+through a softmax, and then
+you get the values out.
+
+00:13:12
+You average them via the
+weights of the similarity
+
+00:13:15
+between the key and
+the query and the keys.
+
+00:13:18
+You do a weighted sum
+with those weights,
+
+00:13:20
+and you get an output, right?
+
+00:13:21
+So it really is
+quite a lookup table
+
+00:13:24
+but in this soft vector
+space mushy sort of sense.
+
+00:13:29
+So I'm really doing
+some kind of accessing
+
+00:13:32
+into this information that's
+stored in the key value store,
+
+00:13:35
+but I'm sort of softly
+looking at all of the results.
+
+00:13:41
+OK, any questions there?
+
+00:13:45
+Cool, so what might
+this look like?
+
+00:13:48
+So if I was trying to
+represent this sentence,
+
+00:13:50
+I went to Stanford
+CS224N and learned--
+
+00:13:54
+so I'm trying to build a
+representation of learned.
+
+00:13:58
+I have a key for each word.
+
+00:14:01
+So this is this self-attention
+thing that we'll get into.
+
+00:14:04
+I have a key for each word.
+
+00:14:05
+A value for each word.
+
+00:14:06
+I've got the query
+for learned, and I've
+
+00:14:08
+got these sort of
+teal-ish bars up top,
+
+00:14:11
+which might say how
+much you're going to try
+
+00:14:14
+to access each of the word.
+
+00:14:15
+Like, oh, maybe 224N
+is not that important.
+
+00:14:18
+CS, maybe that determines
+what I learned.
+
+00:14:20
+Stanford and then
+learned, maybe that's
+
+00:14:24
+important for
+representing itself.
+
+00:14:25
+So you look across
+at the whole sentence
+
+00:14:27
+and build up this soft
+accessing of information
+
+00:14:30
+across the sentence in order to
+represent learned in context.
+
+00:14:35
+OK, so this is
+just a toy diagram.
+
+00:14:38
+So let's get into the math.
+
+00:14:40
+So we're going to look
+at a sequence of words.
+
+00:14:43
+That's W1 to N. Sequence
+of words in a vocabulary.
+
+00:14:46
+So this is like, Zuko
+made his uncle tea.
+
+00:14:49
+That's a good sequence.
+
+00:14:50
+And for each word, we're going
+to embed it with this embedding
+
+00:14:53
+matrix just like we've been
+doing in this class, right?
+
+00:14:56
+So I have this embedding matrix
+that goes from the vocabulary
+
+00:14:58
+size to the dimensionality
+D. So each word
+
+00:15:03
+has a non-contextual
+only dependent on itself
+
+00:15:06
+word embedding,
+and now I'm going
+
+00:15:08
+to transform each word with
+one of three different weight
+
+00:15:11
+matrices.
+
+00:15:12
+So this is often called key
+query value self-attention.
+
+00:15:16
+So I have a matrix Q,
+which is in R D to D.
+
+00:15:19
+So this maps xi which is a
+vector of dimensionality D
+
+00:15:23
+to another vector
+of dimensionality D,
+
+00:15:25
+and so that's going to
+be a query vector, right?
+
+00:15:28
+So it takes an xi and it sort of
+rotates it, shuffles it around,
+
+00:15:31
+stretches it, squishes
+it, makes it different,
+
+00:15:35
+and now it's a query.
+
+00:15:35
+And now for a different
+learnable parameter
+
+00:15:37
+k, so that's another matrix, I'm
+going to come up with my keys.
+
+00:15:41
+And with a different
+learnable parameter V,
+
+00:15:45
+I'm going to come up
+with my values, right?
+
+00:15:47
+So I'm taking each of the
+non-contextual word embeddings,
+
+00:15:49
+each of these xi's and I'm
+transforming each of them
+
+00:15:53
+to come up with my
+query for that word,
+
+00:15:55
+my key for that word, and
+my value for that word.
+
+00:16:00
+OK, so every word is
+doing each of these roles.
+
+00:16:03
+Next, I'm going to compute
+all pairs of similarities
+
+00:16:06
+between the keys and queries.
+
+00:16:08
+So in the toy example we saw,
+I was computing the similarity
+
+00:16:11
+between a single query for
+the word learned and all
+
+00:16:14
+of the keys for the
+entire sentence.
+
+00:16:17
+In this context, I'm computing
+all pairs of similarities
+
+00:16:20
+between all keys and all
+values because I want
+
+00:16:23
+to represent all of these sums.
+
+00:16:25
+So I've got this dot--
+
+00:16:27
+I'm just going to take the
+dot product between these two
+
+00:16:29
+vectors, right?
+
+00:16:30
+So I've got qi.
+
+00:16:31
+So this is saying the query
+for word i dotted with the key
+
+00:16:34
+for word j, and I get this
+score, which is a real value.
+
+00:16:40
+It might be very large
+negative, might be zero,
+
+00:16:42
+might be very
+large and positive.
+
+00:16:44
+And so that's like
+how much should I
+
+00:16:46
+look at j in this lookup table.
+
+00:16:49
+And then I do the
+softmax, right?
+
+00:16:51
+So I softmax.
+
+00:16:52
+So I say that the
+actual weight that I'm
+
+00:16:55
+going to look at j from i
+is softmax of this over all
+
+00:16:59
+of the possible indices.
+
+00:17:00
+So it's like the
+affinity between i
+
+00:17:02
+and j normalized by
+the affinity between i
+
+00:17:05
+and all of the possible
+J prime in the sequence.
+
+00:17:10
+And then my output is just
+the weighted sum of values.
+
+00:17:13
+So I've got this
+output for word i.
+
+00:17:15
+So maybe i is 1
+for Zuko, and I'm
+
+00:17:18
+representing it as the sum
+of these weights for all j.
+
+00:17:23
+So Zuko and made and
+his and uncle and tea,
+
+00:17:25
+and the value vector
+for that word j.
+
+00:17:30
+I'm looking from i to
+j as much as alpha ij.
+
+00:17:35
+What's the dimension of Wi?
+
+00:17:39
+Oh, WI, you can either think
+of it as a symbol in vocab V.
+
+00:17:44
+So that's like-- you could think
+of it as a one hot vector in--
+
+00:17:48
+yeah, in this case, we are, I
+guess, thinking of it as this.
+
+00:17:51
+So one hot vector in
+dimensionality size of vocab.
+
+00:17:54
+So in the matrix e,
+you see that it's
+
+00:17:56
+RD by bars around v. That's
+size of the vocabulary.
+
+00:18:01
+So when I do e
+multiplied by Wi that's
+
+00:18:05
+taking e which is D
+by v, multiplying it
+
+00:18:08
+by W, which is v, and returning
+a vector that's dimensionality
+
+00:18:12
+D.
+
+00:18:12
+So W in that first
+line, like W1n,
+
+00:18:16
+that's a matrix
+where it has maybe
+
+00:18:20
+like a column for every word in
+that sentence and each column
+
+00:18:24
+is a length of v?
+
+00:18:25
+Yeah, usually, I guess we
+think of it as having a--
+
+00:18:28
+I mean, if I'm putting the
+sequence length index first,
+
+00:18:31
+you might think of it as
+having a row for each word.
+
+00:18:33
+But similarly, yeah, it's N,
+which is the sequence length,
+
+00:18:36
+and then the second
+dimension would be V,
+
+00:18:39
+which is the vocabulary size.
+
+00:18:40
+And then that gets mapped
+to this thing, which
+
+00:18:42
+is sequence length by D.
+
+00:18:46
+Why do we learn two
+different matrices, q and k,
+
+00:18:49
+when q transpose-- qi
+transpose kj is really
+
+00:18:53
+just one matrix [INAUDIBLE]?
+
+00:18:56
+That's a great question.
+
+00:18:57
+It ends up being
+because this will end up
+
+00:18:59
+being a low-rank
+approximation to that matrix.
+
+00:19:02
+So it is for computational
+efficiency reasons,
+
+00:19:05
+although it also,
+I think, feels kind
+
+00:19:07
+of nice in the presentation.
+
+00:19:09
+But, yeah, what
+we'll end up doing
+
+00:19:11
+is having a very low-rank
+approximation to QK transpose.
+
+00:19:14
+And so you actually
+do do it like this.
+
+00:19:17
+That's a good question.
+
+00:19:19
+[INAUDIBLE] ii, so that
+[INAUDIBLE] specific?
+
+00:19:25
+Sorry, could you
+repeat that for me?
+
+00:19:27
+This eii, so the query of
+the word dotted with the q
+
+00:19:32
+by itself, does it
+look like an identity
+
+00:19:34
+or does it look like any
+things in particular?
+
+00:19:37
+That's a good question.
+
+00:19:38
+OK, let me remember
+to repeat questions.
+
+00:19:40
+So does eii for j equal to
+i, so looking at itself,
+
+00:19:44
+look like anything
+in particular?
+
+00:19:46
+Does it look like the identity?
+
+00:19:47
+Is that the question?
+
+00:19:48
+OK, so it's unclear actually.
+
+00:19:52
+This question of should
+you look at yourself
+
+00:19:54
+for representing yourself.
+
+00:19:56
+Well, it's going to be encoded
+by the matrices Q and K.
+
+00:20:00
+If I didn't have
+Q and K in there,
+
+00:20:02
+if those were the identity
+matrices, if Q is identity,
+
+00:20:05
+K is identity, then this would
+be dot product with yourself,
+
+00:20:09
+which is going to
+be high on average.
+
+00:20:11
+You're pointing in the
+same direction as yourself,
+
+00:20:13
+but it could be that qxi
+and kxi might be arbitrarily
+
+00:20:19
+different from each other
+because Q could be the identity
+
+00:20:23
+and K could map u to the
+negative of yourself,
+
+00:20:27
+for example, so that you
+don't look at yourself.
+
+00:20:29
+So this is all learned in
+practice so you end up--
+
+00:20:32
+it can sort of
+decide by learning
+
+00:20:35
+whether you should be
+looking at yourself
+
+00:20:37
+or not, and that's
+some of the flexibility
+
+00:20:39
+that parametrizing at s,
+q and k gives you that
+
+00:20:43
+wouldn't be there if I
+just used xi's everywhere
+
+00:20:46
+in this equation.
+
+00:20:49
+I'm going to try to
+move on, I'm afraid,
+
+00:20:51
+because there's a lot
+to get on, but we'll
+
+00:20:53
+keep talking about
+self-attention.
+
+00:20:55
+And so as more
+questions come up,
+
+00:20:57
+I can also potentially
+return back.
+
+00:21:01
+OK, so this is our
+basic building block,
+
+00:21:05
+but there are a bunch
+of barriers to using it
+
+00:21:08
+as a replacement for LSTMs.
+
+00:21:10
+And so what we're going to do
+for this portion of the lecture
+
+00:21:12
+is talk about the
+minimal components
+
+00:21:14
+that we need in order to use
+self-attention as this very
+
+00:21:19
+fundamental building block.
+
+00:21:21
+So we can't use it as it
+stands as I've presented it
+
+00:21:25
+because there are
+a couple of things
+
+00:21:26
+that we need to solve or fix.
+
+00:21:29
+One of them is that there's
+no notion of sequence
+
+00:21:31
+order in self-attention.
+
+00:21:33
+So what does this mean?
+
+00:21:37
+If I have a sentence,
+like when I move over here
+
+00:21:41
+to the whiteboard
+briefly, and hopefully,
+
+00:21:42
+I'll write quite large.
+
+00:21:46
+If I have a sentence
+like Zuko made his uncle,
+
+00:21:55
+and let's say his
+uncle made Zuko.
+
+00:22:05
+If I were to embed
+each of these words,
+
+00:22:07
+right, using its
+embedding matrix,
+
+00:22:09
+the embedding matrix isn't
+dependent on the index
+
+00:22:14
+of the word.
+
+00:22:14
+So this is the word at
+index 1, 2, 3, 4 versus his
+
+00:22:19
+is over here and uncle, right?
+
+00:22:21
+And so when I compute
+the self-attention,
+
+00:22:23
+and there's a lot more on
+this in the lecture notes that
+
+00:22:26
+goes through a full example, the
+actual self-attention operation
+
+00:22:32
+will give you exactly
+the same representations
+
+00:22:34
+for this sequence, Zuko made
+his uncle, as for this sequence,
+
+00:22:37
+his uncle made Zuko.
+
+00:22:39
+And that's bad because
+they're sentences
+
+00:22:41
+that mean different things.
+
+00:22:43
+And so, right, it's this
+idea that self-attention
+
+00:22:46
+is an operation on sets.
+
+00:22:48
+You have a set of
+vectors that you're
+
+00:22:50
+going to perform
+self-attention on
+
+00:22:52
+and nowhere does like the exact
+position of the words come
+
+00:22:55
+into play directly.
+
+00:22:58
+So we're going to encode
+the position of words
+
+00:23:02
+through the keys, queries,
+and values that we have.
+
+00:23:05
+So consider now representing
+each sequence index--
+
+00:23:09
+our sequences are going
+from 1 to n-- as a vector.
+
+00:23:13
+So don't worry so far
+about how it's being made,
+
+00:23:17
+but you can imagine
+representing the number one,
+
+00:23:20
+like the position
+one, the position
+
+00:23:21
+two, the position three as a
+vector in the dimensionality D
+
+00:23:25
+just like we're representing
+our keys, queries, and values.
+
+00:23:28
+And so these are
+position vectors.
+
+00:23:32
+If you were to
+want to incorporate
+
+00:23:36
+the information represented
+by these positions
+
+00:23:39
+into our self-attention,
+you could just
+
+00:23:42
+add these vectors, these pi
+vectors to the inputs, right?
+
+00:23:47
+So if I have this xi
+embedding of a word, which
+
+00:23:53
+is the word at position i but
+really just represents-- oh,
+
+00:23:56
+the word Zuko is here.
+
+00:23:57
+Now I can say that,
+oh, it's the word Zuko,
+
+00:23:59
+and it's at position 5
+because this vector represents
+
+00:24:03
+position 5.
+
+00:24:08
+OK, so how do we do this?
+
+00:24:11
+And we might only
+have to do this once.
+
+00:24:12
+So we can do it once at the
+very input to the network,
+
+00:24:16
+and then that is
+sort of sufficient.
+
+00:24:18
+We don't have to do
+it at every layer
+
+00:24:19
+because it sort of
+knows from the input.
+
+00:24:23
+So one way in which
+people have done this
+
+00:24:25
+is look at these sinusoidal
+position representations.
+
+00:24:29
+So this looks a little bit
+like this, where you have--
+
+00:24:32
+so this is a vector pi, which
+is in dimensionality d, right,
+
+00:24:35
+and each one of the dimensions,
+you take the value i,' You
+
+00:24:40
+modify it by some constant,
+and you pass it to the sine
+
+00:24:46
+or cosine function.
+
+00:24:47
+And you get these
+sort of of values that
+
+00:24:49
+vary according to the period--
+
+00:24:52
+differing periods depending
+on the dimensionality.
+
+00:24:54
+So I've got this
+representation of a matrix
+
+00:24:57
+where d is the
+vertical dimension,
+
+00:24:59
+and then n is the horizontal.
+
+00:25:01
+And you can see that
+there's sort of like, oh,
+
+00:25:04
+as I walk along, you see the
+period of the sine function
+
+00:25:07
+going up and down and
+each of the dimensions
+
+00:25:09
+d has a different period.
+
+00:25:11
+And so together,
+you can represent
+
+00:25:12
+a bunch of different
+sort of position indices,
+
+00:25:15
+and it gives this
+intuition that, oh,
+
+00:25:19
+maybe the absolute position
+of a word isn't as important.
+
+00:25:22
+You've got this sort of
+periodicity of the sines
+
+00:25:24
+and cosines, and maybe that
+allows you to extrapolate
+
+00:25:27
+to longer sequences.
+
+00:25:29
+But in practice,
+that doesn't work.
+
+00:25:31
+But this is sort of
+like an early notion
+
+00:25:34
+that this is still
+sometimes used
+
+00:25:35
+for how to represent
+position in transformers
+
+00:25:39
+and self-attention
+networks in general.
+
+00:25:42
+So that's one idea.
+
+00:25:45
+You might think it's a
+little bit complicated.
+
+00:25:48
+A little bit unintuitive.
+
+00:25:50
+Here's something that feels a
+little bit more deep learning.
+
+00:25:54
+So we're just going to
+say, oh, you know, I've
+
+00:25:57
+got a maximum
+sequence length of n,
+
+00:25:59
+and I'm just going to learn a
+matrix that's dimensionality
+
+00:26:02
+d by n, and that's going
+to represent my positions,
+
+00:26:05
+and I'm going to learn
+it as a parameter,
+
+00:26:06
+just like I learn
+every other parameter.
+
+00:26:08
+And what do they mean?
+
+00:26:09
+Oh, I have no idea, but
+it represents position.
+
+00:26:15
+And so you just sort of
+add this matrix to the xi,
+
+00:26:19
+so your input embeddings,
+and it learns to fit to data.
+
+00:26:24
+So whatever
+representation of position
+
+00:26:26
+that's linear sort of index
+based that you want you
+
+00:26:30
+can learn.
+
+00:26:31
+And the cons are that,
+well, you definitely now
+
+00:26:33
+can't represent anything that's
+longer than n words long.
+
+00:26:37
+No sequence longer than n.
+
+00:26:39
+You can handle because--
+
+00:26:41
+well, you only learned a
+matrix of this many positions.
+
+00:26:44
+And so in practice,
+you'll get a model error.
+
+00:26:47
+If you pass a self-attention
+model something longer than
+
+00:26:50
+length n, it will just sort
+of crash and say, I can't--
+
+00:26:54
+I can't do this.
+
+00:26:56
+And so this is what most
+systems nowadays use.
+
+00:26:59
+There are more flexible
+representations of position,
+
+00:27:02
+including a couple
+in the lecture notes.
+
+00:27:04
+You might want to look at
+the relative linear position
+
+00:27:07
+or words before or
+after each other but not
+
+00:27:10
+their absolute position.
+
+00:27:11
+There's also some
+representations
+
+00:27:13
+that hearken back to
+our dependency syntax
+
+00:27:16
+because like, oh,
+maybe words that
+
+00:27:17
+are close in the
+dependency parse tree
+
+00:27:19
+should be the
+things that are sort
+
+00:27:21
+of close in the
+self-attention operation.
+
+00:27:24
+OK, questions?
+
+00:27:28
+In practice, do we
+typically just make
+
+00:27:31
+n large enough that we don't
+run into the issue of having
+
+00:27:36
+something that could
+be input longer than n?
+
+00:27:38
+So the question is, in
+practice, do we just
+
+00:27:40
+make n long enough so that
+we don't run into the problem
+
+00:27:43
+where we're going to look
+at a text longer than n.
+
+00:27:46
+No, in practice,
+it's actually quite
+
+00:27:47
+a problem, even today,
+even in the largest
+
+00:27:51
+biggest language models,
+and can I fit this
+
+00:27:55
+prompt into ChatGPT or
+whatever is the thing that you
+
+00:27:58
+might see on Twitter?
+
+00:27:59
+I mean, these
+continue to be issues.
+
+00:28:01
+And part of it is because the
+self-attention operation--
+
+00:28:04
+and we'll get into this
+later in the lecture--
+
+00:28:07
+it's quadratic complexity
+in the sequence length.
+
+00:28:09
+So you're going to spend n
+squared sort of memory budget
+
+00:28:13
+in order to make
+sequence lengths longer.
+
+00:28:15
+So in practice, this might be on
+a large model, say 4,000 or so.
+
+00:28:21
+And it's 4,000, so you
+can fit 4,000 words, which
+
+00:28:23
+feels like a lot, but it's
+not going to fit a novel.
+
+00:28:26
+It's not going to
+fit a Wikipedia page.
+
+00:28:29
+And there are models that do
+longer sequences for sure,
+
+00:28:33
+and, again, we'll
+talk a bit about it,
+
+00:28:35
+but no, this
+actually is an issue.
+
+00:28:40
+How do you know that
+the p you've learned
+
+00:28:43
+is the position that is not
+any other without [INAUDIBLE]??
+
+00:28:48
+Yeah.
+
+00:28:49
+So how do you know that
+the p that you've learned,
+
+00:28:51
+this matrix that you've learned,
+is representing position
+
+00:28:53
+as opposed to anything else?
+
+00:28:55
+And the reason is the
+only thing it correlates
+
+00:28:57
+is position, right?
+
+00:28:58
+So like when I
+see these vectors,
+
+00:29:00
+when I'm adding this p
+matrix to my x matrix,
+
+00:29:03
+the word embeddings, I'm
+adding them together,
+
+00:29:06
+and the words that
+show up at each index
+
+00:29:08
+will vary depending on what
+word actually showed up there
+
+00:29:11
+in the example, but the
+p matrix never differs.
+
+00:29:13
+It's always exactly the
+same at every index.
+
+00:29:16
+And so it's the only
+thing in the data
+
+00:29:18
+that it correlates with.
+
+00:29:19
+So you're sort of
+learning it implicitly.
+
+00:29:20
+Like this vector at
+index 1 is always
+
+00:29:22
+at index 1 for every example,
+for every gradient update,
+
+00:29:26
+and nothing else
+co-occurs like that.
+
+00:29:31
+Yeah.
+
+00:29:32
+So what you end up learning,
+I don't know, it's unclear,
+
+00:29:34
+but it definitely
+allows you to know,
+
+00:29:36
+Oh, this word is with
+this index at this.
+
+00:29:38
+Yeah.
+
+00:29:41
+OK.
+
+00:29:42
+Yeah.
+
+00:29:43
+Just quickly, when you
+say [INAUDIBLE] in space,
+
+00:29:47
+is this sequence right now
+defined as a sequence--
+
+00:29:49
+so a sequence of words or--
+
+00:29:53
+I'm trying to figure out what
+the unit is you're using.
+
+00:29:57
+OK.
+
+00:29:57
+So the question is, when this
+is quadratic in the sequence,
+
+00:29:59
+is that a sequence of words?
+
+00:30:01
+Yeah, think of it as
+a sequence of words.
+
+00:30:03
+Sometimes there'll
+be pieces that
+
+00:30:05
+are smaller than
+words, which we'll
+
+00:30:06
+go into in the next
+lecture, but yeah,
+
+00:30:08
+think of this as a
+sequence of words
+
+00:30:09
+but not necessarily
+just for a sentence,
+
+00:30:11
+maybe for an entire paragraph or
+an entire document or something
+
+00:30:15
+like that.
+
+00:30:17
+OK, but the attention
+piece is word-based.
+
+00:30:19
+Yeah, the attention is
+based words to words.
+
+00:30:23
+OK.
+
+00:30:24
+Cool.
+
+00:30:24
+I'm going to move on.
+
+00:30:26
+OK, right, so we
+have another problem.
+
+00:30:30
+Another is that based on the
+presentation of self-attention
+
+00:30:33
+that we've done, there's really
+no non-linearities for sort
+
+00:30:37
+of deep learning
+magic; we're just
+
+00:30:39
+sort of computing weighted
+averages of stuff.
+
+00:30:44
+So if I apply self-attention
+and then apply self-attention
+
+00:30:47
+again and again and
+again and again, you
+
+00:30:50
+should get-- you should
+look at the next lecture
+
+00:30:52
+notes if you're
+interested in this,
+
+00:30:53
+that's actually quite cool.
+
+00:30:54
+But what you end up doing
+is you're just re-averaging
+
+00:30:56
+value vectors together.
+
+00:30:58
+So you're like computing
+averages of value vectors,
+
+00:31:00
+and it ends up looking like
+one big self-attention.
+
+00:31:03
+But there's an easy
+fix to this if you
+
+00:31:05
+want sort of the traditional
+deep learning magic.
+
+00:31:07
+And you can just add a feed
+forward network to post-process
+
+00:31:10
+each output vector.
+
+00:31:11
+So I've got a word
+here, that's sort
+
+00:31:13
+of the output of
+self-attention, and I'm
+
+00:31:15
+going to pass it
+through, in this case,
+
+00:31:17
+I'm calling it a
+multi-layer perceptron MLP.
+
+00:31:20
+So this is a vector in
+rd that's going to be--
+
+00:31:23
+and it's taking in as
+input a vector in rd,
+
+00:31:26
+and you do the usual sort of
+multi-layer perceptron thing,
+
+00:31:29
+right?
+
+00:31:30
+Where you have the output, and
+you multiply it by a matrix,
+
+00:31:32
+pass it through a non-linearity,
+multiply it by another matrix.
+
+00:31:35
+OK?
+
+00:31:35
+And so what this looks
+like in self-attention
+
+00:31:38
+is that I've got this sort
+of sentence, the chef who dot
+
+00:31:40
+dot dot dot food, and I've
+got my embeddings for it.
+
+00:31:43
+I pass it through this whole
+big self-attention block, right,
+
+00:31:46
+which looks at
+the whole sequence
+
+00:31:47
+and sort of incorporates
+context and all that,
+
+00:31:50
+and then I pass each one
+individually through a feed
+
+00:31:53
+forward layer, right?
+
+00:31:55
+So this embedding,
+that's sort of the output
+
+00:31:57
+of the self-attention
+for the word the,
+
+00:31:59
+is passed independently through
+a multi-layer perceptron here,
+
+00:32:03
+and that sort of--
+you can think of it
+
+00:32:04
+as sort of combining
+together or processing
+
+00:32:09
+the result of attention.
+
+00:32:11
+So there's a number of
+reasons why we do this.
+
+00:32:14
+One of them also is
+that you can actually
+
+00:32:16
+stack a ton of computation into
+these feed-forward networks
+
+00:32:20
+very, very efficiently, very
+parallelizable, very good
+
+00:32:22
+for GPUs.
+
+00:32:24
+But this is what's
+done in practice.
+
+00:32:25
+So you do
+self-attention, and then
+
+00:32:27
+you can pass it through this
+sort of position-wise feed
+
+00:32:30
+forward layer, right?
+
+00:32:31
+Every word is
+processed independently
+
+00:32:33
+by this feed forward network
+to process the result.
+
+00:32:39
+OK, so that's adding our sort
+of classical deep learning
+
+00:32:42
+non-linearities
+for self-attention.
+
+00:32:45
+And that's an easy
+fix for this sort
+
+00:32:48
+of no non-linearities
+problem in self-attention,
+
+00:32:50
+and then we have a
+last issue before we
+
+00:32:52
+have our final minimal
+self-attention building block
+
+00:32:56
+with which we can replace RNNS.
+
+00:32:59
+And that's that-- when
+I've been writing out
+
+00:33:03
+all of these examples
+of self-attention,
+
+00:33:04
+you can sort of look at
+the entire sequence, right?
+
+00:33:07
+And in practice, for some tasks
+such as machine translation
+
+00:33:12
+or language modeling,
+whenever you
+
+00:33:13
+want to define a probability
+distribution over a sequence,
+
+00:33:16
+you can't cheat and
+look at the future.
+
+00:33:21
+So at every time
+step, I could define
+
+00:33:24
+the set of keys and
+queries and values
+
+00:33:26
+to only include past words,
+but this is inefficient--
+
+00:33:31
+bear with me.
+
+00:33:31
+It's inefficient because you
+can't parallelize it so well.
+
+00:33:34
+So instead, we compute
+the entire n by n matrix
+
+00:33:37
+just like I showed in the slide
+discussing self-attention,
+
+00:33:41
+and then I mask out
+words in the future.
+
+00:33:43
+So this score, eij, right,
+and I computed eij for all n
+
+00:33:47
+by n pairs of words,
+is equal to whatever
+
+00:33:51
+it was before if the word that
+you're looking at at index j
+
+00:33:57
+is an index that is less than
+or equal to where you are,
+
+00:34:00
+index i, and it's equal
+to negative infinity-ish
+
+00:34:04
+otherwise if it's in the future.
+
+00:34:06
+And when you softmax the
+eij, negative infinity
+
+00:34:08
+gets mapped to zero.
+
+00:34:10
+So now my attention
+is weighted zero,
+
+00:34:13
+my weighted average
+is zero on the future,
+
+00:34:16
+so I can't look at it.
+
+00:34:18
+What does this look like?
+
+00:34:19
+So in order to encode
+these words, the chef who,
+
+00:34:23
+and maybe the
+start symbol there,
+
+00:34:27
+I can look at
+these words, right?
+
+00:34:29
+That's all pairs of words.
+
+00:34:31
+And then I just gray out--
+
+00:34:32
+I sort of negative infinity
+out the words I can't look at.
+
+00:34:35
+So when encoding
+the start symbol,
+
+00:34:37
+I can just look at the start
+symbol; when encoding the,
+
+00:34:40
+I can look at the start symbol
+and the; when encoding chef,
+
+00:34:43
+I can look at start the chef,
+but I can't look at who.
+
+00:34:48
+And so with this
+representation of chef
+
+00:34:52
+that is only looking
+at start the chef,
+
+00:34:56
+I can define a
+probability distribution
+
+00:34:57
+using this vector that
+allows me to predict
+
+00:35:00
+who without having
+cheated by already
+
+00:35:02
+looking ahead and seeing that,
+well, who is the next word.
+
+00:35:09
+Questions.
+
+00:35:11
+So it says we're
+using it in decoders.
+
+00:35:14
+Do we do this for both the
+encoding layer and the decoding
+
+00:35:17
+layer, or for the
+encoding layer,
+
+00:35:19
+are we allowing ourselves
+to look forward?
+
+00:35:21
+The question is it
+says here that we're
+
+00:35:23
+using this in a decoder.
+
+00:35:24
+Do we also use it
+in the encoder?
+
+00:35:26
+So this is the distinction
+between a bidirectional LSTM
+
+00:35:30
+and a unidirectional
+LSTM, right?
+
+00:35:33
+So wherever you don't
+need this constraint,
+
+00:35:37
+you probably don't use it.
+
+00:35:38
+So if you're using an
+encoder on the source
+
+00:35:40
+sentence of your machine
+translation problem,
+
+00:35:42
+you probably don't
+do this masking
+
+00:35:44
+because it's
+probably good to let
+
+00:35:45
+everything look at each other.
+
+00:35:47
+And then whenever you
+do need to use it,
+
+00:35:48
+because you have this
+autoregressive sort
+
+00:35:50
+of probability of word
+1, probability of 2
+
+00:35:53
+given 1, 3 given 2 and one1
+then you would use this.
+
+00:35:56
+So traditionally,
+yes, in decoders
+
+00:35:57
+you will use it, in
+encoders you will not.
+
+00:36:02
+Yes.
+
+00:36:04
+My question is a little
+bit philosophical.
+
+00:36:07
+How humans actually
+generate sentences
+
+00:36:10
+by having some notion of the
+probability of future words
+
+00:36:14
+before they say the
+words that-- or before
+
+00:36:19
+they choose the words that
+they are currently speaking
+
+00:36:25
+or writing, generating?
+
+00:36:26
+Good question.
+
+00:36:27
+So the question is, isn't
+looking ahead a little bit
+
+00:36:30
+and sort of predicting or
+getting an idea of the words
+
+00:36:33
+that you might say in the future
+how humans generate language
+
+00:36:36
+instead of the strict constraint
+of not seeing into the future.
+
+00:36:39
+Is that what you're--
+
+00:36:40
+OK.
+
+00:36:41
+So right, trying to plan ahead
+to see what I should do is
+
+00:36:46
+definitely an interesting
+idea, but when I am training
+
+00:36:49
+the network, I can't--
+
+00:36:52
+if I'm teaching it to try
+to predict the next word,
+
+00:36:55
+and if I give it
+the answer, it's not
+
+00:36:57
+going to learn anything useful.
+
+00:36:59
+So in practice, when
+I'm generating text,
+
+00:37:01
+maybe it would be a good
+idea to make some guesses far
+
+00:37:04
+into the future or have a
+high level plan or something,
+
+00:37:07
+but in training the network,
+I can't encode that intuition
+
+00:37:11
+about how humans generate
+sequences of language
+
+00:37:15
+by just giving it the answer
+of the future directly
+
+00:37:17
+at least because then
+it's just too easy.
+
+00:37:19
+Like there's nothing to learn.
+
+00:37:21
+Yeah.
+
+00:37:22
+But there might be interesting
+ideas about maybe giving
+
+00:37:24
+the network like a hint
+as to what kind of thing
+
+00:37:26
+could come next for example.
+
+00:37:28
+But that's out of
+scope for this.
+
+00:37:29
+Yeah.
+
+00:37:31
+Yeah, question over here.
+
+00:37:32
+So I understand
+like why we would
+
+00:37:34
+want to mask the future for
+stuff like language models,
+
+00:37:36
+but how does it apply
+to machine translation?
+
+00:37:39
+Like why would we use it there?
+
+00:37:40
+Yeah, so in machine
+translation--
+
+00:37:43
+we're going to come
+over to this board
+
+00:37:45
+and hopefully get
+a better marker.
+
+00:37:49
+Yes.
+
+00:37:49
+In machine translation, I have
+a sentence like I like pizza,
+
+00:37:59
+and I want to be able to
+translate it [FRENCH]..
+
+00:38:08
+Nice.
+
+00:38:09
+And so when I'm looking at
+the I like pizza, right?
+
+00:38:15
+I get this as the input.
+
+00:38:16
+And so I want self-attention
+without masking
+
+00:38:22
+because I want I to look at
+like, and I to look at pizza,
+
+00:38:27
+and like to look at
+pizza, and I want it all.
+
+00:38:28
+And then when I'm
+generating this,
+
+00:38:31
+if my tokens are like [FRENCH],,
+I want to-- in encoding this
+
+00:38:37
+word, I want to be able
+to look only at myself--
+
+00:38:40
+and we'll talk about
+encoder-decoder architectures
+
+00:38:43
+in this later in the lecture--
+
+00:38:46
+but I want to be able to look
+at myself none of the future
+
+00:38:48
+and all of this.
+
+00:38:49
+And so what I'm talking about
+right now in this masking case
+
+00:38:52
+is masking out with
+like negative infinity,
+
+00:38:57
+all of these words.
+
+00:38:59
+So that sort of attention score
+from [FRENCH] to everything
+
+00:39:02
+else should be
+negative infinity.
+
+00:39:05
+Yeah.
+
+00:39:06
+Does that answer your question?
+
+00:39:07
+Yes.
+
+00:39:07
+Great.
+
+00:39:09
+OK, let's move ahead.
+
+00:39:11
+OK.
+
+00:39:13
+So that was our last big
+sort of building block issue
+
+00:39:16
+with self-attention.
+
+00:39:17
+So this is what I
+would call, and this
+
+00:39:19
+is my personal opinion, a
+minimal self-attention building
+
+00:39:22
+block.
+
+00:39:22
+You have self-attention,
+the basis of the method,
+
+00:39:25
+so that's sort of
+here in the red,
+
+00:39:29
+and maybe we had the inputs
+to the sequence here,
+
+00:39:31
+and then you embed it with
+that embedding matrix e,
+
+00:39:34
+and then you add position
+embeddings, right?
+
+00:39:36
+And then these three
+arrows represent
+
+00:39:38
+using the key, the
+value, and the query,
+
+00:39:42
+that sort of stylized there.
+
+00:39:44
+This is often how you see
+these diagrams, right?
+
+00:39:47
+And so you pass it
+to self-attention
+
+00:39:50
+with the position
+representation, right?
+
+00:39:53
+So that specifies
+the sequence order,
+
+00:39:55
+because otherwise,
+you'd have no idea what
+
+00:39:56
+order the words showed up in.
+
+00:39:59
+You have the non-linearities in
+the teal feed-forward network
+
+00:40:02
+there to sort of provide
+that sort of squashing
+
+00:40:05
+and sort of deep
+learning expressivity,
+
+00:40:08
+and then you have
+masking in order
+
+00:40:10
+to have parallelizable
+operations that
+
+00:40:13
+don't look at the future.
+
+00:40:15
+OK?
+
+00:40:15
+So this is sort of our
+minimal architecture.
+
+00:40:18
+And then up at the top above
+here, so you have this thing;
+
+00:40:20
+maybe you repeat this
+sort of self-attention
+
+00:40:23
+and feed forward many times.
+
+00:40:24
+So self-attention, feed forward,
+self-attention, feed forward,
+
+00:40:27
+self-attention, feed
+forward, that's what
+
+00:40:29
+I'm calling this block.
+
+00:40:30
+And then maybe at the end of
+it, you predict something.
+
+00:40:33
+I don't know.
+
+00:40:34
+We haven't really
+talked about that.
+
+00:40:35
+But you have these
+representations,
+
+00:40:37
+and then you predict
+the next word
+
+00:40:38
+or you predict the sentiment
+or you predict whatever.
+
+00:40:40
+So this is like a
+self-attention architecture.
+
+00:40:44
+OK, we're going to move on
+to the transformer next.
+
+00:40:46
+So are there any questions?
+
+00:40:47
+Yeah.
+
+00:40:48
+[INAUDIBLE] just for encoders?
+
+00:40:52
+Other way around.
+
+00:40:53
+We will use masking
+for decoders,
+
+00:40:56
+where I want to decode out
+a sequence where I have
+
+00:41:00
+an informational constraint.
+
+00:41:01
+Where to represent
+this word properly,
+
+00:41:04
+I cannot have the
+information of the future.
+
+00:41:06
+And masking when you
+don't [INAUDIBLE],, right?
+
+00:41:08
+Yeah.
+
+00:41:08
+OK.
+
+00:41:13
+OK.
+
+00:41:15
+Great.
+
+00:41:16
+So now let's talk
+about the transformer.
+
+00:41:18
+So what I've pitched
+to you is what
+
+00:41:20
+I call a minimal
+self-attention architecture.
+
+00:41:24
+And I quite like
+pitching it that way,
+
+00:41:28
+but really no one
+uses the architecture
+
+00:41:30
+that was just up on the
+slide, the previous slide.
+
+00:41:34
+It doesn't work quite
+as well as it could,
+
+00:41:35
+and there's a bunch
+of important details
+
+00:41:38
+that we'll talk about now that
+goes into the transformer.
+
+00:41:41
+But what I would hope though
+to sort of have you take away
+
+00:41:45
+from that is that the
+transformer architecture
+
+00:41:47
+as I'll present it now is
+not necessarily the endpoint
+
+00:41:52
+of our search for better and
+better ways of representing
+
+00:41:55
+language even though
+it's now ubiquitous
+
+00:41:57
+and has been for
+a couple of years.
+
+00:41:59
+So think about
+these sort of ideas
+
+00:42:01
+of the problems of
+using self-attention
+
+00:42:04
+and maybe ways of fixing some
+of the issues with transformers.
+
+00:42:08
+OK.
+
+00:42:09
+So a transformer decoder
+is how we'll build systems
+
+00:42:13
+like language models, right?
+
+00:42:14
+And so we've discussed this.
+
+00:42:15
+It's like our decoder with
+our self-attention only sort
+
+00:42:18
+of minimal architecture.
+
+00:42:20
+It's got a couple of extra
+components, some of which
+
+00:42:22
+have grayed out here, that
+we'll go over one by one.
+
+00:42:24
+The first that's
+actually different
+
+00:42:28
+is that we'll replace
+our self-attention
+
+00:42:31
+with masking with masked
+multi-head self-attention.
+
+00:42:35
+This ends up being
+crucial; it's probably
+
+00:42:37
+the most important distinction
+between the transformer
+
+00:42:40
+and this minimal architecture
+that I've presented.
+
+00:42:43
+So let's come back to our
+toy example of attention,
+
+00:42:46
+where we've been trying to
+represent the word learned
+
+00:42:49
+in the context of the sequence
+I went to Stanford CS 224n
+
+00:42:52
+and learned.
+
+00:42:54
+And I was sort of
+giving these teal bars
+
+00:42:57
+to say, Oh, maybe intuitively
+you look at various things
+
+00:43:00
+to build up your
+representation of learned.
+
+00:43:04
+But really there
+are varying ways
+
+00:43:06
+in which I want to look
+back at the sequence
+
+00:43:09
+to see varying sort of
+aspects of information
+
+00:43:13
+that I want to incorporate
+into my representation.
+
+00:43:16
+So maybe in this
+way, I sort of want
+
+00:43:19
+to look at Stanford
+CS 224n because I
+
+00:43:23
+go, it's like entities, like
+you learn different stuff
+
+00:43:26
+at Stanford CS 224n than
+you do at other courses
+
+00:43:29
+or other universities
+or whatever, right?
+
+00:43:31
+And so maybe I want to
+look here for this reason.
+
+00:43:34
+And maybe in another
+sense, I actually
+
+00:43:37
+want to look at
+the word learned,
+
+00:43:39
+and I want to look at I, i
+went, and learned, right?
+
+00:43:43
+As you sort of like maybe
+syntactically relevant words.
+
+00:43:46
+Like there is very
+different reasons
+
+00:43:47
+for which I might want to
+look at different things
+
+00:43:49
+in the sequence.
+
+00:43:50
+And so trying to average it
+all out with a single operation
+
+00:43:53
+of self-attention ends up being
+maybe somewhat too difficult
+
+00:43:57
+in a way that will make
+precise in assignment five.
+
+00:44:00
+Nice, we'll get to do
+a little bit more math.
+
+00:44:03
+OK.
+
+00:44:04
+So any questions
+about this intuition?
+
+00:44:12
+[INAUDIBLE]
+
+00:44:14
+Yeah.
+
+00:44:14
+So it should be an
+application of attention,
+
+00:44:17
+just as I've presented it.
+
+00:44:19
+So one independent, define
+the keys, define the queries,
+
+00:44:22
+define the values.
+
+00:44:22
+I'll define it more
+precisely here.
+
+00:44:24
+But think of it as
+I do attention once,
+
+00:44:27
+and then I do it
+again with different--
+
+00:44:30
+different parameters, being able
+to look at different things,
+
+00:44:32
+et cetera.
+
+00:44:33
+So if we have two
+separate [INAUDIBLE],,
+
+00:44:36
+how do we ensure that they
+learn different things?
+
+00:44:38
+We do not-- OK, so
+the question is,
+
+00:44:39
+if we have two separate sets of
+weights trying to learn, say,
+
+00:44:42
+to do this and to do that,
+how do we ensure that they
+
+00:44:44
+learn different things?
+
+00:44:45
+We do not ensure that
+they hope-- that they
+
+00:44:47
+learn different things.
+
+00:44:48
+And in practice they do,
+although not perfectly.
+
+00:44:52
+So it ends up being the case
+that you have some redundancy,
+
+00:44:55
+and you can sort of
+cut out some of these,
+
+00:44:57
+but that's sort of
+out of scope for this.
+
+00:44:59
+But we sort of
+hope-- just like we
+
+00:45:00
+hope that different
+sort of dimensions
+
+00:45:02
+in our feed-forward layers will
+learn different things because
+
+00:45:04
+of lack of symmetry
+and whatever,
+
+00:45:06
+that we hope that the heads
+will start to specialize,
+
+00:45:09
+and that will mean they'll
+specialize even more,
+
+00:45:11
+and, yeah.
+
+00:45:14
+OK.
+
+00:45:16
+All right.
+
+00:45:16
+So in order to discuss
+multi-head self-attention well,
+
+00:45:19
+we really need to talk
+about the matrices;
+
+00:45:21
+how we're going to implement
+this in GPUs efficiently.
+
+00:45:25
+We're going to talk about
+the sequence stacked
+
+00:45:27
+form of attention.
+
+00:45:29
+So we've been talking about
+each word sort of individually
+
+00:45:31
+as a vector in dimensionality
+D, But really we're
+
+00:45:35
+going to be working on these as
+big matrices that are stacked.
+
+00:45:38
+So I take all of my word
+embeddings x1 to xn,
+
+00:45:42
+and I stack them
+together, and now I
+
+00:45:44
+have a big matrix that is
+in dimensionality R n by d.
+
+00:45:49
+OK.
+
+00:45:50
+And now with my
+matrices k, q, and v,
+
+00:45:55
+I can just multiply them
+sort of on this side of x.
+
+00:45:58
+So x is our n by d,
+k is our d by d, so n
+
+00:46:02
+by d times d by d
+gives you n by d again.
+
+00:46:06
+So I can just compute
+a big matrix multiply
+
+00:46:10
+on my whole sequence
+to multiply each one
+
+00:46:12
+of the words with my key
+query and value matrices
+
+00:46:15
+very efficiently.
+
+00:46:16
+So this is sort of this
+vectorization idea,
+
+00:46:18
+I don't want a for
+loop over the sequence,
+
+00:46:20
+I represent the sequence
+as a big matrix,
+
+00:46:23
+and I just do one
+big matrix multiply.
+
+00:46:27
+And then the output is
+defined as this sort
+
+00:46:29
+of inscrutable
+bit of math, which
+
+00:46:31
+I'm going to go over visually.
+
+00:46:35
+So first, we're going to
+take the key-query dot
+
+00:46:37
+products in one matrix.
+
+00:46:39
+So we've got-- we've got
+XQ, which is our n by d,
+
+00:46:46
+and I've got XK transpose,
+which is our d by n.
+
+00:46:50
+So n by d, d by n,
+this is computing
+
+00:46:53
+all of the eij's, these scores
+for self-attention, right?
+
+00:46:58
+So this is all pairs of
+attention scores computed
+
+00:47:01
+in one big matrix multiply.
+
+00:47:05
+OK?
+
+00:47:06
+So this is this big matrix here,
+next I use the softmax, right?
+
+00:47:11
+So I softmax this over the
+second dimension, the second n
+
+00:47:16
+dimension, and I get my
+sort of normalized scores,
+
+00:47:20
+and then I multiply with xv.
+
+00:47:22
+So this is an n by n matrix
+multiplied by an n by d matrix,
+
+00:47:27
+and what do I get?
+
+00:47:28
+Well, this is just doing
+the weighted average.
+
+00:47:31
+So this is one big weighted
+average contribution
+
+00:47:34
+on the whole matrix giving me
+my whole self-attention output,
+
+00:47:37
+an R n by d.
+
+00:47:39
+So I've just
+restated identically
+
+00:47:41
+the self-attention
+operations but computed
+
+00:47:43
+in terms of matrices so
+that you could do this
+
+00:47:46
+efficiently on a GPU.
+
+00:47:50
+OK.
+
+00:47:51
+So multi-headed attention.
+
+00:47:53
+This is going to
+give us-- and this
+
+00:47:55
+is going to be
+important to compute
+
+00:47:57
+this in terms of the
+matrices, which we'll see.
+
+00:47:59
+This is going to
+give us the ability
+
+00:48:00
+to look in multiple places at
+once for different reasons.
+
+00:48:04
+So sort of self attention looks
+where this dot product here
+
+00:48:08
+is high, right?
+
+00:48:10
+This xi, the Q
+matrix, the K matrix.
+
+00:48:15
+But maybe we want to
+look in different places
+
+00:48:17
+for different reasons,
+so we actually
+
+00:48:19
+define multiple query,
+key, and value matrices.
+
+00:48:24
+So I'm going to have
+a bunch of heads.
+
+00:48:26
+I'm going to have h
+self attention heads.
+
+00:48:30
+And for each head, I'm going
+to define an independent query,
+
+00:48:33
+key, and value
+matrix, and I'm going
+
+00:48:35
+to say that its shape is
+going to map from the model
+
+00:48:38
+dimensionality to the model
+dimensionality over h.
+
+00:48:41
+So each one of these
+is doing projection
+
+00:48:42
+down to a lower
+dimensional space.
+
+00:48:45
+This can be for
+computational efficiency,
+
+00:48:47
+and I'll just apply self
+attention sort of independently
+
+00:48:52
+for each output.
+
+00:48:53
+So this equation here
+is identical to the one
+
+00:48:56
+we saw for single
+headed self attention,
+
+00:48:58
+except I've got these sort
+of l indices everywhere.
+
+00:49:02
+So I've got this lower
+dimensional thing,
+
+00:49:04
+I'm mapping to a lower
+dimensional space,
+
+00:49:06
+and then I do have my lower
+dimensional value vector there,
+
+00:49:09
+so my output is an R d by h.
+
+00:49:11
+But really you're doing exactly
+the same kind of operation,
+
+00:49:14
+I'm just doing it
+h different times.
+
+00:49:17
+And then you
+combine the outputs.
+
+00:49:19
+So I've done sort of
+look in different places
+
+00:49:21
+with the different key,
+query, and value matrices,
+
+00:49:24
+and then I get each
+of their outputs,
+
+00:49:28
+and then I concatenate
+them together.
+
+00:49:30
+So each one is
+dimensionality d by h.
+
+00:49:33
+And I concatenate them together
+and then sort of mix them
+
+00:49:36
+together with the final
+linear transformation.
+
+00:49:39
+And so each head gets to
+look at different things
+
+00:49:42
+and construct their value
+vectors differently,
+
+00:49:45
+and then I combine the
+result all together at once.
+
+00:49:49
+OK, let's go through
+this visually
+
+00:49:50
+because it's at
+least helpful for me.
+
+00:49:53
+So it's actually not more
+costly to do this really
+
+00:49:58
+than it is to compute a
+single head of self-attention,
+
+00:50:00
+and we'll see
+through the pictures.
+
+00:50:05
+So in single headed
+self-attention, we computed XQ,
+
+00:50:09
+and in multi-headed
+self-attention,
+
+00:50:10
+we'll also compute
+XQ the same way.
+
+00:50:13
+So XQ is R n by d.
+
+00:50:19
+And then we can reshape it into
+R n, that's sequence length,
+
+00:50:24
+times the number of heads
+times the model dimensionality
+
+00:50:29
+over the number of heads.
+
+00:50:30
+So I've just reshaped
+it to say now I've
+
+00:50:32
+got a big three-axis
+tensor: the first axis
+
+00:50:36
+is the sequence
+length, the second one
+
+00:50:38
+is the number of heads, the
+third is this reduced model
+
+00:50:40
+dimensionality.
+
+00:50:41
+And that costs nothing, right?
+
+00:50:43
+And do the same thing
+for x and v. And then
+
+00:50:46
+I transpose so that I've got
+the head axis as the first axis.
+
+00:50:50
+And now I can compute
+all my other operations
+
+00:50:53
+with the head axis
+kind of like a batch.
+
+00:50:57
+So what does this
+look like in practice?
+
+00:51:01
+Like instead of having
+one big XQ matrix that's
+
+00:51:05
+model dimensionality D,
+I've got like, in this case,
+
+00:51:08
+three XQ matrices of model
+dimensionality D by 3, D by 3,
+
+00:51:12
+D by 3, same thing with
+the key matrix here.
+
+00:51:16
+So everything looks
+almost identical,
+
+00:51:18
+it's just a reshaping
+of the tensors.
+
+00:51:20
+And now, at the
+output of this, I've
+
+00:51:23
+got three sets of
+attention scores
+
+00:51:26
+just by doing this reshape.
+
+00:51:28
+And the cost is that, well,
+each of my attention heads
+
+00:51:33
+has only a d by h vector to work
+with instead of a D dimensional
+
+00:51:36
+vector to work with, right?
+
+00:51:37
+So I get the output, I get these
+three sets of pairs of scores.
+
+00:51:43
+I compute the
+softmax independently
+
+00:51:45
+for each of the three, and then
+I have three value matrices
+
+00:51:49
+there as well, each of
+them lower dimensional,
+
+00:51:52
+and then finally, I get my
+three different output vectors,
+
+00:51:56
+and I have a final
+linear transformation
+
+00:51:58
+to sort of mush them
+together, and I get an output.
+
+00:52:02
+And in summary, what
+this allows you to do
+
+00:52:04
+is exactly what I gave in
+the toy example, which was I
+
+00:52:08
+can have each of
+these heads look
+
+00:52:10
+at different parts of a
+sequence for different reasons.
+
+00:52:16
+Just a question-- so this
+is at a given block, right?
+
+00:52:20
+Like all of these
+attention heads
+
+00:52:22
+are for a given
+transformer block.
+
+00:52:23
+Our next block would
+also-- could also
+
+00:52:25
+have three attention heads.
+
+00:52:26
+The question is, are all
+of these for a given block?
+
+00:52:30
+And we'll talk
+about a block again,
+
+00:52:31
+but this block was
+this sort of pair
+
+00:52:33
+of self-attention and
+feed-forward networks.
+
+00:52:36
+So you do like self-attention
+feed-forward, that's one block.
+
+00:52:38
+Another block is
+another self-attention,
+
+00:52:40
+another feed forward.
+
+00:52:41
+And the question is, are
+the parameters shared
+
+00:52:43
+between the blocks or not?
+
+00:52:44
+Generally they are not shared.
+
+00:52:46
+You'll have independent
+parameters at every block,
+
+00:52:48
+although there are
+some exceptions.
+
+00:52:52
+During loading on that,
+is it typically the case
+
+00:52:55
+that you have the same number
+of heads at each block,
+
+00:52:58
+or do you vary the number
+of heads across blocks?
+
+00:53:01
+You have-- you
+definitely could vary it.
+
+00:53:03
+People haven't found reason
+to vary-- so the question is,
+
+00:53:06
+do you have different
+numbers of heads
+
+00:53:07
+across the different
+blocks or do
+
+00:53:09
+you have the same number
+of heads across all blocks?
+
+00:53:12
+The simplest thing
+is to just have
+
+00:53:14
+it be the same everywhere,
+which is what people have done.
+
+00:53:16
+I haven't yet found a
+good reason to vary it,
+
+00:53:19
+but, well, it could
+be interesting.
+
+00:53:21
+It's definitely the case that
+after training these networks,
+
+00:53:25
+you can actually just
+totally zero out, remove
+
+00:53:28
+some of the attention heads.
+
+00:53:30
+And I'd be curious to know
+if you could remove more
+
+00:53:35
+or less depending on the layer
+index, which might then say,
+
+00:53:39
+Oh, we should just have fewer.
+
+00:53:40
+But again, it's not actually
+more expensive to have a bunch.
+
+00:53:43
+So people tend to instead
+set the number of heads
+
+00:53:46
+to be roughly so that you have a
+reasonable number of dimensions
+
+00:53:51
+per head given the total model
+dimensionality D that you want.
+
+00:53:55
+So for example, I might
+want at least 64 dimensions
+
+00:53:59
+per head, which if D
+is 128, that tells me
+
+00:54:03
+how many heads I'm
+going to have roughly.
+
+00:54:05
+So people tend to scale
+the number of heads up
+
+00:54:08
+with the model dimensionality.
+
+00:54:12
+Yeah.
+
+00:54:13
+[INAUDIBLE] by slicing
+it in different columns,
+
+00:54:15
+you're reducing the rank
+of the final matrix, right?
+
+00:54:19
+Yeah.
+
+00:54:19
+But that doesn't really have
+any effect on the results?
+
+00:54:23
+So the question is, by having
+these sort of reduced XQ and XK
+
+00:54:29
+matrices, this is a very
+low rank approximation.
+
+00:54:32
+This little sliver
+and this little sliver
+
+00:54:35
+defining this whole big
+matrix, this very low rank,
+
+00:54:37
+is that not bad in practice?
+
+00:54:40
+No.
+
+00:54:41
+Again, it's sort
+of the reason why
+
+00:54:42
+we limit the number of
+heads depending on the model
+
+00:54:45
+dimensionality, because you
+want intuitively at least
+
+00:54:49
+some number of dimensions.
+
+00:54:50
+So 64 is sometimes done,
+128, something like that.
+
+00:54:55
+But if you're not giving
+each head too much to do
+
+00:54:58
+and it's got sort of a simple
+job, you've got a lot of heads,
+
+00:55:01
+it ends up sort of being OK.
+
+00:55:04
+All we really know is that
+empirically, it's way better
+
+00:55:06
+to have more heads
+than like one.
+
+00:55:12
+Yes.
+
+00:55:14
+I'm wondering, have
+there been studies
+
+00:55:16
+to see if information in one
+of the sets of the attention
+
+00:55:22
+scores--
+
+00:55:23
+like information
+that one of them
+
+00:55:25
+learns is consistent and
+related to each other,
+
+00:55:29
+or how are they related?
+
+00:55:32
+So the question
+is, have there been
+
+00:55:33
+studies to see if there is
+sort of consistent information
+
+00:55:36
+encoded by the attention heads?
+
+00:55:38
+And yes, actually there's
+been quite a lot of study
+
+00:55:42
+in interpretability and
+analysis of these models
+
+00:55:44
+to try to figure out what roles,
+what sort of mechanistic roles
+
+00:55:48
+each of these heads takes on.
+
+00:55:49
+And there's quite a bit
+of exciting results there
+
+00:55:53
+around some attention
+heads learning
+
+00:55:55
+to pick out sort of the
+syntactic dependencies
+
+00:55:59
+or maybe doing a sort of a
+global averaging of context.
+
+00:56:03
+The question is
+quite nuanced though,
+
+00:56:05
+because in a deep
+network, it's unclear--
+
+00:56:07
+and we should talk about
+this more offline--
+
+00:56:09
+but it's unclear if
+you look at a word
+
+00:56:11
+10 layers deep in a network,
+what you're really looking at,
+
+00:56:14
+because it's already
+incorporated context
+
+00:56:17
+from everyone else and
+it's a little bit unclear.
+
+00:56:20
+Active area of research.
+
+00:56:21
+But I think I should
+move on now to keep
+
+00:56:25
+discussing transformers.
+
+00:56:26
+But yeah, if you want to talk
+more about it, I'm happy to.
+
+00:56:30
+OK.
+
+00:56:31
+So another sort of hack that
+I'm going to toss in here,
+
+00:56:34
+and maybe they
+wouldn't call it hack,
+
+00:56:36
+but it's a nice little
+method to improve things,
+
+00:56:39
+it's called scaled
+dot product attention.
+
+00:56:41
+So one of the issues with this
+key-query value self attention
+
+00:56:46
+is that when the model
+dimensionality becomes large,
+
+00:56:48
+the dot products between
+vectors, even random vectors,
+
+00:56:51
+tend to become large.
+
+00:56:54
+And when that happens, the
+inputs to the softmax function
+
+00:56:57
+can be very large, making
+the gradients small.
+
+00:57:01
+So intuitively, if you have
+two random vectors and model
+
+00:57:03
+dimensionality D, and you just
+dot product them together,
+
+00:57:07
+as D grows, their
+dot product grows,
+
+00:57:09
+and expectation
+could be very large.
+
+00:57:11
+And so you sort of want to start
+out with everyone's attention
+
+00:57:15
+being very uniform, very
+flat, look everywhere.
+
+00:57:18
+But if some dot products are
+very large, then learning
+
+00:57:21
+will be inhibited.
+
+00:57:23
+And so what you end
+up doing is you just--
+
+00:57:26
+for each of your heads, you just
+sort of divide all the scores
+
+00:57:29
+by this constant
+that's determined
+
+00:57:31
+by the model dimensionality.
+
+00:57:32
+So as the vectors
+grow very large,
+
+00:57:35
+their dot products don't, at
+least at initialization time.
+
+00:57:40
+So this is like a
+nice little important
+
+00:57:45
+but maybe not terribly-- like
+yeah, it's important to know.
+
+00:57:52
+And so that's called scaled
+dot product attention.
+
+00:57:55
+From here on out, we'll
+just assume that we do this.
+
+00:57:58
+It's quite easy to
+implement; you just
+
+00:57:59
+do a little division in
+all of your computations.
+
+00:58:04
+OK.
+
+00:58:05
+So now in the
+transformer decoder.
+
+00:58:07
+We've got a couple
+of other things
+
+00:58:08
+that I have unfaded out here.
+
+00:58:12
+We have two big optimization
+tricks or optimization methods,
+
+00:58:15
+I should say really, because
+these are quite important.
+
+00:58:17
+They end up being
+very important.
+
+00:58:20
+We've got residual connections
+and layer normalization.
+
+00:58:22
+And in transformer diagrams
+that you see around the web,
+
+00:58:26
+they're often written together
+as this add and norm box.
+
+00:58:32
+And in practice, in the
+transformer decoder,
+
+00:58:34
+I'm going to apply masked
+multi-head attention
+
+00:58:38
+and then do this sort of
+optimization; add a norm,
+
+00:58:41
+then I'll do a feed
+forward application
+
+00:58:43
+and then add a norm.
+
+00:58:44
+So this is quite important,
+so let's go over these two
+
+00:58:48
+individual components.
+
+00:58:51
+The first is
+residual connections.
+
+00:58:53
+I mean, I think we've talked
+about residual connections
+
+00:58:55
+before, right?
+
+00:58:56
+It's worth doing it again.
+
+00:58:57
+But it's really a good trick
+to help models train better.
+
+00:59:01
+So just to recap,
+we're going to take--
+
+00:59:04
+instead of having this sort
+of-- you have a layer i minus 1,
+
+00:59:08
+and you pass it through a thing,
+maybe it's self-attention,
+
+00:59:11
+maybe it's a
+feed-forward network,
+
+00:59:12
+now you've got layer i.
+
+00:59:16
+I'm going to add the
+result of layer i
+
+00:59:20
+to this sort of--
+to its input here.
+
+00:59:22
+So now I'm saying I'm just
+going to compute the layer,
+
+00:59:25
+and I'm going to add in
+the input to the layer
+
+00:59:27
+so that I only have
+to learn the residual
+
+00:59:30
+from the previous layer, right?
+
+00:59:32
+So I've got this
+connection here,
+
+00:59:33
+it's often written as this; this
+sort of like ooooh connection,
+
+00:59:38
+OK, right?
+
+00:59:38
+Goes around.
+
+00:59:39
+And you should think
+that the gradient is just
+
+00:59:41
+really great through the
+residual connection, right?
+
+00:59:43
+Like if ah, I've got vanishing
+or exploding gradient--
+
+00:59:47
+vanishing gradients
+through this layer,
+
+00:59:49
+well, I can at least
+learn everything behind it
+
+00:59:51
+because I've got this
+residual connection where
+
+00:59:54
+the gradient is 1,
+because it's the identity.
+
+00:59:57
+So this is really nice.
+
+00:59:59
+And it also maybe is
+like a bias-- at least
+
+01:00:01
+at initialization,
+everything looks a little bit
+
+01:00:04
+like the identity
+function now, right?
+
+01:00:06
+Because if the
+contribution of the layer
+
+01:00:08
+is somewhat small because all
+of your weights are small,
+
+01:00:11
+and I have the addition
+from the input,
+
+01:00:13
+maybe the whole thing
+looks a little bit
+
+01:00:15
+like the identity,
+which might be
+
+01:00:17
+a good sort of place to start.
+
+01:00:20
+And there are really
+nice visualizations;
+
+01:00:22
+I just love this visualization.
+
+01:00:24
+This is your loss
+landscape, right?
+
+01:00:26
+So your gradient
+descent, and you're
+
+01:00:27
+trying to traverse the
+mountains of the loss landscape.
+
+01:00:30
+This is like the
+parameter space,
+
+01:00:32
+and down is better in
+your loss function.
+
+01:00:34
+And it's really hard, so you
+get stuck in some local optima,
+
+01:00:38
+and you can't sort of
+find your way to get out.
+
+01:00:41
+And then this is your
+residual connections.
+
+01:00:43
+I mean, come on, you
+just sort of walk down.
+
+01:00:47
+It's not actually I guess really
+how it works all the time,
+
+01:00:50
+but I really love this.
+
+01:00:51
+It's great.
+
+01:00:55
+OK.
+
+01:00:58
+So yeah, we've seen
+residual connections,
+
+01:01:00
+we should move on to
+layer normalization.
+
+01:01:02
+So layer norm is another
+thing to help your model
+
+01:01:06
+train faster.
+
+01:01:08
+And the intuitions around
+layer normalization and sort
+
+01:01:15
+of the empiricism of it
+working very well maybe
+
+01:01:17
+aren't perfectly like,
+let's say, connected.
+
+01:01:20
+But you should
+imagine, I suppose,
+
+01:01:25
+that we want to, say, there's
+variation within each layer.
+
+01:01:29
+Things can get very big,
+things can get very small.
+
+01:01:32
+That's not actually informative
+because of variations
+
+01:01:36
+between maybe the gradients or
+I've got weird things going on
+
+01:01:43
+in my layers that I
+can't totally control,
+
+01:01:45
+I haven't been able to make
+everything behave sort of
+
+01:01:47
+nicely where everything stays
+roughly the same norm, maybe
+
+01:01:50
+some things explode,
+maybe some things shrink.
+
+01:01:54
+And I want to cut down on sort
+of uninformative variation
+
+01:01:59
+between layers.
+
+01:02:00
+So I'm going to let x and
+Rd be an individual word
+
+01:02:03
+vector in the model.
+
+01:02:05
+So this is like at a
+single index one vector.
+
+01:02:08
+And what I'm going to try
+to do is just normalize it.
+
+01:02:12
+Normalize it in the sense of
+it's got a bunch of variation,
+
+01:02:15
+and I'm going to cut
+out on everything--
+
+01:02:17
+I'm going to
+normalize it to unit
+
+01:02:19
+mean and standard deviation.
+
+01:02:21
+So I'm going to estimate
+the mean here across--
+
+01:02:26
+so for all of the
+dimensions in the vector.
+
+01:02:30
+So j equals 1 to the
+model dimensionality.
+
+01:02:32
+I'm going to sum up the value.
+
+01:02:34
+So I've got this
+one big word vector,
+
+01:02:35
+and I sum up all the values.
+
+01:02:37
+Division by d here, right?
+
+01:02:39
+That's the mean.
+
+01:02:40
+I'm going to have my estimate
+of the standard deviation.
+
+01:02:43
+Again, these should
+say estimates.
+
+01:02:45
+This is my simple estimate
+of the standard deviation
+
+01:02:47
+of the values within
+this one vector.
+
+01:02:50
+And I'm just going to--
+
+01:02:53
+and then possibly I guess I
+can have learned parameters
+
+01:02:58
+to try to scale back out in
+terms of multiplicatively
+
+01:03:02
+and additively here,
+but that's optional.
+
+01:03:05
+We're going to compute this
+standardization, right?
+
+01:03:08
+Where I'm going to
+take my vector x,
+
+01:03:09
+subtract out the mean, divide
+by the standard deviation,
+
+01:03:12
+plus this epsilon
+sort of constant.
+
+01:03:14
+If there's not a
+lot of variation,
+
+01:03:16
+I don't want things to explode.
+
+01:03:17
+So I'm going to have
+this epsilon there.
+
+01:03:19
+That's close to zero.
+
+01:03:21
+So this part here, x
+minus mu over square root
+
+01:03:25
+sigma plus epsilon, is
+saying take all the variation
+
+01:03:28
+and sort of normalize it to unit
+mean and standard deviation.
+
+01:03:32
+And then maybe I want to sort of
+scale it, stretch it back out,
+
+01:03:36
+and then maybe add an offset
+beta that I've learned.
+
+01:03:40
+Although in practice
+actually, this part, and we'll
+
+01:03:42
+discuss this in the
+lecture notes, in practice,
+
+01:03:45
+this part maybe isn't
+actually that important.
+
+01:03:47
+But so layer normalization,
+yeah, you're--
+
+01:03:51
+you can think of this as when
+I get the output of layer
+
+01:03:54
+normalization,
+it's going to be--
+
+01:03:55
+it's going to sort
+of look nice and look
+
+01:03:57
+similar to the next layer
+independent of what's
+
+01:03:59
+gone on because it's
+going to be unit
+
+01:04:01
+mean and standard deviation.
+
+01:04:02
+So maybe that makes
+for a better thing
+
+01:04:04
+to learn off of
+for the next layer.
+
+01:04:09
+OK.
+
+01:04:09
+Any questions for
+residual or layer norm?
+
+01:04:12
+Yes.
+
+01:04:13
+[INAUDIBLE] to subtract the
+[INAUDIBLE] the vector x?
+
+01:04:17
+Yeah, that's a good question.
+
+01:04:18
+When I subtract the scalar
+mu from the vector x,
+
+01:04:21
+I broadcast mu to dimensionality
+d and remove mu from all d.
+
+01:04:27
+Yeah, good point.
+
+01:04:29
+Thank you.
+
+01:04:29
+That was unclear.
+
+01:04:35
+In the fourth bullet, maybe
+I'm confused, is it divided?
+
+01:04:38
+Should it be divided
+by d or [INAUDIBLE]??
+
+01:04:42
+Sorry, can you repeat that.
+
+01:04:43
+In the fourth bullet point when
+you're calculating the mean,
+
+01:04:46
+is it divided by d or is it--
+
+01:04:49
+or maybe I'm just [INAUDIBLE].
+
+01:04:51
+I think it is divided by d.
+
+01:04:52
+Yeah, cool.
+
+01:04:55
+So this is the average
+deviation from the mean
+
+01:04:58
+of all of the-- yeah.
+
+01:04:59
+Yes.
+
+01:05:01
+So if you have five words in
+the sentence [INAUDIBLE] norm,
+
+01:05:04
+do you normalize based on the
+statistics of these five words
+
+01:05:09
+or just one word [INAUDIBLE]?
+
+01:05:11
+So the question is, if I have
+five words in the sequence,
+
+01:05:14
+do I normalize by
+sort of aggregating
+
+01:05:17
+the statistics to estimate mu
+and sigma across all the five
+
+01:05:20
+words, share their statistics or
+do independently for each word?
+
+01:05:24
+This is a great question,
+which I think in all the papers
+
+01:05:26
+that discuss transformers
+is under-specified.
+
+01:05:29
+You do not share across
+the five words, which
+
+01:05:33
+is somewhat confusing to me.
+
+01:05:35
+So each of the five words is
+done completely independently.
+
+01:05:39
+You could have shared
+across the five words
+
+01:05:41
+and said that my estimate
+of the statistics
+
+01:05:43
+are just based on all
+five, but you do not.
+
+01:05:49
+I can't pretend I
+understand totally why.
+
+01:05:51
+[INAUDIBLE] extension
+of that [INAUDIBLE]
+
+01:05:54
+for example, per batch or per
+output for the same position
+
+01:06:00
+[INAUDIBLE]?
+
+01:06:00
+So a similar question.
+
+01:06:02
+The question is, if you have
+a batch of sequences, right?
+
+01:06:06
+So just like we're doing
+batch-based training,
+
+01:06:09
+do you for a single word, now
+we don't share across a sequence
+
+01:06:13
+index for sharing
+the statistics,
+
+01:06:14
+but do you share
+across the batch?
+
+01:06:16
+And the answer is no.
+
+01:06:17
+You also do not share
+across the batch.
+
+01:06:19
+In fact, layer
+normalization was sort of
+
+01:06:22
+invented as a replacement
+for batch normalization
+
+01:06:25
+which did just that.
+
+01:06:26
+And the issue with
+batch normalization
+
+01:06:27
+is that now your forward
+pass sort of depends in a way
+
+01:06:30
+that you don't like on examples
+that should be not related
+
+01:06:34
+to your example.
+
+01:06:35
+And so yeah, you don't share
+statistics across the batch.
+
+01:06:40
+OK.
+
+01:06:41
+Cool.
+
+01:06:44
+OK, so now we have our
+full transformer decoder,
+
+01:06:48
+and we have our blocks.
+
+01:06:50
+So in this sort of slightly
+grayed out thing here that
+
+01:06:53
+says repeat for number of
+encoder or, sorry, decoder
+
+01:06:57
+blocks, each block consists of--
+
+01:07:00
+I pass it through
+self-attention.
+
+01:07:02
+And then my add and norm, right?
+
+01:07:04
+So I've got this
+residual connection here
+
+01:07:06
+that goes around, and I've got
+the layer normalization there
+
+01:07:10
+and then a feed-forward layer
+and then another add and norm.
+
+01:07:15
+And so that set of
+four operations,
+
+01:07:17
+I apply for some number of
+times, number of blocks,
+
+01:07:21
+so that whole thing is
+called a single block.
+
+01:07:23
+And that's it, that's the
+transformer decoder as it is.
+
+01:07:31
+Cool.
+
+01:07:32
+So that's a whole
+architecture right there.
+
+01:07:33
+We've solved things like
+needing to represent position,
+
+01:07:36
+we've solved things
+like not being
+
+01:07:39
+able to look into
+the future, we've
+
+01:07:42
+solved a lot of different
+optimization problems.
+
+01:07:44
+You've got a question.
+
+01:07:44
+Yes.
+
+01:07:45
+[INAUDIBLE] is the multi-headed
+attention [INAUDIBLE]??
+
+01:07:48
+Yes.
+
+01:07:49
+Yes, masked
+multi-head attention.
+
+01:07:51
+Yeah.
+
+01:07:52
+With the dot product
+scaling with the square root
+
+01:07:55
+d over h as well.
+
+01:07:56
+Yeah.
+
+01:08:03
+So the question is,
+how do these models
+
+01:08:05
+handle variable length inputs?
+
+01:08:08
+Yeah, so if you have--
+
+01:08:13
+so the input to the
+GPU forward pass
+
+01:08:17
+is going to be a
+constant length.
+
+01:08:20
+So you're going to maybe
+pad to a constant length.
+
+01:08:24
+And in order to not look at
+the future, the stuff that's
+
+01:08:28
+sort happening in
+the future, you
+
+01:08:30
+can mask out the pad tokens.
+
+01:08:32
+Just like the masking
+that we showed
+
+01:08:34
+for not looking at
+the future in general,
+
+01:08:36
+you can just say set all
+of the attention weights
+
+01:08:39
+to zero or the scores
+to negative infinity
+
+01:08:42
+for all of the pad tokens.
+
+01:08:47
+Yeah, exactly.
+
+01:08:48
+So you can set everything
+to this maximum length.
+
+01:08:52
+Now, in practice--
+so the question was,
+
+01:08:53
+do you set this length
+that you have everything
+
+01:08:55
+be, be that maximum length?
+
+01:08:56
+I mean, yes often, although
+you can save computation
+
+01:09:00
+by setting it to something
+smaller and everything--
+
+01:09:04
+the math all still works out.
+
+01:09:06
+You just have to code it
+properly so it can handle--
+
+01:09:08
+you set everything- instead
+of to n, you set it all to 5
+
+01:09:11
+if everything is
+shorter than length 5,
+
+01:09:13
+and you save a lot
+of computation.
+
+01:09:15
+All of the self-attention
+operations just work.
+
+01:09:19
+So yeah.
+
+01:09:21
+How many layers are in
+the feed-forward normally?
+
+01:09:25
+There's one hidden layer in
+the feed-forward usually.
+
+01:09:27
+Yeah.
+
+01:09:28
+OK, I should move on.
+
+01:09:29
+I've got a couple more things
+and not very much time.
+
+01:09:32
+OK.
+
+01:09:33
+But I'll be here after
+the class as well.
+
+01:09:35
+So in the encoder--
+
+01:09:36
+so the transformer encoder
+is almost identical.
+
+01:09:39
+But, again, we want
+bidirectional context,
+
+01:09:41
+and so we just don't
+do the masking, right?
+
+01:09:44
+So I've got-- in my
+multi-head attention here,
+
+01:09:46
+I've got no masking.
+
+01:09:48
+And so it's that easy to
+make the model bidirectional.
+
+01:09:51
+OK?
+
+01:09:53
+So that's easy.
+
+01:09:53
+So that's called the
+transformer encoder.
+
+01:09:55
+It's almost identical
+but no masking.
+
+01:09:57
+And then finally, we've
+got the transformer encoder
+
+01:10:01
+decoder, which is actually how
+the transformer was originally
+
+01:10:04
+presented in this paper
+Attention Is All You Need.
+
+01:10:07
+And this is when we want to
+have a bidirectional network.
+
+01:10:10
+Here's the encoder.
+
+01:10:11
+It takes in, say,
+my source sentence
+
+01:10:13
+for machine translation;
+It's multi-headed attention
+
+01:10:16
+is not masked.
+
+01:10:17
+And I have a decoder to
+decode out my sentence.
+
+01:10:22
+Now, but you'll see that this
+is slightly more complicated.
+
+01:10:24
+I have my masked
+multi-head self-attention
+
+01:10:27
+just like I had
+before and my decoder,
+
+01:10:29
+but now I have an
+extra operation which
+
+01:10:33
+is called cross
+attention, where I'm
+
+01:10:35
+going to use my decoder
+vectors as my queries,
+
+01:10:41
+but then I'll take the
+output of the encoder
+
+01:10:43
+as my keys and values.
+
+01:10:45
+So now for every
+word in the decoder,
+
+01:10:48
+I'm looking at all the possible
+words in the output of all
+
+01:10:52
+of the blocks of the encoder.
+
+01:10:53
+Yes.
+
+01:10:54
+[INAUDIBLE] is no
+longer [INAUDIBLE]
+
+01:10:59
+like the keys and the values.
+
+01:11:00
+How do we get a key
+and value separated
+
+01:11:03
+from the output, because
+didn't we collapse those
+
+01:11:05
+into the single output?
+
+01:11:07
+So we will-- sorry, how will
+we get the keys and values out?
+
+01:11:12
+How do we-- because
+when we have the output,
+
+01:11:15
+didn't we collapse like
+the keys and values
+
+01:11:17
+into a single output?
+
+01:11:19
+So the output--
+
+01:11:20
+[INAUDIBLE] calculate.
+
+01:11:21
+Yeah, the question
+is, how do you
+
+01:11:22
+get the keys and values and
+queries out of this sort
+
+01:11:24
+of single collapsed output?
+
+01:11:25
+Now, remember, the
+output for each word
+
+01:11:27
+is just this weighted
+average of the value
+
+01:11:29
+vectors for the previous words.
+
+01:11:33
+And then from that output,
+for the next layer,
+
+01:11:35
+we apply a new key, query,
+and value transformation
+
+01:11:38
+to each of them for the next
+layer of self-attention.
+
+01:11:42
+So it's not actually
+that you're--
+
+01:11:43
+--key and the value
+to the output.
+
+01:11:45
+It's not the output
+itself, when you're
+
+01:11:47
+taking from the [INAUDIBLE]?
+
+01:11:48
+Yeah, you apply the key matrix,
+the query matrix to the output
+
+01:11:51
+of whatever came before it.
+
+01:11:52
+Yeah.
+
+01:11:53
+And so just in a little
+bit of math, right?
+
+01:11:56
+We have these vectors h1 through
+hn, I'm going to call them,
+
+01:12:00
+that are the output
+of the encoder, right,
+
+01:12:03
+and then I've got vectors that
+are the output of the decoder.
+
+01:12:07
+So I've got these z's
+I'm calling the output
+
+01:12:09
+of the decoder, and then
+I simply define my keys
+
+01:12:13
+and my values from the
+encoder vectors, these h's.
+
+01:12:19
+So I take the h's, I apply a
+key matrix and a value matrix,
+
+01:12:22
+and then I define the
+queries from my decoder.
+
+01:12:26
+So my query is here.
+
+01:12:27
+So this is why two of the
+arrows come from the encoder,
+
+01:12:30
+and one of the arrows
+comes from the decoder.
+
+01:12:32
+I've got my z's here and my
+queries, my keys and values
+
+01:12:35
+from the encoder.
+
+01:12:39
+OK.
+
+01:12:42
+So that is it.
+
+01:12:44
+I've got a couple
+of minutes, I want
+
+01:12:45
+to discuss some of the
+results of transformers,
+
+01:12:48
+and I'm happy to answer more
+questions about transformers
+
+01:12:50
+after class.
+
+01:12:52
+So really, the original
+results of transformers,
+
+01:12:56
+they had this big
+pitch for like,
+
+01:12:58
+Oh, look, you can do way
+more computation because
+
+01:13:01
+of parallelization;
+they got great results
+
+01:13:03
+in machine translation.
+
+01:13:04
+So you had transformers
+sort of doing quite well,
+
+01:13:13
+although not like astoundingly
+better than existing machine
+
+01:13:16
+translation systems, but
+they were significantly more
+
+01:13:20
+efficient to train,
+right, Because you
+
+01:13:22
+don't have this
+parallelization problem,
+
+01:13:25
+you could compute on much
+more data much faster,
+
+01:13:27
+and you could make use
+of faster GPUs much more.
+
+01:13:31
+After that, there were things
+like document generation,
+
+01:13:34
+where you had this sort of
+old standard of sequence
+
+01:13:37
+to sequence models with LSTMs,
+and eventually, everything
+
+01:13:40
+became sort of transformers
+all the way down.
+
+01:13:44
+Transformers also
+enabled this revolution
+
+01:13:47
+into pre-training, which we'll
+go over in lecture next class.
+
+01:13:51
+And this sort of the efficiency,
+the parallelizability
+
+01:13:54
+allows you to compute on
+tons and tons of data.
+
+01:13:58
+And so after a
+certain point sort
+
+01:14:00
+of on standard large
+benchmarks, everything
+
+01:14:03
+became transformer-based.
+
+01:14:04
+This ability to make use of lots
+and lots of data, lots and lots
+
+01:14:07
+of compute just put transformers
+head and shoulders above LSTMs
+
+01:14:12
+in, let's say, almost every
+sort of modern advancement
+
+01:14:16
+in natural language processing.
+
+01:14:19
+There are many sort of drawbacks
+and variants to transformers.
+
+01:14:24
+The clearest one
+that people have
+
+01:14:25
+tried to work on quite a bit is
+this quadratic compute problem.
+
+01:14:29
+So this all pairs
+of interactions
+
+01:14:31
+means that our sort of total
+computation for each block
+
+01:14:34
+grows quadratically with
+the sequence length.
+
+01:14:36
+And in a student's question,
+we heard that, well,
+
+01:14:39
+as the sequence
+length becomes long,
+
+01:14:41
+if I want to process
+a whole Wikipedia
+
+01:14:43
+article, a whole novel, that
+becomes quite unfeasible.
+
+01:14:48
+And actually, that's a step
+backwards in some sense.
+
+01:14:50
+Because for recurrent
+neural networks,
+
+01:14:52
+it only grew linearly
+with the sequence length.
+
+01:14:55
+Other things people
+have tried to work on
+
+01:14:57
+are sort of better
+position representations
+
+01:14:59
+because the absolute index of a
+word is not really the best way
+
+01:15:04
+maybe to represent its
+position in a sequence.
+
+01:15:07
+And just to give you an
+intuition of quadratic sequence
+
+01:15:10
+length, remember that we had
+this big matrix multiply here
+
+01:15:13
+that resulted in this
+matrix of n by n,
+
+01:15:16
+and computing this is like a big
+cost, it costs a lot of memory.
+
+01:15:22
+And so there's been work--
+
+01:15:24
+yeah, and so if you think
+of the model dimensionality,
+
+01:15:26
+as like 1,000, although
+today it gets much larger.
+
+01:15:28
+And then for a short
+sequence of n is roughly 30,
+
+01:15:32
+maybe if you're computing
+n squared times d,
+
+01:15:36
+30 isn't so bad, but if you
+had something like 50,000,
+
+01:15:41
+then n squared becomes huge
+and sort of totally infeasible.
+
+01:15:46
+So people have tried
+to map things down
+
+01:15:49
+to a lower dimensional
+space to get rid
+
+01:15:51
+of the quadratic computation.
+
+01:15:54
+But in practice, as people
+have gone to things like GPT 3,
+
+01:15:58
+ChatGPT, most of the
+computation doesn't show up
+
+01:16:01
+in the self-attention,
+so people are wondering
+
+01:16:04
+is it even necessary to get
+rid of the self-attention
+
+01:16:08
+operations quadratic constraint?
+it's an open form of research
+
+01:16:12
+whether this is
+sort of necessary.
+
+01:16:14
+And then finally, there have
+been a ton of modifications
+
+01:16:17
+to the transformer over the
+last five, four-ish years.
+
+01:16:21
+And it turns out that
+the original transformer
+
+01:16:25
+plus maybe a couple
+of modifications
+
+01:16:27
+is pretty much the best
+thing there is still.
+
+01:16:31
+There have been a
+couple of things
+
+01:16:32
+that end up being important.
+
+01:16:33
+Changing out the non-linearities
+in the feed-forward network
+
+01:16:37
+ends up being important,
+but it's sort of a--
+
+01:16:40
+it's had lasting power so far.
+
+01:16:43
+But I think it's ripe for
+people to come through and think
+
+01:16:46
+about how to improve
+it in various ways.
+
+01:16:49
+So pre-training is on Tuesday.
+
+01:16:52
+Good luck on assignment four.
+
+01:16:53
+And then yeah, we'll have the
+project proposal documents
+
+01:16:55
+out tonight for
+you to talk about.

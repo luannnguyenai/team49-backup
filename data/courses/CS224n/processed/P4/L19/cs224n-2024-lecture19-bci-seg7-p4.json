@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::cs224n-2024-lecture19-bci::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "The transcript provides enough grounded evidence to generate 2 reinforcement questions about future BCIs, inner-speech decoding, and neuroethics.",
+  "qa_outputs": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is inner-speech decoding highlighted as an important future direction?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Attempted-speech systems are still slower than natural conversation, so inner speech could support more effortless communication",
+        "Inner speech removes every ethical concern from BCIs",
+        "Inner speech needs no brain recordings",
+        "Attempted-speech systems already exceed natural speaking speed"
+      ],
+      "answer_index": 0,
+      "explanation": "The motivation is speed and naturalness: current attempted-speech BCIs are impressive but still slower than ordinary conversation, so decoding inner speech could reduce effort and improve communication rate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "60 to 70 words per minute",
+          "150 words per minute"
+        ],
+        "timestamps": [
+          "01:07:29",
+          "01:07:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which concern is presented as a major ethical challenge for future inner-speech BCIs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They could reveal thoughts or memories that a person did not intend to express",
+        "They can work only with 3D avatars",
+        "They eliminate the need for consent procedures",
+        "They guarantee zero word error rate"
+      ],
+      "answer_index": 0,
+      "explanation": "Inner-speech decoding raises special privacy and consent issues because the boundary between intended communication and private thought becomes much harder to protect.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "private memories",
+          "ethical questions"
+        ],
+        "timestamps": [
+          "01:10:00",
+          "01:11:40"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "global_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "global_kp_id": "kp_future_bcis_inner_speech_and_neuroethics",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is inner-speech decoding highlighted as an important future direction\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which concern is presented as a major ethical challenge for future inner-speech BCIs\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q1",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is inner-speech decoding highlighted as an important future direction\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg7_q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which concern is presented as a major ethical challenge for future inner-speech BCIs\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

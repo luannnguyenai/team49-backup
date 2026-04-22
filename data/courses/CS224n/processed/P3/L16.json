@@ -1,0 +1,114 @@
+{
+  "output_filename": "p3a__cs224n__lecture16_efficient_training.json",
+  "run_id": "<run_id>",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture16-efficient-training",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main gateway KPs on floating-point range/precision and mixed precision, plus formula-heavy, high item_generation_worthiness, and explicit loss-scaling mechanics make this core assessable theory.",
+      "target_kp_ids": [
+        "kp_mixed_precision_training",
+        "kp_floating_point_range_vs_precision",
+        "kp_loss_scaling_for_fp16_training"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "A dominant main gateway KP on DDP plus substantial main coverage of critical gateway ZeRO sharding and high item_generation_worthiness make this foundational multi-GPU procedure worth multiple items.",
+      "target_kp_ids": [
+        "kp_distributed_data_parallel_ddp",
+        "kp_zero_optimizer_and_gradient_sharding",
+        "kp_collective_communication_primitives"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "This technically dense segment has dominant main coverage of critical gateway FSDP, substantial main coverage of ZeRO stage 2, and high item_generation_worthiness around sharding procedure and memory bottlenecks.",
+      "target_kp_ids": [
+        "kp_fsdp",
+        "kp_zero_optimizer_and_gradient_sharding",
+        "kp_activation_memory_as_a_separate_bottleneck"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg4",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of the main capstone decision flowchart plus substantial PEFT motivation gives clear application value, but the section is lighter on derivation and mechanics than the surrounding core systems units.",
+      "target_kp_ids": [
+        "kp_practical_fine_tuning_decision_flowchart",
+        "kp_peft"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of critical capstone LoRA with a formula-heavy low-rank update, trainable-parameter mechanics, and concrete hyperparameter guidance makes this a prime assessment target.",
+      "target_kp_ids": [
+        "kp_lora_low_rank_adaptation",
+        "kp_peft"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg6",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Although Q&A-driven, it contains dominant main coverage of FSDP sharding-policy and communication-overlap mechanics with concrete execution details, so it remains assessable advanced systems content.",
+      "target_kp_ids": [
+        "kp_fsdp_sharding_policy_and_communication_overlap",
+        "kp_fsdp"
+      ],
+      "question_intent": "application",
+      "content_type": "worked_example",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

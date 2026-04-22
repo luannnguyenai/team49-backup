@@ -1,0 +1,1029 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture11-pretraining",
+    "lecture_title": "Lecture 11 - Pretraining",
+    "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Subword modeling and tokenization",
+      "start_s": 126,
+      "end_s": 895
+    },
+    {
+      "section_index": 2,
+      "title": "Why contextual pretraining matters",
+      "start_s": 896,
+      "end_s": 1486
+    },
+    {
+      "section_index": 3,
+      "title": "Language modeling and the pretrain–fine-tune paradigm",
+      "start_s": 1487,
+      "end_s": 2154
+    },
+    {
+      "section_index": 4,
+      "title": "Encoder pretraining and BERT-style masking",
+      "start_s": 2155,
+      "end_s": 3022
+    },
+    {
+      "section_index": 5,
+      "title": "Using pretrained encoders: fine-tuning, RoBERTa, and PEFT",
+      "start_s": 3023,
+      "end_s": 3518
+    },
+    {
+      "section_index": 6,
+      "title": "Encoder-decoders, T5, and decoder-only GPT models",
+      "start_s": 3519,
+      "end_s": 3994
+    },
+    {
+      "section_index": 7,
+      "title": "GPT-3, in-context learning, scaling, and prompting",
+      "start_s": 3995,
+      "end_s": 4718
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture11-pretraining::seg1",
+      "course_id": "CS224n",
+      "name": "Subword modeling and the vocabulary problem",
+      "description": "Explains why fixed word vocabularies fail on typos, morphological variants, and new words, and motivates subword tokenization as the practical alternative used in modern NLP.",
+      "summary": "The lecture opens by showing why a finite word vocabulary is brittle: models trained with whole-word embeddings cannot gracefully handle typos like \"laern,\" elongated spellings like \"taaaasty,\" or productive morphology like \"transformerify\" [ts=184s] [ts=198s]. The instructor argues that mapping all unseen words to a single UNK token throws away too much information, and the problem becomes worse in morphologically rich languages such as Swahili, where a single verb can have hundreds of conjugated forms [ts=254s] [ts=311s]. The solution is subword modeling: start from characters, iteratively merge common adjacent substrings, and tokenize each word into the fewest large known pieces possible [ts=395s] [ts=638s]. This preserves open-vocabulary coverage, lets common words remain intact, and gives useful representations for novel forms such as segmented versions of \"tasty\" or \"transformer\" + \"-ify\" [ts=444s] [ts=549s]. The segment also clarifies that punctuation is typically retained and that the model treats full words and subwords uniformly as vocabulary indices [ts=665s] [ts=736s].",
+      "key_points": [
+        {
+          "text": "Using a single UNK token for unseen words loses substantial lexical information.",
+          "timestamp_s": 254,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Morphologically rich languages make whole-word vocabularies especially inefficient because many related forms would get separate vectors.",
+          "timestamp_s": 311,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Subword vocabularies can be learned by starting from characters and repeatedly merging frequent adjacent substrings.",
+          "timestamp_s": 395,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "At tokenization time, words are split into the largest available subwords so sequence length stays relatively small.",
+          "timestamp_s": 638,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Modern NLP usually keeps punctuation and minimally preprocesses text so inputs stay close to real usage.",
+          "timestamp_s": 665,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 126,
+        "end_s": 895
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 13,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "course_id": "CS224n",
+      "name": "From static embeddings to contextual pretraining",
+      "description": "Motivates whole-model pretraining by contrasting static word embeddings with contextual representations and by showing what can be learned from reconstructing masked text.",
+      "summary": "This segment reframes the course’s earlier distributional hypothesis in contextual terms: word2vec gives one vector for a surface form like \"record,\" so noun and verb senses are blended into a single embedding, whereas contextual models can represent the token differently depending on surrounding words [ts=903s] [ts=956s]. The instructor then contrasts the old setup—pretrained word embeddings plus a randomly initialized task model—with modern pretraining, where the entire network is trained before downstream fine-tuning [ts=1039s] [ts=1065s]. Pretraining is presented as reconstructing corrupted input: mask part of a naturally occurring sentence and force the model to predict the missing content [ts=1207s] [ts=1246s]. Through examples, the lecture argues that this objective can teach syntax (what determiners fit), co-reference (\"her\" matching \"the woman\"), lexical semantics (which sea creatures fit a list), sentiment (predicting whether a movie was bad), and even simple world or reasoning structure such as physical location and numerical continuation [ts=1277s] [ts=1446s].",
+      "key_points": [
+        {
+          "text": "Static embeddings collapse multiple senses of a word like \"record\" into one representation.",
+          "timestamp_s": 956,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Whole-model pretraining means pretraining not only the input embeddings but also the contextual network on top of them.",
+          "timestamp_s": 1065,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A core self-supervised recipe is to mask part of real text and train the network to reconstruct the missing portion.",
+          "timestamp_s": 1207,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Masked prediction can teach syntax by constraining which words can legally fit a context.",
+          "timestamp_s": 1277,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Masked prediction can also surface sentiment and simple world knowledge from ordinary text.",
+          "timestamp_s": 1346,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 896,
+        "end_s": 1486
+      },
+      "difficulty": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 10,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "course_id": "CS224n",
+      "name": "Language modeling as pretraining and why fine-tuning works",
+      "description": "Defines language-model pretraining, explains the two-stage pretrain–fine-tune workflow, and discusses data scale, evaluation, and why pretrained initializations help.",
+      "summary": "Here pretraining is reduced to language modeling: train a model to predict the next token from the prefix, keep all learned weights, and reuse them as the initialization for a downstream task model [ts=1487s] [ts=1538s]. The lecture formalizes the now-standard two-step workflow: first learn broad linguistic regularities from abundant unlabeled text, then adapt the model to a smaller supervised task such as sentiment analysis with additional gradient updates [ts=1552s] [ts=1580s]. A major reason this helps is scale: unlabeled text is orders of magnitude more plentiful than labeled task data, especially in English, so pretraining can absorb generic knowledge about language and the world before fine-tuning specializes it [ts=1649s] [ts=1997s]. During development, perplexity is a practical proxy metric for pretraining quality, while benchmark suites serve as rough task-level checks of generality [ts=1758s] [ts=1774s]. The instructor also emphasizes that optimization matters: starting gradient descent from pretrained parameters often leads fine-tuning to better valleys than random initialization, even though the full theory remains open [ts=1812s] [ts=1875s].",
+      "key_points": [
+        {
+          "text": "Language-model pretraining predicts the next word from previous words and then reuses all learned parameters.",
+          "timestamp_s": 1499,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The standard workflow is pretraining on unlabeled text followed by fine-tuning on a smaller labeled task.",
+          "timestamp_s": 1552,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Unlabeled text is vastly more abundant than labeled task data, which is a core reason pretraining helps.",
+          "timestamp_s": 1649,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Perplexity is a convenient training-time metric that often correlates with downstream performance.",
+          "timestamp_s": 1758,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Fine-tuning works partly because optimization stays near strong pretrained parameters rather than starting from random weights.",
+          "timestamp_s": 1866,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 1487,
+        "end_s": 2154
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "course_id": "CS224n",
+      "name": "Encoder pretraining and BERT",
+      "description": "Covers architecture-specific pretraining for encoders, explains masked language modeling, and introduces BERT’s training recipe and its impact on NLP.",
+      "summary": "The lecture next organizes pretraining by architecture—encoders, encoder-decoders, and decoders—and begins with encoders, which have bidirectional context and therefore cannot use ordinary left-to-right language modeling without trivially peeking at the answer [ts=2155s] [ts=2241s]. The workaround is masked language modeling: corrupt the input by blanking selected tokens, run the encoder over the full masked sequence, and compute loss only on the masked positions so the model learns to reconstruct missing words from both left and right context [ts=2269s] [ts=2327s]. This leads into BERT, introduced as the model that popularized masked language modeling and released pretrained transformer weights that became broadly useful for representation learning [ts=2448s] [ts=2470s]. BERT masks 15% of subword tokens, but mixes masking, random replacement, and unchanged tokens so the network learns to build contextual representations even when no explicit mask appears at test time [ts=2483s] [ts=2571s]. The segment also explains the next-sentence prediction task with segment embeddings, notes that later work found it unnecessary, and highlights how BERT-style pretraining outperformed many bespoke task-specific architectures on standard NLP benchmarks [ts=2608s] [ts=3005s].",
+      "key_points": [
+        {
+          "text": "Encoders cannot use plain next-word language modeling for pretraining because bidirectional attention leaks the target token.",
+          "timestamp_s": 2241,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Masked language modeling trains an encoder to reconstruct masked tokens from both left and right context.",
+          "timestamp_s": 2269,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "BERT masks 15% of subword tokens and uses a mixture of true masks, random replacements, and unchanged tokens.",
+          "timestamp_s": 2483,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Next-sentence prediction asks whether segment B is the true continuation of segment A.",
+          "timestamp_s": 2616,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Longer contexts help contextual interpretation, which is one reason later work found next-sentence prediction unnecessary.",
+          "timestamp_s": 2726,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "BERT-style pretraining largely displaced hand-crafted task-specific architectures across benchmark tasks.",
+          "timestamp_s": 2973,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 2155,
+        "end_s": 3022
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 14,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "course_id": "CS224n",
+      "name": "Fine-tuning pretrained encoders and lightweight adaptation",
+      "description": "Shows how encoder representations are turned into downstream predictions, when BERT is appropriate, and how RoBERTa and parameter-efficient tuning refine the recipe.",
+      "summary": "After pretraining, an encoder yields one contextual vector per input token; to solve a downstream task, the pretraining prediction head is removed and a task-specific classifier is attached to one or more hidden states, then the model is fine-tuned end to end [ts=3056s] [ts=3133s]. The segment notes BERT model sizes and emphasizes the practical separation between expensive pretraining and relatively cheap downstream fine-tuning, which can often be done on modest hardware [ts=3141s] [ts=3189s]. It also clarifies where BERT fits best: because its objective is fill-in-the-blank reconstruction rather than left-to-right generation, it is strong for document or sentence representation tasks such as classification, but less natural for free-form text generation [ts=3211s] [ts=3247s]. Several improvements are then sketched: span masking can be harder and more useful than masking isolated subwords, and RoBERTa improves on BERT by dropping next-sentence prediction and training on more data [ts=3253s] [ts=3319s]. The lecture closes with parameter-efficient fine-tuning ideas such as prefix tuning, prompt tuning, and low-rank weight updates, all motivated by preserving strong pretrained weights while adapting cheaply to a new task [ts=3353s] [ts=3497s].",
+      "key_points": [
+        {
+          "text": "For downstream tasks, remove the masked-token prediction head and add a task-specific classifier on top of encoder states.",
+          "timestamp_s": 3100,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "BERT is better suited to classification and representation tasks than to open-ended generation.",
+          "timestamp_s": 3218,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Masking whole spans can be harder and more effective than masking isolated subwords.",
+          "timestamp_s": 3258,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "RoBERTa improves BERT mainly by removing next-sentence prediction and training on more text.",
+          "timestamp_s": 3305,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Prefix tuning freezes the pretrained network and learns a small set of prepended pseudo-token parameters instead.",
+          "timestamp_s": 3385,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Low-rank adaptation learns a small low-rank update added to frozen weight matrices.",
+          "timestamp_s": 3482,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 3023,
+        "end_s": 3518
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "course_id": "CS224n",
+      "name": "Encoder-decoders, T5, and the rise of decoder-only GPT models",
+      "description": "Introduces span-corruption pretraining for encoder-decoders, connects it to T5 and implicit retrieval, then transitions to decoder-only GPT-style models and their generative strengths.",
+      "summary": "For encoder-decoders, the lecture contrasts a simple split-sequence language-model objective with span corruption, where spans are masked in the encoder input and the decoder generates the missing spans marked by sentinel tokens [ts=3519s] [ts=3594s]. This objective keeps bidirectional context on the input side while preserving generative training on the output side, which makes it attractive for tasks like machine translation and led to strong results in models such as T5 [ts=3597s] [ts=3647s]. The instructor then highlights a striking downstream effect: after salient span masking and fine-tuning on some question-answer examples, T5 could answer unseen trivia questions by apparently retrieving facts stored in its parameters, though fluent answers could still be wrong [ts=3654s] [ts=3739s]. The lecture then moves to decoder-only models, which are trained with ordinary next-token language modeling and are especially natural for generation [ts=3749s] [ts=3793s]. Early GPT is presented as a successful decoder-only precursor, and GPT-2 as a much larger model whose coherent prompt continuations made generative pretraining especially visible [ts=3843s] [ts=3983s].",
+      "key_points": [
+        {
+          "text": "Span corruption masks spans in the input and asks the decoder to generate the missing spans with sentinel markers.",
+          "timestamp_s": 3560,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Span corruption combines bidirectional input context with generative output prediction.",
+          "timestamp_s": 3594,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "T5’s salient span masking enabled some implicit retrieval of factual answers after fine-tuning for open-domain QA.",
+          "timestamp_s": 3682,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Decoder-only pretraining is standard next-token language modeling and is naturally suited to generation.",
+          "timestamp_s": 3753,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "GPT can be fine-tuned on tasks such as natural language inference by concatenating inputs and predicting a label.",
+          "timestamp_s": 3895,
+          "evidence_type": "example"
+        },
+        {
+          "text": "GPT-2 showed surprisingly coherent long-form continuation from prompts at a much larger scale than early GPT.",
+          "timestamp_s": 3943,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 3519,
+        "end_s": 3994
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "course_id": "CS224n",
+      "name": "GPT-3, in-context learning, scaling laws, and prompting",
+      "description": "Explains how very large decoder-only models exhibit in-context learning, discusses compute/data scaling tradeoffs, and introduces chain-of-thought prompting along with broader capability and safety questions.",
+      "summary": "The final segment centers on GPT-3, a much larger decoder-only model that could sometimes perform new tasks without parameter updates, simply from examples placed in the prompt [ts=3995s] [ts=4052s]. This behavior is named in-context learning: the model infers a pattern from demonstrations in the current input—translation, addition, typo correction—and continues it without explicit fine-tuning [ts=4052s] [ts=4102s]. The lecture stresses that the mechanism is still poorly understood: some behavior may come from matching patterns seen during pretraining, while some appears to reflect nontrivial adaptation to the presented context [ts=4141s] [ts=4230s]. It then turns to scaling, noting that larger models trained on more data generally improved, but that compute must be allocated wisely; Chinchilla is cited as evidence that GPT-3 was over-parameterized relative to the amount of training data and that smaller models trained on more tokens can do better [ts=4234s] [ts=4290s]. Finally, the segment introduces chain-of-thought prompting as giving worked intermediate steps in the prompt, which often improves reasoning by letting the model generate a scratchpad, while also emphasizing open concerns about emergent behavior, bias, programming use, and continued domain-adaptive pretraining such as the \"Don't Stop Pretraining\" idea [ts=4310s] [ts=4634s].",
+      "key_points": [
+        {
+          "text": "GPT-3 can sometimes solve tasks from prompt examples alone, without gradient-based fine-tuning.",
+          "timestamp_s": 4023,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In-context learning means inferring and continuing a task pattern from demonstrations within the current input.",
+          "timestamp_s": 4052,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Whether in-context learning is memorized pattern matching or more general task learning remains an open research question.",
+          "timestamp_s": 4196,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scaling requires balancing parameter count against training tokens; Chinchilla improved by using fewer parameters and more data.",
+          "timestamp_s": 4243,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Chain-of-thought prompting provides intermediate reasoning steps in the prompt and often improves answer accuracy.",
+          "timestamp_s": 4342,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Pretraining yields broad capabilities but also biases and hard-to-predict failures.",
+          "timestamp_s": 4459,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A practical extension is to continue pretraining on unlabeled in-domain text before final supervised fine-tuning.",
+          "timestamp_s": 4609,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 3995,
+        "end_s": 4718
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture11-pretraining::seg1",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Foundational tokenization segment with several concrete examples but limited derivation; useful mainly as setup for later pretraining objectives [ts=184s] [ts=444s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Establishes the core motivation for contextual pretraining through multiple masked-prediction examples spanning syntax, semantics, sentiment, and reasoning [ts=1207s] [ts=1446s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Central conceptual segment defining the pretrain–fine-tune pipeline, optimization intuition, and evaluation ideas like perplexity [ts=1499s] [ts=1758s] [ts=1812s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Dense architecture-specific content on encoder pretraining, masked language modeling, and BERT; strong candidate for assessment items [ts=2241s] [ts=2483s] [ts=2973s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Practically important segment on how pretrained encoders are adapted, including RoBERTa and efficient fine-tuning variants [ts=3211s] [ts=3305s] [ts=3385s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Introduces encoder-decoder span corruption, T5-style retrieval behavior, and the transition to decoder-only GPT models [ts=3560s] [ts=3682s] [ts=3843s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Capstone segment covering GPT-3, in-context learning, scaling, chain-of-thought prompting, and open questions about capability and bias [ts=4023s] [ts=4243s] [ts=4342s] [ts=4469s]."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture11-pretraining::seg1",
+      "global_kp_id": "kp_subword_tokenization",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "global_kp_id": "kp_contextual_embeddings",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "global_kp_id": "kp_masked_language_modeling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_peft",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_masked_language_modeling",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "global_kp_id": "kp_span_corruption_for_encoder_decoders",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_in_context_learning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_subword_tokenization",
+      "name": "Subword tokenization",
+      "description": "Representing text with learned subword units instead of a fixed whole-word vocabulary so models can cover unseen words, morphology, and typos.",
+      "track_tags": [
+        "representation_learning",
+        "tokenization"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because subword tokenization clarifies representing text with learned subword units instead of a fixed whole-word vocabulary so models can cover unseen words, morphology, and typos, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_contextual_embeddings",
+      "name": "Contextual representations and embeddings",
+      "description": "A single embedding per word string cannot fully disambiguate sense by context, though it can average across senses in a useful way. Representations whose meaning depends on the surrounding sequence rather than assigning one static vector to each surface form.",
+      "track_tags": [
+        "context_modeling",
+        "polysemy_context",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "nlp",
+        "semantics"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "language_technologist",
+        "nlp_research",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because contextual representations and embeddings formalizes how a single embedding per word string cannot fully disambiguate sense by context, though it can average across senses in a useful way, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture01-wordvecs::kp8",
+        "local::lecture11-pretraining::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "name": "Pretraining, fine-tuning, and transfer learning",
+      "description": "Two-stage learning in which a model first learns generic language structure from large unlabeled corpora and is then adapted to a supervised downstream task. Reusing pretrained CNN features or pretrained weights to solve a new task more effectively when target data is limited.",
+      "track_tags": [
+        "computer_vision",
+        "practical_ml",
+        "pretraining",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "nlp",
+        "pretraining",
+        "transfer_learning"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because pretraining, fine-tuning, and transfer learning formalizes how two-stage learning in which a model first learns generic language structure from large unlabeled corpora and is then adapted to a supervised downstream task, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp3",
+        "local::lecture_6::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp7",
+        "local::lecture11-pretraining::kp4",
+        "local::lecture14-nlg::kp3",
+        "local::lecture13-generative-models-1::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_masked_language_modeling",
+      "name": "Masked language modeling",
+      "description": "Corrupting input text and training an encoder to reconstruct masked tokens using bidirectional context.",
+      "track_tags": [
+        "encoder_models",
+        "self_supervision"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because masked language modeling clarifies corrupting input text and training an encoder to reconstruct masked tokens using bidirectional context, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "name": "BERT and encoder transfer",
+      "description": "Using a pretrained bidirectional encoder such as BERT for downstream tasks by attaching lightweight prediction heads and fine-tuning.",
+      "track_tags": [
+        "encoder_models",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "ml_engineering"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because bERT and encoder transfer clarifies using a pretrained bidirectional encoder such as BERT for downstream tasks by attaching lightweight prediction heads and fine-tuning, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_peft",
+      "name": "Parameter-efficient fine-tuning",
+      "description": "Fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk. Adapting pretrained models by changing only a small number of parameters, such as prefixes, prompts, or low-rank weight updates.",
+      "track_tags": [
+        "adaptation",
+        "model_adaptation",
+        "training_efficiency",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "efficient_ml",
+        "nlp",
+        "transfer_learning"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because parameter-efficient fine-tuning formalizes how fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between high and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16-efficient-training::kp10",
+        "local::lecture11-pretraining::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_span_corruption_for_encoder_decoders",
+      "name": "Span corruption for encoder-decoders",
+      "description": "Pretraining an encoder-decoder by masking contiguous spans in the input and generating the missing spans on the output side.",
+      "track_tags": [
+        "encoder_decoder_models",
+        "self_supervision"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because span corruption for encoder-decoders clarifies pretraining an encoder-decoder by masking contiguous spans in the input and generating the missing spans on the output side, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "name": "Decoder-only pretraining",
+      "description": "Training a causal decoder with next-token prediction, the foundation of GPT-style generative models.",
+      "track_tags": [
+        "decoder_models",
+        "language_modeling"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because decoder-only pretraining formalizes how training a causal decoder with next-token prediction, the foundation of GPT-style generative models, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_in_context_learning",
+      "name": "In-context learning",
+      "description": "Solving a task from examples placed directly in the prompt, without updating model parameters. Task behavior induced by prompts and examples without parameter updates.",
+      "track_tags": [
+        "few_shot_learning",
+        "llm",
+        "nlp",
+        "prompting"
+      ],
+      "domain_tags": [
+        "in_context_learning",
+        "large_language_models",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "llm_engineer",
+        "product_ml"
+      ],
+      "difficulty_level": 0.65,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because in-context learning clarifies solving a task from examples placed directly in the prompt, without updating model parameters, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp2",
+        "local::lecture11-pretraining::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "name": "Pretraining scaling and compute-data tradeoffs",
+      "description": "Large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale. This scaling view also appears in vision-language systems such as CLIP, where larger models and more image-text data improve performance.",
+      "track_tags": [
+        "foundation_models",
+        "llm",
+        "model_efficiency",
+        "nlp",
+        "scaling",
+        "scaling_laws"
+      ],
+      "domain_tags": [
+        "data_scale",
+        "large_language_models",
+        "model_scale",
+        "nlp",
+        "pretraining",
+        "scaling_laws"
+      ],
+      "career_path_tags": [
+        "llm_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_engineering",
+        "research_scientist",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because pretraining scaling and compute-data tradeoffs clarifies large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale, sharpening later modeling, analysis, or evaluation choices while importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp1",
+        "local::lecture11-pretraining::kp11",
+        "local::lecture_16::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "name": "Chain-of-thought prompting",
+      "description": "A prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting. Prompting with worked intermediate reasoning steps so the model generates a scratchpad before the final answer.",
+      "track_tags": [
+        "llm",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "llms",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "ml_engineer",
+        "nlp_researcher",
+        "product_ml",
+        "prompt_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because chain-of-thought prompting formalizes how a prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting, which later units use as core machinery rather than background context while roles split between capstone and gateway and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp3",
+        "local::lecture20-reasoning-agents::kp2",
+        "local::lecture11-pretraining::kp12"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L11_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture11-pretraining_transcript.txt"
+  }
+}

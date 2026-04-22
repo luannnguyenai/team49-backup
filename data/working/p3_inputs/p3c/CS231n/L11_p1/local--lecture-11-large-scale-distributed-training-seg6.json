@@ -1,0 +1,241 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_11_large_scale_distributed_training",
+    "lecture_title": "Stanford CS231N Lecture 11: Large-Scale Distributed Training",
+    "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Hybrid sharded data parallelism, activation checkpointing, and scaling recipe",
+    "description": "Shows how to combine FSDP with outer data-parallel groups, then introduces activation checkpointing as the next memory-saving lever and distills a practical scaling recipe.",
+    "summary": "This segment first presents Hybrid Sharded Data Parallelism (HSDP), which organizes GPUs as a 2D grid: FSDP runs within groups of K GPUs, while ordinary data parallelism runs across M groups that hold replicated sharded setups [ts=2941s] [ts=3044s]. The motivation is topology-aware communication: FSDP communicates about three times the model weights over a forward/backward pass, while outer data parallelism only communicates gradients once, so heavier communication should be placed on faster intra-node or intra-pod links [ts=3064s] [ts=3148s]. The lecture then shifts to activation memory, noting that even when parameters are sharded, activations can dominate memory for large transformers like Llama3-405B [ts=3168s] [ts=3207s]. Activation checkpointing trades memory for recomputation by discarding some activations during forward and recomputing them in backward: full recomputation gives O(N^2) compute and O(1) memory, while checkpointing every C layers gives O(N^2/C) compute and O(C) memory, with C=sqrt(N) yielding the classic O(N√N) compute and O(√N) memory compromise [ts=3209s] [ts=3344s]. The segment ends with a practical scaling recipe: start with plain data parallelism, move to FSDP around billion-parameter scale, add activation checkpointing when activations become the bottleneck, then switch to HSDP and finally to more advanced CP/PP/TP strategies as GPU counts, model size, and sequence length continue to grow [ts=3365s] [ts=3469s].",
+    "key_points": [
+      {
+        "text": "HSDP uses two axes at once: FSDP within K-GPU groups and ordinary data parallelism across M groups.",
+        "timestamp_s": 2941,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "FSDP communicates roughly three times the model weights over a forward/backward pass, while outer data parallelism communicates gradients once.",
+        "timestamp_s": 3064,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A 100B-parameter model can be made feasible by sharding weights, gradients, and optimizer state across many GPUs.",
+        "timestamp_s": 3168,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Activation checkpointing stores fewer activations and recomputes them during backward instead.",
+        "timestamp_s": 3209,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Full recomputation changes an N-layer network from O(N) compute and O(N) memory to O(N^2) compute and O(1) memory.",
+        "timestamp_s": 3301,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Checkpointing every C layers gives O(N^2/C) compute and O(C) memory; choosing C = sqrt(N) gives O(N√N) compute and O(√N) memory.",
+        "timestamp_s": 3330,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "A practical recipe is DP first, then FSDP, then activation checkpointing, then HSDP, and finally CP/PP/TP at very large scale.",
+        "timestamp_s": 3365,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+      "start_s": 2931,
+      "end_s": 3500
+    },
+    "difficulty": 0.78,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "transcript_slice": "00:48:51\nSo this is great.\n\n00:48:54\nAnd this can get you a long way.\n\n00:48:59\nof data parallelism that people sometimes\n\n00:49:05\nAnd in this case, we're actually going\n\n00:49:09\ninto a two-dimensional grid.\n\n00:49:14\nAnd the way that we parallelized our computation was the same.\n\n00:49:20\nin the previous variants of data parallelism.\n\n00:49:25\nwe now are going to have two separate axes of parallelism\n\n00:49:29\nSo the first axis is we will do typical FSDP, Fully Sharded Data\n\n00:49:36\nSo we'll have groups of K GPUs.\n\n00:49:43\nParallelism that we just talked about.\n\n00:49:47\nwill be split across those K GPUs.\n\n00:49:52\nback and forth to each other during the forward\n\n00:49:55\nBut we will have now M copies of those K groups\n\n00:50:01\nSo in this case, we have two groups of four GPUs.\n\n00:50:07\nhas the weights split across the four GPUs.\n\n00:50:15\non a second group of two GPUs.\n\n00:50:21\ndo typical data parallelism across the groups.\n\n00:50:26\nAnd at the end of the backward, each group\n\n00:50:31\nAnd then after the backward, then each group\n\n00:50:36\nso that we now have the full macro macrobatch gradients\n\n00:50:41\nAnd then each group can make a gradient update independently\n\n00:50:46\nmacrobatch.\n\n00:50:51\nbecause now there's basically two different axes, two\n\n00:50:56\nour computation simultaneously.\n\n00:51:01\ndifferent amounts of communication\n\n00:51:04\nSo if we think about fully sharded parallelism,\n\n00:51:08\nto communicate during fully sharded data parallelism?\n\n00:51:13\nremember we were copying the weights all over.\n\n00:51:17\ndoing a communication of one full copy of the network\n\n00:51:20\nThen during the backward pass, we\n\n00:51:24\nand we also need to communicate the gradients.\n\n00:51:29\nduring a single forward backward pass,\n\n00:51:33\nthe network weights across everything participating\n\n00:51:36\nBut when you do normal data parallelism, where\n\n00:51:42\nyou only need to all reduce the gradients.\n\n00:51:47\ngroups, you only need to communicate the network\n\n00:51:51\nAnd this plays into this idea of multiple levels of hierarchy\n\n00:51:56\nSo what you might do, for example,\n\n00:52:00\neight GPUs with higher interconnect\n\n00:52:03\nThose might be an FSDP group because it\n\n00:52:07\nBut then you could have multiple servers\n\n00:52:11\nSo you have one server with a full copy of the model weights,\n\n00:52:17\nAnd remember, communication across servers\n\n00:52:21\nSo then this is our first example of designing algorithms\n\n00:52:28\nthat we know our devices are connected into.\n\n00:52:33\nthese things are impossible to tune.\n\n00:52:40\nAnd then basically, but once you have data parallelism,\n\n00:52:45\nthis is actually a recipe that can take you a long ways.\n\n00:52:51\nwould take 800 GB of memory to store.\n\n00:52:56\nit only takes 10 gigabytes of memory per GPU.\n\n00:53:03\nBut there's another problem that the model activations themselves\n\n00:53:07\nSo if we go back to Llama3-405B, it's a transformer with 126\n\n00:53:15\nSo if you imagine how much GPU memory\n\n00:53:19\nduring the forward pass, that's going to be a lot.\n\n00:53:24\nto run out of memory once your models and sequences get really\n\n00:53:27\nSo that leads to another trick is\n\n00:53:31\nmeans that we're actually not going to store\n\n00:53:34\nWe're going to recompute them during the backward pass.\n\n00:53:40\nof your neural network in a different way,\n\n00:53:44\nEach layer in the neural network does two things.\n\n00:53:49\nactivations for the next layer.\n\n00:53:52\ngradients that take both the upstream gradients\n\n00:53:56\nSo normally, how much compute and memory does this all take?\n\n00:54:02\na forward backward pass will take 1, 2, 3, 4, four steps\n\n00:54:07\nYou'll remember those activations\n\n00:54:10\nThen 1, 2, 3, 4 steps during backward.\n\n00:54:15\nit takes O(N) compute and O(N) memory for an N layer network.\n\n00:54:22\nSo instead what we can do is imagine\n\n00:54:27\nSo what that looks like is something like this.\n\n00:54:30\nWe'll run the first layer and then immediately throw away\n\n00:54:34\nrun the forward pass for the first layer.\n\n00:54:38\nand so do this four times.\n\n00:54:41\ngot the activations at the last layer.\n\n00:54:46\nbut now we're kind out of luck.\n\n00:54:50\nto compute the next backward pass, but we can recompute them.\n\n00:54:54\nNow we can do the backward pass.\n\n00:54:57\nNow do the backward pass.\n\n00:54:59\nNow do another backward pass.\n\n00:55:03\nbeing N squared compute and constant memory for a network\n\n00:55:11\nN minus 3, blah, blah, blah down to one.\n\n00:55:14\nAnd you can split this up.\n\n00:55:18\nSo instead, let's not recompute everything.\n\n00:55:23\nevery C layers.\n\n00:55:30\nThen in that case, if you take C checkpoints\n\n00:55:35\ntimes over the course of your network,\n\n00:55:39\nof C memory.\n\n00:55:41\nto set C equal to root N, in which case\n\n00:55:47\nSo this is a pretty common way that you\n\n00:55:51\nto train even bigger models.\n\n00:55:54\nSo now at this point, once we have\n\n00:56:00\nhere.\n\n00:56:03\nAnd the recipe for that is basically as following.\n\n00:56:07\nquite a long way from here is first, use data parallelism,\n\n00:56:15\nand roughly up to models of around a billion parameters.\n\n00:56:19\nfor models of this size.\n\n00:56:22\nAnd another thing that you almost always\n\n00:56:27\nto max out the GPU memory.\n\n00:56:31\nAnd then once your model starts to get big,\n\n00:56:34\na lot of memory inside your GPU.\n\n00:56:38\nSo it depends on how much memory your GPU has,\n\n00:56:44\nBut in general, once your model starts\n\n00:56:47\nthat's when you want to start thinking\n\n00:56:50\nto fully sharded data parallelism.\n\n00:56:55\nbut then you'll run into the memory bottleneck\n\n00:56:58\nAnd that's when you turn on activation check pointing.\n\n00:57:02\nmakes everything a lot slower, but it does let\n\n00:57:07\nAnd this will scale up to several hundred GPUs.\n\n00:57:12\non your cluster topology, maybe around 256 GPUs, maybe\n\n00:57:18\nof multiple hundreds of devices, then FSDP becomes too expensive.\n\n00:57:25\nAnd then this is basically going to let you get up\n\n00:57:31\ntraining on maybe a thousand GPUs\n\n00:57:36\nSo that's pretty good.\n\n00:57:40\nmore than 50 billion parameter models,\n\n00:57:46\nneed to turn to these more advanced strategies--\n\n00:57:49\nor tensor parallelism.\n\n00:57:53\nIt's like, oh, my God.\n\n00:57:55\nHow am I supposed to optimize this?\n\n00:57:59\nsize, the HSDP dimension, the FSDP dimension,\n\n00:58:03\nI'm lost here.\n\n00:58:04\nThere's so many knobs, I don't know what do I do?\n\n00:58:10\ncalled Model Flops Utilization, MFU.\n\n00:58:15\nModel Flops Utilization is your guiding light.\n\n00:58:19\nto do to optimize your training stack.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "global_kp_id": "kp_hybrid_sharded_data_parallelism_hsdp",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "global_kp_id": "kp_activation_checkpointing",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "global_kp_id": "kp_fsdp",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg6",
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_hybrid_sharded_data_parallelism_hsdp",
+      "name": "Hybrid Sharded Data Parallelism (HSDP)",
+      "description": "A 2D composition of FSDP within groups and ordinary data parallelism across groups, chosen to better match cluster communication hierarchy.",
+      "track_tags": [
+        "cluster_topology",
+        "distributed_training"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "distributed_systems_engineer",
+        "ml_infrastructure_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because hybrid Sharded Data Parallelism (HSDP) clarifies a 2D composition of FSDP within groups and ordinary data parallelism across groups, chosen to better match cluster communication hierarchy, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_11_large_scale_distributed_training::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_activation_checkpointing",
+      "name": "Activation Checkpointing",
+      "description": "A memory-compute tradeoff that stores fewer intermediate activations during forward and recomputes them during backward.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "training_optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_infrastructure_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because activation Checkpointing clarifies a memory-compute tradeoff that stores fewer intermediate activations during forward and recomputes them during backward, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_11_large_scale_distributed_training::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_fsdp",
+      "name": "Fully Sharded Data Parallel (FSDP)",
+      "description": "Stage-3 sharding scheme that partitions parameters, gradients, and optimizer state, then gathers per-layer weights on demand during forward and backward passes. A memory-saving variant of data parallelism that shards parameters, gradients, and optimizer state across GPUs and materializes weights on demand.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_algorithms",
+        "parallel_computing"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "ml_engineer",
+        "ml_infrastructure_engineer",
+        "research_engineer",
+        "systems_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because fully Sharded Data Parallel (FSDP) formalizes how stage-3 sharding scheme that partitions parameters, gradients, and optimizer state, then gathers per-layer weights on demand during forward and backward passes, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16-efficient-training::kp8",
+        "local::lecture_11_large_scale_distributed_training::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "name": "Model FLOPs Utilization (MFU)",
+      "description": "A system-level efficiency metric measuring how much of a device's theoretical compute is turned into useful model forward/backward work in the actual training loop.",
+      "track_tags": [
+        "distributed_training",
+        "performance"
+      ],
+      "domain_tags": [
+        "performance_engineering",
+        "training_systems"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "performance_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because model FLOPs Utilization (MFU) clarifies a system-level efficiency metric measuring how much of a device's theoretical compute is turned into useful model forward/backward work in the actual training loop, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_11_large_scale_distributed_training::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.63,
+    0.93
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L11_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture11-large-scale-distributed-training_transcript.txt"
+  }
+}

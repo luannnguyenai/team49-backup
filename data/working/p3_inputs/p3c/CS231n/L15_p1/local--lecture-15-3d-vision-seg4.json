@@ -1,0 +1,150 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_15_3d_vision",
+    "lecture_title": "Lecture 15: 3D Vision",
+    "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_15_3d_vision::seg4",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Why 3D deep learning needed new data and task formulations",
+    "description": "Places 3D deep learning in historical context, covering why voxels were the first entry point, which datasets enabled progress, and what tasks matter in AI+geometry.",
+    "summary": "Wu situates 3D deep learning historically after the 2D successes of ImageNet-era CNNs, noting that the first instinct was to lift 2D convolutions into 3D by operating on voxel grids because voxels most closely resemble pixels [ts=1679s][ts=1721s][ts=1730s]. He then argues that methods alone were not enough; progress required larger 3D datasets, moving from small benchmarks like the Princeton Shape Benchmark to ShapeNet and ShapeNetCore, and later to Objaverse-scale collections of synthetic assets, while real scanned scene datasets remained much smaller and more expensive to collect [ts=1781s][ts=1852s][ts=1863s][ts=1910s][ts=2120s]. The segment ends by broadening the task space: 3D learning includes generative modeling, conditional reconstruction from images or language, completion and repair, discriminative recognition, and especially joint 2D–3D modeling that exploits abundant 2D data and differentiable rendering to transfer priors from image models into 3D pipelines [ts=2165s][ts=2188s][ts=2231s][ts=2258s].",
+    "key_points": [
+      {
+        "text": "Early 3D deep learning started by extending 2D convolution into volumetric convolution on voxels.",
+        "timestamp_s": 1721,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "ShapeNet provided a large-scale 3D object dataset, with ShapeNetCore serving as the commonly used subset.",
+        "timestamp_s": 1852,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Objaverse and Objaverse-XL expanded 3D asset scale to roughly millions of models.",
+        "timestamp_s": 1910,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "3D scene datasets are much smaller than object datasets because scanning real spaces is costly.",
+        "timestamp_s": 2120,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Core 3D learning tasks include generation, reconstruction, completion, classification, and joint 2D–3D modeling.",
+        "timestamp_s": 2165,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+      "start_s": 1670,
+      "end_s": 2309
+    },
+    "difficulty": 0.51,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 11,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "transcript_slice": "00:27:53\nbut the modern deep learning thing is 2010.\n\n00:27:59\nAnd in 2012, they have AlexNet, which was written on ImageNet.\n\n00:28:04\nOK, now people say, OK, what if I want to do in 3D?\n\n00:28:08\nSo I want to go from 2D convolution neural networks--\n\n00:28:14\nSo how can I apply a 2D convolution neural network on 3D\n\n00:28:17\nAnd everyone knows we have all these different 3D\n\n00:28:21\nBut which one do you begin with?\n\n00:28:26\nthe people who started doing deep learning on 3D data,\n\n00:28:30\nThey're not the graphics people.\n\n00:28:33\nAnd maybe the easiest thing I can do is just to scale up.\n\n00:28:38\nI just make it work on 3D matrices.\n\n00:28:41\nInstead of having 2D convolution network,\n\n00:28:45\nThen, which of these representations\n\n00:28:50\nIt turned out to be this voxel representation.\n\n00:28:55\nBut the graphics people don't agree with that,\n\n00:28:58\noh, this voxel [? representation ?]\n\n00:29:02\nAs we talked about, we have this [INAUDIBLE] sample\n\n00:29:05\nAnd there, you can look at the quality.\n\n00:29:10\nSo people are like, why do you want to start with that?\n\n00:29:14\non 3D data with voxels, because I think it's--\n\n00:29:20\nand you just have to change one of the code.\n\n00:29:24\nnow do 3D convolution.\n\n00:29:28\nBut before I talk about the deep learning methods for 3D data,\n\n00:29:34\nfor 3D data, yeah.\n\n00:29:38\nImageNet really prompted AlexNet and stuff like that.\n\n00:29:44\nSo pre-3D, pre-deep learning, the common data sets or popular\n\n00:29:51\nShape Benchmark, which has 1,800 models, 180 categories.\n\n00:29:57\n180 categories.\n\n00:30:01\n10 models per [INAUDIBLE] year, which is so small.\n\n00:30:06\nAnd people feel like, oh, this is already\n\n00:30:10\nwork well on them.\n\n00:30:15\nSo prior to 2014, all these data sets are more or less small.\n\n00:30:23\n9,000, 10,000.\n\n00:30:27\nAnd so each class, you only have 10 models each or less than 100,\n\n00:30:32\nSo after that, people started by saying, OK, if we have ImageNet,\n\n00:30:38\nSo this is behind efforts of a few concurrent work.\n\n00:30:43\nconsolidated into this thing called\n\n00:30:46\nare actually led by Stanford.\n\n00:30:52\nSo they led these large data sets called ShapeNet,\n\n00:30:57\nBut in practice, just ImageNet, you have this large image.\n\n00:31:03\nSo ShapeNet, similarly, you have a ShapeNet core data set,\n\n00:31:09\nin 55 categories.\n\n00:31:12\nyou have 1,000 models on average.\n\n00:31:15\nSo for chairs, you have actually a lot more.\n\n00:31:19\nhave finally I have thousands of models on chairs.\n\n00:31:22\nBefore I just-- you can have 10 models.\n\n00:31:25\nSo this is how things started, and so there\n\n00:31:31\nthe results are just presented on chairs and cars\n\n00:31:36\nAnd people feel like, OK, that's great.\n\n00:31:38\nSo we should move even bigger.\n\n00:31:45\nthe Allen Institute from Seattle,\n\n00:31:50\ncalled Objaverse and Objaverse Extra Large that you have\n\n00:31:57\nAnd you can see they have much more categories.\n\n00:32:03\nalso with textures.\n\n00:32:07\nBut also, there are real data sets that are being produced,\n\n00:32:12\nYou just take 3D scanners.\n\n00:32:17\nThis is a data set called, I think,\n\n00:32:21\nSo you have 10,000 scans of real-world objects.\n\n00:32:28\nwhere they also encourage people.\n\n00:32:35\nSo they encourage people to take data for them.\n\n00:32:39\nSo people just, using an iPhone-- you have an object.\n\n00:32:42\nYou use an iPhone.\n\n00:32:44\nand then you get $1 or something like that.\n\n00:32:49\nThis is the first version.\n\n00:32:53\nThese are real objects because capturing real objects\n\n00:32:56\nAnd the object version and all the things\n\n00:32:59\nBut these are real objects.\n\n00:33:04\nalgorithms, you can actually take these 360 videos and try\n\n00:33:09\nSo now you have paired data of the videos or images of objects,\n\n00:33:27\nThis is the first version.\n\n00:33:31\nV3 right now, which is supposed to be a little larger.\n\n00:33:35\nThink about it.\n\n00:33:39\nobjects.\n\n00:33:42\nbut I don't think it's over 100,000.\n\n00:33:47\nyou have 100,000 models.\n\n00:33:52\nSo it's [? in the ?] lie on 5 B or whatever.\n\n00:33:56\nAnd Google and OpenAI must have much larger data sets.\n\n00:34:02\npoints that you can have for 2D images or videos versus you can\n\n00:34:06\nSo I think that's a big challenge,\n\n00:34:10\nAnd people have different ideas.\n\n00:34:15\nAt least you can.\n\n00:34:17\ntrain some deep learning models on these data sets now.\n\n00:34:24\nbeing built on parts.\n\n00:34:27\nthey try to annotate a little bit of object\n\n00:34:35\nAnd also, there's this data set called\n\n00:34:40\nnot only the parts and the semantics,\n\n00:34:43\nSo a little bit of mobility information of different parts.\n\n00:34:48\nAnd there are also data sets for 3D scenes,\n\n00:34:51\nBut there are also the rooms.\n\n00:34:57\nThese are people who actually just go inside your home\n\n00:35:01\nThey just come in, and then they just have a 3D scanner.\n\n00:35:07\nSo here and more recently, again, you\n\n00:35:14\nBut still, these kind of data sets are much smaller.\n\n00:35:20\nI think they they have a ++ for the second version,\n\n00:35:26\nSo the amount of data you have for 3D data,\n\n00:35:32\nthe amount of data you have for 3D objects.\n\n00:35:36\nwe go beyond that constraints, because if you have\n\n00:35:40\nbounded by how much time you have\n\n00:35:45\nAnyway, but there are attempts being\n\n00:35:52\nAnd finally, if you want to apply deep learning on to 3D\n\n00:35:59\nSo there are generative modeling,\n\n00:36:03\nYou can generate 2D images or videos.\n\n00:36:07\nYou can generate 3D scenes.\n\n00:36:09\nThe condition can be condition on language, condition on image.\n\n00:36:14\nAnd how can you reconstruct the 3D objects?\n\n00:36:19\nYou have to do shape generation, completion.\n\n00:36:23\nand you want to repair it.\n\n00:36:26\nSo there's geometric data processing as well.\n\n00:36:31\nFor example, you have a 3D shape.\n\n00:36:35\nit belongs to?\n\n00:36:38\nAnd a lot of them now are actually\n\n00:36:41\nbecause you have very good image recognition\n\n00:36:46\nSo you just take a 3D object.\n\n00:36:48\nYou can upload a picture to GPT, and they can do it for you.\n\n00:36:52\nof solving these discriminative problems.\n\n00:36:57\nthat it's not very easy to solve.\n\n00:37:02\nAnd you have the 3D scans.\n\n00:37:05\nspecialized domains where you don't have that much data?\n\n00:37:11\nAnd joint modeling of 2D and 3D data,\n\n00:37:16\nwe have so much more.\n\n00:37:19\nWe have very good foundation models that are trained on them.\n\n00:37:24\nmodels?\n\n00:37:26\nto make an image look realistic, how to make a video\n\n00:37:29\nHow can we use that information to help our 3D reconstruction\n\n00:37:34\nSo joint modeling in 2D and 3D data--\n\n00:37:38\nand very good pretrained models.\n\n00:37:43\nor differential rendering methods that basically connect\n\n00:37:46\nBecause you have 3D world.\n\n00:37:48\nYou can render them into 2D.\n\n00:37:52\nor can be approximated with neural networks.\n\n00:37:56\nmodalities through differentiable neural networks,\n\n00:38:02\nfoundation models into the 3D world.\n\n00:38:09\nbeyond visual data, including text data.\n\n00:38:12\nLet's say, in robotics, you often have tactile data.\n\n00:38:16\nAnd sometimes, for autonomous driving,\n\n00:38:20\nHow can you fuse them as well?\n\n00:38:25\ndifferent problems.\n\n00:38:29\nSo how do we begin with?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg4",
+      "global_kp_id": "kp_level_sets_and_voxels",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg4",
+      "global_kp_id": "kp_3d_datasets_and_ai_geometry_task_space",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_level_sets_and_voxels",
+      "name": "Level sets and voxels",
+      "description": "Grid-based discretizations of implicit fields, with voxels storing binarized occupancy values on a 3D lattice.",
+      "track_tags": [
+        "3d_vision",
+        "volumetric_methods"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "geometry_processing",
+        "medical_imaging"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "graphics_engineering",
+        "medical_imaging"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because level sets and voxels clarifies grid-based discretizations of implicit fields, with voxels storing binarized occupancy values on a 3D lattice, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_3d_datasets_and_ai_geometry_task_space",
+      "name": "3D datasets and AI+geometry task space",
+      "description": "The data and problem formulations that enabled 3D learning, including large object datasets, scanned scene data, and generative/discriminative/multimodal tasks.",
+      "track_tags": [
+        "3d_vision",
+        "datasets",
+        "task_formulation"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "ml_research",
+        "robotics"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because 3D datasets and AI+geometry task space clarifies the data and problem formulations that enabled 3D learning, including large object datasets, scanned scene data, and generative/discriminative/multimodal tasks, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.36,
+    0.66
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture15-3d-vision_transcript.txt"
+  }
+}

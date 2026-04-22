@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_6::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The available transcript evidence clearly supports two safe dropout questions, so no separate clip is necessary.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is clean, grounded, and aligned, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is clean, grounded, and aligned, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can dropout improve test-time generalization?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It prevents the model from over-relying on a small set of correlated features",
+        "It guarantees higher training accuracy on every step",
+        "It replaces backpropagation with a deterministic update rule",
+        "It removes the need to tune learning rates"
+      ],
+      "answer_index": 0,
+      "explanation": "Randomly masking activations during training forces the network to distribute useful information across a broader set of features instead of depending on a few feature combinations that might not generalize.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "can't over rely on features",
+          "learn a more broad set"
+        ],
+        "timestamps": [
+          "00:11:47",
+          "00:12:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After training with dropout probability p, what should happen at test time according to this workflow?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use all activations and multiply them by p",
+        "Keep dropping activations at the same rate p",
+        "Use all activations and divide them by p",
+        "Replace the dropout layer with max pooling"
+      ],
+      "answer_index": 0,
+      "explanation": "The goal is to keep the expected input magnitude seen by later layers consistent between training and inference. Using all activations at test time would otherwise make those inputs too large.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "multiply by the probability",
+          "magnitude is preserved"
+        ],
+        "timestamps": [
+          "00:13:54",
+          "00:14:14"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Dropout improving generalization is a medium conceptual regularization question."
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Test-time handling of dropout requires remembering the training-versus-inference workflow and is moderately technical."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The learner must connect stochastic masking to generalization behavior."
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item is useful as reinforcement on the practical dropout workflow."
+    }
+  ]
+}

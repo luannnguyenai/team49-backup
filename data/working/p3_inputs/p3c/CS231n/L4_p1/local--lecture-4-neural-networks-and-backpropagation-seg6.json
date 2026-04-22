@@ -1,0 +1,227 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_4_neural_networks_and_backpropagation",
+    "lecture_title": "Stanford CS231N | Spring 2025 | Lecture 4: Neural Networks and Backpropagation",
+    "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg6",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Gate patterns, sigmoid example, and modular backprop",
+    "description": "Develops more complex backprop examples, extracts reusable gate rules, and connects them to forward/backward APIs in deep-learning libraries.",
+    "summary": "This section reframes the purpose of backprop as moving dL/d(variable) all the way back to every weight and intermediate without expanding the entire network into one giant symbolic formula [ts=3180s] [ts=3226s]. A longer worked example decomposes a sigmoid of a linear function into multiply, add, negate, exp, reciprocal, and copy-style nodes, then performs forward and backward passes step by step using known local derivatives such as d(1/x)/dx and d(exp(x))/dx [ts=3302s] [ts=3362s] [ts=3480s]. The lecturer then compresses this into reusable patterns: add gates distribute gradients unchanged, multiply gates swap the other input, copy gates sum incoming gradients, and max gates route gradient only to the winning input [ts=3662s] [ts=3722s]. That modularity leads directly to the forward()/backward() interface used in frameworks such as PyTorch, where forward computes outputs and stores intermediates needed for backward, and the section ends by transitioning from scalar derivatives to vector-valued ones [ts=3783s] [ts=3836s] [ts=3903s].",
+    "key_points": [
+      {
+        "text": "Backprop gives gradients of the loss with respect to all variables and parameters without writing out a giant closed-form expression for the whole network.",
+        "timestamp_s": 3180,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "For the sigmoid-of-linear-function example, the backward pass is assembled from local derivatives of reciprocal, addition, exponential, and multiplication nodes.",
+        "timestamp_s": 3302,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The sigmoid local derivative can be written compactly as sigmoid(x) * (1 - sigmoid(x)).",
+        "timestamp_s": 3564,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Add gates distribute gradients, multiply gates swap inputs, copy gates add gradients, and max gates route gradient to the selected input.",
+        "timestamp_s": 3662,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Deep-learning operators can be modularized with forward and backward APIs that save inputs or intermediates needed during backprop.",
+        "timestamp_s": 3783,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Scalar-to-scalar, vector-to-scalar, and vector-to-vector derivatives differ in shape; vector-to-vector derivatives introduce Jacobians.",
+        "timestamp_s": 3903,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=25zD5qJHYsk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=4",
+      "start_s": 3180,
+      "end_s": 3960
+    },
+    "difficulty": 0.78,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 13,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "transcript_slice": "00:53:00\nWhat we needed was to identify to calculate\n\n00:53:06\nwith respect to W1 and W2 and W's in general,\n\n00:53:15\nof, in the opposite direction of the gradients\n\n00:53:21\nSo in order to do that, we need gradient of L loss\n\n00:53:28\nSo what we are doing is, we are just moving gradient of L\n\n00:53:35\nback to every single value of the network,\n\n00:53:42\nfor the entire network.\n\n00:53:46\nnot going to be sitting down and writing the function for all\n\n00:53:51\nThis is how we backpropagate step-by-step\n\n00:53:57\nprocess of every single weight that is going to be incorporated\n\n00:54:02\nOK, another example, so this is a little bit\n\n00:54:15\nAnd we have 1 over 1 plus e to the power of linear combination\n\n00:54:23\nSo there are a bunch of multiplications, additions,\n\n00:54:36\nthe 1 over whatever we calculated function.\n\n00:54:47\nspecific values for W0, x0, W1, x1, and W2.\n\n00:54:56\ncalculate every single value that we have in this process.\n\n00:55:05\nof the details, some of the--\n\n00:55:13\nwhat its derivative is with respect to x\n\n00:55:19\nAlways, the derivative is the constant value itself,\n\n00:55:27\nThese are, again, what we know from algebra.\n\n00:55:34\nthe derivative is equal to 1.\n\n00:55:41\nat the end of the network, the derivative\n\n00:55:48\nSo that's where we start using this rule,\n\n00:55:56\nNow, we can calculate-- upstream,\n\n00:56:02\nThe local gradient could be minus 1 over x2.\n\n00:56:09\nWhatever the input is.\n\n00:56:16\nSo minus 0.53 is the downstream gradient,\n\n00:56:22\nAnd in the next, again, the function\n\n00:56:28\nwhere we know that the local gradient equals to 1.\n\n00:56:39\nAnd next step is the exp function.\n\n00:56:48\nwe already have the value.\n\n00:56:54\nWhat is x?\n\n00:56:59\nSo calculating this will give us minus 0.2.\n\n00:57:08\nHere, we, again, have a multiplication\n\n00:57:16\nequal to that number, or that constant value,\n\n00:57:26\nAnd going back, now here, we have an addition function,\n\n00:57:37\ntwo inputs of the different values here.\n\n00:57:45\nit's 0.2.\n\n00:57:47\nThe downstream, the local gradients will be equal to 1\n\n00:57:57\nAnd an addition, the derivative of x\n\n00:58:04\nSo both inputs will be the same.\n\n00:58:07\nWe have multiplication operations\n\n00:58:14\nAgain, we have the values.\n\n00:58:21\nis, if we always have, say, for example,\n\n00:58:28\nto x is always the other variable.\n\n00:58:37\nwhich is the value of x.\n\n00:58:42\nSo the other variable, whatever the value it has.\n\n00:58:50\nalso calculate the ones with respect to W1 and x1.\n\n00:58:56\nso we can identify how much W should\n\n00:59:08\nin the network.\n\n00:59:13\nThere are so many different ways to draw a computational graph.\n\n00:59:21\nSo we can actually lump all of the functions\n\n00:59:28\na sigmoid of a linear function.\n\n00:59:33\nAnd then all of these operations could be defined as sigmoid.\n\n00:59:41\nto use because the local gradient using sigmoid\n\n00:59:48\nSo the local gradient of sigmoid with respect to the variable x,\n\n00:59:56\nit's 1 minus sigmoid multiplied by the sigmoid of the same x.\n\n01:00:10\nand easy.\n\n01:00:18\nwhat the upstream gradient was, was value 1.\n\n01:00:24\nis this function, replacing x with what the input was,\n\n01:00:34\nwill be 0.2.\n\n01:00:37\nthat we had from before doing it separately.\n\n01:00:47\nare few patterns in the data, often very much in for the nodes\n\n01:00:59\nThere is add gate for the add gate.\n\n01:01:05\nBecause of the properties of addition that I explained,\n\n01:01:18\nFor the multiplication gate, it's a swap function.\n\n01:01:27\nis y, with respect to y is x.\n\n01:01:31\nAnd then there is copy gate.\n\n01:01:41\nis just an addition of what is coming to the network--\n\n01:01:49\nAnd then ultimately, there is a max gate, which is actually\n\n01:01:55\nsimilar to the ReLU function.\n\n01:02:02\nbecause it's taking a max between its inputs.\n\n01:02:11\nroute the gradients towards that direction.\n\n01:02:21\na neural network, forward pass, compute all of the steps.\n\n01:02:27\nstart computing the gradients.\n\n01:02:32\nof the loss function with respect to itself is always 1.\n\n01:02:43\nYou can see here, that we are going up.\n\n01:02:49\nthen going up.\n\n01:02:52\nWe had another add gate.\n\n01:02:58\nwhich basically, very simply, gives us the implementations.\n\n01:03:07\nwhat we can do is just do some--\n\n01:03:20\nand create the forward and backward\n\n01:03:25\nneed in the neural network.\n\n01:03:31\nbecause for multiplication, we need\n\n01:03:39\nWe often save them, memorize them, but then\n\n01:03:45\nthe backward pass, calculate the gradients.\n\n01:03:53\nand backward passes all in.\n\n01:04:00\nIf you look at the sigmoid layer,\n\n01:04:04\nAlthough in this very function it's not implemented.\n\n01:04:11\nthat it's actually implemented in PyTorch.\n\n01:04:16\nis also calculating the same function\n\n01:04:27\nSo far, what we've said--\n\n01:04:33\nthat I wanted to cover in using the scalar values.\n\n01:04:43\nBut we know that all of these operations\n\n01:04:52\njust expanding on that piece here.\n\n01:05:03\nso far, what we've talked about for any input x and y\n\n01:05:08\nSo the derivative will also be a scalar.\n\n01:05:17\nthe value of y will change?\n\n01:05:24\nif x is a vector of n elements and y\n\n01:05:33\nthen in this case, the derivative\n\n01:05:38\nAnd every single element in that vector\n\n01:05:48\nthen how much the amount of y changes,\n\n01:05:53\none single value.\n\n01:05:59\nwhere x and y, both of them are vectors tours of arbitrary size.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg6",
+      "global_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg6",
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg6",
+      "global_kp_id": "kp_modular_forward_backward_operators",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg6",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "name": "Backpropagation as recursive chain rule",
+      "description": "The backward traversal of a computational graph that repeatedly applies the chain rule to obtain gradients for all relevant variables and parameters.",
+      "track_tags": [
+        "automatic_differentiation",
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because backpropagation as recursive chain rule formalizes how the backward traversal of a computational graph that repeatedly applies the chain rule to obtain gradients for all relevant variables and parameters, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_4_neural_networks_and_backpropagation::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "name": "Local, upstream, and downstream gradients",
+      "description": "The node-level view of backprop where each node multiplies its local derivative by an incoming upstream gradient to produce gradients for earlier nodes.",
+      "track_tags": [
+        "automatic_differentiation",
+        "calculus_for_ml"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because local, upstream, and downstream gradients clarifies the node-level view of backprop where each node multiplies its local derivative by an incoming upstream gradient to produce gradients for earlier nodes, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_4_neural_networks_and_backpropagation::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_modular_forward_backward_operators",
+      "name": "Modular forward/backward operators",
+      "description": "The implementation pattern where each operation exposes forward() and backward() behavior and stores intermediates needed for gradient computation.",
+      "track_tags": [
+        "automatic_differentiation",
+        "implementation"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "software_engineering"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because modular forward/backward operators clarifies the implementation pattern where each operation exposes forward() and backward() behavior and stores intermediates needed for gradient computation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_4_neural_networks_and_backpropagation::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "name": "Vector-valued gradients and Jacobians",
+      "description": "The extension from scalar derivatives to vector-to-scalar and vector-to-vector settings, where Jacobians encode how each output component depends on each input component.",
+      "track_tags": [
+        "automatic_differentiation",
+        "linear_algebra"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "mathematics_for_ml"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because vector-valued gradients and Jacobians clarifies the extension from scalar derivatives to vector-to-scalar and vector-to-vector settings, where Jacobians encode how each output component depends on each input component, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_4_neural_networks_and_backpropagation::kp11"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.63,
+    0.93
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture04-neural-networks-and-backpropagation_transcript.txt"
+  }
+}

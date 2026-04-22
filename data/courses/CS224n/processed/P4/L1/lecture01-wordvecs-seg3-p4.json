@@ -1,0 +1,497 @@
+{
+  "unit_id": "local::lecture01-wordvecs::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "This unit has strong transcript grounding for questions about one-hot representations, distributional semantics, and dense embedding spaces.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture01-wordvecs-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture01-wordvecs-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are one-hot word vectors a poor way to represent semantic similarity?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Different words are orthogonal symbols, so related words can have dot product zero.",
+        "They make every word dense and force similar words to share coordinates.",
+        "They automatically encode context and word sense for each occurrence.",
+        "They are too short to distinguish different vocabulary items."
+      ],
+      "answer_index": 0,
+      "explanation": "A one-hot vector identifies a word but does not encode relationships among words. Two related words can still be mathematically orthogonal, so similarity has to come from outside the representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limitations_of_one_hot_localist_word_representations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "it's 0",
+          "nothing to do"
+        ],
+        "timestamps": [
+          "00:33:21",
+          "00:33:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does distributional semantics assume about word meaning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A word’s meaning can be inferred from the contexts in which it appears.",
+        "A word’s meaning is determined only by its dictionary entry.",
+        "A word’s meaning is represented by a unique unchangeable logical symbol.",
+        "A word’s meaning cannot be learned from text data."
+      ],
+      "answer_index": 0,
+      "explanation": "Distributional semantics treats surrounding usage as evidence for meaning. If two words occur in similar contexts, their learned representations can become similar.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_distributional_semantics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "context in which it appears",
+          "distributional semantics"
+        ],
+        "timestamps": [
+          "00:35:16",
+          "00:35:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In dense word embeddings, why is the dot product useful for comparing words?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It gives a similarity score that can be large when vectors point in compatible directions.",
+        "It guarantees that every synonym has exactly the same vector.",
+        "It converts every word into a one-hot vocabulary index.",
+        "It removes all semantic information except word frequency."
+      ],
+      "answer_index": 0,
+      "explanation": "Dense embeddings place words in a vector space. A dot product can reflect whether two vectors align, making it a simple way to measure learned similarity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "taking the product",
+          "similar vectors"
+        ],
+        "timestamps": [
+          "00:37:13",
+          "00:36:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which change best captures the shift from localist representations to word vectors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "From one independent coordinate per word to shorter dense vectors whose geometry can encode similarity.",
+        "From learned numeric representations to manually written synonym lists only.",
+        "From context-based learning to treating every word as unrelated to all others.",
+        "From high-dimensional spaces to eliminating vector representations entirely."
+      ],
+      "answer_index": 0,
+      "explanation": "Localist representations mostly mark identity. Dense word vectors allow relationships among words to be represented through coordinates, distances, directions, and dot products.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "shorter, dense vector",
+          "similar vectors"
+        ],
+        "timestamps": [
+          "00:36:17",
+          "00:36:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can a high-dimensional embedding space capture more than a simple 2D picture suggests?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Many different semantic relationships can be represented along different dimensions or directions.",
+        "All words must lie on a single straight line in the original space.",
+        "High-dimensional embeddings prevent any comparison between words.",
+        "The extra dimensions are used only to store spelling and punctuation."
+      ],
+      "answer_index": 0,
+      "explanation": "A 2D plot is only a simplified view. In a richer space, different directions and neighborhoods can represent multiple overlapping kinds of similarity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "high dimensional space",
+          "good sense of meanings"
+        ],
+        "timestamps": [
+          "00:38:02",
+          "00:37:47"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture01-wordvecs-seg3-q1",
+      "global_kp_id": "kp_limitations_of_one_hot_localist_word_representations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q1",
+      "global_kp_id": "kp_distributional_semantics",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q2",
+      "global_kp_id": "kp_distributional_semantics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q3",
+      "global_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q3",
+      "global_kp_id": "kp_distributional_semantics",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q4",
+      "global_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q5",
+      "global_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture01-wordvecs-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why are one-hot word vectors a poor way to represent semantic similarity\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does distributional semantics assume about word meaning\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"In dense word embeddings, why is the dot product useful for comparing words\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which change best captures the shift from localist representations to word vectors\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can a high-dimensional embedding space capture more than a simple 2D picture suggests\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture01-wordvecs-seg3-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why are one-hot word vectors a poor way to represent semantic similarity\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does distributional semantics assume about word meaning\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In dense word embeddings, why is the dot product useful for comparing words\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which change best captures the shift from localist representations to word vectors\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg3-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can a high-dimensional embedding space capture more than a simple 2D picture suggests\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

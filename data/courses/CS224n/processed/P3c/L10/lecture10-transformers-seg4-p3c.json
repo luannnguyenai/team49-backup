@@ -1,0 +1,191 @@
+{
+  "unit_id": "local::lecture10-transformers::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 4 reinforcement questions about causal masking and the minimal self-attention architecture without requiring a separate video clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is masking necessary in autoregressive language modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because a token must not use information from future words when predicting the next token",
+        "Because keys and values must be different lengths",
+        "Because softmax only works on triangular matrices",
+        "Because decoders cannot use positional embeddings"
+      ],
+      "answer_index": 0,
+      "explanation": "If future tokens were visible during training, the model could cheat by directly reading information it is supposed to predict.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "can't cheat",
+          "look at the future"
+        ],
+        "timestamps": [
+          "00:33:12",
+          "00:33:16"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the unit implement causal masking mathematically?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Set future attention scores to negative infinity before softmax",
+        "Replace future value vectors with zeros after the output is computed",
+        "Delete all query vectors for earlier tokens",
+        "Normalize each row by its maximum instead of a softmax"
+      ],
+      "answer_index": 0,
+      "explanation": "By setting forbidden future scores to a very large negative value before the softmax, their resulting attention weights become zero.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "negative infinity",
+          "gets mapped to zero"
+        ],
+        "timestamps": [
+          "00:34:32",
+          "00:34:08"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After applying the softmax to a masked score matrix, what happens to future positions?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They receive zero attention weight",
+        "They receive equal weight with past positions",
+        "They become new queries for the next layer",
+        "They are copied into the residual connection"
+      ],
+      "answer_index": 0,
+      "explanation": "The softmax turns the masked negative-infinity scores into zero probability mass, so those future positions do not contribute to the weighted sum.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "weighted average is zero",
+          "future"
+        ],
+        "timestamps": [
+          "00:34:08",
+          "00:34:18"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the unit's example, what visibility pattern should the token \"chef\" have in a masked decoder?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It may attend to start, the, and chef, but not to who",
+        "It may attend only to who because who is more informative",
+        "It must attend equally to all tokens in the sentence",
+        "It may attend only to itself and never to earlier tokens"
+      ],
+      "answer_index": 0,
+      "explanation": "A causal mask allows attention to current and earlier positions only. That means \"chef\" can use prior context but not any token that comes later.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "start the chef",
+          "can't look at who"
+        ],
+        "timestamps": [
+          "00:34:37",
+          "00:34:52"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    }
+  ]
+}

@@ -1,0 +1,1051 @@
+{
+  "lecture_title": "Lecture 14 - Natural Language Generation",
+  "table_of_contents": [
+    {
+      "section_index": 0,
+      "title": "Definition, examples, and task taxonomy",
+      "start_s": 107,
+      "end_s": 516
+    },
+    {
+      "section_index": 1,
+      "title": "Autoregressive NLG models and teacher forcing",
+      "start_s": 516,
+      "end_s": 904
+    },
+    {
+      "section_index": 2,
+      "title": "Why maximum-probability decoding fails for open-ended text",
+      "start_s": 904,
+      "end_s": 1344
+    },
+    {
+      "section_index": 3,
+      "title": "Sampling, truncation, temperature, and reranking",
+      "start_s": 1344,
+      "end_s": 2419
+    },
+    {
+      "section_index": 4,
+      "title": "Exposure bias and training beyond MLE",
+      "start_s": 2419,
+      "end_s": 3305
+    },
+    {
+      "section_index": 5,
+      "title": "Automatic metrics for NLG evaluation",
+      "start_s": 3305,
+      "end_s": 3708
+    },
+    {
+      "section_index": 6,
+      "title": "Open-ended evaluation and human judgment",
+      "start_s": 3708,
+      "end_s": 4326
+    },
+    {
+      "section_index": 7,
+      "title": "Ethics, safety, and research outlook",
+      "start_s": 4326,
+      "end_s": 4695
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture14-nlg::seg1",
+      "course_id": "cs224n",
+      "name": "What NLG is and how tasks vary by open-endedness",
+      "description": "Defines natural language generation, surveys representative applications, and introduces the open-ended versus non-open-ended task spectrum.",
+      "summary": "The segment defines natural language generation as NLP where the output is natural language, contrasting it with understanding tasks whose input is language [ts=155s]. It notes a historical shift from rule-based templates and infilling to deep learning systems [ts=189s]. The lecture then surveys examples including machine translation, digital assistants, summarization, creative story writing, data-to-text, image captioning, and ChatGPT as a general-purpose NLG system [ts=214s] [ts=280s]. It organizes tasks by open-endedness: translation and summarization have relatively constrained output spaces, dialogue allows multiple valid continuations, and story generation has extremely large valid output space [ts=348s] [ts=432s]. The segment closes by formalizing this spectrum with entropy, arguing that high-entropy tasks are more open-ended and that this distinction will matter for both decoding and training choices [ts=493s].",
+      "key_points": [
+        {
+          "text": "Natural language generation focuses on systems whose outputs are fluent, coherent, and useful natural language.",
+          "timestamp_s": 155,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Representative NLG tasks include machine translation, dialogue, summarization, story generation, data-to-text, and image captioning.",
+          "timestamp_s": 214,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Open-ended generation has a high degree of freedom in valid outputs, while non-open-ended generation is largely determined by the input.",
+          "timestamp_s": 461,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Task open-endedness can be formalized with entropy: higher entropy implies more open-ended generation.",
+          "timestamp_s": 493,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 107,
+        "end_s": 516
+      },
+      "difficulty": 0.29,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 7,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg2",
+      "course_id": "cs224n",
+      "name": "Autoregressive generation, architectures, and teacher forcing",
+      "description": "Reviews left-to-right autoregressive language modeling, architecture choices, and the standard maximum-likelihood training setup.",
+      "summary": "This segment reviews autoregressive language modeling: at each step the model scores the vocabulary, applies softmax to obtain the next-token distribution, chooses a token, and feeds that prediction back in recursively until the sequence ends [ts=528s]. It then connects task type to architecture, describing encoder-decoder systems as the usual choice for less open-ended tasks like machine translation and decoder-only autoregressive models as the common choice for more open-ended generation, while emphasizing that this is a practical convention rather than a hard constraint [ts=577s] [ts=638s]. The lecture revisits maximum-likelihood training as next-token prediction under teacher forcing, where gold previous tokens are provided during training [ts=672s]. It distinguishes this from generation-time student forcing, where the model must condition on its own earlier outputs, and clarifies that “autoregressive” refers to generating left-to-right by chaining over previously generated tokens [ts=729s] [ts=742s].",
+      "key_points": [
+        {
+          "text": "Autoregressive generation predicts one token at a time from a softmax next-token distribution and feeds predictions back into the model.",
+          "timestamp_s": 528,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Encoder-decoder models are commonly preferred for less open-ended tasks such as machine translation, while decoder-only models are common for more open-ended generation.",
+          "timestamp_s": 577,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Teacher forcing trains by maximizing the probability of the next token given gold previous tokens.",
+          "timestamp_s": 672,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Student forcing uses the model's own generated text as context at generation time.",
+          "timestamp_s": 858,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Autoregressive means generating left to right by conditioning on tokens just generated via the chain rule.",
+          "timestamp_s": 742,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 516,
+        "end_s": 904
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 6,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "course_id": "cs224n",
+      "name": "Greedy and beam decoding under repetition pressure",
+      "description": "Explains why maximizing model probability works for constrained tasks but degenerates for open-ended generation.",
+      "summary": "The segment defines decoding as the function that chooses a token from the model's next-token distribution [ts=915s]. It reviews greedy decoding and beam search as maximum-probability methods aimed at finding the most likely string, which is sensible for low-entropy tasks such as translation and summarization [ts=934s] [ts=968s]. The lecture then shows why this objective fails for open-ended generation: the most likely continuations become repetitive, and plots reveal a self-amplification effect in which repeated phrases receive increasingly favorable probability or lower negative log-likelihood as repetition continues [ts=1008s] [ts=1039s]. This degeneration appears in both LSTMs and transformers and does not disappear just by scaling to larger models [ts=1070s]. N-gram blocking is introduced as a simple heuristic, but it can wrongly ban legitimate reuse such as names appearing multiple times [ts=1098s]. The broader takeaway is that maximum-probability decoding does not match human uncertainty patterns, since human text shows fluctuating confidence while beam-decoded text is unrealistically overconfident [ts=1232s].",
+      "key_points": [
+        {
+          "text": "Greedy decoding chooses the highest-probability token at each time step, while beam search keeps multiple candidate continuations.",
+          "timestamp_s": 934,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Maximum-probability decoding is suitable for low-entropy tasks but encounters problems on open-ended generation.",
+          "timestamp_s": 968,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Repeated phrases can become more probable as they repeat, revealing a self-amplification repetition effect.",
+          "timestamp_s": 1039,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "N-gram blocking prevents exact repeated n-grams but can incorrectly ban valid reuse such as repeated names.",
+          "timestamp_s": 1098,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Human token probabilities fluctuate more than beam-decoded text, suggesting argmax-style decoding mismatches human generation patterns.",
+          "timestamp_s": 1232,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 904,
+        "end_s": 1344
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg4",
+      "course_id": "cs224n",
+      "name": "Sampling-based decoding, truncation, temperature, and reranking",
+      "description": "Builds the main stochastic decoding toolbox for open-ended generation and explains how reranking can improve sampled outputs.",
+      "summary": "This segment argues that if maximum-probability decoding is wrong for open-ended text, decoding should introduce randomness by sampling from the next-token distribution [ts=1356s]. Vanilla sampling increases diversity but suffers from heavy-tailed vocabularies, where many individually low-probability bad tokens still have substantial aggregate mass [ts=1386s]. To cut the tail, top-k sampling restricts choices to the k highest-probability tokens, but the lecture shows fixed k can either remove valid options or leave implausible ones, creating recall and precision problems depending on the shape of the distribution [ts=1456s] [ts=1671s]. Nucleus or top-p sampling addresses this by sampling from the smallest candidate set whose cumulative probability exceeds p, giving an adaptive effective k [ts=1741s] [ts=1769s]. The segment also sketches typical sampling and epsilon sampling as other truncation families [ts=1875s]. Temperature scaling is presented as an orthogonal control: larger temperature flattens the distribution and increases diversity, while smaller temperature sharpens it and approaches greedy decoding [ts=2009s]. Finally, reranking is introduced: sample multiple candidates, score them with perplexity or richer objectives such as style, coherence, entailment, factuality, and consistency, and choose the best candidate; multiple rerankers can be composed [ts=2150s] [ts=2218s].",
+      "key_points": [
+        {
+          "text": "Sampling introduces randomness so the model no longer always follows the single highest-probability continuation.",
+          "timestamp_s": 1356,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Heavy-tailed token distributions make vanilla sampling risky because bad low-probability words have substantial aggregate probability mass.",
+          "timestamp_s": 1386,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Top-k sampling truncates the vocabulary to the k highest-probability tokens.",
+          "timestamp_s": 1456,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Top-p (nucleus) sampling uses cumulative probability mass, giving an adaptive effective k across different distributions.",
+          "timestamp_s": 1741,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Typical sampling and epsilon sampling are alternative truncation strategies based on entropy or minimum probability thresholds.",
+          "timestamp_s": 1875,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Temperature rescales logits: tau greater than 1 flattens the distribution, tau less than 1 sharpens it, and tau near 0 approximates greedy decoding.",
+          "timestamp_s": 2009,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Reranking samples multiple candidates and selects the one with the best quality score, potentially combining style and factuality objectives.",
+          "timestamp_s": 2150,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 1344,
+        "end_s": 2419
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 18,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "course_id": "cs224n",
+      "name": "Exposure bias, alternative training schemes, and RLHF context",
+      "description": "Connects training-time mismatch to generation errors and surveys methods that go beyond plain MLE.",
+      "summary": "The lecture revisits repetition from the training side and argues that maximum-likelihood language models can assign high probability to bad degenerate strings [ts=2473s]. The core diagnosis is exposure bias: under teacher forcing the model trains on gold prefixes, but at generation time it must condition on its own imperfect outputs, creating a harmful train-test mismatch [ts=2510s] [ts=2541s]. Scheduled sampling narrows this gap by mixing model-generated and gold tokens with a probability that increases through training, though the objective can be unstable [ts=2560s]. DAgger similarly augments training data with model-generated sequences so the model learns on states it will actually encounter [ts=2603s]. The lecture also presents retrieval-augmented generation, where the model begins from a retrieved prototype and edits it by insertion, deletion, or swapping, reducing exposure bias because generation no longer starts from scratch left-to-right [ts=2655s]. Reinforcement learning is then framed as an MDP over states, actions, policies, and rewards, with rewards derived from automatic metrics or human preference [ts=2693s] [ts=2827s]. The lecture warns that optimizing BLEU or ROUGE can game the metric rather than improve true quality [ts=2744s]. It finishes with the modern pipeline behind ChatGPT-style systems: large-scale pretraining, instruction tuning, and then RLHF, with RLHF viewed as difficult from scratch but effective on top of a strong pretrained model [ts=3110s] [ts=3130s].",
+      "key_points": [
+        {
+          "text": "MLE-trained language models can place high probability on degenerate repetitive strings.",
+          "timestamp_s": 2473,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Exposure bias is the mismatch between training on gold prefixes and generating from model-produced prefixes at test time.",
+          "timestamp_s": 2510,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Scheduled sampling mixes generated and gold tokens during training, gradually increasing the amount of model-generated context.",
+          "timestamp_s": 2560,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "DAgger reduces train-test mismatch by adding model-generated sequences into the training distribution.",
+          "timestamp_s": 2603,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Retrieval-augmented generation starts from a retrieved prototype and edits it, reducing exposure bias.",
+          "timestamp_s": 2655,
+          "evidence_type": "example"
+        },
+        {
+          "text": "RL for NLG treats next-token selection as actions with rewards from metrics or human preference, but optimizing proxy rewards can game the objective.",
+          "timestamp_s": 2693,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A modern ChatGPT-style pipeline is pretraining, then instruction tuning, then RLHF.",
+          "timestamp_s": 3110,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 2419,
+        "end_s": 3305
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg6",
+      "course_id": "cs224n",
+      "name": "Automatic evaluation metrics for NLG",
+      "description": "Introduces lexical-overlap and embedding-based automatic metrics, along with their main strengths and failure modes.",
+      "summary": "The segment begins the evaluation portion by separating methods into content-overlap metrics, model-based metrics, and human evaluations [ts=3310s]. It explains that lexical-overlap metrics such as BLEU and ROUGE are cheap, fast, and widely used, especially in machine translation and summarization [ts=3323s]. Their weakness is that they operate on word overlap: they can miss semantically equivalent paraphrases and can also reward outputs with high lexical overlap but wrong meaning, yielding both false negatives and false positives [ts=3349s] [ts=3460s]. The lecture emphasizes that these metrics degrade as tasks become more open-ended, from summarization to dialogue to story generation [ts=3387s]. It then transitions to model-based metrics that compare texts through learned embeddings rather than raw n-grams [ts=3515s]. Examples include vector similarity, word mover's distance using optimal transport, BERTScore using contextual embeddings and alignment, sentence-embedding similarity, and BLEURT as a BERT-based regression model for text quality relative to a reference [ts=3582s] [ts=3627s] [ts=3678s].",
+      "key_points": [
+        {
+          "text": "Automatic evaluation splits into content-overlap metrics, model-based metrics, and human evaluations.",
+          "timestamp_s": 3310,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "BLEU and ROUGE are cheap and fast but rely on lexical overlap with a reference.",
+          "timestamp_s": 3323,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Lexical-overlap metrics suffer both false negatives for paraphrases and false positives for wrong answers with overlapping words.",
+          "timestamp_s": 3459,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Content-overlap metrics become progressively worse as NLG tasks become more open-ended.",
+          "timestamp_s": 3387,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Model-based metrics use learned embeddings to measure semantic similarity rather than raw n-gram overlap.",
+          "timestamp_s": 3515,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Word mover's distance aligns source and target embeddings with optimal transport.",
+          "timestamp_s": 3582,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "BERTScore and BLEURT are embedding-based metrics that use contextual alignment or BERT regression to score generated text.",
+          "timestamp_s": 3627,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 3305,
+        "end_s": 3708
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg7",
+      "course_id": "cs224n",
+      "name": "Evaluating open-ended generation and the role of human judgment",
+      "description": "Covers MAUVE, metric-to-human correlation, and the practical limits of human evaluation.",
+      "summary": "This segment asks how to evaluate genuinely open-ended generation, where strict semantic similarity to one reference can be misleading [ts=3718s]. It introduces MAUVE as a distributional metric that computes information divergence in a quantized embedding space between generated text and human-written reference text, motivated by the need to compare batches of outputs rather than exact sentence matches [ts=3738s] [ts=3777s]. The lecture argues MAUVE is more applicable to open-ended settings because it captures a precision-recall view over the target distribution rather than direct reference overlap [ts=3914s]. It then steps back to ask how to evaluate evaluation metrics themselves, proposing correlation with human judgment as the gold criterion and using weak BLEU-human correlation as evidence that BLEU is not a very good general metric [ts=4048s]. Human evaluation is presented as the gold standard for model assessment and for developing automatic metrics, with annotators asked to judge qualities like fluency, coherence, factuality, style, and common sense [ts=4115s]. But human studies are slow, expensive, inconsistent, difficult to calibrate across papers, and fundamentally precision-only rather than recall-aware [ts=4153s] [ts=4226s]. The segment closes by mentioning hybrid approaches that learn metrics from human judgments, divide labor between humans and models, or evaluate interactive co-authoring experience [ts=4227s].",
+      "key_points": [
+        {
+          "text": "For open-ended generation, evaluating exact semantic similarity to a single reference can be the wrong objective.",
+          "timestamp_s": 3718,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "MAUVE measures information divergence between generated and reference text distributions in a quantized embedding space.",
+          "timestamp_s": 3738,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "MAUVE is motivated by open-ended settings where outputs can be high quality without closely matching a reference story.",
+          "timestamp_s": 3914,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A good automatic metric should correlate strongly with human judgment; weak BLEU-human correlation is evidence against BLEU as a general metric.",
+          "timestamp_s": 4048,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Human evaluation typically scores fluency, coherence, factuality, style, and common sense.",
+          "timestamp_s": 4115,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Human evaluation is slow, expensive, inconsistent, not well calibrated across studies, and measures precision rather than recall.",
+          "timestamp_s": 4153,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Hybrid evaluation can learn from human judgments or combine human precision assessment with model-based recall assessment.",
+          "timestamp_s": 4227,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 3708,
+        "end_s": 4326
+      },
+      "difficulty": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg8",
+      "course_id": "cs224n",
+      "name": "Ethical risks, deployment safeguards, and open research problems",
+      "description": "Surveys safety, bias, truthfulness, and adversarial robustness concerns for deployed NLG systems.",
+      "summary": "The ethics section argues that as language models improve, alignment with human values becomes more urgent [ts=4332s]. It stresses that models should avoid harmful and toxic content and should be unbiased and fair across demographic groups [ts=4341s]. The lecture uses ChatGPT prompt refusal as a positive example but notes that jailbreak prompting can bypass safeguards and elicit harmful output [ts=4357s] [ts=4371s]. It also warns that large language models may be convincing while factually wrong, so truthfulness is a separate reliability problem from fluency [ts=4401s]. Another risk comes from pretraining data: internet corpora contain harmful stereotypes and biases that models can repeat when prompted, while fully cleaning web-scale data is extremely costly [ts=4457s] [ts=4480s]. Finally, the lecture discusses adversarial triggers and toxic degeneration, concluding that models should not be deployed without safeguards, trigger-word robustness checks, and careful thought about user interaction [ts=4496s] [ts=4571s]. The closing outlook says that despite ChatGPT's strengths, major limitations remain in creativity, deep reasoning, and especially reliable evaluation, leaving NLG as an active and exciting research area [ts=4612s] [ts=4638s].",
+      "key_points": [
+        {
+          "text": "NLG systems should align with human values by avoiding harmful content, toxicity, and unfair bias across demographic groups.",
+          "timestamp_s": 4332,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Jailbreak prompts can bypass safety behavior even when a model usually refuses toxic requests.",
+          "timestamp_s": 4357,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Large language models can be confidently untruthful, producing factual errors in persuasive language.",
+          "timestamp_s": 4401,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Internet-scale pretraining data can encode harmful stereotypes, and full data cleaning is labor-intensive and nearly infeasible.",
+          "timestamp_s": 4457,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Universal adversarial triggers and even innocuous prompts can elicit toxic content from pretrained models.",
+          "timestamp_s": 4496,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Before deploying or publishing NLG systems, check that outputs are not harmful and that the model is robust to trigger words and adversarial prompts.",
+          "timestamp_s": 4571,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10](https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10)",
+        "start_s": 4326,
+        "end_s": 4695
+      },
+      "difficulty": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 8,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture14-nlg::kp1",
+      "name": "Natural language generation",
+      "description": "The family of NLP tasks whose output is natural language intended to be fluent, coherent, and useful for people.",
+      "track_tags": [
+        "generation",
+        "nlp_foundations"
+      ],
+      "domain_tags": [
+        "nlp",
+        "nlg"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.25,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It defines the problem family that organizes every later discussion of models, decoding, training, evaluation, and risks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp2",
+      "name": "Open-endedness and entropy in NLG tasks",
+      "description": "A way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness.",
+      "track_tags": [
+        "generation",
+        "task_formulation"
+      ],
+      "domain_tags": [
+        "nlg",
+        "information_theory"
+      ],
+      "career_path_tags": [
+        "nlp_research",
+        "applied_science"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture repeatedly uses task openness to motivate different decoding, architecture, and evaluation choices.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp3",
+      "name": "Autoregressive language modeling",
+      "description": "Left-to-right generation where each next token is predicted from previously generated context and fed back into the model.",
+      "track_tags": [
+        "language_models",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "nlg",
+        "language_modeling"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the core generation mechanism underlying both the decoding and training discussions in the rest of the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp4",
+      "name": "Teacher forcing and student forcing",
+      "description": "The contrast between training with gold previous tokens and generating with the model's own previous outputs.",
+      "track_tags": [
+        "training",
+        "language_models"
+      ],
+      "domain_tags": [
+        "nlg",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This distinction is necessary for understanding exposure bias and why generation-time behavior diverges from training-time assumptions.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp5",
+      "name": "Degeneration under maximum-probability decoding",
+      "description": "The failure mode where greedy or beam-style search produces repetitive, overconfident text in open-ended generation.",
+      "track_tags": [
+        "decoding",
+        "generation_quality"
+      ],
+      "domain_tags": [
+        "nlg",
+        "decoding"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It motivates why open-ended generation needs different decoding strategies than low-entropy tasks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp6",
+      "name": "Sampling-based decoding controls",
+      "description": "The family of stochastic decoding methods and hyperparameters such as top-k, top-p, epsilon, typical sampling, and temperature.",
+      "track_tags": [
+        "decoding",
+        "inference"
+      ],
+      "domain_tags": [
+        "nlg",
+        "decoding"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "applied_science"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "These methods are the main practical answer the lecture gives for generating diverse yet plausible open-ended text.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp7",
+      "name": "Reranking sampled candidates",
+      "description": "Selecting among multiple sampled generations using auxiliary quality scores such as style, coherence, or factuality.",
+      "track_tags": [
+        "decoding",
+        "quality_control"
+      ],
+      "domain_tags": [
+        "nlg",
+        "ranking"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "product_ml"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is a practical refinement layer that improves generation quality without retraining the base language model.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp8",
+      "name": "Exposure bias",
+      "description": "The train-test mismatch caused by training on gold prefixes but generating on self-produced prefixes.",
+      "track_tags": [
+        "training",
+        "distribution_shift"
+      ],
+      "domain_tags": [
+        "nlg",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the lecture's main training-side explanation for coherence loss and repetition in generated text.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp9",
+      "name": "Training alternatives to reduce exposure bias",
+      "description": "Methods such as scheduled sampling, DAgger, and retrieval-augmented generation that make training conditions closer to generation conditions.",
+      "track_tags": [
+        "training",
+        "sequence_learning"
+      ],
+      "domain_tags": [
+        "nlg",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.75,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "These techniques are the lecture's concrete responses to exposure bias and train-test mismatch.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp10",
+      "name": "Reinforcement learning and RLHF for NLG",
+      "description": "Training text generators with reward functions, including human-preference reward models layered on top of pretrained systems.",
+      "track_tags": [
+        "training",
+        "alignment"
+      ],
+      "domain_tags": [
+        "nlg",
+        "reinforcement_learning",
+        "alignment"
+      ],
+      "career_path_tags": [
+        "nlp_research",
+        "alignment_research"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "medium",
+      "importance_rationale": "It integrates generation, reward design, and alignment, and connects the lecture to modern ChatGPT-style pipelines.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp11",
+      "name": "Automatic evaluation metrics for NLG",
+      "description": "The landscape of reference-based lexical and embedding-based automatic metrics used to score generated text.",
+      "track_tags": [
+        "evaluation",
+        "generation_quality"
+      ],
+      "domain_tags": [
+        "nlg",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Evaluation quality determines whether model improvements are real, so understanding metric failure modes is central to the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp12",
+      "name": "Human-centered evaluation and metric alignment",
+      "description": "Using human judgments as the gold standard and measuring whether automatic metrics agree with those judgments.",
+      "track_tags": [
+        "evaluation",
+        "human_in_the_loop"
+      ],
+      "domain_tags": [
+        "nlg",
+        "evaluation",
+        "ux"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "product_research"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture treats correlation with human judgment as the gold criterion for judging evaluation methods.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture14-nlg::kp13",
+      "name": "Ethical risks and deployment safeguards for NLG",
+      "description": "The safety, bias, truthfulness, and adversarial robustness considerations that should gate deployment of text generators.",
+      "track_tags": [
+        "ethics",
+        "deployment"
+      ],
+      "domain_tags": [
+        "nlg",
+        "ai_safety",
+        "fairness"
+      ],
+      "career_path_tags": [
+        "alignment_research",
+        "product_ml"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture ends by stressing that useful NLG systems must also be non-harmful, robust, and responsibly deployed.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture14-nlg::seg1",
+      "local_kp_id": "local::lecture14-nlg::kp1",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment explicitly defines NLG and anchors it with multiple examples including MT, dialogue, summarization, and ChatGPT [ts=155s] [ts=214s] [ts=280s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg1",
+      "local_kp_id": "local::lecture14-nlg::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecture develops the open-endedness spectrum and formalizes it with entropy as the main organizing axis for NLG tasks [ts=348s] [ts=461s] [ts=493s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg2",
+      "local_kp_id": "local::lecture14-nlg::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Autoregressive next-token generation is explained step by step, including score computation, softmax, token selection, and feedback into the model [ts=528s] [ts=742s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg2",
+      "local_kp_id": "local::lecture14-nlg::kp4",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Teacher forcing and student forcing are contrasted directly, setting up the later exposure-bias discussion [ts=672s] [ts=858s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg2",
+      "local_kp_id": "local::lecture14-nlg::kp2",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Architecture preference is motivated by whether a task is more or less open-ended [ts=577s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "local_kp_id": "local::lecture14-nlg::kp5",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment centers on how greedy and beam decoding cause repetition and overconfident degeneration in open-ended generation [ts=968s] [ts=1039s] [ts=1232s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "local_kp_id": "local::lecture14-nlg::kp3",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Decoding is framed as selecting from the autoregressive model's next-token distribution [ts=915s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg4",
+      "local_kp_id": "local::lecture14-nlg::kp6",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Sampling, top-k, top-p, epsilon, typical sampling, and temperature are the main focus of the segment [ts=1356s] [ts=1456s] [ts=1741s] [ts=1875s] [ts=2009s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg4",
+      "local_kp_id": "local::lecture14-nlg::kp7",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The latter part of the segment explains generating multiple samples and selecting the best one with auxiliary scoring functions [ts=2150s] [ts=2218s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg4",
+      "local_kp_id": "local::lecture14-nlg::kp5",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Sampling is motivated as a response to the earlier failure of maximum-probability decoding and repetition [ts=1351s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "local_kp_id": "local::lecture14-nlg::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Exposure bias is explicitly defined as the key training-time mismatch behind bad generation behavior [ts=2510s] [ts=2541s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "local_kp_id": "local::lecture14-nlg::kp9",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Scheduled sampling, DAgger, and retrieval-plus-generation are introduced as remedies that make training and test conditions closer [ts=2560s] [ts=2603s] [ts=2655s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "local_kp_id": "local::lecture14-nlg::kp10",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "RL and RLHF are presented as reward-based training extensions, including the modern pretraining -> instruction tuning -> RLHF pipeline [ts=2693s] [ts=2827s] [ts=3110s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg6",
+      "local_kp_id": "local::lecture14-nlg::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment surveys BLEU, ROUGE, embedding similarity, word mover's distance, BERTScore, and BLEURT as automatic evaluation metrics [ts=3310s] [ts=3582s] [ts=3627s] [ts=3678s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg7",
+      "local_kp_id": "local::lecture14-nlg::kp11",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "MAUVE is introduced as another automatic metric, now specialized to open-ended generation [ts=3738s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg7",
+      "local_kp_id": "local::lecture14-nlg::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment makes human judgment the gold standard for evaluating metrics and models, then details human-study criteria and limitations [ts=4048s] [ts=4115s] [ts=4153s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg8",
+      "local_kp_id": "local::lecture14-nlg::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The ethics section covers toxicity, bias, jailbreaks, factual errors, adversarial triggers, and explicit deployment checks [ts=4332s] [ts=4401s] [ts=4496s] [ts=4571s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg8",
+      "local_kp_id": "local::lecture14-nlg::kp10",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Alignment with human values is invoked again in the ethics discussion as a deployment objective for modern LLMs [ts=4332s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture14-nlg::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This is the conceptual framing section that defines NLG and introduces the task taxonomy the rest of the lecture relies on [ts=155s] [ts=493s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Core mechanics of autoregressive modeling and teacher forcing are introduced here and reused in both decoding and training sections [ts=528s] [ts=672s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This segment motivates the entire decoding toolbox by diagnosing degeneration and repetition under greedy and beam search [ts=968s] [ts=1039s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The segment contains the densest practical decoding content, including top-k, top-p, temperature, and reranking [ts=1456s] [ts=1741s] [ts=2009s] [ts=2150s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Exposure bias and its remedies are central training concepts, and the section also links them to RLHF-style modern systems [ts=2510s] [ts=2560s] [ts=3110s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "These automatic metrics are likely to be tested or reused in projects because the lecture emphasizes their strengths and failure modes [ts=3310s] [ts=3459s] [ts=3582s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The segment gives the lecture's most explicit guidance on what makes an evaluation method trustworthy and why human judgment remains the gold standard [ts=4048s] [ts=4115s] [ts=4153s]."
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This section is important for deployment judgment and responsible use, focusing on toxicity, bias, truthfulness, and adversarial robustness [ts=4332s] [ts=4401s] [ts=4571s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture14-nlg"
+}

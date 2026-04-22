@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_14::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for concept questions on implicit density modeling and the role of the latent variable in a basic GAN setup.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement best describes an implicit density model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It may not output a numeric p(x), but it can still generate samples from the learned distribution",
+        "It always provides an exact closed-form likelihood for every sample",
+        "It can only be used for conditional generation and not unconditional generation",
+        "It requires labels y at training time in order to sample"
+      ],
+      "answer_index": 0,
+      "explanation": "Implicit density models focus on sampling rather than directly returning a tractable density value. They can still learn a useful data distribution even when p(x) is not explicitly available.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_implicit_density_modeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cannot output a density",
+          "can sample from distribution"
+        ],
+        "timestamps": [
+          "00:03:12",
+          "00:03:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the basic GAN setup, what is the role of the latent variable z?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is sampled from a simple prior and mapped by the generator into candidate data samples",
+        "It stores the discriminator's binary real-or-fake label for each image",
+        "It is the exact log-likelihood of the training example under the data distribution",
+        "It is the gradient of the discriminator with respect to the model weights"
+      ],
+      "answer_index": 0,
+      "explanation": "GANs begin from an easy-to-sample prior such as a Gaussian. The generator transforms z into outputs whose distribution should become similar to the real data distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sampled from a simple prior",
+          "generator distribution pG match pdata"
+        ],
+        "timestamps": [
+          "00:05:20",
+          "00:06:21"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "global_kp_id": "kp_implicit_density_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which statement best describes an implicit density model\" is a direct reinforcement check and should land on the easier side."
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"In the basic GAN setup, what is the role of the latent variable z\" is a direct reinforcement check and should land on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_14_seg1_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which statement best describes an implicit density model\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture_14_seg1_q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In the basic GAN setup, what is the role of the latent variable z\" works best as an early concept check."
+    }
+  ]
+}

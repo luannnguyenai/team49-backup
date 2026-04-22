@@ -1,0 +1,149 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_15_3d_vision",
+    "lecture_title": "Lecture 15: 3D Vision",
+    "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_15_3d_vision::seg5",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Early 3D learning methods: render-to-2D, voxels, GANs, and octrees",
+    "description": "Covers the first practical deep models for 3D recognition and generation, beginning with multi-view CNNs and progressing to voxel and octree methods.",
+    "summary": "The first deep-learning workaround for 3D recognition was not truly 3D-native: render the shape from multiple viewpoints, run a 2D CNN on each image, and fuse the features with view pooling, thereby reusing strong ImageNet-pretrained image models [ts=2330s][ts=2354s][ts=2362s][ts=2391s]. Wu notes that this strategy worked well for classification but depended on projection quality and became brittle for noisy or incomplete geometry, motivating more native 3D methods [ts=2445s][ts=2460s][ts=2471s]. Voxel CNNs and 3D GANs then treated shape generation and classification as volumetric learning problems, benefiting from simple 3D convolution and occupancy-style losses but suffering from wasted computation in empty space and coarse resolution [ts=2508s][ts=2550s][ts=2582s][ts=2648s]. Octrees improved efficiency by recursively allocating fine cells near surfaces and coarse cells elsewhere, letting models reach higher effective resolution within the same memory budget [ts=2650s][ts=2710s][ts=2726s].",
+    "key_points": [
+      {
+        "text": "Multi-view CNNs solve 3D recognition by rendering many views, encoding each with a 2D CNN, and pooling across views.",
+        "timestamp_s": 2330,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Multi-view methods leverage large 2D pretrained models but require reliable projection from 3D to 2D.",
+        "timestamp_s": 2391,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Voxel-based deep models apply 3D convolution and can support both generation and classification.",
+        "timestamp_s": 2508,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "3D GANs extend adversarial learning from pixels to voxels and can also support controllable 3D-to-2D generation.",
+        "timestamp_s": 2582,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Octrees recursively partition space so high resolution is used mainly near object surfaces.",
+        "timestamp_s": 2650,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+      "start_s": 2310,
+      "end_s": 2736
+    },
+    "difficulty": 0.57,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "transcript_slice": "00:38:33\nis the computer vision people who work on pixels.\n\n00:38:36\nSo naturally, they say, why don't we start with voxels?\n\n00:38:42\nAnd this is the very first idea that people tried in applying\n\n00:38:46\nAnd now, in some sense, it's coming back.\n\n00:38:50\nis, now, let's don't even worry about voxels.\n\n00:38:53\nIt's a mesh.\n\n00:38:55\nAnd I want you to learn to recognize what an object is.\n\n00:39:00\nIt's a chair.\n\n00:39:03\nHow can we process that?\n\n00:39:07\nwhat if I just render it into images because I have very good\n\n00:39:13\nI just take the 3D objects.\n\n00:39:16\nI can render all these images, the objects\n\n00:39:19\nAnd then, now this becomes a 2D problem.\n\n00:39:24\non each of these views, and I have some ways to fuse them.\n\n00:39:29\nAnd then I just do image classification.\n\n00:39:34\nWell, the only difference being, now you have multiple views.\n\n00:39:40\npeople applied to 3D vision.\n\n00:39:43\nAnd why do you want to use 2D networks?\n\n00:39:47\nAnd they're very good.\n\n00:39:51\nSo any model that are pretrained on ImageNet,\n\n00:39:54\nSo the easiest way to solve this 3D recognition problem is\n\n00:39:59\nLater, people move away from it because people are like, oh,\n\n00:40:04\nWe should try to do 3D native--\n\n00:40:07\nAnd people also come up with ideas about connecting 3D and 2D\n\n00:40:11\nBut now I feel like this trend is coming back\n\n00:40:15\nare getting so great.\n\n00:40:18\nor whatever, was released yesterday?\n\n00:40:21\nSo if they're so great, maybe we should just rely a bit more\n\n00:40:26\nbecause they are just trained on a thousand times or tens\n\n00:40:31\nmaybe a million times more data than 3D data.\n\n00:40:36\nBut coming back, now this is the very first method.\n\n00:40:43\njust by converting them into 2D.\n\n00:40:48\nThey have shapes, and you want to classify them\n\n00:40:51\nAnd they have very good performance.\n\n00:40:58\npretrained models.\n\n00:41:02\nBut sometimes, the input can be very noisy.\n\n00:41:07\nThe point clouds, or whatever, they're just not very good.\n\n00:41:11\nSo is it possible for us to come up with more 3D native methods?\n\n00:41:20\napply deep learning directly on 3D data.\n\n00:41:24\nis just to apply your pixel convolution neural network\n\n00:41:30\nSo this is actually a Deep Belief Network,\n\n00:41:34\nBut still, you have some 3D convolutional filters.\n\n00:41:41\nAnd you can see that in their generative model,\n\n00:41:48\nat relatively lower resolution.\n\n00:41:52\nSo back then, this was considered pretty impressive.\n\n00:41:58\nconditional semantic labels at bats and a desk and tables.\n\n00:42:04\nAnd because this is a generative network,\n\n00:42:08\nSo you can do image shape classification as well.\n\n00:42:16\nis what if we just apply it the GANs,\n\n00:42:20\nYou can use GANs to generate 2D pixels.\n\n00:42:25\nSo we just did this very simple thing,\n\n00:42:30\na pretty good generation of 3D objects.\n\n00:42:36\nYeah, OK.\n\n00:42:44\nThat is, you can use GANs to not only generate 3D shapes,\n\n00:42:50\nYou can project them into 2D surfaces so that you can get\n\n00:42:57\nAnd then you can use a cyclegan to convert this depth\n\n00:43:02\nNow you can have adversarial losses not only on 3D shapes,\n\n00:43:05\nYou want 3D shapes to look realistic so that they can be\n\n00:43:12\nYou also want the 2D images to look realistic so that\n\n00:43:18\nSo then you can do 3D generation,\n\n00:43:22\nAnd because you have different latent vectors for the shapes,\n\n00:43:29\nyou also have some level of controllability.\n\n00:43:32\nYou can change the textures.\n\n00:43:36\nAnd you can transfer the texture of one car\n\n00:43:42\nThis is 2018.\n\n00:43:47\nlike convolutional neural networks,\n\n00:43:51\npixels.\n\n00:43:54\nBecause one thing that people have complained about voxels\n\n00:43:59\nYou have to presample them.\n\n00:44:01\nbecause a lot of sample points are just like empty space.\n\n00:44:08\nSo naturally, people thought, OK,\n\n00:44:10\nSo there are improvements to voxels, like octave trees.\n\n00:44:16\nhave explicit representations.\n\n00:44:19\nan implicit representation.\n\n00:44:24\nBut then, instead of representing\n\n00:44:31\nassuming the voxels or--\n\n00:44:37\nI just divide the divide space into different regions.\n\n00:44:41\nAnd when I feel like I'm really close to the surface\n\n00:44:47\nAnd when I'm in this empty space or inside objects,\n\n00:44:52\nI can have huge voxels in some sense.\n\n00:44:57\nand you can have different sizes of voxels at different space.\n\n00:45:04\nSo you can see that compared with just directly using voxels,\n\n00:45:10\nPeople say, OK, octave trees are great because it allows\n\n00:45:14\nThat's how much you can fit into GPU memory.\n\n00:45:20\nBut with octave trees, you can do 256.\n\n00:45:26\nYou can generate objects also.\n\n00:45:31\nbecause you're more efficient in representing the space.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg5",
+      "global_kp_id": "kp_multi_view_and_voxel_based_3d_deep_learning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg5",
+      "global_kp_id": "kp_3d_datasets_and_ai_geometry_task_space",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_multi_view_and_voxel_based_3d_deep_learning",
+      "name": "Multi-view and voxel-based 3D deep learning",
+      "description": "Early neural approaches that either render 3D shapes into multiple images for 2D CNNs or directly process voxel grids with 3D convolution.",
+      "track_tags": [
+        "3d_vision",
+        "deep_learning_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "applied_ml",
+        "cv_research",
+        "graphics_ml"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because multi-view and voxel-based 3D deep learning clarifies early neural approaches that either render 3D shapes into multiple images for 2D CNNs or directly process voxel grids with 3D convolution, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_3d_datasets_and_ai_geometry_task_space",
+      "name": "3D datasets and AI+geometry task space",
+      "description": "The data and problem formulations that enabled 3D learning, including large object datasets, scanned scene data, and generative/discriminative/multimodal tasks.",
+      "track_tags": [
+        "3d_vision",
+        "datasets",
+        "task_formulation"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "ml_research",
+        "robotics"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because 3D datasets and AI+geometry task space clarifies the data and problem formulations that enabled 3D learning, including large object datasets, scanned scene data, and generative/discriminative/multimodal tasks, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.42,
+    0.72
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture15-3d-vision_transcript.txt"
+  }
+}

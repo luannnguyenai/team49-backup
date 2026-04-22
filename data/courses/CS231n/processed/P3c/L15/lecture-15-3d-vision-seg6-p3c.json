@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_15_3d_vision::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about PointNet invariances, point-set losses, AtlasNet, and deep implicit decoders. The critical reasoning is all stated verbally.",
+  "question_bank": [
+    {
+      "item_id": "lecture-15-3d-vision-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does PointNet aggregate point features with a symmetric function such as max or sum?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To guarantee permutation invariance over an unordered point set",
+        "To convert point clouds into regular voxel grids",
+        "To enforce one-to-one matching across point sets",
+        "To estimate surface normals without supervision"
+      ],
+      "answer_index": 0,
+      "explanation": "Because point sets have no canonical ordering, the network must produce the same result no matter how the input points are permuted.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pointnet_and_point_set_invariances",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "points there are unordered",
+          "use a symmetric function"
+        ],
+        "timestamps": [
+          "00:47:05",
+          "00:48:16"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which distance compares two point clouds using a one-to-one matching between points?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Cross-entropy loss",
+        "Chamfer distance",
+        "Earth Mover distance",
+        "Cosine similarity"
+      ],
+      "answer_index": 2,
+      "explanation": "Earth Mover distance pairs points across the two sets with a bipartite matching and minimizes the total transport cost.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pointnet_and_point_set_invariances",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "one-to-one paired",
+          "Earth Mover distance"
+        ],
+        "timestamps": [
+          "00:50:55",
+          "00:50:51"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does AtlasNet learn in order to generate smoother 3D surfaces?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A direct voxel occupancy tensor for the whole scene",
+        "A mapping from UV-like coordinates to 3D surface points",
+        "A graph of only mesh adjacency without geometry",
+        "A set of camera poses for multi-view rendering"
+      ],
+      "answer_index": 1,
+      "explanation": "AtlasNet uses a neural mapping from low-dimensional coordinates into 3D, so the output behaves like learned surface patches rather than isolated points.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_atlasnet_and_deep_implicit_shape_decoders",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "beautiful surfaces",
+          "integrate neural networks"
+        ],
+        "timestamps": [
+          "00:51:46",
+          "00:51:51"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-15-3d-vision-seg6-q1",
+      "global_kp_id": "kp_pointnet_and_point_set_invariances",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg6-q2",
+      "global_kp_id": "kp_pointnet_and_point_set_invariances",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg6-q3",
+      "global_kp_id": "kp_atlasnet_and_deep_implicit_shape_decoders",
+      "role": "primary"
+    }
+  ]
+}

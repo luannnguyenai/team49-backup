@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture06-dependency-parsing::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=KVKvde-_MYc",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "The transcript clearly covers evaluation, neural transition parsing, and graph-based parsing, so five grounded review questions are appropriate without cutting a clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does unlabeled attachment score evaluate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Whether each word was assigned the correct head, ignoring the dependency label",
+        "Whether each sentence has the correct number of words",
+        "Whether the parser predicts the right part of speech for each token",
+        "Whether the parser chooses the right root word length"
+      ],
+      "answer_index": 0,
+      "explanation": "UAS checks head attachment only. It does not require the relation label to be correct.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_uas_and_las_evaluation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "head is correct",
+          "unlabeled"
+        ],
+        "timestamps": [
+          "01:05:05",
+          "01:05:40"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does labeled attachment score differ from unlabeled attachment score?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It requires both the correct head and the correct dependency label",
+        "It ignores heads and checks only labels",
+        "It measures only runtime speed",
+        "It counts how many words appear in the treebank"
+      ],
+      "answer_index": 0,
+      "explanation": "LAS is stricter than UAS because it checks the syntactic label in addition to the head attachment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_uas_and_las_evaluation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "also want to label them",
+          "getting the labels right"
+        ],
+        "timestamps": [
+          "01:05:52",
+          "01:06:06"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why did neural methods help replace older symbolic transition-parser features?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because dense learned representations are less sparse and can generalize beyond exact seen feature combinations",
+        "Because neural methods remove the need for a parser state",
+        "Because neural models never need training data",
+        "Because symbolic features were too accurate"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture argues that symbolic indicator features were sparse, incomplete, and expensive, whereas dense embeddings offer more compact and generalizable inputs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_transition_based_parser",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sparse",
+          "dense and compact feature vector"
+        ],
+        "timestamps": [
+          "01:06:27",
+          "01:07:07"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is fed into the neural transition-based parser before the action classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Concatenated embeddings of selected words, POS tags, and dependency labels from the stack and buffer",
+        "Only the raw sentence string with no parser state",
+        "A full minimum spanning tree over all arcs",
+        "Only dependency labels, without word information"
+      ],
+      "answer_index": 0,
+      "explanation": "The neural parser represents the local state with embeddings from key stack and buffer items, plus associated POS and label information, then concatenates them into one input vector.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_transition_based_parser",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "stack and the buffer",
+          "concatenated"
+        ],
+        "timestamps": [
+          "01:10:00",
+          "01:11:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the basic idea of graph-based dependency parsing in the lecture?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Score possible head choices for each word and then select a well-formed tree, for example with an MST algorithm",
+        "Predict shift and arc actions greedily from a stack",
+        "Use only handcrafted phrase-structure rules",
+        "Choose the longest dependency for every word"
+      ],
+      "answer_index": 0,
+      "explanation": "Graph-based parsing scores candidate arcs and then uses a tree algorithm to choose a globally valid dependency tree.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_graph_based_dependency_parsing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "score each of those possibilities",
+          "minimum spanning tree"
+        ],
+        "timestamps": [
+          "01:17:00",
+          "01:18:08"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q1",
+      "global_kp_id": "kp_uas_and_las_evaluation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q2",
+      "global_kp_id": "kp_uas_and_las_evaluation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q3",
+      "global_kp_id": "kp_neural_transition_based_parser",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q4",
+      "global_kp_id": "kp_neural_transition_based_parser",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture06_dependency_parsing_seg6_q5",
+      "global_kp_id": "kp_graph_based_dependency_parsing",
+      "role": "primary"
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "unit_id": "local::lecture01-wordvecs::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "This unit supports conceptual reinforcement on why language matters for cognition and how modern neural NLP broadened from translation and answer engines to foundation models.",
+  "question_bank": [
+    {
+      "item_id": "lecture01-wordvecs-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is language described as more than just a tool for external communication?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can scaffold planning and higher-level thought, not only communication with others.",
+        "It eliminates the need for memory or perception in intelligent behavior.",
+        "It is useful only because it provides fixed formal meanings for every word.",
+        "It matters mainly because written language is older than spoken language."
+      ],
+      "answer_index": 0,
+      "explanation": "Language can support internal reasoning as well as social exchange. It helps people organize plans, explanations, and abstract thoughts that go beyond immediate perception.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_language_scaffolding_and_thought",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "higher level of thought",
+          "scaffolding"
+        ],
+        "timestamps": [
+          "00:13:40",
+          "00:14:22"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main idea behind calling modern systems “foundation models” rather than only “language models”?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The same large-scale modeling ideas can extend beyond text to modalities such as images, sound, and biological signals.",
+        "They are rule-based systems designed only for dictionary lookup and grammar checking.",
+        "They are small task-specific classifiers trained separately for each label set.",
+        "They avoid neural networks and rely on hand-built symbolic resources."
+      ],
+      "answer_index": 0,
+      "explanation": "Foundation models generalize the large-model paradigm across different kinds of data. The key idea is not only text generation, but broad representation and generation across modalities.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_modern_neural_nlp_and_foundation_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "across modalities",
+          "images, sound"
+        ],
+        "timestamps": [
+          "00:25:32",
+          "00:26:37"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture01-wordvecs-seg2-q1",
+      "global_kp_id": "kp_language_scaffolding_and_thought",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg2-q2",
+      "global_kp_id": "kp_modern_neural_nlp_and_foundation_models",
+      "role": "primary"
+    }
+  ]
+}

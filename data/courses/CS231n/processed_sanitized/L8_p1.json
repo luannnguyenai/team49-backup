@@ -1,0 +1,984 @@
+{
+  "lecture_title": "Lecture 8: Attention and Transformers",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "From RNNs to the sequence bottleneck",
+      "start_s": 0,
+      "end_s": 539
+    },
+    {
+      "section_index": 2,
+      "title": "Adding attention to encoder-decoder RNNs",
+      "start_s": 540,
+      "end_s": 1259
+    },
+    {
+      "section_index": 3,
+      "title": "Visualizing attention and extracting the general operator",
+      "start_s": 1260,
+      "end_s": 1919
+    },
+    {
+      "section_index": 4,
+      "title": "Scaled dot-product attention, batching, keys, values, and cross-attention",
+      "start_s": 1920,
+      "end_s": 2759
+    },
+    {
+      "section_index": 5,
+      "title": "Self-attention, positional information, masking, and multi-heads",
+      "start_s": 2760,
+      "end_s": 3449
+    },
+    {
+      "section_index": 6,
+      "title": "Transformer blocks, scalability, and applications to language and vision",
+      "start_s": 3450,
+      "end_s": 3984
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture_8::seg1",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "RNN sequence-to-sequence translation and the fixed-context bottleneck",
+      "description": "Introduces attention and transformers through the historical starting point of encoder-decoder RNNs for machine translation, then motivates why a single context vector becomes a bottleneck.",
+      "summary": "The lecture opens by positioning attention as a new primitive on sets of vectors and transformers as the dominant modern architecture across deep learning tasks [ts=78s][ts=93s]. It then rolls back historically to sequence-to-sequence translation with encoder-decoder RNNs: an encoder processes an input sentence token by token, and the final hidden state serves as a context vector summarizing the input for a decoder that generates the output sequence one word at a time [ts=239s][ts=317s][ts=382s]. The key limitation is that all communication from input to output flows through one fixed-length vector c, so longer sequences create an information bottleneck that becomes increasingly implausible for paragraphs, books, or larger corpora [ts=435s][ts=458s][ts=484s].",
+      "key_points": [
+        {
+          "text": "Attention is introduced as a neural-network primitive that operates on sets of vectors.",
+          "timestamp_s": 78,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Transformers are introduced as architectures with self-attention at their core and described as the default large-model architecture today.",
+          "timestamp_s": 88,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Encoder recurrence: h_t = f_W(x_t, h_{t-1}).",
+          "timestamp_s": 244,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The encoder summarizes the entire input sequence into a single context vector, typically the last hidden state.",
+          "timestamp_s": 317,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Decoder recurrence uses the previous output token, previous hidden state, and context vector to generate the output sequence.",
+          "timestamp_s": 382,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A single fixed-size context vector creates a communication bottleneck between input and output sequences.",
+          "timestamp_s": 435,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "start_s": 0,
+        "end_s": 539
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Attention inside sequence-to-sequence RNNs",
+      "description": "Derives the original attention mechanism for encoder-decoder RNNs by computing alignment scores, softmax attention weights, and a fresh context vector at every decoder step.",
+      "summary": "To remove the single-vector bottleneck, the decoder is allowed to look back at the full encoder sequence at every output step [ts=540s][ts=548s]. For each decoder state, the model computes scalar alignment scores against every encoder hidden state, normalizes them with softmax into attention weights, and then forms a context vector as a weighted sum of encoder states [ts=590s][ts=660s][ts=738s]. This context vector is concatenated into the decoder computation so the decoder can focus on the most relevant input tokens for the current output token, such as attending more to “we see” when predicting the Italian word corresponding to that phrase [ts=816s][ts=856s]. The whole mechanism is differentiable and learned end-to-end with the standard output loss, so the model does not need explicit supervision of alignments [ts=882s][ts=900s]. Repeating this process at every decoder time step produces a different context vector each time and removes the original fixed-context bottleneck [ts=1080s][ts=1147s].",
+      "key_points": [
+        {
+          "text": "Alignment scores compare the decoder state to each encoder state: e_{t,i} = f_att(s_{t-1}, h_i).",
+          "timestamp_s": 590,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Softmax converts alignment scores into attention weights that form a probability distribution over input positions.",
+          "timestamp_s": 660,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The context vector is a weighted sum of encoder states: c_t = sum_i a_{t,i} h_i.",
+          "timestamp_s": 738,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "When predicting the Italian word for “we see,” the model should place larger weights on the corresponding English tokens than on “the sky.”",
+          "timestamp_s": 856,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Attention weights are learned without direct supervision because the entire computation is differentiable and trained end-to-end.",
+          "timestamp_s": 885,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A new context vector is recomputed at each decoder step instead of reusing one fixed summary vector for the whole output sequence.",
+          "timestamp_s": 1094,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "start_s": 540,
+        "end_s": 1259
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Attention maps and the abstract attention operator",
+      "description": "Shows how attention weights can be visualized to interpret learned alignments, then abstracts attention away from RNNs into a stand-alone query/data/output operator.",
+      "summary": "The lecture next emphasizes that attention weights are not only useful for computation but also for interpretation, since the predicted attention matrix shows what the network is looking at while generating each output token [ts=1272s][ts=1287s]. In the English-to-French example, diagonal patterns indicate roughly in-order word correspondences, while off-diagonal or block patterns reveal reordering and less clean many-to-many alignments [ts=1401s][ts=1516s]. The instructor then extracts the common structure hidden inside the RNN example: there are data vectors containing information to summarize, query vectors representing outputs to compute, and attention returns one output vector per query by comparing the query to all data vectors, softmax-normalizing the scores, and taking a weighted combination of the data [ts=1587s][ts=1716s][ts=1814s][ts=1846s]. This reframing is the bridge from “attention in an RNN” to “attention as a general neural-network layer.”",
+      "key_points": [
+        {
+          "text": "Attention weights can be visualized as a 2D grid to inspect what the model attends to during translation.",
+          "timestamp_s": 1313,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Diagonal attention patterns indicate mostly in-order correspondence between input and output words.",
+          "timestamp_s": 1401,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Off-diagonal or block patterns reveal reordering or non one-to-one alignments between source and target phrases.",
+          "timestamp_s": 1516,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Abstractly, attention takes a query vector, looks back over data vectors, and produces an output vector summarizing the data for that query.",
+          "timestamp_s": 1716,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Single-query attention still follows the same pipeline: similarities, softmax attention weights, then a weighted combination of data vectors.",
+          "timestamp_s": 1814,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "start_s": 1260,
+        "end_s": 1919
+      },
+      "difficulty": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_8::seg4",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Scaled dot-product attention, keys and values, and cross-attention",
+      "description": "Generalizes attention into a scalable matrix-based layer using scaled dot products, multiple queries in parallel, and learned key/value projections.",
+      "summary": "The attention operator is simplified by replacing an arbitrary learned similarity function with a dot product, then improved by scaling that dot product by the square root of the vector dimension to avoid softmax saturation and vanishing gradients as dimensions grow [ts=1932s][ts=2010s][ts=2041s]. The operator is then vectorized to process many queries in parallel: similarities between a query matrix and data vectors are computed by matrix multiplication, softmax is applied across the data dimension for each query, and outputs are formed by another matrix multiplication that takes weighted combinations of data vectors [ts=2160s][ts=2202s][ts=2275s]. The lecture then separates two roles previously played by the same data vectors by introducing keys for matching and values for retrieval, both obtained by learned projections of the data vectors [ts=2297s][ts=2352s][ts=2417s][ts=2428s]. This yields a stand-alone cross-attention layer in which query vectors and data vectors may come from different sources, such as source and target sequences or image features and caption tokens [ts=2696s][ts=2714s][ts=2737s].",
+      "key_points": [
+        {
+          "text": "The simplest similarity function for attention is a dot product between vectors.",
+          "timestamp_s": 1932,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Scaled dot-product attention divides by sqrt(D) to keep softmax gradients from collapsing as vector dimension grows.",
+          "timestamp_s": 2010,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Multiple query vectors can be processed in parallel by computing all pairwise similarities with a matrix multiply.",
+          "timestamp_s": 2160,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Keys are used for matching against queries, while values are the vectors linearly combined to produce the output.",
+          "timestamp_s": 2352,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Learned projections compute keys and values from data vectors: K = XW_K and V = XW_V.",
+          "timestamp_s": 2417,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Cross-attention uses separate query vectors and data vectors, potentially coming from different sources.",
+          "timestamp_s": 2714,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "start_s": 1920,
+        "end_s": 2759
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 14,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_8::seg5",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Self-attention, positional embeddings, masking, and multi-head computation",
+      "description": "Builds self-attention from Q/K/V projections of the same input vectors, explains order issues and positional encodings, then adds masking and multiple heads.",
+      "summary": "Self-attention is introduced as the case where there is only one set of input vectors, and each input is projected into a query, key, and value so every element can compare against every other element in the same set [ts=2768s][ts=2797s][ts=2812s]. The layer is permutation equivariant: shuffling the inputs shuffles the outputs in the same way, meaning the computation itself does not intrinsically care about order, so positional embeddings are added when sequence order matters [ts=3110s][ts=3147s][ts=3177s]. The lecture then shows masked self-attention, where invalid connections are set to negative infinity before softmax so the resulting attention weights become zero; this is crucial for autoregressive language modeling so tokens cannot look ahead [ts=3251s][ts=3264s][ts=3315s]. Finally, multi-head self-attention runs several independent self-attention layers in parallel and fuses them, and the whole mechanism can be implemented efficiently as a small number of large batched matrix multiplications [ts=3332s][ts=3376s][ts=3402s][ts=3442s].",
+      "key_points": [
+        {
+          "text": "In self-attention, each input vector is projected to a query, key, and value vector.",
+          "timestamp_s": 2797,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In practice, D_in and D_out are usually the same even though the formulation allows them to differ.",
+          "timestamp_s": 2868,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Q, K, and V projections are often fused into one large matrix multiply for hardware efficiency.",
+          "timestamp_s": 2903,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Self-attention is permutation equivariant, so it fundamentally operates on a set of vectors rather than an ordered sequence unless position information is added.",
+          "timestamp_s": 3110,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Positional embeddings provide the model with information about token or patch order.",
+          "timestamp_s": 3177,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Masked self-attention blocks illegal connections by setting selected alignment scores to negative infinity before softmax.",
+          "timestamp_s": 3251,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Multi-head self-attention runs H independent heads in parallel and then fuses their outputs.",
+          "timestamp_s": 3332,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Despite the notation, practical self-attention is basically four large batched matrix multiplies.",
+          "timestamp_s": 3402,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "start_s": 2760,
+        "end_s": 3449
+      },
+      "difficulty": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_8::seg6",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Transformer blocks and why transformers scale across domains",
+      "description": "Compares RNNs, convolutions, and attention, then assembles the transformer block and applies it to language models and vision transformers.",
+      "summary": "The lecture compares three sequence-processing primitives: RNNs are inherently sequential and hard to parallelize, convolutions are parallel but local, and self-attention gives global interaction in one layer at the cost of quadratic compute and memory in sequence length [ts=3510s][ts=3566s][ts=3606s][ts=3626s]. This leads directly to the transformer, which places self-attention at the center of a block with residual connections, layer normalization, and an MLP/FFN that processes each vector independently; stacking these blocks gives the full architecture [ts=3760s][ts=3776s][ts=3814s][ts=3845s]. The instructor then emphasizes that this same architecture scales from the original 2017 model to today’s massive systems and can be used for language modeling as well as vision by patchifying images, projecting each patch to a vector, running a transformer over patches, and pooling outputs for classification [ts=3854s][ts=3876s][ts=3885s][ts=3900s]. The segment closes by summarizing attention as a scalable primitive on sets of vectors and transformers as the backbone of modern large AI models [ts=3934s][ts=3950s].",
+      "key_points": [
+        {
+          "text": "RNNs are sequential, convolutions are local but parallel, and self-attention is global and parallelizable.",
+          "timestamp_s": 3510,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Self-attention has O(n^2) compute and memory in sequence length n.",
+          "timestamp_s": 3626,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A transformer uses self-attention as its main interaction mechanism over a set of vectors.",
+          "timestamp_s": 3760,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Residual connections and layer normalization wrap self-attention to stabilize training.",
+          "timestamp_s": 3776,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Each transformer block also includes an MLP/FFN that processes each vector independently.",
+          "timestamp_s": 3814,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A transformer is a stack of transformer blocks.",
+          "timestamp_s": 3845,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Vision Transformers split an image into patches, project each patch to a vector, run a transformer, then pool outputs for classification.",
+          "timestamp_s": 3885,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The lecture concludes that transformers are the backbone of large modern AI models.",
+          "timestamp_s": 3934,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "start_s": 3450,
+        "end_s": 3984
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 6,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture_8::kp1",
+      "name": "Fixed-length context bottleneck in seq2seq RNNs",
+      "description": "Encoder-decoder RNNs compress the input sequence into one context vector, which limits performance on longer sequences because all input-output communication must pass through that fixed-size representation.",
+      "track_tags": [
+        "deep_learning",
+        "sequence_models",
+        "attention"
+      ],
+      "domain_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the motivating limitation that the lecture uses to justify why attention is needed at all.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:07:20, the slide shows an encoder-decoder diagram linked by a single context vector c, visually emphasizing the bottleneck."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp2",
+      "name": "Alignment scores and attention weights",
+      "description": "Attention begins by comparing a decoder/query state with each candidate source state, then applying softmax to turn those scores into normalized attention weights.",
+      "track_tags": [
+        "deep_learning",
+        "attention",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The score-plus-softmax step is the core mechanism that decides what information attention will retrieve.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:11:00, the slide explicitly shows scalar alignment scores flowing into a softmax to become attention weights."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp3",
+      "name": "Context vector as a weighted sum",
+      "description": "The output of attention is a context vector formed by weighting source hidden states with attention weights and summing them.",
+      "track_tags": [
+        "deep_learning",
+        "attention",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This weighted-sum computation is the concrete output of attention and reappears later as the general attention operator.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:12:40, the purple context vector is drawn as a sum of encoder states weighted by attention coefficients."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp4",
+      "name": "Attention heatmaps as learned alignments",
+      "description": "Visualizing attention matrices can reveal approximate word alignments, reorderings, and partial many-to-many correspondences learned without explicit alignment supervision.",
+      "track_tags": [
+        "attention",
+        "interpretability",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "nlp",
+        "model_interpretability"
+      ],
+      "career_path_tags": [
+        "research_scientist",
+        "applied_ai_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.47,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is not the main mechanism, but it gives a valuable interpretability lens on what attention has learned.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:22:00, a translation heatmap shows diagonal and off-diagonal bands between English and French tokens."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp5",
+      "name": "Attention as a query-to-data operator",
+      "description": "Abstractly, attention maps query vectors and data vectors to output vectors by letting each query retrieve a custom summary of the data.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "transformers"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This abstraction is the conceptual bridge from attention in RNNs to attention as a reusable primitive in modern architectures.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:30:30, the slide reframes the mechanism as query vectors and data vectors producing output vectors."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp6",
+      "name": "Scaled dot-product attention",
+      "description": "Using a dot product as similarity and scaling it by the square root of the feature dimension stabilizes softmax behavior and gradient flow.",
+      "track_tags": [
+        "attention",
+        "optimization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "numerical_stability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "systems_ml_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture explicitly marks scaling as important for making attention work as dimensions and model sizes grow.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:32:50, the similarity equation on the slide changes from plain dot product to scaled dot product."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp7",
+      "name": "Keys and values",
+      "description": "Attention separates matching and retrieval by projecting data vectors into keys used for similarity computation and values used for the weighted output.",
+      "track_tags": [
+        "attention",
+        "transformers",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Separating keys from values is a major representational step that leads directly to QKV attention used in transformers.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:39:00, the diagram adds separate K and V projections branching from the data vectors."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp8",
+      "name": "Cross-attention",
+      "description": "Cross-attention uses one set of query vectors to retrieve information from a separate set of data vectors, often from another modality or sequence.",
+      "track_tags": [
+        "attention",
+        "multimodal_models",
+        "transformers"
+      ],
+      "domain_tags": [
+        "nlp",
+        "multimodal_ai",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is an important variant that explains encoder-decoder and multimodal use cases, though it is not the lecture's final destination.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:45:20, the stand-alone layer is described as taking separate query and data inputs."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp9",
+      "name": "Self-attention",
+      "description": "Self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set.",
+      "track_tags": [
+        "self_attention",
+        "transformers",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the main computational primitive inside transformers and the point where attention fully becomes a general architecture component.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:47:20, each input vector is shown branching into Q, K, and V within a self-attention layer."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp10",
+      "name": "Permutation equivariance and positional embeddings",
+      "description": "Because self-attention on its own does not care about order beyond corresponding shuffles, positional embeddings are added when order information matters.",
+      "track_tags": [
+        "self_attention",
+        "sequence_models",
+        "transformers"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Order handling is a fundamental practical issue whenever self-attention is applied to sequences or image patches.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:52:30, the lecture first argues that shuffling inputs only shuffles outputs, then introduces positional information to restore order."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp11",
+      "name": "Masked self-attention",
+      "description": "Masking blocks selected attention links by forcing their pre-softmax scores to negative infinity, which is essential for autoregressive language modeling.",
+      "track_tags": [
+        "self_attention",
+        "language_modeling",
+        "transformers"
+      ],
+      "domain_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture explicitly uses masking to show how self-attention becomes a valid next-token predictor rather than cheating with future context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:54:20, the masked attention diagram blocks future positions and explains that negative infinity becomes zero after softmax."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp12",
+      "name": "Multi-head self-attention",
+      "description": "Multi-head attention runs several independent attention heads in parallel and fuses them, increasing capacity while staying hardware-friendly.",
+      "track_tags": [
+        "self_attention",
+        "transformers",
+        "scalable_ai"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "systems_for_ml"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "systems_ml_engineer"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture states this is the practical default form of self-attention used in modern systems.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 00:56:30, the attention layer is duplicated into H parallel heads whose outputs are fused."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp13",
+      "name": "Transformer block architecture",
+      "description": "A transformer block combines self-attention, residual connections, normalization, and an MLP/FFN, and a full transformer is a stack of these blocks.",
+      "track_tags": [
+        "transformers",
+        "deep_learning",
+        "neural_architectures"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the culminating architecture of the lecture that integrates self-attention with the training-stability and per-token processing components needed in practice.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 01:03:00, the slide assembles self-attention, residuals, layer normalization, and MLPs into the canonical transformer block."
+    },
+    {
+      "local_kp_id": "local::lecture_8::kp14",
+      "name": "Transformers as a cross-domain backbone",
+      "description": "The same transformer architecture supports next-token language models and vision transformers over image patches, and the lecture frames it as the dominant backbone for large AI models.",
+      "track_tags": [
+        "transformers",
+        "llms",
+        "vision_transformers"
+      ],
+      "domain_tags": [
+        "nlp",
+        "computer_vision",
+        "multimodal_ai"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "applied_ai_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecturer explicitly says transformers now underpin almost all large modern models and demonstrates both language and vision instantiations.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around frame 01:04:45, the slides show both language-model and image-patch transformer pipelines, underscoring the same backbone across modalities."
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture_8::seg1",
+      "local_kp_id": "local::lecture_8::kp1",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment spends its final third motivating attention by explaining the fixed-size context bottleneck in encoder-decoder RNNs [ts=435s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "local_kp_id": "local::lecture_8::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The derivation explicitly computes alignment scores and normalizes them with softmax [ts=590s][ts=660s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "local_kp_id": "local::lecture_8::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The context vector as a weighted sum is the centerpiece of the decoder-side update in this section [ts=738s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "local_kp_id": "local::lecture_8::kp1",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment repeatedly contrasts per-step attention with the old single-vector bottleneck [ts=1088s][ts=1094s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "local_kp_id": "local::lecture_8::kp4",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This segment visualizes translation attention matrices and interprets diagonal and off-diagonal patterns [ts=1313s][ts=1401s][ts=1516s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "local_kp_id": "local::lecture_8::kp5",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecture explicitly abstracts attention into query vectors, data vectors, and output vectors [ts=1716s][ts=1758s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "local_kp_id": "local::lecture_8::kp2",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The interpretability discussion relies on reading the previously defined attention weights as a probability distribution over inputs [ts=1287s][ts=1347s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg4",
+      "local_kp_id": "local::lecture_8::kp6",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Scaled dot-product attention is derived and motivated by gradient-flow concerns in this section [ts=1955s][ts=2010s][ts=2041s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg4",
+      "local_kp_id": "local::lecture_8::kp7",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The section spends several minutes separating matching and retrieval into keys and values with learned projections [ts=2297s][ts=2352s][ts=2417s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg4",
+      "local_kp_id": "local::lecture_8::kp8",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Cross-attention is named and explained as the case with separate query and data sources [ts=2714s][ts=2737s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg5",
+      "local_kp_id": "local::lecture_8::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment directly defines self-attention by projecting each input into Q, K, and V [ts=2768s][ts=2797s][ts=2812s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg5",
+      "local_kp_id": "local::lecture_8::kp10",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Permutation equivariance and the need for positional embeddings are explained in detail [ts=3110s][ts=3177s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg5",
+      "local_kp_id": "local::lecture_8::kp11",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Masked self-attention is motivated using next-token language modeling and the no-lookahead constraint [ts=3251s][ts=3315s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg5",
+      "local_kp_id": "local::lecture_8::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The lecture labels multi-head self-attention as the usual practical form and explains the parallel-head construction [ts=3332s][ts=3376s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg6",
+      "local_kp_id": "local::lecture_8::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This segment assembles the transformer block from self-attention, residual paths, normalization, and an MLP, then stacks blocks [ts=3760s][ts=3814s][ts=3845s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg6",
+      "local_kp_id": "local::lecture_8::kp14",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment explicitly applies transformers to language modeling and image patches and ends by stating they are the backbone of large AI models [ts=3876s][ts=3885s][ts=3934s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg6",
+      "local_kp_id": "local::lecture_8::kp9",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The transformer block is introduced explicitly as placing self-attention at the center of the architecture [ts=3760s][ts=3771s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture_8::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This segment sets up the entire lecture by contrasting RNN sequence processing with the fixed-context bottleneck that attention is meant to solve [ts=73s][ts=435s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The section walks through the main attention derivation step by step with alignment-score, softmax, and weighted-sum formulas, then repeats the procedure across decoder steps [ts=590s][ts=738s][ts=1094s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg3",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The segment is conceptually important because it interprets attention maps and then redefines attention as a reusable operator, but it is less algebra-heavy than the derivation segments [ts=1313s][ts=1716s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "This unit introduces the scalable mathematical form of attention, including scaled dot products, batched matrix operations, and learned key/value projections [ts=2010s][ts=2160s][ts=2417s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The segment contains the core transformer-era ideas of self-attention, positional handling, masking, and multi-head computation, all tied to matrix-based implementation [ts=2797s][ts=3177s][ts=3251s][ts=3332s]."
+    },
+    {
+      "unit_id": "local::lecture_8::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This closing unit assembles the transformer block, compares it against earlier sequence-processing primitives, and shows why the architecture generalizes to language and vision [ts=3510s][ts=3760s][ts=3885s][ts=3934s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture_8"
+}

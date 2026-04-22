@@ -1,0 +1,105 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về định nghĩa multimodality, động lực học đa phương thức và các bài toán tiêu biểu như retrieval, captioning hay VQA.",
+  "question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Lý do nào KHÔNG nằm trong các động lực chính để nghiên cứu multimodality?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Con người nhận thức thế giới theo nhiều kênh thông tin cùng lúc.",
+        "Dữ liệu trên internet thường kết hợp văn bản với hình ảnh hoặc phương tiện khác.",
+        "Mở rộng mô hình ngôn ngữ có thể cần thêm dữ liệu ngoài văn bản.",
+        "Multimodality loại bỏ hoàn toàn nhu cầu đánh giá mô hình trên benchmark."
+      ],
+      "answer_index": 3,
+      "explanation": "Ba động lực chính được nêu là nhận thức của con người vốn đa phương thức, dữ liệu web vốn đa phương thức, và hướng mở rộng mô hình có thể cần thêm nguồn dữ liệu ngoài văn bản. Việc bỏ qua đánh giá benchmark không phải là một động lực của multimodality.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "human understanding is intrinsically multimodal",
+          "internet data is naturally multimodal",
+          "adding non-text data"
+        ],
+        "timestamps": [
+          "02:55",
+          "03:15",
+          "03:32"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Hiệu ứng McGurk được dùng chủ yếu để minh họa điều gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Âm thanh luôn quan trọng hơn thị giác trong mọi tác vụ.",
+        "Nhận thức có thể thay đổi khi tín hiệu từ các modality tương tác với nhau.",
+        "Speech recognition chỉ cần dữ liệu hình ảnh để hoạt động tốt.",
+        "Mọi tác vụ multimodal đều phải sinh ra ảnh mới."
+      ],
+      "answer_index": 1,
+      "explanation": "Hiệu ứng McGurk cho thấy cùng một âm thanh nhưng thay đổi chuyển động miệng nhìn thấy có thể làm thay đổi âm thanh ta cảm nhận. Điều đó nhấn mạnh rằng các modality không hoạt động hoàn toàn tách biệt mà tương tác với nhau trong nhận thức.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "McGurk effect",
+          "cross-modal interaction"
+        ],
+        "timestamps": [
+          "04:15",
+          "05:01"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg1-q1",
+      "global_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg1-q2",
+      "global_kp_id": "kp_multimodality_definition_motivation_and_task_framing",
+      "role": "primary"
+    }
+  ]
+}

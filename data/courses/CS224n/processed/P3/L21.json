@@ -1,0 +1,96 @@
+{
+  "output_filename": "p3a__cs224n__lecture21_after_dpo.json",
+  "run_id": "<run_id>",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture21-after-dpo",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture21-after-dpo::seg1",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Formula-heavy treatment of main gateway KPs for RLHF, instruction fine-tuning, and DPO gives substantial coverage with high item_generation_worthiness.",
+      "target_kp_ids": [
+        "kp_rlhf_preference_optimization",
+        "kp_dpo",
+        "kp_instruction_fine_tuning",
+        "kp_post_training_and_rlhf_importance"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg2",
+      "is_worth_learning": false,
+      "salience_score": "skip",
+      "rationale": "Dominant coverage centers on open-alignment history and adoption examples, so this is best classified as historical_context excluded by course_config despite medium item_generation_worthiness.",
+      "target_kp_ids": [
+        "kp_open_alignment_data_and_adoption"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "historical_context",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of the critical gateway reward-modeling KP plus formula-heavy training/evaluation details and the DPO reference caveat make this highly assessable.",
+      "target_kp_ids": [
+        "kp_reward_modeling_from_pairwise_preferences",
+        "kp_dpo_implicit_reward_reference_caveat",
+        "kp_safety_refusal_evaluation"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "A dominant main gateway KP on DPO-versus-PPO/online methods, paired with high item_generation_worthiness and concrete empirical tradeoffs, gives strong application value.",
+      "target_kp_ids": [
+        "kp_dpo_versus_ppo_and_online_methods",
+        "kp_industry_recipes_and_future_directions"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg5",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "override_critical_kp: although this is a Q&A-style unit, it gives substantial main coverage of the critical gateway reward-hacking concept and diagnostic discussion of distribution-shift failure modes.",
+      "target_kp_ids": [
+        "kp_reward_hacking",
+        "kp_preference_formats_beyond_pairwise"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "recap",
+      "content_type_confidence": "low",
+      "override_critical_kp": true,
+      "expected_item_count": 2,
+      "salience_confidence": "low",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

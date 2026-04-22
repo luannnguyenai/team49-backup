@@ -1,0 +1,193 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi ứng dụng về dự án dạy con người các chiến lược siêu nhân từ AlphaZero, cách sinh puzzle từ embedding và tiêu chí đánh giá dựa trên việc con người có học được hay không.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Điểm nào trong AlphaZero được dùng để gợi ý rằng mô hình có thể nắm những khái niệm chiến lược vượt ngoài tri thức con người?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Nó chỉ bắt chước hoàn toàn opening book của cao thủ loài người.",
+        "Opening preferences của nó khác đáng kể với con người dù sức mạnh cao hơn, gợi ý các chiến lược lạ có thể tồn tại.",
+        "Nó chỉ mạnh ở tàn cuộc nên không liên quan đến khái niệm chiến lược mới.",
+        "Nó không tự huấn luyện mà chỉ tinh chỉnh từ Stockfish."
+      ],
+      "answer_index": 1,
+      "explanation": "Nếu một hệ vượt trình độ con người và còn chọn opening khác con người, điều đó gợi ý rằng nó có thể đang dựa trên những cấu trúc chiến lược mà con người chưa quen nghĩ tới hoặc chưa mô tả rõ.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "opening repertoire differs substantially",
+          "suggesting there may be superhuman concepts"
+        ],
+        "timestamps": [
+          "00:56:37",
+          "00:57:07"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Mục tiêu đánh giá đầy tham vọng của dự án mới được mô tả là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chứng minh Magnus Carlsen luôn đánh thắng AlphaZero trong mọi ván thử nghiệm.",
+        "Dạy cho một kiện tướng thế giới ít nhất một chiến lược cờ vua mới mà máy khám phá ra và kiểm tra xem ông có áp dụng được hay không.",
+        "Chỉ tạo thêm puzzle khó hơn cho Stockfish mà không liên quan con người.",
+        "Nén AlphaZero thành một mô hình nhỏ hơn để chạy trên laptop."
+      ],
+      "answer_index": 1,
+      "explanation": "Điểm thú vị của dự án không phải chỉ là mô hình chơi giỏi hơn, mà là kiểm tra xem tri thức máy khám phá có thể trở thành tri thức có thể dạy lại cho chuyên gia con người hay không.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "teach a world champion",
+          "new superhuman chess strategy"
+        ],
+        "timestamps": [
+          "00:57:27",
+          "00:57:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Theo pipeline được mô tả, bước nào nằm trong cách tìm ra chiến lược mới để dạy cho con người?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Quên có chủ đích các chiến lược đã biết, học graph khái niệm, rồi sinh vị trí bàn cờ tương ứng với khái niệm mới để tạo puzzle.",
+        "Thu thập caption ngôn ngữ cho từng nước đi rồi fine-tune một chatbot tổng quát.",
+        "Chỉ lấy những ván Magnus từng thua và học thuộc lại toàn bộ nước đi.",
+        "Dùng saliency map trên ảnh bàn cờ để tô sáng quân cờ quan trọng nhất."
+      ],
+      "answer_index": 0,
+      "explanation": "Dự án cố biến câu hỏi lớn thành một bài toán cụ thể hơn: loại bớt chiến lược quen thuộc, học quan hệ khái niệm, rồi sinh ra các board positions/puzzles để xem con người có học được khái niệm mới hay không.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "forgetting existing chess strategy",
+          "learn a graph",
+          "board positions"
+        ],
+        "timestamps": [
+          "00:57:51",
+          "00:58:01",
+          "00:59:22"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Thành công cuối cùng của dự án được định nghĩa gần nhất với phương án nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một engine khác giải được puzzle nhanh hơn AlphaZero.",
+        "Một chuyên gia con người có thể học và áp dụng ít nhất một phần các khái niệm mà máy phát hiện ra.",
+        "Mọi thế cờ do dự án sinh ra đều mới hoàn toàn với lịch sử cờ vua.",
+        "Embedding của AlphaZero có thể trực quan hóa đẹp trong 2 chiều."
+      ],
+      "answer_index": 1,
+      "explanation": "Mục tiêu không phải là thêm một chiến thắng cho engine, mà là tạo ra tri thức có thể chuyển giao sang chuyên gia con người. Nếu con người hiểu và áp dụng được một phần khái niệm mới, đó đã là thành công lớn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Success is defined as a human expert",
+          "learn and apply"
+        ],
+        "timestamps": [
+          "01:00:01",
+          "01:00:08"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg6-q1",
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q2",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q3",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg6-q4",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "role": "primary"
+    }
+  ]
+}

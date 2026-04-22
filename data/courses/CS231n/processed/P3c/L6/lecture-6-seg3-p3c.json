@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_6::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The segment contains enough explicit conceptual evidence to build two activation-function questions without needing a clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture_6_seg3_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are activation functions inserted after convolutional or fully connected layers?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To introduce nonlinearity into otherwise linear computations",
+        "To make gradients exactly equal to 1 everywhere",
+        "To reduce the number of output classes",
+        "To force every activation to have mean 0"
+      ],
+      "answer_index": 0,
+      "explanation": "Convolutions and fully connected layers are linear combinations of inputs. Without a nonlinear activation after them, stacking many such layers would still behave like a single linear transformation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "introduce nonlinearities",
+          "linear operations"
+        ],
+        "timestamps": [
+          "00:16:23",
+          "00:16:39"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_6_seg3_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main reason sigmoid can cause training difficulties in deep networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Its gradient becomes very small for large positive or negative inputs",
+        "It produces outputs larger than the input",
+        "It requires batch statistics to be computed",
+        "It is undefined at zero"
+      ],
+      "answer_index": 0,
+      "explanation": "When inputs fall in the saturated parts of sigmoid, the derivative is tiny. Backpropagated gradients then shrink as they pass through many layers, making early layers hard to train.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "very small gradient",
+          "approaches 0 very quickly"
+        ],
+        "timestamps": [
+          "00:17:42",
+          "00:18:07"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg3_q1",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg3_q2",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    }
+  ]
+}

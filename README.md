@@ -101,7 +101,7 @@ Hiện tại, nội dung học tập tập trung vào khóa **CS231n — Deep Le
 │ RecommendEng    │ │ Tools:        │ │ Redis 7           │
 │ TimelineBuilder │ │ - Transcript  │ │ (rate limiting)   │
 │ HistoryService  │ │ - Slides      │ │                   │
-│                 │ │ - Sandbox     │ │ data/CS231n/      │
+│                 │ │ - Sandbox     │ │ data/courses/CS231n/ │
 └─────────────────┘ └───────────────┘ └───────────────────┘
 ```
 
@@ -262,7 +262,7 @@ A20-App-049/
 - **Docker Desktop** ≥ 4.x và **Docker Compose v2** (khuyên dùng)
 - Hoặc thủ công: Python 3.12+, Node.js 18+, PostgreSQL 16, Redis 7, [uv](https://docs.astral.sh/uv/)
 - **API key** của ít nhất một LLM provider (Gemini, OpenAI, hoặc Anthropic)
-- Thư mục dữ liệu `data/CS231n/` (tải từ Google Drive của nhóm)
+- Thư mục dữ liệu `data/courses/CS231n/` (tải từ Google Drive của nhóm)
 
 ---
 

@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture22-nlp-linguistics::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript slice and summary provide enough grounding for conceptual questions contrasting symbolic AI, cybernetics, and neural processing; no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the physical symbol system hypothesis claim?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Symbol systems are necessary and sufficient for general intelligent action.",
+        "All intelligent behavior must come from gradient descent over dense vectors.",
+        "Human language is not a symbolic system.",
+        "Cybernetics and symbolic AI are the same research tradition."
+      ],
+      "answer_index": 0,
+      "explanation": "The hypothesis is a strong claim: intelligence requires a system that manipulates symbols, and such a symbol system is enough in principle for general intelligent behavior.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_symbolic_ai_versus_cybernetics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "necessary and sufficient",
+          "general intelligent action"
+        ],
+        "timestamps": [
+          "00:30:20",
+          "00:30:32"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the cybernetic tradition differ from the classical symbolic AI tradition in this comparison?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It grew from control and communication ideas and is the lineage where neural networks were explored.",
+        "It rejected all work on neural networks and focused only on formal logic.",
+        "It claimed that natural language is not made of symbols.",
+        "It was mainly a theory of SQL-style semantic parsing."
+      ],
+      "answer_index": 0,
+      "explanation": "Cybernetics emphasized control, communication, and system dynamics, making it closer to the historical development of neural-network approaches than to logic-centered symbolic AI.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_symbolic_ai_versus_cybernetics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "control and communication",
+          "neural nets"
+        ],
+        "timestamps": [
+          "00:31:16",
+          "00:32:11"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the symbolic nature of language not automatically prove that brains or NLP systems must be symbolic processors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A communication medium can use symbols even if the system processing it is not itself organized as a symbolic rule engine.",
+        "If language has symbols, every hidden state must be a discrete dictionary entry.",
+        "Neural models cannot process spoken language because phonemes are discrete.",
+        "The existence of symbols rules out distributed representations."
+      ],
+      "answer_index": 0,
+      "explanation": "There is a difference between the format of what is communicated and the mechanism that processes it. Neural systems can process symbolic inputs without being classical symbol-manipulating machines internally.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_language_scaffolding_and_thought",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "language is a symbolic system",
+          "does not mean"
+        ],
+        "timestamps": [
+          "00:34:06",
+          "00:35:47"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q1",
+      "global_kp_id": "kp_symbolic_ai_versus_cybernetics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q2",
+      "global_kp_id": "kp_symbolic_ai_versus_cybernetics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q3",
+      "global_kp_id": "kp_language_scaffolding_and_thought",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does the physical symbol system hypothesis claim\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does the cybernetic tradition differ from the classical symbolic AI tradition in this comparison\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.85,
+      "discrimination_prior": 1.06,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why does the symbolic nature of language not automatically prove that brains or NLP systems must be symbolic processors\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does the physical symbol system hypothesis claim\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does the cybernetic tradition differ from the classical symbolic AI tradition in this comparison\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg4-q3",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why does the symbolic nature of language not automatically prove that brains or NLP systems must be symbolic processors\" is a stronger synthesis item suited to later assessment."
+    }
+  ]
+}
