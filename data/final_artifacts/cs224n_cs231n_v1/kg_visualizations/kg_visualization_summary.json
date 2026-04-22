@@ -4,10 +4,10 @@
   "source_gpt54_labels_file": "data/final_artifacts/cs224n_cs231n_v1/gpt54_edge_labels.json",
   "source_modernbert_large_scores_file": "data/final_artifacts/cs224n_cs231n_v1/model_experiments/modernbert_large_edge_scores_masked_v2.json",
   "audit_edges": 93,
-  "kept_only_edges": 88,
-  "gpt54_prune_suggestions": 5,
+  "kept_only_edges": 79,
+  "gpt54_prune_suggestions": 14,
   "audit_nodes": 134,
-  "kept_only_nodes": 129,
+  "kept_only_nodes": 119,
   "artifacts": {
     "kg_p5_audit_dot": "data/final_artifacts/cs224n_cs231n_v1/kg_visualizations/kg_p5_audit.dot",
     "kg_p5_audit_svg": "data/final_artifacts/cs224n_cs231n_v1/kg_visualizations/kg_p5_audit.svg",

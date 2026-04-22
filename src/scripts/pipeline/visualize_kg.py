@@ -51,8 +51,25 @@ def _label_index(gpt54_labels: dict[str, Any] | None) -> dict[tuple[str, str], d
     }
 
 
+def _audit_verdict(audit_label: dict[str, Any] | None) -> str | None:
+    if not audit_label:
+        return None
+    return audit_label.get("best_verdict") or audit_label.get("gpt54_verdict")
+
+
+def _audit_rationale(audit_label: dict[str, Any] | None) -> str:
+    if not audit_label:
+        return ""
+    return (
+        audit_label.get("best_rationale")
+        or audit_label.get("gpt54_rationale")
+        or audit_label.get("baseline_gpt54_rationale")
+        or ""
+    )
+
+
 def _edge_style(edge: dict[str, Any], audit_label: dict[str, Any] | None) -> tuple[str, str, str]:
-    if audit_label and audit_label.get("gpt54_verdict") == "prune":
+    if _audit_verdict(audit_label) == "prune":
         return ("#d62728", "dashed", "GPT prune")
     if edge.get("keep_confidence") == "high":
         return ("#1b7837", "solid", "high")
@@ -124,8 +141,8 @@ def _render_dot(
         target = edge["target_kp_id"]
         audit_label = labels.get((source, target))
         color, style, short_label = _edge_style(edge, audit_label)
-        if audit_label and audit_label.get("gpt54_verdict") == "prune":
-            tooltip = audit_label.get("gpt54_rationale", "")
+        if _audit_verdict(audit_label) == "prune":
+            tooltip = _audit_rationale(audit_label)
         else:
             tooltip = edge.get("keep_rationale", "")
         lines.append(
@@ -234,7 +251,7 @@ def build_visualizations(
     kept_only_edges = [
         edge
         for edge in clean_edges
-        if labels.get((edge["source_kp_id"], edge["target_kp_id"]), {}).get("gpt54_verdict") != "prune"
+        if _audit_verdict(labels.get((edge["source_kp_id"], edge["target_kp_id"]))) != "prune"
     ]
 
     output_dir.mkdir(parents=True, exist_ok=True)
