@@ -1,0 +1,240 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture12_efficient_training",
+    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 12 - Efficient Training, Shikhar Murty",
+    "youtube_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA"
+  },
+  "unit": {
+    "unit_id": "local::lecture12_efficient_training::seg1",
+    "course_id": "cs224n_spring_2024",
+    "name": "Mixed precision training: FP32, FP16, loss scaling, and BF16",
+    "description": "Explains floating-point representation, why naive FP16 training fails, and how mixed precision with BF16 improves training efficiency.",
+    "summary": "After brief lecture setup and announcements, the instructor frames efficient training as a systems topic covering mixed precision, multi-GPU training, and parameter-efficient fine-tuning [ts=53s][ts=63s]. He explains floating-point representation through sign, range, and precision bits, noting that FP32 uses 4 bytes per parameter and offers broad dynamic range and precision [ts=149s][ts=181s]. Naively casting everything to FP16 halves memory but causes underflow of small values to 0, overflow of large values to NaNs, and more rounding error; epsilon and the smallest normal value explain why many gradients vanish in half precision [ts=208s][ts=343s]. Mixed precision addresses this by keeping FP32 master weights, running forward/backward compute in FP16, upcasting gradients to FP32, and updating the master copy before copying weights back [ts=387s][ts=422s]. Because FP16 gradients can still underflow, the loss is scaled before backprop and gradients are unscaled before the FP32 update [ts=525s][ts=560s]. The segment then introduces BF16 as keeping FP32-like range with less precision, which removes the need for grad scaling on supported newer GPUs, and cites a DistilBERT example showing faster training, similar accuracy, and lower memory use [ts=691s][ts=767s].",
+    "key_points": [
+      {
+        "text": "FP32 uses 4 bytes per parameter and allocates bits to sign, range, and precision.",
+        "timestamp_s": 149,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "FP16 halves memory but has less dynamic range and precision, so small numbers can underflow to 0 and large ones can overflow to NaNs.",
+        "timestamp_s": 270,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Epsilon and the smallest normal value determine when additions are rounded away and when values collapse to 0 in FP16.",
+        "timestamp_s": 309,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Mixed precision keeps FP32 master weights while forward and backward computation run in FP16.",
+        "timestamp_s": 387,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Loss scaling multiplies the loss before backprop so more FP16 gradients survive, then unscales them before the FP32 update.",
+        "timestamp_s": 525,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "BFloat16 keeps the same exponent range as FP32 but sacrifices precision, so gradient scaling is usually unnecessary on supported GPUs.",
+        "timestamp_s": 691,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "On an A100, BF16 mixed precision fine-tuning of DistilBERT is presented as faster and lower-memory while keeping about the same accuracy.",
+        "timestamp_s": 767,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+      "start_s": 8,
+      "end_s": 833
+    },
+    "difficulty": 0.46,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 14,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+  "transcript_slice": "00:00:08\nWelcome, everyone, to lecture 12.\n\n00:00:19\ninto vectors, how we convert sentences into vectors\n\n00:00:27\nthat to classify documents.\n\n00:00:34\nToday is going to be a little bit different.\n\n00:00:38\nyou can train large models on GPUs and a few basics\n\n00:00:46\nAnd it has nothing to do with natural language at all,\n\n00:00:53\nSo I'm going to spend some time on mixed precision training,\n\n00:01:00\nand hopefully, by the end of the lecture,\n\n00:01:03\nand some time on parameter efficient fine tuning.\n\n00:01:11\nsome announcements--\n\n00:01:17\nHopefully, by the end of the day.\n\n00:01:21\nI know it's kind of getting a little bit crammed\n\n00:01:27\nproposal.\n\n00:01:31\nThe other thing is the project milestone details\n\n00:01:40\nSo it's worth 5% of the overall grade.\n\n00:01:47\nAnd really, the way to think about the milestone\n\n00:01:52\nto get work done for your final project.\n\n00:01:58\nlet's just jump into the material.\n\n00:02:03\nabout how parameters and gradients and generally numbers\n\n00:02:09\nAnd I promise this is going to be relevant to deep learning\n\n00:02:13\nSo let's start with floating point.\n\n00:02:19\ndepiction of FP32?\n\n00:02:23\nOK, so some of you.\n\n00:02:28\nin computers.\n\n00:02:32\nSo the memory requirement is 32 bits.\n\n00:02:37\nAnd so if you think about neural networks,\n\n00:02:42\nyou need 4 bytes of GPU memory.\n\n00:02:47\nis something like this.\n\n00:02:51\nand then the stuff in green represents the range,\n\n00:03:00\nYeah.\n\n00:03:06\nand it's fairly precise.\n\n00:03:12\nthe more numbers you can represent,\n\n00:03:19\nAnd the more stuff in blue we have, the greater a precision\n\n00:03:28\nSo another popular data type that\n\n00:03:35\nAnd the way we reduce memory is we're\n\n00:03:41\nSo there's going to be less range, less dynamic range,\n\n00:03:46\ngoing to be less precision.\n\n00:03:52\nSo we slashed memory requirements in half.\n\n00:04:00\nyou're trying to train a big neural network\n\n00:04:04\nare represented in FP32.\n\n00:04:11\nerror.\n\n00:04:15\none possible solution is you cast everything into FP16.\n\n00:04:25\nSo let's work through what are some possible problems\n\n00:04:30\nSo like I said, because there's less stuff in green,\n\n00:04:35\nAnd so that means a lot of very small numbers\n\n00:04:44\nwill get converted into NaNs.\n\n00:04:50\nhave less bits in blue, which means you're\n\n00:04:55\nFor example, 1.0001 gets converted to 1 and 1/2\n\n00:05:03\nAnd I have a little screenshot of how\n\n00:05:09\nSo basically, the things to look at are the epsilon.\n\n00:05:17\nthat if you add that to 1, you don't lose any precision.\n\n00:05:23\nthat gets just rounded down to 1.\n\n00:05:29\ncan be represented in FP16.\n\n00:05:36\nAnd for neural network training, if a lot of small numbers\n\n00:05:43\nSo here is a diagram that I took from an NVIDIA blog post that's\n\n00:05:52\nAnd more than half of these gradients\n\n00:05:59\nwhich is kind of a problem.\n\n00:06:04\nAnd the second problem is with precision.\n\n00:06:11\nAnd so our updates are not going to be precise.\n\n00:06:20\nSo we're going to use FP16, but we're also going to use FP32.\n\n00:06:27\nAnd what we're going to do is we're\n\n00:06:33\nand let's call those master weights.\n\n00:06:39\nAnd then when you run your forward pass,\n\n00:06:46\nAnd then you get a gradient on a backward pass\n\n00:06:51\nSo everything so far has happened in FP16.\n\n00:06:58\nand then update your master weights.\n\n00:07:02\nyou copy them into the FP16 version of the neural network.\n\n00:07:09\nI'm using FP16 on my GPU, but I have the full sort of 32-bit\n\n00:07:18\nprecise updates.\n\n00:07:26\nAny guesses?\n\n00:07:30\nWon't it be really slow because you have to copy the 32-bit\n\n00:07:39\nYeah, so that's a good point.\n\n00:07:47\nSo practically, this is not a problem.\n\n00:07:51\nPotentially, if your network is very, very small,\n\n00:07:55\nYeah.\n\n00:07:57\nIndividual gradients are usually fairly small.\n\n00:08:03\nyou may be sending your network somewhere else where\n\n00:08:07\nSo yeah, so that's pretty much the right answer.\n\n00:08:15\nSo this shows gradients in the backward pass.\n\n00:08:21\nin FP16.\n\n00:08:23\nMost of them will just get converted\n\n00:08:29\nSo here's a possible solution.\n\n00:08:35\nyou run your forward pass in FP16, you compute your gradient,\n\n00:08:43\nsorry, so we're here.\n\n00:08:49\nyou get your loss, you scale the loss by some large value.\n\n00:08:55\nAnd then you compute gradients.\n\n00:08:59\nAnd so everything that we had on the left hand\n\n00:09:05\nAnd hopefully, there's less stuff that\n\n00:09:11\nAnd then compute your gradient in FP16, copy it into FP32,\n\n00:09:18\nand then you update your master weights.\n\n00:09:26\nAnd so this is basically what we call mixed precision training.\n\n00:09:35\nAll you have to do is you need to instantiate this grad scaler\n\n00:09:42\nAnd then within the context of this autocast,\n\n00:09:50\nand then scale down your gradient\n\n00:09:58\nBut then this seems a little complex.\n\n00:10:03\nand then scaling it back down.\n\n00:10:09\nand so then you have to update your scaler,\n\n00:10:14\nmultiply by 1,000 and you have to adjust to network dynamics?\n\n00:10:23\nSo can we do something better?\n\n00:10:30\nrecall the role of the bits in green.\n\n00:10:39\nAnd we needed scaling because FP16 has a much smaller range\n\n00:10:47\nAnd so because of that, FP16 cannot represent very small\n\n00:10:51\nSo how do we solve this?\n\n00:11:00\n[INAUDIBLE]\n\n00:11:03\nSo here's the problem.\n\n00:11:08\nyou can't represent very small numbers.\n\n00:11:13\n6e minus 5, it gets sort of rounded down to 0.\n\n00:11:23\nSo how do you solve that?\n\n00:11:29\nAbsolutely.\n\n00:11:31\nSo what we're going to do is we're\n\n00:11:36\nSo that's the idea for BFloat16, which stands for brain float 16.\n\n00:11:46\nfor representing the range.\n\n00:11:49\nSo it has the same dynamic range as FP32, but a lot less\n\n00:11:55\nAnd it turns out that this is OK for neural network training.\n\n00:12:03\nto use grad scalers anymore.\n\n00:12:08\npass within the right context.\n\n00:12:15\navailable on all GPUs, so you need\n\n00:12:21\nwhich the H100s, the A100s, the A6000s have.\n\n00:12:28\nmight not be able to utilize BFloat16.\n\n00:12:31\nCan you further why having less precision for the same amount\n\n00:12:35\nYeah, so it's BFloat16 and-- oh, nevermind.\n\n00:12:43\nSo here are some kind of results.\n\n00:12:51\non a single A100.\n\n00:12:59\nreally rich 64-bit representing of floating points.\n\n00:13:08\nbut it also takes a lot more memory.\n\n00:13:13\nwith BFloat16.\n\n00:13:19\nmore or less have the same accuracy-- a little bit better\n\n00:13:24\neffect from the half precision representatio-- and then\n\n00:13:35\nAnd the reason we see speedups for training\n\n00:13:39\nto be faster when you are multiplying in half precision.\n\n00:13:53\nOK, cool.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture12_efficient_training::seg1",
+      "global_kp_id": "kp_floating_point_range_vs_precision",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture12_efficient_training::seg1",
+      "global_kp_id": "kp_mixed_precision_training",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture12_efficient_training::seg1",
+      "global_kp_id": "kp_loss_scaling_for_fp16_training",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture12_efficient_training::seg1",
+      "global_kp_id": "kp_bfloat16",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_floating_point_range_vs_precision",
+      "name": "Floating-point range vs precision",
+      "description": "How FP32, FP16, and related formats allocate bits to sign, exponent/range, and mantissa/precision, and why that affects underflow, overflow, and memory cost.",
+      "track_tags": [
+        "ml_systems",
+        "numerical_stability"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "numerical_computing"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.43,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because floating-point range vs precision formalizes how how FP32, FP16, and related formats allocate bits to sign, exponent/range, and mantissa/precision, and why that affects underflow, overflow, and memory cost, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_mixed_precision_training",
+      "name": "Mixed precision training",
+      "description": "Specialized matrix-multiply units that dominate GPU throughput and typically consume low-precision inputs while accumulating in higher precision. Training scheme that uses low-precision compute for speed and memory savings while retaining higher-precision state for stable updates.",
+      "track_tags": [
+        "gpu_hardware",
+        "ml_systems",
+        "numerics",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "deep_learning_systems",
+        "numerical_computing",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "kernel_engineer",
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because mixed precision training formalizes how specialized matrix-multiply units that dominate GPU throughput and typically consume low-precision inputs while accumulating in higher precision, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp2",
+        "local::lecture_11_large_scale_distributed_training::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_loss_scaling_for_fp16_training",
+      "name": "Loss scaling for FP16 training",
+      "description": "Technique that multiplies the loss before backpropagation so FP16 gradients are less likely to underflow, then unscales before the optimizer step.",
+      "track_tags": [
+        "ml_systems",
+        "numerical_stability"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because loss scaling for FP16 training clarifies technique that multiplies the loss before backpropagation so FP16 gradients are less likely to underflow, then unscales before the optimizer step, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_bfloat16",
+      "name": "BFloat16",
+      "description": "Half-precision format with FP32-like exponent range and lower mantissa precision, often preferred for mixed-precision training on supported hardware.",
+      "track_tags": [
+        "ml_systems",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "hardware_aware_training"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because bFloat16 clarifies half-precision format with FP32-like exponent range and lower mantissa precision, often preferred for mixed-precision training on supported hardware, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.31,
+    0.61
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L12_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture12-efficient-training_transcript.txt"
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture12_efficient_training",
+    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 12 - Efficient Training, Shikhar Murty",
+    "youtube_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA"
+  },
+  "unit": {
+    "unit_id": "local::lecture12_efficient_training::seg3",
+    "course_id": "cs224n_spring_2024",
+    "name": "ZeRO stage 2, ZeRO stage 3, FSDP, and activation memory",
+    "description": "Extends sharding to gradients and parameters, then explains FSDP communication and the separate role of activation memory.",
+    "summary": "Building on ZeRO stage 1, the lecture explains ZeRO stage 2 as also sharding gradients so the full gradient vector is never instantiated at once; during backprop, each layer's gradient is computed, immediately sent to the responsible worker, and then the temporary memory is freed [ts=1483s][ts=1594s]. The instructor argues this is still close to 'free' in communication terms because it resembles the same collective pattern as DDP, while saving more memory than stage 1 [ts=1657s][ts=1680s]. ZeRO stage 3—also called fully sharded data parallel (FSDP)—goes further by sharding model parameters themselves, which is necessary when even the model cannot fit on one GPU [ts=1699s][ts=1735s]. In FSDP, layers are grouped into FSDP units, parameters are flattened and sharded, and the forward pass must all-gather parameters for each layer before computing and then discard them after use [ts=1744s][ts=1868s]. During the backward pass, the system all-gathers layer parameters again, computes gradients on each worker's data, then reduce-scatters the merged gradients to the owning shards before local updates [ts=1871s][ts=1943s]. The segment closes by distinguishing activation memory from parameter and optimizer memory: activations are needed for backprop, scale linearly with batch size, and are not solved by the sharding methods described so far [ts=2100s][ts=2154s].",
+    "key_points": [
+      {
+        "text": "ZeRO stage 2 shards gradients and avoids materializing the full gradient vector at once.",
+        "timestamp_s": 1483,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "During stage-2 backprop, each layer's gradient is computed, sent to the responsible worker, and then deallocated.",
+        "timestamp_s": 1560,
+        "evidence_type": "example"
+      },
+      {
+        "text": "ZeRO stage 3/FSDP shards model parameters in addition to gradients and optimizer state.",
+        "timestamp_s": 1711,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "FSDP forward passes require all-gathering a layer's parameters before computation and freeing them afterward.",
+        "timestamp_s": 1830,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "FSDP backward passes all-gather parameters again and then reduce-scatter gradients to parameter owners.",
+        "timestamp_s": 1911,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Activation memory scales with batch size and remains a separate bottleneck not fixed by ZeRO or FSDP sharding.",
+        "timestamp_s": 2134,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+      "start_s": 1476,
+      "end_s": 2157
+    },
+    "difficulty": 0.79,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+  "transcript_slice": "00:24:39\nSo let's start doing ZeRO stage 2.\n\n00:24:46\nwhich was my optimizer state, I'm\n\n00:24:52\nAnd now this is going to be a little bit more\n\n00:24:59\nfor the workers data slice.\n\n00:25:04\nfor instantiating the gradient for a small subset\n\n00:25:10\nSo how are we going to deal with that?\n\n00:25:16\nvector.\n\n00:25:24\nyou instantiate a vector sort of temporarily\n\n00:25:30\nand then compute the gradient and then just send it\n\n00:25:34\nAnd then you destroy the memory that you just created.\n\n00:25:42\nSo we have four workers.\n\n00:25:48\nAnd the backward pass happens layer by layer.\n\n00:25:55\nSo you have the loss, and then you have this backward\n\n00:26:00\nSo now let's say you're at layer-j.\n\n00:26:06\nfor the parameters at layer-j.\n\n00:26:13\nsend it to the right worker.\n\n00:26:19\nAnd what's going to happen is every GPU\n\n00:26:26\nfor its data slice sends it to the right worker.\n\n00:26:34\nthat you just created.\n\n00:26:42\nbut really not very different from a reduce scatter.\n\n00:26:46\nSo there are four GPUs that have a gradient,\n\n00:26:51\nto whoever is responsible for maintaining gradient\n\n00:26:58\nAnd then, yeah, so there exists some worker that is\n\n00:27:05\nThey're going to update its parameter shard\n\n00:27:13\nalong with the optimizer state.\n\n00:27:18\nyou have to perform an all gather as before.\n\n00:27:35\nSo let's keep moving.\n\n00:27:42\nwas basically free because turns out that an all reduce\n\n00:27:48\nAnd we're kind of doing the same thing here.\n\n00:27:54\nSo this is practically also for free.\n\n00:28:03\noverhead compared to DDP so far.\n\n00:28:06\nLet's try and see if we can shard even more things.\n\n00:28:14\nearly on--\n\n00:28:19\nSo let's say you run into a situation where--\n\n00:28:23\nEven your model wouldn't fit on a single GPU.\n\n00:28:31\nSo you split up your model across all the different GPUs.\n\n00:28:35\nwhich is the stuff in blue.\n\n00:28:42\nWe're not going to get memory savings for free.\n\n00:28:46\nAnd this is 0 stage three.\n\n00:28:52\nThis is also known as FSDP, fully sharded data\n\n00:29:00\nAnd here's the high level sketch.\n\n00:29:07\ncompared to ZeRO stage 1 and 2 just\n\n00:29:13\nat every step of the way.\n\n00:29:18\nSo the first thing we're going to do\n\n00:29:22\ngoing to convert the entire model into FSDP units.\n\n00:29:31\nI'm going to convert that into multiple FSDP units, three FSDP\n\n00:29:38\nSo that's just a data structure, an FSDP unit.\n\n00:29:44\nAnd then I have this FSDP unit.\n\n00:29:48\na flat parameter, and then I'm going\n\n00:29:56\nSo here we have 16 GPUs and a flat parameter consisting\n\n00:30:04\nso that things divide properly.\n\n00:30:14\nAnd so that's basically just a complex way\n\n00:30:18\nand we just like divided up model parameters to every GPU.\n\n00:30:28\nNow let's start thinking about what my forward pass would\n\n00:30:31\nSo there is no GPU that has the full set of parameters.\n\n00:30:35\nLet's say you're at layer 4.\n\n00:30:40\nso you have to communicate.\n\n00:30:44\nThat's the operation that we did to cumulate multiple things that\n\n00:30:55\nSo you perform an all gather so that all,\n\n00:31:02\nand now you don't need layer 4.\n\n00:31:08\nAnd now you have to run your backward pass.\n\n00:31:13\nhave to do a backward pass.\n\n00:31:18\nYou have your upstream gradient.\n\n00:31:21\nSo you need to do another all gather so you get\n\n00:31:27\nAnd then you run a backward pass for layer 4.\n\n00:31:34\nSo recall that every GPU has different data points.\n\n00:31:41\nSo then for layer 4, you do an all gather, get all parameters,\n\n00:31:47\nEvery GPU has different gradients.\n\n00:31:51\nso that you can send the full gradient to the GPU that's\n\n00:32:03\nSo yeah, so that's basically full FSDP.\n\n00:32:13\nthen each GPU will update its own parameter shard\n\n00:32:21\nand then you do a synchronization.\n\n00:32:29\nwe've looked at so far.\n\n00:32:37\nyou have the full model, the full gradient,\n\n00:32:42\nAnd all you're going to divide up is the full data set.\n\n00:32:49\nEvery GPU gets 250 examples.\n\n00:32:54\nEvery GPU has a different gradient.\n\n00:32:58\nand then you synchronize.\n\n00:33:06\nAnd then we looked at ZeRO which is now\n\n00:33:10\nWe don't want the full sort of memory requirements\n\n00:33:15\non every single GPU.\n\n00:33:21\nso that there is so that you don't\n\n00:33:26\nYou kind of break that down between all the different GPUs\n\n00:33:30\nAnd we saw that the communication overhead\n\n00:33:37\nto basically just doing an all reduce\n\n00:33:42\nis a reduce scatter plus an all gather.\n\n00:33:49\nSo you should just do it.\n\n00:33:55\ngot a little bit more complex because you\n\n00:34:02\nstate, and the gradient.\n\n00:34:06\nyou kind have to do some communication\n\n00:34:11\nfor layer 4 in our example, and then also have\n\n00:34:17\nso you get the full gradient, and then you\n\n00:34:20\ncan send the full gradient for whatever chunk of the parameter\n\n00:34:26\nAnd overall, that's like to all gathers plus a reduce scatter.\n\n00:34:35\nBut if you don't have enough GPU VRAM so that you can even\n\n00:34:42\nis kind of what you have to do.\n\n00:34:50\nof ZeRO or FSDP?\n\n00:35:00\nSo I'm going to fix the lie that I said earlier\n\n00:35:08\nSo I said that this is just like model parameters and gradients\n\n00:35:14\nBut there is this thing, there's this final thing, the model\n\n00:35:17\nSo we've all seen that as you want to increase the batch size,\n\n00:35:27\nthat it can't fit more stuff.\n\n00:35:32\nin the backward pass.\n\n00:35:38\nSo the larger the batch size, the more\n\n00:35:42\nAnd by the way, if you're doing mixed precision,\n\n00:35:49\nAnd so that's the other thing that you have to think about.\n\n00:35:57\nhelp with of sharding model activations.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture12_efficient_training::seg3",
+      "global_kp_id": "kp_collective_communication_primitives",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture12_efficient_training::seg3",
+      "global_kp_id": "kp_zero_optimizer_and_gradient_sharding",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture12_efficient_training::seg3",
+      "global_kp_id": "kp_fsdp",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture12_efficient_training::seg3",
+      "global_kp_id": "kp_activation_memory_as_a_separate_bottleneck",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_collective_communication_primitives",
+      "name": "Collective communication primitives",
+      "description": "All-reduce, reduce-scatter, all-gather, and reduce as the core synchronization operations behind DDP, ZeRO, and FSDP.",
+      "track_tags": [
+        "distributed_training",
+        "systems_fundamentals"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_computing"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because collective communication primitives clarifies all-reduce, reduce-scatter, all-gather, and reduce as the core synchronization operations behind DDP, ZeRO, and FSDP, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_zero_optimizer_and_gradient_sharding",
+      "name": "ZeRO optimizer and gradient sharding",
+      "description": "ZeRO stages 1 and 2 reduce memory by sharding optimizer state and then gradients across workers while preserving synchronized updates.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because zeRO optimizer and gradient sharding formalizes how zeRO stages 1 and 2 reduce memory by sharding optimizer state and then gradients across workers while preserving synchronized updates, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_fsdp",
+      "name": "Fully Sharded Data Parallel (FSDP)",
+      "description": "Stage-3 sharding scheme that partitions parameters, gradients, and optimizer state, then gathers per-layer weights on demand during forward and backward passes. A memory-saving variant of data parallelism that shards parameters, gradients, and optimizer state across GPUs and materializes weights on demand.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_algorithms",
+        "parallel_computing"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "ml_engineer",
+        "ml_infrastructure_engineer",
+        "research_engineer",
+        "systems_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because fully Sharded Data Parallel (FSDP) formalizes how stage-3 sharding scheme that partitions parameters, gradients, and optimizer state, then gathers per-layer weights on demand during forward and backward passes, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp8",
+        "local::lecture_11_large_scale_distributed_training::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_activation_memory_as_a_separate_bottleneck",
+      "name": "Activation memory as a separate bottleneck",
+      "description": "Model activations must be stored for backpropagation, scale with batch size, and are not automatically reduced by parameter or optimizer sharding.",
+      "track_tags": [
+        "memory_optimization",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because activation memory as a separate bottleneck clarifies model activations must be stored for backpropagation, scale with batch size, and are not automatically reduced by parameter or optimizer sharding, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture12_efficient_training::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.64,
+    0.94
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L12_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture12-efficient-training_transcript.txt"
+  }
+}

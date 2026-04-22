@@ -1,0 +1,193 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_3",
+    "lecture_title": "Regularization and Optimization",
+    "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4"
+  },
+  "unit": {
+    "unit_id": "local::lecture_3::seg6",
+    "course_id": "CS231N",
+    "name": "Adaptive optimizers: RMSProp, Adam, and AdamW",
+    "description": "Introduces adaptive per-parameter scaling, Adam's combination of momentum and RMSProp, and decoupled weight decay in AdamW.",
+    "summary": "RMSProp is introduced as an adaptive optimizer that changes update scale by dividing by a decayed squared-gradient term [ts=2969s]. Its intuition is to take smaller steps in directions with large squared gradients and larger steps in flatter directions, so steep directions are damped and flat directions accelerated [ts=3039s]. The visual comparison shows RMSProp turning toward the valley center more quickly than SGD because it changes the relative step sizes by dimension [ts=3159s]. Adam is described as roughly RMSProp with momentum: it combines a first-moment velocity with a second-moment squared-gradient estimate [ts=3226s]. A naive Adam form has a first-timestep issue because moment estimates start at zero and beta values such as 0.9 and 0.999 are close to 1, so the full Adam form adds bias correction [ts=3305s]. Adam with beta1=0.9, beta2=0.999, and learning rate 1e-3 or 5e-4 is recommended as a strong starting point for many models [ts=3403s]. AdamW decouples weight decay: standard Adam includes L2 in moment calculations, while AdamW applies decay after computing moments so velocity reflects the loss landscape more independently of raw weight values [ts=3457s].",
+    "key_points": [
+      {
+        "text": "RMSProp adds element-wise scaling based on historical squared gradients with decay.",
+        "timestamp_s": 2969,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "RMSProp dampens steep directions and accelerates flatter directions.",
+        "timestamp_s": 3039,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Adam combines momentum-style first moments with RMSProp-style second moments.",
+        "timestamp_s": 3226,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Adam needs bias correction because moment estimates start at zero.",
+        "timestamp_s": 3305,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A common Adam starting point is beta1=0.9, beta2=0.999, and learning rate 1e-3 or 5e-4.",
+        "timestamp_s": 3403,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Standard Adam includes L2 in moment calculations, while AdamW applies weight decay after moments are computed.",
+        "timestamp_s": 3457,
+        "evidence_type": "formula"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+      "start_s": 2919,
+      "end_s": 3525
+    },
+    "difficulty": 4.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 10,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "transcript_slice": "00:48:40\ntry a bunch of different ones and see what works best.\n\n00:48:46\nYeah.\n\n00:48:47\nIt could hurt convergence, potentially.\n\n00:48:55\nI'll continue then.\n\n00:49:01\nAnd one other thing I wanted to point out\n\n00:49:05\nSo these equations are identical,\n\n00:49:09\nsee it written in different ways.\n\n00:49:13\nMaybe in interest of time I'll skip over why they're identical.\n\n00:49:18\nand prove to yourself that these are essentially\n\n00:49:22\nOK.\n\n00:49:26\nis a different optimizer.\n\n00:49:29\nAnd now we'll talk about something called RMSProp.\n\n00:49:37\nbut it came out by Geoffrey Hinton's group.\n\n00:49:44\nof just having this running velocity, which\n\n00:49:51\nelement-wise scaling of the gradient.\n\n00:50:00\nAnd the decay rate here is very much like the momentum term\n\n00:50:07\nSo we have this running average where we take the previous term\n\n00:50:12\nAnd then we do 1 minus times.\n\n00:50:16\nAnd so this is a running average of our squared gradients.\n\n00:50:22\nsmaller values will get much smaller.\n\n00:50:26\nin certain values those will get very large\n\n00:50:32\nAnd we're actually going to divide here.\n\n00:50:36\nSo the basic idea here is we're actually now stepping--\n\n00:50:42\nwhat if we changed the direction in which we're stepping?\n\n00:50:46\nAnd this is what this is doing where we're dividing\n\n00:50:50\nSo for values in which we have very large squared gradients,\n\n00:50:59\nwe'll divide by a larger value.\n\n00:51:03\nAnd the more flat regions we'll step farther because we're\n\n00:51:08\nSo this is the basic intuition behind it.\n\n00:51:12\nhad earlier about can we change the way we're\n\n00:51:15\nAnd that's exactly what this is doing here.\n\n00:51:18\nbut you're dividing it by this square root\n\n00:51:23\nwhich gives you larger steps in the flatter areas of your loss\n\n00:51:31\nCan anyone explain, I just gave a brief summary,\n\n00:51:39\nWhat happens with our gradient step direction?\n\n00:51:44\nWe're dividing by this value, which\n\n00:51:47\nthe past gradients.\n\n00:51:52\nso these are vector operations.\n\n00:51:57\nAnd we're dividing element-wise by another set\n\n00:52:02\nSo when it's very large, the denominator is very large,\n\n00:52:07\nin that direction because we're dividing by a large value.\n\n00:52:12\nbecomes much larger, because the gradient squared term is small.\n\n00:52:18\nthe effective step size.\n\n00:52:21\nSo it's specifically for this type of example\n\n00:52:28\nyou want to be moving more in the flatter direction.\n\n00:52:35\nmean in this context?\n\n00:52:39\nalong the steep directions less and along the flat directions\n\n00:52:45\nYeah, yeah.\n\n00:52:48\nbecause it compares the three different approaches here.\n\n00:52:52\ncan see it overshoots as there is a question about earlier.\n\n00:52:57\nYou have SGD, which is slower because it's just always moving\n\n00:53:02\nAnd then you have RMSProp, which we just mentioned.\n\n00:53:07\nin the direction that I'm moving my mouse here\n\n00:53:15\nso we move less in that-- sorry, we move less in that direction.\n\n00:53:21\ntowards the center where it's a flatter landscape at this point,\n\n00:53:26\nSo we're actually changing the direction we're going based on--\n\n00:53:31\nand more in the flat direction.\n\n00:53:33\nThese are the three.\n\n00:53:35\nwhich is by far the most popular optimizer used\n\n00:53:41\nSo it's just a combination of the SGD momentum and RMSProp.\n\n00:53:49\nis, which is the most popular optimizer in deep learning.\n\n00:53:54\nto understand it.\n\n00:53:57\nAnd this first term here in the red\n\n00:54:03\nwhere we have the current, so the beta 1 is the momentum term,\n\n00:54:11\nAnd we're taking a running average.\n\n00:54:17\nfor RMSProp.\n\n00:54:21\nwe're multiplying the learning rate instead of by the step size\n\n00:54:25\nBut now we're still doing the thing\n\n00:54:29\nAnd it's the second moment here.\n\n00:54:33\nis like a relation to physics and mechanics,\n\n00:54:38\nwe explained earlier, where you're accelerating movement\n\n00:54:43\nalong the steep ones, and you're also\n\n00:54:47\nSo you gradually build up speed if you're continuously\n\n00:54:52\nSo as it's written right now, this\n\n00:54:59\nAnd it might be a little bit unclear to you why,\n\n00:55:05\nSo one thing to note is that these betas, beta1 beta2,\n\n00:55:13\nand that these two values are also initialized to 0.\n\n00:55:19\nuse this formulation of Adam you would\n\n00:55:24\nSo one of the other things is it has to do with the second moment\n\n00:55:29\nSo this is the main issue here.\n\n00:55:33\nand then use it on the next line, you run into an issue.\n\n00:55:39\nYeah, that's the exact issue.\n\n00:55:44\nYou have a very large beta.\n\n00:55:48\nAnd if your gradient is not very large in your first step\n\n00:55:54\nNow, we're dividing by something very close to 0,\n\n00:55:59\neven though our gradient was small.\n\n00:56:03\nAnd so the final thing that Adam has is it\n\n00:56:08\nto account for this issue where it's dependent now\n\n00:56:12\nSo I think, this is also something\n\n00:56:16\nI just want to give the basic intuition\n\n00:56:21\nwhich is this really large initial step.\n\n00:56:26\nAnd you'll see how the time step is used.\n\n00:56:31\ninitial step.\n\n00:56:36\nare not needed as much.\n\n00:56:40\nThese are some good defaults that people normally use.\n\n00:56:47\nand maybe it'll work, maybe it won't.\n\n00:56:50\nAnd you can then tell from the remaining slides,\n\n00:56:56\nHow do you know if these other values are right.\n\n00:57:02\nBut the basic idea is that you can\n\n00:57:07\nThey all have different properties.\n\n00:57:12\nwith momentum, where it has characteristics of both, which\n\n00:57:16\nIt aligns with our intuition.\n\n00:57:22\nthat we could look at how regularization\n\n00:57:27\nSo for example, if we have L2 regularization,\n\n00:57:33\nAnd I think the answer is it's actually not\n\n00:57:36\nAnd you can do it in different ways.\n\n00:57:41\ncomputing their gradient.\n\n00:57:45\nthe loss portion of our-- so the data loss portion and then\n\n00:57:49\nFor Adam, it's using both of those\n\n00:57:53\nBut AdamW basically, only looks at the data loss\n\n00:57:59\nthese steps, and it just adds the regularization term\n\n00:58:03\nSo basically, all I'm trying to describe to you\n\n00:58:07\nyou incorporate regularization into your optimizers.\n\n00:58:12\nadd it at the end, L2 regularization at the end,\n\n00:58:17\nfor how you're calculating the velocities\n\n00:58:21\nSo this is the main difference.\n\n00:58:25\nAdamW works slightly better.\n\n00:58:31\nI assume because it does slightly better for them.\n\n00:58:36\nWhy are you splitting it into two?\n\n00:58:42\nAnd AdamW is specifically, separating it into two.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_3::seg6",
+      "global_kp_id": "kp_momentum_optimizer",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg6",
+      "global_kp_id": "kp_rmsprop_and_adaptive_learning_rates",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg6",
+      "global_kp_id": "kp_adam_and_adamw",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_momentum_optimizer",
+      "name": "Momentum optimizer",
+      "description": "Using velocity or a running average of gradients to smooth updates and keep moving in useful directions.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "momentum",
+        "optimizer",
+        "velocity"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because momentum optimizer clarifies using velocity or a running average of gradients to smooth updates and keep moving in useful directions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_rmsprop_and_adaptive_learning_rates",
+      "name": "RMSProp and adaptive learning rates",
+      "description": "Element-wise update scaling by historical squared gradients, giving per-parameter adaptive learning rates.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "adaptive_learning_rates",
+        "rmsprop"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.94,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rMSProp and adaptive learning rates clarifies element-wise update scaling by historical squared gradients, giving per-parameter adaptive learning rates, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_adam_and_adamw",
+      "name": "Adam and AdamW",
+      "description": "Adam combines momentum and RMSProp-style adaptivity; AdamW decouples weight decay from moment estimation.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "adam",
+        "adamw",
+        "bias_correction",
+        "weight_decay"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because adam and AdamW formalizes how adam combines momentum and RMSProp-style adaptivity; AdamW decouples weight decay from moment estimation, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp13"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.65,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L3_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture03-regularization-and-optimization_transcript.txt"
+  }
+}

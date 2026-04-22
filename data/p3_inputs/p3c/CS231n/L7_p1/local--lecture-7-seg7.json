@@ -1,0 +1,144 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_7",
+    "lecture_title": "Lecture 7: Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA"
+  },
+  "unit": {
+    "unit_id": "local::lecture_7::seg7",
+    "course_id": "cs231n_spring_2025",
+    "name": "RNN tradeoffs and vision-language applications",
+    "description": "Covers practical pros/cons of RNNs and historical computer-vision sequence uses.",
+    "summary": "RNN advantages include processing arbitrary-length sequences, keeping model size fixed as length grows, and reusing the same weights at every time step [ts=2899s] [ts=2948s]. In theory, hidden states can carry information from far back, but in practice recurrence is hard to batch and fixed-size hidden states lose information over long sequences [ts=2926s] [ts=2982s] [ts=3032s]. In image captioning, a CNN or visual encoder represents the image, often via a pretrained model’s second-to-last layer, and an RNN decoder combines that visual information with previous generated text until an end token appears [ts=3056s] [ts=3076s] [ts=3107s] [ts=3161s]. The instructor notes captioning failures caused by dataset co-occurrence bias and hallucination of common objects or actions [ts=3191s] [ts=3229s]. Other historical applications include VQA, visual dialog, and visual language navigation [ts=3291s] [ts=3364s] [ts=3382s].",
+    "key_points": [
+      {
+        "text": "RNNs can process arbitrary-length sequences with a fixed-size model.",
+        "timestamp_s": 2899,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Sequential dependence makes RNN training hard to batch and scale.",
+        "timestamp_s": 2982,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Fixed-size hidden states may lose information from far back in long sequences.",
+        "timestamp_s": 3032,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Image captioning can use a pretrained CNN representation as input to an RNN decoder.",
+        "timestamp_s": 3056,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Captioning models can hallucinate objects/actions due to dataset co-occurrence bias.",
+        "timestamp_s": 3191,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=7",
+      "start_s": 2899,
+      "end_s": 3420
+    },
+    "difficulty": 3.2,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 9,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "transcript_slice": "00:48:22\noffs why you might want to use an RNN, when is it helpful.\n\n00:48:29\nSo a lot of these modern language models\n\n00:48:33\ncalled a context length or context window, maximum context\n\n00:48:37\nRNNs don't have this.\n\n00:48:40\nessentially, as long as you can keep running the model on it.\n\n00:48:46\nThe computation for the time step, t\n\n00:48:52\nback if it's captured in the hidden state.\n\n00:48:56\nall of the dynamics of your input\n\n00:48:59\nit can use values from an extremely long time ago.\n\n00:49:04\nwith this, which we'll go into some details there.\n\n00:49:13\nSo we had an example where, what if you just\n\n00:49:20\nYou don't have this issue, which is nice.\n\n00:49:25\nSo basically, we know the update rule\n\n00:49:29\nSo there's some nice symmetry here.\n\n00:49:35\nyou're always doing the same thing\n\n00:49:38\nand also helps with some implementation as well.\n\n00:49:44\nSo you need to compute the previous hidden state to compute\n\n00:49:50\nSo this can be slow if you need to.\n\n00:49:58\non all the previous ones, then this recurrence computation\n\n00:50:05\nSo although this is not an issue during inference time\n\n00:50:10\nalso you have this issue where you\n\n00:50:16\nbut at training time, it's actually\n\n00:50:21\nbecause in order to calculate the loss,\n\n00:50:27\nSo this can pose challenges for scaling up to a lot of data.\n\n00:50:34\ndifficult to access information many time steps back\n\n00:50:40\nand we're trying to cram all the information into it.\n\n00:50:44\nas your sequence goes longer and longer.\n\n00:50:52\nto computer vision, where RNNs have seen success now.\n\n00:50:58\nwhich we talked about.\n\n00:51:02\nthere's this start token or start character which\n\n00:51:06\nAnd then you will terminate when you have this end character\n\n00:51:09\nIn this case, it seems like it's word level tokens.\n\n00:51:16\nThe most basic way to do it is you\n\n00:51:22\na visual encoder, that encodes the image,\n\n00:51:28\nas well as the previous text that was generated.\n\n00:51:33\nAnd very more concretely, how would you\n\n00:51:37\nYou can imagine you have this test image.\n\n00:51:43\nstarting at the first layers at the top\n\n00:51:47\nYou can imagine this is something that was trained\n\n00:51:51\nAnd so we're not going to use the class labels,\n\n00:51:56\nThis is the common strategy we saw\n\n00:52:00\ngetting good visual representations of images.\n\n00:52:06\nAnd then we can start using this as input to our hidden state.\n\n00:52:13\nof this Wih value here.\n\n00:52:23\nwe're also tracking the visual components here.\n\n00:52:28\nbecause this won't be in any of the assignments,\n\n00:52:33\nhow RNNs were used historically with CNNs,\n\n00:52:37\nand now we're including this information\n\n00:52:41\nSo we use the sampling process, either greedy sampling,\n\n00:52:46\nthe tokens at each time step.\n\n00:52:50\nWhenever we sample the end token,\n\n00:52:53\nAnd these models actually worked very well for the time.\n\n00:52:58\nSo you can see here a lot of nice examples of where\n\n00:53:05\non the input image, but also they the models would struggle\n\n00:53:11\nSo a lot of these have to do with the distribution of where\n\n00:53:19\nFor example, someone holding something with their hands\n\n00:53:27\nBut obviously, we can tell this is a phone because it's\n\n00:53:34\nnot downwards.\n\n00:53:39\nAlso, I guess they think the woman's holding\n\n00:53:46\nThey see a beach, so they assume there's a surfboard.\n\n00:53:51\nis still extremely common with vision language models\n\n00:53:58\nare commonly present in a given scene,\n\n00:54:03\nAlso, things like bird being perched in a tree\n\n00:54:07\nThese are all based on the bias in the data set, essentially,\n\n00:54:14\nis most probably true that a certain object\n\n00:54:17\nwhen in the actual image it's not the case.\n\n00:54:25\nof these actions or objects with the particular scene.\n\n00:54:29\nbut it doesn't learn to disentangle.\n\n00:54:33\nwe know they're not throwing because the glove is here,\n\n00:54:38\nbut you need to explain it like that.\n\n00:54:42\nwe're training them just to output the caption.\n\n00:54:46\nand that's why it's part of the reason you\n\n00:54:51\nSo for visual question answering,\n\n00:54:57\nand there are two formulations for visual question answering\n\n00:55:03\nOne is to basically, you say you have\n\n00:55:08\nand you want to see how well it could answer questions.\n\n00:55:14\nand then have it output text and look\n\n00:55:19\nSo you have a probability for each character or token,\n\n00:55:23\nto get the probability of the overall answer.\n\n00:55:29\nto do question answering.\n\n00:55:36\na question as input to the model,\n\n00:55:42\nseparate inputs to your model.\n\n00:55:45\nper question.\n\n00:55:50\nyou have four different classes: answer 1, answer 2, answer 3,\n\n00:55:54\nAnd a lot of different ways you can formulate it,\n\n00:56:00\nwhere you need to use language and where\n\n00:56:04\nAlso visual dialogue.\n\n00:56:10\nThese days, the tasks you have one model that can do almost all\n\n00:56:17\nWe've really seen an explosion in the capabilities\n\n00:56:22\nMaybe one other type of model that RNNs were commonly used for\n\n00:56:30\nSo you have these images coming in, and you want to output\n\n00:56:37\nHow do you get to the target destination?\n\n00:56:42\nall to be aware of where these sequence models were used.\n\n00:56:53\nbefore, but just in the same way where",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_7::seg7",
+      "global_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_7::seg7",
+      "global_kp_id": "kp_character_level_autoregressive_language_modeling",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "name": "RNN tradeoffs and applications",
+      "description": "Arbitrary-length processing and weight sharing versus sequential computation and fixed-state bottlenecks, with CV applications.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rNN tradeoffs and applications clarifies arbitrary-length processing and weight sharing versus sequential computation and fixed-state bottlenecks, with CV applications, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_character_level_autoregressive_language_modeling",
+      "name": "Character-level autoregressive language modeling",
+      "description": "Predicting the next character/token, feeding generated outputs back in, and sampling from probabilities.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because character-level autoregressive language modeling clarifies predicting the next character/token, feeding generated outputs back in, and sampling from probabilities, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.05,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture07-recurrent-neural-networks_transcript.txt"
+  }
+}

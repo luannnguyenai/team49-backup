@@ -1,0 +1,348 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "tutorial02-pytorch",
+    "lecture_title": "PyTorch Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg"
+  },
+  "unit": {
+    "unit_id": "local::tutorial02-pytorch::seg4",
+    "course_id": "cs224n-2024",
+    "name": "Neural-network modules and the training loop",
+    "description": "Shows how to define layers with torch.nn, compose them into blocks and custom modules, inspect parameters, choose losses and optimizers, and implement a full PyTorch training loop.",
+    "summary": "This final segment moves from tensors to neural-network construction. It introduces torch.nn and explains nn.Linear as a layer parameterized by input and output dimensions that maps the last dimension of its input to the specified output size, effectively acting like an affine transformation with optional bias [ts=2098s] [ts=2163s]. A worked example passes a 2x3x4 tensor through a linear layer with output size 2 and obtains a 2x3x2 tensor; a mismatched input dimension example is used to argue again for printing shapes when debugging layer errors [ts=2183s] [ts=2286s]. The instructor shows that model parameters, including weights and bias, can be inspected and that they store gradients to be updated during training [ts=2383s] [ts=2419s]. Other module building blocks are briefly surveyed, including convolutions, batch normalization, upsampling, and pooling [ts=2424s] [ts=2451s]. The segment then adds nonlinearities with sigmoid and uses nn.Sequential to compose a linear layer and activation into a reusable block [ts=2474s] [ts=2528s]. A custom multilayer perceptron is implemented by subclassing nn.Module, defining parameters in **init**, and defining the computation in forward [ts=2531s] [ts=2632s]. Finally, optimization is introduced through torch.optim: the model, Adam optimizer, and cross-entropy loss are instantiated, and the canonical training loop is demonstrated as zero_grad, forward pass, loss computation, backward, and optimizer step [ts=2645s] [ts=2762s]. The segment ends by emphasizing that PyTorch abstracts away manual backpropagation and optimizer details so students can focus on assembling architectures from reusable components [ts=2769s] [ts=2813s].",
+    "key_points": [
+      {
+        "text": "nn.Linear takes an input dimension and output dimension and transforms the last input dimension to the output size, with an optional bias term.",
+        "timestamp_s": 2108,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Passing a 2x3x4 tensor through a linear layer with output size 2 yields a 2x3x2 output tensor.",
+        "timestamp_s": 2183,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Printing shapes is an effective way to debug layer mismatch errors because internal error messages may flatten or reinterpret tensor shapes.",
+        "timestamp_s": 2255,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Neural-network parameters include both weights and bias and are accessible for inspection through the layer's parameters.",
+        "timestamp_s": 2383,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "nn.Sequential can compose layers such as a linear transform followed by sigmoid into a single callable block.",
+        "timestamp_s": 2498,
+        "evidence_type": "example"
+      },
+      {
+        "text": "To define a custom network in PyTorch, subclass nn.Module, initialize components in **init**, and implement the forward pass in forward.",
+        "timestamp_s": 2531,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A standard training loop is: optimizer.zero_grad(), predictions = model(x), compute loss, loss.backward(), optimizer.step().",
+        "timestamp_s": 2705,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+      "start_s": 2078,
+      "end_s": 2813
+    },
+    "difficulty": 0.55,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg",
+  "transcript_slice": "00:34:38\nSo now we're going to move on to one\n\n00:34:44\nis neural networks.\n\n00:34:47\nAnd once we have that and we have our optimization,\n\n00:34:54\ntrain a neural network, what does that look like,\n\n00:34:59\nin PyTorch.\n\n00:35:04\nis we're going to be defining neural networks in terms\n\n00:35:12\nwill implement for instance linear layers\n\n00:35:17\nSo we're going to import torch.nn\n\n00:35:23\ngoing to make use of.\n\n00:35:27\nThe way the linear layer works in PyTorch,\n\n00:35:32\nIt takes in the input dimension and then the output dimension.\n\n00:35:42\nhas some arbitrary amount of dimensions,\n\n00:35:48\nAnd it will essentially output it\n\n00:35:54\nand the very last place.\n\n00:36:00\nas essentially just performing a simple ax plus b.\n\n00:36:08\nbut you can also disable that if you don't want a bias term.\n\n00:36:23\nSo here we have our input.\n\n00:36:31\nas an input size of 4 and output size of 2.\n\n00:36:39\nby instantiating it with nn.linear.\n\n00:36:45\nwe call it linear.\n\n00:36:48\nas if it were a function to whatever input.\n\n00:36:55\nthrough this linear layer to get our output.\n\n00:37:06\nThen we pass it through this linear layer,\n\n00:37:10\nAnd so ultimately, our output is 2x3x2, which is good.\n\n00:37:16\nThat's not shape error.\n\n00:37:21\nis maybe you decide to get a little confused\n\n00:37:32\nYou match the wrong dimension.\n\n00:37:39\nAnd you see that the error message isn't as helpful\n\n00:37:43\nwe were working with.\n\n00:37:45\nUnder the hood, PyTorch has changed this to a 6x4.\n\n00:37:54\nwith the shape.\n\n00:37:58\none simple thing we could do is actually just\n\n00:38:02\nOK, this last dimension is size 4,\n\n00:38:06\ndimension in my linear layer to be size 4.\n\n00:38:17\nwe have this grad function.\n\n00:38:21\ncomputing and storing the gradients here for our tensor.\n\n00:38:32\nSo typically, we think of the first dimension\n\n00:38:36\nSo in this case, it said n-- this\n\n00:38:40\nit would be the number of images.\n\n00:38:44\nit would be essentially the number\n\n00:38:51\nThat is usually considered the batch dimension.\n\n00:38:55\nnumber of dimensions.\n\n00:38:59\nthis could be a 4-dimensional tensor object.\n\n00:39:05\nby the height, by the width.\n\n00:39:10\nYour input tensor can be any number of dimensions.\n\n00:39:16\nneeds to match up with the input dimension of your linear layer.\n\n00:39:22\nSo essentially, we're saying that we're\n\n00:39:28\nis 4-dimensional to now 2-dimensional.\n\n00:39:33\nas if we're stacking a neural network,\n\n00:39:38\nAnd this would be like the hidden dimension size.\n\n00:39:45\nprint out the parameters.\n\n00:39:50\nor in general, for any layer that we\n\n00:39:56\nAnd in this case, we see that there's two sets of parameters\n\n00:40:07\nitself.\n\n00:40:11\nAnd in this case, these are what the current values\n\n00:40:19\nAnd they'll change as we trained the network.\n\n00:40:24\nSo now let's go through some of the other module layers.\n\n00:40:34\nyou have access to.\n\n00:40:37\nThey are pretty common.\n\n00:40:40\nYou have transpose convolutions.\n\n00:40:45\nin your network.\n\n00:40:48\nYou can do max pooling.\n\n00:40:51\nBut the main key here is that all of them\n\n00:40:56\njust like we did with nn.Linear.\n\n00:41:02\nI guess I'm running out of time, but let's just try and go\n\n00:41:07\nwrap up by showing you an example that\n\n00:41:10\nSo in this case, we can define an activation function, which\n\n00:41:16\nWe need to introduce non-linearities.\n\n00:41:21\nAnd so now we can define our network\n\n00:41:26\nan activation.\n\n00:41:32\nwe don't need to actually write every single line-by-line\n\n00:41:38\nWe can actually stack all of them together.\n\n00:41:43\nand list all of the layers.\n\n00:41:47\nAnd then now we're just essentially passing the input\n\n00:41:54\nSo we take our input.\n\n00:42:02\nLet's just kind of see putting it all together\n\n00:42:05\nand what does it look like when we train one?\n\n00:42:10\na multi-layer perceptron.\n\n00:42:14\nyou extend the nn.module class.\n\n00:42:20\nyou have to define when you create your own network.\n\n00:42:24\nSo in the init function, you actually\n\n00:42:28\nIn this case, we initialize an input size, a hidden size,\n\n00:42:34\nIn this case, it's a simple model,\n\n00:42:40\nby an activation, followed by another linear layer,\n\n00:42:45\nAnd the second function we have to define\n\n00:42:50\nof the network.\n\n00:42:56\nIn general, it could take in some arbitrary amount of inputs\n\n00:43:02\nneeds to figure out how are you actually computing the output?\n\n00:43:07\nWe just pass it into the network that we just defined\n\n00:43:12\nAnd again, you could do this more explicitly\n\n00:43:19\nwrite out all of the layers individually instead\n\n00:43:27\na line-by-line operation for each one of these layers.\n\n00:43:35\nit's very simple to use it.\n\n00:43:39\ninstantiate our model by calling multi-layer perceptron\n\n00:43:48\nSo that's great, but this is all just the forward pass.\n\n00:43:53\nHow do we actually make it better?\n\n00:43:57\nis we have optimization built in to PyTorch.\n\n00:44:02\nwhich goes and computes all of these gradients\n\n00:44:05\nAnd now the only step left is to actually update the parameters\n\n00:44:10\nAnd so here we'll import the torch.optim package,\n\n00:44:19\nThis part is just creating some random data,\n\n00:44:25\nBut this is really the key here, which\n\n00:44:31\nWe'll define the Adam optimizer.\n\n00:44:38\nWe'll define a loss function, which is again,\n\n00:44:41\nIn this case, we're using the cross entropy loss.\n\n00:44:48\nis just call model on our actual input.\n\n00:44:53\ncall our loss function on our predictions\n\n00:44:57\nAnd we extract the scalar here.\n\n00:45:03\nthis is what the training loop looks like.\n\n00:45:06\nwant to train our network.\n\n00:45:11\nis we take our optimizer and we zero out the gradient.\n\n00:45:16\nnoted, we actually are accumulating the gradient.\n\n00:45:22\nSo we zero out the gradient.\n\n00:45:28\nWe then compute the loss between the predictions\n\n00:45:33\nFinally, we call loss.backward.\n\n00:45:37\nof the gradients in the backward pass from our loss.\n\n00:45:45\nIn this case, we're using Adam.\n\n00:45:50\nAnd so if we run this code, we end up\n\n00:45:55\nis relatively high.\n\n00:45:59\ncompletely fit our data.\n\n00:46:05\nand we printed them out from the start as well,\n\n00:46:09\ndone this optimization.\n\n00:46:14\nthink the key takeaway is that a lot of the things that you're\n\n00:46:19\nare really about understanding the basics of how\n\n00:46:25\nhow you implement the backward pass.\n\n00:46:29\nget to the very next assignment, you'll\n\n00:46:33\nunderstanding of those things, you\n\n00:46:37\ndo you do backprop, how do you store all of these gradients,\n\n00:46:43\nand let PyTorch handle all of that for you.\n\n00:46:48\nof these different neural network layers\n\n00:46:53\ncan use to solve whatever problems you need.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::tutorial02-pytorch::seg4",
+      "global_kp_id": "kp_neural_network_modules_and_composition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::tutorial02-pytorch::seg4",
+      "global_kp_id": "kp_pytorch_training_loop",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::tutorial02-pytorch::seg4",
+      "global_kp_id": "kp_shape_based_debugging",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::tutorial02-pytorch::seg4",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::tutorial02-pytorch::seg4",
+      "global_kp_id": "kp_computation_graphs_and_backprop",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::tutorial02-pytorch::seg4",
+      "global_kp_id": "kp_gradient_accumulation_and_zero_grad",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_neural_network_modules_and_composition",
+      "name": "Neural-network modules and composition",
+      "description": "PyTorch provides reusable modules such as linear layers, activations, and Sequential blocks, and custom networks are created by subclassing nn.Module.",
+      "track_tags": [
+        "model_building",
+        "software_abstractions"
+      ],
+      "domain_tags": [
+        "neural_networks",
+        "pytorch"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because neural-network modules and composition formalizes how pyTorch provides reusable modules such as linear layers, activations, and Sequential blocks, and custom networks are created by subclassing nn.Module, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial02-pytorch::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pytorch_training_loop",
+      "name": "PyTorch training loop",
+      "description": "A standard PyTorch training loop combines forward computation, loss evaluation, backward gradient computation, and an optimizer step inside an epoch loop. Treating Hugging Face models as standard PyTorch modules inside a DataLoader-based training loop with optimizer and scheduler.",
+      "track_tags": [
+        "fine_tuning",
+        "optimization",
+        "pytorch",
+        "training",
+        "training_loops"
+      ],
+      "domain_tags": [
+        "deep_learning_training",
+        "nlp",
+        "optimization",
+        "pytorch"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "applied_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_research",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because pyTorch training loop synthesizes a standard PyTorch training loop combines forward computation, loss evaluation, backward gradient computation, and an optimizer step inside an epoch loop into an end-to-end method or integrated recipe.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp8",
+        "local::tutorial02-pytorch::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_shape_based_debugging",
+      "name": "Shape-based debugging",
+      "description": "Printing and checking tensor shapes is a core debugging habit for understanding errors and verifying that operations behave as intended.",
+      "track_tags": [
+        "debugging",
+        "engineering_practice"
+      ],
+      "domain_tags": [
+        "pytorch",
+        "software_engineering"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.22,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because shape-based debugging clarifies printing and checking tensor shapes is a core debugging habit for understanding errors and verifying that operations behave as intended, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial02-pytorch::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "name": "Tensor shapes and broadcasting",
+      "description": "Reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication. Core shape vocabulary for rectangular matrices, one-dimensional vectors, higher-dimensional tensors, and NumPy shape notation.",
+      "track_tags": [
+        "broadcasting",
+        "debugging",
+        "deep_learning",
+        "linear_algebra",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "linear_algebra",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because tensor shapes and broadcasting formalizes how reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial01-python-review::kp10",
+        "local::tutorial01-python-review::kp15",
+        "local::tutorial02-pytorch::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_computation_graphs_and_backprop",
+      "name": "Computational graphs and automatic differentiation",
+      "description": "General reverse-mode autodiff runs forward in topological order on a DAG and backward in reverse topological order, which is how modern frameworks implement backpropagation. A neural network can be understood as a directed acyclic graph of operations whose forward pass computes values and whose backward pass computes gradients.",
+      "track_tags": [
+        "automatic_differentiation",
+        "deep_learning",
+        "deep_learning_basics",
+        "implementation",
+        "neural_networks",
+        "optimization",
+        "systems_for_ml"
+      ],
+      "domain_tags": [
+        "automatic_differentiation",
+        "backpropagation",
+        "computation_graphs",
+        "deep_learning",
+        "pytorch",
+        "software_engineering"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "research_engineer",
+        "research_scientist",
+        "software_engineer_ml"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because computational graphs and automatic differentiation formalizes how general reverse-mode autodiff runs forward in topological order on a DAG and backward in reverse topological order, which is how modern frameworks implement backpropagation, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture03-backprop::kp9",
+        "local::lecture03-backprop::kp11",
+        "local::tutorial02-pytorch::kp5",
+        "local::lecture_4_neural_networks_and_backpropagation::kp7",
+        "local::lecture_5_image_classification_with_cnns::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gradient_accumulation_and_zero_grad",
+      "name": "Gradient accumulation and zero_grad",
+      "description": "PyTorch accumulates gradients across backward passes, so training code must explicitly zero them before each new optimization step.",
+      "track_tags": [
+        "optimization",
+        "training_loops"
+      ],
+      "domain_tags": [
+        "deep_learning_training",
+        "pytorch"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gradient accumulation and zero_grad clarifies pyTorch accumulates gradients across backward passes, so training code must explicitly zero them before each new optimization step, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial02-pytorch::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.4,
+    0.7
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_pytorch_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-tutorial02-pytorch_transcript.txt"
+  }
+}

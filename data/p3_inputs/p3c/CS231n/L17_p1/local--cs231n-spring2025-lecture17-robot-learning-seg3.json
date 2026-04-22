@@ -1,0 +1,197 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "unit": {
+    "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+    "course_id": "stanford::cs231n::spring_2025",
+    "name": "Robot perception and the perception-action loop",
+    "description": "Explains what makes robot perception different from standard computer vision: multimodal sensing, incomplete and dynamic worlds, affordances, and tight coupling between perception and action.",
+    "summary": "Robot perception is presented as the problem of distilling structured, decision-relevant knowledge from high-dimensional observations such as RGB, RGBD, and tactile signals [ts=775s] [ts=793s]. Li argues that the real world is messy: sensors are partial and noisy, actions can fail, and robots must cope with deformable objects, moving agents, and changing scenes [ts=817s] [ts=836s] [ts=854s]. Because of this, capable systems use multimodal sensing and combine modalities such as vision, touch, audio, and depth so that each compensates for the others [ts=877s] [ts=901s] [ts=923s]. He then contrasts passive computer vision with robot vision, which must reason about affordances and the effects of actions; robot vision is embodied, active, and situated, and should close a task-specific perception-action loop rather than recover the entire world state [ts=938s] [ts=989s] [ts=998s] [ts=1075s].",
+    "key_points": [
+      {
+        "text": "Robot perception turns raw RGB, RGBD, and tactile observations into structured information useful for decision making.",
+        "timestamp_s": 793,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Perception must handle occlusion, sensing errors, failed grasps, and dynamic environments with deformable objects and other agents.",
+        "timestamp_s": 817,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Robotic systems often fuse vision, touch, audio, and depth because the modalities provide complementary information.",
+        "timestamp_s": 877,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Robot vision must understand affordances and the effect of actions, not only segment static images.",
+        "timestamp_s": 938,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Robot vision is embodied, active, and environmentally situated.",
+        "timestamp_s": 998,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Perception should focus on task-relevant local regions, like the area near a shirt button, to close the perception-action loop.",
+        "timestamp_s": 1075,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=17",
+      "start_s": 758,
+      "end_s": 1118
+    },
+    "difficulty": 0.56,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 6,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "transcript_slice": "00:12:38\nNow, I'm moving on to robot perception,\n\n00:12:43\nproblem within this robot learning domain\n\n00:12:48\nconsider in computer vision.\n\n00:12:51\nyou're actually going to see this image again and again\n\n00:12:55\nSo this is, essentially, in the question\n\n00:13:02\nfrom the physical world.\n\n00:13:06\nhigh-dimensional RGB observation or RGBD observations.\n\n00:13:12\nlike tactile sensings.\n\n00:13:15\nis essentially trying to distill or harness\n\n00:13:23\nis useful for the robot to do the downstream decision making.\n\n00:13:30\nis trying to make sense of this unstructured real world.\n\n00:13:37\nSo essentially, the observations the robots\n\n00:13:41\ncan only contain incomplete knowledge of the objects\n\n00:13:46\nThere could be occlusions.\n\n00:13:52\nAnd the imperfect action may also lead to failure.\n\n00:13:59\nbut their grasping behavior may not always be successful.\n\n00:14:05\nwhich will also cause evolutions and unexpected changes\n\n00:14:10\nThey will also need to have this perception system that is\n\n00:14:14\nAnd also this environment can change.\n\n00:14:20\nbut deformable object-- clothes, ropes, granular medias.\n\n00:14:26\nor other humans that are also in the same environments,\n\n00:14:31\nAnd your perception system needs to be\n\n00:14:37\nSo that is why, in the robotics domain,\n\n00:14:43\nThey try to add as much sensor as possible to the robots\n\n00:14:51\nIt's really considered, for example, the tactile sensings,\n\n00:14:57\nAnd typically, we will have to design a system that\n\n00:15:04\nthat allows them to complement each other,\n\n00:15:09\nabout the physical context.\n\n00:15:13\nabout whether a graph is stable or not.\n\n00:15:17\nabout something that is more on the higher level,\n\n00:15:22\nof this environment.\n\n00:15:25\nand work together is very, very important\n\n00:15:31\nin the real physical world.\n\n00:15:38\nvery important difference between a robot vision\n\n00:15:42\nthe effect of the actions and also the affordance\n\n00:15:46\nOn the left is a very typical example\n\n00:15:51\nto do instance segmentation.\n\n00:15:56\nYou have segments, different instances from this 2D image,\n\n00:16:03\nBut what's different in the robotics domain, for example,\n\n00:16:07\nthe robot can, for example, given one object.\n\n00:16:14\na lot of pieces that are, for example, stacked\n\n00:16:17\nSo the robot has to know what type of actions\n\n00:16:23\nperceptions about this environment.\n\n00:16:27\npieces composed together?\n\n00:16:31\nand actively interact with the environments for the robot\n\n00:16:38\nSo that is why a robot vision is embodied, active, and also\n\n00:16:46\nBy embodied, what we mean is robots\n\n00:16:53\nthe physical world directly.\n\n00:16:58\nwith the world that have immediate feedback\n\n00:17:02\nAnd active, meaning the robots are active perceivers.\n\n00:17:09\nand determines how and when and where\n\n00:17:14\nYou can move your head around.\n\n00:17:17\nyou can just move around to see what's behind the table.\n\n00:17:21\nis different from what people typically\n\n00:17:24\nThey are mostly working with a passively collected data set.\n\n00:17:31\nwhere the robots are situated in the world.\n\n00:17:37\nand now of the world directly influencing\n\n00:17:42\nRobots really have to understand, especially\n\n00:17:48\nIt sees the world and understand its goals\n\n00:17:53\nupon its perceptions.\n\n00:17:58\nof the environment.\n\n00:18:01\nI only have to know the local regions near that button for me\n\n00:18:05\nSo some of the perception has to be\n\n00:18:10\nand the downstream decision-making\n\n00:18:14\nor task-relevant regions of the environment to be properly--\n\n00:18:22\nSo this is about some very specific considerations\n\n00:18:27\ndifferent from what people typically\n\n00:18:31\nI will be starting to discuss some of the algorithms that\n\n00:18:36\nthe robot to act in the world.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "global_kp_id": "kp_multimodal_robot_perception",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "global_kp_id": "kp_embodied_active_and_situated_robot_vision",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+      "global_kp_id": "kp_perception_action_integration",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_multimodal_robot_perception",
+      "name": "Multimodal robot perception",
+      "description": "Robots need to fuse multiple sensory streams such as vision, depth, touch, and audio to recover task-relevant structure from partial, noisy observations.",
+      "track_tags": [
+        "perception",
+        "robotics"
+      ],
+      "domain_tags": [
+        "multimodal_sensing",
+        "robot_perception"
+      ],
+      "career_path_tags": [
+        "embodied_ai_researcher",
+        "perception_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because multimodal robot perception clarifies robots need to fuse multiple sensory streams such as vision, depth, touch, and audio to recover task-relevant structure from partial, noisy observations, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_embodied_active_and_situated_robot_vision",
+      "name": "Embodied, active, and situated robot vision",
+      "description": "Robot vision differs from passive computer vision because the robot has a body, can choose viewpoints or perturbations, and operates in the here-and-now of a specific physical context.",
+      "track_tags": [
+        "perception",
+        "robotics"
+      ],
+      "domain_tags": [
+        "embodied_ai",
+        "robot_vision"
+      ],
+      "career_path_tags": [
+        "embodied_ai_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because embodied, active, and situated robot vision clarifies robot vision differs from passive computer vision because the robot has a body, can choose viewpoints or perturbations, and operates in the here-and-now of a specific physical context, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_perception_action_integration",
+      "name": "Perception-action integration",
+      "description": "Robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times. Robotics is framed as the closure of the loop between seeing and doing, requiring both perception and action planning.",
+      "track_tags": [
+        "embodied_ai",
+        "perception",
+        "planning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "perception_action_loop",
+        "robotics",
+        "task_conditioned_perception"
+      ],
+      "career_path_tags": [
+        "autonomy_engineer",
+        "ml_engineering",
+        "research",
+        "robotics",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because perception-action integration clarifies robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp6",
+        "local::lecture_18_human_centered_ai::kp13"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.41,
+    0.71
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

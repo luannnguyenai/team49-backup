@@ -1,0 +1,124 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "unit": {
+    "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+    "course_id": "stanford::cs231n::spring_2025",
+    "name": "Robotic foundation models",
+    "description": "Defines robotic foundation models as broad, goal-conditioned policies and uses Pi-Zero to illustrate data aggregation, VLM-based pretraining, task-specific post-training, and current limitations.",
+    "summary": "Li defines robotic foundation models as policies that map the current observation or state plus a goal into actions, without explicitly representing states or transition dynamics as a separate model [ts=3825s] [ts=3841s] [ts=3856s]. What makes them “foundation” models is the ambition to generalize broadly, analogous to vision-language models whose outputs are not always perfect but are usually reasonable; for robot policies, the desired behavior is a smooth, sensible trajectory that follows the task specification [ts=3870s] [ts=3895s] [ts=3913s] [ts=3935s]. Li notes rapid empirical progress from RT-1 through RT-2, RT-X, OpenVLA, and Pi-Zero, while warning that evaluation remains noisy and broad generalization is hard to quantify [ts=3961s] [ts=3999s] [ts=4015s] [ts=4029s]. Using Pi-Zero as the main example, he explains that foundation models require large cross-embodiment datasets, start from pretrained vision-language backbones, use co-fine-tuning for action prediction plus VQA-style objectives, and then rely on task-specific post-training for harder in-distribution or unseen tasks [ts=4109s] [ts=4134s] [ts=4153s] [ts=4176s] [ts=4232s]. He also points out current limitations: teleoperated data collection is slow, policies inherit that slowness, and one giant policy may not be enough for broad home-scale tasking without higher-level abstractions [ts=4262s] [ts=4331s] [ts=4374s].",
+    "key_points": [
+      {
+        "text": "A robotic foundation model is a goal-conditioned policy from observation/state to action, without an explicit transition model.",
+        "timestamp_s": 3825,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The target behavior is not always optimal action, but a smooth and reasonable trajectory that respects the instruction.",
+        "timestamp_s": 3913,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Progress is tracked through families such as RT-1, RT-2, RT-X, OpenVLA, and Pi-Zero.",
+        "timestamp_s": 3999,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Foundation models need large aggregated robot datasets across many embodiments as their training fuel.",
+        "timestamp_s": 4112,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Pretraining typically starts from a vision-language model and preserves semantic knowledge while adding action prediction.",
+        "timestamp_s": 4134,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Post-training with task-specific robot data is usually required for strong performance on harder tasks.",
+        "timestamp_s": 4176,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Current foundation policies are often slower than humans because teleoperated demonstrations are slower and harder to collect well.",
+        "timestamp_s": 4262,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Li does not expect one monolithic policy alone to solve broad home-scale tasking without higher-level structure.",
+        "timestamp_s": 4374,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=17",
+      "start_s": 3803,
+      "end_s": 4432
+    },
+    "difficulty": 0.67,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "transcript_slice": "01:03:23\nis robotic foundation models.\n\n01:03:30\nActually, for each one of these items,\n\n01:03:35\nSo for today's lecture, I'm just skimming through them very,\n\n01:03:39\nI only tell you the gist, the high-level knowledge\n\n01:03:45\nAnd for robotic foundation models,\n\n01:03:53\nlearning or imitation learning in their function class.\n\n01:03:59\nof the states or this kind of model.\n\n01:04:03\ndoesn't learn the model of the environments.\n\n01:04:09\nand goes into the actions.\n\n01:04:13\ncan be very nicely represented using these figures.\n\n01:04:17\na policy that takes the current state\n\n01:04:21\nAnd you're trying to generate these actions that\n\n01:04:26\nBut you might say that this is very\n\n01:04:30\nSo what's special about this robotic foundation models?\n\n01:04:36\nto all the developments within the foundation model domain,\n\n01:04:42\nmodel and also those vision language-related foundation\n\n01:04:47\nBut it needs to generalize much better than a policy that just\n\n01:04:54\nHere is actually my definitions.\n\n01:04:59\nlanguage models, meaning their outputs may not always\n\n01:05:06\ngenerate something reasonable as you prompts\n\n01:05:10\nSo what we hope to achieve with this robotic foundation model\n\n01:05:16\nbe the optimal actions as conditioned\n\n01:05:19\nBut the general trajectory will always\n\n01:05:24\nin the real physical world.\n\n01:05:28\nIt should be smooth and continuous.\n\n01:05:32\ninstructions you are given to the robots.\n\n01:05:39\nexactly the same things.\n\n01:05:42\nModels like VLAs.\n\n01:05:46\nBut in the essence, they are all describing the same thing,\n\n01:05:52\ninstructions or whatever, like a task specification.\n\n01:05:57\nacross a wide range of scenarios.\n\n01:06:04\nNoisy meaning it's very, very hard\n\n01:06:10\nof robotic foundation models.\n\n01:06:14\nwhat does that mean?\n\n01:06:18\nover a wide range of scenarios.\n\n01:06:21\nneed significant evidence to show it actually\n\n01:06:24\nSo that's why evaluation and quantitative measurements\n\n01:06:30\nBut still, by looking at their empirical videos,\n\n01:06:36\nprogress over the past two years.\n\n01:06:41\nstarts with RT-1, which was released\n\n01:06:47\nAnd since then, I would say maybe roughly every half a year,\n\n01:06:55\nand some of the recent ones like Pi-Zero,\n\n01:07:02\nmore and more generalizable robotic foundation models.\n\n01:07:09\nThere's a [INAUDIBLE] first of a lot of foundation models,\n\n01:07:17\nSo there's a lot of investigations\n\n01:07:21\nin not only like a capital investment\n\n01:07:27\nand better and more generalizable\n\n01:07:31\nSo due to the time, I clearly cannot go into the details\n\n01:07:36\nSo if you are interested, I actually\n\n01:07:40\nspecifically describing and discussing some\n\n01:07:44\nIf you are interested, please go and watch it.\n\n01:07:51\nof what actually is essential for this kind of foundation\n\n01:07:58\nfrom Pi-Zero.\n\n01:08:06\nI think this is the word that convinced me\n\n01:08:11\ncan do some very reliable dexterous manipulations\n\n01:08:16\nIt can handle cloth folding and box\n\n01:08:22\nat a very reliable manner.\n\n01:08:26\nlooks like on the high level.\n\n01:08:32\nSo for any model to be called the foundation model,\n\n01:08:36\nAnd that fuel is data.\n\n01:08:41\nand also data collected by themselves\n\n01:08:45\nwhere the robot is doing some kind\n\n01:08:50\nAnd they use this data to do pre-training.\n\n01:08:56\nis this starts with a pre-trained visual language\n\n01:09:01\nalready trained on vast amount of vision-language-related data\n\n01:09:08\nfrom those models.\n\n01:09:13\nthey call code fine-tuning, using both objective for action\n\n01:09:19\nfrom those vision question answering those type of tasks,\n\n01:09:25\nwithin those models.\n\n01:09:30\nAnd this is the pre-training stage.\n\n01:09:36\nfoundation models is called post-training,\n\n01:09:42\nin the large language model communities\n\n01:09:46\nBase model can give you some reasonable baseline performance.\n\n01:09:51\ngood on a specific task, you actually\n\n01:09:56\ndo post-training on the data for that specific task\n\n01:10:02\nSo they are evaluating their whole systems\n\n01:10:06\nThe first one is directly using their base model.\n\n01:10:11\nfor some very simple in-distribution data.\n\n01:10:18\nmight have already been encountered\n\n01:10:22\nFor different task but slightly more complicated,\n\n01:10:28\nmodel to further improve on those in-distribution tasks.\n\n01:10:34\nhave to do post-training by collecting\n\n01:10:40\non these tasks for you to be performance.\n\n01:10:46\nAnd you can just download the checkpoints.\n\n01:10:50\nbeen starting to play with their models\n\n01:10:54\nAnd we're starting to see some very promising results.\n\n01:11:01\nThat is a very good question.\n\n01:11:05\nof the existing robotic foundation models.\n\n01:11:10\nslower than humans.\n\n01:11:14\nfrom how the data was collected, how the demonstration\n\n01:11:18\nTypically, for many of these scenarios,\n\n01:11:22\nby human teleoperating the robots on that exact same robots\n\n01:11:30\nAnd human teleoperations is actually\n\n01:11:36\neven if you have gone through hours of training.\n\n01:11:41\nthan an embodiment that you person is the most familiar with\n\n01:11:48\na certain distance away from you.\n\n01:11:51\nSometimes, you have to look very closely, carefully,\n\n01:11:57\nangles in order to really understand,\n\n01:12:02\nThere's a lot of caveats and inefficiencies\n\n01:12:08\nThat is why the policy directly trained on those data\n\n01:12:14\nSo that's why there's a lot of investigations\n\n01:12:18\nto be even more efficient, to be at human speeds.\n\n01:12:24\nSo this is a very good question.\n\n01:12:28\nargue this is already a very long horizon task.\n\n01:12:35\nable to handle this long horizon task.\n\n01:12:39\nwant this policy to be useful in a more larger scale,\n\n01:12:44\nyou not only want the robot to fold the box.\n\n01:12:50\nand clean all the messes on the floor.\n\n01:12:54\ncurrently, me, personally, I don't\n\n01:12:59\nto those scenarios.\n\n01:13:03\nof scene graph, some symbolic representations\n\n01:13:08\nlanguage action models for those policy\n\n01:13:13\ninto different type of tasks and scale\n\n01:13:19\nSo this started with a pre-trained vision language\n\n01:13:22\nSo that's why there's already a lot of semantic knowledge\n\n01:13:27\nthis vision language data.\n\n01:13:31\nare coming for free, meaning the base model can actually\n\n01:13:37\nat the semantic level.\n\n01:13:41\nto make sure it can also generalize\n\n01:13:46\nSo we can have the question maybe at the end\n\n01:13:50\nI still have maybe one--",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "name": "Robotic foundation models with pretraining and post-training",
+      "description": "Robotic foundation models aim for broad goal-conditioned action generalization by combining large aggregated robot datasets with pretrained VLMs and task-specific post-training.",
+      "track_tags": [
+        "foundation_models",
+        "robotics"
+      ],
+      "domain_tags": [
+        "pretraining",
+        "robot_foundation_models",
+        "vision_language_action_models"
+      ],
+      "career_path_tags": [
+        "foundation_model_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because robotic foundation models with pretraining and post-training formalizes how robotic foundation models aim for broad goal-conditioned action generalization by combining large aggregated robot datasets with pretrained VLMs and task-specific post-training, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp15"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.52,
+    0.82
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "tutorial03-huggingface",
+    "lecture_title": "Stanford CS224N Hugging Face Transformers Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8"
+  },
+  "unit": {
+    "unit_id": "local::tutorial03-huggingface::seg3",
+    "course_id": "cs224n-2024",
+    "name": "Choosing model classes and running inference",
+    "description": "Covers task-specific model classes, architectural constraints, how inputs are passed into models, and how logits, loss, and predictions are produced.",
+    "summary": "The lecture moves from tokenizers to models and shows that Hugging Face provides both model-specific classes and AutoModel-style loaders that select the correct implementation automatically [ts=856s] [ts=960s]. The speaker explains that pre-trained transformers share a backbone idea but expose different task heads, such as sequence classification, masked language modeling, or base representations, and illustrates this with DistilBERT variants [ts=894s] [ts=947s]. He also emphasizes an architectural constraint: encoder-only models like DistilBERT cannot be used as sequence-to-sequence encoder-decoder systems, so the architecture has to match the task [ts=1057s] [ts=1086s]. The segment then demonstrates two ways to call the model: explicitly passing input_ids and attention_mask, or unpacking the tokenizer output dictionary with Python's double-asterisk syntax [ts=1180s] [ts=1260s]. Finally, he shows that Hugging Face outputs logits for each class, that binary classification still uses two logits, and that these models are ordinary PyTorch modules, so one can compute loss with PyTorch or pass labels to the model and let Hugging Face return the loss directly; predictions then come from argmax over logits [ts=1278s] [ts=1354s] [ts=1385s] [ts=1440s].",
+    "key_points": [
+      {
+        "text": "Hugging Face exposes task-specific classes such as DistilBertForSequenceClassification, DistilBertForMaskedLM, and the base DistilBERT model.",
+        "timestamp_s": 894,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "AutoModel plays the same convenience role for models that AutoTokenizer plays for tokenizers.",
+        "timestamp_s": 960,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Model architecture constrains valid tasks; an encoder-only model like DistilBERT is not a sequence-to-sequence model.",
+        "timestamp_s": 1057,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Tokenizer outputs can be passed to the model either by naming input_ids and attention_mask explicitly or by unpacking the dictionary with **.",
+        "timestamp_s": 1180,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Sequence classification outputs logits over the label set, and binary classification is represented with two class logits.",
+        "timestamp_s": 1278,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Because Hugging Face models are PyTorch modules, loss.backward works normally for fine-tuning.",
+        "timestamp_s": 1330,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Passing labels into the model makes Hugging Face include the loss in the output, and argmax over logits gives the predicted label.",
+        "timestamp_s": 1385,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+      "start_s": 851,
+      "end_s": 1459
+    },
+    "difficulty": 3.2,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=b80by3Xk_A8",
+  "transcript_slice": "00:14:16\nSo again, this is pretty similar to what\n\n00:14:23\nYou just choose the specific model type for your model.\n\n00:14:32\nof AutoModel class.\n\n00:14:37\nthe initialization process.\n\n00:14:44\nany too much overhead.\n\n00:14:51\nthat we have, they generally have the same underlying\n\n00:14:54\nBut you'll have different kind of heads associated\n\n00:15:00\nSo attention heads so you might have\n\n00:15:05\nsome other task.\n\n00:15:09\nAnd so, for this, we'll walk through an example\n\n00:15:16\nSo if there's a specific context like sequence classification\n\n00:15:24\nthe very specific kind of like class Hugging Face\n\n00:15:31\nAlternatively, if we were doing it using DistilBERT\n\n00:15:37\nwe use DistilBERT for masked LM.\n\n00:15:41\nit purely for the representations\n\n00:15:45\ncan just use the baseline model.\n\n00:15:49\nis that there are some task specific classes that we\n\n00:15:55\nSo AutoModel, again, is similar to the auto tokenizer.\n\n00:16:04\nby default that specific model.\n\n00:16:12\nthat you need for that.\n\n00:16:22\nof models that we can look at.\n\n00:16:27\nA decoder type model, like GPT-2 that's\n\n00:16:36\nAnd encoder decoder, models so BART or T5, in this case.\n\n00:16:45\nthere's a whole sort of different types of models\n\n00:16:51\nAnd if we look in the documentation as well, so here,\n\n00:17:00\nthat we might want to use.\n\n00:17:06\nmodels for different types of tasks.\n\n00:17:13\nthat you're looking for, then you\n\n00:17:17\nHere, again, if you use an AutoModel from pre-trained,\n\n00:17:22\nan instance of that BERT model.\n\n00:17:33\nWe can go ahead and start.\n\n00:17:39\nof your model matches up with kind\n\n00:17:46\nThese different types of models can perform specific tasks.\n\n00:17:54\nBERT, for instance, or DistilBERT as a sequence\n\n00:18:00\nand decoder because DistilBERT only consists of an encoder.\n\n00:18:09\nuse these, but it's, basically, based on the model\n\n00:18:16\nOK, awesome.\n\n00:18:21\nSo similarly here, we can import to AutoModel\n\n00:18:28\nSo again, this is-- we're going to perform some classification\n\n00:18:33\nhere so that we don't have to reference, again,\n\n00:18:39\nWe'll be able to load it automatically\n\n00:18:43\nAlternatively, we can do DistilBERT for sequence\n\n00:18:47\nAnd that specifically will require DistilBERT\n\n00:18:53\nOK, so these are two different ways of basically getting\n\n00:18:59\nexplicitly DistilBERT.\n\n00:19:03\nAnd here, because it's classification,\n\n00:19:08\nthat we're actually going to classify for each of the input\n\n00:19:13\nOK, so here, we'll get some--\n\n00:19:20\nand you print this out because some\n\n00:19:26\nAnd so we'll go ahead and take care of that.\n\n00:19:37\nsome of these models.\n\n00:19:41\nthat you get from a tokenizer into the model, OK?\n\n00:19:49\nup here and we pass this into the model\n\n00:19:57\nIDs from the model inputs.\n\n00:20:02\nor we can show here and specifically\n\n00:20:07\ngoing to correspond to the attention mask\n\n00:20:14\nSo this is option one where you can specifically identify\n\n00:20:20\nThe second option is using kind of a Pythonic hack\n\n00:20:28\npass in the model inputs.\n\n00:20:36\nof the model inputs here.\n\n00:20:43\nThe attention mask corresponds to the attention mask argument.\n\n00:20:51\nthis will go ahead and unpack our dictionary\n\n00:20:55\nto something of the same keys.\n\n00:21:00\nBoth are going to be the same.\n\n00:21:08\nthe model outputs look like.\n\n00:21:14\nmask.\n\n00:21:19\nSo here, notice that the outputs are given by these logits here.\n\n00:21:27\nand there's two potential classes\n\n00:21:31\nAnd then, lastly, we have a course--\n\n00:21:37\nSince this is going to be binary classification.\n\n00:21:42\ngoing to have the two classes for the binary classification\n\n00:21:46\nAnd you could, basically, just choose\n\n00:21:51\nBut we do this just, basically, because of how\n\n00:21:57\nAnd so, additionally, these are-- the models\n\n00:22:05\nPyTorch modules.\n\n00:22:09\nAnd we can use them in the same way\n\n00:22:13\nSo that means things like loss.backward or something\n\n00:22:21\ncorresponding to the loss of your inputs that you pass in.\n\n00:22:28\nhave a label for your data.\n\n00:22:36\nfunction.\n\n00:22:39\nAnd then, you can go ahead and back propagate it.\n\n00:22:47\nthat you're--\n\n00:22:50\nSo this is just some big tensor of the actual embedding weights\n\n00:22:57\nOK, we also have a pretty easy way\n\n00:23:04\nthat we get.\n\n00:23:08\nwe get our model inputs.\n\n00:23:13\nAnd then, give some kind of corresponding label\n\n00:23:20\nWe can see here that the actual model\n\n00:23:25\nincludes this loss here, right?\n\n00:23:31\nto that input anyways.\n\n00:23:37\njust natively in Hugging Face without having\n\n00:23:44\nAnd then, lastly, we can actually even use--\n\n00:23:49\nhere, again, for positive or negative, what we can do\n\n00:23:57\nand see which one is like the biggest again.\n\n00:24:03\nSo that will give the index that's largest.\n\n00:24:07\nthat the model is actually predicting.\n\n00:24:11\nof being able to do this sort of classification,\n\n00:24:17\nwithin Hugging Face.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::tutorial03-huggingface::seg3",
+      "global_kp_id": "kp_task_specific_model_classes_and_architecture_task_matching",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg3",
+      "global_kp_id": "kp_sequence_classification_outputs_loss_and_predictions",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg3",
+      "global_kp_id": "kp_transformer_tokenization_outputs",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_task_specific_model_classes_and_architecture_task_matching",
+      "name": "Task-specific model classes and architecture-task matching",
+      "description": "The idea that Hugging Face exposes different classes and heads for different tasks, and that valid task choices depend on whether a model is encoder-only, decoder-only, or encoder-decoder.",
+      "track_tags": [
+        "architectures",
+        "model_selection",
+        "task_design"
+      ],
+      "domain_tags": [
+        "model_architecture",
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because task-specific model classes and architecture-task matching formalizes how the idea that Hugging Face exposes different classes and heads for different tasks, and that valid task choices depend on whether a model is encoder-only, decoder-only, or encoder-decoder, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_sequence_classification_outputs_loss_and_predictions",
+      "name": "Sequence classification outputs, loss, and predictions",
+      "description": "How to pass tokenized inputs through a classification model, read logits, obtain loss, and convert logits to predicted labels.",
+      "track_tags": [
+        "fine_tuning",
+        "inference",
+        "supervised_learning"
+      ],
+      "domain_tags": [
+        "classification",
+        "huggingface",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sequence classification outputs, loss, and predictions clarifies how to pass tokenized inputs through a classification model, read logits, obtain loss, and convert logits to predicted labels, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_transformer_tokenization_outputs",
+      "name": "Transformer tokenization outputs",
+      "description": "How raw text becomes input IDs, attention masks, and special-token-augmented sequences aligned with a model's vocabulary.",
+      "track_tags": [
+        "preprocessing",
+        "tokenization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "nlp",
+        "tokenization",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because transformer tokenization outputs formalizes how how raw text becomes input IDs, attention masks, and special-token-augmented sequences aligned with a model's vocabulary, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp2"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.05,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_hf_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-tutorial03-huggingface_transcript.txt"
+  }
+}

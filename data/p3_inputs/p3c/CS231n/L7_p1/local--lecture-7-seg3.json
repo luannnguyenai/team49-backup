@@ -1,0 +1,148 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_7",
+    "lecture_title": "Lecture 7: Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA"
+  },
+  "unit": {
+    "unit_id": "local::lecture_7::seg3",
+    "course_id": "cs231n_spring_2025",
+    "name": "RNN mechanics: hidden state, unrolling, and vanilla equations",
+    "description": "Defines recurrent hidden state, unrolled RNN diagrams, output projection, and the vanilla tanh RNN.",
+    "summary": "An RNN has an input sequence x, output sequence y, and a recurrent internal hidden state that updates while the sequence is processed [ts=448s] [ts=470s]. The current hidden state depends on both x_t and h_{t-1}; unrolling makes this dependency and the gradient order explicit [ts=479s] [ts=501s]. The hidden-state recurrence applies the same function and same parameters W at every time step [ts=533s] [ts=571s]. A separate output function, often using W_hy, maps the hidden dimension to the output dimension and learns a transformation [ts=591s] [ts=618s]. Vanilla RNNs commonly use tanh for h_t because it is bounded, zero-centered, and can represent positive and negative values; the simplest output is a matrix multiply from h_t to y_t [ts=792s] [ts=823s].",
+    "key_points": [
+      {
+        "text": "RNNs maintain a hidden state updated as each input arrives.",
+        "timestamp_s": 470,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Unrolling shows h_t depends on x_t and h_{t-1}.",
+        "timestamp_s": 501,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The same recurrent function and parameters W are reused at every time step.",
+        "timestamp_s": 533,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "W_hy converts hidden state to output dimension through a learned projection.",
+        "timestamp_s": 591,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Vanilla RNNs often use tanh because it is bounded and zero-centered.",
+        "timestamp_s": 792,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=7",
+      "start_s": 448,
+      "end_s": 840
+    },
+    "difficulty": 3.0,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "transcript_slice": "00:07:28\nOK, so what is an RNN?\n\n00:07:36\nsequence y.\n\n00:07:41\nSo often people will diagram it by this arrow that's\n\n00:07:46\nThis is how you know it's a recurrent layer when you're\n\n00:07:50\nBut what it actually means is that RNNs\n\n00:07:55\nas it's often called, that is updated\n\n00:07:59\nSo every time there's a new input to the model,\n\n00:08:04\nor internal state.\n\n00:08:07\nand it depends on the new inputs as well as the previous internal\n\n00:08:14\nI think this diagram is sometimes a bit confusing\n\n00:08:18\nactually calculated and what are the order of operations.\n\n00:08:25\nAnd so here it's basically the same as before,\n\n00:08:32\ncalculation is dependent on our input at that time step\n\n00:08:38\nSo we're more explicitly modeling what is exactly\n\n00:08:43\nRNN you move backwards in the computational graph.\n\n00:08:51\nSo let's formulate this with mathematical equations now.\n\n00:08:57\na sequence of vectors, x.\n\n00:09:01\nat every single time step.\n\n00:09:06\nof the old hidden state and the input vector at some time step\n\n00:09:14\nfunction along with some parameters,\n\n00:09:17\nvery similar to the initial neural network\n\n00:09:23\nmultiply by and then you follow it up by an activation function.\n\n00:09:29\nThe only change is that it's now a recurrence formula.\n\n00:09:39\nfunction each time we're computing the hidden state.\n\n00:09:48\nAnd to get the actual output, so how do we\n\n00:09:51\nWe have a separate function that depends\n\n00:09:57\nconvert our hidden dimension state into the dimension\n\n00:10:03\nAnd also is a set of weights to convert the hidden state\n\n00:10:07\nSo this does two and one.\n\n00:10:10\nfrom the dimension size of our hidden state, which\n\n00:10:15\nAnd then also it provides a transformation there.\n\n00:10:23\nstate to get the--\n\n00:10:25\nIt converts your hidden state to the dimension of your output.\n\n00:10:31\nAnd then also, it's a weight matrix that you learn.\n\n00:10:36\nbut also it applies a transformation\n\n00:10:40\nSo it's how you convert your hidden states\n\n00:10:45\nSo the previous slide was how we calculate the new hidden state.\n\n00:10:51\nwhere you're doing this recursively with the same set\n\n00:10:54\nof parameters and one function for calculating\n\n00:10:57\nWe have another set of parameters and another function\n\n00:11:02\nit is, and how we want to model the RNN.\n\n00:11:09\nbut there's two different things here.\n\n00:11:13\nit'll be more clear as we go through more concrete examples.\n\n00:11:19\nwhich is this internal state of the RNN.\n\n00:11:22\nto the output, which is this slide.\n\n00:11:31\nwe can see that you need to initialize your hidden state\n\n00:11:36\nSo we usually call this h,0 and you can initialize it\n\n00:11:42\nIn principle, usually this is a learned input vector,\n\n00:11:50\nof this unrolled recurrent RNN and actually\n\n00:11:55\nyou're doing the forward pass.\n\n00:12:00\nwith some of the questions is that we're\n\n00:12:05\nand we're applying this recurrence formula at each time\n\n00:12:08\nSo you really do notice how the same function and the same set\n\n00:12:13\nwhen computing the hidden state.\n\n00:12:17\nare always used at each time step\n\n00:12:22\nYeah, so can old values of y affect the new hidden state?\n\n00:12:27\nAnd we'll actually go through one example of why that's used.\n\n00:12:33\nif you're doing a language modeling or autoregressive\n\n00:12:37\nto predict one value given the previous values,\n\n00:12:43\nSo that's generally how people do\n\n00:12:47\naffect the next hidden state.\n\n00:12:53\nSo they use basically different weights.\n\n00:13:02\nused to update every hidden state to the next one.\n\n00:13:08\nbut basically they're using different weights,\n\n00:13:12\nSo when people say Vanilla RNN, they usually\n\n00:13:18\nwhere we have our hidden state t, which\n\n00:13:26\nThis is nice because it's bounded between 1\n\n00:13:30\nSo as you do the operation over and over again,\n\n00:13:35\nSo this is a nice property to have.\n\n00:13:38\nrepresent both positive and negative values.\n\n00:13:43\nAlso we sometimes have an output function fy here,\n\n00:13:50\ncould just be a matrix multiplied by your hidden state.\n\n00:13:57\nAnd what we'll specifically go in our concrete example",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_7::seg3",
+      "global_kp_id": "kp_rnn_basics",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_7::seg3",
+      "global_kp_id": "kp_vanilla_rnn_equations",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rnn_basics",
+      "name": "Recurrent neural networks",
+      "description": "Shared-parameter sequence models that update a hidden state over time to summarize prior context. Updating a hidden state from current input and previous hidden state at every time step.",
+      "track_tags": [
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "recurrent_neural_networks",
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because recurrent neural networks formalizes how shared-parameter sequence models that update a hidden state over time to summarize prior context, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp10",
+        "local::lecture_7::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vanilla_rnn_equations",
+      "name": "Vanilla RNN equations",
+      "description": "The tanh-based recurrent update and output projection used as the baseline RNN formulation.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because vanilla RNN equations formalizes how the tanh-based recurrent update and output projection used as the baseline RNN formulation, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    2.85,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture07-recurrent-neural-networks_transcript.txt"
+  }
+}

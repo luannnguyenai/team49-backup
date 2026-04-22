@@ -1,0 +1,73 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 7 - Attention, Final Projects and LLM Intro",
+    "youtube_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg2",
+    "course_id": "<course_id>",
+    "name": "Why Attention Fixes the Seq2Seq Bottleneck",
+    "description": "Motivates attention in encoder-decoder translation and walks through the core decoder-time-step attention procedure before introducing the main equations.",
+    "summary": "This segment motivates attention as a fix for the seq2seq bottleneck where an encoder must compress an entire source sentence into a single hidden state before decoding [ts=793s] [ts=833s]. The lecturer argues that this is implausible for longer sentences and unlike human translation, where people repeatedly look back at the source as they produce target words [ts=856s] [ts=874s]. He then describes the decoding procedure: compare the current decoder state to each encoder state, turn the resulting scores into a softmax distribution over source positions, compute a weighted average of encoder states, and combine that context vector with the decoder hidden state to predict the next word [ts=935s] [ts=1019s]. The discussion closes by formalizing dot-product scoring, softmax-normalized attention weights, and context-vector concatenation before highlighting attention’s performance, interpretability, and gradient-flow benefits [ts=1146s] [ts=1401s].",
+    "key_points": [
+      {
+        "text": "The original encoder-decoder setup forces all useful source information into one hidden vector.",
+        "timestamp_s": 813,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Attention lets the decoder look back at different source positions as needed during generation.",
+        "timestamp_s": 887,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Attention scores are turned into a softmax distribution over encoder positions.",
+        "timestamp_s": 962,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The attention output is a weighted average of encoder hidden states.",
+        "timestamp_s": 976,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The decoder concatenates the context vector with its hidden state before predicting the next word.",
+        "timestamp_s": 1000,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Attention provides interpretability by showing which source words the model focuses on at each decoding step.",
+        "timestamp_s": 1424,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
+      "start_s": 716,
+      "end_s": 1504
+    },
+    "difficulty": 0.67,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 13,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE",
+  "transcript_slice": "00:11:56\nSo after this, I want to go on and so introduce\n\n00:12:04\na very fundamental, important idea in neural systems.\n\n00:12:12\nsomething novel that was invented kind of recently.\n\n00:12:21\nuntil now, really it had all been\n\n00:12:27\nSo basic feedforward neural networks,\n\n00:12:34\nother things that we haven't yet haven't talked about,\n\n00:12:39\ninvented last millennium.\n\n00:12:45\nuntil there was sufficient data and computational power for them\n\n00:12:52\nBut attention was something that actually\n\n00:13:00\ntranslation.\n\n00:13:05\nneural networks more powerful.\n\n00:13:12\nwas looking at exactly this kind of machine translation problem.\n\n00:13:19\nAnd then we were using this hidden state\n\n00:13:24\nfeeding into the generator, LSTM, for the target sentence.\n\n00:13:33\nuseful about this sentence has to be\n\n00:13:38\nAnd while that's maybe not so hard if you've got a four-word\n\n00:13:45\nAnd it seems to be kind of implausible\n\n00:13:51\nto fit everything about that sentence\n\n00:13:55\nAnd well, obviously there are crude solutions to this.\n\n00:13:59\nand then you've got more representational space.\n\n00:14:05\nYou've got more representational space.\n\n00:14:12\nAnd it's certainly not like what a human being does, right?\n\n00:14:18\nthey read the sentence and they've\n\n00:14:22\nBut as they start to translate, they\n\n00:14:26\nand make use of that and their translation.\n\n00:14:34\nSo the idea should be that our neural network should\n\n00:14:41\nso that they can get information as needed,\n\n00:14:47\nAnd so this is the idea of attention.\n\n00:14:53\ngoing to insert direct connections to the encoder\n\n00:15:01\nSo I've got a bunch of diagram sentences\n\n00:15:05\nAnd then after that, I'll present the equations\n\n00:15:10\nOK, so once we're starting to translate,\n\n00:15:19\nand then we're going to use this hidden state as our key\n\n00:15:29\nSo we're going to compare--\n\n00:15:35\nthe hidden state, with the hidden state at every position\n\n00:15:44\nAnd based on our comparisons, we're\n\n00:15:52\nbe looking at in the source sentence\n\n00:15:59\nAnd so based on these attention scores,\n\n00:16:06\nAnd we'll then get a probability distribution or a weighting\n\n00:16:13\nAnd then we will use this weighting\n\n00:16:23\nis then going to be a weighted average of the encoder states.\n\n00:16:33\nthe representation above the first word \"il,\"\n\n00:16:38\nSo then we'll take that attention output.\n\n00:16:50\nAnd we'll use both of them together\n\n00:16:56\nwe stick through our softmax, and generate\n\n00:17:04\nAnd so then at that point, we just repeat this over.\n\n00:17:14\nWell, we copy down the first word generator\n\n00:17:19\nWe work out attention at every position.\n\n00:17:26\nsorry.\n\n00:17:28\nis a little fine point, which maybe I won't deal with.\n\n00:17:35\ndo things like stick the previous time step's attention\n\n00:17:42\nAnd we actually do that in--\n\n00:17:46\nThat's buggy.\n\n00:17:49\nbut I'll gloss over that.\n\n00:17:57\nAnd at each time step, we're looking\n\n00:18:02\nand they will help us to translate the sentence.\n\n00:18:07\nWhy does the start words point to the attention score?\n\n00:18:18\nWait, wait.\n\n00:18:19\nSo why is the green part pointing to--\n\n00:18:23\nOK, so the green vector, the hidden vector of the decoder,\n\n00:18:33\nThe hidden vectors of the encode are\n\n00:18:40\nSo the attention score at a position\n\n00:18:46\nof the decoder at that position and the current hidden state\n\n00:18:55\nAnd I'll explain exactly how in a moment.\n\n00:19:03\nOK.\n\n00:19:09\nOK, so we have encoder hidden states,\n\n00:19:17\nSo we have decoder hidden states,\n\n00:19:24\nAnd we're going to, at each point,\n\n00:19:29\nso we'll be dealing with st. So to calculate the attention\n\n00:19:44\nwe're going to calculate an attention\n\n00:19:52\nOK, I'll discuss alternatives for this in a moment.\n\n00:20:00\nwhich is shown here, is to take a dot product\n\n00:20:08\nand the current hidden state of the decoder.\n\n00:20:15\nSo that will give us some dot product score, which\n\n00:20:21\nThen the next thing we do is we stick those et scores\n\n00:20:28\nAnd then that gives us our probability distribution\n\n00:20:37\nAnd so then, we are calculating the weighted average\n\n00:20:44\ndoing with the obvious equation that we're\n\n00:20:51\nbased on the attention weights.\n\n00:20:59\nour attention output and the hidden state of the decoder.\n\n00:21:07\nthen a double-length vector.\n\n00:21:10\ninto producing the next word from the decoder.\n\n00:21:18\nby another matrix and then putting it through a softmax\n\n00:21:29\nto output and choosing the highest probability word.\n\n00:21:37\nThat makes sense, I hope.\n\n00:21:40\nOK, so attention is great.\n\n00:21:49\nSo the very first modern neural machine translation system\n\n00:21:56\nAnd they used a pure but very large, very deep LSTM.\n\n00:22:10\nfor the time.\n\n00:22:15\nBut very shortly thereafter, people\n\n00:22:25\nand Yoshua Bengio did a second version\n\n00:22:32\nand with a much more modest compute budget\n\n00:22:38\nThey were able to get better results because attention\n\n00:22:44\nSo attention significantly improved NMT performance.\n\n00:22:53\nsince has used attention like we've just seen.\n\n00:23:00\nwhat a human would do.\n\n00:23:02\nwhat you need to translate.\n\n00:23:07\nYou now no longer have to stuff all the information\n\n00:23:14\nYou can have the whole of your representational space\n\n00:23:21\nIt also helps with the vanishing gradient problem.\n\n00:23:27\ntalking about residual connections--\n\n00:23:33\nconnect things.\n\n00:23:37\nto all of the hidden states of the encoder.\n\n00:23:44\nis it gives you some interpretability.\n\n00:23:50\nyou can basically see what it's translating at different time\n\n00:23:55\nAnd so that can be really useful.\n\n00:24:03\nwhere without explicitly having trained a system that does that.\n\n00:24:12\nat the first position, it was looking at the first word \"il,\"\n\n00:24:20\nThen in French, there's this sort of verb, \"entarté.\"\n\n00:24:26\nI guess in English as well, you can use pie as a verb, right?\n\n00:24:37\nSo it's sort of like \"he has me pied,\"\n\n00:24:42\nAnd so the \"hit\" is already looking at the \"pied.\"\n\n00:24:50\nAnd then the \"pie\" is attending still to \"antarté,\"\n\n00:24:58\nfor words of a sentence.\n\n00:25:04\nOK.",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.52,
+    0.82
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-attention_transcript.txt"
+  }
+}

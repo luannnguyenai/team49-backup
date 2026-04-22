@@ -1,0 +1,198 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_15_3d_vision",
+    "lecture_title": "Lecture 15: 3D Vision",
+    "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_15_3d_vision::seg2",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Parametric surfaces and the explicit–implicit trade-off",
+    "description": "Explains parametric curves and surfaces, then contrasts the strengths of explicit versus implicit representations.",
+    "summary": "Wu next introduces parametric representations, where a lower-dimensional parameter space is mapped into 3D; the key idea is that many shapes have lower intrinsic dimensionality than the ambient space [ts=698s][ts=731s]. He uses a circle and a sphere as examples, then mentions Bézier curves and Bézier surfaces as flexible smooth representations controlled by a small number of control points [ts=760s][ts=783s][ts=798s]. This leads to a broader comparison: explicit representations directly produce points on the surface, which makes sampling easy because one can plug parameters into the function [ts=863s][ts=941s]. However, explicit forms make inside/outside queries difficult, whereas implicit forms define the surface by a condition such as f(x,y,z)=0, making membership-style queries easier and foreshadowing why implicit functions are attractive for later neural rendering methods [ts=981s][ts=1064s][ts=1172s].",
+    "key_points": [
+      {
+        "text": "Parametric representations map lower-dimensional intrinsic variables into 3D shape geometry.",
+        "timestamp_s": 698,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A circle can be represented parametrically by varying a single variable rather than storing samples.",
+        "timestamp_s": 760,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A sphere in 3D needs two degrees of freedom, typically u and v.",
+        "timestamp_s": 783,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Bézier curves and surfaces use a small number of control points to model smooth geometry.",
+        "timestamp_s": 798,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Explicit representations make sampling surface points easy.",
+        "timestamp_s": 941,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Explicit representations make inside/outside tests hard, motivating implicit geometry.",
+        "timestamp_s": 981,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Implicit geometry represents a surface by a constraint such as f(x,y,z)=0.",
+        "timestamp_s": 1064,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+      "start_s": 672,
+      "end_s": 1247
+    },
+    "difficulty": 0.63,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "transcript_slice": "00:11:14\nAnd there are other type of representations,\n\n00:11:20\nare not just totally irregular.\n\n00:11:24\nIn meshes, they're very general.\n\n00:11:27\nIf you look at, let's say, your chairs or your tables,\n\n00:11:31\nSo how can you represent these kind of straight lines?\n\n00:11:35\nuse some of these parametric representations.\n\n00:11:41\nSo think about it.\n\n00:11:45\nif I want to represent a surface or represent a curve,\n\n00:11:51\nOften, if I have a curve, there's\n\n00:11:55\nThat's why I can represent a curve using\n\n00:12:01\nSo you can use basically all these different types\n\n00:12:08\na certain number of variables, the underlying intrinsic\n\n00:12:13\nin two or even one, and then mapping into the 3D space.\n\n00:12:19\nin a parametric representations using basically a set\n\n00:12:23\nYou can do that for curves, let's say, in circles.\n\n00:12:28\nyou don't really need--\n\n00:12:33\nOr you can even connect them, like meshes.\n\n00:12:37\nAnother way is you just represent the curve\n\n00:12:41\nBasically, there's a sine function,\n\n00:12:48\nYou can think about it as the degrees or angles,\n\n00:12:52\nSo here now, you can use a function to represent parametric\n\n00:12:59\nAnd of course, you can do that in 3D as well.\n\n00:13:03\nall you need is just two degrees of freedom, u and v.\n\n00:13:09\nmap them to every point in 3D space for this sphere.\n\n00:13:15\nI'm not going to detail here--\n\n00:13:18\nlike Bézier curves and Bézier surfaces,\n\n00:13:25\nsurfaces in 3D using basically a few control points.\n\n00:13:33\nto capture the underlying lower dimensionalities\n\n00:13:37\nmap the underlying low dimensionality\n\n00:13:43\nAnd they also allow you to do things like subdivision,\n\n00:13:49\nand to make it more fine-grained and stuff like that.\n\n00:13:53\nof shape representations.\n\n00:13:57\nlike a collection of unordered points or their connections\n\n00:14:01\nOr you can represent them in a parametric way, where\n\n00:14:05\nAnd by varying a few parameters that\n\n00:14:11\ngeometry, you can map them into more complex shapes.\n\n00:14:18\nif you remember, at the very beginning,\n\n00:14:21\nto represent object geometry.\n\n00:14:24\nThere's more implicit.\n\n00:14:27\nof being quite explicit.\n\n00:14:30\nAnd points are just directly points [INAUDIBLE] on objects.\n\n00:14:36\nthey directly map it to the points on the objects.\n\n00:14:43\nThey have a lot of benefits.\n\n00:14:49\nso you can get all these points.\n\n00:14:55\nI have Bézier surface representations.\n\n00:15:02\nlower dimensional space and then go into that function and map it\n\n00:15:06\nSo I directly get a point in a 3D space.\n\n00:15:13\nI can directly get other points.\n\n00:15:17\nSo let's say I have this torus, and I have represented\n\n00:15:22\nSo now my question is, can you just sample some points\n\n00:15:26\nThis is so easy because I would just randomly\n\n00:15:30\nI just randomly sample those u and v values and then let them\n\n00:15:37\nsome of the 3D points, which are guaranteed to be on this surface\n\n00:15:41\nSo sampling is much easier.\n\n00:15:48\nThe hard thing is it's very hard, in some sense,\n\n00:15:56\nSimilarly, if I represent a sphere as this\n\n00:16:03\nBut it is hard for me to say, now\n\n00:16:07\nI say, at this point, 3 over 4, 1 over 2, 1 over 4.\n\n00:16:13\nor the outside object.\n\n00:16:18\nactually, I'm not even sure about that.\n\n00:16:24\ninside or outside object.\n\n00:16:31\nall these representations, they have their own strengths\n\n00:16:34\nAnd for explicit representations,\n\n00:16:38\nare very useful because sometimes, you\n\n00:16:41\nAnd then you want to apply, whatever your point,\n\n00:16:44\nBut it is hard to test if a certain point is\n\n00:16:49\nFor example, let's say if you want to use a neural rendering\n\n00:16:54\nrequires a lot of these kind of queries\n\n00:16:59\nWhat would be the geometry or density of object\n\n00:17:02\nWhat would be the material?\n\n00:17:05\nat that particular point?\n\n00:17:11\nit's not easy to run these operations\n\n00:17:15\nSo naturally, people thought, OK, maybe we\n\n00:17:19\nto represent geometry.\n\n00:17:23\nBut as you can see later, in a lot of these neural rendering\n\n00:17:27\nthey just extend these implicit representations for not only\n\n00:17:33\nSo the idea of these implicit representations is now,\n\n00:17:39\nSo I assume, if the points are on the objects,\n\n00:17:44\nthen they satisfy some certain relationship.\n\n00:17:48\nwould be the points on the sphere, on the unit sphere?\n\n00:17:54\nof x and the square of y and square z.\n\n00:17:59\nSo this is constraint they satisfied for all the points\n\n00:18:05\nAll right, so more generally, you\n\n00:18:09\nof x and y and z equals 0.\n\n00:18:14\nwill be x squared plus y squared plus z squared minus 1.\n\n00:18:19\nBut more generally, you can think about it\n\n00:18:23\nthese functions can be so complex that you don't even\n\n00:18:27\nSo how can I represent an f?\n\n00:18:30\nMy hope is a neural network will be able to represent it.\n\n00:18:35\nsome function or some constraints\n\n00:18:41\nAnd this is the way you will represent an object.\n\n00:18:45\nwhich started with geometry.\n\n00:18:49\nrepresenting textures, materials, appearance,\n\n00:18:52\nSo the good thing about implicit representation-- sorry, let's\n\n00:18:56\nThe bad thing about implicit representation\n\n00:19:00\nI tell you, OK, this is a constraint,\n\n00:19:04\nRight, OK, every x and y and z, if I put it into this function,\n\n00:19:11\nmust be on the surface of this object.\n\n00:19:17\nThat would be very hard because they are required\n\n00:19:20\nAnd this function is maybe not too hard to solve.\n\n00:19:25\nBut when the function gets really complex for arbitrary\n\n00:19:32\nSo it's not easy to actually now sample points\n\n00:19:38\nimplicitly.\n\n00:19:40\nis now, it's actually pretty easy\n\n00:19:44\noutside object.\n\n00:19:48\nthen this is so easy because it's inside or outside.\n\n00:19:52\nI'll get a value, or the value is minus 1 over 8.\n\n00:19:56\nSo because I assume the object is represented by this function.\n\n00:20:03\nthey satisfy that function equals 0.\n\n00:20:07\nlower than 0 is negative.\n\n00:20:11\nmust be inside the object.\n\n00:20:14\nthen the point must be outside the object.\n\n00:20:20\ninside or outside object, although it becomes much\n\n00:20:24\non the surface of an object.\n\n00:20:28\nbetween these implicit and explicit representations.\n\n00:20:33\nBut this distinction and the contrast\n\n00:20:38\nis very important and fundamental.\n\n00:20:44\nto 3D data in general, as we'll see later.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg2",
+      "global_kp_id": "kp_parametric_curves_and_surfaces",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg2",
+      "global_kp_id": "kp_implicit_functions_for_geometry",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg2",
+      "global_kp_id": "kp_explicit_vs_implicit_geometry_taxonomy",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_parametric_curves_and_surfaces",
+      "name": "Parametric curves and surfaces",
+      "description": "Representations that map a low-dimensional parameter domain such as t or (u,v) into points on a 2D or 3D shape.",
+      "track_tags": [
+        "3d_vision",
+        "shape_modeling"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "geometry"
+      ],
+      "career_path_tags": [
+        "cad",
+        "graphics_engineering",
+        "robotics"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because parametric curves and surfaces clarifies representations that map a low-dimensional parameter domain such as t or (u,v) into points on a 2D or 3D shape, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_implicit_functions_for_geometry",
+      "name": "Implicit functions for geometry",
+      "description": "A representation in which surface points satisfy a condition like f(x,y,z)=0, enabling inside/outside reasoning and later neural field methods.",
+      "track_tags": [
+        "3d_vision",
+        "neural_fields"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "computer_vision",
+        "geometry"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "generative_ai",
+        "graphics_research"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because implicit functions for geometry formalizes how a representation in which surface points satisfy a condition like f(x,y,z)=0, enabling inside/outside reasoning and later neural field methods, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_explicit_vs_implicit_geometry_taxonomy",
+      "name": "Explicit vs. implicit geometry taxonomy",
+      "description": "The organizing distinction between representations that directly enumerate or parametrize surface points and representations that define geometry through a function or field.",
+      "track_tags": [
+        "3d_vision",
+        "geometry_representations"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "graphics_engineering",
+        "robotics"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because explicit vs. implicit geometry taxonomy formalizes how the organizing distinction between representations that directly enumerate or parametrize surface points and representations that define geometry through a function or field, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp1"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.48,
+    0.78
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture15-3d-vision_transcript.txt"
+  }
+}

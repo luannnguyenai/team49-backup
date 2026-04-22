@@ -1,0 +1,204 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "unit": {
+    "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+    "course_id": "stanford::cs231n::spring_2025",
+    "name": "Model learning and model-based planning",
+    "description": "Shows how robots can learn forward dynamics models and then optimize actions through those models, with examples using pixel, keypoint, and particle-based state representations.",
+    "summary": "Motivated by the limits of model-free RL, Li proposes learning an approximate forward model of the world from robot interaction data and using it for planning [ts=2500s] [ts=2515s] [ts=2535s]. The planning problem is the inverse of prediction: given a current state and target state, the robot optimizes action sequences so the model’s predicted trajectory moves toward the target, usually executing only the first action and then replanning with fresh observations [ts=2561s] [ts=2574s] [ts=2617s]. He notes that GPUs make large-scale parallel sampling and optimization practical [ts=2633s] [ts=2641s]. A major design choice is state representation, illustrated through pixel dynamics (Deep Visual Foresight), keypoint dynamics for rigid pushing, and particle dynamics for granular media and dough manipulation [ts=2666s] [ts=2698s] [ts=2726s] [ts=2772s]. The particle-based examples show letter-shaping with granular materials and a dumpling-making system that chooses tools and actions while recovering from disturbances; in that dough domain, a learned dynamics model from real interactions beat a physics-based deformable simulator [ts=2856s] [ts=2891s] [ts=2950s] [ts=3248s] [ts=3270s].",
+    "key_points": [
+      {
+        "text": "Model learning trains a forward dynamics model from interaction data and uses it for downstream planning.",
+        "timestamp_s": 2515,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Planning solves the inverse problem: choose actions so the predicted future state approaches a target state.",
+        "timestamp_s": 2561,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A common loop is to optimize a trajectory, execute only the first action, observe the new state, and re-optimize.",
+        "timestamp_s": 2617,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "GPU-enabled parallel sampling makes action-sequence optimization efficient enough to use learned models in practice.",
+        "timestamp_s": 2633,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Pixel dynamics predicts future images directly from actions.",
+        "timestamp_s": 2698,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Keypoint dynamics tracks 3D keypoints to plan rigid-object pushing.",
+        "timestamp_s": 2726,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Particle dynamics models granular media and dough, enabling tasks like letter rearrangement and dumpling making.",
+        "timestamp_s": 2772,
+        "evidence_type": "example"
+      },
+      {
+        "text": "For deformable dough, the learned model from real interactions was more accurate than the physics-based MPM simulator.",
+        "timestamp_s": 3248,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=17",
+      "start_s": 2230,
+      "end_s": 3295
+    },
+    "difficulty": 0.82,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 18,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "transcript_slice": "00:37:13\nand to do model-based planning.\n\n00:37:18\nTypically, the simulation people use would be, for example,\n\n00:37:23\nAnd there are essentially a bunch of rigid body simulations\n\n00:37:30\ntype of representation, like a representation of the floor.\n\n00:37:36\nIt is not simulating those snows.\n\n00:37:40\nthe simulated environments a lot and randomize\n\n00:37:47\ninside this environment such that people will assume whatever\n\n00:37:55\npoint within the distributions you\n\n00:37:59\nSo if your policies can be robust,\n\n00:38:05\nand if the real world is just one data\n\n00:38:09\nAnd so far, at least from this empirical evidence,\n\n00:38:14\nand the policy actually works very reliably and robustly\n\n00:38:18\nSo the question is about, what is the actual command?\n\n00:38:23\nthere can be a person providing high-level commands\n\n00:38:27\nFor example, which direction should the robots walk?\n\n00:38:32\nwalking forwards.\n\n00:38:37\nthe robot has to decide this kind of low-level actions.\n\n00:38:41\nfor example, the joint torque that\n\n00:38:47\non top of this robot.\n\n00:38:52\nlike, meaning humans give high-level commands,\n\n00:38:55\nThe robot has to use this policy to decide\n\n00:39:00\nusing joint torque.\n\n00:39:05\nlearned from this line of work on locomotion\n\n00:39:10\nAs long as you randomize it enough,\n\n00:39:15\nBut such lesson hasn't really been generalized very well\n\n00:39:21\nSo in the manipulation domain, how accurate the simulation\n\n00:39:26\nmatters is still a research question people hope to answer.\n\n00:39:32\nIf in the simulation you are pushing a box forwards,\n\n00:39:37\nbut in reality it rotates for 12 degrees,\n\n00:39:41\nBut if in the real world, your grasping was successful.\n\n00:39:46\nflies away because of some kind of numerical issues.\n\n00:39:52\nthat's problematic.\n\n00:39:56\nThere are other regions sim-to-real gap may not\n\n00:40:01\nAnd people still are trying to answer\n\n00:40:06\nand what are some of the most important recipes\n\n00:40:11\nto have for the most reliable sim-to-real transfer.\n\n00:40:17\nyou are asking--\n\n00:40:21\nto the robots.\n\n00:40:23\ncome up with better plans than the human?\n\n00:40:28\nAlthough many of these videos seems very nice,\n\n00:40:34\nto choose which route to go.\n\n00:40:40\nlet's say, there's some kind of rough terrains\n\n00:40:43\nAnd the humans can actually try to command the robot\n\n00:40:50\nIf that fails, humans can actually\n\n00:40:54\nthis pile of rocks.\n\n00:40:57\non the human side in understanding the capabilities\n\n00:41:01\nSo this is also why some of this video\n\n00:41:08\nthat the human knows can show the limits and also\n\n00:41:13\nAnd how to do that autonomously?\n\n00:41:18\npeople are also doing research upon.\n\n00:41:25\nSo I've discussed some of the successful examples and power\n\n00:41:30\ndiscussed the limitations of reinforcement learning.\n\n00:41:35\nand wide-scale deployments of reinforcement\n\n00:41:40\nAnd we, humans, not just learn from trials and error.\n\n00:41:45\nSo we're asking the question, can we actually learn\n\n00:41:49\nwith the environments and using that model for the robot to do\n\n00:41:55\nSo specifically, what we are touching upon, again, back\n\n00:42:00\nand approximations of the real physical world,\n\n00:42:07\nthat runs on the virtual domain can help\n\n00:42:12\nto take in the physical world?\n\n00:42:17\nfor example, let's say, you have already learned the models\n\n00:42:24\nwe can predict, given the current state st\n\n00:42:29\nwill change into states t plus 1.\n\n00:42:34\nas a forward model that, given the current state and action,\n\n00:42:38\nSo what actually is the problem for us\n\n00:42:43\nan inverse of this forward model?\n\n00:42:48\nstates and to come up with the action that can allow the robot\n\n00:42:54\nGiven the current state shown in the blue dots,\n\n00:42:58\nWe can have maybe some initial guesses of how\n\n00:43:02\nAnd our model, our approximated learned models,\n\n00:43:07\nevolutions of the states, which is\n\n00:43:13\nAnd then we can measure the distance between this green dots\n\n00:43:18\nor doing optimizations using the gradients of their distance\n\n00:43:27\nto do this type of optimizations,\n\n00:43:32\nto getting us closer to the targets shown in the red.\n\n00:43:38\nso we typically only executes the first actions,\n\n00:43:44\nAnd we can re-optimize the action sequence using\n\n00:43:49\ntechniques you use to do this trajectory optimizations.\n\n00:43:56\nwith the development of GPUs and also neural dynamics model,\n\n00:44:02\nand simultaneously sampling to allow\n\n00:44:07\nof those action sequences, which is actually quite efficient.\n\n00:44:14\nyou have the model, which is this kind of forward process.\n\n00:44:19\nto do this inverse optimizations to come up\n\n00:44:25\nconfiguration.\n\n00:44:28\nbeen, what should be the right representation\n\n00:44:31\nWhat should be the right and most effective\n\n00:44:34\nAnd how we can learn this model based\n\n00:44:38\nAnd over the years, there has been\n\n00:44:43\ndifferent types of state representations.\n\n00:44:48\njust 2D images as a representation of the states\n\n00:44:53\nmeaning how the image might change if you apply a specific\n\n00:44:58\nThis is a work called deep visual foresight, which\n\n00:45:02\nin the whole domains of word models.\n\n00:45:08\npeople can come up with strategies\n\n00:45:12\nthe distance between the current observations and some\n\n00:45:18\nto achieve the targets shown in green,\n\n00:45:23\nSo this is about pixel dynamics.\n\n00:45:29\nas a representation of the environments\n\n00:45:33\nAnd here, what we can do is to track the movement\n\n00:45:42\nneural dynamics model of those keypoints as a result of some\n\n00:45:47\nAnd then we can allow the robots to use\n\n00:45:53\nto track some specific trajectories in order\n\n00:46:01\nSo besides using keypoints, so what\n\n00:46:06\nof freedom?\n\n00:46:10\ncan also represent those objects using a set of particles,\n\n00:46:16\nHere, which is actually a work that\n\n00:46:22\nwe were representing this pile of granular pieces,\n\n00:46:27\nto predict how those particles will move around\n\n00:46:32\nAnd this forward model can allow the robots\n\n00:46:37\nhandle a wide range of granular objects\n\n00:46:42\nAnd we come up with strategies that\n\n00:46:46\nregion shown in the bottom right,\n\n00:46:51\nAnd the same model with good feedback from the environments\n\n00:46:59\nand come up with strategies that can be very reliably aggregate\n\n00:47:06\nAnd obviously, this model not just\n\n00:47:11\nof different granular sizes.\n\n00:47:17\nHere, you will very quickly realize what\n\n00:47:20\nThe robot has to come up with a strategy that\n\n00:47:27\nAnd after the redistribution, it has\n\n00:47:31\nwith the targets like shape.\n\n00:47:36\nThe task here is actually to rearrange this granular pieces\n\n00:47:42\nto letter Z. And with this kind of forward models,\n\n00:47:47\nwith a sequence of strategies, of course,\n\n00:47:51\nto allow the robot to rearrange this kind of object pieces\n\n00:47:55\nAnd this is actually a highly nontrivial task.\n\n00:48:03\nwhich I was also involved and done\n\n00:48:07\nAnd we designed this kind of dumpling-making robots, that is,\n\n00:48:15\ntools.\n\n00:48:19\nto do a reconstruction of the geometry of the store.\n\n00:48:25\nand what action to take to get this dumpling into--\n\n00:48:32\nAnd the key enabling factor is also\n\n00:48:39\nOr here, the red dots are representing\n\n00:48:43\nare representing the shape of the objects.\n\n00:48:49\nand second row is what actually happens in the real environment.\n\n00:48:56\nfrom this real-world interactions\n\n00:49:02\nwhen using different tools, applying different actions,\n\n00:49:09\nmake a dumpling out of a dough.\n\n00:49:12\nis there's a person constantly perturbing\n\n00:49:17\nThe robot will take the real-time visual feedback\n\n00:49:22\nunderstanding the shape of the dough\n\n00:49:28\nthe learned dynamics model that predicts how the environment is\n\n00:49:32\nchange if you use a tool to apply a specific action,\n\n00:49:37\nis making this inverse decision.\n\n00:49:42\nboth at the high level, which is to decide\n\n00:49:48\nAnd given these tools, the robot also\n\n00:49:53\nin deciding what specific action to take in order to progress\n\n00:49:59\nHumans are just so annoying, adding pieces, folding\n\n00:50:02\nThe robot is very robust to this external disturbance\n\n00:50:08\nHere's what's interesting.\n\n00:50:13\ndestroys everything.\n\n00:50:16\nto start from the very beginning,\n\n00:50:20\nto progress with this kind of task objective.\n\n00:50:26\nthe robustness of our systems with this type\n\n00:50:30\nAnd all of these capabilities is enabled\n\n00:50:34\npredicts how the shape of the dough\n\n00:50:39\nIn the end, the robot will place the skin\n\n00:50:45\non top of this dumpling skin and use a hook\n\n00:50:50\nto use this general purpose robot equipped\n\n00:50:57\nSo this is about how we can learn the model\n\n00:51:03\nplanning.\n\n00:51:08\nto describe it more rigorously, we\n\n00:51:12\nWe just learn the model and use that model to do planning,\n\n00:51:18\ncan be executed in the real environment in a more\n\n00:51:22\nBut some people also call it model-based reinforcement\n\n00:51:25\nDecide which background you are coming from.\n\n00:51:29\nand model-based planning.\n\n00:51:33\nBut the key idea is you want to learn the model from the robot's\n\n00:51:39\nand using that learned model that\n\n00:51:42\nto decide its behaviors to progress with the task\n\n00:51:47\nSo in this specific case, the high-level planning\n\n00:51:52\nSo over the high level, we are given the current state,\n\n00:51:58\nthe robot able to achieve, essentially\n\n00:52:04\nAnd conditional on this classifier, tool label,\n\n00:52:09\nwhat specific action to take in order to progress\n\n00:52:14\nVery good question.\n\n00:52:17\nAt that time, visual language model wasn't very powerful.\n\n00:52:25\nto do the data collection, demonstration\n\n00:52:30\nWe use that data to train this kind of classifier\n\n00:52:35\nThat allows us to actually jump back and forth over this chain.\n\n00:52:41\nthe human destroys everything.\n\n00:52:45\nfits to its current observation in order\n\n00:52:52\nSo in this specific case, what we have been doing\n\n00:52:57\noptimization versus policy learning.\n\n00:53:02\nof this dough.\n\n00:53:05\nWe'll be able to sample a bunch of actions and sample\n\n00:53:11\nof the shape of that dough.\n\n00:53:15\nwith the targets we hope to achieve,\n\n00:53:20\nFor example, our model predicts the shape of the dough\n\n00:53:25\nis this red dots, while comparing their distance.\n\n00:53:30\nthe most effective actions that can get us to the target\n\n00:53:35\nAnd we can do a lot of samples like this.\n\n00:53:41\nSo we do this type of sampling in an offline fashion, which\n\n00:53:45\nAnd we can use that data set to train a policy that can\n\n00:53:50\nusing a very short period of time\n\n00:53:54\nThere is still a neural network as the policies.\n\n00:53:56\nAlthough the policy is learned by distilling from our models\n\n00:54:04\nFor this specific work, there is no physics-based simulation\n\n00:54:08\nWe actually have a baseline that uses a state-of-the-art\n\n00:54:13\nMaterial Point Methods.\n\n00:54:19\nidentification, like estimating the parameters\n\n00:54:24\nthe identified model is noticeably less accurate\n\n00:54:28\nfrom the real-world interactions.\n\n00:54:31\nthe first row is our model's open loop prediction.\n\n00:54:35\nOur model's prediction aligns very well\n\n00:54:39\nmuch more accurate than whatever physics-based simulator is\n\n00:54:46\nOK.\n\n00:54:49\nSo what do we have discussed in this kind of model learning\n\n00:54:54\neffective for the downstream model-based planning.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "global_kp_id": "kp_state_representations_for_learned_world_models",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "name": "Learned forward dynamics for model-based planning",
+      "description": "Instead of directly learning a policy, a robot can learn how actions change the world and use that model to optimize future action sequences.",
+      "track_tags": [
+        "planning",
+        "robotics",
+        "world_models"
+      ],
+      "domain_tags": [
+        "forward_dynamics",
+        "model_based_planning",
+        "model_learning"
+      ],
+      "career_path_tags": [
+        "control_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.83,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because learned forward dynamics for model-based planning formalizes how instead of directly learning a policy, a robot can learn how actions change the world and use that model to optimize future action sequences, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_state_representations_for_learned_world_models",
+      "name": "State representations for learned world models",
+      "description": "World models can represent state at different granularities—pixels, keypoints, or particles—and the right choice depends on the task and object structure.",
+      "track_tags": [
+        "planning",
+        "representation_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "deformable_objects",
+        "state_representation",
+        "world_models"
+      ],
+      "career_path_tags": [
+        "perception_engineer",
+        "robotics_researcher"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because state representations for learned world models clarifies world models can represent state at different granularities—pixels, keypoints, or particles—and the right choice depends on the task and object structure, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "name": "Model-free RL successes and sim-to-real limitations",
+      "description": "RL has produced dramatic wins in games and locomotion, yet still suffers from sample inefficiency, safety concerns, and limited robustness in many manipulation settings.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "model_free_rl",
+        "robot_locomotion",
+        "sim_to_real"
+      ],
+      "career_path_tags": [
+        "rl_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because model-free RL successes and sim-to-real limitations clarifies rL has produced dramatic wins in games and locomotion, yet still suffers from sample inefficiency, safety concerns, and limited robustness in many manipulation settings, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp10"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.67,
+    0.97
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

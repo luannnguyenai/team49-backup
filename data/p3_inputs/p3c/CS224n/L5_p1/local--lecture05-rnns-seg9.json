@@ -1,0 +1,154 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture05-rnns",
+    "lecture_title": "Stanford CS224N: NLP with Deep Learning | Spring 2024 | Lecture 5 - Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4"
+  },
+  "unit": {
+    "unit_id": "local::lecture05-rnns::seg9",
+    "course_id": "cs224n-2024",
+    "name": "RNN rollout generation and character/contextual variants",
+    "description": "Uses trained RNN language models to generate text and broadens the idea to character-level and contextual sequence generation.",
+    "summary": "To generate text, the model starts from an initial hidden state and a special start-of-sequence symbol, samples a next token from the softmax distribution, feeds that generated token back in, and continues until an end-of-sequence symbol is produced [ts=4644s] [ts=4694s] [ts=4728s] [ts=4772s]. The instructor notes that later systems such as ChatGPT use the same autoregressive rollout pattern, though with more complex architectures [ts=4790s] [ts=4806s]. Example outputs from Barack Obama speeches, Harry Potter, and recipe corpora show that simple RNNs can mimic local style and syntax but still struggle with global coherence [ts=4870s] [ts=5037s] [ts=5087s]. The final examples extend RNNs to character-level generation and contextual initialization, including generating paint-color names from RGB values [ts=5176s] [ts=5216s] [ts=5266s].",
+    "key_points": [
+      {
+        "text": "Generation begins with a start-of-sequence token and an initial hidden state.",
+        "timestamp_s": 4671,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Autoregressive rollout samples a word, feeds it back as the next input, and repeats until an end-of-sequence symbol is produced.",
+        "timestamp_s": 4728,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The lecture explicitly connects this rollout process to how later systems like ChatGPT generate responses.",
+        "timestamp_s": 4790,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "RNNs trained on Obama speeches, Harry Potter, or recipes generate stylistically plausible but imperfect text.",
+        "timestamp_s": 4870,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Character-level RNNs generate one letter at a time instead of one word at a time.",
+        "timestamp_s": 5176,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A contextual RNN can initialize the hidden state with side information such as RGB values to generate paint-color names.",
+        "timestamp_s": 5266,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+      "start_s": 4116,
+      "end_s": 4723
+    },
+    "difficulty": 0.61,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 9,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "transcript_slice": "01:08:40\nwe can use RNN language model to generate text.\n\n01:08:48\nexcept now rather than just using counts of n-grams,\n\n01:08:56\nto give us the input to a probability distribution\n\n01:09:03\nSo I can start with the initial hidden state.\n\n01:09:10\nI mean, the example I had before, I started immediately\n\n01:09:18\nBut what you should have asked is, wait a minute,\n\n01:09:22\nSo normally what we actually do is\n\n01:09:29\nlike this angle bracketed S. And so we sort of feed it\n\n01:09:38\nAnd then based on this, we'll be generating\n\n01:09:43\nSo we end up with some representation from which we can\n\n01:09:51\nSo now we don't have any actual text.\n\n01:09:58\nthat we generated and copy it down as the next input,\n\n01:10:07\nsample from the probability distribution\n\n01:10:13\nas the next word of the input and keep on generating.\n\n01:10:20\nthat you're continuing to roll the dice\n\n01:10:28\nAnd normally you want to stop at some point.\n\n01:10:35\nspecial symbol, the angle brackets /S,\n\n01:10:44\nSo we can generate an end of sequence symbol\n\n01:10:49\nAnd so using this, we can generate pieces of text.\n\n01:10:56\nhappening if you use something like ChatGPT, that the model is\n\n01:11:04\nbut it's generating the response to you\n\n01:11:11\ntreating it as an input and generating the next word\n\n01:11:17\nAnd that's why and it's done probabilistically.\n\n01:11:25\nWe haven't yet gotten to ChatGPT,\n\n01:11:29\nSo you can take this simple recurrent neural network\n\n01:11:35\ncan train it on any piece of text\n\n01:11:40\nSo, for example, I can train it on Barack Obama's speeches.\n\n01:11:46\nHe didn't talk that much.\n\n01:11:51\nIt's not a huge corpus.\n\n01:11:55\nBut I can generate from it and I get something\n\n01:12:01\nto the cost of a new challenges of the American people that\n\n01:12:07\nThey were attacked.\n\n01:12:10\nof the final days of war, that I will not be able to get this\n\n01:12:15\nYeah, well, maybe that's slightly better\n\n01:12:19\nIt's still not perfect, you might say, but somewhat better,\n\n01:12:23\nDid you have a question?\n\n01:12:26\nSo it's like creating a model like a truncated set\n\n01:12:31\nDoes that impose some kind of limitation\n\n01:12:37\nhave some coherency and the meaning of the sentence we're\n\n01:12:43\nSo yeah.\n\n01:12:49\nunits.\n\n01:12:53\nthat we're going to use.\n\n01:12:57\nThat's typically several sentences.\n\n01:13:02\nto even more about the further back context,\n\n01:13:07\nAnd certainly that's one of the ways\n\n01:13:13\nfar bigger contexts than that.\n\n01:13:18\nYeah, absolutely.\n\n01:13:23\nSo in some sense, actually, even though in theory\n\n01:13:30\ncontext, as soon as I say practically,\n\n01:13:36\nmeans we are making a Markov assumption again\n\n01:13:43\nYeah?\n\n01:13:45\nA couple more examples.\n\n01:13:50\nfeed in Harry Potter, which is a somewhat bigger corpus of text\n\n01:13:56\nAnd so I can get, sorry, Harry shouted, panicking.\n\n01:14:02\nNo idea, said nearly headless Nick,\n\n01:14:07\nthe last bit of treacle charms from Harry's shoulder.\n\n01:14:13\nFour arms held a shining knob from when\n\n01:14:21\nWell, there you are.\n\n01:14:28\nand generate a recipe.\n\n01:14:35\nbut it looks like a recipe if you don't look very hard.\n\n01:14:43\nCategories: game, casseroles, cookies, cookies.\n\n01:14:49\n2 tablespoons of Parmesan cheese chopped,\n\n01:14:57\nPlace each pasta.\n\n01:15:01\nShape mixture into the moderate oven and simmer until firm.\n\n01:15:12\nCombine the cheese and salt together,\n\n01:15:19\nand stir in the chocolate and pepper.\n\n01:15:25\nwhen it comes down to it.\n\n01:15:32\nmaybe if I had scaled it more and had a bigger corpus,\n\n01:15:36\nBut it's definitely not using the ingredients there are.\n\n01:15:41\nIt's almost time today, so maybe about all I can do is do--\n\n01:15:54\nYeah, I probably should do that bit at the start next time.\n\n01:16:01\nI mean, so far we've been building them over words\n\n01:16:12\nI mean, actually you can use the idea\n\n01:16:18\nand people have used them for other things.\n\n01:16:23\nfor things like DNA, for having gene sequencing or protein\n\n01:16:30\nBut even staying with language, instead of building them\n\n01:16:38\nso that I'm generating a letter at a time\n\n01:16:45\nAnd so that can sometimes be useful\n\n01:16:55\nand perhaps have the structure of English words.\n\n01:17:02\nSo before I initialized the hidden state,\n\n01:17:10\nYou can make it zeros if you want.\n\n01:17:17\nwhere we can initialize the hidden state with something\n\n01:17:21\nSo in particular, I can initialize the hidden state\n\n01:17:28\nAnd so I can have initialized the hidden state with the color\n\n01:17:37\nAnd I can train a model based on paint companies' catalog\n\n01:17:48\nAnd then I can give it different paint colors\n\n01:17:54\nAnd it actually does an excellent job.\n\n01:17:57\nLook at this.\n\n01:18:06\ncoe white, horrible gray, homestar brown.\n\n01:18:13\nof these in a paint catalog?\n\n01:18:17\nthere's some really good ones over here in the bottom right.\n\n01:18:29\nstinky bean and turdly.\n\n01:18:37\nin the paint company market for my recurrent neural network.\n\n01:18:43\nmore of the science of neural networks next time.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture05-rnns::seg9",
+      "global_kp_id": "kp_autoregressive_rollout_and_rnn_variants",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05-rnns::seg9",
+      "global_kp_id": "kp_rnn_basics",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_autoregressive_rollout_and_rnn_variants",
+      "name": "Autoregressive rollout and RNN variants",
+      "description": "Generating sequences token by token and extending RNNs to character-level or conditioned-generation settings.",
+      "track_tags": [
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "generation",
+        "recurrent_neural_networks"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because autoregressive rollout and RNN variants extends the core thread to generating sequences token by token and extending RNNs to character-level or conditioned-generation settings without being required for the main pipeline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_rnn_basics",
+      "name": "Recurrent neural networks",
+      "description": "Shared-parameter sequence models that update a hidden state over time to summarize prior context. Updating a hidden state from current input and previous hidden state at every time step.",
+      "track_tags": [
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "recurrent_neural_networks",
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because recurrent neural networks formalizes how shared-parameter sequence models that update a hidden state over time to summarize prior context, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp10",
+        "local::lecture_7::kp3"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.46,
+    0.76
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L5_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture05-rnns_transcript.txt"
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_5_image_classification_with_cnns",
+    "lecture_title": "Image Classification with CNNs",
+    "youtube_url": "https://www.youtube.com/watch?v=f3g1zGdxptI"
+  },
+  "unit": {
+    "unit_id": "local::lecture_5_image_classification_with_cnns::seg7",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Pooling, translation equivariance, and summary",
+    "description": "The final teaching segment presents pooling as a cheap downsampling operator, discusses common pooling choices, and ends with the translation-equivariance property that motivates image-specific operators.",
+    "summary": "Pooling is introduced as another way to downsample inside a network, one that is much cheaper than convolution because it reduces spatial size without performing expensive filter dot products [ts=3573s][ts=3604s]. The instructor describes pooling as operating independently on each feature plane, keeping channel count fixed while shrinking height and width [ts=3606s][ts=3648s]. Max pooling is presented as the most common case: split a feature map into tiles such as 2x2 regions with stride 2 and keep the maximum from each tile [ts=3659s][ts=3698s]. He notes that pooling has kernel, stride, and function choices, that padding is usually not used, and that many networks simply use pooling to downsample by a factor of two between convolution blocks [ts=3700s][ts=3762s][ts=3831s][ts=3846s]. The segment also distinguishes max pooling, which is nonlinear, from average pooling, which is linear [ts=3850s][ts=3873s]. Finally, it introduces translation equivariance: translating an image and then applying convolution or pooling gives the same result as applying the operator first and translating afterward, up to boundary effects, which formalizes the idea that image features should depend on content rather than absolute location [ts=3892s][ts=3980s][ts=3998s][ts=4023s].",
+    "key_points": [
+      {
+        "text": "Pooling downsamples each feature plane independently and is much cheaper than convolution.",
+        "timestamp_s": 3573,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Max pooling with 2x2 stride 2 keeps the largest value in each non-overlapping tile.",
+        "timestamp_s": 3664,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Pooling hyperparameters include kernel size, stride, and the reduction function; padding is usually omitted.",
+        "timestamp_s": 3700,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A common architecture pattern intersperses conv and pooling blocks, often downsampling by exactly a factor of two.",
+        "timestamp_s": 3752,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Max pooling is nonlinear, while average pooling is linear.",
+        "timestamp_s": 3851,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Convolution and pooling are translation equivariant up to boundary conditions.",
+        "timestamp_s": 3921,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+      "start_s": 3573,
+      "end_s": 4076
+    },
+    "difficulty": 0.58,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
+  "transcript_slice": "00:59:34\nThankfully, pooling is pretty simple.\n\n00:59:40\nof your neural network.\n\n00:59:43\nis one way that we can downsample inside\n\n00:59:46\nAnd downsampling is useful because it lets us build up\n\n00:59:50\ngo through the depth of the network.\n\n00:59:54\nquite a lot of computation.\n\n00:59:59\nhappens in a convolutional network.\n\n01:00:02\nto downsample that's very, very cheap.\n\n01:00:06\nAnd the idea in a pooling layer is\n\n01:00:12\nby 112 by 112.\n\n01:00:15\nlike a three-dimensional volume of features\n\n01:00:20\nand we have 64 planes, 64 channels of activation.\n\n01:00:26\nis a 112 by 112 image.\n\n01:00:30\ntake each one of those individual feature planes,\n\n01:00:34\nand downsample them independently, and then restack\n\n01:00:37\nSo then this input 64 by 224 by 224,\n\n01:00:43\nindependently downsample it and then\n\n01:00:48\nbut change in the spatial size.\n\n01:00:52\nGreat question.\n\n01:00:56\nthere's a couple different mechanisms\n\n01:00:59\nOne of the common ones-- one of the most common ones to use\n\n01:01:04\nSo in Max pooling what we're going\n\n01:01:08\ndivide it up into non-overlapping regions.\n\n01:01:13\nand we often use-- and we use the same terminology\n\n01:01:17\nSo this way this we could say it's\n\n01:01:21\nbecause that then that divides our inputs\n\n01:01:26\nThen within each of those non-overlapping 2 by 2 tiles,\n\n01:01:30\nIn this case, it's a 6, 8, 3, 4.\n\n01:01:36\nand then that-- and then that gives us\n\n01:01:40\nAnd there's a whole-- you can imagine a whole set\n\n01:01:43\nYou could say, what is the kernel size.\n\n01:01:47\nYou can change the stride.\n\n01:01:51\nMax pooling is pretty common.\n\n01:01:53\nYou'll also see anti-aliased down pooling sometimes.\n\n01:01:59\nmaps one at a time.\n\n01:02:01\nDo we make a use of padding.\n\n01:02:06\nThere's nothing mathematically preventing you from doing so.\n\n01:02:12\nIt's basically equivalent to a ReLU.\n\n01:02:15\nif you're also using a ReLU that would be redundant.\n\n01:02:21\nI'm actually not sure if PyTorch has\n\n01:02:26\nYeah.\n\n01:02:29\nof these architectural hyperparameters.\n\n01:02:32\nUsually, the intuition behind pooling layer--\n\n01:02:36\nwant to downsample my I want to downsample everything\n\n01:02:42\nSo then the most common thing to do would be 2 by 2 stride 2.\n\n01:02:48\nBut basically, the most common settings by far\n\n01:02:52\nby a factor of exactly two.\n\n01:02:56\nDo images all have to be the same input size.\n\n01:03:02\nYou're going to run into big problems\n\n01:03:06\nSo then things that you'll typically\n\n01:03:12\nto the exact same size before you batch\n\n01:03:15\nSometimes you'll also pad your images out\n\n01:03:19\nthem all the same signs but now padded rather than warped.\n\n01:03:24\nindependently for images of different aspect ratios.\n\n01:03:29\nin more sophisticated training setups,\n\n01:03:33\nbucketing.\n\n01:03:35\nbucket them into different aspect ratios.\n\n01:03:38\npass the network will be on a batch of images\n\n01:03:42\nBut then each iteration, you might grab images\n\n01:03:47\nor that's something that you'll see\n\n01:03:50\nYeah.\n\n01:03:53\nThese are usually interspersed with the convolution layers.\n\n01:03:57\na pretty common pattern for ConvNets\n\n01:04:01\nSo for example, you'll see com com pool,\n\n01:04:06\nis a prototypical convolutional network.\n\n01:04:11\nDoes this introduce non-linearity.\n\n01:04:16\nthat you're using.\n\n01:04:20\nSo in some networks, if you have a max pooling,\n\n01:04:26\nbecause a max pooling is a non-linearity itself.\n\n01:04:31\nSo then if you do average pooling it's linear.\n\n01:04:37\nOK.\n\n01:04:39\nof pooling is basically the same hyperparameters as convolution.\n\n01:04:45\nis what is the mechanism you're using to do the downsampling.\n\n01:04:52\nis this notion of translation equivariance.\n\n01:04:57\nSo I said at the beginning of the-- beginning of the lecture\n\n01:05:01\nrespecting the spatial structure of our images.\n\n01:05:06\ninto big vectors is somehow not respecting the spatial structure\n\n01:05:10\nSo there's a really interesting property that is shared by both\n\n01:05:17\nnotion of them respecting the 2D spatial structure of the images.\n\n01:05:23\nSo it sounds like-- it sounds pretty crazy,\n\n01:05:29\ndifferent branches.\n\n01:05:33\ndoing a convolution or pooling operator\n\n01:05:38\nby shifting that feature map to the side by, for example.\n\n01:05:44\ninstead.\n\n01:05:48\nand then do our convolution or pool operator\n\n01:05:53\nAnd it just so happens that in this case,\n\n01:05:58\nyou get the same result as if you had done convolution\n\n01:06:04\nblah, blah, blah, blah.\n\n01:06:08\nand blah, blah, blah, blah, blah,\n\n01:06:12\nit's really interesting that you can actually\n\n01:06:16\nversus performing these downsampling or convolution\n\n01:06:20\nAnd that bakes in an important intuition\n\n01:06:27\nthe features that we extract from an image\n\n01:06:31\nand should not depend on where in the image that-- where\n\n01:06:38\nSo that means that if I'm looking this way,\n\n01:06:41\nit looks like people and benches.\n\n01:06:45\nAnd the fact that it's over here on my right and the fact\n\n01:06:49\nwant to process that data in the exact same way.\n\n01:06:53\nan important structure that we want to of images and of the 2D\n\n01:06:58\nAnd this notion of translation, equivariance\n\n01:07:03\nhow that structure is baked into these operators.\n\n01:07:09\nthat we can build in our intuition\n\n01:07:13\nthrough the design of our operators,\n\n01:07:17\nas we saw at the beginning.\n\n01:07:20\nYou.\n\n01:07:23\nThis is basically a mathematical curiosity.\n\n01:07:27\ndo this inside of your neural networks.\n\n01:07:32\nhappens to be true, but you would not\n\n01:07:37\nAnd if you're a mathematician, you\n\n01:07:40\nAnd mathematicians love those things.\n\n01:07:45\nWe talked about convolutional networks.\n\n01:07:48\nWe talked about these two new operators\n\n01:07:52\nAnd then next lecture, we'll see how to stitch those together\n\n01:07:56\nAnd see you next time for that.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_5_image_classification_with_cnns::seg7",
+      "global_kp_id": "kp_pooling_and_translation_equivariance",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_5_image_classification_with_cnns::seg7",
+      "global_kp_id": "kp_receptive_fields_and_strided_downsampling",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_5_image_classification_with_cnns::seg7",
+      "global_kp_id": "kp_end_to_end_learning_for_images",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_pooling_and_translation_equivariance",
+      "name": "Pooling and translation equivariance",
+      "description": "Pooling offers cheap spatial downsampling, and together with convolution exhibits translation equivariance, a property that matches how image content should be processed.",
+      "track_tags": [
+        "computer_vision",
+        "network_design"
+      ],
+      "domain_tags": [
+        "pooling",
+        "translation_equivariance"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because pooling and translation equivariance clarifies pooling offers cheap spatial downsampling, and together with convolution exhibits translation equivariance, a property that matches how image content should be processed, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_5_image_classification_with_cnns::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_receptive_fields_and_strided_downsampling",
+      "name": "Receptive fields and strided downsampling",
+      "description": "The receptive field measures how much of the original image can affect a later activation; stride and downsampling let that field grow faster with depth.",
+      "track_tags": [
+        "computer_vision",
+        "network_design"
+      ],
+      "domain_tags": [
+        "downsampling",
+        "receptive_field"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because receptive fields and strided downsampling clarifies the receptive field measures how much of the original image can affect a later activation; stride and downsampling let that field grow faster with depth, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_5_image_classification_with_cnns::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_end_to_end_learning_for_images",
+      "name": "End-to-end learning for images",
+      "description": "Replacing hand-engineered feature stages with trainable image-processing operators that preserve spatial structure and are learned from data.",
+      "track_tags": [
+        "computer_vision",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "end_to_end_learning",
+        "image_models"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because end-to-end learning for images clarifies replacing hand-engineered feature stages with trainable image-processing operators that preserve spatial structure and are learned from data, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_5_image_classification_with_cnns::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.43,
+    0.73
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L5_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture05-image-classification-with-cnns_transcript.txt"
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_9",
+    "lecture_title": "Detection, Segmentation, Visualization, and Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture_9::seg1",
+      "course_id": "cs231n_spring_2025",
+      "name": "Vision Transformer refresher and modern transformer tweaks",
+      "description": "Recaps how images are processed with ViTs, then surveys common transformer modifications used to stabilize training and increase capacity.",
+      "summary": "The lecture revisits vision transformers by explaining that an image is split into patches, each patch is linearly projected into a D-dimensional token, and positional embeddings are added because patching discards 2D location information [ts=210s] [ts=245s] [ts=278s]. For classification, the instructor contrasts two readout strategies: a learned class token whose output becomes class probabilities, or pooling all output patch tokens before a final projection; unlike autoregressive language models, ViTs do not need masking because all image patches can attend to each other [ts=354s] [ts=440s] [ts=464s]. The segment then summarizes practical transformer tweaks: pre-norm moves normalization inside residual paths to preserve an identity route, RMSNorm is a simpler normalization that empirically stabilizes training, SwiGLU replaces the plain MLP with a gated nonlinearity, and mixture-of-experts routes each token to A of E experts to increase parameters with a smaller compute increase [ts=587s] [ts=609s] [ts=653s] [ts=725s].",
+      "key_points": [
+        {
+          "text": "A ViT converts an image into a sequence by splitting it into patches.",
+          "timestamp_s": 218,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Each image patch is reshaped and linearly projected into a D-dimensional token.",
+          "timestamp_s": 245,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Positional embeddings are added because patching loses the image's 2D position information.",
+          "timestamp_s": 278,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A learned class token can be appended so its output becomes the class-probability vector.",
+          "timestamp_s": 354,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "An alternative ViT classifier pools all output tokens and projects the pooled vector to class scores.",
+          "timestamp_s": 464,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pre-norm moves normalization before self-attention and the MLP so the residual path can preserve identity behavior.",
+          "timestamp_s": 587,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "RMSNorm normalizes by root-mean-square magnitude instead of using the mean and is presented as more stable in training.",
+          "timestamp_s": 609,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Mixture-of-experts routes each token to A active experts out of E total experts, increasing parameters faster than compute.",
+          "timestamp_s": 725,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+        "start_s": 0,
+        "end_s": 959
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 16,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_9::seg2",
+      "course_id": "cs231n_spring_2025",
+      "name": "Semantic segmentation from per-pixel labeling to U-Net",
+      "description": "Introduces semantic segmentation, motivates the need for context and shared computation, and walks through FCNs, upsampling, transposed convolution, and U-Net.",
+      "summary": "Semantic segmentation is framed as assigning a semantic class to every pixel, which immediately shows why isolated pixels are ambiguous and why context around a center pixel matters [ts=1068s] [ts=1120s] [ts=1140s]. The lecture first contrasts an inefficient sliding-window approach with fully convolutional networks that output an entire label map at once, then explains why practical models downsample to reduce cost and upsample back to image resolution instead of staying full-resolution throughout [ts=1180s] [ts=1257s] [ts=1297s] [ts=1328s]. Training is described as summing or averaging a softmax classification loss over pixels, while decoder design uses unpooling, max-unpooling, or learned transposed convolution to restore spatial size; U-Net is highlighted as a particularly important encoder-decoder because it copies encoder features into the decoder to recover sharp boundaries and preserve structure [ts=1451s] [ts=1519s] [ts=1664s] [ts=1814s] [ts=1853s].",
+      "key_points": [
+        {
+          "text": "Semantic segmentation assigns a semantic category to every pixel in the image.",
+          "timestamp_s": 1068,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A single pixel is not enough for segmentation; the model needs surrounding context to label the center pixel.",
+          "timestamp_s": 1140,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Fully convolutional networks keep spatial structure and output a full segmentation map rather than one label.",
+          "timestamp_s": 1257,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The segmentation loss can be defined as a softmax classification loss summed or averaged over all pixels.",
+          "timestamp_s": 1451,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Unpooling can upsample with nearest-neighbor copying, bed-of-nails placement, or saved max-pooling locations.",
+          "timestamp_s": 1519,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Transposed convolution is learned upsampling where overlapping projected outputs are summed.",
+          "timestamp_s": 1664,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "U-Net sharpens segmentation outputs by copying encoder feature maps into the decoder through skip connections.",
+          "timestamp_s": 1814,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+        "start_s": 960,
+        "end_s": 1960
+      },
+      "difficulty": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 17,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_9::seg3",
+      "course_id": "cs231n_spring_2025",
+      "name": "Object detection as classification plus localization and the R-CNN family",
+      "description": "Builds object detection from a single-object multitask loss to scalable multi-object pipelines based on region proposals and shared feature extraction.",
+      "summary": "Object detection is introduced as predicting both a category and a bounding box, so the network must output class scores together with box coordinates such as x, y, w, and h [ts=2075s] [ts=2086s] [ts=2092s]. For a single object, the lecture defines a multitask objective that combines softmax classification loss with an L2 regression loss on the box, but then explains why direct multi-object prediction or exhaustive sliding windows over all boxes quickly becomes unscalable [ts=2104s] [ts=2111s] [ts=2160s] [ts=2243s]. The remedy is region proposals: R-CNN classifies proposal crops and refines boxes, Fast R-CNN shares convolution over the whole image and reads regions from the feature map, and region proposal networks refine candidate boxes and keep top-K proposals, though the whole family is still described as computationally heavy because it effectively needs proposal generation plus classification/refinement stages [ts=2280s] [ts=2335s] [ts=2434s] [ts=2495s] [ts=2581s] [ts=2655s].",
+      "key_points": [
+        {
+          "text": "Object detection predicts class scores together with bounding-box coordinates (x, y, w, h).",
+          "timestamp_s": 2080,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A basic detector can be trained with a compound loss: softmax for class prediction plus L2 regression for the box.",
+          "timestamp_s": 2111,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Exhaustive sliding windows over all candidate boxes are not scalable for multi-object scenes.",
+          "timestamp_s": 2195,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Region proposals restrict computation to image regions that are likely to contain objects.",
+          "timestamp_s": 2280,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "R-CNN classifies each proposed crop and refines its box, but it is slow because it reruns a CNN per proposal.",
+          "timestamp_s": 2335,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Fast R-CNN shares one convolutional pass over the full image and reads proposal regions from the feature map.",
+          "timestamp_s": 2434,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A region proposal network refines candidate boxes and keeps the top-K high-probability proposals.",
+          "timestamp_s": 2541,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+        "start_s": 1961,
+        "end_s": 2620
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_9::seg4",
+      "course_id": "cs231n_spring_2025",
+      "name": "Single-stage and transformer detectors: YOLO and DETR",
+      "description": "Covers faster one-stage detection with YOLO and then shows how transformer encoder-decoder designs can be repurposed for detection with learned object queries.",
+      "summary": "To avoid the two-stage cost of R-CNN-style detectors, the lecture introduces single-stage detection and uses YOLO as the canonical example: the image is divided into an S x S grid, each cell predicts B bounding boxes plus objectness and class probabilities, and postprocessing uses thresholding and non-maximum suppression to keep the best detections [ts=2675s] [ts=2738s] [ts=2772s] [ts=2851s]. The segment then presents DETR as a transformer-based detector built from encoder tokens with positional encodings plus a decoder that receives learned object queries rather than proposal boxes [ts=2940s] [ts=2997s] [ts=3006s] [ts=3052s]. Each query outputs either a class and bounding box or a no-object prediction, supervision still uses class labels and box losses, and the instructor emphasizes that queries are trainable parameters rather than image patches; more queries can be used when more objects are expected [ts=3104s] [ts=3121s] [ts=3208s] [ts=3275s] [ts=3449s] [ts=3460s].",
+      "key_points": [
+        {
+          "text": "YOLO divides the image into an S x S grid for one-pass detection.",
+          "timestamp_s": 2738,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Each grid cell predicts B boxes together with objectness and class probabilities.",
+          "timestamp_s": 2772,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Thresholding and non-maximum suppression are used to keep the highest-confidence YOLO detections.",
+          "timestamp_s": 2851,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "DETR reuses a transformer encoder-decoder architecture for object detection.",
+          "timestamp_s": 2940,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "DETR uses learned object queries in the decoder to request up to N detected objects.",
+          "timestamp_s": 3052,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Each object query outputs either a class-plus-box prediction or a no-object label.",
+          "timestamp_s": 3121,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Object queries are learned parameters, not image patches or predefined boxes.",
+          "timestamp_s": 3275,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+        "start_s": 2621,
+        "end_s": 3380
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 13,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_9::seg5",
+      "course_id": "cs231n_spring_2025",
+      "name": "Instance segmentation with Mask R-CNN",
+      "description": "Explains how to extend detection systems so they not only find objects and boxes but also assign distinct pixel masks to each object instance.",
+      "summary": "The lecture returns to the gap between semantic and instance segmentation: semantic segmentation labels pixels by class, but it cannot tell which pixels belong to one dog versus another, so instance-aware detection machinery is needed [ts=3481s] [ts=3490s] [ts=3523s]. Mask R-CNN is introduced as a direct extension of the R-CNN pipeline in which region proposals still feed class and box heads, but an extra convolutional branch also predicts a pixel-level mask for each detected object [ts=3498s] [ts=3504s] [ts=3523s] [ts=3554s] [ts=3566s]. The instructor notes that this architecture produces strong results on known categories and closes the computer-vision-tasks portion by stressing that such detection-and-segmentation pipelines remain practically relevant in industrial settings such as quality control [ts=3600s] [ts=3607s] [ts=3663s] [ts=3674s].",
+      "key_points": [
+        {
+          "text": "Instance segmentation separates pixels into distinct object instances, not just semantic classes.",
+          "timestamp_s": 3490,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Mask R-CNN extends the R-CNN pipeline by adding a mask-prediction branch.",
+          "timestamp_s": 3523,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The extra mask head predicts a pixel-level mask for each detected object.",
+          "timestamp_s": 3554,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The mask output can be produced with a fully convolutional head over each detected region.",
+          "timestamp_s": 3575,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Mask R-CNN is presented as a strong extension of R-CNN for object-level masks.",
+          "timestamp_s": 3600,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Detection and segmentation pipelines remain useful for industrial quality-control applications.",
+          "timestamp_s": 3663,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+        "start_s": 3381,
+        "end_s": 3720
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_9::seg6",
+      "course_id": "cs231n_spring_2025",
+      "name": "Visualization and understanding: saliency, CAM, Grad-CAM, and ViT attention",
+      "description": "Summarizes common ways to inspect what networks learn, from visualizing filters to attributing class decisions back to pixels or attention maps.",
+      "summary": "The final segment first connects visualization back to earlier lectures by noting that linear classifiers can be interpreted as class templates and that early CNN filters can likewise be visualized as simple learned edges or shapes, though direct filter visualization becomes harder once hidden layers have many channels [ts=3742s] [ts=3775s] [ts=3808s] [ts=3822s]. It then defines saliency as the gradient of a class score with respect to input pixels, so the largest-magnitude derivatives indicate which pixels most affect the score for a class such as dog [ts=3881s] [ts=3953s] [ts=3979s] [ts=3993s]. For class activation methods, CAM is described as tracing class scores back to spatial feature maps through weighted sums, while Grad-CAM replaces fixed classifier weights with gradient-based weights and a ReLU to highlight positive evidence; for ViTs, the instructor says attention maps already provide a more direct visualization route in pixel space [ts=4048s] [ts=4104s] [ts=4234s] [ts=4264s] [ts=4284s] [ts=4352s] [ts=4381s].",
+      "key_points": [
+        {
+          "text": "Early CNN filters can be visualized directly and often resemble simple edges, orientations, and basic shapes.",
+          "timestamp_s": 3775,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Saliency asks which input pixels matter most for a class prediction.",
+          "timestamp_s": 3881,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A saliency map is the gradient of the class score with respect to the input pixels.",
+          "timestamp_s": 3979,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "CAM localizes class evidence by combining spatial feature maps with class-specific weights.",
+          "timestamp_s": 4052,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Grad-CAM uses gradient-derived weights and a ReLU to highlight positive evidence for a class.",
+          "timestamp_s": 4234,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "ViTs provide attention maps that can be visualized directly over image patches or pixels.",
+          "timestamp_s": 4357,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+        "start_s": 3721,
+        "end_s": 4416
+      },
+      "difficulty": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 6,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L9_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture09-object-detection-image-segmentation-visualizing_transcript.txt"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "cs224n-2024-lecture13-bci",
+    "lecture_title": "Brain-Computer Interfaces",
+    "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8"
+  },
+  "unit": {
+    "unit_id": "local::cs224n-2024-lecture13-bci::seg4",
+    "course_id": "cs224n-2024",
+    "name": "Recording technologies and movement-based BCIs in practice",
+    "description": "Compares brain-recording modalities and shows how intracortical decoders support cursor typing, robotic-arm control, and handwriting-based communication.",
+    "summary": "The lecture next compares recording modalities along spatial and temporal resolution, stressing that ideal systems would capture fine-grained neural events quickly rather than averaging over large regions or long windows [ts=1382s][ts=1445s]. The clinical platform emphasized here is the microelectrode array: a fingernail-sized implant with many tiny needles that can sample signals from roughly hundreds of nearby neurons in motor cortex [ts=1504s][ts=1528s]. The speaker then walks through a spinal-cord-injury example in which movement-related channels are calibrated and decoded in real time to infer intended cursor or arm motion [ts=1557s][ts=1658s]. Several demos ground this idea: virtual-keyboard typing with mind-controlled cursor movement, robotic-arm reaching and grasping, and handwriting BCI as a faster communication modality [ts=1712s][ts=1992s][ts=2086s]. He also situates performance numerically, contrasting slow sip-and-puff communication with 2D cursor control at about 8 words per minute, handwriting at around 18 words per minute, and natural conversation around 150 to 160 words per minute [ts=2130s][ts=2162s].",
+    "key_points": [
+      {
+        "text": "Recording modalities trade off spatial resolution against temporal resolution.",
+        "timestamp_s": 1382,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A microelectrode array is a small grid of penetrating electrodes that can record signals from roughly hundreds of neurons.",
+        "timestamp_s": 1504,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Movement-decoding BCIs can map intended motor-cortex activity to cursor or arm control in real time.",
+        "timestamp_s": 1658,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A virtual-keyboard cursor BCI reached roughly 20 correct characters per minute on average and peaked near 40.",
+        "timestamp_s": 1731,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Handwriting BCI was presented as faster than 2D cursor control, with handwriting around 18 words per minute versus cursor around 8 words per minute.",
+        "timestamp_s": 2162,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=14",
+      "start_s": 1327,
+      "end_s": 2189
+    },
+    "difficulty": 0.49,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 14,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "transcript_slice": "00:22:11\ninto the brain, into the motor cortex,\n\n00:22:14\nAnd then we know how the neuron encodes those signals.\n\n00:22:21\nto decode those signals.\n\n00:22:26\nto be able to build a brain-computer interface so\n\n00:22:34\nfully-functioning brain trying to do.\n\n00:22:44\nSo yeah, this is a very complicated figure.\n\n00:22:50\nWhat I'm trying to show here is that basically, there's\n\n00:22:55\nuse to record brain signals.\n\n00:23:00\nyou can think about it as in this kind\n\n00:23:05\nSo on the y-axis is the think about it\n\n00:23:13\nSo the higher up you go on the y-axis,\n\n00:23:20\nyou can basically measure like very--\n\n00:23:30\nlike the size of the region of the brain that you can measure.\n\n00:23:34\nthen that means that you can only measure, say,\n\n00:23:40\nactivity of a very large brain area.\n\n00:23:46\nthat means that you can actually measure\n\n00:23:51\nWhereas the horizontal axis here means the temporal resolution.\n\n00:24:01\nkind of like a single-neuron recordings,\n\n00:24:08\nFor example, like 1 milliseconds.\n\n00:24:13\nWhereas for technology, recording technology,\n\n00:24:20\nflow in a small brain region, it can only measure on average\n\n00:24:27\nwhat's the blood flow changes in that small brain area.\n\n00:24:33\nbecause we know that the neuron fires, like this really--\n\n00:24:37\nThe firing, the electric potential change of a neuron\n\n00:24:43\nSo if you can only measure things around--\n\n00:24:49\nsmoothing out a lot of information.\n\n00:24:55\na high spatial resolution and also temporal resolution here.\n\n00:25:08\nnow in a clinical trial in our lab,\n\n00:25:15\nSo each electrode here is like a tiny needle\n\n00:25:25\nAnd then you put this needles into a small tiny\n\n00:25:31\nAnd then you can measure maybe on the order\n\n00:25:36\nAll right.\n\n00:25:41\nLet's go into a more examples of how we do this here.\n\n00:25:57\nSuppose someone have, let's say, a spinal cord injury and then\n\n00:26:05\nSo his mind is still fully functioning.\n\n00:26:12\nwhat kind of information can still decode from his motor\n\n00:26:18\nand then use those informations to either control his arm\n\n00:26:27\nWhat am I going to do is try to put\n\n00:26:33\ninto his motor cortex, really penetrating into the surface\n\n00:26:44\nAnd each electrode here, as you see here,\n\n00:26:48\nAnd those gray triangle is the size of a neuron.\n\n00:26:57\nof multiple-- like local field potential\n\n00:27:06\nAnd we can pass all this information in real time\n\n00:27:23\nAnd then this is what we get on the computer here\n\n00:27:29\nthe measurement of that one electrodes.\n\n00:27:39\nas we just showed now, we can probably\n\n00:27:43\nFor example, this one is probably its preferred direction\n\n00:27:51\nSo we can repeat the experiments,\n\n00:27:59\nAnd probably train an ML-Decoder to figure out\n\n00:28:04\nthe preferred direction for each channel.\n\n00:28:12\nwe can basically ask our participants who\n\n00:28:17\nto try to imagine, to move his hand to some directions,\n\n00:28:24\nis trying to move.\n\n00:28:29\nLet me go to a demo here.\n\n00:28:39\nSo here, you see a participant is\n\n00:28:47\nAnd then on the bottom shows the typing speed\n\n00:28:55\nSo it peaks around 40.\n\n00:29:14\nI think this is really amazing.\n\n00:29:19\nwho used to have to--\n\n00:29:24\nNow with this brain-computer interface,\n\n00:29:33\nlike, say, a computer.\n\n00:29:36\nYeah.\n\n00:29:41\nHe still opens his eyes.\n\n00:29:45\nSo is there anything with eye tracking?\n\n00:29:50\nSo even she closed the eye still work?\n\n00:29:56\nBut, like, she won't have the visual feedback.\n\n00:30:00\nHow about if she came up with a character in the mind,\n\n00:30:08\nOK.\n\n00:30:11\nSo--\n\n00:30:12\nYeah.\n\n00:30:18\nor whether it's the machine that's not capturing\n\n00:30:25\nLike, I'm confused by what you mean by character.\n\n00:30:29\nOh, here.\n\n00:30:32\nSo let me clarify here.\n\n00:30:36\nmaybe it's not readable-- but I think the task here is basically\n\n00:30:44\nSo we know the ground truth.\n\n00:30:49\nAnd yeah.\n\n00:30:55\nmotion or the selection motion?\n\n00:31:00\na certain way of knowing that the user is pressing down,\n\n00:31:08\nThat's a really good question.\n\n00:31:11\nSo we can decode movements and we can also\n\n00:31:18\nsay, you can use this kind of gestures\n\n00:31:22\nSo you can just imagine different motor movements.\n\n00:31:29\nthat to, say, a click signal or different signals.\n\n00:31:38\nand then remember the keyboard in her brain,\n\n00:31:49\nI think that's really--\n\n00:31:53\nI can't remember, like, can you remember the keyboard,\n\n00:31:59\nI use keyboard every day.\n\n00:32:03\nAnd I just closed my eyes.\n\n00:32:07\nSo it's not like a physical keyboard.\n\n00:32:10\nOh.\n\n00:32:11\nSo yeah.\n\n00:32:14\nhere is that the mental image for her\n\n00:32:21\nI mean, it's just like controlling like a mouse, right?\n\n00:32:27\nbut she is actually moving like, say, a mouse.\n\n00:32:32\nOK, let's move on.\n\n00:32:37\nSo this is basically just to showcase\n\n00:32:42\nthat we have learned about the brain.\n\n00:32:51\nlike this--\n\n00:32:55\nBut I think it's T6, I codenamed T6,\n\n00:33:01\nto regain communication through this kind of BCI.\n\n00:33:09\nyou can also use BCI to control robotic arms.\n\n00:33:16\nis the participants in, I think, Caltech.\n\n00:33:20\n[VIDEO PLAYBACK]\n\n00:33:25\nHe's using his mind to control this robotic arm, which\n\n00:33:41\n- Cheers.\n\n00:33:49\n- Hey, you finish that thing off.\n\n00:33:58\n- And that's that.\n\n00:33:59\n- [INAUDIBLE]\n\n00:34:08\n- Yay.\n\n00:34:10\n- Yeah.\n\n00:34:12\n[PLAYBACK ENDS]\n\n00:34:14\nAnd also can do things like a restore walking abilities.\n\n00:34:24\nnow is that maybe there's we can try\n\n00:34:30\nFor example, just now, we're just using the movements,\n\n00:34:34\nby restoring movements, we can control computer.\n\n00:34:39\nto handwriting?\n\n00:34:46\nSo Frank, Frank Willett, research scientists\n\n00:34:53\nto show that you can actually do this kind of handwriting BCI.\n\n00:35:00\ncompared to the previous one.\n\n00:35:06\nto restore communication.\n\n00:35:14\nof communicating.\n\n00:35:19\nand puff interface is very slow.\n\n00:35:25\nmove, but can still do some breathing,\n\n00:35:30\nto say yes and no to communicate.\n\n00:35:33\nMaybe around five words per minute.\n\n00:35:38\nI'm really surprised that on average, a normal person\n\n00:35:45\nThat's really slow, but maybe that's just the average speed.\n\n00:35:52\nwhich can reach up to 150 and 60 words per minute, for a minute.\n\n00:35:59\nSo the 2D cursor, I just showed you guys right now.\n\n00:36:05\neight words per minute.\n\n00:36:10\nSo compared to the--\n\n00:36:17\nwe are doing--\n\n00:36:23\nBut still it's way far from the natural conversation speed.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs224n-2024-lecture13-bci::seg4",
+      "global_kp_id": "kp_bci_recording_modalities",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture13-bci::seg4",
+      "global_kp_id": "kp_movement_based_bci_applications",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_bci_recording_modalities",
+      "name": "Brain-signal recording modalities",
+      "description": "Different BCI sensing technologies trade spatial and temporal resolution, with microelectrode arrays offering fine-grained intracortical access. BCI performance depends strongly on where signals are recorded: scalp EEG is safer but coarse, while intracortical recordings are more precise.",
+      "track_tags": [
+        "neuroscience",
+        "signal_acquisition",
+        "signal_processing"
+      ],
+      "domain_tags": [
+        "brain_signal_acquisition",
+        "eeg",
+        "intracortical_recording",
+        "microelectrode_arrays",
+        "recording_modalities"
+      ],
+      "career_path_tags": [
+        "biomedical_research",
+        "hardware_research",
+        "neuroengineering"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because brain-signal recording modalities clarifies different BCI sensing technologies trade spatial and temporal resolution, with microelectrode arrays offering fine-grained intracortical access, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture13-bci::kp2",
+        "local::cs224n-2024-lecture13-bci::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_movement_based_bci_applications",
+      "name": "Movement-based BCI applications",
+      "description": "Intracortical decoders can restore interaction through cursor control, robotic-arm control, and handwriting-based communication.",
+      "track_tags": [
+        "assistive_ai",
+        "robotics"
+      ],
+      "domain_tags": [
+        "cursor_control",
+        "handwriting_bci",
+        "robotic_arm_control"
+      ],
+      "career_path_tags": [
+        "assistive_technology",
+        "robotics_ml"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because movement-based BCI applications synthesizes intracortical decoders can restore interaction through cursor control, robotic-arm control, and handwriting-based communication into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture13-bci::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.34,
+    0.64
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture13-bci_transcript.txt"
+  }
+}

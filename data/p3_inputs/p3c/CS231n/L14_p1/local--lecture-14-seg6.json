@@ -1,0 +1,208 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_14",
+    "lecture_title": "CS231N Lecture 14: Generative Models (Part 2)",
+    "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_14::seg6",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Conditional diffusion, CFG, and noise schedules",
+    "description": "Explains conditional rectified flow, classifier-free guidance, and why non-uniform noise schedules are used.",
+    "summary": "Conditional rectified flow extends the dataset from x to pairs (x,y) and gives y as an auxiliary model input, so sampling can be controlled by a user-provided condition such as text or an image [ts=2730s], [ts=2759s]. Because naïve conditional models may not obey the conditioning strongly enough, classifier-free guidance (CFG) modifies training by randomly dropping the condition, often about 50% of the time [ts=2806s], [ts=2823s]. This forces a single model to learn both unconditional velocity vectors v_empty toward p(x) and conditional velocity vectors v_y toward p(x|y) [ts=2864s], [ts=2881s]. During sampling, CFG forms v_cfg=(1+w)v_y - w v_empty so larger w overemphasizes the conditioning signal [ts=2904s], [ts=2937s]. The cost is that each sampling step usually evaluates the model twice, doubling inference cost [ts=2950s]. The lecture then discusses noise schedules: uniform sampling over t gives equal emphasis to easy endpoints and hard middle-noise cases [ts=3008s], [ts=3053s]. Practical schedules such as logit-normal sampling put more weight in the middle, and shifted schedules help high-resolution data where pixel correlations change how much noise is needed [ts=3090s], [ts=3113s].",
+    "key_points": [
+      {
+        "text": "Conditional rectified flow trains on pairs (x,y) and feeds y as an auxiliary input.",
+        "timestamp_s": 2759,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Classifier-free guidance randomly drops the conditioning signal during training.",
+        "timestamp_s": 2806,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Dropping the condition forces the model to learn an unconditional velocity vector toward p(x).",
+        "timestamp_s": 2864,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Keeping the condition gives a conditional velocity vector toward p(x|y).",
+        "timestamp_s": 2881,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CFG uses v_cfg=(1+w)v_y - w v_empty to emphasize conditioning.",
+        "timestamp_s": 2904,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "CFG typically doubles sampling cost because the model is evaluated twice per step.",
+        "timestamp_s": 2950,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Uniform t sampling gives equal weight to easy endpoints and hard middle-noise cases.",
+        "timestamp_s": 3008,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Logit-normal and shifted noise schedules put more training emphasis where denoising is harder or resolution-dependent.",
+        "timestamp_s": 3090,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+      "start_s": 2730,
+      "end_s": 3154
+    },
+    "difficulty": 4.4,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 7,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "transcript_slice": "00:45:30\nSo to do conditional rectified flow,\n\n00:45:35\ndistribution.\n\n00:45:37\nMaybe our data is actually squares and triangles.\n\n00:45:43\nour two subdistributions, pdata x given that y is a square\n\n00:45:51\nSo this is the picture you should have in mind\n\n00:45:56\nThen in the case of rectified flow\n\n00:45:59\nSo your data set now has pairs x and y\n\n00:46:05\nsomehow.\n\n00:46:09\nYou get your predicted V's.\n\n00:46:14\nSo this all goes through.\n\n00:46:18\nhopefully some conditional signal\n\n00:46:21\nMaybe this is a text prompt.\n\n00:46:23\nMaybe this is some kind of user input\n\n00:46:27\nactually make these models controllable and useful\n\n00:46:31\nBut then there's another really interesting question.\n\n00:46:37\nhow much the model pays attention to the conditioning\n\n00:46:40\nIt turns out if you train these things naively,\n\n00:46:44\nsignal quite as much as you would like.\n\n00:46:49\nor CFG that changes our diffusion training\n\n00:46:55\nSo what we're going to do is we're still\n\n00:46:58\ninputs your xt, inputs your y, but on every training iteration,\n\n00:47:05\nAnd if that coin is heads we're going to delete the conditioning\n\n00:47:08\nSo we're going to set it equal to some kind of 0\n\n00:47:13\ninformation 50% of the time.\n\n00:47:17\nthat most people use in practice.\n\n00:47:20\nIf the coin is heads, delete the conditioning information.\n\n00:47:24\nnow forced to learn two different kinds of velocity\n\n00:47:32\nSo then the model is forced to learn two different kinds\n\n00:47:37\nSo in the case where we pass it this null value for y that\n\n00:47:44\nthen this is basically an unconditional generative model\n\n00:47:47\nNow that predicted velocity vector, v, has to point back\n\n00:47:55\nbut when we pass a real conditioning input\n\n00:48:01\nthen we're getting a conditional velocity vector that\n\n00:48:07\nbut towards the conditional data distribution, which\n\n00:48:11\nthat we cared about.\n\n00:48:15\nto take a linear combination of these two vectors\n\n00:48:24\nSo in particular we'll have a scalar hyperparameter w\n\n00:48:29\nvy minus w times v null.\n\n00:48:33\nnow points even more towards the conditional distribution\n\n00:48:40\nAnd then the idea is that during sampling we're now going to--\n\n00:48:46\nto step according to this v CFG vector rather\n\n00:48:53\nAnd then setting w equals 1--\n\n00:48:59\nthe conditional 1.\n\n00:49:03\nyou're overemphasizing the conditioning signal.\n\n00:49:10\nSo then your inference code doesn't really change too much,\n\n00:49:15\nto get your vy and your v0.\n\n00:49:20\nand then step according to that.\n\n00:49:25\nThere was an earlier paper called classifier guidance\n\n00:49:29\nAnd then they removed the classifier.\n\n00:49:33\npapers and it's now been four years since the second one,\n\n00:49:38\nSo it is what it is.\n\n00:49:41\nfor getting high quality outputs and that's CFG.\n\n00:49:45\nThat's used everywhere in diffusion models.\n\n00:49:49\nneed to hit the model twice on every iteration, which\n\n00:49:53\nThere's this thing on optimal prediction.\n\n00:49:56\nThat's not so interesting.\n\n00:50:01\nBut one thing that we sometimes need to do\n\n00:50:08\nSo we saw in particular that we were sampling t\n\n00:50:13\nin a raw rectified flow model.\n\n00:50:18\ngoing to put uniform emphasis on all noise levels.\n\n00:50:23\nthe problem is very easy.\n\n00:50:29\nThen the optimal prediction from the model\n\n00:50:33\ndistribution.\n\n00:50:37\nthen the optimal prediction is actually\n\n00:50:42\nSo actually the optimal prediction\n\n00:50:48\nare actually very relatively easy problems.\n\n00:50:53\nBut when you're somewhere in the middle,\n\n00:50:57\nyou're somewhere in the middle and you sample that xt,\n\n00:51:02\nand z that could have given rise to that same xt in the middle.\n\n00:51:07\nto solve this expectation problem\n\n00:51:11\nto predict that integrates over all possible x's and z's that\n\n00:51:17\nSo somehow those points in the middle are intuitively much\n\n00:51:24\nfrom 0 to 1t, then we're putting equal importance on all levels\n\n00:51:30\nSo in practice you'll often sample\n\n00:51:34\nAnd one very popular one is this one\n\n00:51:38\nlooks like a Gaussian, puts relatively little weight\n\n00:51:43\nAnother thing you'll see sometimes\n\n00:51:47\nthat are asymmetric that shift more towards one\n\n00:51:50\nAnd those are important as we scale to high resolution data.\n\n00:51:55\nimage, then there can be very strong\n\n00:51:59\nWhen you have a low resolution image,\n\n00:52:02\ntend to be smaller.\n\n00:52:05\nyou have in your data, you actually\n\n00:52:09\nto properly destroy information in a nice way.\n\n00:52:16\nAnd that's actually a big problem with these diffusion\n\n00:52:21\nbut they're hard to get them to work naively\n\n00:52:26\nSo that leads to actually--\n\n00:52:30\nof generative modeling.\n\n00:52:34\nmost popular are these so-called latent diffusion",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_14::seg6",
+      "global_kp_id": "kp_conditional_rectified_flow",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_14::seg6",
+      "global_kp_id": "kp_classifier_free_guidance",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_14::seg6",
+      "global_kp_id": "kp_noise_schedules",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_conditional_rectified_flow",
+      "name": "Conditional rectified flow",
+      "description": "Conditioning adds y as an input so generation can follow labels, text, images, or other user controls.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because conditional rectified flow clarifies conditioning adds y as an input so generation can follow labels, text, images, or other user controls, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_classifier_free_guidance",
+      "name": "Classifier-free guidance",
+      "description": "CFG combines unconditional and conditional predictions to strengthen adherence to conditioning at sampling time.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.86,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because classifier-free guidance clarifies cFG combines unconditional and conditional predictions to strengthen adherence to conditioning at sampling time, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_noise_schedules",
+      "name": "Noise schedules",
+      "description": "Non-uniform t sampling such as logit-normal or shifted schedules emphasizes difficult noise levels and high-resolution needs.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because noise schedules clarifies non-uniform t sampling such as logit-normal or shifted schedules emphasizes difficult noise levels and high-resolution needs, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp18"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.25,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture14-generative-models-2_transcript.txt"
+  }
+}

@@ -1,0 +1,200 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture15-after-dpo",
+    "lecture_title": "Life After DPO: Post-Training, Reward Models, and Open Alignment Research",
+    "youtube_url": "https://www.youtube.com/watch?v=dnF463_Ar9I"
+  },
+  "unit": {
+    "unit_id": "local::lecture15-after-dpo::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Open alignment history and DPO adoption",
+    "description": "Traces open alignment from early instruction-tuned models and scarce human data to Zephyr, UltraFeedback, and Tulu 2.",
+    "summary": "Lambert explains that DPO’s paper appeared months before popular DPO-trained models; the community first moved through April 2023 instruction-tuned systems such as Alpaca, Vicuna, Koala, and Dolly, many built from synthetic data and Llama [ts=899s]. Vicuna’s ShareGPT use gave academic alignment researchers human prompts, though with legal/provenance concerns; LMSYS/WildChat-style data later aimed for more permissive consent-based collection [ts=956s]. Open Assistant is presented as a rare high-effort community dataset with prompts, responses, preference pairs, controls, voting, and ranking, and its difficulty explains why few comparable human datasets exist [ts=1014s]. CarperAI had an early RLHF model that outperformed Vicuna, but the work did not catch on because open artifacts also need resources, data, and usable codebases [ts=1067s]. The Llama 2 refusal backlash produced “uncensored” non-refusal research artifacts, while Lambert distinguishes research use from deployment responsibility [ts=1117s]. Zephyr’s September 2023 success made DPO credible by combining UltraFeedback, GPT-4-labeled synthetic preference data, and an unusually low 5e-7 learning rate; Tulu 2 then scaled a similar recipe to 70B and helped open the floodgates for many DPO models [ts=1239s].",
+    "key_points": [
+      {
+        "text": "Early open alignment models included Alpaca, Vicuna, Koala, and Dolly, mostly using instruction tuning and synthetic data.",
+        "timestamp_s": 929,
+        "evidence_type": "example"
+      },
+      {
+        "text": "ShareGPT gave human prompts to academic alignment but had legal/provenance concerns.",
+        "timestamp_s": 956,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Open Assistant showed high-quality community human preference data is valuable but hard to create.",
+        "timestamp_s": 1014,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Open releases need usable resources, data, and codebases; success alone does not guarantee adoption.",
+        "timestamp_s": 1086,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Llama 2 refusal behavior motivated non-refusal research artifacts but raises deployment safety questions.",
+        "timestamp_s": 1117,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Zephyr’s DPO success depended on UltraFeedback and a very low learning rate around 5e-7.",
+        "timestamp_s": 1279,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Tulu 2 showed the UltraFeedback/low-learning-rate DPO recipe could scale to 70B.",
+        "timestamp_s": 1335,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=dnF463_Ar9I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=16",
+      "start_s": 899,
+      "end_s": 1455
+    },
+    "difficulty": 0.56,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 9,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=dnF463_Ar9I",
+  "transcript_slice": "00:14:59\nSo that's a quick one on one of what the core ideas are.\n\n00:15:08\ngot to training models with DPO because I think this slide was\n\n00:15:15\nBut DPO really came out months before we started getting\n\n00:15:20\nSo it's like, how did we actually get to the point\n\n00:15:24\nwith DPO, which is much more recently than the paper was\n\n00:15:29\nAnd this comes all the way back to these first instruction-tuned\n\n00:15:33\nSo the Alpaca, the Vicuna, Koala,\n\n00:15:39\nAnd these are all built on similar things\n\n00:15:44\nSo there's kind of figuring out how to use synthetic data.\n\n00:15:48\nthere's some other things that I'll talk about.\n\n00:15:52\nThey're all using instruction tuning.\n\n00:15:56\nAnd what Vicuna actually did was they\n\n00:16:02\nwas the first time that people working in an academic alignment\n\n00:16:09\nIt ended up being a bit of a legal gray area\n\n00:16:15\nextension called ShareGPT to make it\n\n00:16:20\nBut this data was really important to things like Vicuna\n\n00:16:25\nand is still used in models today\n\n00:16:29\nSo just having access to these human prompts\n\n00:16:35\nand is still something that we're seeing.\n\n00:16:39\ndata sets like this that were collected\n\n00:16:42\nThis kind of LMSYS access data has\n\n00:16:46\nAnd WildChat, which was a project from Ai2, which\n\n00:16:51\nin exchange for their data.\n\n00:16:56\nwas the realization that we need more human data.\n\n00:17:01\nthat we honestly need more of.\n\n00:17:06\nhuman data that we haven't seen more things like this.\n\n00:17:12\nworking extremely long hours to generate prompts, responses,\n\n00:17:19\nAnd this was from April of 2023.\n\n00:17:26\nLMSYS's data is similar but there's not\n\n00:17:30\nthat went into this Open Assistant data.\n\n00:17:35\nwith and many people still train models with and come up\n\n00:17:38\nSo it's just these one or two influential data sets\n\n00:17:44\nSo you'll get the theme as I keep going.\n\n00:17:52\nas well.\n\n00:17:56\na lot of work in the space.\n\n00:18:01\nBut there were people that were doing the similar methods\n\n00:18:06\nThat kind of knowledge and infrastructure\n\n00:18:12\nSo there's also this vein of like, even if things are open,\n\n00:18:19\nuseful.\n\n00:18:23\nup in a way that people can build on it, which\n\n00:18:27\nThis RLHF model from Carper was successful.\n\n00:18:32\nBut no one really built on it right away,\n\n00:18:37\nAnd then later in the year, another key thing\n\n00:18:42\nwhere the Llama 2 was asked to kill a Linux process,\n\n00:18:46\nAnd this kind of bred a whole series of models which are still\n\n00:18:55\nBecause I don't think there was ever actually\n\n00:18:58\nIt wasn't intentional censorship.\n\n00:19:02\ndon't refuse any request, which is useful as a research\n\n00:19:08\nif it answers every question, what\n\n00:19:11\nThere are other ways to use that which are up to you.\n\n00:19:19\nsets because they were from ChatGPT, there's data that says,\n\n00:19:24\nSo people started filtering all of that out.\n\n00:19:29\nthese uncensored models today as a popular area of development.\n\n00:19:37\nneed when doing research.\n\n00:19:43\nBut if you're to deploy a model for free use to users,\n\n00:19:47\neverything should be answered.\n\n00:19:53\ndepend on the work that you're actually going to be doing.\n\n00:19:59\nI'm almost done with the [? winLMs. ?]\n\n00:20:03\nthat are really interesting to people like me that never really\n\n00:20:06\nWhere they're saying there are things-- like, we used RLHF.\n\n00:20:12\nand these other eval tools.\n\n00:20:16\nBut they don't always have papers.\n\n00:20:18\n[CHUCKLES]\n\n00:20:22\nIt's not just like the Hugging Face of the world.\n\n00:20:28\nand elsewhere that were aligning models and getting\n\n00:20:33\ncompanies in these places that you look for models to these.\n\n00:20:39\nAnd this is all--\n\n00:20:43\nbefore the first big splash of DPO.\n\n00:20:49\nthat I remember making a splash with DPO.\n\n00:20:54\nwas in September after the May release of the paper,\n\n00:21:00\nIt took four months.\n\n00:21:04\nEveryone uses it.\n\n00:21:06\nBut in industry and people trying to train models,\n\n00:21:11\nSo this is a classic academic story\n\n00:21:17\nuntil your work is vindicated in some ways.\n\n00:21:21\nset, the ultra feedback data set,\n\n00:21:27\nlabeled by GPT-4.\n\n00:21:33\nit's a preference data set.\n\n00:21:36\nIt was made by an Openbnb.\n\n00:21:40\nI should know more.\n\n00:21:43\nto make it work.\n\n00:21:46\nto make this kind of chat model work with DPO,\n\n00:21:51\nIf you're really plugged into AI,\n\n00:21:56\nrate.\n\n00:21:59\nSo that's what it took to get this to work.\n\n00:22:03\ndid more hyperparameter sweeps.\n\n00:22:09\nthat people now backcast as being like, this\n\n00:22:13\nIt's somewhat random.\n\n00:22:17\nto the Allen Institute.\n\n00:22:21\nis trying to do a systematic study of instruction-tuning data\n\n00:22:28\nwere coming out.\n\n00:22:31\nthere's always skeptics of, oh, like doing it at 7B is easy.\n\n00:22:35\nSo it's like, oh, is it going to actually scale to the real deal,\n\n00:22:41\nSo it was like, OK, we have some more compute.\n\n00:22:46\nAnd we showed similar gains.\n\n00:22:50\nrecipe, the low learning rate, and it largely worked.\n\n00:22:56\nAnd then this is when--\n\n00:23:01\nAll these startups that are releasing their own models\n\n00:23:07\nAnd that kind of continued for six months.\n\n00:23:12\nis interesting.\n\n00:23:17\nAnd it has finally slowed down a little bit.\n\n00:23:21\nBut there is so many.\n\n00:23:25\nof DPO models after these two.\n\n00:23:31\nand when we're like, OK, DPO really works.\n\n00:23:38\nIt's like, we could retrain models on data sets\n\n00:23:41\nWe don't have that many data sets.\n\n00:23:46\nLike, Zephyr was built on the success of needing\n\n00:23:49\nThis Tulu 2 model was actually trained on TPUs\n\n00:23:54\nSo we have bigger TPUs to train these models.\n\n00:24:00\nAnd that's kind of where most of what\n\n00:24:03\nis the recent research that we've\n\n00:24:07\nand answer the fundamental questions of what\n\n00:24:15\nSo this is kind of the reality that I go back and forth",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture15-after-dpo::seg2",
+      "global_kp_id": "kp_open_alignment_data_and_adoption",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture15-after-dpo::seg2",
+      "global_kp_id": "kp_dpo",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture15-after-dpo::seg2",
+      "global_kp_id": "kp_safety_refusal_evaluation",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_open_alignment_data_and_adoption",
+      "name": "Open alignment data and adoption",
+      "description": "ShareGPT, Open Assistant, UltraFeedback, Zephyr, and Tulu 2 as drivers of open alignment progress.",
+      "track_tags": [
+        "datasets",
+        "open_models"
+      ],
+      "domain_tags": [
+        "data_collection",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "data_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because open alignment data and adoption clarifies shareGPT, Open Assistant, UltraFeedback, Zephyr, and Tulu 2 as drivers of open alignment progress, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-after-dpo::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dpo",
+      "name": "Direct Preference Optimization",
+      "description": "A direct classification-style preference objective that avoids a separate RLHF optimization loop. DPO as a simpler preference-optimization method that avoids full PPO-style RL infrastructure.",
+      "track_tags": [
+        "dpo",
+        "llm",
+        "nlp",
+        "preference_optimization"
+      ],
+      "domain_tags": [
+        "llm_alignment",
+        "optimization",
+        "post_training",
+        "preference_optimization"
+      ],
+      "career_path_tags": [
+        "ai_engineer",
+        "llm_engineer",
+        "ml_researcher",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.86,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because direct Preference Optimization formalizes how a direct classification-style preference objective that avoids a separate RLHF optimization loop, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-posttraining::kp10",
+        "local::lecture15-after-dpo::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_safety_refusal_evaluation",
+      "name": "Safety/refusal evaluation",
+      "description": "Benchmarking whether models refuse harmful requests, over-refuse, or answer everything.",
+      "track_tags": [
+        "refusal",
+        "safety"
+      ],
+      "domain_tags": [
+        "ai_safety",
+        "nlp_evaluation"
+      ],
+      "career_path_tags": [
+        "ai_safety_researcher"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because safety/refusal evaluation clarifies benchmarking whether models refuse harmful requests, over-refuse, or answer everything, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-after-dpo::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.41,
+    0.71
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture15-after-dpo_transcript.txt"
+  }
+}

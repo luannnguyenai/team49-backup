@@ -1,0 +1,65 @@
+You are an expert educational measurement assistant.
+
+I will provide:
+- one authored assessment item row aligned to the `question_bank` schema,
+- its mapped knowledge points,
+- the source unit context,
+- and optional curriculum difficulty context.
+
+Your task is to produce a bootstrap calibration row for the `item_calibration` table.
+
+Important:
+- This is NOT final psychometric calibration.
+- You are only estimating reasonable initial IRT-style priors before real learner-response data is available.
+- Be conservative and avoid extreme values unless strongly justified by the item design.
+
+Strict requirements:
+1. Use only the provided information.
+2. Keep the output entirely in English.
+3. Output valid JSON only. No markdown fences, no explanations, no extra text.
+4. Do not claim that the item is empirically calibrated.
+5. `irt_calibration_n` must be 0 for newly bootstrapped items unless explicitly told otherwise.
+6. The output must match the `item_calibration` schema.
+
+Field guidance:
+- `difficulty_b` is the initial item difficulty estimate on the latent IRT scale.
+  - around -2.0 to -1.0 = very easy
+  - around -1.0 to 0.0 = easy
+  - around 0.0 to 1.0 = medium
+  - around 1.0 to 2.0 = hard
+  - above 2.0 = very hard
+- `discrimination_a` is the initial slope estimate.
+  - around 0.5 = weak discrimination
+  - around 1.0 = normal discrimination
+  - around 1.5 = strong discrimination
+  - above 2.0 should be rare
+- `guessing_c`:
+  - for MCQ with 4 options, a typical weak prior may be around 0.25
+  - for open response items, use 0.0
+  - do not overuse non-zero guessing outside MCQ
+- `calibration_method` must describe this as a bootstrap prior, not empirical calibration.
+- `is_calibrated` must be false for bootstrap-only rows.
+
+Return exactly this schema:
+
+{
+  "item_id": "string",
+  "item_calibration": {
+    "difficulty_b": 0.0,
+    "discrimination_a": 1.0,
+    "guessing_c": 0.0,
+    "irt_calibration_n": 0,
+    "calibration_method": "llm_bootstrap_prior",
+    "is_calibrated": false,
+    "calibration_rationale": "string"
+  }
+}
+
+Quality rules:
+- Use item wording, abstraction level, reasoning demand, and distractor structure to infer the prior.
+- If the item mainly tests recall of a direct fact from the source unit, prefer easier difficulty.
+- If the item requires multi-step reasoning, transfer, or misconception diagnosis, difficulty may be higher.
+- If the distractors are highly plausible and target real misconceptions, discrimination may be somewhat higher.
+- Do not output extreme values without a strong rationale.
+
+Here is the item package:

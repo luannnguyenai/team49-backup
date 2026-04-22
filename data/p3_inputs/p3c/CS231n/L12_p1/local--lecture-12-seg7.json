@@ -1,0 +1,190 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_12",
+    "lecture_title": "Lecture 12: Self-Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_12::seg7",
+    "course_id": "cs231n_spring_2025",
+    "name": "SimCLR, MoCo, CPC, and DINO in the modern SSL landscape",
+    "description": "Surveys major contrastive and near-contrastive methods, focusing on SimCLR's design choices and MoCo's queue-based alternative, then briefly situates CPC and DINO.",
+    "summary": "SimCLR is introduced as an instance-contrastive method that creates two augmented views per image, encodes both, and uses all other non-positive samples in the batch as negatives, so a batch of N images yields 2N views and a positive partner for each view [ts=3976s] [ts=4104s]. The lecture highlights SimCLR's empirical impact—linear evaluation and semi-supervised results comparable to supervised learning—and singles out two design choices as especially important: a nonlinear projection head that preserves extra information in h while applying contrastive loss in z, and very large batch sizes that supply many negatives [ts=4137s] [ts=4259s]. MoCo is presented as a remedy for the batch-size bottleneck: it keeps a queue of negative keys across batches, updates a separate key encoder with momentum from the query encoder, and thereby decouples the number of negatives from minibatch size; combining MoCo's queue with SimCLR-style projection heads and augmentations yields a stronger MoCo v2 [ts=4280s] [ts=4414s]. The closing remarks only briefly mention CPC as sequence-level contrastive predictive coding and DINO/MoCo v3 as widely used later frameworks, with DINO noted as student-teacher self-distillation rather than plain contrastive learning [ts=4425s] [ts=4475s].",
+    "key_points": [
+      {
+        "text": "SimCLR forms positive pairs by sampling two augmentations of the same image and treats all other views in the batch as negatives.",
+        "timestamp_s": 3976,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "With N input images, SimCLR operates on 2N augmented views, and each view has exactly one positive counterpart in the batch.",
+        "timestamp_s": 4069,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "A nonlinear projection head is used so contrastive loss acts on z while richer information can remain in h for downstream tasks.",
+        "timestamp_s": 4206,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Large batches are important for SimCLR because more negatives improve training, but this increases memory cost.",
+        "timestamp_s": 4252,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "MoCo replaces in-batch negatives with a running queue of keys and updates the key encoder through momentum.",
+        "timestamp_s": 4283,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "CPC is mentioned as sequence-level contrastive predictive coding, and DINO as a student-teacher feature-learning framework rather than plain contrastive learning.",
+        "timestamp_s": 4425,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+      "start_s": 3976,
+      "end_s": 4475
+    },
+    "difficulty": 0.72,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "transcript_slice": "01:06:16\nfor contrastive learning, is basically taking each image,\n\n01:06:24\ntransfer it into the representation space.\n\n01:06:29\nthe cosine similarity between embeddings representations.\n\n01:06:40\ninto a set of features z, that calculates the distance\n\n01:06:49\nAnd this is the way that they do this,\n\n01:06:57\nAnd for generating positive samples,\n\n01:07:05\nThe details are basically covered here.\n\n01:07:14\nfunctions.\n\n01:07:20\nand see loss on the pairs.\n\n01:07:29\nmultiplied by n samples that we have created.\n\n01:07:39\nin the mini batch, in the batch that we have,\n\n01:07:48\nof the same image.\n\n01:07:55\nof it.\n\n01:08:02\nAnd then this means that for each\n\n01:08:10\nand everything else is negative.\n\n01:08:16\nEverything else is negative.\n\n01:08:19\nand everything else is negative.\n\n01:08:24\nSo this is a high level definition of SimCLR.\n\n01:08:36\nrelated to SimCLR that you will be exploring this framework\n\n01:08:44\nBut be careful that the definition is slightly\n\n01:08:49\npresented here.\n\n01:08:57\nSo SimCLR was actually very successful.\n\n01:09:05\nand then a training a linear classifier\n\n01:09:13\nall of the previous works and even basically generate\n\n01:09:22\nfully supervised learning frameworks.\n\n01:09:28\nwe are learning more generic features.\n\n01:09:32\nnot as it was comparable to what we had for supervised learning.\n\n01:09:44\nand some of the results around it\n\n01:09:53\nActually, let me spend time on the main choices.\n\n01:10:02\ninto a new variable instead of using the same representations?\n\n01:10:10\nbecause they rightly so assume that when\n\n01:10:17\ndoes this contrast between samples,\n\n01:10:24\nsome extra information that do not\n\n01:10:28\nSo in order to preserve all of those extra features,\n\n01:10:36\nbut then there is this linear or non-linear projection--\n\n01:10:42\nto get the z values that they can calculate influencer.\n\n01:10:52\nAnd the other one is I mentioned earlier large batch sizes.\n\n01:10:59\nto be able to get better SimCLR performance.\n\n01:11:08\nBut we can't always do large batch sizes\n\n01:11:13\nat hand because of constraints in memory and so on.\n\n01:11:23\nfor example, mocha was proposed momentum contrastive learning.\n\n01:11:34\nin the batch, what it does is it creates a queue\n\n01:11:46\nacross batches over time in the model.\n\n01:11:53\nit has a separate queue that is defined\n\n01:12:01\nupdates it over time to train, to do the inference loss,\n\n01:12:13\nBut because we have this queue, we cannot back propagate\n\n01:12:19\nSo we cannot back propagate for the negative samples,\n\n01:12:27\nfor positive samples, which are now called query.\n\n01:12:32\ncalled key in this architecture.\n\n01:12:42\nthe Q encoder, using a momentum m, it updates the key encoder,\n\n01:12:53\nSo this is a framework that has actually\n\n01:13:01\nand follow up versions of it.\n\n01:13:07\nbut then what they've done was basically\n\n01:13:19\nand data augmentation from SimCLR\n\n01:13:26\nand negative samples from MoCo, and they've\n\n01:13:34\nit improves the performance by a lot.\n\n01:13:45\nof CPC, the Contrastive Predictive Coding,\n\n01:13:55\nAnd then a better version of MoCo, MoCo version 3 and DINO\n\n01:14:04\nhas a similar type of architecture as MoCo,\n\n01:14:14\nlearning because now we have students and teacher networks.\n\n01:14:20\nand if you're interested, we can discuss maybe\n\n01:14:27\nBut anyways, this is also one of the widely used frameworks\n\n01:14:35\nsometimes.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "planner_role": "prereq",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "global_kp_id": "kp_cpc_and_dino_as_broader_ssl_directions",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "name": "SimCLR and MoCo design tradeoffs",
+      "description": "SimCLR uses in-batch negatives and a projection head, while MoCo uses a momentum-updated key encoder and a queue to reduce batch-size dependence.",
+      "track_tags": [
+        "contrastive_learning",
+        "instance_level_ssl"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "foundation_models",
+        "research"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because simCLR and MoCo design tradeoffs clarifies simCLR uses in-batch negatives and a projection head, while MoCo uses a momentum-updated key encoder and a queue to reduce batch-size dependence, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "name": "Contrastive learning and InfoNCE",
+      "description": "A general SSL formulation that attracts positive pairs and repels negatives, optimized with the InfoNCE objective.",
+      "track_tags": [
+        "contrastive_learning",
+        "loss_functions"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "information_theory",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because contrastive learning and InfoNCE formalizes how a general SSL formulation that attracts positive pairs and repels negatives, optimized with the InfoNCE objective, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cpc_and_dino_as_broader_ssl_directions",
+      "name": "CPC and DINO as broader SSL directions",
+      "description": "CPC extends contrastive learning to sequences, while DINO uses a student-teacher self-distillation setup related to but distinct from plain contrastive learning.",
+      "track_tags": [
+        "self_distillation",
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "foundation_models",
+        "research"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cPC and DINO as broader SSL directions extends the core thread to cPC extends contrastive learning to sequences, while DINO uses a student-teacher self-distillation setup related to but distinct from plain contrastive learning without being required for the main pipeline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp10"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.57,
+    0.87
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L12_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture12-self-supervised-learning_transcript.txt"
+  }
+}

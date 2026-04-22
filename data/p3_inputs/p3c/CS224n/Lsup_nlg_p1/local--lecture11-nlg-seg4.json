@@ -1,0 +1,194 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture11_nlg",
+    "lecture_title": "Lecture 11 - Natural Language Generation",
+    "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY"
+  },
+  "unit": {
+    "unit_id": "local::lecture11_nlg::seg4",
+    "course_id": "cs224n",
+    "name": "Sampling-based decoding, truncation, temperature, and reranking",
+    "description": "Builds the main stochastic decoding toolbox for open-ended generation and explains how reranking can improve sampled outputs.",
+    "summary": "This segment argues that if maximum-probability decoding is wrong for open-ended text, decoding should introduce randomness by sampling from the next-token distribution [ts=1356s]. Vanilla sampling increases diversity but suffers from heavy-tailed vocabularies, where many individually low-probability bad tokens still have substantial aggregate mass [ts=1386s]. To cut the tail, top-k sampling restricts choices to the k highest-probability tokens, but the lecture shows fixed k can either remove valid options or leave implausible ones, creating recall and precision problems depending on the shape of the distribution [ts=1456s] [ts=1671s]. Nucleus or top-p sampling addresses this by sampling from the smallest candidate set whose cumulative probability exceeds p, giving an adaptive effective k [ts=1741s] [ts=1769s]. The segment also sketches typical sampling and epsilon sampling as other truncation families [ts=1875s]. Temperature scaling is presented as an orthogonal control: larger temperature flattens the distribution and increases diversity, while smaller temperature sharpens it and approaches greedy decoding [ts=2009s]. Finally, reranking is introduced: sample multiple candidates, score them with perplexity or richer objectives such as style, coherence, entailment, factuality, and consistency, and choose the best candidate; multiple rerankers can be composed [ts=2150s] [ts=2218s].",
+    "key_points": [
+      {
+        "text": "Sampling introduces randomness so the model no longer always follows the single highest-probability continuation.",
+        "timestamp_s": 1356,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Heavy-tailed token distributions make vanilla sampling risky because bad low-probability words have substantial aggregate probability mass.",
+        "timestamp_s": 1386,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Top-k sampling truncates the vocabulary to the k highest-probability tokens.",
+        "timestamp_s": 1456,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Top-p (nucleus) sampling uses cumulative probability mass, giving an adaptive effective k across different distributions.",
+        "timestamp_s": 1741,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Typical sampling and epsilon sampling are alternative truncation strategies based on entropy or minimum probability thresholds.",
+        "timestamp_s": 1875,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Temperature rescales logits: tau greater than 1 flattens the distribution, tau less than 1 sharpens it, and tau near 0 approximates greedy decoding.",
+        "timestamp_s": 2009,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Reranking samples multiple candidates and selects the one with the best quality score, potentially combining style and factuality objectives.",
+        "timestamp_s": 2150,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10",
+      "start_s": 1344,
+      "end_s": 2419
+    },
+    "difficulty": 0.68,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 18,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "transcript_slice": "00:22:24\nSo yeah, let's talk about the decoding algorithm\n\n00:22:29\nSo given that searching for the most likely string\n\n00:22:34\nAnd how do we simulate that human pattern?\n\n00:22:39\nand stochasticity to decoding.\n\n00:22:46\np.\n\n00:22:49\nhat from this distribution.\n\n00:22:54\nin the distribution.\n\n00:22:57\nrestroom or grocery.\n\n00:23:02\nSo however, sampling introduces a new set of problems.\n\n00:23:10\nvanilla sampling would make every token\n\n00:23:15\nAnd in some unlucky cases, we might end up with a bad word.\n\n00:23:24\nif most of the probability mass of the distribution\n\n00:23:30\nthe tail of the distribution will still\n\n00:23:35\nAnd therefore, if we add all those longtails, in aggregate,\n\n00:23:40\nSo statistically speaking, this is\n\n00:23:44\nand language is exactly a heavy-tailed distribution.\n\n00:23:50\nare probably really wrong in this context.\n\n00:23:55\nwe assign them each very little probability.\n\n00:24:00\nbecause there are so many of them,\n\n00:24:04\nhave a high chance of being selected.\n\n00:24:09\nfor this problem of long tail is that we should just\n\n00:24:13\nWe should just zero out the probabilities\n\n00:24:16\nAnd one idea is called top-k sampling\n\n00:24:22\nsample from the top-k tokens in the probability distribution.\n\n00:24:33\nOK, yeah.\n\n00:24:37\nhad some very low probability samples as well on the graph,\n\n00:24:41\nHow would top-k sampling deal with that?\n\n00:24:47\nThe orange-blue graph of the human versus--\n\n00:24:52\nSo top-k will basically eliminate-- it will not--\n\n00:24:58\nthe super low probability tokens.\n\n00:25:04\nbecause now you don't have the super low probability\n\n00:25:09\ntokens in a fluent way.\n\n00:25:14\nthat people can use for detecting\n\n00:25:18\nYeah?\n\n00:25:22\nFor example, a poem or novels or more creative writing,\n\n00:25:28\nYeah, yeah, for sure.\n\n00:25:32\nyou will choose k differently.\n\n00:25:37\nand for open-ended, k should be large.\n\n00:25:42\nI guess, intuitively, this is built off of one of the earlier\n\n00:25:46\nWhy don't we consider the case like where we sample and then\n\n00:25:53\nscore or something rather than just looking at top-k,\n\n00:25:58\ntype of situation.\n\n00:26:02\nof selecting.\n\n00:26:06\nSo top-k just kind of zeros out all the tails\n\n00:26:11\nBut for the things that it didn't zero out,\n\n00:26:15\nIt's still trying to choose proportional to the scores\n\n00:26:20\nIs that just, like, computationally more efficient\n\n00:26:26\nIt can be like for like 10 or something?\n\n00:26:30\nThat could be one gain of top-k decoding\n\n00:26:37\nYeah.\n\n00:26:39\nI think you should show--\n\n00:26:48\nSo we've discussed this part.\n\n00:26:53\nformally what is happening for top-k sampling,\n\n00:26:59\nof the probability distribution.\n\n00:27:03\nso we can set k to be large or small.\n\n00:27:08\nare making our output more diverse\n\n00:27:14\nIf we decrease k, then we are making more\n\n00:27:17\nBut possibly, the generation will\n\n00:27:24\nSo is top-k decoding good enough?\n\n00:27:29\nfind some problems with top-k decoding.\n\n00:27:35\nThere are many words that are still\n\n00:27:40\nBut those words got zeroed out because they are not\n\n00:27:45\nSo this actually leads to bad recall for your generation\n\n00:27:49\nAnd similarly, another failure of top-k\n\n00:27:55\nSo in this example, code is not really a valid answer,\n\n00:28:00\nwant to eat a piece of code.\n\n00:28:05\nmeaning that the model might still sample code as an output,\n\n00:28:12\nAnd this means bad precision for the generation model.\n\n00:28:21\nhow can we address them?\n\n00:28:26\nis no single k that fits all circumstances?\n\n00:28:31\nthat we sample from are dynamic.\n\n00:28:35\nis relatively flat, having a small k\n\n00:28:40\nSo having a limited k will remove many viable options.\n\n00:28:46\nSimilarly, when a distribution p is too picky,\n\n00:28:52\na high k would allow for too many options to be viable.\n\n00:28:59\nso that we are being safer.\n\n00:29:03\na bad hyperparameter.\n\n00:29:09\nWe should think about how to sample from tokens in the top p\n\n00:29:17\nmass of the CDF, for example.\n\n00:29:25\nwe sample from the top-p percentile\n\n00:29:29\nis that this is actually equivalent to we\n\n00:29:35\nAnd let me explain what I mean by having an adaptive k.\n\n00:29:41\nis like a regular power law of language.\n\n00:29:45\nAnd then doing top-k sampling means\n\n00:29:50\nBut doing top-p sampling means that we\n\n00:29:55\nsimilar to top k in effect.\n\n00:29:59\nlike the blue one, we can see that doing top-p\n\n00:30:04\nAnd then if we have a more skewed distribution,\n\n00:30:10\ninclude fewer candidates.\n\n00:30:16\nin the probability distribution, we\n\n00:30:21\nand therefore, have a better sense\n\n00:30:27\nAny questions about top-p, top-k decoding?\n\n00:30:34\nYeah, sounds good.\n\n00:30:39\nis not necessarily saving compute or this whole idea\n\n00:30:45\nbecause, in the case of top-p, in order\n\n00:30:50\nneed to compute the softmax over the entire vocabulary set\n\n00:30:56\nto compute the p properly.\n\n00:31:00\nbut it's improving performance.\n\n00:31:06\nSo yeah, much more to go with decoding algorithms.\n\n00:31:13\nthere are some more recent approaches\n\n00:31:18\nthat we want to relate the score based\n\n00:31:22\nand try to generate texts that are closer\n\n00:31:27\nto the negative entropy of the data distribution.\n\n00:31:32\na close-ended task or non-open-ended task,\n\n00:31:37\nyou want a negative log probability to be smaller,\n\n00:31:41\nSo it kind of type checks very well.\n\n00:31:47\nsampling coming from John.\n\n00:31:53\nto lower bound probabilities.\n\n00:31:57\nis less than 0.03, for example, then that word\n\n00:32:04\nThat word will never be part of your output\n\n00:32:09\nYeah?\n\n00:32:13\nOh, cool, great question.\n\n00:32:19\nyou can suppose that we have a discrete distribution.\n\n00:32:24\nAnd then it's like negative log probability of x.\n\n00:32:32\nit's basically expected of log probability of x.\n\n00:32:38\nSo this is the entropy of a distribution.\n\n00:32:46\nis very concentrated to a few words,\n\n00:32:52\nIf your distribution is very flat,\n\n00:32:58\nYeah.\n\n00:33:02\nthat we have no valid options?\n\n00:33:09\nSo in the case that there is no valid options,\n\n00:33:15\njust as an edge case, I think.\n\n00:33:23\nSo another hyperparameter that we can tune to affect decoding\n\n00:33:29\nSo recall that previously at each time step,\n\n00:33:35\nand then we renormalize that score using softmax to get\n\n00:33:39\nSo one thing that we can adjust here\n\n00:33:44\ntau to relate to the score.\n\n00:33:50\nAnd after dividing this, we apply softmax\n\n00:33:54\nAnd this temperature adjustment is not really\n\n00:34:01\nFor example, if word A has higher probability than word B\n\n00:34:07\nword A is still going to have a higher probability than word B.\n\n00:34:14\nSo for example, if we raise the temperature tau\n\n00:34:21\nwill become more uniform.\n\n00:34:24\nAnd this kind of implies that there\n\n00:34:29\nflatter and it's more spread out across different words\n\n00:34:35\nOn the other hand, if we lower the temperature\n\n00:34:41\nAnd then this means that, if we sample from the pt,\n\n00:34:47\nSo because here the probability is concentrated only\n\n00:34:51\nSo in the very extreme case, if we set tau\n\n00:34:57\nwill kind of be a one-hot vector where all the probability mass\n\n00:35:02\nAnd then this kind of reduces back\n\n00:35:07\nSo temperature is a hyperparameter\n\n00:35:13\nIt is a hyperparameter for decoding.\n\n00:35:18\nSo it's kind of orthogonal to the approaches\n\n00:35:23\nAny questions so far?\n\n00:35:29\nTemperature is so easy.\n\n00:35:36\nright, even though we try very hard in terms\n\n00:35:43\nSo what if we're just unlucky and decode a bad sequence\n\n00:35:47\nOne common solution is to do reranking.\n\n00:35:52\nLike, for example, we can decode 10 candidates, but, like,\n\n00:35:57\nThe only choice is that you want to balance\n\n00:36:02\nSo if you decode too many sequences, then of course,\n\n00:36:07\nbut it's also very costly to just generate\n\n00:36:13\nAnd then, so once you have a bunch of sample sequences,\n\n00:36:19\nto approximate the quality of the sequence and rerank\n\n00:36:25\nSo the simple thing to do is we can use perplexity as a metric,\n\n00:36:32\nBut we need to be careful that, because we have talked\n\n00:36:37\nlike, if we try to argmax log probability,\n\n00:36:42\nthe texts are actually very repetitive.\n\n00:36:48\nAnd perplexity, to some extent, is not a perfect rescoring\n\n00:36:53\nIt's not a perfect scoring function because it's not\n\n00:36:58\nSo alternatively, the rerankers can actually\n\n00:37:03\nLike we can score texts based on their style, their discourse\n\n00:37:10\nconsistency, and so on.\n\n00:37:19\nYeah, question?\n\n00:37:21\nYou mentioned 10 candidates or any number of candidates.\n\n00:37:25\nWhat's the strategy you usually use to generate\n\n00:37:29\nLike what heuristic do you use?\n\n00:37:35\nright?\n\n00:37:38\nyou're going to get a different output.\n\n00:37:41\nSo if you sample 10 times, you will very likely\n\n00:37:46\nAnd then you are just given this 10 different outputs\n\n00:37:51\nYou can just decide to rerank them and select the candidate\n\n00:37:56\nWhere does the randomness come from?\n\n00:38:01\nThat sample-- OK.\n\n00:38:05\nthen well, suppose that A and B are equally probable.\n\n00:38:10\nwith the same probability.\n\n00:38:15\nAnd another cool thing that we can do with reranking\n\n00:38:20\nSo basically, suppose you have a scoring function for style\n\n00:38:26\nYou can just add those two scoring functions together\n\n00:38:31\neverything based on your new scoring\n\n00:38:36\nand good at factual consistency.\n\n00:38:43\ndo we just pick the decoding that has the highest score,\n\n00:38:49\nThe idea is you just take the decoding that\n\n00:38:53\nsay, 10 candidates.\n\n00:38:56\nAnd then, you just choose one that has the highest score.\n\n00:39:01\nAny other questions?\n\n00:39:06\nWhat is perplexity?\n\n00:39:11\nas log probabilities.\n\n00:39:18\nIt's kind of like if a token has high perplexity,\n\n00:39:24\nare more perplexed.\n\n00:39:32\nsection.\n\n00:39:35\nfrom selecting the most probable string to sampling and then\n\n00:39:42\ncan do to improve sampling like top-p, top-k, epsilon, typical\n\n00:39:47\nAnd finally, we discuss how we can do in terms\n\n00:39:52\nSo decoding is still a really essential problem in NLG,\n\n00:39:59\nespecially as ChatGPT is so powerful we should all\n\n00:40:04\nSo it would be interesting if you\n\n00:40:08\nAnd also, different decoding algorithms\n\n00:40:15\nthat we are trying to generate.\n\n00:40:19\nin NLG in the last couple of years",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture11_nlg::seg4",
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11_nlg::seg4",
+      "global_kp_id": "kp_reranking_sampled_candidates",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11_nlg::seg4",
+      "global_kp_id": "kp_degeneration_under_maximum_probability_decoding",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_sampling_based_decoding_controls",
+      "name": "Sampling-based decoding controls",
+      "description": "The family of stochastic decoding methods and hyperparameters such as top-k, top-p, epsilon, typical sampling, and temperature.",
+      "track_tags": [
+        "decoding",
+        "inference"
+      ],
+      "domain_tags": [
+        "decoding",
+        "nlg"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "ml_engineering"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sampling-based decoding controls clarifies the family of stochastic decoding methods and hyperparameters such as top-k, top-p, epsilon, typical sampling, and temperature, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11_nlg::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reranking_sampled_candidates",
+      "name": "Reranking sampled candidates",
+      "description": "Selecting among multiple sampled generations using auxiliary quality scores such as style, coherence, or factuality.",
+      "track_tags": [
+        "decoding",
+        "quality_control"
+      ],
+      "domain_tags": [
+        "nlg",
+        "ranking"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "product_ml"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reranking sampled candidates clarifies selecting among multiple sampled generations using auxiliary quality scores such as style, coherence, or factuality, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11_nlg::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_degeneration_under_maximum_probability_decoding",
+      "name": "Degeneration under maximum-probability decoding",
+      "description": "The failure mode where greedy or beam-style search produces repetitive, overconfident text in open-ended generation.",
+      "track_tags": [
+        "decoding",
+        "generation_quality"
+      ],
+      "domain_tags": [
+        "decoding",
+        "nlg"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because degeneration under maximum-probability decoding clarifies the failure mode where greedy or beam-style search produces repetitive, overconfident text in open-ended generation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11_nlg::kp5"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.53,
+    0.83
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_nlg_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture20-nlg_transcript.txt"
+  }
+}

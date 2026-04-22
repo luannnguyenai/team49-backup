@@ -1,0 +1,214 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_18_human_centered_ai",
+    "lecture_title": "What We See and What We Value: AI with the Human Perspective",
+    "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_18_human_centered_ai::seg2",
+    "course_id": "cs231n_spring_2025",
+    "name": "Object recognition: from human vision to ImageNet and deep learning",
+    "description": "Reviews why object recognition became the canonical visual intelligence problem and traces the pre-deep-learning and deep-learning eras that made it practical.",
+    "summary": "Fei-Fei Li begins from human perception experiments, noting that people can detect targets in rapidly flashed scenes and categorize complex stimuli within roughly 150 ms, with specialized brain areas supporting object understanding [ts=297s] [ts=373s]. She uses this to motivate object recognition as a foundational computer vision task, then recounts the pre-deep-learning history: part-based compositional models were elegant but ineffective, while statistical machine learning introduced learnable parameters, data dependence, and models such as Bayes nets, random fields, and SVMs [ts=423s] [ts=564s]. The decisive unlock came from taking Biederman's estimate of tens of thousands of human-recognizable categories seriously, leading to ImageNet's scale and, later, the 2012 convergence of data, CNNs, and GPUs that made object recognition industrially mature [ts=692s] [ts=856s].",
+    "key_points": [
+      {
+        "text": "Humans can detect targets in unfamiliar scenes shown at 10 Hz, highlighting strong object-focused visual understanding.",
+        "timestamp_s": 297,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Object recognition became a fundamental building block for visual intelligence in computer vision.",
+        "timestamp_s": 423,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Part-based object recognition models from the 1970s-1990s were mathematically appealing but did not work well in practice.",
+        "timestamp_s": 543,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Statistical machine learning reframed recognition as learning parameters from data rather than hand-tuning rules.",
+        "timestamp_s": 576,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Biederman's conjecture that children know roughly 30,000 to 100,000 visual categories motivated scaling up datasets.",
+        "timestamp_s": 694,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The 2012 convergence of ImageNet, CNNs, and GPUs is presented as the birth of deep learning for vision.",
+        "timestamp_s": 856,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+      "start_s": 288,
+      "end_s": 904
+    },
+    "difficulty": 0.5,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 10,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "transcript_slice": "00:04:48\nBuilding AI to see what humans see.\n\n00:04:53\nHumans are so good at seeing.\n\n00:04:57\nThis is a very half a century old experiment showing us\n\n00:05:07\nplayed at 10 hertz, which means every frame is only about\n\n00:05:14\nyou've never seen that, it's still no problem for human eyes\n\n00:05:22\nIn this complex scene where you have no idea prior knowledge\n\n00:05:29\nunderscores the superb ability of human visual understanding,\n\n00:05:39\nWe also have briefly mentioned that around the turn\n\n00:05:47\nare measuring the speed of vision in terms of humans\n\n00:06:01\nelectrical signals measured from EEG caps.\n\n00:06:10\nanimals versus animals is a very complex task,\n\n00:06:18\nafter the onset of the stimuli.\n\n00:06:25\nwe have under our skulls.\n\n00:06:31\nthat objects is a very important functionality\n\n00:06:41\nSo important that there are neural correlates in our brain.\n\n00:06:49\nsuch as phase areas or place areas or body parts areas.\n\n00:06:57\nto hone in our visual intelligence skills\n\n00:07:03\nSo all this built up the history for the field of computer vision\n\n00:07:13\nbecame a fundamental building block for visual intelligence.\n\n00:07:20\nAnd in order to do that, we define the problem, or at least\n\n00:07:29\nhow do we empower, enable a computer to call out the objects\n\n00:07:40\nThat's such an effortless task for humans.\n\n00:07:45\nlearned enough computer vision to know that mathematically,\n\n00:07:54\nany object because of different lighting, texture, background,\n\n00:08:04\nyou name it.\n\n00:08:12\nThe history pre-deep learning is also very interesting.\n\n00:08:20\nat solving the problem of generic generalizable object\n\n00:08:26\nAnd the first wave of attempt was actually very inspired\n\n00:08:32\nWe self-introspect sometimes even\n\n00:08:39\nWe think that humans compose parts.\n\n00:08:47\nand then we can compose them into different objects.\n\n00:08:57\nand to compose them in specific ways\n\n00:09:07\nSo these are different work or models coming from\n\n00:09:15\ndifferent parts and configurations to recognize\n\n00:09:19\nOf course, it didn't really work.\n\n00:09:24\nSo a second wave of object recognition pre-deep learning\n\n00:09:36\nIs really the beginning of machine learning.\n\n00:09:41\nIt was the marriage between computer programming\n\n00:09:46\nAnd with that marriage, we start to realize\n\n00:09:53\nproblems, whether it's visual intelligence or language\n\n00:10:00\nin order to generalize, we need to learn the parameters.\n\n00:10:15\nWe now know we need data, even though we didn't at that time\n\n00:10:20\nBut we also know that we need to design or architect\n\n00:10:28\nthe capability of learning through different learning\n\n00:10:32\nAnd because of that, we saw a blossoming of models in that era\n\n00:10:41\nor support vector machines and all that.\n\n00:10:50\nin the first decade of the 21st century in object recognition,\n\n00:10:59\nof object classes to encourage everybody to compare\n\n00:11:06\nSo we're inching together.\n\n00:11:12\nagain goes back to cognitive science.\n\n00:11:19\nhad long conjectured that humans can recognize\n\n00:11:26\nAnd this is intuitive for our common knowledge.\n\n00:11:32\nI personally call it the Biederman number,\n\n00:11:40\nwere able to recognize about 30,000 to 100,000 different\n\n00:11:47\nAnd he used this-- where did he come up with?\n\n00:11:54\nthe number of nouns, as well as visual studies of how kids\n\n00:12:01\nBut it's a number that's pretty daunting and pretty sobering\n\n00:12:10\nthis is middle of the first decade of 21st century,\n\n00:12:18\nnumber of images to work with compared to what humans\n\n00:12:24\nAnd this was, as you know, the motivation\n\n00:12:36\nand constructed--\n\n00:12:42\nthe psychologist Biederman conjectured,\n\n00:12:51\nAnd of course, that's the beginning\n\n00:12:57\nIs that because of the large data provided by ImageNet,\n\n00:13:07\nat the beginning with convolutional neural network\n\n00:13:12\nstart to really show their power through big data.\n\n00:13:23\nwho didn't learn about this.\n\n00:13:26\nSo the quick history is, as soon as we have ImageNet,\n\n00:13:35\nafter the beginning of ImageNet, we\n\n00:13:41\nof solving the problem of object recognition.\n\n00:13:48\ntake to look at any picture in the world\n\n00:13:55\nand in any kind of orientation.\n\n00:14:01\nNo.\n\n00:14:04\nBut as far as industrial application goes,\n\n00:14:10\nbeen a matured problem.\n\n00:14:16\ncame at a convergence point, which is the year 2012, where\n\n00:14:24\nfor the convolutional neural network,\n\n00:14:30\nAnd the three ingredients come together and brought\n\n00:14:37\nthe birth of deep learning.\n\n00:14:42\nabout different various architectures\n\n00:14:49\nthroughout the past decade or so in terms\n\n00:14:57\nSo that's the beginning, really, about deep learning revolution.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "name": "Visual intelligence and object recognition",
+      "description": "Object recognition is treated as a core capability of both human and machine vision and as the starting point of modern computer vision progress. The lecture frames vision as central to animal and human intelligence, not merely one application area inside AI.",
+      "track_tags": [
+        "foundations",
+        "motivation",
+        "recognition",
+        "vision_basics"
+      ],
+      "domain_tags": [
+        "artificial_intelligence",
+        "cognitive_science",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.33,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because visual intelligence and object recognition formalizes how object recognition is treated as a core capability of both human and machine vision and as the starting point of modern computer vision progress, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp2",
+        "local::lecture_1_introduction::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "name": "Data-driven supervised learning pipeline",
+      "description": "Pre-deep-learning progress came from shifting from hand-coded rules to learnable statistical models trained from data. The collect-train-predict paradigm: gather labeled data, fit a model, and evaluate predictions on unseen examples.",
+      "track_tags": [
+        "deep_learning_basics",
+        "machine_learning",
+        "machine_learning_foundations",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning",
+        "model_training",
+        "supervised_learning"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because data-driven supervised learning pipeline formalizes how pre-deep-learning progress came from shifting from hand-coded rules to learnable statistical models trained from data, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp3",
+        "local::lecture_2_image_classification_with_linear_classifiers::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.35,
+    0.65
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L18_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture18-human-centered-ai_transcript.txt"
+  }
+}

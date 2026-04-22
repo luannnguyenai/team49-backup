@@ -1,0 +1,215 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture10-posttraining",
+    "lecture_title": "CS224N Lecture 10: Post-training for Large Language Models",
+    "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4"
+  },
+  "unit": {
+    "unit_id": "local::lecture10-posttraining::seg7",
+    "course_id": "CS224N",
+    "name": "Direct Preference Optimization",
+    "description": "Derives DPO as a direct preference-pair objective that avoids the RL loop.",
+    "summary": "The instructor introduces DPO because full RLHF is complex, sampling-heavy, hyperparameter-sensitive, and historically limited to high-resource groups [ts=3362s] [ts=3413s]. The key idea is to write the reward model in terms of the language model: if probability mass is shifted toward completions humans like, model log probabilities can correspond to human preference [ts=3490s] [ts=3528s]. DPO is possible because after preference labels are collected, the reward-model fitting and RL optimization steps add no new external information [ts=3561s] [ts=3590s]. The derivation starts from the KL-regularized expected-reward objective and gives a closed-form Boltzmann-style optimum: reweight the reference model by exponentiated reward, normalized by a partition function Z(x) [ts=3614s] [ts=3711s]. Z(x) is intractable because it would require summing over all possible completions, but algebra expresses reward using a beta-scaled log probability ratio between the optimized policy and reference model [ts=3721s] [ts=3792s]. When plugged into the Bradley-Terry objective, the partition function cancels because winning and losing completions share the same input x [ts=3953s] [ts=4009s]. The result is a direct binary-classification-style loss over preferred versus dispreferred answers, with no RL loop [ts=4057s] [ts=4089s].",
+    "key_points": [
+      {
+        "text": "DPO is motivated as a simpler alternative to complex RLHF.",
+        "timestamp_s": 3409,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "DPO writes the reward model in terms of language-model probabilities.",
+        "timestamp_s": 3490,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The KL-regularized objective has a closed-form optimum that reweights the reference model by reward.",
+        "timestamp_s": 3634,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The partition function Z(x) is intractable because it sums over all possible completions.",
+        "timestamp_s": 3693,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Reward can be expressed as a beta-scaled log-ratio between optimized and reference policies.",
+        "timestamp_s": 3754,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The partition function cancels in Bradley-Terry reward differences for the same input.",
+        "timestamp_s": 3983,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "DPO becomes a binary classification loss over preference pairs.",
+        "timestamp_s": 4072,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=35X6zlhoCy4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=11",
+      "start_s": 3360,
+      "end_s": 4351
+    },
+    "difficulty": 4.9,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 17,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "transcript_slice": "00:56:00\nCool.\n\n00:56:07\nLike I gave you a very high-level summary that's, like,\n\n00:56:11\nthere's whole courses on this for a reason, so it just--\n\n00:56:17\nit's just completely to intimidate you.\n\n00:56:25\nYou have to sample the model a lot.\n\n00:56:29\nSo there's a lot that goes on here.\n\n00:56:36\nit can be very hard.\n\n00:56:40\nwas restricted to very, very like compute, high resource\n\n00:56:46\nSo what we're going to talk about and cover in this course\n\n00:56:51\nwhich is a much simpler alternative to RLHF,\n\n00:56:55\nBut please bear with me, there will be a lot of math on here,\n\n00:57:01\nwith a very simple algorithm.\n\n00:57:07\nquestions.\n\n00:57:10\nyou need from humans, in terms of GPT 4\n\n00:57:17\nhelp with needing to reduce the number of parameters,\n\n00:57:25\n[INAUDIBLE].\n\n00:57:28\nSo generally speaking, as the-- if you\n\n00:57:33\nthe model size, it will improve quite a lot.\n\n00:57:39\nand you can keep adding data as you keep like scaling models up.\n\n00:57:45\nthe amount of data collection.\n\n00:57:50\nYeah.\n\n00:57:52\nSo we talked about RLHF and the current pipeline\n\n00:57:58\nwe train a reward model on the comparison data\n\n00:58:02\nWe're going to start with our pretrained or instruction-tuned\n\n00:58:06\nmodel using the reinforcement learning techniques.\n\n00:58:13\nis, what if we could just simply write a reward model in terms\n\n00:58:18\nNow, to intuitively understand that what is going on,\n\n00:58:24\nto whatever is the most plausible completion next,\n\n00:58:30\nBut you could restrict the probability\n\n00:58:35\nand then the log probabilities of your model\n\n00:58:40\nand not just some arbitrary completion on the internet.\n\n00:58:46\nprobability that a language model assigns,\n\n00:58:51\nThey can have a direct correspondence in them.\n\n00:58:56\nthat I'm trying to come up with, we will derive this\n\n00:59:01\nSo the general idea with direct preference optimization\n\n00:59:07\nof our language model, and now that we can write our reward\n\n00:59:13\ndirectly fit our reward model to the preference data we have,\n\n00:59:21\nSo we started off with some preference data,\n\n00:59:24\nto it, which directly optimizes the language parameters.\n\n00:59:32\nWe did this really cumbersome process\n\n00:59:37\nbut in the whole process, the only external information\n\n00:59:42\nwas human labels, labels on the preference data.\n\n00:59:47\nthere is no new information being added into the system.\n\n00:59:53\nFor quite a few years, this was not obvious,\n\n00:59:58\nstart to make sense.\n\n01:00:04\nI'll be here after the class as well if you have questions,\n\n01:00:09\nSo yes, we discussed that we wanted\n\n01:00:17\nwe want to maximize the expected reward,\n\n01:00:22\nessentially penalizes the distance between where\n\n01:00:27\nSo we don't want to drift too far away from where we started.\n\n01:00:38\nof doing an iterative routine, there's actually a closed form\n\n01:00:43\nSo the closed form solution looks something like this.\n\n01:00:51\nor something to that effect before,\n\n01:00:55\nis this, that we're going to take a pretrained distribution\n\n01:01:02\nby the expected reward.\n\n01:01:08\nit's going to have a higher probability mass,\n\n01:01:11\ngoing to have a lower probability mass,\n\n01:01:15\nAnd beta is a hyperparameter which essentially governs\n\n01:01:21\nmodel and the constraint.\n\n01:01:25\nyou're going to start paying more and more attention\n\n01:01:30\nSo the probabilities look something like this.\n\n01:01:36\nand the reason why it exists is that the numerator by itself\n\n01:01:42\nIt's not a probability distribution.\n\n01:01:46\nyou have to normalize it, and z is simply\n\n01:01:51\nSo real quick.\n\n01:01:55\nYeah, and that's exactly like-- it's sum over all ys for a given\n\n01:02:01\nis like it's intractable.\n\n01:02:05\ncompletion and not just syntactically correct ones,\n\n01:02:13\nand the completions can go arbitrarily long.\n\n01:02:17\nThis quantity is not easy to approximate even.\n\n01:02:26\nyou can actually-- there does exist at least a closed form\n\n01:02:31\nlook like or optimal language model will look like.\n\n01:02:36\njust move some terms around, take a logarithm here or there.\n\n01:02:40\nyou can actually express the reward model\n\n01:02:45\nAnd I think this term is reasonably intuitive as well.\n\n01:02:52\nhat has a high reward.\n\n01:02:58\nto it relative to my initialized model.\n\n01:03:04\nis what we're looking at here.\n\n01:03:10\nbut it's intractable, but the beta log ratio\n\n01:03:15\nIs everyone following along?\n\n01:03:20\nOK.\n\n01:03:25\nBut really every policy is probably\n\n01:03:30\nThis is mathematically true as well.\n\n01:03:36\nyou take a current policy, take your initialized model,\n\n01:03:42\nAnd this is the exact identity, which leads to this.\n\n01:03:49\nbarring the log partition term, which\n\n01:03:55\nGo for it.\n\n01:03:55\nI don't know how you got there.\n\n01:03:59\nis a thing that we're trying to optimize and how to [INAUDIBLE]\n\n01:04:02\nYeah, for now, we're not optimizing any reward model.\n\n01:04:11\nit probably represents some kind of a reward model\n\n01:04:18\nholds for every P star and every reward model, what I'm saying\n\n01:04:25\nit also represents some kind of a reward model.\n\n01:04:30\nBut I want to say because at the beginning, PRL is ppt.\n\n01:04:35\nAnd so we just get that the reward is basically--\n\n01:04:38\n[INAUDIBLE] 0, and so what do we do?\n\n01:04:44\nYeah, but that's a good observation\n\n01:04:48\nBut how do we start optimizing if--\n\n01:04:51\nOK.\n\n01:04:55\nSo the idea is that given the language model\n\n01:05:03\noptimal [INAUDIBLE].\n\n01:05:09\nBut the key idea is that my language model, the probability\n\n01:05:16\nI think that's really the main point here,\n\n01:05:22\nCool.\n\n01:05:26\nthe elephant in the room here, which is the partition function.\n\n01:05:32\nif this was just the beta log ratio, that\n\n01:05:35\nI can compute all these quantities.\n\n01:05:39\nmodel.\n\n01:05:41\nunder my pretrained model, and I can compute the reward score,\n\n01:05:46\nBut I don't know what to do about the log partition\n\n01:05:50\nThis is where something fun happens.\n\n01:05:58\nWhen we started off-- we started off\n\n01:06:02\nand what we really wanted to optimize\n\n01:06:06\nand the losing completion.\n\n01:06:12\nWe don't care about the exact reward\n\n01:06:18\nthe difference between winning and losing completion.\n\n01:06:23\nbecause if you plug-in the definition of the RM theta\n\n01:06:31\nactually just cancels out.\n\n01:06:36\nThe input is exactly the same.\n\n01:06:41\nso the partition function zx will just cancel out.\n\n01:06:46\nSo what you get is that the reward difference\n\n01:06:49\nis the differences between the beta log ratio for the winning\n\n01:06:54\nYou can plug-in the terms, you can work it out.\n\n01:06:58\nSo the partition function, which was our--\n\n01:07:03\nwe could not compute, actually, just simply vanished away.\n\n01:07:07\nZ doesn't appear in the Bradley-Terry model.\n\n01:07:13\nSo how does plugging in violate your model transparency?\n\n01:07:21\nsee, and we're going to plug in place of R and phi,\n\n01:07:31\nOh, I see.\n\n01:07:32\nYeah.\n\n01:07:36\nCool.\n\n01:07:39\nI mean, the key observation is we could express our reward\n\n01:07:44\nand our problems with the partition function\n\n01:07:47\nthe Bradley-Terry model.\n\n01:07:52\nis that we're going to express the loss function directly\n\n01:08:00\nand we're going to be able to directly optimize on our data\n\n01:08:07\nand this is simply a binary classification problem.\n\n01:08:11\nwhether an answer is good or bad,\n\n01:08:17\nBefore I go on like people want to absorb this in, I mean,\n\n01:08:26\nI don't get why good-- and why win and why lose come from.\n\n01:08:32\nGood question.\n\n01:08:36\nas well, but the way the process works is that you\n\n01:08:41\nto generate some answers, and then you\n\n01:08:45\nSo they're model-generated.\n\n01:08:49\nbut they typically model generated.\n\n01:08:54\nAll you need is a label saying, which is a better answer.\n\n01:09:01\nYou must be losing some information because of the lack\n\n01:09:09\nyou're canceling out your--\n\n01:09:14\nfunction, you are bound to lose information\n\n01:09:21\nyou would have taken into account in standard RLHF, right?\n\n01:09:27\nI don't think I'll be able to completely answer\n\n01:09:32\nis almost kind of a free variable.\n\n01:09:37\nthink of when you-- there's many reward models that\n\n01:09:42\nSo there's a free variable here that you can actually completely\n\n01:09:48\nSo think of it this way--\n\n01:09:51\nand assign something a reward of minus 1,\n\n01:09:55\nit's a reward of plus 199, and it will give you the same loss.\n\n01:10:04\nit's shift invariant in a ways.\n\n01:10:15\nIf you're actually training a reward model,\n\n01:10:21\nto that as compared to minus 1 [INAUDIBLE] 0 or something.\n\n01:10:28\nhere is if a human prefers something over the other,\n\n01:10:35\nbetween the rewards.\n\n01:10:39\nand DP also makes.\n\n01:10:43\nNot completely true, but it holds to a fairly large degree.\n\n01:10:53\nCool.\n\n01:10:57\nAnd really like, I mean, the goal of this plot is to--\n\n01:11:02\nwe optimize things with DPO.\n\n01:11:07\nat is PPO, which is the typical RLHF pipeline,\n\n01:11:12\nand we're comparing two human summaries.\n\n01:11:18\nbut you're really not losing much by just\n\n01:11:22\nAnd that's really compelling because DPO is simply\n\n01:11:27\nprocedure.\n\n01:11:33\nWhat we have seen thus far is that we\n\n01:11:38\nand the way we do this is like instead of relying\n\n01:11:43\nand feedback on that.\n\n01:11:48\nlike RLHF, where we first fit a reward model\n\n01:11:53\nor we do something like direct preference optimization\n\n01:11:59\nloss on that.\n\n01:12:04\nPeople, when they have a lot of computational budget,\n\n01:12:08\nover some routine like that.\n\n01:12:13\nI mean, you might want to go for DPO,\n\n01:12:19\nIt's still an active area of research.\n\n01:12:23\nwith these algorithms, so I'm not making any strong claims\n\n01:12:28\nDPO is just much simpler to work with.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture10-posttraining::seg7",
+      "global_kp_id": "kp_dpo",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture10-posttraining::seg7",
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture10-posttraining::seg7",
+      "global_kp_id": "kp_reward_hacking",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_dpo",
+      "name": "Direct Preference Optimization",
+      "description": "A direct classification-style preference objective that avoids a separate RLHF optimization loop. DPO as a simpler preference-optimization method that avoids full PPO-style RL infrastructure.",
+      "track_tags": [
+        "dpo",
+        "llm",
+        "nlp",
+        "preference_optimization"
+      ],
+      "domain_tags": [
+        "llm_alignment",
+        "optimization",
+        "post_training",
+        "preference_optimization"
+      ],
+      "career_path_tags": [
+        "ai_engineer",
+        "llm_engineer",
+        "ml_researcher",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.86,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because direct Preference Optimization formalizes how a direct classification-style preference objective that avoids a separate RLHF optimization loop, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-posttraining::kp10",
+        "local::lecture15-after-dpo::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "name": "Reward modeling from pairwise preferences",
+      "description": "Turning pairwise human preferences into a reward-model objective based on reward differences. Pairwise reward-model training and RewardBench as local evaluation for reward models.",
+      "track_tags": [
+        "llm",
+        "nlp",
+        "reward_modeling",
+        "rewardbench",
+        "rlhf"
+      ],
+      "domain_tags": [
+        "bradley_terry",
+        "nlp_evaluation",
+        "reward_modeling",
+        "rlhf"
+      ],
+      "career_path_tags": [
+        "ai_evaluation_engineer",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reward modeling from pairwise preferences formalizes how turning pairwise human preferences into a reward-model objective based on reward differences, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-posttraining::kp8",
+        "local::lecture15-after-dpo::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_hacking",
+      "name": "Reward hacking and KL regularization",
+      "description": "The risk of exploiting learned rewards and the KL-style penalty that keeps the policy near the reference model. Optimizers exploiting incomplete reward specifications in reward-model-based alignment.",
+      "track_tags": [
+        "ai_safety",
+        "alignment",
+        "llm",
+        "nlp",
+        "reward_hacking"
+      ],
+      "domain_tags": [
+        "ai_safety",
+        "kl_divergence",
+        "reinforcement_learning",
+        "reward_hacking"
+      ],
+      "career_path_tags": [
+        "ai_safety_researcher",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.81,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because reward hacking and KL regularization formalizes how the risk of exploiting learned rewards and the KL-style penalty that keeps the policy near the reference model, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-posttraining::kp9",
+        "local::lecture15-after-dpo::kp12"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.75,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture10-posttraining_transcript.txt"
+  }
+}

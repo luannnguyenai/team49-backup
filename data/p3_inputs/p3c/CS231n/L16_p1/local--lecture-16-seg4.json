@@ -1,0 +1,204 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_16",
+    "lecture_title": "Lecture 16: Vision and Language — Multi-Modal Foundation Models",
+    "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_16::seg4",
+    "course_id": "CS231N",
+    "name": "CLIP robustness, scale, and CoCa",
+    "description": "Explains why CLIP generalizes beyond ImageNet and how CoCa improves CLIP through captioning.",
+    "summary": "After presenting zero-shot CLIP, the lecturer emphasizes that matching ImageNet is not the main surprise; the more interesting result is performance on datasets such as ObjectNet, which contains familiar categories in unusual viewpoints or conditions [ts=875s] [ts=900s]. CLIP generalizes better than ImageNet-trained models because internet text contains richer supervision than class labels, including shape, color, and other structural information [ts=943s]. Scale also matters: ImageNet has around 1.3 million images, while internet-scale image-text training can use hundreds of millions or billions of pairs [ts=977s]. The original CLIP setup benefited from a large ViT-style model with about 307 million parameters and around 400 million image-text pairs [ts=1073s] [ts=1088s]. CoCa then improves on CLIP by retaining the contrastive image-text objective but adding a decoder and captioning loss via cross-attention, encouraging the model to learn richer visual information needed to describe images [ts=1118s] [ts=1130s]. The lecturer states that CoCa improves across ImageNet variants and marks a turning point where foundation models beat supervised-learning models on major image benchmarks [ts=1169s] [ts=1181s].",
+    "key_points": [
+      {
+        "text": "ObjectNet tests robustness by using the same kinds of categories in unusual contexts and viewpoints.",
+        "timestamp_s": 900,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Internet text supervision can encode shape, color, and other structure beyond category labels.",
+        "timestamp_s": 943,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CLIP benefits from much larger data scale than ImageNet-style supervised training.",
+        "timestamp_s": 977,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The discussed CLIP model used a large transformer architecture with about 307 million parameters.",
+        "timestamp_s": 1073,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CoCa adds a decoder and captioning loss to the CLIP-style contrastive objective.",
+        "timestamp_s": 1118,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Captioning is hypothesized to be a stronger learning objective because describing an image requires richer information than naming a class.",
+        "timestamp_s": 1147,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+      "start_s": 875,
+      "end_s": 1215
+    },
+    "difficulty": 4.5,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 6,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "transcript_slice": "00:14:38\nYou can basically adapt this for a wide variety of new image\n\n00:14:42\nAnd to your question right now, of course,\n\n00:14:48\nwell on ImageNet, but it is still exciting that it does\n\n00:14:53\nI think more interesting is that when you look at other data\n\n00:15:00\nSo data set like ObjectNet which contains objects\n\n00:15:06\nSo they put a banana on the ground and took a photo of it,\n\n00:15:10\nand took a photo of it.\n\n00:15:14\nAnd so in this data set, if you train on ImageNet,\n\n00:15:21\ncontains most of these categories\n\n00:15:24\nBut if you take the CLIP model, it performs just as well.\n\n00:15:31\nbecause this ability to generalize\n\n00:15:35\nseen before, that's even out of domain to some degree,\n\n00:15:38\nSo why do you think this is?\n\n00:15:42\nthan training on ImageNet?\n\n00:15:45\nthink it's the right response, is the text\n\n00:15:51\nit contains a lot more than the category labels.\n\n00:15:55\ncontains information about shape,\n\n00:15:59\nadds to the representations.\n\n00:16:05\nthat maybe is slightly out of distribution or an object that\n\n00:16:10\ndoes have all these other things it's looking for as well.\n\n00:16:15\nhelps quite a lot.\n\n00:16:20\nImageNet is only about 1.3 million images or so,\n\n00:16:26\nAt this point, billions of image text\n\n00:16:30\nAnd so these models have just seen so much more data\n\n00:16:36\nAnd so people started doing these experiments\n\n00:16:41\nSo they showed that you can generalize these models\n\n00:16:46\nthat you can also do this on adversarial data sets as well.\n\n00:16:51\nto indicate that these models are just really,\n\n00:16:57\nAnd then here I'm showing you the difference between zero shot\n\n00:17:01\nAnd you can see that, of course, linear probe, when\n\n00:17:05\nand train it and adapt it a little bit,\n\n00:17:09\nof the data sets, the ones in green\n\n00:17:14\nIn some cases, the CLIP zero shot\n\n00:17:19\nAnd so it just seemed to indicate that we finally\n\n00:17:23\nable to adapt image encoders for a wide variety\n\n00:17:29\nAnd this is why I think a lot of people\n\n00:17:35\nSo let's talk about what makes CLIP work so well.\n\n00:17:40\nWe're just downloading any text associated with images.\n\n00:17:45\nI was saying it contained when it was first trained,\n\n00:17:51\nwell, the parameters were just gigantic.\n\n00:17:55\nchanged the architecture from ResNet to a VIT.\n\n00:18:00\nwith 307 million parameters that was used to train this model.\n\n00:18:08\nSo instead of just 1.2 million images from ImageNet,\n\n00:18:14\nfrom the internet that they downloaded\n\n00:18:17\nSo that scale, both in terms of model size\n\n00:18:23\nquite a lot.\n\n00:18:26\npeople started experimenting with this objective.\n\n00:18:31\nthat have come out over the years.\n\n00:18:35\nin 2022, it's called CoCa.\n\n00:18:40\nHere, you can see it's the same objective here.\n\n00:18:44\nYou've got the text being encoded on one side.\n\n00:18:47\nbetween the two.\n\n00:18:50\nThey added a decoder as well that\n\n00:18:56\nAnd then they fed it in through cross-attention\n\n00:19:01\nAnd it turns out this captioning process also\n\n00:19:07\nSo the general motivation here is\n\n00:19:11\nable to say that this is an image of a cat versus a dog,\n\n00:19:16\nrequires a lot more information to be learned by the model.\n\n00:19:22\nobjective.\n\n00:19:26\nAnd we found that to be true overall.\n\n00:19:32\nimproves quite a lot across all the different ImageNet variants.\n\n00:19:38\nacross all of the data sets.\n\n00:19:44\nmodels actually beat all the models that we had trained\n\n00:19:50\nSo at this point, we had many different models\n\n00:19:55\nAnd in those leaderboards across the years,\n\n00:20:00\nas models are performing better and better.\n\n00:20:04\nwhere people abandoned supervised learning objectives\n\n00:20:09\non just pre-training objectives using\n\n00:20:15\nSo let's talk about some advantages of CLIP.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "global_kp_id": "kp_clip_out_of_distribution_robustness",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "global_kp_id": "kp_coca_contrastive_captioning_objective",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_clip_out_of_distribution_robustness",
+      "name": "CLIP out-of-distribution robustness",
+      "description": "CLIP can generalize to unusual datasets such as ObjectNet because language supervision and data scale expose richer visual structure than category labels alone.",
+      "track_tags": [
+        "robustness",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "ood_generalization"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cLIP out-of-distribution robustness clarifies cLIP can generalize to unusual datasets such as ObjectNet because language supervision and data scale expose richer visual structure than category labels alone, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "name": "Pretraining scaling and compute-data tradeoffs",
+      "description": "Large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale. This scaling view also appears in vision-language systems such as CLIP, where larger models and more image-text data improve performance.",
+      "track_tags": [
+        "foundation_models",
+        "llm",
+        "model_efficiency",
+        "nlp",
+        "scaling",
+        "scaling_laws"
+      ],
+      "domain_tags": [
+        "data_scale",
+        "large_language_models",
+        "model_scale",
+        "nlp",
+        "pretraining",
+        "scaling_laws"
+      ],
+      "career_path_tags": [
+        "llm_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_engineering",
+        "research_scientist",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because pretraining scaling and compute-data tradeoffs clarifies large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale, sharpening later modeling, analysis, or evaluation choices while importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-posttraining::kp1",
+        "local::lecture09-pretraining::kp11",
+        "local::lecture_16::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_coca_contrastive_captioning_objective",
+      "name": "CoCa contrastive captioning objective",
+      "description": "CoCa augments CLIP-style contrastive learning with a decoder and captioning loss to learn richer visual representations.",
+      "track_tags": [
+        "generative_objectives",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "captioning",
+        "coca"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.92,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because coCa contrastive captioning objective clarifies coCa augments CLIP-style contrastive learning with a decoder and captioning loss to learn richer visual representations, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp11"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.35,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L16_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture16-vision-and-language_transcript.txt"
+  }
+}

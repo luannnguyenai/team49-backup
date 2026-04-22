@@ -1,0 +1,281 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "cs224n-2024-lecture18",
+    "lecture_title": "NLP, Linguistics, and Philosophy",
+    "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4"
+  },
+  "unit": {
+    "unit_id": "local::cs224n-2024-lecture18::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Open problems after the success of scaling",
+    "description": "A survey of the hardest unresolved issues in current NLP systems and their deployment.",
+    "summary": "After the recap, Manning turns to what large language models still do poorly. He questions whether they truly generalize or mostly benefit from having seen enormous amounts of data, comparing them to 'a talking encyclopedia' rather than a human-like problem solver [ts=289s] [ts=323s]. He cites an example where LSTMs generalize from limited formal-language data better than transformers, using this to contrast human one-shot learning with the much heavier data needs of current models [ts=358s] [ts=405s]. He then highlights interpretability work, including early neuron-level analyses and more recent mechanistic interpretability, before moving to multilingual inequity: GPT-4 improves many large languages, but low-resource and mostly oral languages still remain outside the reach of current data-hungry methods [ts=485s] [ts=653s]. The segment closes on evaluation contamination, domain-specific risk in legal and medical NLP, legal-answer hallucinations at about one in six, and persistent cultural bias and underrepresentation problems [ts=741s] [ts=914s].",
+    "key_points": [
+      {
+        "text": "A central question is whether large pretrained models generalize or mainly memorize patterns from massive exposure.",
+        "timestamp_s": 289,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Manning compares large language models to a 'talking encyclopedia' rather than a system that solves truly new problems like humans do.",
+        "timestamp_s": 323,
+        "evidence_type": "example"
+      },
+      {
+        "text": "On limited finite-automata data, an LSTM reaches near-ceiling generalization while a transformer needs much more data.",
+        "timestamp_s": 358,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Mechanistic interpretability and causal abstraction aim to understand what neural networks learn internally.",
+        "timestamp_s": 530,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "For low-resource languages, there often is not enough written data to build the kinds of models discussed in the course.",
+        "timestamp_s": 694,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Benchmark contamination can make strong results untrustworthy because models may have already seen benchmark problems during pretraining.",
+        "timestamp_s": 757,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "In a recent RegLab study, legal NLP systems hallucinated in about one question out of six.",
+        "timestamp_s": 914,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18",
+      "start_s": 500,
+      "end_s": 979
+    },
+    "difficulty": 0.63,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "transcript_slice": "00:08:27\nwas effectively measuring position along a line of text.\n\n00:08:34\nits value started to change because the model was learning\n\n00:08:43\nand that the line was likely to be ending at that point.\n\n00:08:48\nbe with transformers as well, a lot of work\n\n00:08:53\nabstraction, trying to understand\n\n00:08:58\nA problem that's far from solved and, in many respects, probably\n\n00:09:06\nof dealing with all the other languages of the world, that you\n\n00:09:15\nfor English, it's worse for every other language\n\n00:09:23\nNow, there is a good news story here.\n\n00:09:28\nSo in this graph, which is kind of small,\n\n00:09:38\nand then all of the green bars are then the performance\n\n00:09:45\nAnd so there's a genuine good news story here, which is, look,\n\n00:09:53\nfor Greek, Latvian, Arabic, Turkish,\n\n00:10:05\nSo that's the good news argument,\n\n00:10:13\nraising all boats.\n\n00:10:19\nAnd things are starting to drop off\n\n00:10:27\nwhere the performance is worse than English in GPT 3.5.\n\n00:10:37\navailable, but they're still large languages.\n\n00:10:42\nare actually all Indian languages.\n\n00:10:48\nwhich are languages that are each\n\n00:10:51\nThey're not small languages.\n\n00:10:57\nget to the small low-resource languages?\n\n00:11:04\ndon't have millions of speakers.\n\n00:11:09\nto hundreds of thousands of speakers.\n\n00:11:14\nA lot of those languages are primarily oral\n\n00:11:21\nNow, some of those languages are likely--\n\n00:11:27\nin the coming decades.\n\n00:11:31\nwould like to preserve their languages.\n\n00:11:38\nthat we've been talking about in the later parts of the course\n\n00:11:45\nbecause there just isn't sufficient data\n\n00:11:51\nSo I imagine you've gotten some idea in this course of how\n\n00:12:00\nthat effectively a lot of the way that progress is being\n\n00:12:06\nshould be able to achieve and then\n\n00:12:14\nso that they do better on what we see as good language\n\n00:12:21\nOne of the concerns that many people\n\n00:12:30\nfrom large companies is a concern\n\n00:12:35\nand not to be trusted.\n\n00:12:45\nAnd he's noting, I suspect, GPT-4's performance influenced\n\n00:12:52\none of the coding benchmarks.\n\n00:12:57\nit solved 10 out of 10 pre-2021 problems,\n\n00:13:04\nThis strongly points to contamination.\n\n00:13:10\nseeing these fantastic results of how well the latest best\n\n00:13:17\nso much data is on the web that gets\n\n00:13:26\nthat essentially they're memorizing\n\n00:13:31\nin these challenges.\n\n00:13:34\nin a fair way as an independent test set at all.\n\n00:13:39\nAnd so there's issues then as to what kind\n\n00:13:46\nor dynamic evaluation mechanisms so we can actually\n\n00:13:52\nAnother huge area that a number of us\n\n00:13:56\nis making NLP work in different technical domains.\n\n00:14:04\nNLP have a lot of differences, a lot vocabulary and usage.\n\n00:14:12\nBut they also have a lot of potential risks of doing harm\n\n00:14:19\nI myself have been more involved doing things in the legal NLP,\n\n00:14:27\nwith Dan Ho in building foundation models for law.\n\n00:14:35\nin which this kind of technology could be really useful.\n\n00:14:44\nit's bad in the United States, but it's way worse in a place\n\n00:14:48\nis that most people can't get access to the kind of legal help\n\n00:14:55\nof the cost of it and the lack of trained lawyers.\n\n00:15:02\npeople via NLP tools, in principle, that would be great.\n\n00:15:13\nunderstanding.\n\n00:15:18\nout at the moment looking at legal NLP systems.\n\n00:15:25\nrate, the rate in which there was made up\n\n00:15:31\nfor one question in six, which isn't a very good accuracy\n\n00:15:36\nto rely on these systems for legal advice.\n\n00:15:43\ndealing with the social and cultural aspects of NLP.\n\n00:15:52\nand religions.\n\n00:16:01\nfrom somewhere, but those social norms\n\n00:16:06\nAnd related to there being small languages\n\n00:16:12\nare lots of issues with underrepresented groups",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs224n-2024-lecture18::seg2",
+      "global_kp_id": "kp_generalization_versus_memorization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture18::seg2",
+      "global_kp_id": "kp_mechanistic_interpretability",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture18::seg2",
+      "global_kp_id": "kp_multilingual_and_low_resource_nlp_gaps",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture18::seg2",
+      "global_kp_id": "kp_benchmark_contamination",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture18::seg2",
+      "global_kp_id": "kp_domain_specific_and_socially_situated_nlp",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_generalization_versus_memorization",
+      "name": "Generalization versus memorization",
+      "description": "The concern that LLM success may rely heavily on memorized exposure rather than flexible generalization from limited data.",
+      "track_tags": [
+        "evaluation",
+        "generalization",
+        "nlp"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because generalization versus memorization clarifies the concern that LLM success may rely heavily on memorized exposure rather than flexible generalization from limited data, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture18::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_mechanistic_interpretability",
+      "name": "Mechanistic interpretability",
+      "description": "Research that tries to explain what internal neural-network computations and components are doing.",
+      "track_tags": [
+        "deep_learning",
+        "interpretability",
+        "nlp"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because mechanistic interpretability clarifies research that tries to explain what internal neural-network computations and components are doing, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture18::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_multilingual_and_low_resource_nlp_gaps",
+      "name": "Multilingual and low-resource NLP gaps",
+      "description": "The mismatch between strong English-centric performance and much weaker support for many other languages, especially low-resource ones.",
+      "track_tags": [
+        "evaluation",
+        "fairness",
+        "multilingual_nlp"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "language_technologist",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because multilingual and low-resource NLP gaps clarifies the mismatch between strong English-centric performance and much weaker support for many other languages, especially low-resource ones, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture18::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_benchmark_contamination",
+      "name": "Benchmark contamination and overfitting",
+      "description": "Benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests. The problem that benchmark examples may leak into pretraining data, undermining claims of true generalization.",
+      "track_tags": [
+        "benchmark_validity",
+        "benchmarks",
+        "evaluation",
+        "llms",
+        "robustness"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models",
+        "machine_learning",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "benchmark_design",
+        "evaluation_engineer",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because benchmark contamination and overfitting clarifies benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests, sharpening later modeling, analysis, or evaluation choices though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture11-benchmarking::kp15",
+        "local::cs224n-2024-lecture18::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_domain_specific_and_socially_situated_nlp",
+      "name": "Domain-specific and socially situated NLP",
+      "description": "The idea that NLP behavior changes across legal, medical, and social contexts, where failures can cause real harm.",
+      "track_tags": [
+        "applied_nlp",
+        "domain_adaptation",
+        "ethics"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "policy_researcher"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because domain-specific and socially situated NLP clarifies the idea that NLP behavior changes across legal, medical, and social contexts, where failures can cause real harm, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture18::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.48,
+    0.78
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L18_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture18-nlp-linguistics_transcript.txt"
+  }
+}

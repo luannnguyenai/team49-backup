@@ -1,0 +1,187 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg5",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Video datasets, Sports-1M results, and C3D",
+    "description": "Discusses Sports-1M, empirical comparisons of simple and 3D models, dataset distribution issues, and the C3D architecture.",
+    "summary": "After covering architectures, the lecture asks what data can train video classifiers, using Sports-1M as a major early dataset for fine-grained sports classification with 487 categories [ts=1921s] [ts=1939s] [ts=1972s]. Results on Sports-1M show a surprising lesson: the single-frame baseline already performs strongly, early fusion can be slightly worse, late fusion is slightly better, and a 2014-style 3D CNN gives only a modest 2–3% boost in that setting [ts=1989s] [ts=2013s] [ts=2031s]. The segment also notes video datasets are harder to distribute than ImageNet because videos are huge; Sports-1M was shared as YouTube URLs, but many videos disappear or change, making the dataset unstable over time [ts=2083s] [ts=2108s] [ts=2124s]. C3D is introduced as an early popular 3D CNN, essentially a VGG-like architecture with 3 x 3 x 3 convolutions and 2 x 2 x 2 pooling, trained on Sports-1M and widely reused as a pretrained feature extractor [ts=2149s] [ts=2179s] [ts=2227s]. Its drawback is compute: converting 2D VGG-style computation to 3D raises cost to about 39.5 GFLOPs, roughly 2.9 times VGG-16, motivating later improvements such as residual connections and better architectures [ts=2296s] [ts=2334s] [ts=2376s].",
+    "key_points": [
+      {
+        "text": "Sports-1M is an early large video dataset with very fine-grained sports categories, including 487 sports classes.",
+        "timestamp_s": 1939,
+        "evidence_type": "example"
+      },
+      {
+        "text": "On Sports-1M, the single-frame baseline reaches strong top-five accuracy, early fusion is slightly worse, late fusion slightly better, and 3D CNNs add about 2–3%.",
+        "timestamp_s": 1994,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Video datasets distributed as YouTube URL lists can become unstable because videos are modified or deleted.",
+        "timestamp_s": 2108,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "C3D is VGG-like but replaces 2D image operations with 3D convolution and pooling, such as 3 x 3 x 3 conv and 2 x 2 x 2 pooling.",
+        "timestamp_s": 2149,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Pretrained C3D became popular as a feature extractor for researchers who could not afford to train large video models.",
+        "timestamp_s": 2227,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "C3D is computationally expensive: about 39.5 GFLOPs versus 13.6 GFLOPs for VGG-16 and 0.7 GFLOPs for AlexNet.",
+        "timestamp_s": 2296,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 1921,
+      "end_s": 2399
+    },
+    "difficulty": 3.3,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:32:01\nSo we have talked about this tools, 3D convolution networks or architectures.\n\n00:32:13\nto do video to train a video classifier? So one example dataset, challenge dataset that\n\n00:32:27\nSo for this dataset, you can see what tasks we can do. We can do very, very fine-grained\n\n00:32:37\nthe ground shoes. And yellow, it shows the top five predictions. And the green\n\n00:32:49\nYou can see that the action categories in the dataset is very,\n\n00:32:59\nultra marathon. Actually, I don't know the difference between them,\n\n00:33:09\nAnd here are some results if we train these different types of classifiers we have talked\n\n00:33:20\nsee here is that for this single frame model that I asked you to try, if you want to develop\n\n00:33:33\nYou can see that the single frame model, if you just treat it as an image classifier, it actually\n\n00:33:45\nit actually has a slightly worse performance. And for late fusion is slightly better. And if we use\n\n00:33:59\nSo the takeaway message here is that, definitely, you should try the single\n\n00:34:12\nI showed here is the 3D convolution neural network used in 2014. But over the past 10 years,\n\n00:34:23\nmuch better, as I'm going to talk about in the later slides.\n\n00:34:30\ntrain an image classifier. That's exactly what a single frame is doing. Basically,\n\n00:34:38\ntraining on a lot of frames on videos. It's not a single frame in each video.\n\n00:34:47\nvideos are very huge. When people sharing video datasets, we cannot just share them\n\n00:35:02\nthis dataset has maybe 1 million videos. It's not very doable to download all of them, to share it.\n\n00:35:14\nYouTube URLs. But one thing you can expect from this YouTube video URLs is that people\n\n00:35:24\nhave 1 million videos. But now, I guess, maybe half of the videos are already gone\n\n00:35:37\nSo like I mentioned, 3D convolution neural networks have been improving gradually since\n\n00:35:56\ncalled [? C3N ?] network. So basically, it's actually very simple. Basically,\n\n00:36:09\nBut now, we just convert things to three-dimension convolution neural network. And for example,\n\n00:36:25\nAnd except maybe for the first layer, it has some changes. So the overall architecture is\n\n00:36:36\nAnd so that's why it's called the VGG of 3D CNNs. And the model,\n\n00:36:50\nwas introduced like in 2014. And at that time, imagine that you want to train such a model.\n\n00:37:07\nSo actually, this model was trained at Facebook. And they released this model, the pre-trained\n\n00:37:19\npre-trained model as a feature extractor. So many people actually who cannot afford\n\n00:37:28\nSo they can just take a video and extract features from this\n\n00:37:37\nother linear classifier. So people start to use it. That's why it got popular.\n\n00:37:48\nhow many frames we should take as input in terms to extract the features? So basically,\n\n00:37:56\na predefined length, like 16 frames or 32 frames to train a single model that always takes 16\n\n00:38:09\naggregate this clip level prediction. But for now, we're just doing clip level feature extraction.\n\n00:38:21\nwe just directly, in a brute force way, we just make this VGG style from 2D to\n\n00:38:35\nlike gigaflops. It's trying to measure how many floating point operations you need for\n\n00:38:45\nSo for AlexNet, it takes 0.7 GFLOPS. For VGG-16, it takes like 13.6 GFLOPS. But for C3D,\n\n00:39:01\nit's 2.9 times VGG, so it's not very efficient. So that's the downside of this kind of network.\n\n00:39:17\ngets about 4% gain in terms of top five accuracy. So this is just one example\n\n00:39:31\nright. We are talking about a lot of tricks that we can do for 2D image classification.\n\n00:39:41\nwe can also do that just to improve, say, 3D to adding some residual connections or other\n\n00:39:50\ntrying to improve this, different types of video architectures, and also papers on that.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg5",
+      "global_kp_id": "kp_sports_1m_and_video_dataset_instability",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg5",
+      "global_kp_id": "kp_c3d",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_10::seg5",
+      "global_kp_id": "kp_single_frame_cnn_baseline",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_sports_1m_and_video_dataset_instability",
+      "name": "Sports-1M and video dataset instability",
+      "description": "Sports-1M is a fine-grained sports video dataset originally distributed as YouTube URLs, making it vulnerable to deleted or modified videos.",
+      "track_tags": [
+        "datasets",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "dataset_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sports-1M and video dataset instability clarifies sports-1M is a fine-grained sports video dataset originally distributed as YouTube URLs, making it vulnerable to deleted or modified videos, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_c3d",
+      "name": "C3D",
+      "description": "C3D is an early VGG-like 3D CNN trained on Sports-1M and widely used as a pretrained feature extractor, but it is compute-heavy.",
+      "track_tags": [
+        "3d_cnn",
+        "architectures"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because c3D clarifies c3D is an early VGG-like 3D CNN trained on Sports-1M and widely used as a pretrained feature extractor, but it is compute-heavy, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_single_frame_cnn_baseline",
+      "name": "Single-frame CNN baseline",
+      "description": "A simple video classifier can sample frames, run a 2D CNN independently, and average probabilities.",
+      "track_tags": [
+        "baselines",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because single-frame CNN baseline clarifies a simple video classifier can sample frames, run a 2D CNN independently, and average probabilities, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp3"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.15,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

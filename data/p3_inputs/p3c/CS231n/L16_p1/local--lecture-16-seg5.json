@@ -1,0 +1,152 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_16",
+    "lecture_title": "Lecture 16: Vision and Language — Multi-Modal Foundation Models",
+    "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_16::seg5",
+    "course_id": "CS231N",
+    "name": "Advantages and limitations of CLIP-style models",
+    "description": "Surveys what makes CLIP useful in practice and where CLIP-style contrastive training still fails.",
+    "summary": "The lecturer identifies three major advantages of CLIP-style models: the dot-product similarity computation is simple and efficient, embedded datasets enable fast retrieval, and the model is open-vocabulary because users can provide arbitrary text descriptions [ts=1215s] [ts=1227s] [ts=1247s]. CLIP is also easy to chain with other systems, a theme returned to later in the lecture [ts=1261s]. The limitations begin with compositional failures such as confusing “a mug in grass” with “grass in a mug,” showing that CLIP may not represent relationships between concepts reliably [ts=1273s] [ts=1388s]. The lecturer explains that contrastive learning depends heavily on batch size: larger batches are more likely to contain hard negatives that force fine-grained discrimination, but even very large batches do not guarantee robust representations [ts=1293s] [ts=1327s] [ts=1357s]. Handcrafting hard negatives can backfire by hurting semantic generalization [ts=1426s] [ts=1452s]. Finally, image-level captions lack grounding: they do not tell the model where the person, car, or street is, and even billions of images may not cover all important visual concepts [ts=1497s] [ts=1521s].",
+    "key_points": [
+      {
+        "text": "CLIP-style dot-product similarity is efficient for both training and inference.",
+        "timestamp_s": 1215,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Embedding a dataset once enables fast retrieval over CLIP representations.",
+        "timestamp_s": 1227,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Open-vocabulary use lets users query with arbitrary text descriptions.",
+        "timestamp_s": 1247,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CLIP can fail at compositional distinctions such as “mug in grass” versus “grass in a mug.”",
+        "timestamp_s": 1273,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Large batch sizes help because they increase the chance of hard negative examples.",
+        "timestamp_s": 1327,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Image-level captions omit grounding information such as object locations and relationships.",
+        "timestamp_s": 1497,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+      "start_s": 1215,
+      "end_s": 1559
+    },
+    "difficulty": 4.3,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 6,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "transcript_slice": "00:20:15\nSo let's talk about some advantages of CLIP.\n\n00:20:20\nIt's super easy to train because it's just simple contrastive\n\n00:20:25\nIt's also really fast in terms of inference.\n\n00:20:32\nand then all you have to do to classify\n\n00:20:38\nSo you can retrieve things very easily\n\n00:20:41\nmakes it really useful for not just classification\n\n00:20:47\nAnother thing that people really liked about CLIP\n\n00:20:51\nYou can feed in any text description,\n\n00:20:54\nthe right images for you.\n\n00:20:58\nacross many different domains.\n\n00:21:03\nCLIP is really amenable to being chained with other models.\n\n00:21:10\nBut hold off on that.\n\n00:21:13\nOf course, I'm telling you all the good things.\n\n00:21:18\nCLIP unfortunately can distinguish\n\n00:21:22\nSo you have an image of a mug in grass\n\n00:21:27\nand CLIP just does not know the difference between these two\n\n00:21:33\nThe reason it doesn't know is because the CLIP's learning\n\n00:21:40\nIf your batch size is not large enough,\n\n00:21:45\nare unlikely to provide any useful supervision\n\n00:21:49\nIf you're always comparing a cat versus a truck,\n\n00:21:56\nInstead, what you get is some representation that's\n\n00:22:02\nyou're more likely to encounter other animals that\n\n00:22:05\nlearn a much better representation.\n\n00:22:09\nto let's say 32,000 and you train it across many, many GPUs,\n\n00:22:17\nYou can actually start identifying a Welsh\n\n00:22:21\nAnd this only is possible when you have gigantic batch sizes,\n\n00:22:27\nin your batch that are close enough, that are\n\n00:22:33\nSo that's very important for getting\n\n00:22:37\nBut unfortunately, regardless of how much\n\n00:22:41\ndoesn't guarantee that the model will learn a good representation\n\n00:22:46\nAnd so you're at the mercy of the randomness of your training\n\n00:22:51\nSo increasing the batch size does\n\n00:22:54\nBut of course, it's still limited.\n\n00:23:01\nfor most labs to even consider doing.\n\n00:23:08\nacross many different benchmarks and identify\n\n00:23:14\nSo this idea that the mug and the grass\n\n00:23:18\nIt's really about composing different concepts,\n\n00:23:24\nin all of those individual components\n\n00:23:31\nAnd there's been a ton of different benchmarks\n\n00:23:36\nAnd a lot of these benchmarks have actually come from my lab.\n\n00:23:42\nhas a ton of limitations, and there's a ton of things\n\n00:23:46\nNow, of course, in reaction, the community immediately\n\n00:23:53\ncontains the hard negatives, so if I have one type of corgi\n\n00:24:00\nSo your model really is forced to learn good representations.\n\n00:24:06\nbecame really popular in the community for a whole one\n\n00:24:12\nsaid that if you train with hard negatives,\n\n00:24:18\nFor whatever reason, and this is something\n\n00:24:22\nwe end up actually with much worse performance\n\n00:24:28\nand different kind of data sets.\n\n00:24:32\nin terms of figuring out the right way of constructing\n\n00:24:38\nand training signal.\n\n00:24:41\nBut regardless, people are still very excited about CLIP\n\n00:24:48\nregardless.\n\n00:24:54\nIdeally, what we want is more than just that.\n\n00:24:59\na person crossing the street, but that the person is\n\n00:25:04\nAll of that information, that grounding information\n\n00:25:08\nAnd so ideally, you'd want also your data\n\n00:25:14\nand your model to also be able to reason\n\n00:25:18\nAlso, the final thing that's a big disadvantage for CLIP\n\n00:25:24\neven if you collect upwards of, let's say, 5 billion images,\n\n00:25:29\nall of the important things that you might care about.\n\n00:25:34\nthat we've been doing in data filtering.\n\n00:25:38\nto find the best training data for training these CLIP models?\n\n00:25:43\nare all of these mechanisms that people are exploring that's now\n\n00:25:49\nlike in this field.\n\n00:25:54\nwe talked about.\n\n00:25:57\nto a whole host of tasks.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_16::seg5",
+      "global_kp_id": "kp_clip_retrieval_open_vocabulary_use_and_chainability",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg5",
+      "global_kp_id": "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_clip_retrieval_open_vocabulary_use_and_chainability",
+      "name": "CLIP retrieval, open-vocabulary use, and chainability",
+      "description": "CLIP is useful because its dot-product similarity enables fast retrieval, arbitrary text queries, and composition with other models.",
+      "track_tags": [
+        "retrieval",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "open_vocabulary"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cLIP retrieval, open-vocabulary use, and chainability clarifies cLIP is useful because its dot-product similarity enables fast retrieval, arbitrary text queries, and composition with other models, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+      "name": "CLIP limitations: batch size, compositionality, grounding, and coverage",
+      "description": "CLIP struggles with relational compositionality, depends on large/hard-negative batches, lacks localization grounding, and cannot cover all concepts through web data alone.",
+      "track_tags": [
+        "model_limitations",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "compositionality",
+        "grounding"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.94,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cLIP limitations: batch size, compositionality, grounding, and coverage clarifies cLIP struggles with relational compositionality, depends on large/hard-negative batches, lacks localization grounding, and cannot cover all concepts through web data alone, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp13"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.15,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L16_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture16-vision-and-language_transcript.txt"
+  }
+}

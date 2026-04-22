@@ -1,0 +1,161 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_4_neural_networks_and_backpropagation",
+    "lecture_title": "Stanford CS231N | Spring 2025 | Lecture 4: Neural Networks and Backpropagation",
+    "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg2",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "From linear classifiers to fully connected neural networks",
+    "description": "Introduces multi-layer fully connected networks, their dimensions, and the role of hidden layers in representing more complex decision boundaries.",
+    "summary": "The lecture transitions from the linear score function f = Wx to a two-layer network f = W2 max(0, W1x), emphasizing the meanings of D (input dimension), C (number of outputs/classes), and H (hidden units), while noting that biases are omitted only for simplicity [ts=613s] [ts=662s] [ts=754s]. It explains that the max operation introduces a nonlinearity between linear maps, which is essential because some problems are not linearly separable in the original space; the instructor uses a polar-coordinate feature transform as an example of moving data to a space where a linear separator works [ts=720s] [ts=786s] [ts=827s]. The section also names these models as fully connected networks or multi-layer perceptrons and argues that adding hidden units lets the model learn many intermediate templates or parts that can be shared across classes rather than only class-level templates [ts=870s] [ts=965s] [ts=1000s].",
+    "key_points": [
+      {
+        "text": "A 2-layer neural network can be written as f = W2 max(0, W1x), with H denoting the number of hidden neurons.",
+        "timestamp_s": 662,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The max operation creates the nonlinearity between linear transformations and is a crucial part of the model.",
+        "timestamp_s": 720,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Nonlinear feature transforms can make data linearly separable in a new space, as in the polar-coordinate example.",
+        "timestamp_s": 827,
+        "evidence_type": "example"
+      },
+      {
+        "text": "These models are more precisely called fully connected networks or multi-layer perceptrons (MLPs).",
+        "timestamp_s": 870,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Hidden units let the network learn reusable part-like templates shared across classes, not just one template per class.",
+        "timestamp_s": 978,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=25zD5qJHYsk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=4",
+      "start_s": 601,
+      "end_s": 1082
+    },
+    "difficulty": 0.52,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "transcript_slice": "00:10:06\nand solve more exciting and harder problems.\n\n00:10:21\nof W multiplied by x.\n\n00:10:30\nthat could be defined as just one layer.\n\n00:10:36\nAnd what I want you to pay attention to here\n\n00:10:46\nare the dimensionality of the input data,\n\n00:10:54\nAnd C is the number of classes, basically, the number\n\n00:11:02\nwe need.\n\n00:11:12\nwe can define a new set of weights referred to as W2 here.\n\n00:11:24\nof W1 multiplied by x.\n\n00:11:31\nhere that we have the C number of outputs and D\n\n00:11:37\nBut then you also define H, and that\n\n00:11:49\nnodes, or neurons.\n\n00:11:53\nThe second point is this max function\n\n00:12:00\nAnd we'll explain what it is and what it means.\n\n00:12:07\nis to create a non-linearity between\n\n00:12:15\nAnd this is actually a very, very important part\n\n00:12:22\nI will talk a little bit about the non-linearity\n\n00:12:30\nIn practice, that's right that we are only including W and x,\n\n00:12:39\nWe also incorporate a bias just to have a complete framework.\n\n00:12:47\nbut we don't write it here for the sake of simplicity.\n\n00:12:56\nAnd it's actually very important because, as we talked\n\n00:13:06\nwe said, we mentioned that there are so many different problems\n\n00:13:15\none single line.\n\n00:13:20\nto be able to solve this problem with neural networks,\n\n00:13:27\ntransformation from the original space to a new space.\n\n00:13:35\nusing a line.\n\n00:13:44\nbetween the input and then the second space,\n\n00:13:52\nand theta.\n\n00:13:57\nThere are so many other examples, too.\n\n00:14:07\nlet's go back to our definition of the two layer neural network.\n\n00:14:17\nand outside this class, these types\n\n00:14:26\nand so on, there are no other operations than multiplication,\n\n00:14:33\nor multi-layer perceptrons, MLPs.\n\n00:14:40\nAnd we can actually stack more and more layers\n\n00:14:49\nAnd in this case, again, pay attention\n\n00:14:54\nthat we have in the middle and the dimensionalities that\n\n00:15:04\nSo back to this visual representation of what\n\n00:15:16\nWe talked about this when we had the linear representations,\n\n00:15:28\nis learning some sort of templates.\n\n00:15:34\ntalking about these templates that are being learned.\n\n00:15:40\nI mean, they are some representatives of the images\n\n00:15:49\nSo these templates in what we discussed last week\n\n00:15:59\nby applying the W's on top of the input neurons.\n\n00:16:11\nnow we can actually create some more templates.\n\n00:16:18\ncreate 100 templates, as opposed to just 10\n\n00:16:24\nAlthough we still have those 10 as well.\n\n00:16:31\nunderstanding point of view, I'm telling you what this means.\n\n00:16:38\nwe are giving the network the power\n\n00:16:44\nbut maybe parts of the object.\n\n00:16:49\nwe had bird, cat, deer, dog, frog, horse, they all have eyes.\n\n00:16:59\ncould probably be a part of the object that could be shared\n\n00:17:05\nSo from a high level point of view and understanding\n\n00:17:12\nAnd when we come back to the topics of visualization\n\n00:17:19\nwe'll uncover more details about what\n\n00:17:24\nSo back to the function max.\n\n00:17:32\nthat is created here.\n\n00:17:37\nwe call that an activation function.\n\n00:17:45\na pivotal role, in building the model,\n\n00:17:51\nLet's answer this question that we have on the slide.\n\n00:17:59\nof these activation functions, let's say, the max function?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg2",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg2",
+      "global_kp_id": "kp_activation_functions",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "name": "Feed-forward neural networks / MLPs",
+      "description": "Stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons. A neural layer concatenates embeddings, applies an affine transformation plus nonlinearity, and maps hidden features to output scores.",
+      "track_tags": [
+        "architectures",
+        "deep_learning",
+        "neural_networks"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because feed-forward neural networks / MLPs formalizes how stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02::kp21",
+        "local::lecture_4_neural_networks_and_backpropagation::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_activation_functions",
+      "name": "Activation functions and nonlinearities",
+      "description": "Differentiable nonlinear activation functions such as sigmoid, tanh, ReLU, and ReLU-like variants are needed so networks can model nonlinear functions and support gradient-based learning. The idea that activations between linear maps prevent the network from collapsing into a single linear transformation and allow nonlinear decision boundaries.",
+      "track_tags": [
+        "deep_learning",
+        "neural_networks",
+        "optimization",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "activation_functions",
+        "deep_learning",
+        "machine_learning",
+        "neural_networks"
+      ],
+      "career_path_tags": [
+        "ai_practitioner",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because activation functions and nonlinearities formalizes how differentiable nonlinear activation functions such as sigmoid, tanh, ReLU, and ReLU-like variants are needed so networks can model nonlinear functions and support gradient-based learning, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture03-backprop::kp2",
+        "local::lecture_4_neural_networks_and_backpropagation::kp3",
+        "local::lecture_4_neural_networks_and_backpropagation::kp4",
+        "local::lecture_6::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.37,
+    0.67
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L4_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture04-neural-networks-and-backpropagation_transcript.txt"
+  }
+}

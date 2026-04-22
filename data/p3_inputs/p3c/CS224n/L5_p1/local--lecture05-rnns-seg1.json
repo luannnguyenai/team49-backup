@@ -1,0 +1,115 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture05-rnns",
+    "lecture_title": "Stanford CS224N: NLP with Deep Learning | Spring 2024 | Lecture 5 - Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4"
+  },
+  "unit": {
+    "unit_id": "local::lecture05-rnns::seg1",
+    "course_id": "cs224n-2024",
+    "name": "Roadmap, scale, and the deep learning resurgence",
+    "description": "Sets up the lecture and motivates why sequence models matter by connecting modern language model scale to the historical difficulty of training deep neural networks.",
+    "summary": "The instructor frames the lecture as a short review of extra neural-net concepts before moving into language models and then recurrent neural networks, with transformers deferred to later lectures [ts=9s] [ts=56s]. He motivates the topic by noting that modern language models are enormous deep systems, then reviews how backprop enabled hidden-layer neural nets in the 1980s and 1990s but deeper networks were long believed too hard to train until late-2000s and 2010s ideas reversed that stagnation [ts=177s] [ts=354s] [ts=422s].",
+    "key_points": [
+      {
+        "text": "The lecture roadmap is: extra neural-net concepts, then language models, then recurrent neural networks, with transformers later.",
+        "timestamp_s": 9,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Modern language models are described as huge deep models with over 100 billion parameters.",
+        "timestamp_s": 177,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Historically, deep multilayer networks were widely seen as too difficult to train and often worse than one- or two-hidden-layer nets.",
+        "timestamp_s": 317,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A small set of seemingly modest ideas and tweaks helped restart progress in deep learning after years of stagnation.",
+        "timestamp_s": 458,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+      "start_s": 5,
+      "end_s": 476
+    },
+    "difficulty": 0.34,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "transcript_slice": "00:00:05\nOK, let me get started for today.\n\n00:00:13\nto spend a few minutes talking about a couple\n\n00:00:19\nactually a couple of the concepts that\n\n00:00:25\nThen the bulk of today is then going\n\n00:00:34\nAnd then after introducing language models,\n\n00:00:42\nis one way to build language models, which\n\n00:00:47\nThey're important thing to know about,\n\n00:00:52\nbut they're certainly not the only way\n\n00:00:56\nIn fact, probably a lot of you already\n\n00:01:00\ntransformers, and we'll get on to those\n\n00:01:06\nTalk a bit about problems with recurrent neural networks\n\n00:01:13\nBefore getting into the content of the class,\n\n00:01:18\nthe stats of who is in CS224N.\n\n00:01:26\ncharts they show in CS106A these days, except more grad students,\n\n00:01:33\nSo the four big groups are the computer science undergrads,\n\n00:01:42\nand the NDO grads.\n\n00:01:47\nSome of them are in the computer science grads.\n\n00:01:55\nAnd if you're not in one of those four big groups,\n\n00:02:01\nSo there are lots of other interesting groups down here.\n\n00:02:07\nwhere the math and physics PhDs are, Up here, I\n\n00:02:16\ngrad students than there are census undergrads.\n\n00:02:23\nAnd one of my favorite groups, the little magenta group\n\n00:02:33\nYeah, humanities undergrads.\n\n00:02:40\nFirst year grad students are the biggest group.\n\n00:02:47\nAny brave frosh here today?\n\n00:02:53\nOK.\n\n00:02:56\nYeah.\n\n00:03:03\nare enormous.\n\n00:03:11\nbut it's sort of actually hard to make an accurate\n\n00:03:18\nthe biggest language model makers\n\n00:03:23\nare in terms of parameters.\n\n00:03:28\nwhich have over 100 billion parameters.\n\n00:03:39\nneural nets are a cornerstone of modern NLP systems.\n\n00:03:48\nto look at those kind of deep models.\n\n00:03:55\nI did just want to key you in for a few minutes\n\n00:04:03\nSo the last time neural nets were popular was in the 80s\n\n00:04:12\nthe backpropagation algorithm.\n\n00:04:17\nalgorithm that we've looked at.\n\n00:04:25\nAnd so, but in those days, pretty much all the neural\n\n00:04:31\nwere trained with one hidden layer.\n\n00:04:37\nand that's all that there was.\n\n00:04:45\npeople couldn't really get things to work\n\n00:04:51\nSo that only started to change in the resurgence of what's\n\n00:05:00\nstarted around 2006.\n\n00:05:07\nGreedy Layer-Wise Training of Deep Neural Networks\n\n00:05:12\nAnd so right at the beginning of that paper,\n\n00:05:17\n\"However, until recently, it was believed\n\n00:05:23\nEmpirically, deep networks were generally found to be not\n\n00:05:31\nhidden layers.\"\n\n00:05:35\nwho worked very early on autonomous\n\n00:05:39\n\"As this is a negative result, it has not been much reported\n\n00:05:46\nSo although people had neural networks and back propagation\n\n00:05:54\ntoday--\n\n00:06:00\n15 years or so, things seemed completely stuck,\n\n00:06:07\nit seemed like deep neural networks should be promising.\n\n00:06:13\nAnd so it really then took some new developments\n\n00:06:21\nin the 2010's decade to actually figure out\n\n00:06:30\nworking far better than the shallow neural networks\n\n00:06:37\nAnd, we're going to be starting to talk about some\n\n00:06:47\nAnd I mean, I think the tendency when\n\n00:06:54\nbetter, the natural reaction is to shrug and be underwhelmed\n\n00:07:06\nThis doesn't exactly seem like difficult science.\n\n00:07:13\nThey're fairly little introductions\n\n00:07:19\nBut nevertheless, a handful of little ideas and tweaks\n\n00:07:28\nthat was stuck for 15 years going nowhere\n\n00:07:35\nto suddenly turning around and there being the ability\n\n00:07:43\namazingly better as machine learning systems\n\n00:07:49\nand dominated for the intervening time.\n\n00:07:55\nSo what are these things?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture05-rnns::seg1",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.19,
+    0.49
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L5_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture05-rnns_transcript.txt"
+  }
+}

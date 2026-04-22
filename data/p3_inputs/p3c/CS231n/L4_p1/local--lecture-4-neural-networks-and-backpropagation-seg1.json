@@ -1,0 +1,122 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_4_neural_networks_and_backpropagation",
+    "lecture_title": "Stanford CS231N | Spring 2025 | Lecture 4: Neural Networks and Backpropagation",
+    "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg1",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Recap: loss functions, gradients, and optimization",
+    "description": "Refreshes the supervised learning setup from earlier lectures so the neural-network material has a clear optimization context.",
+    "summary": "The lecture begins by recapping the standard supervised-learning pipeline: paired data (x, y), a linear score function, loss functions, and regularization [ts=87s] [ts=122s]. It clarifies that softmax is common but not the only classification loss, and contrasts it with hinge/SVM loss, which enforces a margin between the correct score and competing scores rather than turning scores into probabilities [ts=175s] [ts=241s]. The recap then revisits the loss landscape view of optimization, gradient descent as taking steps in the negative gradient direction, the practical preference for analytic gradients with numerical gradients used for checking, and minibatch SGD for large datasets [ts=363s] [ts=418s] [ts=482s]. It closes by reminding students of momentum, RMSProp, Adam, and learning-rate scheduling, including the point that Adam-like optimizers often encode some adaptation internally [ts=523s] [ts=546s] [ts=578s].",
+    "key_points": [
+      {
+        "text": "Softmax is widely used for classification, but hinge/SVM loss is another valid loss and enforces a margin between the correct class score and other scores.",
+        "timestamp_s": 175,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Hinge loss penalizes cases where the correct score is not larger than incorrect scores by at least a margin.",
+        "timestamp_s": 241,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Gradient descent updates parameters by stepping in the negative direction of the gradient on the loss landscape.",
+        "timestamp_s": 372,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In practice, derive analytic gradients and use numerical gradients mainly to check implementations.",
+        "timestamp_s": 424,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Mini batches approximate the full-dataset gradient when computing loss and updates would be too expensive on all N examples.",
+        "timestamp_s": 482,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Learning-rate decay often matters for optimization, though Adam and related methods reduce the need for manual schedules.",
+        "timestamp_s": 578,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=25zD5qJHYsk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=4",
+      "start_s": 0,
+      "end_s": 600
+    },
+    "difficulty": 0.34,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "transcript_slice": "00:00:05\nAs you can see on this slide, today, we\n\n00:00:14\nWhich is actually the process--\n\n00:00:19\nI was often referring to it as the magical process that\n\n00:00:30\npretty much like humans but in a more organized fashion,\n\n00:00:39\nSo let's dive into the topic.\n\n00:00:46\nAnd this is laying the foundation\n\n00:00:51\nEvery single algorithm that we will be discussing in the future\n\n00:00:59\nAnd so that's why understanding this lecture and the topics\n\n00:01:08\nOK, in keeping us with the tradition,\n\n00:01:19\nSo I'm sure you now remember what we talked about last time.\n\n00:01:34\nfunctions, what we call here.\n\n00:01:40\nBut to do that, we formulated everything\n\n00:01:53\nWhich, in this case, we are using a linear scoring function,\n\n00:02:02\nultimately, this loss function.\n\n00:02:07\nis what we drew, showing all the process, the entire process\n\n00:02:16\nThere has been some questions.\n\n00:02:26\nthat why we are only using the softmax function.\n\n00:02:34\nthat we have and we use.\n\n00:02:42\nespecially for the task of classification.\n\n00:02:47\nthat we use for other tasks, for different tasks.\n\n00:02:53\nif you've looked at the slides that we've\n\n00:02:59\nor used to be called SVM loss in the reading\n\n00:03:07\nSo in the slides, we had examples and everything\n\n00:03:16\nIt is also one of those widely used loss\n\n00:03:26\nAnd just to give you a high level understanding of what\n\n00:03:38\nturn the scores into probabilities.\n\n00:03:42\nis not the only option.\n\n00:03:48\nThis function encourages the score of--\n\n00:03:54\nthe score of the correct items, which\n\n00:04:06\nof all other items Sj.\n\n00:04:16\nif the condition is true.\n\n00:04:22\nso as I said, it encourages the score of the correct item\n\n00:04:32\nby at least a margin.\n\n00:04:35\nis the margin that it creates.\n\n00:04:41\nthe loss increases proportionally from the margin.\n\n00:04:48\ncreating this visualization of the function.\n\n00:05:02\nwhere irrelevant items are scored too highly.\n\n00:05:10\nfor examples and to get better understanding of that.\n\n00:05:20\nhow to find the best parameters, W, for the neural network.\n\n00:05:32\nabout this loss landscape being as a large valley as shown\n\n00:05:42\nAnd every point on that valley is a different set\n\n00:05:48\nAnd we wanted to find the set of parameters, W, that\n\n00:05:56\nWe talked about the fact that the key\n\n00:06:03\nfunction, L, with respect to W and use\n\n00:06:12\nWhich gave us the gradient descent algorithm.\n\n00:06:22\nAlthough it's very hard for me to see from this distance,\n\n00:06:32\nSo anyways, in order to walk down\n\n00:06:42\na step size is defined and we often\n\n00:06:54\nin the negative direction of the gradient.\n\n00:07:01\nAnd in order to optimize, we talked\n\n00:07:09\nand analytical gradient, both of which having pros and cons.\n\n00:07:21\nin practice, we derive analytical gradients.\n\n00:07:28\nand everything, we check our implementations\n\n00:07:37\nAnd one of the other challenges we talked about\n\n00:07:46\non the entire data set.\n\n00:07:51\nto run the loss function and the derivative on the entire data\n\n00:07:58\nAnd that's why we talked about the idea of mini batches,\n\n00:08:12\noften maybe 32, 64, or 128, or 256.\n\n00:08:27\nand then taking the steps towards the minimum.\n\n00:08:39\nwe talked about some optimizations of SGD\n\n00:08:51\nAnd there were a lot of details that I would refer you\n\n00:08:59\nif you have any specific questions about this.\n\n00:09:09\ntalked about was the importance of the learning rate\n\n00:09:14\nAnd in some of the optimizers, we\n\n00:09:21\nand then start using different types of decaying the learning\n\n00:09:33\nAnd this is normally needed in many optimizers.\n\n00:09:43\nwe often do not need to manually, or explicitly decrease\n\n00:09:53\nSo with that, I want us to get to the topic of neural networks",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg1",
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "name": "Optimization objectives and loss landscapes",
+      "description": "The prior-lecture setup of score functions, losses, regularization, gradients, and optimization algorithms that neural-network training builds on. Using classification losses to score parameter settings and optimization algorithms such as SGD or Adam to search for low-loss solutions.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_basics",
+        "foundations",
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "loss_functions",
+        "loss_landscape",
+        "machine_learning",
+        "parameter_space",
+        "training"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because optimization objectives and loss landscapes clarifies the prior-lecture setup of score functions, losses, regularization, gradients, and optimization algorithms that neural-network training builds on, sharpening later modeling, analysis, or evaluation choices though roles split between gateway and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp7",
+        "local::lecture_4_neural_networks_and_backpropagation::kp1",
+        "local::lecture_5_image_classification_with_cnns::kp2"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.19,
+    0.49
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L4_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture04-neural-networks-and-backpropagation_transcript.txt"
+  }
+}

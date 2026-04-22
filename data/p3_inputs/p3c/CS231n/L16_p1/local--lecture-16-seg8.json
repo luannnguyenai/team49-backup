@@ -1,0 +1,274 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_16",
+    "lecture_title": "Lecture 16: Vision and Language — Multi-Modal Foundation Models",
+    "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_16::seg8",
+    "course_id": "CS231N",
+    "name": "Molmo, open multimodal models, and grounded visual reasoning",
+    "description": "Discusses the gap between closed and open multimodal language models and presents Molmo as an open, grounded vision-language model.",
+    "summary": "The lecturer describes a large performance gap between early open models such as LLaVA and closed API models such as GPT-4V/GPT-4o, Gemini, and Claude on popular visual understanding benchmarks [ts=2495s] [ts=2527s]. Many open models were distilled from GPT or Gemini, creating a reproducibility problem: the community could produce strong models only if closed models already existed, but did not know how to reproduce them from first principles [ts=2557s] [ts=2582s]. Molmo is introduced as a response: an open-weights, open-data, open-code multimodal language model intended to make the recipe reproducible [ts=2643s]. The lecturer reports user-study evidence comparing model outputs, including hundreds of users and hundreds of thousands of pairwise comparisons, where Molmo performed competitively with major closed models [ts=2700s] [ts=2724s]. The core trick is grounding decisions in pixels: for counting boats, the model points to each boat before outputting the count, reducing hallucination by requiring visual evidence [ts=2850s] [ts=2861s]. The data recipe matters more than architecture: Molmo uses a LLaVA-like CLIP-plus-linear-connector-plus-LLM architecture, but with carefully curated dense descriptions and spoken annotations designed to capture spatial, material, size, and positional information that people rarely write on the internet [ts=2882s] [ts=2934s] [ts=3025s] [ts=3046s]. The segment also shows grounded uses such as pointing to menus, bus numbers, counting objects, chaining Molmo points into SAM 2 masks, and robotics workflows where pointing guides a robot to objects and target locations [ts=3071s] [ts=3136s] [ts=3168s].",
+    "key_points": [
+      {
+        "text": "Closed API models substantially outperformed early open multimodal models on visual understanding benchmarks.",
+        "timestamp_s": 2495,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Distilling from GPT or Gemini creates an open-source reproducibility problem because the recipe still depends on closed models.",
+        "timestamp_s": 2582,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Molmo is presented as open weights, open data, and open code.",
+        "timestamp_s": 2643,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Grounded decision-making has the model point to visual evidence before producing an answer.",
+        "timestamp_s": 2850,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Dense curated descriptions can contain spatial, material, size, and positional information that incidental web captions omit.",
+        "timestamp_s": 2934,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Molmo can be chained with SAM 2 by using predicted points as segmentation prompts.",
+        "timestamp_s": 3136,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Pointing outputs can guide robotics workflows such as locating a water bottle, sink, and free space.",
+        "timestamp_s": 3168,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+      "start_s": 2491,
+      "end_s": 3247
+    },
+    "difficulty": 4.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 13,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "transcript_slice": "00:41:31\nSo this is where we were, I think, sometime last year\n\n00:41:38\nstarted investing quite heavily on these models.\n\n00:41:44\nlike GPT-40 GPT-4V, Gemini 1.5 Pro, Gemini 1.5 Flash.\n\n00:41:54\nand even Anthropic came into the picture with Claude 3 Opus.\n\n00:42:01\nAnd so you had a lot of these models come out,\n\n00:42:05\non a bunch of these benchmarks.\n\n00:42:10\nof the more popular visual understanding benchmarks\n\n00:42:14\nAnd there's this gigantic difference.\n\n00:42:19\nopen source, that's down here at about 43% accuracy on average.\n\n00:42:27\nmuch, much better at about somewhere like 80 or high 70s.\n\n00:42:34\nbetween these two different kinds of models.\n\n00:42:39\npeople started distilling GPT and Gemini\n\n00:42:48\nSo Alibaba, which is a company in China,\n\n00:42:52\nAnd then there's Intern VL, there's Phi.\n\n00:42:57\nAnd all of them were distilled from GPT.\n\n00:43:02\nNow that led to a big problem in the field,\n\n00:43:09\nagenda has been trying to focus on, which is we\n\n00:43:14\nhow to build really performant vision language models.\n\n00:43:20\nthey only the people in OpenAI and Gemini\n\n00:43:26\nBut the open source community, they're down here.\n\n00:43:29\nThis is where the research community was as of last year.\n\n00:43:36\nbut they're not really open.\n\n00:43:39\nknow how to reproduce these models.\n\n00:43:44\nBut if GPT exists.\n\n00:43:48\nto create these other models.\n\n00:43:51\nhas been focused on over the last couple of years,\n\n00:43:55\nhow do you build really good multi-modal language models\n\n00:44:01\nto the entire community.\n\n00:44:08\nnow, is we've created our own a class of models\n\n00:44:14\nAnd I'm showing you Molmo's performance up at the top.\n\n00:44:20\nthere is that it's completely open source,\n\n00:44:25\nSo you can download the model.\n\n00:44:29\nwell as the evaluation set.\n\n00:44:32\ntrain your own Molmo in your own home,\n\n00:44:37\nevaluate, add on new evaluations,\n\n00:44:42\nstart using it for a wide variety of different contexts.\n\n00:44:49\nBecause what we care about at the end of the day is\n\n00:44:53\nWill people want to use these models over GPT?\n\n00:45:00\nwe released a playground with Molmo,\n\n00:45:05\nwhere we actually compared head to head outputs\n\n00:45:10\nAnd our model has the same Elo rating as GPT.\n\n00:45:17\nrating versus GPT-40.\n\n00:45:22\ncan show you some examples.\n\n00:45:26\nThis is about 870 users that we showed these model outputs to.\n\n00:45:34\nwhere we asked people which models output do you prefer.\n\n00:45:39\nlike I said, second, more or less a coin\n\n00:45:42\nbetween GPT and our model.\n\n00:45:49\nNow, the big difference is we are a small research lab,\n\n00:45:56\nof investment into Gemini, as well\n\n00:46:00\nand already matching GPT.\n\n00:46:05\nBut we also developed a 7-billion model that comes\n\n00:46:10\nAnd that 7- billion model is really exciting\n\n00:46:15\nSo you can now have this model capable\n\n00:46:19\nthat works on a single GPU, meaning a lot of people\n\n00:46:25\nWe released this model in September 25\n\n00:46:30\nThis is the first time a very performant, multimodal vision\n\n00:46:36\nstarted talking and writing articles about all the ways they\n\n00:46:40\nOne of the use cases that kept popping up over and over\n\n00:46:46\nfor robotics applications.\n\n00:46:50\nbecause you're going to learn about it in the next class.\n\n00:46:55\nthat people were excited about with robotics.\n\n00:47:02\nstarted chatting about how this should never\n\n00:47:06\nof how much model development you do in private.\n\n00:47:11\nand we were catching up at that point.\n\n00:47:17\nin response, their LLaVA 3.2 model and a lot of people\n\n00:47:26\nAnd again, I'm very happy that we came up on top of LLaVA\n\n00:47:30\nSo let me show you why Molmo does so well.\n\n00:47:36\nThe trick was to ground its decision\n\n00:47:41\nSo usually, when you give a model a question like count\n\n00:47:47\nand oftentimes, it hallucinates.\n\n00:47:50\nis that it actually points to all the things\n\n00:47:53\nSo it generates points to all the boats\n\n00:47:58\nSo it's decision making is grounded in the pixels itself.\n\n00:48:05\nunlike LLaVA for Meta that was trained on about six billion\n\n00:48:12\ntext pairs.\n\n00:48:17\ntext pairs, and that was the biggest difference between what\n\n00:48:23\ncompanies were building were doing.\n\n00:48:30\ntext pairs from the internet.\n\n00:48:34\ntrain these vision language models.\n\n00:48:39\nwith their associated text.\n\n00:48:43\nThe text that's often associated with an image\n\n00:48:47\nthat the uploader felt about the image.\n\n00:48:52\nof the image itself.\n\n00:48:57\nSo for a single image, we have a dense description\n\n00:49:03\nAnd we have things that people never\n\n00:49:06\nThere's a ton of tasks and knowledge about the visual world\n\n00:49:11\nI will never tell you that something\n\n00:49:14\njust because it's unnatural for us to do that.\n\n00:49:18\nis to the left of something.\n\n00:49:21\nSo that's the kind of information\n\n00:49:24\nWe started talking about-- we started getting people\n\n00:49:29\nlike large or shaped like rectangular.\n\n00:49:34\nand its positioning across the image,\n\n00:49:40\nSo all of this information really\n\n00:49:44\nHere's another example from the data set.\n\n00:49:50\nAnd we have information here that again is completely missing\n\n00:49:56\nThings like this is a tablet device.\n\n00:50:02\nis this.\n\n00:50:04\nhelp people use these models.\n\n00:50:08\nwe never talk about on the internet.\n\n00:50:12\nwe designed a lot of different questions.\n\n00:50:17\nstudies to figure out what are the right things\n\n00:50:22\nand how do we elicit them as effectively as possible.\n\n00:50:27\nis we had all of our annotators not type descriptions,\n\n00:50:34\nbreaks a lot of stereotypes around [? Gricean ?] maxims.\n\n00:50:41\nwe got them to speak about things that they\n\n00:50:46\nThe model itself didn't look any different from LLaVA.\n\n00:50:51\nYou had a connector that was just a linear layer,\n\n00:50:56\nthat would take in all of these tokens and then output any thing\n\n00:51:00\nSo the model itself looked very similar to existing models.\n\n00:51:05\nand the quality and density of the data itself.\n\n00:51:11\nwhere the model grounds its decision\n\n00:51:14\nget Malmo to do things that you can't\n\n00:51:19\nthings like point to the menu.\n\n00:51:22\nor you can tell it to point to where I can set my search\n\n00:51:27\nis where you might want to set those options or point to where\n\n00:51:33\nwhat option you need to move.\n\n00:51:36\nI already showed you that you can point to count,\n\n00:51:41\nlike being able to ask, what is the route number on this bus?\n\n00:51:47\nit actually points to where in the image.\n\n00:51:51\nthat contains the bus number and then returns\n\n00:51:56\nYou can ask it to reason about how many cars\n\n00:52:00\nYou can ask it to reason over depth images or overhead images,\n\n00:52:08\nWhat's also really exciting, and again,\n\n00:52:11\nis this idea of chaining that keeps\n\n00:52:16\nThe idea of chaining Molmo to other models, what you can do\n\n00:52:22\nthe input of another model like SAM 2,\n\n00:52:28\nAnd now you take that point, you feed it to a model like SAM 2,\n\n00:52:33\ncan do segmentation of that cricket bat across time.\n\n00:52:39\nHere's one that we played around with in the office, which again,\n\n00:52:44\nin the next lecture with when you hear about robotics.\n\n00:52:52\nAnd then we moved the robot using simple motion planners\n\n00:52:56\nNext, we ask it to go move that water bottle\n\n00:53:01\nIt points to the dish--\n\n00:53:05\nAnd then we tell it to go point to where\n\n00:53:09\nthat bottle in that location.\n\n00:53:15\nand chain them to even automate a lot of robotics applications.\n\n00:53:21\nis adapting a lot of these visual language models\n\n00:53:26\nin the actual physical domain.\n\n00:53:31\nbe able to point if you were always\n\n00:53:38\nWell, it turns out that you can actually\n\n00:53:43\nThere are these mechanisms like [INAUDIBLE] that\n\n00:53:52\ninput and you can adapt them to point in that new space instead.\n\n00:53:59\nchange depending on how big your image size is\n\n00:54:07\nSo that was the conversation around adding vision",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_molmo_open_multimodal_language_model",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_grounded_decision_making_through_pointing",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_dense_curated_visual_descriptions",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_chaining_grounded_vlm_outputs_into_other_models",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "name": "Closed-model distillation and open reproducibility gap",
+      "description": "Many strong open VLMs were distilled from closed models, leaving the community without a fully reproducible training recipe.",
+      "track_tags": [
+        "multimodal_language_models",
+        "open_source_ai"
+      ],
+      "domain_tags": [
+        "distillation",
+        "reproducibility"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because closed-model distillation and open reproducibility gap clarifies many strong open VLMs were distilled from closed models, leaving the community without a fully reproducible training recipe, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp20"
+      ]
+    },
+    {
+      "global_kp_id": "kp_molmo_open_multimodal_language_model",
+      "name": "Molmo open multimodal language model",
+      "description": "Molmo is presented as an open-weights, open-data, open-code VLM that competitively matches closed models in user preference evaluations.",
+      "track_tags": [
+        "multimodal_language_models",
+        "open_source_ai"
+      ],
+      "domain_tags": [
+        "molmo",
+        "vlm"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because molmo open multimodal language model clarifies molmo is presented as an open-weights, open-data, open-code VLM that competitively matches closed models in user preference evaluations, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp21"
+      ]
+    },
+    {
+      "global_kp_id": "kp_grounded_decision_making_through_pointing",
+      "name": "Grounded decision-making through pointing",
+      "description": "A VLM can reduce hallucination and improve interpretability by producing visual points tied to the evidence used for an answer.",
+      "track_tags": [
+        "grounding",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "hallucination_mitigation",
+        "visual_grounding"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.94,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because grounded decision-making through pointing formalizes how a VLM can reduce hallucination and improve interpretability by producing visual points tied to the evidence used for an answer, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp22"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dense_curated_visual_descriptions",
+      "name": "Dense curated visual descriptions",
+      "description": "High-quality curated annotations capture spatial, positional, material, and size information that incidental internet captions omit.",
+      "track_tags": [
+        "data_centric_ai",
+        "multimodal_training"
+      ],
+      "domain_tags": [
+        "annotation",
+        "visual_descriptions"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dense curated visual descriptions clarifies high-quality curated annotations capture spatial, positional, material, and size information that incidental internet captions omit, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp23"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chaining_grounded_vlm_outputs_into_other_models",
+      "name": "Chaining grounded VLM outputs into other models",
+      "description": "Grounded outputs such as points can become prompts or control signals for models like SAM or robotics planners.",
+      "track_tags": [
+        "grounding",
+        "model_chaining"
+      ],
+      "domain_tags": [
+        "robotics",
+        "sam",
+        "vlm"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because chaining grounded VLM outputs into other models clarifies grounded outputs such as points can become prompts or control signals for models like SAM or robotics planners, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp24"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.65,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L16_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture16-vision-and-language_transcript.txt"
+  }
+}

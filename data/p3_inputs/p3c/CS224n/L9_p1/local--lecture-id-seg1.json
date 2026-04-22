@@ -1,0 +1,68 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Lecture 9 - Pretraining",
+    "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg1",
+    "course_id": "<course_id>",
+    "name": "Subword modeling and the vocabulary problem",
+    "description": "Explains why fixed word vocabularies fail on typos, morphological variants, and new words, and motivates subword tokenization as the practical alternative used in modern NLP.",
+    "summary": "The lecture opens by showing why a finite word vocabulary is brittle: models trained with whole-word embeddings cannot gracefully handle typos like \"laern,\" elongated spellings like \"taaaasty,\" or productive morphology like \"transformerify\" [ts=184s] [ts=198s]. The instructor argues that mapping all unseen words to a single UNK token throws away too much information, and the problem becomes worse in morphologically rich languages such as Swahili, where a single verb can have hundreds of conjugated forms [ts=254s] [ts=311s]. The solution is subword modeling: start from characters, iteratively merge common adjacent substrings, and tokenize each word into the fewest large known pieces possible [ts=395s] [ts=638s]. This preserves open-vocabulary coverage, lets common words remain intact, and gives useful representations for novel forms such as segmented versions of \"tasty\" or \"transformer\" + \"-ify\" [ts=444s] [ts=549s]. The segment also clarifies that punctuation is typically retained and that the model treats full words and subwords uniformly as vocabulary indices [ts=665s] [ts=736s].",
+    "key_points": [
+      {
+        "text": "Using a single UNK token for unseen words loses substantial lexical information.",
+        "timestamp_s": 254,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Morphologically rich languages make whole-word vocabularies especially inefficient because many related forms would get separate vectors.",
+        "timestamp_s": 311,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Subword vocabularies can be learned by starting from characters and repeatedly merging frequent adjacent substrings.",
+        "timestamp_s": 395,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "At tokenization time, words are split into the largest available subwords so sequence length stays relatively small.",
+        "timestamp_s": 638,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Modern NLP usually keeps punctuation and minimally preprocesses text so inputs stay close to real usage.",
+        "timestamp_s": 665,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=9",
+      "start_s": 126,
+      "end_s": 895
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 13,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "transcript_slice": "00:02:06\nOK.\n\n00:02:09\nis a bit of a technical detail on word structure and sort\n\n00:02:19\nSo when we were teaching word2vec and all the methods\n\n00:02:29\nright?\n\n00:02:32\nYou've looked at some data.\n\n00:02:36\nAnd so you have some words like hat and learn.\n\n00:02:44\nIt's in red because you've learned it properly.\n\n00:02:48\nwith \"pizza\" and \"tasty.\"\n\n00:02:51\nAnd so that's all well and good.\n\n00:02:56\nand you have an embedding that's been learned on your data\n\n00:03:04\nBut when you see some sort of variations,\n\n00:03:09\nlike \"laern,\" or maybe novel items\n\n00:03:15\ncan understand as this combination--\n\n00:03:21\n--of like this word, transformer, that\n\n00:03:28\na verb that means to make more like that noun,\n\n00:03:33\nto make NLP more like using transformers and such.\n\n00:03:40\nthis maybe didn't show up in your training corpus.\n\n00:03:45\nPeople are always coming up with new words,\n\n00:03:49\nyoung people are always making new words.\n\n00:03:52\nAnd so it's a problem for your model,\n\n00:03:57\nAnd there's no mapping in that vocabulary\n\n00:04:04\nshould be relatively well defined based\n\n00:04:07\nIt's just that the string of characters that define them\n\n00:04:13\nAnd so what do you do?\n\n00:04:18\nthis UNK, right?\n\n00:04:21\nI don't know what, I've never seen it before.\n\n00:04:24\nby the same token, UNK.\n\n00:04:28\nAnd that's sort of bad, right, because it's totally\n\n00:04:34\nBut you need to map it to something.\n\n00:04:43\nit's a problem.\n\n00:04:45\nit's a substantially larger problem, right?\n\n00:04:53\nThere's a couple of conjugations for each verb, like eat,\n\n00:05:00\nBut in a language with much more complex morphology or word\n\n00:05:10\nof things that you could see in the world.\n\n00:05:17\nand it has over 300 conjugations.\n\n00:05:23\nof characters maps to its own word,\n\n00:05:28\nwould get an independent vector under my model, which\n\n00:05:35\nhave a lot in common and differ by sort of meaningful extents.\n\n00:05:41\nI'd have to have a huge vocabulary if I wanted\n\n00:05:46\nAnd that's a mistake for efficiency reasons\n\n00:05:50\nAny questions so far?\n\n00:05:55\nOK.\n\n00:06:02\nwe'll look at subword structure, subword modeling.\n\n00:06:07\nI'm not going to even try to define\n\n00:06:12\nI'm going to define my vocabulary\n\n00:06:18\nWhere am I?\n\n00:06:26\nSo I'm going to split words into sequences of known subwords.\n\n00:06:32\nfor this where you start with all characters, right?\n\n00:06:38\nand maybe like an \"end-of-word\" symbol, for a finite data set,\n\n00:06:46\nas long as I had seen all possible characters,\n\n00:06:50\nI'm going to split it into all of its individual characters.\n\n00:06:55\nYou can sort of represent any word.\n\n00:07:00\nand say, OK, \"a\" and \"b\" co-occur\n\n00:07:03\nSo I'm going to add a new word to my vocabulary.\n\n00:07:10\nwhich is a subword.\n\n00:07:14\ngoing to replace the character pair with a new subword\n\n00:07:19\na lot of vocabulary items through this process\n\n00:07:24\nAnd so what you'll end up with is a vocabulary\n\n00:07:31\nby which you can build up words.\n\n00:07:35\nfor machine translation but then has\n\n00:07:40\nmodels.\n\n00:07:44\nSo in our subword vocabulary, \"hat\" and \"learn\"\n\n00:07:49\nSo that's sort of good, ri ght?\n\n00:07:56\njust like you would like them to.\n\n00:08:00\nAnd then maybe, in some cases, this ## means\n\n00:08:07\nSo T-A-A, and then A-A-A, and then S-T-Y, right?\n\n00:08:15\nAnd in my vocabulary, it's now split\n\n00:08:19\nSo when I pass this to my transformer\n\n00:08:24\nthe recurrent neural network would\n\n00:08:29\ndo the RNN update, and then take A-A-A, do the RNN update,\n\n00:08:35\nSo it could learn to process constructions like this.\n\n00:08:42\nand have it do something similar instead\n\n00:08:48\nand not knowing what it means.\n\n00:08:58\nHow loud is that feedback?\n\n00:09:02\nOK, I think we're fixed.\n\n00:09:06\nAnd so same with \"transformerify.\"\n\n00:09:09\nAnd then \"-ify\" And so you can see that you have three learned\n\n00:09:17\nSo this is just wildly useful and is used pretty much\n\n00:09:21\nVariants of this algorithm are used pretty much everywhere\n\n00:09:26\nQuestions?\n\n00:09:28\nIf we have three embeddings for \"tasty,\"\n\n00:09:32\nSo the question is, if we have three embeddings for \"tasty,\"\n\n00:09:37\nIf we want to represent--\n\n00:09:42\nI'd see something like \"I learned about the T-A-A, A-A-A,\n\n00:09:50\nSo it'd actually be totally separate tokens.\n\n00:09:54\nmy representation of this thing, it\n\n00:09:58\nSometimes you average the contextual representations\n\n00:10:06\nAt that point, it's unclear what to do,\n\n00:10:11\nHow do you know where to split?\n\n00:10:13\nHow do you know where to split the phrases?\n\n00:10:18\nthat I specified earlier for learning the vocabulary.\n\n00:10:24\nby just combining commonly co-occurring adjacent strings\n\n00:10:29\nSo \"a, b\" co-occurred a lot.\n\n00:10:33\nAnd then, when I'm actually walking through and tokenizing,\n\n00:10:38\nSo I split words into the maximal subword that\n\n00:10:43\nThere are algorithms for this.\n\n00:10:48\nthere's many ways I can split it up.\n\n00:10:52\nthe best way to split it into the fewest words is.\n\n00:10:56\n[INAUDIBLE] of punctuation in the character set [INAUDIBLE]??\n\n00:11:00\nThe question is, do people make use of punctuation\n\n00:11:04\nDo people do it?\n\n00:11:06\nSo from this point on, just assume\n\n00:11:15\nis as unprocessed as possible.\n\n00:11:18\nYou try to make it sort of clean-looking text\n\n00:11:24\nor whatever.\n\n00:11:27\nas little as possible so that it reflects\n\n00:11:32\nbe using this for.\n\n00:11:36\nwe were looking at word2vec, maybe we might\n\n00:11:40\nwant word2vec vectors of punctuation or something\n\n00:11:45\nNow everything is just as close as possible\n\n00:11:50\nto use your system would be.\n\n00:11:53\nIn practice punctuation, and dot, dot,\n\n00:12:00\nbecause people make big bars across tables.\n\n00:12:07\nHow does it impact one word or it could be multiple embeddings\n\n00:12:16\nDoes the system treat those any differently?\n\n00:12:23\nwords that are really themselves, the whole word,\n\n00:12:27\nNo, the system has no idea.\n\n00:12:34\nmatrix.\n\n00:12:41\nWhat about really long words that are, I guess,\n\n00:12:44\nBecause if you're building up from,\n\n00:12:47\nwhat happens then?\n\n00:12:51\nif you're building up from character pairs\n\n00:12:56\nIn practice, the statistics speak really\n\n00:13:01\nSo if a long word is very common,\n\n00:13:04\nAnd if it's not very common, it won't.\n\n00:13:09\nthat do slightly better in various ways,\n\n00:13:16\nwhat the common co-occurring substrings are\n\n00:13:21\nAnd so, yeah, you can actually just\n\n00:13:26\nAnd you see some long words just because they--\n\n00:13:36\nI'm curious, how does it weigh the frequency?\n\n00:13:44\nit was like -ify at the very last one.\n\n00:13:50\nSo how does a weigh the frequency of a subword\n\n00:13:54\nIt tries to split it up into the smallest number.\n\n00:13:59\nwas super common?\n\n00:14:01\nSo the question is, if a \"transformer\" is\n\n00:14:07\nand \"y\" is a subword, and -ify, as a three-use letter tuple,\n\n00:14:16\nmaybe it's not very common, as opposed to splitting it\n\n00:14:22\nIt's just a choice.\n\n00:14:26\nbecause that tends to be more of the bottleneck as\n\n00:14:32\nshort subwords.\n\n00:14:37\nAnd this seems to be what works.\n\n00:14:41\nof a sequence and running the transformer on all of them\n\n00:14:46\nwhich one will work better.\n\n00:14:49\ntends to be the best sort of idea.\n\n00:14:53\nFeel free to ask me more questions",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L9_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture09-pretraining_transcript.txt"
+  }
+}

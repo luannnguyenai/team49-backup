@@ -1,0 +1,156 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "tutorial03-huggingface",
+    "lecture_title": "Stanford CS224N Hugging Face Transformers Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8"
+  },
+  "unit": {
+    "unit_id": "local::tutorial03-huggingface::seg4",
+    "course_id": "cs224n-2024",
+    "name": "Inspecting hidden states and attention",
+    "description": "Shows how to request hidden states and attention tensors, how eval mode fits into analysis, and how to interpret layer/head visualizations.",
+    "summary": "This segment focuses on introspection rather than prediction. The speaker shows how to load a model with output_attentions=True and output_hidden_states=True so the forward pass returns internals that can be examined [ts=1491s] [ts=1508s]. He sets the model to eval mode and explains that eval mode is the standard PyTorch way to disable training-time behavior when the goal is only evaluation or analysis, making the process more efficient [ts=1520s] [ts=1610s]. The resulting output dictionary includes hidden states and attention weights; the speaker highlights the large tensor shapes and explains how to interpret them by layer, batch element, representation dimension, and query-key dimensions for attention [ts=1540s] [ts=1680s]. He then discusses plotting attentions across layers and heads, with rows corresponding to layers, columns corresponding to heads, and color intensity indicating attention magnitude, where yellow means larger values and dark colors are near zero [ts=1759s] [ts=1823s] [ts=1860s].",
+    "key_points": [
+      {
+        "text": "Setting output_attentions=True and output_hidden_states=True makes the model return internal activations for analysis.",
+        "timestamp_s": 1491,
+        "evidence_type": "example"
+      },
+      {
+        "text": "model.eval() puts the model in evaluation mode and is the correct setting when inspecting a pre-trained model without training it.",
+        "timestamp_s": 1610,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Model outputs can include hidden_states and attentions in addition to logits.",
+        "timestamp_s": 1540,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Hidden-state shapes can be interpreted by layer, batch entry, and representation dimension.",
+        "timestamp_s": 1680,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "In the attention visualization, rows correspond to layers and columns correspond to heads.",
+        "timestamp_s": 1823,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The heatmap color scale uses yellow for higher attention values and dark colors for values near zero.",
+        "timestamp_s": 1860,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+      "start_s": 1460,
+      "end_s": 1873
+    },
+    "difficulty": 3.7,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=b80by3Xk_A8",
+  "transcript_slice": "00:24:23\nSo well, last thing as well is that we can also\n\n00:24:33\nand also seeing what the attention weights\n\n00:24:37\nthe attention weights the model actually has.\n\n00:24:43\nto understand what's going on inside of some NLP model.\n\n00:24:51\nwhere we're importing our model from some pre-trained model\n\n00:25:01\nWe want to output attention.\n\n00:25:06\nto true.\n\n00:25:08\nthat we can use for actually investigating\n\n00:25:15\nAgain, we'll set the model to be in eval mode.\n\n00:25:24\nagain.\n\n00:25:29\nAgain, so we don't actually want to backpropagate anything here.\n\n00:25:36\nSo now, what we're able to do is when\n\n00:25:41\nso now this is a new kind of property in the output\n\n00:25:46\nWe can look at what these actually look like here.\n\n00:25:54\nSo you can actually look at the hidden state size per layer,\n\n00:25:58\nAnd so this kind of gives a notion\n\n00:26:02\nwhat the shape of this is, at each given layer in our model,\n\n00:26:10\nSo this gives you the kind of shape\n\n00:26:13\nAnd then, if we actually look at the model output itself,\n\n00:26:23\nSo we have tons and tons of these different hidden states.\n\n00:26:30\nSo the model output is pretty robust for showing you\n\n00:26:36\nas what attention weights actually look like here.\n\n00:26:43\nthis is a really helpful way of doing that.\n\n00:26:48\nsorry, question is, what does the .eval do?\n\n00:26:55\nand this is true for any PyTorch module or model--\n\n00:27:01\nSo again, for this, we're not really\n\n00:27:07\nlike that that might correspond to correspond to some data\n\n00:27:16\nWe just care about evaluating it on that particular data point.\n\n00:27:24\ninto eval mode, essentially, to help\n\n00:27:32\nstuff that you'd use during training time.\n\n00:27:37\nYeah, the question is, it's already pre-trained,\n\n00:27:41\nYeah, you can.\n\n00:27:44\nwith no fine tuning.\n\n00:27:50\nthese shapes, basically, for the attention head size\n\n00:27:57\nYeah, the key thing here is you'll probably\n\n00:28:03\nIt'll correspond to the layer that you're actually\n\n00:28:08\nSo here, when we call-- we looked at the shape here.\n\n00:28:16\nright?\n\n00:28:20\nThe second gives us a notion of the batch\n\n00:28:25\nAnd then, the last is like-- so this is like some tensor,\n\n00:28:29\n768 dimensional, I don't know, representation\n\n00:28:35\nAnd then, for the attention head size,\n\n00:28:41\nfor these last two here.\n\n00:28:53\nof initial index here, the one to be bigger if we printed out\n\n00:28:59\nBut we're just looking at the first one here.\n\n00:29:08\nbeing able to get some notion of how these different-- how\n\n00:29:16\nSo again, if we take this same kind of model input, which\n\n00:29:22\nwe're actually trying to see what\n\n00:29:28\nSo what we can do here is, basically, we're\n\n00:29:35\nand again, this is purely from the model output\n\n00:29:42\nSo what we can do is, for each layer, and then, for each head,\n\n00:29:50\nlike, and in particular, what the attention weights\n\n00:29:55\nSo this is a good way of, again, understanding\n\n00:30:01\nSo on the side, if we look here, maybe zoom in a bit,\n\n00:30:08\ncorresponds to the different layers.\n\n00:30:12\nare across the different attention heads, OK?\n\n00:30:18\nof what the weights are here.\n\n00:30:23\nSo again, if we maybe look at the labels--\n\n00:30:28\nSo this y-axis here, these different rows,\n\n00:30:36\nOops.\n\n00:30:45\nthat are present in the model as well.\n\n00:30:49\nfor-- at each layer to basically get\n\n00:30:57\nbeing distributed, what's being attended to, corresponding\n\n00:31:05\nSo if we look up, again, here as well, right?\n\n00:31:12\nthe model attentions that we get for each corresponding layer.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::tutorial03-huggingface::seg4",
+      "global_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg4",
+      "global_kp_id": "kp_sequence_classification_outputs_loss_and_predictions",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "name": "Model introspection with hidden states and attention",
+      "description": "Using Hugging Face model outputs to inspect layerwise hidden states and attention distributions for analysis and debugging.",
+      "track_tags": [
+        "analysis",
+        "debugging",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "interpretability",
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because model introspection with hidden states and attention clarifies using Hugging Face model outputs to inspect layerwise hidden states and attention distributions for analysis and debugging, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_sequence_classification_outputs_loss_and_predictions",
+      "name": "Sequence classification outputs, loss, and predictions",
+      "description": "How to pass tokenized inputs through a classification model, read logits, obtain loss, and convert logits to predicted labels.",
+      "track_tags": [
+        "fine_tuning",
+        "inference",
+        "supervised_learning"
+      ],
+      "domain_tags": [
+        "classification",
+        "huggingface",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sequence classification outputs, loss, and predictions clarifies how to pass tokenized inputs through a classification model, read logits, obtain loss, and convert logits to predicted labels, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp5"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.55,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_hf_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-tutorial03-huggingface_transcript.txt"
+  }
+}

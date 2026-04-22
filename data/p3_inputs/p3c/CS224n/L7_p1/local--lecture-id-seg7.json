@@ -1,0 +1,68 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 7 - Attention, Final Projects and LLM Intro",
+    "youtube_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg7",
+    "course_id": "<course_id>",
+    "name": "Pretrained LLMs and Practical Project Design",
+    "description": "Places current project design in the era of large pretrained models, emphasizing practicality, lightweight adaptation, API usage, and research questions that go beyond simply calling a model.",
+    "summary": "The closing segment argues that the research landscape has shifted: earlier projects often tried to invent better architectures from scratch, but most modern work builds on large pretrained models whose architecture is largely fixed [ts=4280s] [ts=4377s]. For most practical projects, the lecturer recommends loading pretrained models—especially via Hugging Face—and adding analysis, adaptation, or surrounding system logic rather than reinventing the base network [ts=4399s] [ts=4428s]. He warns students to stay realistic about scale because many flashy papers rely on compute far beyond course budgets, which is why lightweight methods such as parameter-efficient fine-tuning are attractive [ts=4463s] [ts=4534s]. Finally, he explicitly permits API-based use of models like GPT-4, Gemini, Claude, and LLaMA-class systems, while insisting that a strong project must ask an interesting research question—such as prompting, in-context learning, bias analysis, or reasoning behavior—rather than merely piping documents through a model and stopping there [ts=4550s] [ts=4653s].",
+    "key_points": [
+      {
+        "text": "Modern projects usually build on large pretrained models rather than inventing new full architectures.",
+        "timestamp_s": 4334,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "For many practical NLP projects, loading a pretrained model and building analysis or adaptation around it is the sensible default.",
+        "timestamp_s": 4399,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Students should prefer practical, lightweight methods such as parameter-efficient fine-tuning under limited compute.",
+        "timestamp_s": 4516,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Using commercial or frontier models is acceptable when done through API access.",
+        "timestamp_s": 4550,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A project is not complete just because a strong model produced good summaries; the research contribution must come from the surrounding question and analysis.",
+        "timestamp_s": 4641,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
+      "start_s": 4280,
+      "end_s": 4657
+    },
+    "difficulty": 0.52,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 6,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE",
+  "transcript_slice": "01:11:24\nprocessing with deep learning, there's\n\n01:11:31\nSo in the early days of the deep learning revival,\n\n01:11:38\nwere trying to find better deep learning architectures.\n\n01:11:47\nI've got an idea of how I could add attention in some new place,\n\n01:11:54\nand the numbers will go up.\n\n01:12:00\nAnd there was a lot of fun.\n\n01:12:07\nAnd people were often able to build systems\n\n01:12:14\nBut in the last five years, your chances of doing this\n\n01:12:24\nIf you've really got a good idea and it's something\n\n01:12:31\nSo most work these days, even for people\n\n01:12:39\nthey're making use of existing large pretrained models\n\n01:12:45\nAnd then once you're doing that, that actually sort of fixes\n\n01:12:51\nbecause your large pretrained neural\n\n01:12:55\nand you kind of have to live with that.\n\n01:13:01\nit with something like low rank adaptation around the site\n\n01:13:05\nBut nevertheless, there's constraints\n\n01:13:09\nSo for just about any practical project,\n\n01:13:15\nto understand it and get facts out of it or something\n\n01:13:19\nEssentially, the only sensible choice\n\n01:13:27\nwhich we have a tutorial on coming up ahead.\n\n01:13:33\nand I will be running it over the text.\n\n01:13:37\ncan do on top and around that.\n\n01:13:42\nis really only a sensible choice.\n\n01:13:48\na sort of exploring architectures project,\n\n01:13:53\nhey, I've got an idea for a different nonlinearity\n\n01:13:59\nlet me investigate kind of thing because then you\n\n01:14:05\nYeah, maybe I won't read out all of this list.\n\n01:14:13\nmore interesting now.\n\n01:14:23\nI mean, one of the problems we now have\n\n01:14:31\nwas being pushed by DeepMind, whoever,\n\n01:14:39\nand they turn up and say, I want to do this for my project.\n\n01:14:48\nyou'll find that they were doing it on 30 to a 100 for a month.\n\n01:14:55\nthat you're going to have available to you in almost\n\n01:15:00\nMaybe they're one or two industry students\n\n01:15:05\nAnd if so, go for it.\n\n01:15:10\nSo you do have to do something that is practical.\n\n01:15:20\nof the people in the world.\n\n01:15:24\nyou find lots of people doing stuff in lightweight ways\n\n01:15:31\nAnd that's why methods like parameter-efficient fine-tuning\n\n01:15:38\nThe question related to that--\n\n01:15:43\nis-- I just want to mention again--\n\n01:15:53\nPro or Claude Opus or any of these models in your project.\n\n01:16:04\nYou can't possibly train your own big models.\n\n01:16:11\nand like those, for big models, you can't even load them\n\n01:16:19\nSo probably you can load a LLaMA 7B model,\n\n01:16:27\nSo you have to be realistic on that size.\n\n01:16:36\nyou can do with API access, doing things\n\n01:16:42\nthat or building larger language model\n\n01:16:48\nAnd you're certainly encouraged to do that.\n\n01:16:55\nlook at these models sexist and racist still, or do they\n\n01:17:03\nor can they interpret love letters or whatever\n\n01:17:09\nLots of things you can do, and that's totally allowed.\n\n01:17:17\ntrying to evaluate us on what interesting stuff you did.\n\n01:17:25\nand it produced great summaries of the documents.\n\n01:17:29\nThe question is, what did you do in addition\n\n01:17:36\nOK, I'll stop there.",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.37,
+    0.67
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-attention_transcript.txt"
+  }
+}

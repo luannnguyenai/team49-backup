@@ -1,0 +1,142 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_7",
+    "lecture_title": "Lecture 7: Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA"
+  },
+  "unit": {
+    "unit_id": "local::lecture_7::seg4",
+    "course_id": "cs231n_spring_2025",
+    "name": "Hand-built RNN for detecting repeated 1s",
+    "description": "A worked example manually designs an RNN that detects consecutive ones in a binary sequence.",
+    "summary": "The concrete example builds an RNN by hand so the forward pass and matrix roles are visible [ts=840s]. The toy many-to-many task takes a binary sequence and outputs 1 only when two 1s occur consecutively [ts=868s] [ts=895s]. To solve it, the hidden state must store the previous input and current x; the example uses a three-dimensional hidden vector for current, previous, and a constant 1, initialized as h_0=(0,0,1) [ts=917s] [ts=934s] [ts=958s]. ReLU is used for simple arithmetic [ts=988s]. W_xh maps x=0 to [0,0,0]^T and x=1 to [1,0,0]^T, W_hh copies the former current value into the previous slot and preserves the constant, and the output computes ReLU(current+previous-1) so only two consecutive ones produce 1 [ts=1069s] [ts=1131s] [ts=1232s].",
+    "key_points": [
+      {
+        "text": "Toy task: output 1 when the binary input has two consecutive 1s.",
+        "timestamp_s": 868,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The hidden state should capture previous input and current x.",
+        "timestamp_s": 917,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The example hidden vector stores current, previous, and constant 1, initialized as (0,0,1).",
+        "timestamp_s": 934,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "W_xh writes the current input value into the hidden state.",
+        "timestamp_s": 1069,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The output uses ReLU(current + previous - 1).",
+        "timestamp_s": 1232,
+        "evidence_type": "formula"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=7",
+      "start_s": 840,
+      "end_s": 1323
+    },
+    "difficulty": 3.3,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "transcript_slice": "00:14:05\na recurrent neural network.\n\n00:14:09\nthese different methods.\n\n00:14:15\nAnd we'll go through it and you'll\n\n00:14:18\neach of the different weight matrices are doing,\n\n00:14:23\nSo in this really toy example because it\n\n00:14:26\ngoing to be going through all the different weights.\n\n00:14:32\nis to output a 1 when there's two repeated 1's in a row.\n\n00:14:39\noutput a 0 otherwise.\n\n00:14:45\nSo far, there's been no repeated ones.\n\n00:14:48\nhave another repeated one because there's two in a row\n\n00:14:52\nSo this is the type of model we're building.\n\n00:14:55\nThis is specifically the many to many sequence modeling tasks\n\n00:15:01\nAnd so we've been talking high level so far,\n\n00:15:07\nwhat information should be captured in the hidden state?\n\n00:15:13\ninformation needs to be captured there in order to do this task?\n\n00:15:20\nAnd if our output is only dependent on the hidden state,\n\n00:15:23\nAnd the current--\n\n00:15:26\nSo this is the information that we need\n\n00:15:29\nSo previous input and the current value for x, so 0 or 1.\n\n00:15:36\nset the hidden state t to be a three dimensional vector.\n\n00:15:41\nwe're trying to do the output stage calculation,\n\n00:15:47\nThis is just to make the math easy and simple\n\n00:15:51\nAnd the other information is the current value.\n\n00:15:57\n0 or 1.\n\n00:16:00\nso that we're basically assuming it's basically seeing two zeros\n\n00:16:06\nYeah, so this is how we will do.\n\n00:16:11\nwe're trying to track in our hidden state.\n\n00:16:15\nSo I talked about how you can initialize it\n\n00:16:19\nThis is what we'll initialize it to\n\n00:16:24\nand I'll do it step by step.\n\n00:16:28\nBut we'll also do ReLU, I guess, sorry, one other thing\n\n00:16:33\nsetting our activation functions to be ReLU,\n\n00:16:36\nSo it'll just be max of 0 or whatever the value is.\n\n00:16:41\nin this case.\n\n00:16:44\nYeah,\n\n00:16:48\nBut this is just something that I\n\n00:16:52\nAnd so just to make the math really easy, we'll just do ReLU.\n\n00:16:57\nthat could do this with tanh.\n\n00:17:02\nSo we have ReLU.\n\n00:17:06\nWe have the first weight, which converts\n\n00:17:13\nIt applies a transformation to the previous hidden state\n\n00:17:20\nAnd then we have this weight here,\n\n00:17:25\nstate, as well as applies a transformation.\n\n00:17:31\nSo our current hidden state is a function\n\n00:17:36\nstep.\n\n00:17:41\nat time step t, we're looking to calculate this current value\n\n00:17:46\nSo we'll use the x value here.\n\n00:17:55\n1, 0, 0, such that when x is 0 and we do the matrix multiply,\n\n00:18:06\nAnd we'll add this to another term,\n\n00:18:09\nwhat is the current value here.\n\n00:18:15\nAnd it's calculated based on this first operation here.\n\n00:18:23\nbased on the input.\n\n00:18:31\ntransformation.\n\n00:18:35\nhere.\n\n00:18:38\nThis means that when we multiply it\n\n00:18:41\nget a 0 value here for the top.\n\n00:18:46\nside contains.\n\n00:18:50\non the previous hidden state.\n\n00:18:55\nWhy we do this?\n\n00:18:58\nstate from the previous time step here.\n\n00:19:05\nto be the former current time step.\n\n00:19:08\nWhat this will do is it'll multiply by h,t minus 1.\n\n00:19:14\nfor this time step.\n\n00:19:19\nand it will be whatever the previous time step input\n\n00:19:24\nAnd then this final bit here just maintains the one\n\n00:19:31\nSo just to recap, we have zeros here\n\n00:19:36\ntracking this current value.\n\n00:19:42\nstep to be the previous--\n\n00:19:46\nto be the previous of the current time step.\n\n00:19:52\nmaybe it's easy in the code but h,t previous is equal to h,t,\n\n00:20:00\nhere.\n\n00:20:03\nSo how do we actually get our output now?\n\n00:20:10\nthe weight matrices I talked about, so Whh and Wxh\n\n00:20:17\nour hidden state into the output dimension,\n\n00:20:23\nSo it's a single value that's being output when we have\n\n00:20:28\nAnd this is a dot product between the values here\n\n00:20:32\nSo what this will correspond to is the current\n\n00:20:39\nhere.\n\n00:20:42\nand the current associated here with a one.\n\n00:20:49\nas well.\n\n00:20:52\nAnd if you think about it, this general formula will work.\n\n00:21:02\nthe previous is 2 minus 1 is 1 for this left hand\n\n00:21:07\nSo the max of 1 and 0 is 1.\n\n00:21:13\nThese are a 1 and a 0.\n\n00:21:16\nSo these are how you can construct these weight matrices.\n\n00:21:23\nif there were any questions about any step\n\n00:21:29\ngo through in class, where we're literally doing all the matrix\n\n00:21:34\nwill be more high level explanations for how people tend\n\n00:21:39\nSo I just want to pause and see if there's a question about how\n\n00:21:46\nand updated.\n\n00:21:49\ngo about constructing the weight matrices?\n\n00:21:53\nand I thought to put it in the slide here.\n\n00:21:56\nIt's the same way we're always finding the weight\n\n00:21:59\nWe're going to be using gradient descent.\n\n00:22:03\nyou have multiple time steps, and maybe you",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_7::seg4",
+      "global_kp_id": "kp_manual_rnn_state_construction",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_7::seg4",
+      "global_kp_id": "kp_vanilla_rnn_equations",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_manual_rnn_state_construction",
+      "name": "Manual RNN state construction",
+      "description": "Designing hidden-state contents and weights by reasoning from a toy sequence task.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because manual RNN state construction clarifies designing hidden-state contents and weights by reasoning from a toy sequence task, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vanilla_rnn_equations",
+      "name": "Vanilla RNN equations",
+      "description": "The tanh-based recurrent update and output projection used as the baseline RNN formulation.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because vanilla RNN equations formalizes how the tanh-based recurrent update and output projection used as the baseline RNN formulation, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.15,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture07-recurrent-neural-networks_transcript.txt"
+  }
+}

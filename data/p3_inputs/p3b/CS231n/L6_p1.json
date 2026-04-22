@@ -1,0 +1,399 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_6",
+    "lecture_title": "Training CNNs and CNN Architectures",
+    "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture_6::seg1",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "CNN components recap and normalization layers",
+      "description": "Reviews convolution, pooling, and fully connected layers, then introduces normalization layers with LayerNorm as the main example.",
+      "summary": "The segment re-establishes how CNNs are assembled from convolution, pooling, and fully connected layers before extending the layer toolbox with normalization. Convolutions use filters whose depth matches the input depth and produce one activation map per filter, while pooling reduces spatial dimensions via max or average operations [ts=78s][ts=154s]. Normalization layers all follow the same two-step recipe: first normalize activations toward mean 0 and standard deviation 1, then apply learned scale and shift parameters [ts=237s][ts=268s]. LayerNorm is explained as computing statistics separately for each sample, and for CNN tensors that means aggregating across all channels, heights, and widths of one example [ts=322s][ts=419s]. The lecture contrasts this with BatchNorm, where per-channel statistics are computed across the minibatch, emphasizing that normalization methods differ mainly in which subset of values is used to estimate statistics [ts=458s][ts=503s].",
+      "key_points": [
+        {
+          "text": "A convolution layer uses filters whose depth matches the input depth, and output depth equals the number of filters.",
+          "timestamp_s": 78,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Pooling consolidates spatial dimensions; max pooling and average pooling are both common choices.",
+          "timestamp_s": 154,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Normalization layers first normalize activations to mean 0 and standard deviation 1, then apply learned scale and shift.",
+          "timestamp_s": 267,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "LayerNorm computes mean and standard deviation separately for each sample; in CNNs it aggregates over all channels, heights, and widths of that sample.",
+          "timestamp_s": 419,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "BatchNorm computes per-channel statistics across the minibatch rather than independently per example.",
+          "timestamp_s": 503,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 5,
+        "end_s": 576
+      },
+      "difficulty": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg2",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Dropout regularization",
+      "description": "Explains dropout as train-time random masking, why it improves generalization, and how inference-time scaling works.",
+      "summary": "This segment presents dropout as a regularization layer that injects randomness during training by zeroing out a fixed proportion of activations on each forward pass [ts=596s][ts=625s]. The instructor frames its benefit as discouraging co-adaptation: the model cannot over-rely on a small set of correlated features, so it learns broader and more redundant feature-to-class correspondences [ts=677s][ts=751s]. He explicitly notes the tradeoff that training gets harder because the model sees incomplete information, but test-time performance can improve because dropout is removed at inference [ts=793s][ts=827s]. At test time, all activations are used and then scaled by the dropout probability so the expected magnitude of inputs matches what downstream layers saw during training [ts=833s][ts=915s]. Backprop through dropped activations yields zero gradient, so weights connected only through those masked paths are not updated on that step [ts=867s][ts=906s].",
+      "key_points": [
+        {
+          "text": "In each forward pass, dropout randomly sets a fixed fraction p of activations to zero; 0.5 and 0.25 are common settings.",
+          "timestamp_s": 596,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Dropout encourages redundant representations and prevents the network from over-relying on correlated feature pairs.",
+          "timestamp_s": 677,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Dropout can hurt training accuracy while improving test-time generalization because masking is only used during training.",
+          "timestamp_s": 793,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "At test time, use all activations and multiply by the dropout probability to preserve expected input magnitude.",
+          "timestamp_s": 845,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Masked activations contribute zero gradient, so associated upstream paths are not updated on that step.",
+          "timestamp_s": 887,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 577,
+        "end_s": 970
+      },
+      "difficulty": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg3",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Activation functions in CNNs",
+      "description": "Compares sigmoid, ReLU, GELU, and related activations, focusing on gradient behavior and placement in CNNs.",
+      "summary": "The segment motivates activations as the source of nonlinearity in CNNs, since convolution and fully connected layers by themselves are only linear combinations of inputs [ts=980s][ts=1001s]. Sigmoid is described historically but criticized for vanishing gradients: for large positive or negative inputs its derivative becomes tiny, so backpropagated gradients shrink layer by layer [ts=1015s][ts=1087s]. ReLU became popular because it is cheap to compute and keeps gradient 1 on the positive half-line, though it still has zero gradient for negative inputs [ts=1091s][ts=1138s]. GELU is presented as a smoother alternative that behaves like x·Φ(x), keeps non-zero gradients around 0, and approaches ReLU at extreme values; the instructor notes that GELU is the main activation used in transformers today [ts=1157s][ts=1231s]. The section closes by stating the default placement rule: activations are generally applied after linear operators such as fully connected and convolutional layers [ts=1280s][ts=1300s].",
+      "key_points": [
+        {
+          "text": "Activation functions introduce nonlinearity after otherwise linear convolutional and fully connected operations.",
+          "timestamp_s": 980,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Sigmoid has very small gradients for very negative and very positive inputs, leading to vanishing gradients through deep stacks.",
+          "timestamp_s": 1056,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "ReLU computes f(x) = max(0, x), keeping gradient 1 for positive inputs and 0 for negative inputs.",
+          "timestamp_s": 1093,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "GELU computes x·Φ(x), smooths the transition near 0, and approaches ReLU at extreme values.",
+          "timestamp_s": 1197,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Activations are generally placed after linear/feedforward/convolutional layers in CNNs.",
+          "timestamp_s": 1281,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 971,
+        "end_s": 1305
+      },
+      "difficulty": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg4",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Architecture scaling from AlexNet to VGG",
+      "description": "Uses ImageNet history and the VGG case study to explain why deeper stacks of small filters can outperform shallower large-filter models.",
+      "summary": "The lecture transitions from individual layers to whole architectures by showing that ImageNet error dropped sharply as winning models became deeper, with the jump in layer count accompanying the first major accuracy leap past human performance [ts=1320s][ts=1344s]. AlexNet and VGG are then compared as block diagrams: VGG largely keeps the same basic ingredients as earlier CNNs, but scales depth by repeatedly stacking 3×3 stride-1 padded convolutions and periodic max pooling before fully connected classification layers [ts=1403s][ts=1479s]. The instructor emphasizes a key design insight behind VGG: three stacked 3×3 convolutions have the same effective receptive field as one 7×7 convolution [ts=1617s][ts=1684s]. This stack is preferable because it uses fewer parameters when channel count is held fixed and inserts extra nonlinearities, making the model more expressive [ts=1686s][ts=1739s].",
+      "key_points": [
+        {
+          "text": "ImageNet winners improved as models became deeper, with a sharp error drop coinciding with a sharp increase in layer count.",
+          "timestamp_s": 1320,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In VGG-style CNNs, 3×3 convolutions use stride 1 and padding 1 so spatial resolution is preserved across the conv stack.",
+          "timestamp_s": 1403,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "For image classification, the final output layer size matches the number of classes in the dataset.",
+          "timestamp_s": 1453,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A stack of three 3×3 stride-1 convolutions has the same effective receptive field as one 7×7 convolution.",
+          "timestamp_s": 1617,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Replacing a large 7×7 filter with several 3×3 layers gives fewer parameters and more nonlinear modeling capacity.",
+          "timestamp_s": 1686,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 1306,
+        "end_s": 1741
+      },
+      "difficulty": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg5",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Residual networks and the degradation problem",
+      "description": "Explains why plain deeper CNNs can optimize worse than shallower ones and how ResNet residual blocks solve that issue.",
+      "summary": "This unit motivates ResNets with the degradation problem: a plain 56-layer CNN can have worse training error and worse test error than a 20-layer CNN, so the problem is not overfitting but difficult optimization [ts=1773s][ts=1807s]. The instructor argues that deeper models should contain shallower ones as a special case, since some layers could in principle act like identities, and then turns that intuition into architecture by learning a residual map F(x) instead of a full mapping h(x) [ts=1831s][ts=1916s]. In a residual block, input x is copied forward and added to the output of the convolutional stack, so the block can easily realize the identity by learning zero or very small filters [ts=1920s][ts=1988s]. This makes it easier for deep networks to match or exceed shallower ones and empirically enabled training of 100+ layer models that became dominant across computer vision tasks [ts=2021s][ts=2510s]. The lecture also notes practical constraints: residual addition requires matching tensor shapes, so these skip additions are inserted where spatial size is preserved, and ResNets periodically trade spatial resolution for more channels deeper in the network [ts=2383s][ts=2459s].",
+      "key_points": [
+        {
+          "text": "A plain 56-layer CNN can have worse training and test error than a 20-layer CNN, indicating an optimization problem rather than overfitting.",
+          "timestamp_s": 1773,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Residual learning fits F(x) and adds the input x back, instead of forcing the stacked layers to learn the full target mapping directly.",
+          "timestamp_s": 1910,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A residual block can implement the identity easily by learning zero or very small filters, so deeper networks can bypass unnecessary transformations.",
+          "timestamp_s": 1943,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Residual connections require matching tensor shapes for addition, so standard skip additions are used where spatial size is preserved.",
+          "timestamp_s": 2383,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "ResNets periodically downsample spatial dimensions and increase channel depth as activations move deeper into the model.",
+          "timestamp_s": 2435,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 1742,
+        "end_s": 2527
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 13,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg6",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Weight initialization for stable CNN training",
+      "description": "Shows why too-small or too-large initial weights destabilize activations and introduces Kaiming initialization as the practical default.",
+      "summary": "This segment explains weight initialization as the final step needed to make an architecture ready for training, with the central goal of keeping activation statistics stable across layers [ts=2531s][ts=2604s]. If weights are initialized too small, the mean and standard deviation of activations shrink toward zero as depth increases [ts=2565s][ts=2600s]. If initialized too large, activations grow layer by layer and quickly become unmanageable in very deep models [ts=2608s][ts=2637s]. The practical recipe presented is Kaiming/MSRA initialization, with scale sqrt(2 / D_in) for ReLU networks, which approximately preserves activation mean and standard deviation across depth [ts=2674s][ts=2736s]. The same principle applies to convolutional layers by taking D_in from the kernel dimensions and channel count [ts=2777s][ts=2796s].",
+      "key_points": [
+        {
+          "text": "Too-small weight initialization causes activation means and standard deviations to shrink toward zero in deeper layers.",
+          "timestamp_s": 2592,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Too-large weight initialization makes activations grow layer by layer and destabilizes deep networks.",
+          "timestamp_s": 2624,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Kaiming/MSRA initialization uses std = sqrt(2 / D_in) for ReLU-style networks.",
+          "timestamp_s": 2677,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The purpose of Kaiming initialization is to keep activation statistics relatively constant across layers.",
+          "timestamp_s": 2712,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "For convolutional layers, D_in is computed from kernel height, kernel width, and input channels.",
+          "timestamp_s": 2777,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 2528,
+        "end_s": 2949
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg7",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Image preprocessing and data augmentation",
+      "description": "Covers per-channel image normalization and a practical menu of augmentations used to regularize computer vision models.",
+      "summary": "The second half of the lecture begins with image preprocessing: for RGB data, compute the mean and standard deviation for each channel, subtract the mean, and divide by the standard deviation before the model sees the image [ts=2954s][ts=2978s]. The instructor notes that practitioners often reuse ImageNet channel statistics when dataset-specific values are unavailable or when following common pretrained-model conventions [ts=2984s][ts=3011s]. He then reframes augmentation as regularization: add randomness during training, remove or average it at test time, and thereby make memorization harder while effectively increasing dataset diversity [ts=3042s][ts=3134s]. Specific augmentations include horizontal flips, random resized crops, test-time augmentation over multiple crops and scales, color jitter, and cutout-like occlusion; the practical criterion is that transformed images should still look in-distribution and easily recognizable to a human [ts=3200s][ts=3476s].",
+      "key_points": [
+        {
+          "text": "Standard image normalization subtracts the per-channel mean and divides by the per-channel standard deviation.",
+          "timestamp_s": 2959,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A common practical shortcut is to use ImageNet mean and standard deviation values for preprocessing.",
+          "timestamp_s": 2984,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Data augmentation adds training-time randomness but preserves the label, increasing effective dataset diversity and discouraging memorization.",
+          "timestamp_s": 3088,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Horizontal flips are useful for many everyday-object datasets but are a bad augmentation for mirrored text reading tasks.",
+          "timestamp_s": 3200,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Random resized crop resizes the image so the short side reaches a chosen scale L and then samples a random 224×224 patch.",
+          "timestamp_s": 3251,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Test-time augmentation averages predictions across multiple scales, crops, and flips for extra performance.",
+          "timestamp_s": 3346,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Color jitter and cutout should be tuned so augmented samples still look normal and recognizable to a human.",
+          "timestamp_s": 3391,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 2950,
+        "end_s": 3478
+      },
+      "difficulty": 0.47,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_6::seg8",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Transfer learning and hyperparameter selection",
+      "description": "Gives a practical workflow for low-data CNN training using pretrained models, then outlines debugging and search procedures for hyperparameters.",
+      "summary": "The final segment is strongly project-oriented. It first motivates transfer learning by arguing that the penultimate CNN feature vector already clusters semantically similar images, so a pretrained CNN can be treated as a strong fixed feature extractor or fine-tuned end to end on a new task [ts=3548s][ts=3619s]. The basic transfer recipe is to load a model trained on ImageNet or another large dataset, replace the final classification layer with one matching the new label set, and either freeze the backbone and train only the last layer or fine-tune the full model when more target data is available [ts=3625s][ts=3699s]. The lecture then gives a decision heuristic: similar data + little data favors a linear classifier on frozen features, similar data + more data favors fine-tuning all layers, and very different data is hardest, especially when it is also scarce [ts=3837s][ts=3915s]. For hyperparameters, the recommended debugging loop is to first overfit a tiny sample to near-zero loss, then sweep learning rates, inspect train/validation curves for overfitting or underfitting, and prefer random search over grid search because it explores important dimensions more efficiently [ts=4044s][ts=4179s][ts=4194s][ts=4234s].",
+      "key_points": [
+        {
+          "text": "Penultimate-layer CNN features place same-category images close together in feature space, making them useful for simple downstream classifiers.",
+          "timestamp_s": 3548,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A standard transfer-learning setup freezes a pretrained backbone, replaces the final classifier, and trains only the new last layer.",
+          "timestamp_s": 3625,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "With larger target datasets, fine-tuning all pretrained layers usually works better than training only the final layer.",
+          "timestamp_s": 3685,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Heuristic: similar data + little data suggests a linear classifier on frozen features; similar data + more data suggests fine-tuning all layers.",
+          "timestamp_s": 3837,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "First debugging step for a broken training setup is to overfit one example and drive training loss near zero.",
+          "timestamp_s": 4044,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Choose learning rates by finding the ones that produce the most sustained decrease in training loss early in training.",
+          "timestamp_s": 4092,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Random search is preferred over grid search because it explores the important hyperparameter dimensions more thoroughly.",
+          "timestamp_s": 4194,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "start_s": 3479,
+        "end_s": 4260
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 13,
+      "ordering_index": 8,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L6_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture06-cnn-architectures_transcript.txt"
+  }
+}

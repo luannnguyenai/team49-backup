@@ -1,0 +1,210 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_18_human_centered_ai",
+    "lecture_title": "What We See and What We Value: AI with the Human Perspective",
+    "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_18_human_centered_ai::seg8",
+    "course_id": "cs231n_spring_2025",
+    "name": "Human-preference-driven robotics, BEHAVIOR, and assistive futures",
+    "description": "Argues that robot task design should follow human preferences, introduces the BEHAVIOR benchmark, and ends with assistive brain-controlled robotics and an augmentation-first conclusion.",
+    "summary": "The lecture asks a normative question—who decides which tasks robots should do?—and answers it with a human-centered survey of about 1,400 people, showing that respondents want help with chores like floor cleaning but not with socially or emotionally salient activities like opening Christmas gifts or buying wedding rings [ts=3308s] [ts=3425s]. This preference signal is used to define a thousand target tasks and to motivate BEHAVIOR, a benchmark built from scanned real-world environments, thousands of object assets, and a high-fidelity simulator developed with NVIDIA Omniverse [ts=3462s] [ts=3534s]. Fei-Fei Li emphasizes that current algorithms still score essentially zero on hard BEHAVIOR tasks without privileged information, then closes with EEG-based robot control as an assistive direction and the final message that AI should help people rather than replace them [ts=3628s] [ts=3900s].",
+    "key_points": [
+      {
+        "text": "Robot task selection should be guided by human preference rather than only by researcher convenience.",
+        "timestamp_s": 3334,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A survey of about 1,400 people was used to rank which everyday tasks people want robots to help with.",
+        "timestamp_s": 3425,
+        "evidence_type": "example"
+      },
+      {
+        "text": "BEHAVIOR stands for a benchmark for everyday household activities in virtual, interactive, ecological environments.",
+        "timestamp_s": 3297,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The BEHAVIOR setup includes scanned scenes, more than 10,000 object assets, and a simulator built with NVIDIA Omniverse.",
+        "timestamp_s": 3487,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Without privileged information, current robotic algorithms achieve essentially zero performance on benchmarked BEHAVIOR tasks.",
+        "timestamp_s": 3650,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "EEG-based control of a robot arm is presented as an assistive path for severely paralyzed patients.",
+        "timestamp_s": 3800,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The final takeaway is that AI should augment and help people rather than replace them.",
+        "timestamp_s": 3892,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+      "start_s": 3230,
+      "end_s": 3905
+    },
+    "difficulty": 0.63,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "transcript_slice": "00:53:50\nAnother work I want to just show you quickly\n\n00:54:03\ngood benchmark, and while we're still experimenting in the labs,\n\n00:54:14\nuncertain, have large variability,\n\n00:54:20\nhas a lot of multitasking task.\n\n00:54:26\nvision has benefited a lot from setting up important large scale\n\n00:54:36\nSo in our lab, we have been working on this project that\n\n00:54:47\nenvironment and try to encourage researchers\n\n00:54:57\nAnd that's the behavior of benchmark,\n\n00:55:03\nactivities in virtual interactive and ecological\n\n00:55:08\nNow, here's a question because this lecture has a lot\n\n00:55:15\nwhich tasks robots should do?\n\n00:55:19\nwho are working on robotics just want two tasks.\n\n00:55:25\nThat's great, but moving beyond grad school, what are the tasks\n\n00:55:34\nSo instead of us coming up with this task list,\n\n00:55:44\nor sorry to ask humans--\n\n00:55:47\n--that what would you like robots to help you?\n\n00:55:52\nWould you like a robot to help you to clean the kitchen floor?\n\n00:55:58\nOK, good.\n\n00:56:03\nShoveling snow?\n\n00:56:06\nFolding laundry?\n\n00:56:08\nOK, good.\n\n00:56:11\nNo.\n\n00:56:12\nSee, we're getting mixture answers, right?\n\n00:56:18\nNo.\n\n00:56:21\nPeople are different.\n\n00:56:25\nbut we don't want it.\n\n00:56:31\nCan you imagine that?\n\n00:56:37\nto respect human preference.\n\n00:56:42\nfrom a labor office in the US and Europe and so on,\n\n00:56:55\nAnd then we went online to find people.\n\n00:57:02\nbut I think we have room to improve.\n\n00:57:08\nAnd to answer these tasks and tell us\n\n00:57:16\nAnd you can see that just like grad students,\n\n00:57:25\ntoilet cleaning, floor cleaning, but people don't want robots\n\n00:57:34\nor to even mix baby cereals.\n\n00:57:38\nto us as humans, emotionally or socially or whatever.\n\n00:57:51\nare the 1,000 tasks that we want to train robots for, and those\n\n00:57:59\nAnd with that in mind, we have to actually build\n\n00:58:07\nSo we scanned or acquired 3D scene from 50 different real\n\n00:58:19\nto grocery stores to offices and so on.\n\n00:58:29\nwe acquire more than 10,000 object assets,\n\n00:58:37\nwhether it's articulation, deformability,\n\n00:58:43\nAnd then we have to build a simulation environment.\n\n00:58:50\nLet me just fast forward.\n\n00:58:54\nwas a collaboration with NVIDIA's Omniverse group.\n\n00:59:03\nperceptually, and also interactively\n\n00:59:11\ntaking account, for example, physical effects\n\n00:59:18\nWe also tested our behavior environment\n\n00:59:27\nfrom human user study.\n\n00:59:32\nof physical interaction, such as cloth or liquids and so on.\n\n00:59:43\nAnd let me just fast forward, and these are some benchmarks\n\n00:59:51\nOK.\n\n00:59:54\nSo this is an ongoing work actually in our lab,\n\n01:00:04\nto help us to learn robotics, to help us,\n\n01:00:11\nand also to use that for even cognitive studies.\n\n01:00:23\nOne thing I want to share with you is that--\n\n01:00:33\ncannot do behavior tasks.\n\n01:00:41\nis what we wish robots can do.\n\n01:00:47\nThey have to be dropped in an environment and do these tasks.\n\n01:00:53\nusing today's robotic algorithm.\n\n01:01:00\nAnd once you start to give more privileged information\n\n01:01:08\nsimpler, like magic motion or a perfect memory and all that,\n\n01:01:18\nIf you look at it, only look at the top row,\n\n01:01:25\nBut as a grad student, I hope you're\n\n01:01:33\nOK.\n\n01:01:37\nI'm going to actually fast forward because I think\n\n01:01:44\nWell, by the way, we're also doing digital twin of behavior\n\n01:01:52\nin the real-world environment, and that's\n\n01:02:00\nAgain, this is an unsolved problem.\n\n01:02:07\nAnd in this particular case, we're\n\n01:02:13\nyou can see how slow it is.\n\n01:02:21\nOK.\n\n01:02:23\nThis is actually some of the mistakes\n\n01:02:30\nfor example, it cannot pick up the bottle,\n\n01:02:41\nin the wrong place.\n\n01:02:45\nOK, let me fast forward.\n\n01:02:53\nto study visually impaired patients,\n\n01:02:59\nin a safe environment to study.\n\n01:03:07\nand this is the last technical work I want to show\n\n01:03:20\nand doctors to study how we can use brain waves to control\n\n01:03:26\nSo what you're seeing here is a demo\n\n01:03:34\nand that just is sending instructions,\n\n01:03:42\nfrom thoughts.\n\n01:03:47\nThis is from electrical signals.\n\n01:03:53\nYou have to pretrain the robotic arm with, say, lift or place\n\n01:04:01\nAnd once you do that, this is an entire meal\n\n01:04:06\nThis is really sci-fi.\n\n01:04:11\nSo I'm pretty excited by where all this is going, combining\n\n01:04:19\nand also helping people in clinical settings.\n\n01:04:25\nis helping severely paralyzed patients.\n\n01:04:34\naimed at augmenting people.\n\n01:04:41\nAnd it has realistic and ecological physics\n\n01:04:46\nAnd the last take home message is\n\n01:04:57\nthings, we really want to build it to help people.\n\n01:05:05\nis very important instead of a tool that replaces.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "global_kp_id": "kp_human_preference_driven_robot_benchmarking",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "global_kp_id": "kp_perception_action_integration",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_human_preference_driven_robot_benchmarking",
+      "name": "Human-preference-driven robot benchmarking",
+      "description": "Robot benchmarks should prioritize tasks people actually want help with and should be evaluated in realistic, diverse environments.",
+      "track_tags": [
+        "benchmarking",
+        "human_centered_robotics"
+      ],
+      "domain_tags": [
+        "human_computer_interaction",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "product",
+        "research",
+        "robotics"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because human-preference-driven robot benchmarking clarifies robot benchmarks should prioritize tasks people actually want help with and should be evaluated in realistic, diverse environments, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_perception_action_integration",
+      "name": "Perception-action integration",
+      "description": "Robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times. Robotics is framed as the closure of the loop between seeing and doing, requiring both perception and action planning.",
+      "track_tags": [
+        "embodied_ai",
+        "perception",
+        "planning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "perception_action_loop",
+        "robotics",
+        "task_conditioned_perception"
+      ],
+      "career_path_tags": [
+        "autonomy_engineer",
+        "ml_engineering",
+        "research",
+        "robotics",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because perception-action integration clarifies robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp6",
+        "local::lecture_18_human_centered_ai::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "name": "AI augmentation over replacement",
+      "description": "Smart sensing and machine learning can compensate for labor shortages by supporting monitoring and decision-making in clinical and home settings. The lecture's closing principle is that AI should enhance human capability and care rather than simply replace people.",
+      "track_tags": [
+        "ambient_intelligence",
+        "healthcare_ai",
+        "human_centered_ai",
+        "societal_impact"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "computer_vision",
+        "digital_health",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "healthcare_ai",
+        "policy",
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because aI augmentation over replacement synthesizes smart sensing and machine learning can compensate for labor shortages by supporting monitoring and decision-making in clinical and home settings into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp12",
+        "local::lecture_18_human_centered_ai::kp15"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.48,
+    0.78
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L18_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture18-human-centered-ai_transcript.txt"
+  }
+}

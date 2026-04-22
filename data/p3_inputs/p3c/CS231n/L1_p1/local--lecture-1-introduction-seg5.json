@@ -1,0 +1,209 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_1_introduction",
+    "lecture_title": "CS231n Lecture 1: Introduction",
+    "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A"
+  },
+  "unit": {
+    "unit_id": "local::lecture_1_introduction::seg5",
+    "course_id": "CS231N",
+    "name": "Deep learning revival, ImageNet-era breakthroughs, and why the field exploded",
+    "description": "Explains how modern deep learning transformed computer vision through large datasets, neural architectures, and compute, while also expanding to many applications and raising ethical concerns.",
+    "summary": "The lecture recounts the neural-network branch of the timeline from perceptrons and backpropagation to LeNet and the gradual re-emergence of 'deep learning' in the 2000s [slides show perceptron, backprop, LeNet, and early deep learning milestones around the mid-lecture timeline]. Li presents ImageNet as a turning point for scalable visual recognition and shows how the AlexNet era made deep learning dominant in image classification and then across retrieval, detection, segmentation, activity recognition, captioning, relationship understanding, style transfer, and image generation [ts=1450s] [ts=2353s]. She emphasizes that the modern explosion came from three converging forces—computation, algorithms, and data—which pulled the field out of AI winter [ts=2420s] [ts=2446s]. The segment also highlights the role of hardware improvements, especially rapid GPU progress in FLOPs per dollar, and connects this to the broader acceleration of AI conferences, startups, and enterprise applications [ts=2448s] [ts=2515s]. It closes by warning that computer vision is still unsolved and that data-driven systems can carry bias and materially affect people's lives in areas like face recognition, jobs, loans, and medicine [ts=2522s] [ts=2611s].",
+    "key_points": [
+      {
+        "text": "Backpropagation enabled effective training of multilayer neural networks, paving the way for modern deep learning.",
+        "timestamp_s": 1500,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "ImageNet-scale recognition marked a decisive shift that made deep learning central to computer vision.",
+        "timestamp_s": 2100,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Modern computer vision expanded from classification into retrieval, detection, segmentation, activity recognition, captioning, relationship understanding, style transfer, and image generation.",
+        "timestamp_s": 2270,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The modern AI boom is attributed to the convergence of computation, algorithms, and data.",
+        "timestamp_s": 2420,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Rapid GPU hardware progress strongly accelerated deep learning adoption.",
+        "timestamp_s": 2465,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Bias in data can propagate into vision systems, especially in face recognition and other high-stakes uses.",
+        "timestamp_s": 2550,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+      "start_s": 1450,
+      "end_s": 2610
+    },
+    "difficulty": 0.57,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 19,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "transcript_slice": "00:24:16\nBut research is actually happening and progressing.\n\n00:24:24\nAnd some of you might still remember\n\n00:24:29\nAnd when I enter grad school, the most exciting thing\n\n00:24:34\nI remembered that first year in my grad school,\n\n00:24:39\nAnd five years later, the first digital camera\n\n00:24:49\nbecause of face detection.\n\n00:24:56\nAnd then around the early 21st century,\n\n00:25:04\nis internet started to happen.\n\n00:25:12\nAnd the combination of digital cameras and internet\n\n00:25:19\nsome data to work with.\n\n00:25:26\nor tens of thousands of images to study the visual recognition\n\n00:25:32\nSo you've got data sets like Pascal Visual Object\n\n00:25:40\nI'm going to pause here.\n\n00:25:50\nstart to progress.\n\n00:25:54\nBecause I'm going to come back and talk about deep learning.\n\n00:26:03\nthrough neurophysiology to computer vision,\n\n00:26:11\na separate effort is going on in parallel.\n\n00:26:17\nIt started from these early studies of neural network,\n\n00:26:24\nAnd people like Rumelhart started to work.\n\n00:26:32\nstarted to work with a small number of artificial neurons\n\n00:26:41\nAnd you've heard people like the great minds like Marvin Minsky\n\n00:26:52\nof this perception.\n\n00:27:02\nXOR logic functions.\n\n00:27:10\nWell, things continued to progress despite the setback.\n\n00:27:21\npoint is this neocognitron work by Fukushima in Japan.\n\n00:27:31\nSo it has about five or six layers.\n\n00:27:41\nacross the layers, which you will\n\n00:27:46\ninspired by the visual pathway that I was describing.\n\n00:27:54\nto more complicated receptive field.\n\n00:27:59\nThe early layers have simple functions.\n\n00:28:03\nhave more complex functions.\n\n00:28:08\nOr he uses the convolution function.\n\n00:28:13\nfrom the convolution layers.\n\n00:28:19\nbecause every parameter was hand-designed.\n\n00:28:26\nHe has to just meticulously put them together\n\n00:28:32\nrecognize digits or letters.\n\n00:28:41\nis a learning rule.\n\n00:28:45\nIt's going to be one of our first classes\n\n00:28:52\nthey took neural network architecture\n\n00:29:04\nso that if you put in some input and know\n\n00:29:10\ntake the difference between what the neural network outputs\n\n00:29:17\npropagate the information back so that you\n\n00:29:28\nAnd that propagation from the output\n\n00:29:33\nis called backpropagation.\n\n00:29:39\nAnd that was a watershed moment for neural network algorithm.\n\n00:29:50\nAll these work was happening without public fanfare.\n\n00:29:57\nthese are very important milestones.\n\n00:30:03\nnetwork with backpropagation is Yann LeCun's convolutional\n\n00:30:10\nin the Bell Labs.\n\n00:30:15\nabout seven layers-ish, and made it good enough\n\n00:30:25\nAnd it was actually shipped to some part of the US Postal\n\n00:30:33\nSo that was an application of early neural network.\n\n00:30:41\ncontinued to work on neural network.\n\n00:30:45\nBecause despite these improvements and tweaks\n\n00:30:57\nThey collected a big data set of digits and letters.\n\n00:31:03\nin terms of recognition.\n\n00:31:08\nof digital photos that the neuroscientists were using\n\n00:31:14\nand flowers, it just didn't work.\n\n00:31:22\nAnd lack of data is not just an inconvenience.\n\n00:31:29\nbecause these algorithms are high capacity algorithms that\n\n00:31:39\nin order to learn to generalize.\n\n00:31:45\nbehind these rules of generalization and model\n\n00:31:49\nAnd data was underappreciated, was\n\n00:31:54\nlooking at these architectures.\n\n00:31:59\npart of the first class citizen for machine\n\n00:32:03\nSo this is part of the work that my students and I did\n\n00:32:14\nof data.\n\n00:32:21\nmissing this-- underappreciating the importance of data.\n\n00:32:27\nset called ImageNet that has 50 million images\n\n00:32:32\nAnd these 15 million images were sorted across 22,000 categories\n\n00:32:39\nWe actually studied a lot of the cognitive and psychology\n\n00:32:51\nsorry, 22,000 categories were roughly in the order\n\n00:32:58\nin the early years of their life.\n\n00:33:02\nset and created an ImageNet challenge called the Large Scale\n\n00:33:07\nWe curated a subset of ImageNet of a million images or a million\n\n00:33:16\nan international object recognition challenge for many\n\n00:33:22\nAnd the goal is that we ask researchers to participate.\n\n00:33:29\nIt doesn't matter which kind of algorithms.\n\n00:33:35\nphotos and see if you can call out these 1,000 object classes\n\n00:33:42\nAnd here are the errors.\n\n00:33:53\nthe best performing algorithms error was nearly 30%.\n\n00:34:00\nunder like, say, 3% error.\n\n00:34:07\nBut something happened in 2012.\n\n00:34:12\nThat year, Jeff Hinton and his students\n\n00:34:18\nconvolutional neural network.\n\n00:34:23\nAnd it truly showed the power of deep learning algorithms.\n\n00:34:34\nchallenge was called AlexNet.\n\n00:34:42\nit's not that different from Fukushima's neocognitron\n\n00:34:49\nBut two major things happened between these two.\n\n00:34:57\nIt's a principled, mathematically rigorous learning\n\n00:35:04\nto tune parameters.\n\n00:35:09\nAnother breakthrough was data.\n\n00:35:19\nthese high capacity models, which eventually will have\n\n00:35:26\nof parameters-- was critical for setting off the deep learning\n\n00:35:36\nAnd really, many people consider the year of 2012\n\n00:35:46\nthe challenge the historical moment of the birth\n\n00:35:54\nrevolution.\n\n00:35:59\nis since then, we are in the era of deep learning explosion.\n\n00:36:10\nconference, called CVPR--\n\n00:36:15\nAnd our arXiv paper has exploded.\n\n00:36:22\nhave been invented to participate in the ImageNet\n\n00:36:28\nIn the following years, we're going\n\n00:36:31\nBut the point is that some of these\n\n00:36:39\nin the progress of the field of computer vision\n\n00:36:49\nSo a lot of things have happened.\n\n00:36:54\nNot only the field of computer vision\n\n00:37:01\nto recognize everyday m like cats and dogs and chairs--\n\n00:37:10\nthe 2012 moment, we've got algorithms\n\n00:37:22\ncan retrieve images, or can do multiple object detections,\n\n00:37:30\nThese are all different tasks in visual recognition\n\n00:37:36\nfamiliar with throughout this course\n\n00:37:42\nThere is so much in the nuanced ability of visual recognition.\n\n00:37:52\nSo there are work in video classification, human activity\n\n00:37:58\nI'm showing you this overview.\n\n00:38:04\nYou don't have to understand exactly what's going on here.\n\n00:38:14\nMedical imaging, those of you who come from a medical field,\n\n00:38:24\nother aspects of medicine, is deeply visual.\n\n00:38:31\nScientific discovery-- even the seminal picture\n\n00:38:41\nuses a lot of computer vision and computational photography\n\n00:38:47\nOf course, applications in sustainability and environment\n\n00:38:58\nAnd we also have made a lot of progress\n\n00:39:07\nThis is actually work by Andrej Karpathy, where he was\n\n00:39:13\nThen we also worked on relationship understanding.\n\n00:39:22\nabout seeing what's on the pixel,\n\n00:39:26\nincluding relationships of objects and also style transfer.\n\n00:39:35\nJustin Johnson, who will come to guest lecture this course,\n\n00:39:45\nAnd of course, in generative AI eras,\n\n00:39:53\nAnd this is the very early days of image generation of Dall-E. I\n\n00:40:03\nand everything has gone beyond these avocado and peach chairs.\n\n00:40:14\nof AI explosion.\n\n00:40:25\nand data have taken this field just\n\n00:40:32\ntotally out of AI winter.\n\n00:40:40\nAnd I don't see any of this slowing down\n\n00:40:48\nAnd also, just a word, because we are in the Silicon Valley,\n\n00:40:58\nlecture hall-- so we cannot ignore also the progress\n\n00:41:05\nSo here is just the FLOP per dollar graph for NVIDIA's GPUs.\n\n00:41:19\nBut as soon as deep learning started\n\n00:41:27\ncan just see the GFLOPS have just completely taken off.\n\n00:41:40\nof lots of compute as well as lots of AI.\n\n00:41:47\nshowing you conference attendees, startups,\n\n00:41:54\nnot just computer vision.\n\n00:42:02\nSo quickly, last but not the least, it's been exciting.\n\n00:42:08\nBut there is still a lot to be done in computer vision.\n\n00:42:14\nAnd with great tools comes with great consequences as well.\n\n00:42:24\nBut it also can do harm.\n\n00:42:28\nevery single AI algorithm today, the large ones,\n\n00:42:33\nAnd data is an artifact of human activities\n\n00:42:40\nAnd a lot of the data carry our bias.\n\n00:42:47\nWe have seen a lot of face recognition algorithms having\n\n00:42:52\nAnd we do have to really recognize that.\n\n00:43:01\nThink about medical imaging.\n\n00:43:05\nWhat if AI is solely behind deciding your job\n\n00:43:11\nSo again, is it totally bad?\n\n00:43:17\nThese are very complicated issues.\n\n00:43:23\nor law school or education school or business school\n\n00:43:29\nissues are engineering issues.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_1_introduction::seg5",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_1_introduction::seg5",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_1_introduction::seg5",
+      "global_kp_id": "kp_human_centered_ai",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "name": "Modern vision extends beyond classification",
+      "description": "The course treats vision as covering segmentation, detection, video, multimodal learning, generative models, vision-language models, 3D vision, and embodied intelligence.",
+      "track_tags": [
+        "frontier_topics",
+        "tasks"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_ai",
+        "multimodal_ai",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "industry",
+        "research",
+        "robotics"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because modern vision extends beyond classification formalizes how the course treats vision as covering segmentation, detection, video, multimodal learning, generative models, vision-language models, 3D vision, and embodied intelligence, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_1_introduction::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_human_centered_ai",
+      "name": "Human-centered AI",
+      "description": "The lecture frames AI progress through the lens of human perception, human impact, and human values rather than only algorithmic performance. Vision systems can save lives and create value, but also propagate bias and cause harm in high-stakes settings.",
+      "track_tags": [
+        "ai_overview",
+        "ethics",
+        "human_centered_ai",
+        "societal_impact"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "industry",
+        "policy",
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because human-centered AI formalizes how the lecture frames AI progress through the lens of human perception, human impact, and human values rather than only algorithmic performance, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp1",
+        "local::lecture_1_introduction::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.42,
+    0.72
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L1_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture01-introduction_transcript.txt"
+  }
+}

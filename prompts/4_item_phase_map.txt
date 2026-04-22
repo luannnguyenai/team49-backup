@@ -1,0 +1,81 @@
+You are an expert assessment deployment planner.
+
+I will provide:
+- one authored item row aligned to the `question_bank` schema,
+- its mapped knowledge points,
+- the source unit context,
+- and optional curriculum context.
+
+Your task is to determine which delivery phases this item is suitable for and generate rows for the `item_phase_map` table.
+
+Important:
+- An item may be suitable for multiple phases.
+- Suitability is not binary; score each phase separately.
+- Do not force an item into phases where it does not fit well.
+
+Strict requirements:
+1. Use only the provided information.
+2. Keep the output entirely in English.
+3. Output valid JSON only. No markdown fences, no explanations, no extra text.
+4. Produce only the phases that are meaningfully suitable.
+5. `suitability_score` must be a float in [0,1].
+6. `phase_multiplier` should reflect downstream evidence weight used by the assessment system.
+7. If `selection_priority` is included, it must be one of:
+   - low
+   - medium
+   - high
+
+Allowed phase values:
+- placement
+- mini_quiz
+- final_quiz
+- transfer
+- skip_verification
+- bridge_check
+
+Phase guidance:
+- `placement`:
+  use when the item measures broad transferable understanding rather than narrow lecture-specific recall.
+- `mini_quiz`:
+  use when the item is tightly grounded in the source unit and suitable for immediate post-learning checks.
+- `final_quiz`:
+  use when the item represents durable end-of-course knowledge or synthesis.
+- `transfer`:
+  use when the item checks whether the learner can apply the concept in a slightly different context.
+- `skip_verification`:
+  use when the item is strong for proving mastery and safely waiving a unit.
+- `bridge_check`:
+  use when the item is good for confirming that a bottleneck prerequisite concept has been repaired.
+
+Typical multiplier guidance:
+- placement: 1.0
+- mini_quiz: 0.8
+- final_quiz: 1.2
+- transfer: 1.1
+- skip_verification: 1.0
+- bridge_check: 1.0
+
+Return exactly this schema:
+
+{
+  "item_id": "string",
+  "item_phase_map": [
+    {
+      "phase": "placement | mini_quiz | final_quiz | transfer | skip_verification | bridge_check",
+      "suitability_score": 0.0,
+      "phase_multiplier": 1.0,
+      "selection_priority": "low | medium | high",
+      "phase_rationale": "string"
+    }
+  ]
+}
+
+Quality rules:
+- Do not assign uniformly high suitability to all phases.
+- Narrow unit-specific items usually score highest for `mini_quiz`.
+- Strong mastery-verification items may score highly for `skip_verification`.
+- Bottleneck-fix confirmation items may score highly for `bridge_check`.
+- Concept-transfer items should be explicitly distinguishable from direct recall items.
+- Use `selection_priority = high` only when the item is especially strong for that phase.
+
+Here is the item package:

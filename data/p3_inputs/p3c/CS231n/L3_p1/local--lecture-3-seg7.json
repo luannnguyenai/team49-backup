@@ -1,0 +1,245 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_3",
+    "lecture_title": "Regularization and Optimization",
+    "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4"
+  },
+  "unit": {
+    "unit_id": "local::lecture_3::seg7",
+    "course_id": "CS231N",
+    "name": "Learning-rate schedules, second-order optimization, and the neural-network transition",
+    "description": "Covers learning-rate tuning and schedules, Hessian-based methods, practical optimizer defaults, and the preview of neural networks.",
+    "summary": "All discussed optimizers have learning rate as a hyperparameter [ts=3525s]. A very high learning rate can make loss explode by oscillating out of the landscape, a very low learning rate converges slowly, and a still-too-high rate near a minimum can keep the optimizer bouncing around [ts=3556s]. Modern deep learning often varies learning rate during training [ts=3609s]. Step decay reduces the learning rate at fixed points, such as multiplying by 0.1 during ResNet training [ts=3625s]. Cosine decay follows a half-cosine from maximum learning rate toward zero; other options include linear and inverse-square-root decay [ts=3654s]. Linear warmup ramps from zero to the maximum learning rate before another scheduler, and a common empirical rule is to scale learning rate by N when batch size increases by N [ts=3726s]. Second-order optimization uses the Hessian to form a quadratic approximation instead of only a gradient-based linear approximation, but Hessian methods are rarely used for large neural networks because second derivatives and Hessian matrices are too expensive in memory and computation [ts=3819s]. The practical advice is that Adam or AdamW is a strong default, AdamW with warmup and cosine decay is common, SGD+Momentum can outperform Adam with more tuning, and small full-batch problems may justify second-order methods [ts=4006s]. The lecture closes by previewing neural networks: a 2-layer network uses two weight matrices with a nonlinearity such as ReLU between them, enabling transformations that can make non-linearly separable points separable by a final linear classifier [ts=4044s].",
+    "key_points": [
+      {
+        "text": "Learning rate is a hyperparameter for SGD, SGD+Momentum, RMSProp, Adam, and AdamW.",
+        "timestamp_s": 3525,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Too-high learning rates can explode or bounce around minima; too-low learning rates converge slowly.",
+        "timestamp_s": 3556,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Step decay reduces learning rate at fixed points, such as multiplying by 0.1 during ResNet training.",
+        "timestamp_s": 3625,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Cosine decay follows a half-cosine schedule from maximum learning rate toward zero.",
+        "timestamp_s": 3654,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Linear warmup ramps learning rate from zero to a target maximum before continuing with a scheduler.",
+        "timestamp_s": 3726,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Linear scaling rule: if batch size increases by N, increase learning rate by N.",
+        "timestamp_s": 3766,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Second-order optimization uses the Hessian to build a quadratic approximation but is impractical for very large deep networks.",
+        "timestamp_s": 3819,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A 2-layer neural network inserts a nonlinearity such as ReLU between two weight matrices.",
+        "timestamp_s": 4044,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+      "start_s": 3525,
+      "end_s": 4113
+    },
+    "difficulty": 4.5,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "transcript_slice": "00:58:48\nyour velocities, your momentums to actually\n\n00:58:53\nwant it to be a function of the loss.\n\n00:58:58\nindependent of your actual weight values,\n\n00:59:02\nBut you still might want a regularization term.\n\n00:59:06\ncalculation.\n\n00:59:09\nUltimately, it's empirical you try both\n\n00:59:12\nBut this is why you would do it that way.\n\n00:59:16\nSo we'll talk about learning rates.\n\n00:59:21\nlearning rates can be chosen.\n\n00:59:25\nwhere what will happen is basically\n\n00:59:30\nof the loss landscape, as we described earlier.\n\n00:59:34\nyour issue is you just converge very slowly.\n\n00:59:39\nbut you might not be able to converge because you're\n\n00:59:44\nbut you're not actually able to get\n\n00:59:48\nAnd ideally, a good learning rate\n\n00:59:52\nto decrease quickly over time, but then you\n\n00:59:59\nIn reality, actually, depending on the situation, a lot of these\n\n01:00:04\ndepending on the step in training,\n\n01:00:09\nSo you can actually change your learning rate\n\n01:00:13\nYou don't need to always have a fixed learning rate or step\n\n01:00:16\nAnd pretty much all modern deep learning,\n\n01:00:21\nhave different ways they vary the learning\n\n01:00:25\nSo one really simple way you could do it is after a fixed\n\n01:00:33\nand you continue training.\n\n01:00:39\ntoo high for you to be able to converge any further,\n\n01:00:44\ninto the loss landscape.\n\n01:00:48\nSo that's a very popular type of convolutional neural network,\n\n01:00:54\nAnother thing you could do is cosine learning rate decay.\n\n01:01:00\nSo here you have--\n\n01:01:05\nwhere you're starting at your maximum learning rate here.\n\n01:01:11\nAnd it follows this 1.2 cosine shape,\n\n01:01:17\nI won't go into too many details,\n\n01:01:21\nWhen your loss uses a cosine learning rate scheduler,\n\n01:01:25\nwhere you get pretty good continued gains\n\n01:01:30\nBut the basic idea is that the actual shape\n\n01:01:34\non what scheduler you use.\n\n01:01:38\nIt looks very different, for example, than this one,\n\n01:01:42\nof the learning rate during training.\n\n01:01:48\nSo it just follows a straight line.\n\n01:01:52\nThere's basically, an unlimited number of ways\n\n01:01:57\nAnd depending on the type of model you're training\n\n01:02:00\nyou just choose the one that works best.\n\n01:02:05\nin your setting.\n\n01:02:09\nis to have a linear warm up.\n\n01:02:13\nyou spend a fixed number of iterations\n\n01:02:20\nyou go about doing whatever scheduler you had afterwards.\n\n01:02:24\nwould be like the inverse square root.\n\n01:02:28\ncosine is a very popular setup for training models.\n\n01:02:38\ncalled the linear scaling hypothesis or linear scaling\n\n01:02:44\nI forget the name.\n\n01:02:46\nit shows that if you increase your batch\n\n01:02:53\nyou should also scale your learning rate by n.\n\n01:02:58\nyou should increase your learning rate directly\n\n01:03:03\nSo I think the math behind this is a bit involved,\n\n01:03:09\nSo people have tried to show mathematical proofs\n\n01:03:13\nBut based on the variation of gradients in your batch\n\n01:03:21\net cetera, but really this is just\n\n01:03:25\nSo this is a good rule of thumb.\n\n01:03:28\nwant to increase the batch size, then also\n\n01:03:35\nCool.\n\n01:03:39\nis this idea of second-order optimization, which\n\n01:03:45\na question about earlier, too.\n\n01:03:49\nbut just to let you know this exists.\n\n01:03:53\nBut the basic idea is right now we're using the gradient\n\n01:03:59\nwhere's the downward direction where\n\n01:04:03\nAnd we just look at the direction\n\n01:04:07\nAnd we added fancy things like momentum and the RMSProp\n\n01:04:15\nBut this is the basic idea.\n\n01:04:21\nThe idea of the Hessian is instead of using the gradient,\n\n01:04:33\npolynomial to your function based on the derivatives\n\n01:04:38\nAnd you then try to find the minimum this way.\n\n01:04:44\nthis actually works extremely well.\n\n01:04:49\nbecause it requires two things.\n\n01:04:53\nwhereas right now we're just doing the first part where we're\n\n01:04:57\nneed to be able to calculate the second mixed derivatives, which\n\n01:05:05\nthis mixed derivative of all of your parameters\n\n01:05:12\ncan get very large as you have these many million or billion\n\n01:05:17\nSo in practice, we don't use it because these matrices become\n\n01:05:25\nAnd so you run out of memory on your computer\n\n01:05:27\nSpecifically, you're on a GPU memory.\n\n01:05:31\nor if you're OK with spending much more time to get better\n\n01:05:39\nwant to look into this.\n\n01:05:42\nthis actually works quite well.\n\n01:05:45\nwe basically never do this due to the memory restrictions.\n\n01:05:50\ntrying to calculate the Hessian, et cetera,\n\n01:05:58\nAll right.\n\n01:06:03\nall that can be useful.\n\n01:06:08\nfor training your first model if you're working on a new problem.\n\n01:06:14\nAnd it could even work OK, even if you do constant learning\n\n01:06:16\nSo usually people will try Adam AdamW with constant learning\n\n01:06:21\ndecay those are like a really popular combination.\n\n01:06:30\nBut the tricky thing is because you generally\n\n01:06:36\nhave to try many more learning rates because you\n\n01:06:43\nfor the steep directions.\n\n01:06:46\nwhereas in practice, Adam's best by test.\n\n01:06:50\nand it works very well.\n\n01:06:55\nIf you're doing a full-batch update where you're already,\n\n01:06:59\nyour entire training set into your batch size,\n\n01:07:06\ninto second-order and beyond, because it seems like your data\n\n01:07:11\nand you could potentially, benefit\n\n01:07:17\nand computing more sophisticated strategies for going down trying\n\n01:07:25\nYeah, so I think we're essentially\n\n01:07:28\nI'll give some slides about looking forward.\n\n01:07:34\nthan linear models, which is what we covered in this lecture?\n\n01:07:39\nbe looking at neural networks, which is very exciting topic.\n\n01:07:47\nyou have two of these weight matrices\n\n01:07:51\nAnd you have something called a non-linearity sort of stuck\n\n01:07:55\nSo in this case, the most common--\n\n01:08:00\none is just this ReLU function, which you'll learn about more.\n\n01:08:05\nand we have this additional function\n\n01:08:11\nThis is nice because, as I said, it's nonlinear.\n\n01:08:16\ndata like this, you'll run into an issue\n\n01:08:20\nare not linearly separable.\n\n01:08:24\nor through many layers of a model,\n\n01:08:28\ninto a way in which it is separable by a line, which\n\n01:08:33\n[AUDIO LOGO]",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_3::seg7",
+      "global_kp_id": "kp_adam_and_adamw",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg7",
+      "global_kp_id": "kp_learning_rate_schedules_warmup_and_batch_size_scaling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_3::seg7",
+      "global_kp_id": "kp_second_order_optimization_and_hessian_limitations",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg7",
+      "global_kp_id": "kp_neural_network_nonlinearity_preview",
+      "planner_role": "main",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_adam_and_adamw",
+      "name": "Adam and AdamW",
+      "description": "Adam combines momentum and RMSProp-style adaptivity; AdamW decouples weight decay from moment estimation.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "adam",
+        "adamw",
+        "bias_correction",
+        "weight_decay"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because adam and AdamW formalizes how adam combines momentum and RMSProp-style adaptivity; AdamW decouples weight decay from moment estimation, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_learning_rate_schedules_warmup_and_batch_size_scaling",
+      "name": "Learning-rate schedules, warmup, and batch-size scaling",
+      "description": "Changing learning rates during training using step, cosine, linear, inverse-square-root schedules, warmup, and linear scaling with batch size.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "batch_size_scaling",
+        "learning_rate_schedule",
+        "warmup"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because learning-rate schedules, warmup, and batch-size scaling clarifies changing learning rates during training using step, cosine, linear, inverse-square-root schedules, warmup, and linear scaling with batch size, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_second_order_optimization_and_hessian_limitations",
+      "name": "Second-order optimization and Hessian limitations",
+      "description": "Using Hessians and quadratic approximations, and why these methods are usually impractical for large deep networks.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "hessian",
+        "newton_method",
+        "second_order_optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because second-order optimization and Hessian limitations extends the core thread to using Hessians and quadratic approximations, and why these methods are usually impractical for large deep networks without being required for the main pipeline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_neural_network_nonlinearity_preview",
+      "name": "Neural-network nonlinearity preview",
+      "description": "A two-layer neural network adds a nonlinearity between weight matrices to transform data into a linearly separable representation.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "feature_transform",
+        "neural_networks",
+        "nonlinearity",
+        "relu"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because neural-network nonlinearity preview formalizes how a two-layer neural network adds a nonlinearity between weight matrices to transform data into a linearly separable representation, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp16"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.35,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L3_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture03-regularization-and-optimization_transcript.txt"
+  }
+}

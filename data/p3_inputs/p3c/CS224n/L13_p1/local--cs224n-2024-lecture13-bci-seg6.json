@@ -1,0 +1,195 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "cs224n-2024-lecture13-bci",
+    "lecture_title": "Brain-Computer Interfaces",
+    "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8"
+  },
+  "unit": {
+    "unit_id": "local::cs224n-2024-lecture13-bci::seg6",
+    "course_id": "cs224n-2024",
+    "name": "Training pipeline for the speech neuroprosthesis",
+    "description": "Details the full decoding pipeline: paired data collection, phoneme targets, CTC alignment, GRU modeling, beam search, language models, and reranking.",
+    "summary": "The technical pipeline begins with paired data collection: T12 reads prompted sentences while researchers record neural activity, forming supervised neural-to-text training examples gathered in 40-sentence blocks over roughly 100-minute sessions [ts=2891s][ts=2947s]. Across about three months the team collected around 10,000 conversational-English sentences from the Switchboard corpus, trained a decoder in roughly 10 to 20 minutes after each session, and then evaluated on held-out sentences [ts=2989s][ts=3003s]. For modeling, the key design choice is to decode phonemes before words because English has only about 40 phonemes, making coverage easier under limited data [ts=3052s][ts=3068s]. The neural-to-phoneme problem is treated as monotonic sequence transduction, so the speaker introduces CTC with blank symbols and repeated-token collapse rather than a fully general encoder-decoder alignment [ts=3111s][ts=3210s][ts=3300s]. He then argues for GRU-based recurrent models over transformers because the dataset is small and real-time latency matters, and describes beam search, pronunciation-lexicon conversion, n-gram language modeling with a word insertion bonus, transformer reranking, and word error rate as the evaluation metric [ts=3375s][ts=3524s][ts=3635s][ts=3781s][ts=3843s].",
+    "key_points": [
+      {
+        "text": "Training uses paired examples of neural activity aligned with target sentences read by the participant.",
+        "timestamp_s": 2898,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The team collected data in 40-sentence blocks over about 100 minutes per session and trained a decoder after each session.",
+        "timestamp_s": 2947,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Phonemes are used as an intermediate target because English has about 40 phonemes, far fewer than the number of possible words.",
+        "timestamp_s": 3052,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CTC handles length mismatch and monotonic alignment by adding blank tokens and collapsing repeats.",
+        "timestamp_s": 3300,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "GRUs were preferred over transformers because the dataset was small and recurrent models were efficient for real-time inference.",
+        "timestamp_s": 3375,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Decoding combines beam search, a pronunciation lexicon, an n-gram language model, a word insertion bonus, and transformer reranking.",
+        "timestamp_s": 3603,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Performance is measured with word error rate.",
+        "timestamp_s": 3845,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=14",
+      "start_s": 2884,
+      "end_s": 3886
+    },
+    "difficulty": 0.82,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 17,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "transcript_slice": "00:48:04\nOK.\n\n00:48:05\nMore technical details about how we build this speech BCI here.\n\n00:48:15\nis to try to build a decoder.\n\n00:48:19\nwe need to do some data collection.\n\n00:48:24\nsitting next to T12, and asking her to read\n\n00:48:29\nAnd then we'll record the neural activities days\n\n00:48:33\nSo we'll have this kind of compared\n\n00:48:38\nthe neural activity.\n\n00:48:42\nSo we basically have to basically go to where T12 lived.\n\n00:48:51\nand then testing the decoder.\n\n00:48:59\nhave very limited time.\n\n00:49:06\nSo we'll divide our data collection\n\n00:49:12\nwe can start instructing her to speak 40 sentences every block,\n\n00:49:18\nSo the data collection will last about 100 minutes\n\n00:49:24\nAnd then we'll train a decoder.\n\n00:49:30\nIt's really quick.\n\n00:49:32\nstart actually evaluating the performance of the decoder\n\n00:49:38\nand then see how well we can decode\n\n00:49:43\nSo in total, we did the experiments sessions\n\n00:49:49\nAnd then we collect about 10,000 sentences from this,\n\n00:49:59\nwhich I really want to emphasize that we want to decode this kind\n\n00:50:06\nOnce we have the data, then we can\n\n00:50:10\ncan best solve this task.\n\n00:50:15\nSo we have some neural features inputs, right.\n\n00:50:21\nis a time series.\n\n00:50:25\nthat at each time point, we'll get some feature vectors.\n\n00:50:38\nSo we know that she's trying to speak some sentence.\n\n00:50:44\nfeatures here.\n\n00:50:52\nwords from the input sentences, maybe we\n\n00:50:59\nThe reason is that first, we know that there's\n\n00:51:05\nSo that's a much smaller set compared to the number of words.\n\n00:51:10\ndecode words, then you need to have much more data to cover\n\n00:51:15\nWhereas for phonemes, you probably need way less data\n\n00:51:20\nSo instead of decoding directly decoding the words,\n\n00:51:26\nof phonemes from the neural input features.\n\n00:51:34\nOne is the first is a neural to phoneme decoder.\n\n00:51:38\nSo that's the two decoders that will have to design this task.\n\n00:51:47\nSo basically, I think at this point of the class,\n\n00:51:54\nto sequence problem.\n\n00:51:57\nThe output is a token sequence.\n\n00:52:04\nprobably know that we can use some encoder and decoder\n\n00:52:11\nHowever, for encoder decoder model,\n\n00:52:16\nneed because encoder and decoder model allows\n\n00:52:22\nand outputs.\n\n00:52:27\nWhereas some languages have different word orders\n\n00:52:34\nBut here, we know that the alignment is actually\n\n00:52:43\nmachine translation, where the alignment is\n\n00:52:47\nI mean, that you know that the probability-- that the say,\n\n00:52:53\nlike corresponds to the first phonemes in output sentence\n\n00:52:58\nSo this is of a monotonic alignment.\n\n00:53:07\nwe can actually borrow an idea that people have developed\n\n00:53:15\nand speech recognition, where the task is also\n\n00:53:21\nsequence or a phoneme sequence, also, ladder sequences from some\n\n00:53:30\nAnd the techniques are going to use\n\n00:53:34\nSo for people who have taken CS224S,\n\n00:53:40\nbut I'm going to do a little bit introduction about this thing.\n\n00:53:46\nbut I'll just quickly go over it here.\n\n00:53:50\nThe connection time classification tool\n\n00:53:55\nThe goal is that we want to decode some output sequence,\n\n00:54:02\nAnd usually, the input output has some length mismatch.\n\n00:54:10\nthe input is could have a length of several thousands of frames,\n\n00:54:20\nlike fine high temporal resolution features,\n\n00:54:26\nwhereas the output only has a few tokens.\n\n00:54:33\nWhat we can do is we can still using, say, a RNN transformer\n\n00:54:44\nright.\n\n00:54:47\na way to fill in between, like filling between the output\n\n00:54:52\nSome like spacers so that the output token can also\n\n00:54:57\nsequence can have the same length as the input sequence.\n\n00:55:01\nDoes is- introduce this additional blank token\n\n00:55:07\nWith this blank token, what you can actually do is,\n\n00:55:16\nIt's trying to produce this kind of sequence here.\n\n00:55:24\nand then you're taking out that blank tokens.\n\n00:55:30\nthat corresponds to the output.\n\n00:55:33\nyou to do a sequence to sequence problem that\n\n00:55:40\nand also has this kind of monotonic alignment property.\n\n00:55:49\nhow you can train a CTC loss here.\n\n00:55:58\nSo now let's suppose that we have\n\n00:56:04\nbe used to train our model.\n\n00:56:10\nwe want to use for this task.\n\n00:56:15\nI think at this point of class, I think most of you guys\n\n00:56:20\nThere's no reason for me to say more about it.\n\n00:56:25\nThe reason is that we don't have a large data set.\n\n00:56:31\nAnd also transformer is really good at dealing\n\n00:56:35\nHere, for the speech production, there\n\n00:56:42\nSo let's just go back to the very simple RNN.\n\n00:56:48\nAnd it can predict--\n\n00:56:54\nAnd another nice thing about RNN is that it can\n\n00:56:58\nIt can do, like put a very complicated RNN,\n\n00:57:08\nThe most popular RNN we have learned is that LSTM.\n\n00:57:16\nhere with my cursor, is this memory\n\n00:57:23\nlike long-range information, and then use this different input\n\n00:57:29\ngates to control how you can write, read and write\n\n00:57:35\nBut LSTM is also very complicated.\n\n00:57:40\nGRU, gated recurrent unit.\n\n00:57:44\nis that it's trying to combine this memory\n\n00:57:50\nBy doing that, you can also reduce some gates.\n\n00:57:57\nthat works really well when you have a small data set.\n\n00:58:06\nSo now, we know that how we can decode phonemes.\n\n00:58:11\nto decode the phonemes.\n\n00:58:14\nSo at inference time, by inference time,\n\n00:58:19\npass in some neural activities into our decoders,\n\n00:58:24\nSo there's maybe at the first time stamp,\n\n00:58:30\nThe problem here is that how do I figure out\n\n00:58:36\nthis phoneme probabilities?\n\n00:58:40\nsequences here.\n\n00:58:48\ndid something similar in the assignment 3, which\n\n00:58:53\nthe most likely sequence here.\n\n00:58:57\nwhen you are applying it to the CTC loss,\n\n00:59:05\nYeah, so let's just skip over that.\n\n00:59:12\nsearch to find the most likely phoneme sequences.\n\n00:59:18\nSo that's because we eventually want to decode a sentence,\n\n00:59:25\nSo one thing you can modify the beam search\n\n00:59:31\nyou can map each words into its pronunciations,\n\n00:59:35\nwe can basically see if you decode some phoneme sequences\n\n00:59:40\nreplace that phoneme sequence with that words.\n\n00:59:47\nby using a language model.\n\n00:59:55\nthat's the decoding equation.\n\n01:00:03\nthe y is the decoded the word sequences.\n\n01:00:10\nhave the same likelihood.\n\n01:00:16\nsay I can spoke.\n\n01:00:21\nSo we can use maybe use the language model to evaluate\n\n01:00:26\nand then using that as some sort of weight\n\n01:00:32\nSo we're adding this extra term here\n\n01:00:37\nThat's actually you can just decompose that\n\n01:00:45\nAnd you can basically measure these things using any language\n\n01:00:50\nNow another thing we want to add here is--\n\n01:00:54\nSo one problem about this language model,\n\n01:01:03\nwill have smaller probabilities than shorter sentences.\n\n01:01:08\nhow you decompose that, how you decompose this probability here.\n\n01:01:14\nthe length of the decoder sequence\n\n01:01:20\nSo what we are eventually trying to optimize\n\n01:01:27\nby the RNN decoder, and then using\n\n01:01:33\nword insertion bonus, and also some ways here you can optimize.\n\n01:01:39\nJust trying to put everything together.\n\n01:01:44\nwhich is you get this neural features every 20 milliseconds.\n\n01:01:50\nyou get some phoneme probabilities.\n\n01:01:54\nSo everything has to happen under--\n\n01:01:59\nYou do a really quick beam search\n\n01:02:05\nto the word I or the word I. And then\n\n01:02:11\nmodel instead of a more powerful transformer language model.\n\n01:02:19\nreally quickly under 20 milliseconds.\n\n01:02:25\nAnd then you want all your values\n\n01:02:28\nIf you use a transformer language model, such as GPT 3,\n\n01:02:35\ninferences under 20 milliseconds.\n\n01:02:39\nyou can just load everything into memory.\n\n01:02:43\nSo it's really quick.\n\n01:02:48\nand then you just keep say the top k hypothesis\n\n01:02:54\nSo that's how we use the n-gram language model\n\n01:03:01\nAfter that, we'll use the transformer language model.\n\n01:03:09\nmodel.\n\n01:03:12\nout the entire sentence.\n\n01:03:19\nat this time, I can use the transformer language model,\n\n01:03:25\nto say only for 100 hypothesis under the time of maybe half\n\n01:03:30\nAnd then can get a better probability measurement\n\n01:03:36\nYeah.\n\n01:03:38\nis how the entire system works when I show you\n\n01:03:44\nusing this complicated, not [INAUDIBLE] multi-stage machine\n\n01:03:52\nto say and build this high performance neural speech BCI.\n\n01:04:00\nWell, almost time here.\n\n01:04:03\nThis evaluation is how we measure\n\n01:04:09\nYou also have all the data open to as a competition.\n\n01:04:14\nreally want to curious about this thing,\n\n01:04:19\nI think here is--\n\n01:04:25\nis that you actually see how your research can impact people\n\n01:04:30\nSo this is a quote from our participant T12.\n\n01:04:36\nworked for her.\n\n01:04:41\nafter so many years of silence.\n\n01:04:46\nSo in the last five minutes, maybe I",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs224n-2024-lecture13-bci::seg6",
+      "global_kp_id": "kp_paired_neural_text_data_collection",
+      "planner_role": "prereq",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture13-bci::seg6",
+      "global_kp_id": "kp_ctc_for_monotonic_neural_to_phoneme_alignment",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture13-bci::seg6",
+      "global_kp_id": "kp_real_time_decoding_stack_with_grus_beam_search_and_language_models",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_paired_neural_text_data_collection",
+      "name": "Paired neural-text data collection",
+      "description": "Building a speech decoder requires supervised paired recordings of neural activity and target utterances collected under clinical constraints.",
+      "track_tags": [
+        "dataset_design"
+      ],
+      "domain_tags": [
+        "data_collection",
+        "paired_data"
+      ],
+      "career_path_tags": [
+        "applied_ml",
+        "research_engineering"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because paired neural-text data collection clarifies building a speech decoder requires supervised paired recordings of neural activity and target utterances collected under clinical constraints, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture13-bci::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_ctc_for_monotonic_neural_to_phoneme_alignment",
+      "name": "CTC for monotonic neural-to-phoneme alignment",
+      "description": "Connectionist Temporal Classification solves the mismatch between long neural sequences and shorter phoneme outputs when alignment is monotonic but unknown.",
+      "track_tags": [
+        "sequence_modeling",
+        "speech"
+      ],
+      "domain_tags": [
+        "ctc",
+        "monotonic_alignment"
+      ],
+      "career_path_tags": [
+        "ml_research",
+        "speech_ml"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cTC for monotonic neural-to-phoneme alignment formalizes how connectionist Temporal Classification solves the mismatch between long neural sequences and shorter phoneme outputs when alignment is monotonic but unknown, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture13-bci::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_real_time_decoding_stack_with_grus_beam_search_and_language_models",
+      "name": "Real-time decoding stack with GRUs, beam search, and language models",
+      "description": "The final system couples a GRU acoustic-style decoder with beam search, lexicon constraints, fast n-gram language modeling, and transformer reranking.",
+      "track_tags": [
+        "sequence_modeling",
+        "speech"
+      ],
+      "domain_tags": [
+        "beam_search",
+        "gru",
+        "n_gram_language_model",
+        "reranking"
+      ],
+      "career_path_tags": [
+        "inference_engineering",
+        "speech_ml"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because real-time decoding stack with GRUs, beam search, and language models synthesizes the final system couples a GRU acoustic-style decoder with beam search, lexicon constraints, fast n-gram language modeling, and transformer reranking into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture13-bci::kp11"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.67,
+    0.97
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture13-bci_transcript.txt"
+  }
+}

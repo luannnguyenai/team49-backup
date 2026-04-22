@@ -1,0 +1,206 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture11_nlg",
+    "lecture_title": "Lecture 11 - Natural Language Generation",
+    "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY"
+  },
+  "unit": {
+    "unit_id": "local::lecture11_nlg::seg2",
+    "course_id": "cs224n",
+    "name": "Autoregressive generation, architectures, and teacher forcing",
+    "description": "Reviews left-to-right autoregressive language modeling, architecture choices, and the standard maximum-likelihood training setup.",
+    "summary": "This segment reviews autoregressive language modeling: at each step the model scores the vocabulary, applies softmax to obtain the next-token distribution, chooses a token, and feeds that prediction back in recursively until the sequence ends [ts=528s]. It then connects task type to architecture, describing encoder-decoder systems as the usual choice for less open-ended tasks like machine translation and decoder-only autoregressive models as the common choice for more open-ended generation, while emphasizing that this is a practical convention rather than a hard constraint [ts=577s] [ts=638s]. The lecture revisits maximum-likelihood training as next-token prediction under teacher forcing, where gold previous tokens are provided during training [ts=672s]. It distinguishes this from generation-time student forcing, where the model must condition on its own earlier outputs, and clarifies that “autoregressive” refers to generating left-to-right by chaining over previously generated tokens [ts=729s] [ts=742s].",
+    "key_points": [
+      {
+        "text": "Autoregressive generation predicts one token at a time from a softmax next-token distribution and feeds predictions back into the model.",
+        "timestamp_s": 528,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Encoder-decoder models are commonly preferred for less open-ended tasks such as machine translation, while decoder-only models are common for more open-ended generation.",
+        "timestamp_s": 577,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Teacher forcing trains by maximizing the probability of the next token given gold previous tokens.",
+        "timestamp_s": 672,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Student forcing uses the model's own generated text as context at generation time.",
+        "timestamp_s": 858,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Autoregressive means generating left to right by conditioning on tokens just generated via the chain rule.",
+        "timestamp_s": 742,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10",
+      "start_s": 516,
+      "end_s": 904
+    },
+    "difficulty": 0.46,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 6,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "transcript_slice": "00:08:39\nand review the NLG models and trainings\n\n00:08:44\nSo I think we discussed the basics of natural language\n\n00:08:48\nSo here is how autoregressive language model works.\n\n00:08:53\ntake in a sequence of tokens as input.\n\n00:08:58\nAnd the output is basically the new token yt.\n\n00:09:06\nto assign a score for each token in the vocabulary, denoted\n\n00:09:10\nAnd then we apply softmax to get the next token distribution p,\n\n00:09:16\nthis next token distribution.\n\n00:09:21\nwe then pass it back into the language model as the input,\n\n00:09:26\nAnd then we do so recursively until we've reached\n\n00:09:31\nSo any questions so far?\n\n00:09:37\nSo for the two types of NLG tasks that we talked about,\n\n00:09:43\nthey tend to prefer different model architectures.\n\n00:09:49\nwe typically use an encoder-decoder system,\n\n00:09:55\nabout functions as the decoder.\n\n00:09:59\nfor encoding the inputs.\n\n00:10:04\nbecause the encoder is like the bidirectional LSTM,\n\n00:10:12\nSo for more open-ended tasks, typically,\n\n00:10:20\nOf course, these architectures are not really hard constraints\n\n00:10:27\nused to do machine translation.\n\n00:10:31\nbe used for storage generation.\n\n00:10:35\nbut it's a reasonable convention because using\n\n00:10:42\ncompared to an encoder-decoder model for MT.\n\n00:10:48\nseems to achieve similar performance\n\n00:10:52\nAnd therefore, if you have the compute budget\n\n00:10:56\nyou might just be better off by only training a larger decoder\n\n00:10:59\nSo it's kind of more of an allocation of resources problem\n\n00:11:10\nOK, so how do we train such a language model?\n\n00:11:15\nthat the language models are trained by maximum likelihood.\n\n00:11:21\nthe probability of the next token, yt,\n\n00:11:25\nAnd this is our optimization objective.\n\n00:11:32\ntask because we are trying to distinguish the actual word, yt\n\n00:11:40\nAnd this is also called teacher forcing because, at each time\n\n00:11:49\nas input to the model.\n\n00:11:54\nyou wouldn't have any access to y star,\n\n00:11:59\nto feed it back into the model to generate the next token.\n\n00:12:03\nwe'll talk in detail later.\n\n00:12:09\nYeah?\n\n00:12:11\nAbout autoregressive, we've never used that word before.\n\n00:12:15\nAutoregressive?\n\n00:12:18\nso let's look at these animations again.\n\n00:12:22\nOh, it just looks like you are generating word\n\n00:12:26\nSo here, suppose that you are given y less than t.\n\n00:12:32\nAnd then once you have yt, you'll\n\n00:12:36\nand then feed it back in, generate another thing.\n\n00:12:40\nare using chain rule to condition on the tokens\n\n00:12:46\nThis chain rule thing is called autoregressive.\n\n00:12:50\nare doing left to right autoregressive\n\n00:12:53\nBut there are also other more interesting models\n\n00:12:58\nThis idea of generating one token at once\n\n00:13:04\nCool.\n\n00:13:08\nYep.\n\n00:13:16\nwill define a function to select a token from this distribution.\n\n00:13:23\nmodel to compute this p, which is the next token distribution.\n\n00:13:28\nis the decoding algorithm, which helps\n\n00:13:34\nSo the obvious decoding algorithm\n\n00:13:39\nas yt hat for each time step.\n\n00:13:44\nworks because they work for your homework 4, to do better,\n\n00:13:49\nWe can decide to improve decoding\n\n00:13:54\nOf course, there are other things that we can do.\n\n00:13:58\nimprove model architectures.\n\n00:14:04\nSo now let's talk about how decoding algorithms work\n\n00:14:10\nBefore that, I'm happy to take any questions\n\n00:14:17\nOK, yeah.\n\n00:14:20\nthe difference between teacher forcing and student forcing?\n\n00:14:27\nSo basically, for teacher forcing,\n\n00:14:30\ntrain the language model because you already\n\n00:14:34\nSo you kind of use the gold text up until time step t,\n\n00:14:39\nwill try to predict yt plus 1.\n\n00:14:45\nto this gold reference data.\n\n00:14:49\nso you have to use the text that you generated yourself\n\n00:14:55\nto predict t plus 1.\n\n00:15:00\nCool.\n\n00:15:03\nAt each time step, our model computes a vector",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture11_nlg::seg2",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11_nlg::seg2",
+      "global_kp_id": "kp_teacher_forcing_and_student_forcing",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11_nlg::seg2",
+      "global_kp_id": "kp_open_ended_generation",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp7",
+        "local::lecture09-pretraining::kp4",
+        "local::lecture11_nlg::kp3",
+        "local::lecture13-generative-models-1::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_teacher_forcing_and_student_forcing",
+      "name": "Teacher forcing and student forcing",
+      "description": "The contrast between training with gold previous tokens and generating with the model's own previous outputs.",
+      "track_tags": [
+        "language_models",
+        "training"
+      ],
+      "domain_tags": [
+        "nlg",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because teacher forcing and student forcing clarifies the contrast between training with gold previous tokens and generating with the model's own previous outputs, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11_nlg::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_open_ended_generation",
+      "name": "Open-ended generation and evaluation",
+      "description": "A way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness. Open-ended tasks have many valid answers and graded quality, so evaluation must move beyond exact labels.",
+      "track_tags": [
+        "evaluation",
+        "generation",
+        "task_formulation"
+      ],
+      "domain_tags": [
+        "information_theory",
+        "language_models",
+        "nlg",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "applied_science",
+        "nlp_research",
+        "research"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because open-ended generation and evaluation formalizes how a way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture11-benchmarking::kp6",
+        "local::lecture11_nlg::kp2"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.31,
+    0.61
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_nlg_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture20-nlg_transcript.txt"
+  }
+}

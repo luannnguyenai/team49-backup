@@ -1,0 +1,114 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_6",
+    "lecture_title": "Training CNNs and CNN Architectures",
+    "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_6::seg2",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Dropout regularization",
+    "description": "Explains dropout as train-time random masking, why it improves generalization, and how inference-time scaling works.",
+    "summary": "This segment presents dropout as a regularization layer that injects randomness during training by zeroing out a fixed proportion of activations on each forward pass [ts=596s][ts=625s]. The instructor frames its benefit as discouraging co-adaptation: the model cannot over-rely on a small set of correlated features, so it learns broader and more redundant feature-to-class correspondences [ts=677s][ts=751s]. He explicitly notes the tradeoff that training gets harder because the model sees incomplete information, but test-time performance can improve because dropout is removed at inference [ts=793s][ts=827s]. At test time, all activations are used and then scaled by the dropout probability so the expected magnitude of inputs matches what downstream layers saw during training [ts=833s][ts=915s]. Backprop through dropped activations yields zero gradient, so weights connected only through those masked paths are not updated on that step [ts=867s][ts=906s].",
+    "key_points": [
+      {
+        "text": "In each forward pass, dropout randomly sets a fixed fraction p of activations to zero; 0.5 and 0.25 are common settings.",
+        "timestamp_s": 596,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Dropout encourages redundant representations and prevents the network from over-relying on correlated feature pairs.",
+        "timestamp_s": 677,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Dropout can hurt training accuracy while improving test-time generalization because masking is only used during training.",
+        "timestamp_s": 793,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "At test time, use all activations and multiply by the dropout probability to preserve expected input magnitude.",
+        "timestamp_s": 845,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Masked activations contribute zero gradient, so associated upstream paths are not updated on that step.",
+        "timestamp_s": 887,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+      "start_s": 577,
+      "end_s": 970
+    },
+    "difficulty": 0.44,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "transcript_slice": "00:09:37\nSo the next type of layer we'll talk about is called dropout.\n\n00:09:44\nAnd this is the final layer that you'll\n\n00:09:48\nwe can start going through all these different CNN\n\n00:09:53\nSo with dropout, the basic idea is\n\n00:09:59\nthat we then take away at test time.\n\n00:10:03\nto learn the training data, but then it will generalize better.\n\n00:10:09\nThe way we do it concretely is that in each forward pass\n\n00:10:15\nsome of the outputs or activations from that layer.\n\n00:10:24\nwhich is just a fixed hyperparameter,\n\n00:10:28\nAnd 0.5 is probably the most common or 0.25\n\n00:10:34\nSo you're just dropping out a fixed percentage of the values\n\n00:10:37\nAnd so going forward to the next layer these would be 0.\n\n00:10:45\nSo I mean, basically all the outputs here are 0 at this point\n\n00:10:52\neven need to calculate the values because 0\n\n00:10:57\nSo I think in general you might ask, why does this work?\n\n00:11:07\nstudied from a theoretical standpoint,\n\n00:11:13\ncan view what dropout is doing to gain intuition\n\n00:11:17\nSo it basically forces your network to--\n\n00:11:24\nSo if we have a list of features that we're learning at a given\n\n00:11:31\nand we have a CNN that is basically extracting each\n\n00:11:37\nears in the image or if there's a tail, if it's furry,\n\n00:11:43\nto output the probability of a cat score.\n\n00:11:47\nis because some of these values might randomly\n\n00:11:51\nYour model can't over rely on certain features\n\n00:11:56\nand actually needs to learn a more broad set\n\n00:12:02\nclasses.\n\n00:12:07\nif it has an ear and is furry, it just so happens\n\n00:12:14\nor if it has claws and it has an ear,\n\n00:12:20\nSo it'll actually help you generalize\n\n00:12:25\nset there might actually be really strong correlations\n\n00:12:30\nclass.\n\n00:12:33\nmaking it so the model can't rely\n\n00:12:36\nbecause it won't always see the pairs of features together.\n\n00:12:43\nAnd the question is if we had something like tree instead\n\n00:12:48\nSo the dropping out part is actually completely random\n\n00:12:54\nIt's just in this case 50% of your features at any given step\n\n00:13:01\nSo yeah, you don't have to make choices\n\n00:13:08\nHow would the model know if you're only\n\n00:13:13\nThe point is you will actually do worse on the training data\n\n00:13:18\nSo it does make the model worse by not having\n\n00:13:22\nat test time, this idea.\n\n00:13:25\nand test time because at test time\n\n00:13:30\nSo the final component here, which maybe I\n\n00:13:35\nis the idea at test time you're no longer dropping out\n\n00:13:39\nSo this is randomness that we're adding during the training phase\n\n00:13:41\nThen at test time we're never masking\n\n00:13:49\nidea altogether.\n\n00:13:54\nout 50% of the activations during training time,\n\n00:13:58\n50% more values that are being input to each of your layers.\n\n00:14:06\nSo what you need to do is multiply by the probability\n\n00:14:14\ninto each layer is preserved during training and test time.\n\n00:14:19\nand then at test time, you just include all of them,\n\n00:14:24\nbe seeing much larger magnitude of inputs than before.\n\n00:14:30\nSo for back prop when you have these zeroed values,\n\n00:14:40\nof your directed graph anymore.\n\n00:14:43\nIf you have a zeroed value at that point\n\n00:14:47\nSo anything further back in your computational graph,\n\n00:14:56\nIf you're dropping out certain values or activations,\n\n00:15:03\nwill not be updated during gradient descent\n\n00:15:08\nSo the question is--\n\n00:15:11\nWhat are we doing at test time?\n\n00:15:17\nWe're not dropping them out anymore,\n\n00:15:21\nSo we multiply each of our output activations\n\n00:15:26\nSo otherwise you can imagine you have\n\n00:15:32\nof inputs than it did during training at test time.\n\n00:15:37\nto maintain the same magnitude of your inputs coming in.\n\n00:15:43\nthese different properties.\n\n00:15:47\nSo the question is, can you just add noise to the image instead?\n\n00:15:51\nto do that in future slides.\n\n00:15:57\nOK, some specific code here.\n\n00:16:01\nbut you're dropping a p percentage of your activations",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_6::seg2",
+      "global_kp_id": "kp_dropout",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_dropout",
+      "name": "Dropout regularization",
+      "description": "A train-time masking technique that randomly zeros activations so the network cannot rely on brittle co-adapted features. A regularization method that randomly masks hidden activations during training and rescales at test time.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "regularization"
+      ],
+      "domain_tags": [
+        "dropout",
+        "generalization",
+        "neural_network_training",
+        "regularization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because dropout regularization clarifies a train-time masking technique that randomly zeros activations so the network cannot rely on brittle co-adapted features, sharpening later modeling, analysis, or evaluation choices while roles split between optional and supporting and importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05-rnns::kp3",
+        "local::lecture_6::kp3"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.29,
+    0.59
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L6_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture06-cnn-architectures_transcript.txt"
+  }
+}

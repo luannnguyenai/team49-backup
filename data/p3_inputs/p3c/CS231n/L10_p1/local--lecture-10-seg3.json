@@ -1,0 +1,150 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg3",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Early fusion and 3D convolution as slow fusion",
+    "description": "Explains early temporal fusion by channel stacking, its limitation, and the motivation for 3D convolution and 3D pooling.",
+    "summary": "Early fusion tries to compare frames near the input by reshaping T RGB frames into a 3T x H x W tensor and using the first 2D convolution to map the channel dimension from 3T to D [ts=979s] [ts=1002s]. After this first layer, the rest of the network is a standard 2D CNN trained with cross-entropy, but the temporal dimension has been collapsed immediately, so all temporal processing is forced into one convolutional layer [ts=1028s] [ts=1038s]. A student question clarifies that pooling in the earlier late-fusion setup averages feature vectors, producing a D-dimensional feature by mean or max pooling over features rather than pooling raw frames [ts=1046s] [ts=1061s]. The instructor then motivates 3D CNNs as a middle ground: instead of fusing at the very beginning or very end, use 3D convolution and 3D pooling to gradually combine spatial and temporal information over the course of the network [ts=1098s] [ts=1115s]. The segment reviews 2D convolution over H and W, then extends it to 3D convolution over T x H x W while still spanning the channel dimension, ending with flattened features and FC layers for class scores [ts=1132s] [ts=1201s] [ts=1273s].",
+    "key_points": [
+      {
+        "text": "Early fusion reshapes T frames from T x 3 x H x W into 3T x H x W.",
+        "timestamp_s": 988,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The first 2D convolution in early fusion maps 3T channels to D and collapses temporal information immediately.",
+        "timestamp_s": 1002,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Late-fusion pooling averages or max-pools feature vectors over time, leaving a D-dimensional feature rather than pooling raw frames.",
+        "timestamp_s": 1046,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Early fusion may be too ambitious because it tries to capture all temporal information in a single layer.",
+        "timestamp_s": 1085,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A 3D CNN uses 3D convolution and 3D pooling to slowly fuse temporal information throughout the network.",
+        "timestamp_s": 1103,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "3D convolution slides over a cube in T x H x W while going through the channel dimension.",
+        "timestamp_s": 1206,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 979,
+      "end_s": 1322
+    },
+    "difficulty": 3.4,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 6,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:16:19\nSo instead of doing late fusion, we actually we can do early fusion. So to do early fusion,\n\n00:16:28\nwe can just take this input and then we directly reshape them to 3T times H times W. We just\n\n00:16:42\nAnd then we use some 2D convolution, the first 2D convolution layer, just directly map them\n\n00:16:55\ninformation in the first layer to map the channel dimension from 3T to D to process the video frames\n\n00:17:08\nAnd the rest of the network is then in standard 2 CNN. And\n\n00:17:18\nusing a single layer. And then the rest is just like image classification. And\n\n00:17:26\nFor each frame, we get features like D. And each single frame will give you a feature D. So you\n\n00:17:36\nwe can do mean pooling to average the features or be max pooling with max over the features.\n\n00:17:49\nSo that's early fusion. So then, the downside of the early fusion is that\n\n00:18:05\nwe are too ambitious. We're trying to capture everything in a single layer.\n\n00:18:12\nsingle convolution network. Maybe it's not going to achieve what we want it to achieve.\n\n00:18:23\nsomething in between. That's slow fusion. That's exactly what this 3D convolution neural network\n\n00:18:35\nWe want to slowly fuse the information over the course of the network. Instead of doing it at a\n\n00:18:45\nspatial dimension to get this 3D feature maps. So that's the idea of 3D convolution neural network.\n\n00:18:57\npooling? So you have learned the 2D convolution. Right. For 2D convolution layer. Basically,\n\n00:19:10\nyou have learned that you can-- for each kernel, you have this filter.\n\n00:19:23\na sliding window approach, just slides across space and goes all the way in the depth dimension.\n\n00:19:42\nAnd then finally, you obtain this activation map of 28 times 28 times 1,\n\n00:19:53\nthe depths that-- go all the way over the channel dimension, and then map from 3 to 1, in this case.\n\n00:20:06\nnow, we just have one extra dimension. So here, you can think of that-- here, the input\n\n00:20:21\nBut what I'm showing here, because we can only show things in 3D, we cannot show things in 4D.\n\n00:20:30\ndimension is not shown here. So you can think of that for each grid point in this feature map,\n\n00:20:42\nAnd then for this 3D convolution, basically, if we are talking about a 66 times 6 times\n\n00:20:52\nslide over the spatial dimension just in the H and W dimension over the images,\n\n00:21:06\nSo it includes both the spatial dimension and the temporal dimension. And also, it goes all the way\n\n00:21:20\nis just like the 2D convolution. It's just we have this extra dimension.\n\n00:21:29\nlayer of 5 times 5. And finally, after you processed doing these 3D convolution operations,\n\n00:21:39\nmap them to the class scores. So that is basically the idea of 3D convolution.\n\n00:21:54\nand the 3D convolution neural networks. Just to give you a flavor of how it works. In practice,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg3",
+      "global_kp_id": "kp_early_fusion",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_10::seg3",
+      "global_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_early_fusion",
+      "name": "Early fusion",
+      "description": "Early fusion stacks frames along channels so the first 2D convolution compares frames and collapses time.",
+      "track_tags": [
+        "fusion",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because early fusion clarifies early fusion stacks frames along channels so the first 2D convolution compares frames and collapses time, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "name": "3D CNN and slow fusion",
+      "description": "3D CNNs use 3D convolution and pooling to gradually fuse spatial and temporal information across layers.",
+      "track_tags": [
+        "3d_cnn",
+        "video_classification"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because 3D CNN and slow fusion formalizes how 3D CNNs use 3D convolution and pooling to gradually fuse spatial and temporal information across layers, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.25,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

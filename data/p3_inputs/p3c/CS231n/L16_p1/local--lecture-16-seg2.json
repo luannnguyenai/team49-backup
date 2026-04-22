@@ -1,0 +1,248 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_16",
+    "lecture_title": "Lecture 16: Vision and Language — Multi-Modal Foundation Models",
+    "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk"
+  },
+  "unit": {
+    "unit_id": "local::lecture_16::seg2",
+    "course_id": "CS231N",
+    "name": "From SimCLR to CLIP-style image-text contrastive learning",
+    "description": "Explains how SimCLR-style contrastive learning extends from image-image pairs to image-text pairs in CLIP.",
+    "summary": "The lecturer recalls SimCLR as a self-supervised contrastive method that pulls together representations of transformed versions of the same image and pushes apart dissimilar images [ts=266s] [ts=366s]. This idea is extended to multimodal representations by embedding text phrases such as “a cute fluffy cat” or “my favorite dog is a golden retriever” near the corresponding image concepts, allowing image and language queries to occupy a shared representation space [ts=320s]. CLIP keeps an image encoder but adds a text encoder, trains on mini-batches of image-text pairs, and applies a symmetric contrastive objective: image embeddings should be closest to their matching text, and text embeddings should be closest to their matching image [ts=394s] [ts=449s]. The training signal is scalable because internet image-text associations can be collected in large quantities [ts=475s]. Once trained, the image encoder can be transferred to classification, detection, or segmentation by adding a linear layer or decoder on top [ts=510s] [ts=523s].",
+    "key_points": [
+      {
+        "text": "SimCLR pulls together augmented views of the same image and pushes apart representations of different images.",
+        "timestamp_s": 266,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Adding text to the representation space allows phrases to be embedded near corresponding visual concepts.",
+        "timestamp_s": 320,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CLIP uses an image encoder and a text encoder trained on matching image-text pairs.",
+        "timestamp_s": 394,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "CLIP uses a symmetric contrastive objective: image-to-text matching and text-to-image matching.",
+        "timestamp_s": 449,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Internet image-text pairs make CLIP-style training scalable.",
+        "timestamp_s": 475,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A pre-trained CLIP image encoder can be adapted to classification, detection, or segmentation with lightweight downstream heads.",
+        "timestamp_s": 523,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+      "start_s": 256,
+      "end_s": 590
+    },
+    "difficulty": 4.2,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 6,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "transcript_slice": "00:04:18\nSo how do we actually go about building a foundation model that\n\n00:04:25\nset you might care about.\n\n00:04:29\nwe were talking about self-supervised learning.\n\n00:04:33\nof those methods that you saw was\n\n00:04:38\ncontrasts against dissimilar images\n\n00:04:45\nhas been transformed in some way or the other.\n\n00:04:51\nsimilar concepts.\n\n00:04:54\nshould result in representations that are similar to one another,\n\n00:04:59\nfor other kinds of categories, like dogs, for example.\n\n00:05:06\nobjectives is that these representations become general\n\n00:05:11\na sketch of a cat or a sketch of a dog, it's still\n\n00:05:17\neasy to classify exactly what those concepts are.\n\n00:05:21\nWe can take these same ideas, the same objective, and then\n\n00:05:27\nto that representation space.\n\n00:05:31\nembed a representation of the text that says a cute fluffy cat\n\n00:05:38\nthat would be great, because now we\n\n00:05:44\nAnd similarly, if we can also embed the phrase\n\n00:05:49\nand ideally that representation would\n\n00:05:55\nSo that's the general idea behind adapting\n\n00:06:00\nbeen talking about in class so far to incorporate text\n\n00:06:06\nSo in SimCLR, if you remember, the main objective\n\n00:06:13\nof the same image.\n\n00:06:18\nSo that green arrow right there indicates two things\n\n00:06:21\nAnd it should be further away from all\n\n00:06:24\nSo any other image of a dog or a monkey,\n\n00:06:29\nNow we can use that same idea and now\n\n00:06:34\nIn CLIP what they do is they still have that same image\n\n00:06:40\nbut on the right-hand side, you now have a text encoder.\n\n00:06:46\nof those individual images.\n\n00:06:51\nthat it should be closer to a representation of a text that\n\n00:06:56\nand far away from all the other representations.\n\n00:07:01\nthat you've seen with SimCLR, the objective\n\n00:07:05\nis just by collecting a lot of image text pairs.\n\n00:07:10\nfeed them into a model in a mini-batch,\n\n00:07:15\nthat we use for SimCLR.\n\n00:07:19\nSo we're pulling together, here in the numerator,\n\n00:07:24\nand pulling apart the representations\n\n00:07:29\nNow, of course, we want that image\n\n00:07:33\nand far away from all the other text.\n\n00:07:37\nSo we have a second objective as well\n\n00:07:42\nand further away from all the other image descriptions.\n\n00:07:48\nthat you have between the two different types of modalities\n\n00:07:55\nSo of course, what's really nice about a CLIP\n\n00:08:02\nof images and text.\n\n00:08:06\nSo you have a lot of data of corresponding images and text\n\n00:08:10\nYou can download, and now you can train this model\n\n00:08:14\nAnd this is exactly what OpenAI did\n\n00:08:18\nthey released their CLIP model.\n\n00:08:22\nand then they trained it using this contrastive objective,\n\n00:08:27\nthat they found from the internet.\n\n00:08:30\nyou follow the same 2-step pipeline that you saw\n\n00:08:35\nwhere in step 1 you do that pre-training,\n\n00:08:40\nand now you can adapt it to a new task.\n\n00:08:46\nyou take it, you take its weights,\n\n00:08:50\nto adapt it to an image classification\n\n00:08:54\nput in something like a decoder and decode out\n\n00:09:00\nSo a ton of different tasks become possible just\n\n00:09:07\nWhat was really exciting when this paper came out\n\n00:09:13\non top of this CLIP encoder led to really large improvements\n\n00:09:18\nSo here in this graph, I'm showing you\n\n00:09:23\ndata sets.\n\n00:09:26\nthey're all the way at the top.\n\n00:09:32\nyou end up getting better and better performance.\n\n00:09:36\nseemed to indicate that there's this really\n\n00:09:41\nand there's an abundance of image text\n\n00:09:46\nto be very, very large and very, very performant.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_internet_scale_image_text_data",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "name": "SimCLR contrastive representation learning",
+      "description": "A self-supervised objective that pulls together augmented views of the same image and pushes apart different images.",
+      "track_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "domain_tags": [
+        "contrastive_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because simCLR contrastive representation learning clarifies a self-supervised objective that pulls together augmented views of the same image and pushes apart different images, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "name": "Contrastive vision-language pretraining",
+      "description": "The CLIP/ALIGN family of models that align independently encoded images and text with contrastive objectives and scale primarily through data and compute. CLIP trains an image encoder and text encoder so matching image-text pairs are close and mismatched pairs are far in a shared embedding space.",
+      "track_tags": [
+        "contrastive_learning",
+        "multimodal_ml",
+        "pretraining",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "computer_vision",
+        "foundation_models",
+        "nlp",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "foundation_model_engineering",
+        "ml_engineer",
+        "ml_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.77,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because contrastive vision-language pretraining formalizes how the CLIP/ALIGN family of models that align independently encoded images and text with contrastive objectives and scale primarily through data and compute, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16_multimodal_deep_learning::kp5",
+        "local::lecture_16::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_internet_scale_image_text_data",
+      "name": "Internet-scale image-text data",
+      "description": "Web image-text associations provide scalable supervision for CLIP-style multimodal pretraining.",
+      "track_tags": [
+        "data_centric_ai",
+        "foundation_models"
+      ],
+      "domain_tags": [
+        "vision_language",
+        "web_data"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because internet-scale image-text data clarifies web image-text associations provide scalable supervision for CLIP-style multimodal pretraining, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "name": "Downstream transfer and extrinsic evaluation",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
+      "track_tags": [
+        "computer_vision",
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "downstream_adaptation",
+        "linear_probe",
+        "machine_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02::kp14",
+        "local::lecture_12::kp3",
+        "local::lecture_16::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    4.05,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L16_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture16-vision-and-language_transcript.txt"
+  }
+}

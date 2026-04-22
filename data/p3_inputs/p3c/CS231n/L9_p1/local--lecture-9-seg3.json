@@ -1,0 +1,156 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_9",
+    "lecture_title": "Detection, Segmentation, Visualization, and Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4"
+  },
+  "unit": {
+    "unit_id": "local::lecture_9::seg3",
+    "course_id": "cs231n_spring_2025",
+    "name": "Object detection as classification plus localization and the R-CNN family",
+    "description": "Builds object detection from a single-object multitask loss to scalable multi-object pipelines based on region proposals and shared feature extraction.",
+    "summary": "Object detection is introduced as predicting both a category and a bounding box, so the network must output class scores together with box coordinates such as x, y, w, and h [ts=2075s] [ts=2086s] [ts=2092s]. For a single object, the lecture defines a multitask objective that combines softmax classification loss with an L2 regression loss on the box, but then explains why direct multi-object prediction or exhaustive sliding windows over all boxes quickly becomes unscalable [ts=2104s] [ts=2111s] [ts=2160s] [ts=2243s]. The remedy is region proposals: R-CNN classifies proposal crops and refines boxes, Fast R-CNN shares convolution over the whole image and reads regions from the feature map, and region proposal networks refine candidate boxes and keep top-K proposals, though the whole family is still described as computationally heavy because it effectively needs proposal generation plus classification/refinement stages [ts=2280s] [ts=2335s] [ts=2434s] [ts=2495s] [ts=2581s] [ts=2655s].",
+    "key_points": [
+      {
+        "text": "Object detection predicts class scores together with bounding-box coordinates (x, y, w, h).",
+        "timestamp_s": 2080,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A basic detector can be trained with a compound loss: softmax for class prediction plus L2 regression for the box.",
+        "timestamp_s": 2111,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Exhaustive sliding windows over all candidate boxes are not scalable for multi-object scenes.",
+        "timestamp_s": 2195,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Region proposals restrict computation to image regions that are likely to contain objects.",
+        "timestamp_s": 2280,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "R-CNN classifies each proposed crop and refines its box, but it is slow because it reruns a CNN per proposal.",
+        "timestamp_s": 2335,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Fast R-CNN shares one convolutional pass over the full image and reads proposal regions from the feature map.",
+        "timestamp_s": 2434,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A region proposal network refines candidate boxes and keeps the top-K high-probability proposals.",
+        "timestamp_s": 2541,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+      "start_s": 1961,
+      "end_s": 2620
+    },
+    "difficulty": 0.74,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "transcript_slice": "00:32:45\nAnd as we talked about this, we only get labels for the pixels.\n\n00:32:55\nwe have no idea which one is which.\n\n00:33:07\nAnd that brings us to the topic of instance segmentation,\n\n00:33:18\nbut also, I want you to know that these pixels belong\n\n00:33:24\nAnd this next one is actually a different dog.\n\n00:33:37\nmultiple objects in the image and brings us\n\n00:33:43\nObject detection has been one of the, besides image\n\n00:33:51\nhas been one of the core Computer Vision problems\n\n00:33:59\nAnd for many years, many, many different algorithms\n\n00:34:09\nWe are going to fly over some of them\n\n00:34:15\nBut again, there are so many works in the literature,\n\n00:34:22\nthat I am not covering here, so in the past 10, 15 years.\n\n00:34:35\nIf it's just a single object, it means that we need to generate--\n\n00:34:42\ngenerate a label class scores, as well\n\n00:34:50\nSo we need the coordinates of the box\n\n00:34:58\nSo this is exactly the task of object detection.\n\n00:35:03\nIt's very simple.\n\n00:35:11\nAnd we can define an L2 loss function, which\n\n00:35:20\ncoordinates.\n\n00:35:27\nWe are solving two tasks at the same time.\n\n00:35:34\nthe loss values and generate a compound loss function,\n\n00:35:43\nSo this is simple.\n\n00:35:47\nIf you have one single object, you can for sure\n\n00:35:56\nthat I talked about.\n\n00:36:00\nmultiple objects in the scene.\n\n00:36:07\nAnd if there are more, then it's going\n\n00:36:12\nSo this algorithm is not really scalable.\n\n00:36:17\ninto some object detection, which is fine,\n\n00:36:23\nSo when there are multiple objects,\n\n00:36:35\nas the input, why not to look at bounding boxes.\n\n00:36:44\nand whether it's a cat or a dog or the background.\n\n00:36:56\neach of the bounding boxes, I can do a sliding window.\n\n00:37:01\nslide it over the image from coordinate 0, 0\n\n00:37:10\nand see if we can detect the object.\n\n00:37:16\nI can find the bounding boxes that I\n\n00:37:23\nBut there is a huge problem here.\n\n00:37:29\nof bounding boxes that you can use.\n\n00:37:35\nWhat we've been doing in the literature, again,\n\n00:37:43\nthese articles were published, 2014,\n\n00:37:52\nregions that they have high probability\n\n00:38:00\nSo region proposals.\n\n00:38:07\nthat's actually going to be an easy-ish problem.\n\n00:38:14\nFor an image, what we can do is if I have region proposals,\n\n00:38:23\nand run a CNN on that patch, a convolutional neural network\n\n00:38:31\nAnd in order to--\n\n00:38:37\nSo classify and then refine the bounding boxes\n\n00:38:48\nSo we can classify the boxes and also refine\n\n00:38:53\nthe coordinates a little bit.\n\n00:39:01\nAnd although it works, and, again, this is one of the early\n\n00:39:12\nThese are very slow because for each of these boxes, again,\n\n00:39:20\nBut there is one catch that what we can do\n\n00:39:34\non each of these boxes, because convolution operations,\n\n00:39:41\nThey either downsample or upsample.\n\n00:39:50\nthey are.\n\n00:39:56\nthe convolutional neural network on the patches, let's say,\n\n00:40:06\nAnd then now we have the regions in that feature\n\n00:40:11\nLet's look at those regions.\n\n00:40:18\nand generate the outputs for each of these two outputs\n\n00:40:25\nFirst, the box offset.\n\n00:40:30\nOr what's the object category is?\n\n00:40:37\nThese are some basic algorithms that we\n\n00:40:44\ntheir bounding boxes, and so on.\n\n00:40:49\nare predefined?\n\n00:40:53\nI will talk very briefly about the region proposal networks do.\n\n00:41:03\nOne, puts the bounding boxes of the regions, the proposed\n\n00:41:08\nUnder the images, one puts it on the feature maps of the ConvNet.\n\n00:41:16\nas well as offset of improving the location\n\n00:41:22\nBut this will mean, this requires\n\n00:41:35\nand have a region proposal network that tells us\n\n00:41:40\nAnd there has been research on building region proposal\n\n00:41:47\nAnd here, what we do is we just randomly start with a CNN.\n\n00:41:59\nin the image.\n\n00:42:03\nwe refine those regions where they have the higher probability\n\n00:42:12\nlabels and locations.\n\n00:42:17\nAnd then each of those also refine the box coordinates.\n\n00:42:26\nis it refines the boxes, each of those boxes that\n\n00:42:36\nin them, the output boxes.\n\n00:42:43\nAgain, I'm leaving all of the details about the coordinates\n\n00:42:50\nfor you to check afterwards, because they\n\n00:42:54\nAnd we don't want to spend too much time on this algorithm.\n\n00:43:01\nwe often take the top K, the ones\n\n00:43:08\nof having an object in them as the proposals for this image.\n\n00:43:18\nSo most of the regions are centered\n\n00:43:23\nBut, in general, that's not the case.\n\n00:43:29\nused in different setups.\n\n00:43:37\nWith that, and after talking a little bit",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_9::seg3",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_9::seg3",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "name": "Object detection as joint classification and localization",
+      "description": "Detection extends classification by predicting both an object category and bounding-box coordinates for each object.",
+      "track_tags": [
+        "computer_vision",
+        "detection"
+      ],
+      "domain_tags": [
+        "multitask_learning",
+        "object_detection"
+      ],
+      "career_path_tags": [
+        "cv_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because object detection as joint classification and localization formalizes how detection extends classification by predicting both an object category and bounding-box coordinates for each object, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "name": "Region proposals and the R-CNN progression",
+      "description": "R-CNN, Fast R-CNN, and Faster R-CNN progressively reduce detection cost by sharing features and learning proposal generation.",
+      "track_tags": [
+        "cnn",
+        "detection"
+      ],
+      "domain_tags": [
+        "r_cnn",
+        "region_proposal_networks"
+      ],
+      "career_path_tags": [
+        "autonomy_engineer",
+        "cv_engineer"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because region proposals and the R-CNN progression clarifies r-CNN, Fast R-CNN, and Faster R-CNN progressively reduce detection cost by sharing features and learning proposal generation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp8"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.59,
+    0.89
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L9_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture09-object-detection-image-segmentation-visualizing_transcript.txt"
+  }
+}

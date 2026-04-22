@@ -1,0 +1,334 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "tutorial03-huggingface",
+    "lecture_title": "Stanford CS224N Hugging Face Transformers Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8"
+  },
+  "units": [
+    {
+      "unit_id": "local::tutorial03-huggingface::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Overview, installation, and the Hub-to-model workflow",
+      "description": "Introduces the Hugging Face ecosystem, installs the core packages, and presents the end-to-end pattern for selecting a model and running a transformer task.",
+      "summary": "The speaker frames Hugging Face Transformers as a practical way to reuse off-the-shelf transformer NLP models in class projects and future work, and recommends the official documentation and walkthroughs as the first place to look when students need more detail [ts=4s] [ts=49s]. He installs the transformers and datasets packages in Colab and explains that transformers provides pre-trained models while datasets provides task-ready corpora such as sentiment data [ts=68s] [ts=85s]. He then lays out the main workflow used throughout the tutorial: choose a model from the Hugging Face Hub, load the matching tokenizer and model, tokenize raw text into vocabulary IDs, and run the model to obtain logits and a prediction for a task like sentiment analysis [ts=121s] [ts=195s] [ts=302s]. The segment also shows that many model families and task-specific model listings are searchable on the Hub, including BERT, GPT-2, T5, and models for zero-shot classification [ts=132s] [ts=178s].",
+      "key_points": [
+        {
+          "text": "The official Hugging Face documentation and tutorials are the recommended fallback resource for missing details.",
+          "timestamp_s": 49,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The tutorial installs two core packages: transformers for pre-trained models and datasets for task datasets.",
+          "timestamp_s": 68,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A standard Hugging Face workflow is: find a model on the Hub, load its tokenizer and model, tokenize text, and run the task.",
+          "timestamp_s": 121,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The tokenizer converts input text into discrete vocabulary IDs that the model can consume.",
+          "timestamp_s": 196,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The model output for sentiment analysis is a set of logits over classes and a corresponding prediction.",
+          "timestamp_s": 303,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+        "start_s": 4,
+        "end_s": 302
+      },
+      "difficulty": 2.1,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 5,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Tokenizer mechanics and common utilities",
+      "description": "Explains what tokenizers produce, how AutoTokenizer selects the correct one, and how to use padding, truncation, tensors, and decoding.",
+      "summary": "This segment explains tokenizers as the preprocessing stage that maps raw strings into model-usable numerical inputs, especially input IDs and attention masks [ts=350s] [ts=480s]. The speaker emphasizes that tokenizers are model-specific and that AutoTokenizer is useful because it automatically loads the tokenizer aligned with the chosen model and therefore the correct token-to-index mapping [ts=364s] [ts=401s]. He distinguishes the Python tokenizer from the Rust-based fast tokenizer, noting that AutoTokenizer generally defaults to the fast version [ts=406s] [ts=422s]. The segment then walks through the internal tokenization pipeline—splitting text into tokens, converting those tokens to IDs, and adding required special tokens for inference [ts=538s] [ts=565s]. It also covers practical utilities: returning PyTorch tensors, batching multiple strings, padding to a common length, truncating long inputs, and using batch_decode with skip_special_tokens to turn token IDs back into readable text [ts=626s] [ts=692s] [ts=780s] [ts=820s].",
+      "key_points": [
+        {
+          "text": "A tokenizer maps raw text to numerical IDs and attention masks for the model.",
+          "timestamp_s": 350,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "AutoTokenizer helps ensure the model uses the tokenizer that matches the model's training-time indexing.",
+          "timestamp_s": 401,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The fast tokenizer is the Rust implementation and is generally the default when using AutoTokenizer.",
+          "timestamp_s": 406,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The tokenization pipeline is: split into tokens, convert tokens to IDs, then add any required special tokens.",
+          "timestamp_s": 538,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Setting return_tensors allows tokenizer outputs to be returned directly as PyTorch tensors.",
+          "timestamp_s": 626,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Padding and truncation can be enabled in the tokenizer call to normalize sequence lengths for batching.",
+          "timestamp_s": 692,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "batch_decode reconstructs text from token IDs, and skip_special_tokens removes padding and special markers from the decoded output.",
+          "timestamp_s": 780,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+        "start_s": 303,
+        "end_s": 850
+      },
+      "difficulty": 2.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Choosing model classes and running inference",
+      "description": "Covers task-specific model classes, architectural constraints, how inputs are passed into models, and how logits, loss, and predictions are produced.",
+      "summary": "The lecture moves from tokenizers to models and shows that Hugging Face provides both model-specific classes and AutoModel-style loaders that select the correct implementation automatically [ts=856s] [ts=960s]. The speaker explains that pre-trained transformers share a backbone idea but expose different task heads, such as sequence classification, masked language modeling, or base representations, and illustrates this with DistilBERT variants [ts=894s] [ts=947s]. He also emphasizes an architectural constraint: encoder-only models like DistilBERT cannot be used as sequence-to-sequence encoder-decoder systems, so the architecture has to match the task [ts=1057s] [ts=1086s]. The segment then demonstrates two ways to call the model: explicitly passing input_ids and attention_mask, or unpacking the tokenizer output dictionary with Python's double-asterisk syntax [ts=1180s] [ts=1260s]. Finally, he shows that Hugging Face outputs logits for each class, that binary classification still uses two logits, and that these models are ordinary PyTorch modules, so one can compute loss with PyTorch or pass labels to the model and let Hugging Face return the loss directly; predictions then come from argmax over logits [ts=1278s] [ts=1354s] [ts=1385s] [ts=1440s].",
+      "key_points": [
+        {
+          "text": "Hugging Face exposes task-specific classes such as DistilBertForSequenceClassification, DistilBertForMaskedLM, and the base DistilBERT model.",
+          "timestamp_s": 894,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "AutoModel plays the same convenience role for models that AutoTokenizer plays for tokenizers.",
+          "timestamp_s": 960,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Model architecture constrains valid tasks; an encoder-only model like DistilBERT is not a sequence-to-sequence model.",
+          "timestamp_s": 1057,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Tokenizer outputs can be passed to the model either by naming input_ids and attention_mask explicitly or by unpacking the dictionary with **.",
+          "timestamp_s": 1180,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Sequence classification outputs logits over the label set, and binary classification is represented with two class logits.",
+          "timestamp_s": 1278,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Because Hugging Face models are PyTorch modules, loss.backward works normally for fine-tuning.",
+          "timestamp_s": 1330,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Passing labels into the model makes Hugging Face include the loss in the output, and argmax over logits gives the predicted label.",
+          "timestamp_s": 1385,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+        "start_s": 851,
+        "end_s": 1459
+      },
+      "difficulty": 3.2,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Inspecting hidden states and attention",
+      "description": "Shows how to request hidden states and attention tensors, how eval mode fits into analysis, and how to interpret layer/head visualizations.",
+      "summary": "This segment focuses on introspection rather than prediction. The speaker shows how to load a model with output_attentions=True and output_hidden_states=True so the forward pass returns internals that can be examined [ts=1491s] [ts=1508s]. He sets the model to eval mode and explains that eval mode is the standard PyTorch way to disable training-time behavior when the goal is only evaluation or analysis, making the process more efficient [ts=1520s] [ts=1610s]. The resulting output dictionary includes hidden states and attention weights; the speaker highlights the large tensor shapes and explains how to interpret them by layer, batch element, representation dimension, and query-key dimensions for attention [ts=1540s] [ts=1680s]. He then discusses plotting attentions across layers and heads, with rows corresponding to layers, columns corresponding to heads, and color intensity indicating attention magnitude, where yellow means larger values and dark colors are near zero [ts=1759s] [ts=1823s] [ts=1860s].",
+      "key_points": [
+        {
+          "text": "Setting output_attentions=True and output_hidden_states=True makes the model return internal activations for analysis.",
+          "timestamp_s": 1491,
+          "evidence_type": "example"
+        },
+        {
+          "text": "model.eval() puts the model in evaluation mode and is the correct setting when inspecting a pre-trained model without training it.",
+          "timestamp_s": 1610,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Model outputs can include hidden_states and attentions in addition to logits.",
+          "timestamp_s": 1540,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Hidden-state shapes can be interpreted by layer, batch entry, and representation dimension.",
+          "timestamp_s": 1680,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "In the attention visualization, rows correspond to layers and columns correspond to heads.",
+          "timestamp_s": 1823,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The heatmap color scale uses yellow for higher attention values and dark colors for values near zero.",
+          "timestamp_s": 1860,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+        "start_s": 1460,
+        "end_s": 1873
+      },
+      "difficulty": 3.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg5",
+      "course_id": "cs224n-2024",
+      "name": "IMDb dataset preparation and manual PyTorch fine-tuning",
+      "description": "Builds a small sentiment dataset with the datasets library, tokenizes it, formats it for Torch, and connects it to a standard PyTorch training loop.",
+      "summary": "The speaker transitions from model inspection to practical fine-tuning and notes that most projects will want to fine-tune a model on task data [ts=1896s] [ts=1910s]. He loads the IMDb dataset from Hugging Face datasets and constructs a small demonstration DatasetDict containing shuffled train and validation splits, using 128 examples for training and 32 for validation after truncating reviews to keep the example CPU-friendly [ts=1925s] [ts=1999s]. He then inspects the dataset structure, showing that it behaves like a dictionary with text entries and integer sentiment labels, where 1 means positive and 0 means negative [ts=2040s] [ts=2076s]. Next he tokenizes the dataset with map and a lambda function, enabling padding and truncation in batched mode, then removes the raw text column, renames label to labels, and sets the dataset format to Torch so it can feed directly into a model [ts=2096s] [ts=2160s]. The segment closes by creating PyTorch DataLoaders and emphasizing that once the data are prepared, training a Hugging Face model is fundamentally the same as training any PyTorch model: compute loss, backpropagate, and step the optimizer and scheduler [ts=2322s] [ts=2401s].",
+      "key_points": [
+        {
+          "text": "The tutorial uses the IMDb dataset from Hugging Face datasets for sentiment analysis fine-tuning.",
+          "timestamp_s": 1925,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A small DatasetDict is built by shuffling the IMDb training split and selecting 128 train examples and 32 validation examples.",
+          "timestamp_s": 1999,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The dataset returns text and label fields, where 1 is positive sentiment and 0 is negative sentiment.",
+          "timestamp_s": 2076,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Dataset.map with a tokenizer lambda preprocesses text into input IDs and attention masks, using padding and truncation.",
+          "timestamp_s": 2096,
+          "evidence_type": "example"
+        },
+        {
+          "text": "After preprocessing, the text column is removed, the label column is renamed to labels, and the dataset format is set to Torch.",
+          "timestamp_s": 2150,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Padding can be applied within batches rather than padding the entire dataset to one global length.",
+          "timestamp_s": 2250,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Once batched through a DataLoader, the fine-tuning loop is essentially the standard PyTorch train loop.",
+          "timestamp_s": 2370,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+        "start_s": 1874,
+        "end_s": 2442
+      },
+      "difficulty": 3.1,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Trainer API, callbacks, evaluation, and checkpoint reuse",
+      "description": "Presents Hugging Face's higher-level Trainer abstraction and shows how to configure training arguments, metrics, callbacks, prediction, and checkpoint loading.",
+      "summary": "This final teaching segment presents Hugging Face's higher-level Trainer path as an alternative to writing the loop manually, especially for students who want a convenient abstraction over logging, evaluation, and optimization [ts=2460s] [ts=2489s]. The speaker introduces TrainingArguments as a configuration object containing output directories, per-device batch sizes, epoch counts, evaluation strategy, learning rate settings, warmup, and other training controls [ts=2504s] [ts=2580s]. He then shows the Trainer constructor, which packages together the model, arguments, train and eval datasets, tokenizer, and a compute_metrics function that can compute accuracy, F1, recall, or other metrics from logits and labels [ts=2593s] [ts=2640s]. The segment also covers callbacks such as logging and early stopping, noting that patience is model-dependent rather than fixed by a universal rule [ts=2657s] [ts=2705s]. It concludes with trainer.train, trainer.predict on the validation set, checkpoint saving during training, and reloading checkpoints later with from_pretrained by pointing to the saved checkpoint folder [ts=2732s] [ts=2775s] [ts=2813s]. A brief appendix mention notes further notebook material on generation, custom datasets, and pipelines [ts=2835s] [ts=2867s].",
+      "key_points": [
+        {
+          "text": "TrainingArguments is the main configuration object for Trainer-based fine-tuning.",
+          "timestamp_s": 2504,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "TrainingArguments can specify logging, device batch sizes, epochs, evaluation strategy, learning rate, warmup, and weight decay.",
+          "timestamp_s": 2550,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Trainer wraps the model, arguments, train/eval datasets, tokenizer, and metric function into a higher-level training interface.",
+          "timestamp_s": 2593,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "compute_metrics receives predictions and labels so users can calculate accuracy, F1, recall, or other metrics.",
+          "timestamp_s": 2634,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Callbacks support behaviors such as logging and early stopping during training.",
+          "timestamp_s": 2657,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "trainer.train launches training and trainer.predict evaluates on a chosen dataset.",
+          "timestamp_s": 2732,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Saved checkpoints can be reloaded later by passing the checkpoint path to from_pretrained.",
+          "timestamp_s": 2813,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+        "start_s": 2443,
+        "end_s": 2869
+      },
+      "difficulty": 2.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 6,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_hf_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-tutorial03-huggingface_transcript.txt"
+  }
+}

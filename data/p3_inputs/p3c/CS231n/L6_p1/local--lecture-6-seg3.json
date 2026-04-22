@@ -1,0 +1,117 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_6",
+    "lecture_title": "Training CNNs and CNN Architectures",
+    "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_6::seg3",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Activation functions in CNNs",
+    "description": "Compares sigmoid, ReLU, GELU, and related activations, focusing on gradient behavior and placement in CNNs.",
+    "summary": "The segment motivates activations as the source of nonlinearity in CNNs, since convolution and fully connected layers by themselves are only linear combinations of inputs [ts=980s][ts=1001s]. Sigmoid is described historically but criticized for vanishing gradients: for large positive or negative inputs its derivative becomes tiny, so backpropagated gradients shrink layer by layer [ts=1015s][ts=1087s]. ReLU became popular because it is cheap to compute and keeps gradient 1 on the positive half-line, though it still has zero gradient for negative inputs [ts=1091s][ts=1138s]. GELU is presented as a smoother alternative that behaves like x·Φ(x), keeps non-zero gradients around 0, and approaches ReLU at extreme values; the instructor notes that GELU is the main activation used in transformers today [ts=1157s][ts=1231s]. The section closes by stating the default placement rule: activations are generally applied after linear operators such as fully connected and convolutional layers [ts=1280s][ts=1300s].",
+    "key_points": [
+      {
+        "text": "Activation functions introduce nonlinearity after otherwise linear convolutional and fully connected operations.",
+        "timestamp_s": 980,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Sigmoid has very small gradients for very negative and very positive inputs, leading to vanishing gradients through deep stacks.",
+        "timestamp_s": 1056,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "ReLU computes f(x) = max(0, x), keeping gradient 1 for positive inputs and 0 for negative inputs.",
+        "timestamp_s": 1093,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "GELU computes x·Φ(x), smooths the transition near 0, and approaches ReLU at extreme values.",
+        "timestamp_s": 1197,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Activations are generally placed after linear/feedforward/convolutional layers in CNNs.",
+        "timestamp_s": 1281,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+      "start_s": 971,
+      "end_s": 1305
+    },
+    "difficulty": 0.53,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 6,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "transcript_slice": "00:16:11\nThe next topic I'll talk about is activation functions.\n\n00:16:15\nnow in CNNs.\n\n00:16:19\nfunctions.\n\n00:16:23\nis to introduce nonlinearities to our model.\n\n00:16:29\nthe kernel sliding across the image\n\n00:16:35\nthey're all just linear operations\n\n00:16:39\nAnd the whole point of the activation function\n\n00:16:43\nSo historically, sigmoid was a really commonly used activation\n\n00:16:52\nthat is the reason why it's no longer used today.\n\n00:16:57\nYou can see the equation in the top right of the slide here.\n\n00:17:06\nwas after many layers of sigmoids,\n\n00:17:10\nas you're computing backprop.\n\n00:17:13\nare fairly large in magnitude.\n\n00:17:18\ngo to the initial early layers of your model,\n\n00:17:22\nas you do this process.\n\n00:17:27\nThis isn't a phenomenon we see that occurs with sigmoid.\n\n00:17:33\ndoes sigmoid have a really small gradient?\n\n00:17:39\nAnd this is actually a huge issue.\n\n00:17:42\nin the graph the gradient is very flat.\n\n00:17:45\nIt's very small.\n\n00:17:49\nspace from negative infinity to positive infinity\n\n00:17:53\nAnd it's only this narrow range in the middle\n\n00:17:58\nso it basically approaches 0 very quickly\n\n00:18:02\nAnd so this means that if the values coming into sigmoid\n\n00:18:07\nyour gradient will be very small.\n\n00:18:13\nwhy ReLU became super popular because now\n\n00:18:19\nIt's just derivative of 1 here, but in practice, you still\n\n00:18:27\nwhere your gradient is 0.\n\n00:18:36\nHere we get a gradient of 1 and the other half\n\n00:18:41\nof it being 0 or very close to 0 except for a small region\n\n00:18:44\nSo in practice these work better.\n\n00:18:48\na max operation between 0 and your input value then\n\n00:18:52\nSo for those two reasons, ReLU became super popular.\n\n00:18:59\nyou get a 0 gradient and so more recently there's\n\n00:19:07\nby basically having a non-flat section of the activation\n\n00:19:17\nSo this is GELU, And there's also SELU,\n\n00:19:23\nThey look very similar.\n\n00:19:31\nin the derivative from 0 to 1 at 0.0 for ReLU.\n\n00:19:41\nbut the nice part about GELU is we actually\n\n00:19:46\nAnd in the limit as x approaches infinity or negative infinity,\n\n00:19:52\nbut you get more smooth behavior in the middle here.\n\n00:19:57\nis this Gaussian error linear unit.\n\n00:20:05\nof a Gaussian normal.\n\n00:20:09\nthat's what this phi of x is at any point x.\n\n00:20:14\nhere you'll have a value close to 0,\n\n00:20:19\nAnd at a very high positive value\n\n00:20:24\nso it converges to x here.\n\n00:20:28\nIt has these nice properties and it converges to ReLU\n\n00:20:31\nAnd this is the main activation function used in transformers\n\n00:20:38\nIf you look at all of them and you squint, a lot of these\n\n00:20:41\nThe basic idea is something relatively flat.\n\n00:20:49\nand it becomes a linear line.\n\n00:20:56\nof x, which also has this property\n\n00:21:02\nand for very positive value it's close to 1.\n\n00:21:08\nfunction for the unit Gaussian that is phi here.\n\n00:21:12\nreally similar looking too.\n\n00:21:20\nand the general answer is that they're\n\n00:21:24\nSo almost any time we have a feedforward or a linear layer\n\n00:21:29\nare all words for the same layer,\n\n00:21:34\nOr if we have a convolutional layer, pretty much after these\n\n00:21:39\nso after the convolutional layer,\n\n00:21:45\nOK, so you've learned everything now",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_6::seg3",
+      "global_kp_id": "kp_activation_functions",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_activation_functions",
+      "name": "Activation functions and nonlinearities",
+      "description": "Differentiable nonlinear activation functions such as sigmoid, tanh, ReLU, and ReLU-like variants are needed so networks can model nonlinear functions and support gradient-based learning. The idea that activations between linear maps prevent the network from collapsing into a single linear transformation and allow nonlinear decision boundaries.",
+      "track_tags": [
+        "deep_learning",
+        "neural_networks",
+        "optimization",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "activation_functions",
+        "deep_learning",
+        "machine_learning",
+        "neural_networks"
+      ],
+      "career_path_tags": [
+        "ai_practitioner",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because activation functions and nonlinearities formalizes how differentiable nonlinear activation functions such as sigmoid, tanh, ReLU, and ReLU-like variants are needed so networks can model nonlinear functions and support gradient-based learning, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture03-backprop::kp2",
+        "local::lecture_4_neural_networks_and_backpropagation::kp3",
+        "local::lecture_4_neural_networks_and_backpropagation::kp4",
+        "local::lecture_6::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.38,
+    0.68
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L6_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture06-cnn-architectures_transcript.txt"
+  }
+}

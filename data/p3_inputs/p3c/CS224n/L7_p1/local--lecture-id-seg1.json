@@ -1,0 +1,68 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 7 - Attention, Final Projects and LLM Intro",
+    "youtube_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg1",
+    "course_id": "<course_id>",
+    "name": "Machine Translation Evaluation with BLEU",
+    "description": "Introduces automatic evaluation for machine translation, explains BLEU, and situates neural MT historically against phrase-based and syntax-based systems.",
+    "summary": "The segment explains why machine translation needs automatic evaluation and why BLEU became the dominant metric despite known flaws. BLEU scores candidate translations by overlap with one or more human reference translations using n-grams, while also adding a brevity penalty to discourage systems from translating only easy parts [ts=207s] [ts=451s]. The lecturer stresses that translation has many valid outputs, so BLEU can underrate good translations and still award partial credit to bad ones if local words match [ts=355s] [ts=417s]. He then uses BLEU trends to contrast stalled phrase-based and syntax-based MT with the steep improvement of neural MT after 2014–2016, noting modern systems can reach much higher BLEU ranges than earlier systems [ts=520s] [ts=689s].",
+    "key_points": [
+      {
+        "text": "BLEU evaluates a system translation by n-gram overlap against human reference translations.",
+        "timestamp_s": 207,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "BLEU traditionally uses up to 4-gram matches, though the cutoff is a design choice rather than a law.",
+        "timestamp_s": 227,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "BLEU includes a brevity penalty so systems cannot score highly by translating only easy fragments.",
+        "timestamp_s": 451,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Translation has many valid outputs, so BLEU can miss good paraphrastic translations.",
+        "timestamp_s": 355,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Neural machine translation rapidly surpassed phrase-based and syntax-based MT after 2015–2016.",
+        "timestamp_s": 689,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
+      "start_s": 5,
+      "end_s": 716
+    },
+    "difficulty": 0.38,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE",
+  "transcript_slice": "00:00:05\nOK, welcome everyone, to week four we're into now.\n\n00:00:14\nfirst of all, well, a couple more\n\n00:00:20\njust talking a little bit about evaluating machine translation.\n\n00:00:27\nSo attention is a very fundamental concept\n\n00:00:34\ndeveloped in the context of machine translation.\n\n00:00:41\nwhen we're talking about transformers, which we then\n\n00:00:46\nOK, so getting straight into it.\n\n00:00:54\ntowards the end of last time.\n\n00:01:01\nwe are using a multi-layer LSTM, where we were feeding\n\n00:01:09\nwere flipping to then turning the model\n\n00:01:16\nwould generate one word at a time to generate\n\n00:01:22\nSo here I've got an German sentence,\n\n00:01:28\nthat looks a pretty good one.\n\n00:01:35\nwell, are we producing good translations or not.\n\n00:01:44\nNow, this is a complex area because if you\n\n00:01:51\npeople have proposed literally hundreds of different measures\n\n00:01:59\nI'm guilty of writing a couple of papers on it myself,\n\n00:02:05\nBut by far the most common measure that you see to this day\n\n00:02:15\nevaluate machine translation, which\n\n00:02:22\nfor bilingual evaluation understudy,\n\n00:02:27\nthat it was proposed by IBM.\n\n00:02:31\nSo until this point, the only way\n\n00:02:39\nwas getting human beings to look at them\n\n00:02:44\nAnd that's still a gold standard measure\n\n00:02:52\nbecause many of the automatic measures\n\n00:02:58\nthat make human evaluation useful.\n\n00:03:06\nwe'd like to iterate quickly on evaluations.\n\n00:03:13\nand things like that.\n\n00:03:17\nsuggest, well, maybe we can come up\n\n00:03:24\nAnd the idea of what they propose was this--\n\n00:03:31\nfor a piece of text.\n\n00:03:36\nAnd then we can score any automatic translation mainly\n\n00:03:47\nand 4 grams.\n\n00:03:51\nYou could have only gone up to 3 or 5,\n\n00:03:56\noverlapping n-grams with one of the reference translations.\n\n00:04:05\nAnd there's discussion of this evaluation in the assignment.\n\n00:04:11\nAnd I won't go actually through all the formulas right now.\n\n00:04:18\nAnd so here's a picture of how that looks.\n\n00:04:25\nis have several reference translations.\n\n00:04:32\nAnd then we'd look at this machine translation\n\n00:04:39\nSo we can certainly find the unigram \"the.\"\n\n00:04:48\nAirport and its\" in the second reference translation.\n\n00:04:55\nWe can find that again.\n\n00:04:57\n\"Office all receives ones calls self the sand Arab.\"\n\n00:05:03\nSo that all misses.\n\n00:05:09\nand you use those to work out a score.\n\n00:05:15\ntranslations so that you can sample\n\n00:05:22\nand have reasonable coverage.\n\n00:05:27\nit's not so uncommon that people do this with only one reference\n\n00:05:31\nAnd the argument then is still on a kind\n\n00:05:36\nThe more often you have a good translation,\n\n00:05:40\nand therefore your score will be better.\n\n00:05:44\nSo why did people come up with this,\n\n00:05:55\nWell, the problem with translation\n\n00:06:00\nIt's not like the kind of classification things\n\n00:06:06\nAnd the right answer is to say, the class of this object\n\n00:06:16\nFor any sentence, there are many different ways to translate it.\n\n00:06:23\nthis phrasing is a little bit nicer than this phrasing, blah,\n\n00:06:27\nBut to a first approximation, you\n\n00:06:31\nAnd those different ways of translation\n\n00:06:36\nSo you can't really check the words off\n\n00:06:40\nAnd that's what motivated this idea of matching n-grams\n\n00:06:45\nSo you can get reasonable credit for having the right matches.\n\n00:06:57\nYou can still get a poor BLEU score for a good translation\n\n00:07:03\nhappen to match a reference translation.\n\n00:07:09\nwithout really having a good translation at all.\n\n00:07:14\neven if they're having completely the wrong role\n\n00:07:20\nBut it's harder to get n-gram matches\n\n00:07:26\nusing words the right way.\n\n00:07:31\nthat there's a penalty for too short system translations\n\n00:07:37\neverything difficult and only translate the easy part\n\n00:07:41\nAnd then for the bits you have translated,\n\n00:07:46\nfor the precision of those pieces.\n\n00:07:52\nyour systems for assignment 3, we'll use them with BLEU.\n\n00:08:03\nWe can start looking at how well does systems do on a BLEU score.\n\n00:08:16\nBut you're never going to get to 100\n\n00:08:22\nAnd so, typically, if you can start to get to the 20s,\n\n00:08:28\nyou can understand what the source document was about.\n\n00:08:35\nthe translations are getting much, much better.\n\n00:08:40\nSo statistical phrase-based translation was pioneered by IBM\n\n00:08:51\ndecade and was what Google launched as Google Translate\n\n00:08:56\nAnd it continued to be worked on for the following decade.\n\n00:09:04\nthat progress in translation had--\n\n00:09:10\nhad basically stalled, that it got a little bit better\n\n00:09:18\nmodels with more data every year and things like that.\n\n00:09:24\nSo in the years from about 2005 to '15, or maybe '14,\n\n00:09:36\nwas the way we were going to get better machine\n\n00:09:43\ntranslation.\n\n00:09:46\nand we'd pass them up, then we'd know what the role of words\n\n00:09:52\nable to translate much better.\n\n00:09:58\nwhere translation work terribly.\n\n00:10:04\nOK for languages like French to English or Spanish\n\n00:10:14\nBut the results worked way worse for Chinese to English or German\n\n00:10:21\nAnd even though English is a Germanic language,\n\n00:10:27\nwith commonly verbs at the end of a clause\n\n00:10:32\nAnd so people tried to work on grammar-based, syntax-based\n\n00:10:43\nAnd I was one of those who worked on those in the late\n\n00:10:48\nBut the truth is that sort of didn't really work, right?\n\n00:10:59\nhad slightly more slope than phrase-based machine translation\n\n00:11:09\nSo things were completely then thrown\n\n00:11:15\ninvented because as I explained, the first attempts were in 2014.\n\n00:11:23\noff evaluations was 2015.\n\n00:11:30\ntranslation methods.\n\n00:11:34\nAnd it was just on this much, much steeper slope\n\n00:11:39\nAnd this graph only goes up to 2019,\n\n00:11:44\nAnd so it's not that uncommon these days that you see BLEU\n\n00:11:52\nsystems.\n\n00:11:56\nSo after this, I want to go on and so introduce",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.23,
+    0.53
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-attention_transcript.txt"
+  }
+}

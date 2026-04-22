@@ -1,0 +1,156 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_6",
+    "lecture_title": "Training CNNs and CNN Architectures",
+    "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_6::seg7",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Image preprocessing and data augmentation",
+    "description": "Covers per-channel image normalization and a practical menu of augmentations used to regularize computer vision models.",
+    "summary": "The second half of the lecture begins with image preprocessing: for RGB data, compute the mean and standard deviation for each channel, subtract the mean, and divide by the standard deviation before the model sees the image [ts=2954s][ts=2978s]. The instructor notes that practitioners often reuse ImageNet channel statistics when dataset-specific values are unavailable or when following common pretrained-model conventions [ts=2984s][ts=3011s]. He then reframes augmentation as regularization: add randomness during training, remove or average it at test time, and thereby make memorization harder while effectively increasing dataset diversity [ts=3042s][ts=3134s]. Specific augmentations include horizontal flips, random resized crops, test-time augmentation over multiple crops and scales, color jitter, and cutout-like occlusion; the practical criterion is that transformed images should still look in-distribution and easily recognizable to a human [ts=3200s][ts=3476s].",
+    "key_points": [
+      {
+        "text": "Standard image normalization subtracts the per-channel mean and divides by the per-channel standard deviation.",
+        "timestamp_s": 2959,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "A common practical shortcut is to use ImageNet mean and standard deviation values for preprocessing.",
+        "timestamp_s": 2984,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Data augmentation adds training-time randomness but preserves the label, increasing effective dataset diversity and discouraging memorization.",
+        "timestamp_s": 3088,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Horizontal flips are useful for many everyday-object datasets but are a bad augmentation for mirrored text reading tasks.",
+        "timestamp_s": 3200,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Random resized crop resizes the image so the short side reaches a chosen scale L and then samples a random 224×224 patch.",
+        "timestamp_s": 3251,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Test-time augmentation averages predictions across multiple scales, crops, and flips for extra performance.",
+        "timestamp_s": 3346,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Color jitter and cutout should be tuned so augmented samples still look normal and recognizable to a human.",
+        "timestamp_s": 3391,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+      "start_s": 2950,
+      "end_s": 3478
+    },
+    "difficulty": 0.47,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 9,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "transcript_slice": "00:49:12\nSo how do you actually train your model?\n\n00:49:16\nis it's really easy for images.\n\n00:49:19\nthe standard way to do it is you calculate the average red,\n\n00:49:25\nalong with the standard deviations.\n\n00:49:30\nand you divide by the standard deviation.\n\n00:49:36\nIs actually very straightforward.\n\n00:49:40\nthe means and standard deviation for each pixel channel.\n\n00:49:45\nthey'll use means that have already been calculated.\n\n00:49:51\nmeans and standard deviations and apply those\n\n00:49:57\non ImageNet.\n\n00:50:05\nAnd different models will use different values here\n\n00:50:10\nis just use the mean and standard deviation\n\n00:50:14\nYeah, so any input image, you apply this operation\n\n00:50:23\nSo yeah, that one was really quick.\n\n00:50:27\nso someone had a suggestion earlier in the class\n\n00:50:34\nAnd that's a great idea.\n\n00:50:37\nto your image here.\n\n00:50:40\nfrom overfitting.\n\n00:50:47\nwith regularization, where during training time\n\n00:50:50\nAnd then at testing time you then average out the randomness.\n\n00:50:56\nbut for example, for dropout, we saw that during training time\n\n00:51:02\nAnd then at testing time we'll use all the activations,\n\n00:51:06\nby this probability of dropout p.\n\n00:51:11\nAnd it's also used for data augmentation.\n\n00:51:21\nis like your data set.\n\n00:51:24\nSo we have a cat label and we have our original image\n\n00:51:28\nBefore we actually pass it into our model, it's extremely common\n\n00:51:35\npeople will always use data augmentation for training\n\n00:51:40\nBut the basic idea is to apply some transformations\n\n00:51:45\nrecognizable for the category class\n\n00:51:50\ncomputing the loss here.\n\n00:51:53\nis you can effectively increase the size of your data set\n\n00:51:58\nit will be seeing different versions of the image\n\n00:52:02\nare the same category label.\n\n00:52:06\nand therefore it increases your generalization capabilities,\n\n00:52:12\nseeing the same example over and over again.\n\n00:52:18\nSo how do we know the weight initialization is just right?\n\n00:52:23\nbecause the means and the standard deviations\n\n00:52:28\nof the network.\n\n00:52:30\nin this case, we saw mode collapse to 0.\n\n00:52:38\nincreased the number of layers.\n\n00:52:43\nis by using the formula.\n\n00:52:46\nSo in practice that's how people do it.\n\n00:52:52\nmaybe does some different kind of operation\n\n00:52:56\nwould need to try a bunch of different weight initialization\n\n00:53:01\nBut generally for these linear layers\n\n00:53:09\nwhich is called the timing initialization.\n\n00:53:14\nSo back to data augmentation, so what\n\n00:53:20\nSo one of them is horizontal flipping.\n\n00:53:23\nSo if you want to have a model that\n\n00:53:28\nto use because the text is now-- it's\n\n00:53:31\nand you can't read it properly.\n\n00:53:37\nIt's usually pretty good because most objects\n\n00:53:44\nAnd then you could also imagine if you're looking maybe\n\n00:53:48\nthat you could also do a vertical flip\n\n00:53:51\nBut for everyday objects, vertical flipping actually\n\n00:53:56\nalways seen in this position, but maybe\n\n00:53:59\nin all different orientations, you\n\n00:54:02\nwould make sense for your data set.\n\n00:54:11\nSo what ResNets and many different image\n\n00:54:21\na random crop of the image and then resize\n\n00:54:27\nThey might even take another crop afterwards.\n\n00:54:30\npick the length of what is basically\n\n00:54:35\nSo if you have a input image size to your model of 224\n\n00:54:43\nand find some crop of your image that contains this larger scale\n\n00:54:53\nYou crop the image.\n\n00:54:59\nYou resize the image to be that scale.\n\n00:55:04\nif we use 256 here we resize the short side, so 600 to be 256\n\n00:55:12\nSo we scale it to this L. We scale the short side to L\n\n00:55:19\nby 224 pixels from that image.\n\n00:55:24\nyou've preserved the relative resolution,\n\n00:55:29\nand then you take a random crop of that.\n\n00:55:35\nrandom resized crop is what it's called in most libraries.\n\n00:55:40\nand it reserves the relative resolution of your images.\n\n00:55:46\nyou can do with augmentation called test time augmentation.\n\n00:55:51\npossible, you can basically get a bunch of these different crops\n\n00:55:56\nand then average your predictions at the end.\n\n00:56:01\ntry a bunch of different scales, a bunch of different crop\n\n00:56:07\nAnd usually you'll start getting diminishing returns,\n\n00:56:13\nperformance boost by using this sort of test time augmentation.\n\n00:56:18\nyou're trying to eke out every last bit of percentage points,\n\n00:56:22\nthat you can use for almost any computer vision problem.\n\n00:56:31\nOne is color jitter, so here we're specifically\n\n00:56:36\nand scaling the image correspondingly.\n\n00:56:40\nsay the colors look more muted or more brighter,\n\n00:56:47\nAnd usually with all these different augmentations,\n\n00:56:52\nwhich ones make your images still look in distribution\n\n00:56:56\nAnd that's a pretty good way to judge\n\n00:57:00\nyou should have, how much brightness, variance, et cetera.\n\n00:57:04\nI'll try a bunch of these different augmentations.\n\n00:57:08\ndifferent from the original data,\n\n00:57:13\nto recognize.\n\n00:57:18\nFinal one is you can imagine just\n\n00:57:21\nwhere you just are basically putting\n\n00:57:25\nAnd I think this one's maybe less commonly used,\n\n00:57:29\nget creative with the augmentations\n\n00:57:32\nSay you're in a setting where things will get covered\n\n00:57:38\nthe objects fully, this could be a really neat trick\n\n00:57:42\nblocking parts of your objects.\n\n00:57:46\nwhat augmentations make sense.\n\n00:57:51\nso that it's still recognizable to you as a human,\n\n00:57:56\nexamples?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_6::seg7",
+      "global_kp_id": "kp_image_normalization_preprocessing",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_6::seg7",
+      "global_kp_id": "kp_data_augmentation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_image_normalization_preprocessing",
+      "name": "Image normalization preprocessing",
+      "description": "Per-channel centering and scaling of image inputs before training or inference.",
+      "track_tags": [
+        "computer_vision",
+        "data_pipeline"
+      ],
+      "domain_tags": [
+        "image_normalization",
+        "preprocessing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because image normalization preprocessing clarifies per-channel centering and scaling of image inputs before training or inference, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_6::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_data_augmentation",
+      "name": "Data augmentation",
+      "description": "Label-preserving input transformations used during training to improve generalization and reduce memorization.",
+      "track_tags": [
+        "computer_vision",
+        "regularization"
+      ],
+      "domain_tags": [
+        "data_augmentation",
+        "generalization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because data augmentation clarifies label-preserving input transformations used during training to improve generalization and reduce memorization, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_6::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.32,
+    0.62
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L6_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture06-cnn-architectures_transcript.txt"
+  }
+}

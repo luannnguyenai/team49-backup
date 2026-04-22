@@ -1,0 +1,192 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "tutorial03-huggingface",
+    "lecture_title": "Stanford CS224N Hugging Face Transformers Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8"
+  },
+  "unit": {
+    "unit_id": "local::tutorial03-huggingface::seg1",
+    "course_id": "cs224n-2024",
+    "name": "Overview, installation, and the Hub-to-model workflow",
+    "description": "Introduces the Hugging Face ecosystem, installs the core packages, and presents the end-to-end pattern for selecting a model and running a transformer task.",
+    "summary": "The speaker frames Hugging Face Transformers as a practical way to reuse off-the-shelf transformer NLP models in class projects and future work, and recommends the official documentation and walkthroughs as the first place to look when students need more detail [ts=4s] [ts=49s]. He installs the transformers and datasets packages in Colab and explains that transformers provides pre-trained models while datasets provides task-ready corpora such as sentiment data [ts=68s] [ts=85s]. He then lays out the main workflow used throughout the tutorial: choose a model from the Hugging Face Hub, load the matching tokenizer and model, tokenize raw text into vocabulary IDs, and run the model to obtain logits and a prediction for a task like sentiment analysis [ts=121s] [ts=195s] [ts=302s]. The segment also shows that many model families and task-specific model listings are searchable on the Hub, including BERT, GPT-2, T5, and models for zero-shot classification [ts=132s] [ts=178s].",
+    "key_points": [
+      {
+        "text": "The official Hugging Face documentation and tutorials are the recommended fallback resource for missing details.",
+        "timestamp_s": 49,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The tutorial installs two core packages: transformers for pre-trained models and datasets for task datasets.",
+        "timestamp_s": 68,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A standard Hugging Face workflow is: find a model on the Hub, load its tokenizer and model, tokenize text, and run the task.",
+        "timestamp_s": 121,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The tokenizer converts input text into discrete vocabulary IDs that the model can consume.",
+        "timestamp_s": 196,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The model output for sentiment analysis is a set of logits over classes and a corresponding prediction.",
+        "timestamp_s": 303,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=b80by3Xk_A8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=23",
+      "start_s": 4,
+      "end_s": 302
+    },
+    "difficulty": 2.1,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 5,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=b80by3Xk_A8",
+  "transcript_slice": "00:00:04\nSPEAKER 1: Hi, everyone.\n\n00:00:12\nSo this tutorial is just going to be about using the Hugging\n\n00:00:17\nIt's really useful and it's a super effective way\n\n00:00:24\nspecifically, models that are kind of transformer-based.\n\n00:00:33\nyour custom final project, or something like that.\n\n00:00:36\nSo these are-- it's a really helpful package to learn.\n\n00:00:45\nOK, so first things first is in case\n\n00:00:51\nfrom this kind of tutorial, the Hugging Face documentation\n\n00:00:56\nThey also have lots of tutorials and walkthroughs\n\n00:01:01\nthat you can play around with as well.\n\n00:01:06\nthat's a really good place to look.\n\n00:01:10\nwe're going to do that I already did, but can maybe run again,\n\n00:01:17\nand then the data sets Python package.\n\n00:01:24\nand data sets.\n\n00:01:27\nThe Transformers is where we'll get\n\n00:01:31\nAnd the data sets will give us some helpful data\n\n00:01:36\nSo, in this case, sentiment analysis.\n\n00:01:45\nunderstand what encoding is--\n\n00:01:50\nSo we'll run this just to kind of kick things\n\n00:01:56\nOK, so first, what we'll do is this\n\n00:02:03\nsomething off of Hugging Face.\n\n00:02:09\nfrom the Hugging Face Hub here.\n\n00:02:15\nthat you're able to use.\n\n00:02:20\nwhich is another language model from Google.\n\n00:02:26\nare pre-trained and all of these weights\n\n00:02:31\nfor you guys to download.\n\n00:02:36\nyou can probably find a version of it here.\n\n00:02:42\nas well that--\n\n00:02:44\nSo if we wanted to do something like zero shot classification,\n\n00:02:53\nthat particular task.\n\n00:02:57\nthere's probably a Hugging Face model for it\n\n00:03:02\nOK, so that's what we'll do first\n\n00:03:08\nAnd then, whatever you want to do, in this case,\n\n00:03:13\nAnd then, there are two things that we need next.\n\n00:03:21\ntext into tokens that your model can use\n\n00:03:27\nAnd so the tokenizer, again, converts this\n\n00:03:32\nThese discrete IDs that your model can actually take in.\n\n00:03:39\nOK, so first, what we can do is, again,\n\n00:03:49\nfor sequence classification.\n\n00:03:53\ndownload some of the key things that we need so that we\n\n00:03:59\nSo what do each of these do?\n\n00:04:04\nis from some pre-trained tokenizer\n\n00:04:10\nSo in general, there's a corresponding tokenizer\n\n00:04:14\nIn this case, it's like SiEBERT, so like something\n\n00:04:20\nAnd then, the second is you can import this model\n\n00:04:27\non the model hub again.\n\n00:04:32\nLarge English.\n\n00:04:37\nWe can find it as I think English.\n\n00:04:46\nSo again, this is something we can easily find.\n\n00:04:50\nand then you can import that.\n\n00:04:56\nsome kind of binary files as well.\n\n00:05:02\nuse some of these inputs, right?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::tutorial03-huggingface::seg1",
+      "global_kp_id": "kp_hugging_face_end_to_end_workflow",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg1",
+      "global_kp_id": "kp_transformer_tokenization_outputs",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::tutorial03-huggingface::seg1",
+      "global_kp_id": "kp_task_specific_model_classes_and_architecture_task_matching",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_hugging_face_end_to_end_workflow",
+      "name": "Hugging Face end-to-end workflow",
+      "description": "The reusable pattern of selecting a Hub model, loading the corresponding tokenizer and model, preprocessing text, and running inference or fine-tuning.",
+      "track_tags": [
+        "applied_nlp",
+        "tooling",
+        "workflow"
+      ],
+      "domain_tags": [
+        "huggingface",
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because hugging Face end-to-end workflow clarifies the reusable pattern of selecting a Hub model, loading the corresponding tokenizer and model, preprocessing text, and running inference or fine-tuning, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_transformer_tokenization_outputs",
+      "name": "Transformer tokenization outputs",
+      "description": "How raw text becomes input IDs, attention masks, and special-token-augmented sequences aligned with a model's vocabulary.",
+      "track_tags": [
+        "preprocessing",
+        "tokenization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "nlp",
+        "tokenization",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because transformer tokenization outputs formalizes how how raw text becomes input IDs, attention masks, and special-token-augmented sequences aligned with a model's vocabulary, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_task_specific_model_classes_and_architecture_task_matching",
+      "name": "Task-specific model classes and architecture-task matching",
+      "description": "The idea that Hugging Face exposes different classes and heads for different tasks, and that valid task choices depend on whether a model is encoder-only, decoder-only, or encoder-decoder.",
+      "track_tags": [
+        "architectures",
+        "model_selection",
+        "task_design"
+      ],
+      "domain_tags": [
+        "model_architecture",
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because task-specific model classes and architecture-task matching formalizes how the idea that Hugging Face exposes different classes and heads for different tasks, and that valid task choices depend on whether a model is encoder-only, decoder-only, or encoder-decoder, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::tutorial03-huggingface::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    1.95,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/Lsup_hf_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-tutorial03-huggingface_transcript.txt"
+  }
+}

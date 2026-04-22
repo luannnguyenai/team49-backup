@@ -1,0 +1,114 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "cs224n-2024-lecture13-bci",
+    "lecture_title": "Brain-Computer Interfaces",
+    "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8"
+  },
+  "unit": {
+    "unit_id": "local::cs224n-2024-lecture13-bci::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Early BCI history, EEG, and why invasive signals are needed",
+    "description": "Covers foundational BCI history from early brain-electricity measurements to EEG and explains why scalp recordings are too coarse for high-performance decoding.",
+    "summary": "The historical arc starts with Richard Caton's animal experiments, which showed that electrical activity could be measured from the brain and changed with behavior [ts=362s][ts=391s]. It then moves to Hans Berger's EEG, where scalp electrodes revealed distinct wave patterns associated with different brain states, such as calmer alpha activity versus sharper beta activity during cognitively demanding tasks [ts=414s][ts=455s]. The speaker uses early EEG-based control demos to illustrate the dream of bypassing the body, but argues that scalp signals are too weak and averaged over too many neurons to support fine decoding [ts=586s][ts=614s][ts=671s]. This motivates moving inside the brain, especially toward motor cortex recordings, to obtain signals precise enough for restoring movement or speech [ts=680s][ts=720s].",
+    "key_points": [
+      {
+        "text": "Richard Caton's experiments established that brain electricity can be measured and changes with behavior.",
+        "timestamp_s": 362,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "EEG measures wave-like brain signals from electrodes placed on the scalp.",
+        "timestamp_s": 422,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Hans Berger linked different EEG rhythms to different brain states, including calmer alpha and more cognitively engaged beta activity.",
+        "timestamp_s": 455,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Scalp EEG has low precision because it reflects averaged activity from many neurons rather than fine-grained local signals.",
+        "timestamp_s": 671,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Moving electrodes closer to neurons in motor cortex is presented as the path to better decoding for movement and speech restoration.",
+        "timestamp_s": 720,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=14",
+      "start_s": 357,
+      "end_s": 743
+    },
+    "difficulty": 0.34,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 6,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "transcript_slice": "00:05:57\nSo first, back to the 19th century here.\n\n00:06:06\nstarted to do some experiments on animals.\n\n00:06:14\nmeasure the brain activity-- measure\n\n00:06:19\nMoreover, if you ask the animal, not\n\n00:06:25\nsay moving their heads, then you can\n\n00:06:31\nSo I think this is the very first early experiments\n\n00:06:37\ncan decode some signals from the brain,\n\n00:06:43\nwhat those electric signals means here.\n\n00:06:54\ncalled Hans Berger invented this device called the--\n\n00:07:01\nBut anyway, so it's short for EEG.\n\n00:07:04\nyou can see it's kind of like this electrodes\n\n00:07:11\non your skull and then measure this kind of wave signals.\n\n00:07:23\nso first, he's the first scientist\n\n00:07:28\nlike signals from just this kind of a electrodes placed\n\n00:07:33\nAnd then he found that this kind of signals\n\n00:07:40\nthe user, how the patient is--\n\n00:07:46\nif the patient is in this kind of very calm state,\n\n00:07:51\naround like 10 to maybe 20 Hertz.\n\n00:07:55\nBut if the patient is open their eyes\n\n00:08:00\nthen you'll see really sharp beta waves.\n\n00:08:05\nusing this kind of electrodes to measure\n\n00:08:11\nAnd also, there's a funny story here, is that the Hans\n\n00:08:17\nused to be a soldier.\n\n00:08:21\nand then he fell from the horse and suffered from a concussion.\n\n00:08:29\nhe has a twin sister.\n\n00:08:33\nher sister felt like there is a weird,\n\n00:08:37\nstarting to worry about-- he worry about his brother.\n\n00:08:44\nand telling his brother that it's his brother.\n\n00:08:50\nthat maybe there's something called a telepathy that\n\n00:08:57\nthis brain wave.\n\n00:09:00\nto study psychology and neuroscience,\n\n00:09:06\nto diagnose things like epilepsy.\n\n00:09:14\nAnd then people starting to using this kind of EEG devices\n\n00:09:23\ndetect this kind of wave, like things from the brain,\n\n00:09:30\nSo someone study like a musician here,\n\n00:09:37\nAnyway, so I guess you guys already\n\n00:09:41\nlike doing trying to perform some music with his brain wave.\n\n00:09:46\nIt's done in, I think, in the 1950s,\n\n00:09:53\nthe idea that you can actually bypass your body.\n\n00:10:00\nconnect your brain to some external device\n\n00:10:03\nSo I think the idea here is that what\n\n00:10:08\nbut to help people like Howard.\n\n00:10:14\nBut the problem with this kind of EEG or external measuring\n\n00:10:23\nJust imagine that your brain is generating.\n\n00:10:32\nThe neurons are actually generating a lot of signals.\n\n00:10:39\non the scalp, and then what you are actually measuring is like\n\n00:10:45\nwhich is, if you think about the analogy, is that-\n\n00:10:51\npeople are saying in the room next to us,\n\n00:10:58\nin this room, what we are hearing\n\n00:11:02\nWe can probably just tell, maybe they\n\n00:11:05\nor maybe they have reached a conclusion,\n\n00:11:10\nSo the limitation here is that this kind of EEG device\n\n00:11:17\nsignal.\n\n00:11:20\nSo how-- I think the answer is trying to go inside the brain,\n\n00:11:29\nand then trying to directly measure the neural activities\n\n00:11:35\nAnd for the purpose of this talk,\n\n00:11:44\nin this region of the brain called the motor cortex.\n\n00:11:50\nthat brain has different regions that's doing different tasks.\n\n00:11:57\nIt's basically controlling all your muscles or all your body\n\n00:12:00\nSo the hope here is that if we can understand\n\n00:12:07\nencoded here, then perhaps, we can decode this information\n\n00:12:14\nto be able to control a external arm\n\n00:12:23\nSo here's some very basic neuroscience.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs224n-2024-lecture13-bci::seg2",
+      "global_kp_id": "kp_bci_recording_modalities",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_bci_recording_modalities",
+      "name": "Brain-signal recording modalities",
+      "description": "Different BCI sensing technologies trade spatial and temporal resolution, with microelectrode arrays offering fine-grained intracortical access. BCI performance depends strongly on where signals are recorded: scalp EEG is safer but coarse, while intracortical recordings are more precise.",
+      "track_tags": [
+        "neuroscience",
+        "signal_acquisition",
+        "signal_processing"
+      ],
+      "domain_tags": [
+        "brain_signal_acquisition",
+        "eeg",
+        "intracortical_recording",
+        "microelectrode_arrays",
+        "recording_modalities"
+      ],
+      "career_path_tags": [
+        "biomedical_research",
+        "hardware_research",
+        "neuroengineering"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because brain-signal recording modalities clarifies different BCI sensing technologies trade spatial and temporal resolution, with microelectrode arrays offering fine-grained intracortical access, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture13-bci::kp2",
+        "local::cs224n-2024-lecture13-bci::kp5"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.19,
+    0.49
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture13-bci_transcript.txt"
+  }
+}

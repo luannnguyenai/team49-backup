@@ -1,0 +1,68 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 7 - Attention, Final Projects and LLM Intro",
+    "youtube_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg5",
+    "course_id": "<course_id>",
+    "name": "Project Constraints, Resources, and Proposal Requirements",
+    "description": "Covers topic restrictions, compute options, LLM API resources, and the required elements of the project proposal and paper review.",
+    "summary": "This segment defines what counts as an acceptable CS224N project and what support students should plan around. Final projects must substantively involve both human language and neural networks, though multimodal combinations are allowed as long as language is central rather than incidental [ts=2770s] [ts=2827s]. The lecturer then reviews realistic compute options—cloud credits, notebook platforms, low-cost GPU services, and Together AI API credits for LLM experiments—while warning that model size strongly affects token budgets and feasibility [ts=2943s] [ts=3155s]. He next explains the project proposal: one per team, centered on both a project plan and a critical two-page research-paper review [ts=3206s] [ts=3260s]. For custom proposals in particular, students must make the data source and evaluation plan concrete, and all proposals now need an ethical-considerations paragraph about deployment risks and mitigations [ts=3308s] [ts=3386s].",
+    "key_points": [
+      {
+        "text": "A CS224N final project must substantively involve both human language and neural networks.",
+        "timestamp_s": 2776,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Cloud and notebook resources are limited, so students should plan projects around realistic compute budgets.",
+        "timestamp_s": 2943,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Together AI credits can support experiments on large language models via API access.",
+        "timestamp_s": 3144,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The project proposal includes a critical review of a key research paper plus a project plan.",
+        "timestamp_s": 3226,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Custom proposals must clearly specify data, evaluation, and an ethical-considerations paragraph.",
+        "timestamp_s": 3315,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
+      "start_s": 2805,
+      "end_s": 3480
+    },
+    "difficulty": 0.36,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE",
+  "transcript_slice": "00:46:47\nThat doesn't mean it has to be only about human language.\n\n00:46:56\nand language.\n\n00:47:02\nbut it has to, substantively, not completely trivially,\n\n00:47:08\nIf you've got any questions about that, ask.\n\n00:47:14\nSo again, it doesn't have to be wholly about neural networks.\n\n00:47:18\noh, I think I could show using kernel machines that they work\n\n00:47:25\nor something like that, that's of course fine to do as well.\n\n00:47:32\nThe default final project is more guided.\n\n00:47:40\nWe're hoping that people do the same amount of work\n\n00:47:45\nBut on the other hand, it does give you a clearer focus\n\n00:47:52\nBut it's still an open-ended project.\n\n00:48:00\nand custom final projects, there are great projects.\n\n00:48:07\nIf anything, there's a bit more variance\n\n00:48:11\nSo the path of success is not to try and do\n\n00:48:20\njust looks really weak compared to people's default\n\n00:48:25\nOK.\n\n00:48:30\nWe give best project awards to both kinds of projects.\n\n00:48:37\nyou have to pick.\n\n00:48:41\nYeah, so-- to be honest, with the confessions\n\n00:48:48\nin a less good position for computing\n\n00:48:54\nAnd it's all OpenAI's fault. Now, that part is--\n\n00:48:59\nBut up until and including last year,\n\n00:49:08\nto get very generous cloud computing giveaways from one\n\n00:49:15\nwhich really provided a lot of computing support.\n\n00:49:24\non at the moment due to the great success of large language\n\n00:49:28\nAnd it turns out that cloud compute providers just\n\n00:49:34\nAnd gee, I guess the AWS rep was pointing out\n\n00:49:44\nlast year, so it's getting harder to do.\n\n00:49:52\ntogether more in many cases.\n\n00:49:59\nto be able to find free and cheap stuff.\n\n00:50:08\ncan be used for assignments 3, 4, and the final project.\n\n00:50:15\nused a cloud with an account before,\n\n00:50:21\nwhich can be a useful thing.\n\n00:50:28\nSo the most used one is Google Colab,\n\n00:50:35\nIt often tends to get tighter later in the quarter,\n\n00:50:42\nto not have a couple of lattes and pay $10 a month\n\n00:50:52\nBut there are alternatives to that which\n\n00:50:55\nSo AWS provides a Jupyter Notebook environment SageMaker\n\n00:51:01\nAnd also owned by Google, Kaggle separately provides\n\n00:51:10\naccess than Google Colab provides,\n\n00:51:18\n[LAUGHS] Kaggle Notebooks are just bare-bones Jupyter\n\n00:51:27\ngrafted on it.\n\n00:51:31\nModal is a low-priced GPU provider\n\n00:51:38\nso that could be handy.\n\n00:51:43\nwhich could be of relevance.\n\n00:51:47\nsay more about in a minute is the way things have changed\n\n00:51:55\nthat you might want to do where you're not actually building\n\n00:52:03\non large language models or you're\n\n00:52:09\nmodels or other things of that sort.\n\n00:52:16\nto large language models.\n\n00:52:22\nso you can automate things.\n\n00:52:27\nis through the generosity of Together AI,\n\n00:52:34\nto large language models, which can actually be a lot.\n\n00:52:44\nSo something you should think about is how big a model do you\n\n00:52:51\na 7-billion-parameter language model on Together,\n\n00:52:59\nwhereas if you want to run a much bigger model,\n\n00:53:05\nit goes down by orders of magnitude.\n\n00:53:11\nAnd I mentioned some other ones.\n\n00:53:17\nthat talk about these different GPU options.\n\n00:53:24\nOK, jumping ahead.\n\n00:53:30\nso it's one per team.\n\n00:53:36\nAnd so for the project proposal, part of it\n\n00:53:43\nBut there's another major part of it,\n\n00:53:50\npaper for your topic.\n\n00:53:56\nso you can find something else.\n\n00:53:59\nto extend the project for your custom project,\n\n00:54:03\nBut what we want you to do is get some practice\n\n00:54:11\nunderstanding what's convincing, what it didn't consider,\n\n00:54:16\nAnd so we want you to write a two-page summary of a research\n\n00:54:22\nAnd the goal is for you to be thinking\n\n00:54:29\ndid it do that was exciting versus what\n\n00:54:35\neven wrong, et cetera.\n\n00:54:41\nSo after that, we want you to say what you're planning to do.\n\n00:54:52\nbut it's really important for a custom final project.\n\n00:55:04\ngoing to use, if any, and the kind of models\n\n00:55:08\nBut it turns out that when we're unhappy with custom\n\n00:55:16\nyou tell us about custom final projects\n\n00:55:21\nyou're going to use because we're worried already\n\n00:55:29\ndata you can use for your final project\n\n00:55:34\ngoing to evaluate your system.\n\n00:55:39\ngetting any success.\n\n00:55:45\nyou to include an ethical considerations\n\n00:55:52\nif it were deployed in the real world\n\n00:55:57\nThis is something that now a lot of conferences are requiring\n\n00:56:03\nSo we want to give you a little bit of practice on that\n\n00:56:08\nHow much there is to talk about varies somewhat\n\n00:56:15\nhas a lot of ethical problems or whether it's\n\n00:56:20\nBut in all cases, you might think\n\n00:56:26\nof this piece of work.\n\n00:56:33\nOK.\n\n00:56:38\nyeah, do think critically.\n\n00:56:49\npeople that just paraphrase what's in the abstract\n\n00:56:54\nAnd we want you to think a bit harder about this.\n\n00:57:03\nIs it something that you could use\n\n00:57:08\nor was it really exploiting a trick of one data set?\n\n00:57:16\nhave done differently or you weren't\n\n00:57:20\nIs it similar or distinctive to other\n\n00:57:26\nDoes it suggest perhaps something\n\n00:57:32\nOK.\n\n00:57:37\nmost of the points are on that paper review.\n\n00:57:44\nThere are some points on the project plan.\n\n00:57:52\nformative feedback on the project plan\n\n00:57:59\nBut nevertheless, we're expecting",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.21,
+    0.51
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-attention_transcript.txt"
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "unit": {
+    "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+    "course_id": "stanford::cs231n::spring_2025",
+    "name": "Imitation learning from demonstrations",
+    "description": "Covers the supervised-learning view of policy learning from demonstrations, the cascading-error problem in behavior cloning, reward inference from demonstrations, and newer generative-policy approaches.",
+    "summary": "Li reframes policy learning as supervised learning over demonstration data: instead of learning a world model, the system directly learns a mapping from state or observation to action from expert trajectories [ts=3296s] [ts=3338s]. He introduces behavior cloning as the basic form of this idea and then explains cascading error: small deviations lead the policy into states outside the training distribution, where errors compound over time [ts=3384s] [ts=3405s] [ts=3431s] [ts=3446s]. To mitigate this, practitioners iteratively collect more demonstrations or corrective actions on the policy’s failure cases [ts=3454s] [ts=3471s] [ts=3487s]. He also covers inverse reinforcement learning, which infers reward functions from demonstrations, and newer generative-policy families such as implicit behavior cloning and diffusion policies that handle multimodal actions and rich contact manipulation better than simple one-shot regression [ts=3521s] [ts=3540s] [ts=3587s] [ts=3642s] [ts=3670s]. The section ends by arguing that imitation learning is still the most efficient way to get a useful real-world manipulation policy, although robustness depends on iterative data collection [ts=3740s] [ts=3760s] [ts=3775s].",
+    "key_points": [
+      {
+        "text": "Imitation learning uses a demonstration dataset to train a policy mapping observations or states to actions.",
+        "timestamp_s": 3338,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Behavior cloning is the classic supervised version of imitation learning.",
+        "timestamp_s": 3388,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Cascading error occurs when small early mistakes move the policy off the demonstration distribution and amplify over time.",
+        "timestamp_s": 3405,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A practical workflow is to roll out the policy, observe failures, and add corrective demonstrations.",
+        "timestamp_s": 3457,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Inverse reinforcement learning infers rewards from demonstrations and then uses those rewards for RL.",
+        "timestamp_s": 3524,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Implicit behavior cloning and diffusion policies use more expressive generative modeling ideas to handle multimodal behavior and complex manipulation.",
+        "timestamp_s": 3587,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Imitation learning is currently the most efficient route to a robot policy that does something useful in the real world.",
+        "timestamp_s": 3760,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=17",
+      "start_s": 3296,
+      "end_s": 3802
+    },
+    "difficulty": 0.68,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "transcript_slice": "00:55:01\nSo just to recap a little bit, we\n\n00:55:06\nThat is directly learning the policies\n\n00:55:10\nhas a lot of troubles, for example, the sample efficiency,\n\n00:55:14\nAnd for the model learning, what we have been doing\n\n00:55:19\nof supervised learning, where we have the evolutions\n\n00:55:23\nYou use that data to do supervised\n\n00:55:27\nto do model-based planning.\n\n00:55:32\nlearning to train the model, people are also asking,\n\n00:55:38\nThis is the general idea of imitation learning, meaning\n\n00:55:46\nto be done and using this data set\n\n00:55:50\nI'm showing this figure again.\n\n00:55:54\ntaking the states as inputs that predict the actions.\n\n00:56:00\nare done through a large-scale collected data,\n\n00:56:09\nSo learning from demonstration is, of course, not new.\n\n00:56:14\nIt's also constantly how we human is actually\n\n00:56:19\nor social activities in the real world,\n\n00:56:24\nSo one of the most earlier classic imitation\n\n00:56:32\ntrying to learn this kind of mapping that maps currently\n\n00:56:39\nAnd this policy is represented using this function\n\n00:56:45\nSo one of the key issues for behavior cloning\n\n00:56:51\nthe key difference between the robot learning\n\n00:56:56\nis it is a sequential decision-making problem.\n\n00:57:02\nin the typical computer vision domain\n\n00:57:06\nand be amplified over time.\n\n00:57:09\nyou made a very small error.\n\n00:57:15\ndeviates from the distribution of data\n\n00:57:19\nThat will lead the policy to make an even larger error.\n\n00:57:26\nThat leads to a trajectory that can\n\n00:57:31\nSo that's the typical issues of behavioral cloning.\n\n00:57:37\nare trying to make imitation learning work,\n\n00:57:42\nwe have the demonstration collected by the experts.\n\n00:57:49\nlearning to train this policy.\n\n00:57:53\nand observe those failure cases.\n\n00:57:59\nor provide corrective behaviors that\n\n00:58:03\nthe initial demonstrations but also those corrective behaviors\n\n00:58:11\nto the canonical trajectory or get back to the trajectory.\n\n00:58:16\nSo this is actually a typical life cycle.\n\n00:58:21\nagents or imitation learning algorithms\n\n00:58:26\nAnd along these lines, because if people\n\n00:58:32\nthere's not a very explicit definition\n\n00:58:37\nThe task is implicitly hidden within those demonstrations.\n\n00:58:44\ninverse reinforcement learning, where on the left\n\n00:58:49\nlearning, whereas on the right, where people are trying\n\n00:58:54\nto summarize the rewards from your demonstrations\n\n00:59:00\ntypical reinforcement learning to learn\n\n00:59:04\nSome of the earlier success examples\n\n00:59:08\nby Pieter Abbeel and also Andrew Ng.\n\n00:59:16\nvery crazy behaviors.\n\n00:59:19\nAnd be able to achieve this type of agile and effective behaviors\n\n00:59:27\nis very impressive at that time.\n\n00:59:32\nand using that demonstration to summarize the rewards.\n\n00:59:37\nthis is what we are able to achieve.\n\n00:59:42\nhave been making the imitation learning algorithms\n\n00:59:47\nin connecting with, for example, energy-based models.\n\n00:59:52\non the left, they directly do the mapping from the observation\n\n00:59:56\nIf you are coming up with this kind of implicit policies,\n\n01:00:01\nthat direct taking the observation and actions\n\n01:00:09\nto do inference to get this kind of predicted actions a\n\n01:00:17\nare very multi-modal or handle scenarios\n\n01:00:21\nbe very, very smooth.\n\n01:00:26\ndistill these policies from the demonstrations\n\n01:00:32\nIn order to say--\n\n01:00:37\nof robot learning as a whole is the results of this work\n\n01:00:45\ntaking some of the advances in the community\n\n01:00:49\nFor this one, for the implicit behavior cloning,\n\n01:00:54\nof energy-based model.\n\n01:00:58\nin the deep learning community.\n\n01:01:03\nin the deep learning community is called diffusion models.\n\n01:01:10\nit as a policy function class to allow the agents to also inherit\n\n01:01:20\nSo this work was originally done at Columbia.\n\n01:01:27\nAnd the leads, like the PI of this work, now come to Stanford.\n\n01:01:35\nhere at Stanford.\n\n01:01:41\nAnd this policy really shows a very diverse set\n\n01:01:47\nto do not just planner pushing, but many fine-grained\n\n01:01:52\nNot only pick and place, but for example here,\n\n01:01:57\nand also scrambled eggs, also peeling the potatoes\n\n01:02:04\nSo it really shows that this type\n\n01:02:09\nand using the best policies, learning mechanisms,\n\n01:02:17\nin a very, very efficient manner, meaning you\n\n01:02:21\nYou train the policy in the nuance.\n\n01:02:26\nin the real physical world.\n\n01:02:30\nin how reliable your policy is and how generalizable\n\n01:02:37\nbe for the policy to still work very robustly.\n\n01:02:44\nto get a policy that can do something\n\n01:02:49\nAnd for the policies to be very effective and robust\n\n01:02:55\nof iterative data collections will\n\n01:02:59\nto cover those kind of unexpected behaviors\n\n01:03:06\nSo this is about imitation learning.\n\n01:03:13\nOK, so if there's no more questions,\n\n01:03:17\nsome of the recent developments that",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+      "global_kp_id": "kp_behavior_cloning_and_iterative_correction",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+      "global_kp_id": "kp_inverse_rl_implicit_bc_and_diffusion_policies",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_behavior_cloning_and_iterative_correction",
+      "name": "Behavior cloning and iterative correction",
+      "description": "A policy can be supervised on demonstrations, but practical imitation learning usually needs repeated expert correction to counter distribution shift and cascading error.",
+      "track_tags": [
+        "imitation_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "behavior_cloning",
+        "dataset_aggregation",
+        "learning_from_demonstrations"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because behavior cloning and iterative correction clarifies a policy can be supervised on demonstrations, but practical imitation learning usually needs repeated expert correction to counter distribution shift and cascading error, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_inverse_rl_implicit_bc_and_diffusion_policies",
+      "name": "Inverse RL, implicit BC, and diffusion policies",
+      "description": "More expressive imitation-learning methods infer rewards or use generative-policy parameterizations to better capture multimodal demonstrations and rich manipulation behavior.",
+      "track_tags": [
+        "generative_models",
+        "imitation_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "diffusion_policy",
+        "energy_based_models",
+        "inverse_reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "generative_model_researcher",
+        "robotics_researcher"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because inverse RL, implicit BC, and diffusion policies clarifies more expressive imitation-learning methods infer rewards or use generative-policy parameterizations to better capture multimodal demonstrations and rich manipulation behavior, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp14"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.53,
+    0.83
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

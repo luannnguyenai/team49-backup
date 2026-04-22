@@ -1,0 +1,197 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_3",
+    "lecture_title": "Regularization and Optimization",
+    "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4"
+  },
+  "unit": {
+    "unit_id": "local::lecture_3::seg1",
+    "course_id": "CS231N",
+    "name": "Recap: image classification, kNN, linear scores, and data loss",
+    "description": "Connects image classification and linear classifiers to the loss formulation used later for regularization and optimization.",
+    "summary": "Image classification is framed as mapping an image to one label from a fixed set such as cat, dog, bird, deer, or truck [ts=27s]. The recap emphasizes the semantic gap between human perception and pixel tensors, plus viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation [ts=64s]. Because hand-written rules are inadequate, kNN provides a data-driven baseline: 1-NN copies the closest training label, and k-NN uses the most common label among nearby examples [ts=182s]. Validation data is used to choose hyperparameters such as k, while the test set is saved for final unseen-data evaluation [ts=216s]. Linear classifiers compute class scores by flattening a 32x32x3 image into 3,072 values and multiplying by W plus bias [ts=558s]. A loss function formalizes how bad the classifier is: dataset loss averages per-example losses, and Softmax/cross-entropy is high when the correct class has low predicted probability [ts=626s].",
+    "key_points": [
+      {
+        "text": "Image classification maps an input image to a label from a fixed label set.",
+        "timestamp_s": 27,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Recognition is difficult because pixels differ from semantic human perception and because images vary by viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation.",
+        "timestamp_s": 64,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In kNN, 1-NN assigns the closest training label; larger k assigns the most common label among neighbors.",
+        "timestamp_s": 182,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Use validation data to choose hyperparameters and reserve the test set for final unseen-data evaluation.",
+        "timestamp_s": 216,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A 32x32 RGB image has 32*32*3 = 3,072 values for a linear classifier.",
+        "timestamp_s": 558,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Dataset loss is the average of per-example losses.",
+        "timestamp_s": 626,
+        "evidence_type": "formula"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+      "start_s": 5,
+      "end_s": 714
+    },
+    "difficulty": 2.0,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 12,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "transcript_slice": "00:00:05\nToday's lecture topic will be about regularization\n\n00:00:12\nbroadly in deep learning and machine learning,\n\n00:00:17\nAnd we're going to start with a recap from last week\n\n00:00:24\nSo we really honed in on this idea\n\n00:00:30\nAnd what this task is is given an image as input,\n\n00:00:40\nSo here we have five different labels, cat, dog, bird, deer,\n\n00:00:45\nAnd the goal is to assign the correct label\n\n00:00:48\nAnd you're creating some model or some function\n\n00:00:55\nAnd we also talked about a lot of the challenges\n\n00:01:00\nSo one of the main challenges is shown in the top left here,\n\n00:01:07\nwe as humans perceive in the image, which is the cat,\n\n00:01:12\nin the computer, which is this grid of pixel values\n\n00:01:19\nor tensor, and you have discrete values for each of the pixels.\n\n00:01:26\nand just deciding that this is a cat.\n\n00:01:33\ninto one that we humans understand\n\n00:01:36\nBut also there's challenges surrounding the images\n\n00:01:40\nSo if you look at something like the illumination of the scene,\n\n00:01:46\nbased on where the lighting is in the scene.\n\n00:01:52\nare in the shade and harder to see.\n\n00:01:56\nso you talk about deformable objects that can move around\n\n00:02:00\nso they won't always have the same shape.\n\n00:02:04\ntrying to design an algorithm to detect objects.\n\n00:02:08\nSo you could have a cat that's hiding underneath the cushions\n\n00:02:13\ntell it's a cat because of the tail, how it's sticking up\n\n00:02:16\nAnd then the way that cats behave,\n\n00:02:20\nYou'll also have things like background clutter, where\n\n00:02:25\nSo we need to account for this somehow as well.\n\n00:02:31\ndifferent objects in the same category\n\n00:02:35\nbut we still need to group them all into the same category.\n\n00:02:41\nand why it isn't such a simple problem where you can just\n\n00:02:48\nsimple logic to classify.\n\n00:02:52\nyou can't just create these logic rules,\n\n00:02:56\nHere's where we talked about data-driven approaches.\n\n00:03:02\nlearning model, which is this k-nearest neighbors model.\n\n00:03:10\nare the existing data points in your training set\n\n00:03:18\ncoming in.\n\n00:03:23\nyou find the closest data point, you assign it that class label.\n\n00:03:29\nyou're assigning the most common class label among those nearest\n\n00:03:34\nSo we talked about these two different approaches.\n\n00:03:39\nwant to split your data set into train and test,\n\n00:03:44\nso that you can use this validation set here\n\n00:03:50\nSo the main hyperparameter for k-nearest neighbors\n\n00:03:56\nAnd what we showed is an example where\n\n00:04:00\nhere over the different k values here.\n\n00:04:07\nSo this is how you use the validation set,\n\n00:04:11\nOK, how does your model do on completely new data\n\n00:04:14\nThat would be the purpose of the test set.\n\n00:04:18\nThere was a bit of confusion about distance metrics.\n\n00:04:24\nBut we talked about two different distance metrics.\n\n00:04:30\nwhich are the Manhattan distance or L1 distance and L2 distance\n\n00:04:36\nL2 distance is like if you imagine just the straight line\n\n00:04:42\nhow we think of distance in everyday usage\n\n00:04:46\nAnd then Manhattan distance is this idea where you can only\n\n00:04:52\nand you can't move diagonally.\n\n00:04:57\nThe reason why all these points on the line\n\n00:05:01\nhere is because you can't move diagonally,\n\n00:05:07\nso the total distance is 1, whereas here you're\n\n00:05:13\nThe same distance here.\n\n00:05:18\nequidistant from the origin here form a circle\n\n00:05:23\nSo this is maybe a brief explanation.\n\n00:05:30\nwas this idea of a linear classifier.\n\n00:05:36\nis we have an image, which is say, width 32 and height 32,\n\n00:05:44\nof the spatial locations in our image representing\n\n00:05:52\nAnd the idea is we take this array of numbers for our image,\n\n00:05:59\nnumbers, 3,072.\n\n00:06:06\nAnd the basic idea is if we have a weight matrix W that has\n\n00:06:18\nwe're multiplying each of these rows by our input sample x.\n\n00:06:26\nSo oftentimes we'll add a bias term\n\n00:06:32\nSo this would be a size 10 vector here.\n\n00:06:37\nyou can view or think about these linear models.\n\n00:06:43\nwhere each row is represented-- independently\n\n00:06:48\nAnd you multiply it by the input vector x, you get your score\n\n00:06:56\nAnd you do each row independently in the sense.\n\n00:07:04\nas templates where if we then reravel\n\n00:07:13\nwe could plot the intensities here and understand what\n\n00:07:21\nthis visualization represents.\n\n00:07:25\nabout it is a geometric viewpoint, where\n\n00:07:32\nare represented by these lines here in our input space.\n\n00:07:40\nwe set this equation to 0, which is the decision boundary.\n\n00:07:48\nyou could have a positive score, and below the line\n\n00:07:54\nSo these are the different viewpoints\n\n00:07:59\nThey're all doing the same thing.\n\n00:08:03\nis that if you visualize your data, like, say, you\n\n00:08:09\nit's very easy to tell that you can't draw a line that perfectly\n\n00:08:14\nSo it's nice way you can gain intuition\n\n00:08:21\nOK.\n\n00:08:24\nof what we discussed last time.\n\n00:08:30\non the new content for this lecture now,\n\n00:08:35\nif anyone had any questions about what we discussed\n\n00:08:41\nYeah.\n\n00:08:45\nis this the same as running k-nearest neighbors?\n\n00:08:52\nthat you're comparing against?\n\n00:08:55\nNo, they're not the same because these templates\n\n00:09:02\npoint.\n\n00:09:09\nthey would represent more like, if you see in this diagram\n\n00:09:15\nso it would be representing this point here.\n\n00:09:22\nSo the idea here is that if the height of our image is 32 pixels\n\n00:09:31\nis represented by three values, the red, green, and blue pixel\n\n00:09:38\nto represent the entire image.\n\n00:09:44\nSo here's, I guess, very specific example\n\n00:09:50\nAnd when we multiply our input x by our weight matrix W,\n\n00:09:59\nAnd you can see that for cat it's\n\n00:10:04\nAnd we want the highest score for the correct class.\n\n00:10:09\ndoes pretty well because it's doing it correctly.\n\n00:10:14\nwhere it's by far the lowest score of the three.\n\n00:10:20\nBut how do we mathematically formalize this intuition?\n\n00:10:26\nThis is the idea of a loss function, which tells you\n\n00:10:34\nSo given a data set of examples where we're indexing with this\n\n00:10:43\nyi as each of the training labels--\n\n00:10:49\nwhere we calculate this loss for each training example\n\n00:10:57\nWe get our label.\n\n00:11:02\nAnd we just take the average over our whole data set.\n\n00:11:07\nWe talked about, in last lecture, the Softmax loss\n\n00:11:13\nused loss for classification.\n\n00:11:18\nBut basically, it's very high loss\n\n00:11:26\nIt's very low loss when you're predicting the correct class\n\n00:11:32\nSo this what I just explained is all\n\n00:11:39\nSo this is a loss that tells you how\n\n00:11:45\nAnd obviously, we want this to be very low.\n\n00:11:49\nfitting our training data well.\n\n00:11:54\nwhich is this regularization term of the loss function.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_3::seg1",
+      "global_kp_id": "kp_image_classification",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg1",
+      "global_kp_id": "kp_data_driven_knn_and_validation_test_splits",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_3::seg1",
+      "global_kp_id": "kp_linear_classifier_scores_and_loss_functions",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_image_classification",
+      "name": "Image classification and recognition challenges",
+      "description": "Assigning an image to a label despite semantic gap, viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation. The task of assigning one label from a fixed vocabulary to an input image.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning_basics",
+        "machine_learning"
+      ],
+      "domain_tags": [
+        "image_classification",
+        "recognition",
+        "supervised_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.27,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because image classification and recognition challenges formalizes how assigning an image to a label despite semantic gap, viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation, which later units use as core machinery rather than background context though roles split between gateway and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_2_image_classification_with_linear_classifiers::kp1",
+        "local::lecture_3::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_data_driven_knn_and_validation_test_splits",
+      "name": "Data-driven kNN and validation/test splits",
+      "description": "Using nearest training examples to classify and using validation data to select hyperparameters while preserving test data for final evaluation.",
+      "track_tags": [
+        "machine_learning",
+        "model_evaluation"
+      ],
+      "domain_tags": [
+        "hyperparameters",
+        "knn",
+        "validation"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because data-driven kNN and validation/test splits clarifies using nearest training examples to classify and using validation data to select hyperparameters while preserving test data for final evaluation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_linear_classifier_scores_and_loss_functions",
+      "name": "Linear classifier scores and loss functions",
+      "description": "Linear score functions, Softmax/cross-entropy, and dataset loss as an average of per-example losses.",
+      "track_tags": [
+        "deep_learning",
+        "machine_learning"
+      ],
+      "domain_tags": [
+        "linear_classifier",
+        "loss_functions",
+        "softmax"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because linear classifier scores and loss functions formalizes how linear score functions, Softmax/cross-entropy, and dataset loss as an average of per-example losses, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_3::kp3"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    1.85,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L3_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture03-regularization-and-optimization_transcript.txt"
+  }
+}

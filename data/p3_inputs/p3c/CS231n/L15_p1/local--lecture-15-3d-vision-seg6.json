@@ -1,0 +1,198 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_15_3d_vision",
+    "lecture_title": "Lecture 15: 3D Vision",
+    "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_15_3d_vision::seg6",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Learning directly on point sets and learned surface parameterizations",
+    "description": "Introduces PointNet, point-set loss functions, AtlasNet, and the conceptual move toward deep implicit shape functions.",
+    "summary": "This segment shifts from voxel-centric learning to methods designed around better geometric representations. PointNet is presented as the first major network for point clouds, with the key design constraints that the model must be permutation invariant to point ordering and robust to sampling variation across the surface [ts=2783s][ts=2797s][ts=2854s][ts=2858s]. The core solution is strikingly simple: compute per-point embeddings and aggregate them with a symmetric function such as max or sum, then use the pooled representation for recognition or downstream tasks [ts=2875s][ts=2896s]. For generation, Wu explains that point outputs require set-based distances rather than pixelwise losses, highlighting Chamfer distance and Earth Mover distance as differentiable objectives for comparing unordered point clouds [ts=3022s][ts=3051s]. He then moves to AtlasNet, where an MLP learns a mapping from low-dimensional UV coordinates to 3D space, effectively learning parametric surface patches that yield smoother outputs than voxels or raw point clouds [ts=3118s][ts=3148s][ts=3231s]. The unit closes with the insight that deep networks themselves can serve as implicit functions over x,y,z queries, motivating 2019-style deep occupancy and deep SDF methods [ts=3352s][ts=3386s].",
+    "key_points": [
+      {
+        "text": "PointNet directly processes point clouds and must be permutation invariant because point sets are unordered.",
+        "timestamp_s": 2783,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Point-cloud models should also be sampling invariant so predictions reflect geometry rather than sampling artifacts.",
+        "timestamp_s": 2858,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "PointNet aggregates per-point embeddings with a symmetric operator such as max or sum.",
+        "timestamp_s": 2875,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Chamfer distance compares two point sets by nearest-neighbor matching in both directions.",
+        "timestamp_s": 3022,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Earth Mover distance uses a one-to-one bipartite matching between point sets.",
+        "timestamp_s": 3051,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "AtlasNet learns an MLP mapping from UV coordinates to 3D surface points, using multiple sheets for complex shapes.",
+        "timestamp_s": 3118,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Deep implicit functions query x,y,z with a network to predict occupancy or signed distance directly.",
+        "timestamp_s": 3386,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+      "start_s": 2737,
+      "end_s": 3459
+    },
+    "difficulty": 0.73,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "transcript_slice": "00:45:37\nlearning to 3D space.\n\n00:45:41\nThen this is the moment where people\n\n00:45:46\nnow what if you the graphics people feel like-- you're just\n\n00:45:51\nBecause why do you want to use this kind of pretty\n\n00:45:56\nlike voxels or octave trees?\n\n00:45:59\npoint clouds, meshes, splines.\n\n00:46:03\nBut as we said, the challenge is, points are here and there.\n\n00:46:08\nlike that?\n\n00:46:10\nBut people start to look into it.\n\n00:46:15\nlearning methods that directly work on not only just 3D data,\n\n00:46:21\nlike point clouds.\n\n00:46:26\nfrom Stanford, from Leo's team.\n\n00:46:32\nnetwork that directly works with 3D point clouds.\n\n00:46:37\nSo the idea is, for points, you have to be permutation invariant\n\n00:46:45\nand point 2 is here.\n\n00:46:49\nI would say point 1 here and point 2 there.\n\n00:46:55\nbe invariant to these two types of input, which means no matter\n\n00:47:02\nor I name this one's point 1, that one\n\n00:47:05\nbecause the points there are unordered.\n\n00:47:10\nthat our top left is 1, 1.\n\n00:47:14\nSo if there's an order, if the points are unordered,\n\n00:47:19\nSo how can we do that?\n\n00:47:25\nSo sometimes, you sample, say, 10 points\n\n00:47:31\nand 5 points on the tail of the rabbit.\n\n00:47:34\non the tail of the rabbit, only 5 points\n\n00:47:38\nSo how can you also be invariant to that?\n\n00:47:42\nSo there are a bit of a issue here and there,\n\n00:47:50\nthink it's basically probably the most important point,\n\n00:47:53\nI just apply-- it's also so simple.\n\n00:47:57\non the embeddings of the points.\n\n00:48:01\nI first compute some embeddings for them,\n\n00:48:07\nor different windows of image.\n\n00:48:11\nAnd then I just have to fuse them.\n\n00:48:16\nso I just use a symmetric function in the sense\n\n00:48:21\nAnd I take the maximum, softmax.\n\n00:48:24\nI just add them up.\n\n00:48:27\nThis is so simple.\n\n00:48:31\nAnd then you have compute embeddings for them,\n\n00:48:34\nYou can compute the max for each dimension.\n\n00:48:38\nAnd yeah.\n\n00:48:42\nAnd then you go through maybe a few layers\n\n00:48:46\nAnd then you use it to classify all--\n\n00:48:55\nSo that's basically what's going on,\n\n00:49:00\nAnd of course, there have been a lot of the improvements\n\n00:49:04\nPeople have been coming up with new methods that\n\n00:49:07\nThey have PointNet++.\n\n00:49:11\nis graph neural networks because you can easily translate points\n\n00:49:19\nwhether points are close to each other as the edges\n\n00:49:23\nSo there have been like graph neural networks\n\n00:49:26\nbeen developed for these point cloud processing.\n\n00:49:34\nand it turned out to be also very powerful.\n\n00:49:38\nis you also want to measure.\n\n00:49:41\nI have an output image.\n\n00:49:44\nI just compute the differences between the two.\n\n00:49:48\nFor points, how would you compare the output point cloud\n\n00:49:52\ncare about generation task?\n\n00:49:55\nYou have input point cloud, and output\n\n00:49:59\nYou have a cross-entropy loss.\n\n00:50:02\nBut if you output, if you're doing a generation task,\n\n00:50:06\nJust do a cross-entropy loss of the 100\n\n00:50:10\nBut if your output is a point and 100 points, and how would\n\n00:50:16\npoint cloud?\n\n00:50:19\nSo the two common distance metrics that people did use--\n\n00:50:24\nA Chamfer distance is easy to understand.\n\n00:50:27\nAnd for each point on each side or each set,\n\n00:50:33\nSo you have a collection of red points.\n\n00:50:36\nAnd for the red point, for each of red points,\n\n00:50:40\nAnd for each of the blue points, you just\n\n00:50:43\nAnd you want to minimize the distance,\n\n00:50:46\nto its nearest neighbor in the other set.\n\n00:50:51\nis called Earth Mover distance.\n\n00:50:55\nsets of points, and you have a one-to-one paired\n\n00:50:59\nwant to minimize the distance among all these pairs.\n\n00:51:04\nthat people use when they're comparing the distance\n\n00:51:07\nAnd they can be made differentiable,\n\n00:51:10\nand use it to optimize your neural network so\n\n00:51:14\nclouds if you're caring about a point cloud generation problem.\n\n00:51:23\nAnd then people were like, OK, this is great.\n\n00:51:28\nBut we also have other beautiful partitions like splines.\n\n00:51:34\nIf you use any kind of neural network\n\n00:51:38\nthey always look very ugly.\n\n00:51:42\nSo how can we have a neural network\n\n00:51:46\nthe beautiful surfaces?\n\n00:51:51\nabout how I can integrate neural networks with things\n\n00:51:56\nAnd a notable example--\n\n00:52:00\nSo what's going on here is they try to use deep learning.\n\n00:52:06\nclouds, so I learned a transformation function.\n\n00:52:13\nAnd then, if you remember, when we say you have these parametric\n\n00:52:19\nlet's say, a 2D space of u and v into a 3D space, like a sphere.\n\n00:52:27\nYou can write it down.\n\n00:52:32\nBut for complex objects, it is very hard to write a function.\n\n00:52:36\nSo the idea here is, OK, if there is no closed form,\n\n00:52:40\nto represent that?\n\n00:52:44\nwhich is implemented as MLP, just learns that function f.\n\n00:52:51\nto the function f.\n\n00:52:55\nof the function f and u and v and output a point in 3D space.\n\n00:53:04\nspace into the 3D space, and it might be too hard to represent\n\n00:53:11\nSo people thought, OK, we can use a couple\n\n00:53:14\nSo think about it as now you have a piece of paper.\n\n00:53:18\nYou can fold it multiple times.\n\n00:53:21\nto form the final shapes you care about.\n\n00:53:29\nthree different representations.\n\n00:53:31\nAnd if you want to represent it reconstructed using voxels,\n\n00:53:36\nBut you're really bounded by limited resolution voxels.\n\n00:53:42\nbounded by the resolutions.\n\n00:53:46\nBut the points are really unordered.\n\n00:53:50\nclouds.\n\n00:53:54\nlearning transform pieces, you can\n\n00:53:58\nSo using neural network to represent\n\n00:54:02\nfrom a low-dimensional space to a higher-dimensional space,\n\n00:54:07\nAnd when they are combined, they give you the final output\n\n00:54:16\nOK, so finally, in some sense, we can put it this way.\n\n00:54:32\ndoing ImageNet classification?\n\n00:54:36\nthat map input images in the form of pixels\n\n00:54:42\nIs it a cat or a dog or person or whatever?\n\n00:54:47\nis really small.\n\n00:54:50\nSo it's like, OK, it's a cat or dog?\n\n00:54:53\nOutput space is so small.\n\n00:54:57\nby 500 pixels.\n\n00:55:00\nInput space is much larger.\n\n00:55:03\nThe function is really hard to write.\n\n00:55:09\nso that I can classify the input image by computing\n\n00:55:15\nif this is a cat or dog?\n\n00:55:17\nThe function is so hard to write.\n\n00:55:19\nThat's why I need a deep network.\n\n00:55:22\nOutput space is small.\n\n00:55:26\nabout what they are doing, then you realize a lot of the things\n\n00:55:31\nit doesn't seem to map that mapping to that, I would say,\n\n00:55:37\nSo it doesn't map that well.\n\n00:55:40\nmap them-- map it the best?\n\n00:55:44\nthat seems to really fit into the paradigm?\n\n00:55:50\nthen people realize, oh, yeah, in some sense,\n\n00:55:54\nAnd why don't we just use it to represent implicit function\n\n00:55:59\nSo instead of representing the voxels\n\n00:56:04\nyou turn it into pixels, but then you just scale up into 3D.\n\n00:56:09\nBut fundamentally, voxel is really about\n\n00:56:14\nSo instead of just directly prequerying the space and get\n\n00:56:20\nwhat if I just directly using deep network to perform that\n\n00:56:25\nor anything?\n\n00:56:29\nif the output can just be one dimensional inside and outside,\n\n00:56:38\nSo finally, I think people move that leap,\n\n00:56:44\non point clouds or splines into implicit representations,\n\n00:56:49\nBut instead, think about it as a level set\n\n00:56:55\nThat's the final step.\n\n00:56:59\nyou're learning the transformation from a 2D space\n\n00:57:03\nBut now I can directly do an implicit query\n\n00:57:07\nSo that goes to deep implicit functions, which\n\n00:57:13\nthere are four papers that are doing almost exactly\n\n00:57:17\nThey all argue that before we have been using voxels and point\n\n00:57:22\nor weakness.\n\n00:57:24\nis I should just send the query into the deep network.\n\n00:57:31\nlet's say x, y, z-coordinate, and output\n\n00:57:37\nAnd that would be, in some sense, the final, I would say,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg6",
+      "global_kp_id": "kp_pointnet_and_point_set_invariances",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg6",
+      "global_kp_id": "kp_atlasnet_and_deep_implicit_shape_decoders",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg6",
+      "global_kp_id": "kp_parametric_curves_and_surfaces",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_pointnet_and_point_set_invariances",
+      "name": "PointNet and point-set invariances",
+      "description": "The idea that point-cloud networks should respect permutation and sampling invariance, implemented by symmetric aggregation over point features.",
+      "track_tags": [
+        "3d_vision",
+        "point_based_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "autonomous_systems",
+        "cv_research",
+        "robotics"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because pointNet and point-set invariances formalizes how the idea that point-cloud networks should respect permutation and sampling invariance, implemented by symmetric aggregation over point features, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_atlasnet_and_deep_implicit_shape_decoders",
+      "name": "AtlasNet and deep implicit shape decoders",
+      "description": "Learned mappings from low-dimensional parameter spaces or x,y,z queries to geometry, covering both patch-based surface decoders and occupancy/SDF-style networks.",
+      "track_tags": [
+        "3d_vision",
+        "neural_fields",
+        "shape_generation"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "geometry_processing"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "generative_ai",
+        "graphics_research"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because atlasNet and deep implicit shape decoders synthesizes learned mappings from low-dimensional parameter spaces or x,y,z queries to geometry, covering both patch-based surface decoders and occupancy/SDF-style networks into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_parametric_curves_and_surfaces",
+      "name": "Parametric curves and surfaces",
+      "description": "Representations that map a low-dimensional parameter domain such as t or (u,v) into points on a 2D or 3D shape.",
+      "track_tags": [
+        "3d_vision",
+        "shape_modeling"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "geometry"
+      ],
+      "career_path_tags": [
+        "cad",
+        "graphics_engineering",
+        "robotics"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because parametric curves and surfaces clarifies representations that map a low-dimensional parameter domain such as t or (u,v) into points on a 2D or 3D shape, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp4"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.58,
+    0.88
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture15-3d-vision_transcript.txt"
+  }
+}

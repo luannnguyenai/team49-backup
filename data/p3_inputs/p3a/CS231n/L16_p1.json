@@ -1,0 +1,1826 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_16",
+    "lecture_title": "Lecture 16: Vision and Language — Multi-Modal Foundation Models",
+    "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "From task-specific models to foundation models",
+      "start_s": 5,
+      "end_s": 256
+    },
+    {
+      "section_index": 2,
+      "title": "From SimCLR to CLIP-style image-text contrastive learning",
+      "start_s": 256,
+      "end_s": 590
+    },
+    {
+      "section_index": 3,
+      "title": "Zero-shot CLIP classification with text prompts",
+      "start_s": 590,
+      "end_s": 875
+    },
+    {
+      "section_index": 4,
+      "title": "CLIP robustness, scale, and CoCa",
+      "start_s": 875,
+      "end_s": 1215
+    },
+    {
+      "section_index": 5,
+      "title": "Advantages and limitations of CLIP-style models",
+      "start_s": 1215,
+      "end_s": 1559
+    },
+    {
+      "section_index": 6,
+      "title": "Multimodal language models: LLaVA and Flamingo architectures",
+      "start_s": 1559,
+      "end_s": 2130
+    },
+    {
+      "section_index": 7,
+      "title": "Flamingo training, few-shot behavior, and benchmark shift",
+      "start_s": 2130,
+      "end_s": 2491
+    },
+    {
+      "section_index": 8,
+      "title": "Molmo, open multimodal models, and grounded visual reasoning",
+      "start_s": 2491,
+      "end_s": 3247
+    },
+    {
+      "section_index": 9,
+      "title": "Segment Anything as a foundation model for masks",
+      "start_s": 3247,
+      "end_s": 3624
+    },
+    {
+      "section_index": 10,
+      "title": "Chaining, visual programming, agents, and open research directions",
+      "start_s": 3624,
+      "end_s": 4184
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture_16::seg1",
+      "course_id": "CS231N",
+      "name": "From task-specific models to foundation models",
+      "description": "Introduces the lecture theme and contrasts specialized computer vision models with the foundation-model paradigm.",
+      "summary": "The lecture opens by framing multimodal foundation models as a shift away from building one specialized model per dataset and task. Traditional workflows collect training and test sets, train a task-specific model such as an image classifier or captioner, and evaluate it on that task [ts=59s]. Foundation models instead pre-train on broad skills and data, then adapt to individual tasks through fine-tuning, few-shot use, or even zero-shot use with little or no new training data [ts=98s] [ts=134s]. The lecturer lists the agenda: image-classification foundation models such as CLIP and CoCa, models that combine language models with vision models, models with non-text outputs such as masks or images, and chaining multiple models together [ts=172s] [ts=208s]. A practical definition is given: foundation models are generally robust across many tasks and often have many parameters, large-scale data, and self-supervised pretraining objectives [ts=226s].",
+      "key_points": [
+        {
+          "text": "Traditional course models were framed as specialized systems trained and evaluated for individual tasks.",
+          "timestamp_s": 59,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A foundation model is pre-trained on broad skills and later adapted to task-specific needs.",
+          "timestamp_s": 98,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Foundation models can often adapt with very little data or no task-specific training data.",
+          "timestamp_s": 134,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture focuses on multimodal vision foundation models, including CLIP, CoCa, language-plus-vision models, mask/image outputs, and chaining.",
+          "timestamp_s": 172,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Typical foundation-model traits include robustness across tasks, many parameters, large training datasets, and self-supervised objectives.",
+          "timestamp_s": 226,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 5,
+        "end_s": 256
+      },
+      "difficulty": 2.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 4,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "course_id": "CS231N",
+      "name": "From SimCLR to CLIP-style image-text contrastive learning",
+      "description": "Explains how SimCLR-style contrastive learning extends from image-image pairs to image-text pairs in CLIP.",
+      "summary": "The lecturer recalls SimCLR as a self-supervised contrastive method that pulls together representations of transformed versions of the same image and pushes apart dissimilar images [ts=266s] [ts=366s]. This idea is extended to multimodal representations by embedding text phrases such as “a cute fluffy cat” or “my favorite dog is a golden retriever” near the corresponding image concepts, allowing image and language queries to occupy a shared representation space [ts=320s]. CLIP keeps an image encoder but adds a text encoder, trains on mini-batches of image-text pairs, and applies a symmetric contrastive objective: image embeddings should be closest to their matching text, and text embeddings should be closest to their matching image [ts=394s] [ts=449s]. The training signal is scalable because internet image-text associations can be collected in large quantities [ts=475s]. Once trained, the image encoder can be transferred to classification, detection, or segmentation by adding a linear layer or decoder on top [ts=510s] [ts=523s].",
+      "key_points": [
+        {
+          "text": "SimCLR pulls together augmented views of the same image and pushes apart representations of different images.",
+          "timestamp_s": 266,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Adding text to the representation space allows phrases to be embedded near corresponding visual concepts.",
+          "timestamp_s": 320,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "CLIP uses an image encoder and a text encoder trained on matching image-text pairs.",
+          "timestamp_s": 394,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "CLIP uses a symmetric contrastive objective: image-to-text matching and text-to-image matching.",
+          "timestamp_s": 449,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Internet image-text pairs make CLIP-style training scalable.",
+          "timestamp_s": 475,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A pre-trained CLIP image encoder can be adapted to classification, detection, or segmentation with lightweight downstream heads.",
+          "timestamp_s": 523,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 256,
+        "end_s": 590
+      },
+      "difficulty": 4.2,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 6,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg3",
+      "course_id": "CS231N",
+      "name": "Zero-shot CLIP classification with text prompts",
+      "description": "Shows how CLIP can classify new images without training a new classifier by using text embeddings as class prototypes.",
+      "summary": "The lecturer contrasts language models, which can use next-token prediction as a universal interface for new tasks, with CLIP, which lacks an autocomplete mechanism and otherwise needs a trained linear layer for downstream adaptation [ts=600s] [ts=634s]. The zero-shot trick is to use CLIP’s text encoder to create vector representations for every candidate class label, embed a new image with the image encoder, and classify by nearest-neighbor similarity to those text vectors [ts=660s] [ts=695s]. This is described as a one-nearest-neighbor algorithm where text embeddings serve as class centers [ts=737s]. Because CLIP was trained on phrases rather than isolated words, prompts such as “a photo of a dog” can improve ImageNet performance over bare labels [ts=760s] [ts=786s]. Prompt ensembling further improves robustness by averaging vectors across multiple templates such as “a photo of” and “a drawing of” each class [ts=808s] [ts=824s].",
+      "key_points": [
+        {
+          "text": "Language models can often adapt zero-shot because tasks can be cast as autocomplete, while CLIP does not naturally have that interface.",
+          "timestamp_s": 600,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Zero-shot CLIP classification uses the text encoder to create class vectors without retraining the model.",
+          "timestamp_s": 660,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A new image is embedded with the image encoder and assigned to the nearest text class vector.",
+          "timestamp_s": 695,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The procedure is equivalent to a one-nearest-neighbor classifier with text embeddings as class prototypes.",
+          "timestamp_s": 737,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Prompting with phrases like “a photo of a [category]” performs better than isolated class words.",
+          "timestamp_s": 760,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Averaging multiple prompt vectors per class reduces template bias and yields stronger class representations.",
+          "timestamp_s": 824,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 590,
+        "end_s": 875
+      },
+      "difficulty": 4.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 5,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "course_id": "CS231N",
+      "name": "CLIP robustness, scale, and CoCa",
+      "description": "Explains why CLIP generalizes beyond ImageNet and how CoCa improves CLIP through captioning.",
+      "summary": "After presenting zero-shot CLIP, the lecturer emphasizes that matching ImageNet is not the main surprise; the more interesting result is performance on datasets such as ObjectNet, which contains familiar categories in unusual viewpoints or conditions [ts=875s] [ts=900s]. CLIP generalizes better than ImageNet-trained models because internet text contains richer supervision than class labels, including shape, color, and other structural information [ts=943s]. Scale also matters: ImageNet has around 1.3 million images, while internet-scale image-text training can use hundreds of millions or billions of pairs [ts=977s]. The original CLIP setup benefited from a large ViT-style model with about 307 million parameters and around 400 million image-text pairs [ts=1073s] [ts=1088s]. CoCa then improves on CLIP by retaining the contrastive image-text objective but adding a decoder and captioning loss via cross-attention, encouraging the model to learn richer visual information needed to describe images [ts=1118s] [ts=1130s]. The lecturer states that CoCa improves across ImageNet variants and marks a turning point where foundation models beat supervised-learning models on major image benchmarks [ts=1169s] [ts=1181s].",
+      "key_points": [
+        {
+          "text": "ObjectNet tests robustness by using the same kinds of categories in unusual contexts and viewpoints.",
+          "timestamp_s": 900,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Internet text supervision can encode shape, color, and other structure beyond category labels.",
+          "timestamp_s": 943,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "CLIP benefits from much larger data scale than ImageNet-style supervised training.",
+          "timestamp_s": 977,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The discussed CLIP model used a large transformer architecture with about 307 million parameters.",
+          "timestamp_s": 1073,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "CoCa adds a decoder and captioning loss to the CLIP-style contrastive objective.",
+          "timestamp_s": 1118,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Captioning is hypothesized to be a stronger learning objective because describing an image requires richer information than naming a class.",
+          "timestamp_s": 1147,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 875,
+        "end_s": 1215
+      },
+      "difficulty": 4.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 6,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg5",
+      "course_id": "CS231N",
+      "name": "Advantages and limitations of CLIP-style models",
+      "description": "Surveys what makes CLIP useful in practice and where CLIP-style contrastive training still fails.",
+      "summary": "The lecturer identifies three major advantages of CLIP-style models: the dot-product similarity computation is simple and efficient, embedded datasets enable fast retrieval, and the model is open-vocabulary because users can provide arbitrary text descriptions [ts=1215s] [ts=1227s] [ts=1247s]. CLIP is also easy to chain with other systems, a theme returned to later in the lecture [ts=1261s]. The limitations begin with compositional failures such as confusing “a mug in grass” with “grass in a mug,” showing that CLIP may not represent relationships between concepts reliably [ts=1273s] [ts=1388s]. The lecturer explains that contrastive learning depends heavily on batch size: larger batches are more likely to contain hard negatives that force fine-grained discrimination, but even very large batches do not guarantee robust representations [ts=1293s] [ts=1327s] [ts=1357s]. Handcrafting hard negatives can backfire by hurting semantic generalization [ts=1426s] [ts=1452s]. Finally, image-level captions lack grounding: they do not tell the model where the person, car, or street is, and even billions of images may not cover all important visual concepts [ts=1497s] [ts=1521s].",
+      "key_points": [
+        {
+          "text": "CLIP-style dot-product similarity is efficient for both training and inference.",
+          "timestamp_s": 1215,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Embedding a dataset once enables fast retrieval over CLIP representations.",
+          "timestamp_s": 1227,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Open-vocabulary use lets users query with arbitrary text descriptions.",
+          "timestamp_s": 1247,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "CLIP can fail at compositional distinctions such as “mug in grass” versus “grass in a mug.”",
+          "timestamp_s": 1273,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Large batch sizes help because they increase the chance of hard negative examples.",
+          "timestamp_s": 1327,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Image-level captions omit grounding information such as object locations and relationships.",
+          "timestamp_s": 1497,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 1215,
+        "end_s": 1559
+      },
+      "difficulty": 4.3,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 6,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg6",
+      "course_id": "CS231N",
+      "name": "Multimodal language models: LLaVA and Flamingo architectures",
+      "description": "Introduces vision-language models as image-conditioned autoregressive language models and compares LLaVA and Flamingo fusion mechanisms.",
+      "summary": "The lecture shifts from image-classification foundation models to multimodal language models, motivated by the flexibility of next-token prediction for adapting to many tasks [ts=1559s] [ts=1582s]. LLaVA-style models ground an autoregressive language model in image tokens: instead of conditioning only on previous words such as “cats are so,” the model also receives visual tokens and generates words about the image [ts=1663s] [ts=1705s]. LLaVA obtains those tokens from a pre-trained CLIP image encoder, using penultimate-layer patch features because final non-CLS tokens are not directly supervised, while penultimate features retain useful spatial information [ts=1748s] [ts=1801s]. A linear connector maps CLIP representations into the token space an LLM can process [ts=1849s]. Flamingo follows the same broad goal but changes the fusion mechanism: instead of feeding visual features only as input tokens, it injects vision features into every LLM layer through a perceiver sampler and gated cross-attention modules [ts=1886s] [ts=1973s]. Most of Flamingo is frozen; the trained parts are the perceiver sampler and cross-attention layers, allowing the language model to decide where and when to attend to visual features [ts=2002s] [ts=2021s].",
+      "key_points": [
+        {
+          "text": "Multimodal language models try to extend autoregressive language-model reasoning to image-conditioned tasks.",
+          "timestamp_s": 1559,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "LLaVA feeds image tokens together with text context into a language model to generate image-grounded text.",
+          "timestamp_s": 1705,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "LLaVA uses a pre-trained CLIP image encoder to create visual tokens.",
+          "timestamp_s": 1748,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Penultimate CLIP patch features are useful because final non-CLS tokens are not directly supervised.",
+          "timestamp_s": 1801,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A trainable linear layer converts CLIP features into representations understandable by the LLM.",
+          "timestamp_s": 1849,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Flamingo adds perceiver sampling and gated cross-attention into LLM layers while freezing most vision and language weights.",
+          "timestamp_s": 1973,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 1559,
+        "end_s": 2130
+      },
+      "difficulty": 5.3,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg7",
+      "course_id": "CS231N",
+      "name": "Flamingo training, few-shot behavior, and benchmark shift",
+      "description": "Explains Flamingo’s interleaved image-text training and how multimodal models expanded evaluation beyond classification.",
+      "summary": "Flamingo’s training uses long interleaved image-text sequences rather than isolated image-caption pairs [ts=2131s]. A masking scheme ensures that when generating the description for a particular image, the model attends only to that image’s visual features, even though it sees a longer context of images and descriptions [ts=2184s]. This supports applications such as multi-turn dialogue about an image, where a user can ask follow-up questions and the model inherits reasoning capabilities from the underlying language model [ts=2233s] [ts=2257s]. It also supports multi-image reasoning and in-context learning: users can provide examples of image-caption or image-question-answer pairs and ask the model to continue the pattern on a new image [ts=2306s] [ts=2320s]. The lecturer clarifies that giving examples is few-shot learning, while removing those examples would make the task zero-shot [ts=2397s]. Flamingo’s results helped shift the field from reporting mostly classification benchmarks to reporting any visual understanding task that can be framed as question answering [ts=2450s] [ts=2471s].",
+      "key_points": [
+        {
+          "text": "Flamingo trains on interleaved image-text sequences rather than single isolated captions.",
+          "timestamp_s": 2131,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A masking scheme restricts each generated description to attend to the corresponding image features.",
+          "timestamp_s": 2184,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Multi-turn dialogue becomes possible because the model combines visual grounding with language-model reasoning.",
+          "timestamp_s": 2233,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Flamingo can reason over multiple images and answer questions about what they have in common.",
+          "timestamp_s": 2306,
+          "evidence_type": "example"
+        },
+        {
+          "text": "In-context visual learning uses example image-text or image-QA pairs to induce behavior on a new image.",
+          "timestamp_s": 2320,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Visual understanding benchmarks expanded because many skills can be framed as question answering.",
+          "timestamp_s": 2450,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 2130,
+        "end_s": 2491
+      },
+      "difficulty": 5.1,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "course_id": "CS231N",
+      "name": "Molmo, open multimodal models, and grounded visual reasoning",
+      "description": "Discusses the gap between closed and open multimodal language models and presents Molmo as an open, grounded vision-language model.",
+      "summary": "The lecturer describes a large performance gap between early open models such as LLaVA and closed API models such as GPT-4V/GPT-4o, Gemini, and Claude on popular visual understanding benchmarks [ts=2495s] [ts=2527s]. Many open models were distilled from GPT or Gemini, creating a reproducibility problem: the community could produce strong models only if closed models already existed, but did not know how to reproduce them from first principles [ts=2557s] [ts=2582s]. Molmo is introduced as a response: an open-weights, open-data, open-code multimodal language model intended to make the recipe reproducible [ts=2643s]. The lecturer reports user-study evidence comparing model outputs, including hundreds of users and hundreds of thousands of pairwise comparisons, where Molmo performed competitively with major closed models [ts=2700s] [ts=2724s]. The core trick is grounding decisions in pixels: for counting boats, the model points to each boat before outputting the count, reducing hallucination by requiring visual evidence [ts=2850s] [ts=2861s]. The data recipe matters more than architecture: Molmo uses a LLaVA-like CLIP-plus-linear-connector-plus-LLM architecture, but with carefully curated dense descriptions and spoken annotations designed to capture spatial, material, size, and positional information that people rarely write on the internet [ts=2882s] [ts=2934s] [ts=3025s] [ts=3046s]. The segment also shows grounded uses such as pointing to menus, bus numbers, counting objects, chaining Molmo points into SAM 2 masks, and robotics workflows where pointing guides a robot to objects and target locations [ts=3071s] [ts=3136s] [ts=3168s].",
+      "key_points": [
+        {
+          "text": "Closed API models substantially outperformed early open multimodal models on visual understanding benchmarks.",
+          "timestamp_s": 2495,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Distilling from GPT or Gemini creates an open-source reproducibility problem because the recipe still depends on closed models.",
+          "timestamp_s": 2582,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Molmo is presented as open weights, open data, and open code.",
+          "timestamp_s": 2643,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Grounded decision-making has the model point to visual evidence before producing an answer.",
+          "timestamp_s": 2850,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Dense curated descriptions can contain spatial, material, size, and positional information that incidental web captions omit.",
+          "timestamp_s": 2934,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Molmo can be chained with SAM 2 by using predicted points as segmentation prompts.",
+          "timestamp_s": 3136,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Pointing outputs can guide robotics workflows such as locating a water bottle, sink, and free space.",
+          "timestamp_s": 3168,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 2491,
+        "end_s": 3247
+      },
+      "difficulty": 4.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 13,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg9",
+      "course_id": "CS231N",
+      "name": "Segment Anything as a foundation model for masks",
+      "description": "Explains SAM as a promptable segmentation foundation model and emphasizes architecture, ambiguity, and data collection.",
+      "summary": "The lecture expands foundation models beyond classification and text generation to arbitrary output spaces, focusing on Segment Anything Model (SAM) as a foundation model for segmentation [ts=3252s] [ts=3263s]. SAM aims to output masks for any category or user-specified object, rather than a fixed closed set of segmentation categories [ts=3281s] [ts=3293s]. This creates two challenges: collecting diverse mask data across many categories and designing an architecture that lets users specify exactly what they care about [ts=3307s] [ts=3318s]. The lecturer motivates promptable segmentation using ambiguity: if an image has two cats and the user asks for “the cat,” a point or other prompt can specify which instance is intended [ts=3333s]. SAM uses an image encoder, a prompt encoder for text, points, boxes, or other user specifications, and a lightweight mask decoder [ts=3384s] [ts=3405s]. Because even a point can be ambiguous, SAM outputs multiple masks at different granularities and trains against the closest ground-truth mask rather than penalizing all alternatives [ts=3436s] [ts=3472s]. The lecturer stresses that SAM’s performance depends on data scale and quality: the paper grew segmentation images by about 6x and masks by about 400x, using a human-in-the-loop/model-in-the-loop process to iteratively annotate and refine masks [ts=3499s] [ts=3510s] [ts=3561s].",
+      "key_points": [
+        {
+          "text": "SAM is framed as a foundation model for segmentation tasks.",
+          "timestamp_s": 3263,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "SAM’s goal is to generalize from fixed category segmentation to masks for any user-relevant category.",
+          "timestamp_s": 3281,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Promptable segmentation helps resolve instance ambiguity, such as choosing which cat in an image to segment.",
+          "timestamp_s": 3333,
+          "evidence_type": "example"
+        },
+        {
+          "text": "SAM combines an image encoder, prompt encoder, and lightweight decoder to produce masks.",
+          "timestamp_s": 3384,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "SAM outputs multiple masks at different granularities because a single prompt can refer to different valid object extents.",
+          "timestamp_s": 3436,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "SAM relied on a major data-scale increase: roughly 6x more segmentation images and 400x more masks.",
+          "timestamp_s": 3510,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A human-in-the-loop/model-in-the-loop process iteratively proposed and corrected segmentation masks.",
+          "timestamp_s": 3561,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 3247,
+        "end_s": 3624
+      },
+      "difficulty": 4.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 9,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_16::seg10",
+      "course_id": "CS231N",
+      "name": "Chaining, visual programming, agents, and open research directions",
+      "description": "Explains how multiple models can be composed into systems that solve tasks no single model handles well.",
+      "summary": "The final segment defines chaining as combining different models to enable capabilities that a single model cannot perform alone [ts=3624s] [ts=3635s]. One example uses GPT-style descriptions to help CLIP classify categories it has not directly seen: when category names are unfamiliar, generated descriptions provide semantic anchors that CLIP can match to images [ts=3688s] [ts=3696s]. Another example counts people across boats by chaining object detector outputs and arithmetic rather than relying on a single multimodal model answer [ts=3776s] [ts=3817s]. The lecturer connects this to VisProg/visual programming, where GPT generates a Python program that calls specialized models such as object detectors or face detectors and combines their outputs to answer a question [ts=3837s] [ts=3881s]. In-context examples for program generation can be chosen statically or dynamically through retrieval, with dynamic retrieval performing better when the retrieval system is strong [ts=3891s] [ts=3930s]. Chaining can be costly because it may require API calls and sequentially running many models, motivating current research on distilling these capabilities into one model [ts=3958s] [ts=3973s]. The lecturer explicitly says this resembles an agent that decides which tools it needs and how to stitch them together [ts=3988s]. The segment closes by summarizing foundation models as models trained on one broad objective and generalized to many downstream applications, including classification, multimodal language tasks, masks, and chained systems [ts=4025s]. In Q&A, the lecturer notes that pointing can reduce hallucination but does not guarantee correctness, and that verifier models or tool-building systems are active research directions [ts=4096s] [ts=4154s].",
+      "key_points": [
+        {
+          "text": "Chaining combines different models to enable capabilities no single model can do alone.",
+          "timestamp_s": 3624,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "GPT-generated descriptions can make unseen categories easier for CLIP to classify.",
+          "timestamp_s": 3688,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Counting across images can be solved by running object detection on each image and combining counts.",
+          "timestamp_s": 3817,
+          "evidence_type": "example"
+        },
+        {
+          "text": "VisProg generates programs that call specialized models and combine their outputs to answer visual questions.",
+          "timestamp_s": 3837,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Dynamic retrieval of in-context program examples can improve program generation if retrieval is strong.",
+          "timestamp_s": 3930,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Chaining is costly because it may require API calls and sequential execution of many models.",
+          "timestamp_s": 3958,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A chained system can be viewed as an agent choosing which models or tools to use for a question.",
+          "timestamp_s": 3988,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Verifier systems can mitigate hallucinations by checking generated outputs before showing them to users.",
+          "timestamp_s": 4096,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "start_s": 3624,
+        "end_s": 4184
+      },
+      "difficulty": 5.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 10,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture_16::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Sets the foundation-model frame and lecture roadmap; mostly conceptual definitions and motivation."
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Contains the central CLIP contrastive objective and the bridge from SimCLR to image-text representation learning."
+    },
+    {
+      "unit_id": "local::lecture_16::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Explains the key zero-shot classification trick and practical prompting techniques."
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Links CLIP’s empirical robustness to language supervision and scale, then introduces CoCa as an important extension."
+    },
+    {
+      "unit_id": "local::lecture_16::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Strong exam/retrieval value because it lists both CLIP strengths and concrete failure modes."
+    },
+    {
+      "unit_id": "local::lecture_16::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Architecture-heavy segment explaining how image tokens are fused into language models in LLaVA and Flamingo."
+    },
+    {
+      "unit_id": "local::lecture_16::seg7",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Important for understanding Flamingo training data, masking, few-shot visual prompting, and benchmark changes."
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Contains concrete Molmo examples, grounding, data-centric lessons, and applications to SAM/robotics."
+    },
+    {
+      "unit_id": "local::lecture_16::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Core SAM architecture and data-engine discussion; central example of non-text foundation-model outputs."
+    },
+    {
+      "unit_id": "local::lecture_16::seg10",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Capstone segment tying CLIP, VLMs, detectors, segmenters, agents, and verifiers into chained systems."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture_16::seg1",
+      "global_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg1",
+      "global_kp_id": "kp_traits_of_foundation_models",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_internet_scale_image_text_data",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg2",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg3",
+      "global_kp_id": "kp_zero_shot_clip_classification_as_nearest_neighbor_over_text_prototypes",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg3",
+      "global_kp_id": "kp_prompt_templates_and_prompt_ensembling_for_clip",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "global_kp_id": "kp_clip_out_of_distribution_robustness",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg4",
+      "global_kp_id": "kp_coca_contrastive_captioning_objective",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg5",
+      "global_kp_id": "kp_clip_retrieval_open_vocabulary_use_and_chainability",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg5",
+      "global_kp_id": "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg6",
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg6",
+      "global_kp_id": "kp_llava_clip_to_llm_connector_architecture",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg6",
+      "global_kp_id": "kp_flamingo_perceiver_sampler_and_gated_cross_attention",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg7",
+      "global_kp_id": "kp_interleaved_image_text_training_and_masking",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg7",
+      "global_kp_id": "kp_in_context_and_few_shot_multimodal_reasoning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg7",
+      "global_kp_id": "kp_benchmark_shift_to_broad_visual_question_answering",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_molmo_open_multimodal_language_model",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_grounded_decision_making_through_pointing",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_dense_curated_visual_descriptions",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg8",
+      "global_kp_id": "kp_chaining_grounded_vlm_outputs_into_other_models",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg9",
+      "global_kp_id": "kp_sam_promptable_segmentation_architecture",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg9",
+      "global_kp_id": "kp_sam_ambiguity_handling_and_data_engine",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg10",
+      "global_kp_id": "kp_chaining_and_visual_programming",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_16::seg10",
+      "global_kp_id": "kp_chaining_grounded_vlm_outputs_into_other_models",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_16::seg10",
+      "global_kp_id": "kp_verification_distillation_and_tool_building_frontiers",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "name": "Foundation-model pretraining and adaptation paradigm",
+      "description": "A foundation model is pretrained broadly and then adapted to many downstream tasks through fine-tuning, prompting, zero-shot, or few-shot use. The core recipe is broad pretraining followed by task-directed post-training or adaptation.",
+      "track_tags": [
+        "foundation_models",
+        "llms",
+        "multimodal_ml",
+        "nlp"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "natural_language_processing",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because foundation-model pretraining and adaptation paradigm formalizes how a foundation model is pretrained broadly and then adapted to many downstream tasks through fine-tuning, prompting, zero-shot, or few-shot use, which later units use as core machinery rather than background context while importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture18::kp2",
+        "local::lecture_16::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_traits_of_foundation_models",
+      "name": "Traits of foundation models",
+      "description": "Foundation models are typically general and robust across tasks, and often use large parameter counts, large datasets, and self-supervised objectives.",
+      "track_tags": [
+        "foundation_models"
+      ],
+      "domain_tags": [
+        "model_scaling",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because traits of foundation models clarifies foundation models are typically general and robust across tasks, and often use large parameter counts, large datasets, and self-supervised objectives, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "name": "SimCLR contrastive representation learning",
+      "description": "A self-supervised objective that pulls together augmented views of the same image and pushes apart different images.",
+      "track_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "domain_tags": [
+        "contrastive_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because simCLR contrastive representation learning clarifies a self-supervised objective that pulls together augmented views of the same image and pushes apart different images, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "name": "Contrastive vision-language pretraining",
+      "description": "The CLIP/ALIGN family of models that align independently encoded images and text with contrastive objectives and scale primarily through data and compute. CLIP trains an image encoder and text encoder so matching image-text pairs are close and mismatched pairs are far in a shared embedding space.",
+      "track_tags": [
+        "contrastive_learning",
+        "multimodal_ml",
+        "pretraining",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "computer_vision",
+        "foundation_models",
+        "nlp",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "foundation_model_engineering",
+        "ml_engineer",
+        "ml_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.77,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because contrastive vision-language pretraining formalizes how the CLIP/ALIGN family of models that align independently encoded images and text with contrastive objectives and scale primarily through data and compute, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16_multimodal_deep_learning::kp5",
+        "local::lecture_16::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_internet_scale_image_text_data",
+      "name": "Internet-scale image-text data",
+      "description": "Web image-text associations provide scalable supervision for CLIP-style multimodal pretraining.",
+      "track_tags": [
+        "data_centric_ai",
+        "foundation_models"
+      ],
+      "domain_tags": [
+        "vision_language",
+        "web_data"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because internet-scale image-text data clarifies web image-text associations provide scalable supervision for CLIP-style multimodal pretraining, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "name": "Downstream transfer and extrinsic evaluation",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
+      "track_tags": [
+        "computer_vision",
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "downstream_adaptation",
+        "linear_probe",
+        "machine_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02::kp14",
+        "local::lecture_12::kp3",
+        "local::lecture_16::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_zero_shot_clip_classification_as_nearest_neighbor_over_text_prototypes",
+      "name": "Zero-shot CLIP classification as nearest neighbor over text prototypes",
+      "description": "CLIP can classify new images by embedding candidate class labels with the text encoder and choosing the most similar text embedding.",
+      "track_tags": [
+        "vision_language",
+        "zero_shot_learning"
+      ],
+      "domain_tags": [
+        "classification",
+        "clip"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.88,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because zero-shot CLIP classification as nearest neighbor over text prototypes formalizes how cLIP can classify new images by embedding candidate class labels with the text encoder and choosing the most similar text embedding, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_prompt_templates_and_prompt_ensembling_for_clip",
+      "name": "Prompt templates and prompt ensembling for CLIP",
+      "description": "Using phrases and averaging multiple prompt embeddings improves class representations compared with bare class names.",
+      "track_tags": [
+        "prompting",
+        "zero_shot_learning"
+      ],
+      "domain_tags": [
+        "classification",
+        "clip"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because prompt templates and prompt ensembling for CLIP clarifies using phrases and averaging multiple prompt embeddings improves class representations compared with bare class names, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_out_of_distribution_robustness",
+      "name": "CLIP out-of-distribution robustness",
+      "description": "CLIP can generalize to unusual datasets such as ObjectNet because language supervision and data scale expose richer visual structure than category labels alone.",
+      "track_tags": [
+        "robustness",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "ood_generalization"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cLIP out-of-distribution robustness clarifies cLIP can generalize to unusual datasets such as ObjectNet because language supervision and data scale expose richer visual structure than category labels alone, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "name": "Pretraining scaling and compute-data tradeoffs",
+      "description": "Large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale. This scaling view also appears in vision-language systems such as CLIP, where larger models and more image-text data improve performance.",
+      "track_tags": [
+        "foundation_models",
+        "llm",
+        "model_efficiency",
+        "nlp",
+        "scaling",
+        "scaling_laws"
+      ],
+      "domain_tags": [
+        "data_scale",
+        "large_language_models",
+        "model_scale",
+        "nlp",
+        "pretraining",
+        "scaling_laws"
+      ],
+      "career_path_tags": [
+        "llm_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_engineering",
+        "research_scientist",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because pretraining scaling and compute-data tradeoffs clarifies large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale, sharpening later modeling, analysis, or evaluation choices while importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-posttraining::kp1",
+        "local::lecture09-pretraining::kp11",
+        "local::lecture_16::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_coca_contrastive_captioning_objective",
+      "name": "CoCa contrastive captioning objective",
+      "description": "CoCa augments CLIP-style contrastive learning with a decoder and captioning loss to learn richer visual representations.",
+      "track_tags": [
+        "generative_objectives",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "captioning",
+        "coca"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.92,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because coCa contrastive captioning objective clarifies coCa augments CLIP-style contrastive learning with a decoder and captioning loss to learn richer visual representations, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_retrieval_open_vocabulary_use_and_chainability",
+      "name": "CLIP retrieval, open-vocabulary use, and chainability",
+      "description": "CLIP is useful because its dot-product similarity enables fast retrieval, arbitrary text queries, and composition with other models.",
+      "track_tags": [
+        "retrieval",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "open_vocabulary"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cLIP retrieval, open-vocabulary use, and chainability clarifies cLIP is useful because its dot-product similarity enables fast retrieval, arbitrary text queries, and composition with other models, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+      "name": "CLIP limitations: batch size, compositionality, grounding, and coverage",
+      "description": "CLIP struggles with relational compositionality, depends on large/hard-negative batches, lacks localization grounding, and cannot cover all concepts through web data alone.",
+      "track_tags": [
+        "model_limitations",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "compositionality",
+        "grounding"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.94,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cLIP limitations: batch size, compositionality, grounding, and coverage clarifies cLIP struggles with relational compositionality, depends on large/hard-negative batches, lacks localization grounding, and cannot cover all concepts through web data alone, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "name": "Generative multimodal language models",
+      "description": "Decoder-centric multimodal systems that condition large language models on visual inputs through projections, cross-attention, or adapter-like components. Vision-language models condition an autoregressive language model on image tokens so visual tasks can be handled through text generation.",
+      "track_tags": [
+        "foundation_models",
+        "generation",
+        "multimodal_language_models",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "autoregressive_modeling",
+        "computer_vision",
+        "foundation_models",
+        "nlp",
+        "vlm"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "foundation_model_engineering",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because generative multimodal language models formalizes how decoder-centric multimodal systems that condition large language models on visual inputs through projections, cross-attention, or adapter-like components, which later units use as core machinery rather than background context while roles split between capstone and gateway and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16_multimodal_deep_learning::kp8",
+        "local::lecture_16::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_llava_clip_to_llm_connector_architecture",
+      "name": "LLaVA CLIP-to-LLM connector architecture",
+      "description": "LLaVA uses CLIP visual features, typically penultimate patch tokens, and maps them through a trainable linear connector into an LLM.",
+      "track_tags": [
+        "architecture",
+        "multimodal_language_models"
+      ],
+      "domain_tags": [
+        "clip",
+        "llava",
+        "llm"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because lLaVA CLIP-to-LLM connector architecture clarifies lLaVA uses CLIP visual features, typically penultimate patch tokens, and maps them through a trainable linear connector into an LLM, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_flamingo_perceiver_sampler_and_gated_cross_attention",
+      "name": "Flamingo perceiver sampler and gated cross-attention",
+      "description": "Flamingo fuses vision into an LLM by sampling visual tokens and injecting them into every layer through gated cross-attention modules.",
+      "track_tags": [
+        "architecture",
+        "multimodal_language_models"
+      ],
+      "domain_tags": [
+        "cross_attention",
+        "flamingo"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because flamingo perceiver sampler and gated cross-attention clarifies flamingo fuses vision into an LLM by sampling visual tokens and injecting them into every layer through gated cross-attention modules, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_interleaved_image_text_training_and_masking",
+      "name": "Interleaved image-text training and masking",
+      "description": "Flamingo trains on long interleaved image-text sequences while masking attention so each description attends to the correct image.",
+      "track_tags": [
+        "few_shot_learning",
+        "multimodal_training"
+      ],
+      "domain_tags": [
+        "flamingo",
+        "interleaved_data"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because interleaved image-text training and masking clarifies flamingo trains on long interleaved image-text sequences while masking attention so each description attends to the correct image, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_in_context_and_few_shot_multimodal_reasoning",
+      "name": "In-context and few-shot multimodal reasoning",
+      "description": "A multimodal language model can infer new visual task behavior from example image-text or image-QA demonstrations in the prompt.",
+      "track_tags": [
+        "few_shot_learning",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "in_context_learning",
+        "visual_question_answering"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because in-context and few-shot multimodal reasoning clarifies a multimodal language model can infer new visual task behavior from example image-text or image-QA demonstrations in the prompt, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp18"
+      ]
+    },
+    {
+      "global_kp_id": "kp_benchmark_shift_to_broad_visual_question_answering",
+      "name": "Benchmark shift to broad visual question answering",
+      "description": "As multimodal language models improved, evaluation broadened from image classification to many visual understanding tasks framed as QA.",
+      "track_tags": [
+        "evaluation",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "benchmarks",
+        "visual_understanding"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because benchmark shift to broad visual question answering clarifies as multimodal language models improved, evaluation broadened from image classification to many visual understanding tasks framed as QA, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp19"
+      ]
+    },
+    {
+      "global_kp_id": "kp_closed_model_distillation_and_open_reproducibility_gap",
+      "name": "Closed-model distillation and open reproducibility gap",
+      "description": "Many strong open VLMs were distilled from closed models, leaving the community without a fully reproducible training recipe.",
+      "track_tags": [
+        "multimodal_language_models",
+        "open_source_ai"
+      ],
+      "domain_tags": [
+        "distillation",
+        "reproducibility"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because closed-model distillation and open reproducibility gap clarifies many strong open VLMs were distilled from closed models, leaving the community without a fully reproducible training recipe, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp20"
+      ]
+    },
+    {
+      "global_kp_id": "kp_molmo_open_multimodal_language_model",
+      "name": "Molmo open multimodal language model",
+      "description": "Molmo is presented as an open-weights, open-data, open-code VLM that competitively matches closed models in user preference evaluations.",
+      "track_tags": [
+        "multimodal_language_models",
+        "open_source_ai"
+      ],
+      "domain_tags": [
+        "molmo",
+        "vlm"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because molmo open multimodal language model clarifies molmo is presented as an open-weights, open-data, open-code VLM that competitively matches closed models in user preference evaluations, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp21"
+      ]
+    },
+    {
+      "global_kp_id": "kp_grounded_decision_making_through_pointing",
+      "name": "Grounded decision-making through pointing",
+      "description": "A VLM can reduce hallucination and improve interpretability by producing visual points tied to the evidence used for an answer.",
+      "track_tags": [
+        "grounding",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "hallucination_mitigation",
+        "visual_grounding"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.94,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because grounded decision-making through pointing formalizes how a VLM can reduce hallucination and improve interpretability by producing visual points tied to the evidence used for an answer, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp22"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dense_curated_visual_descriptions",
+      "name": "Dense curated visual descriptions",
+      "description": "High-quality curated annotations capture spatial, positional, material, and size information that incidental internet captions omit.",
+      "track_tags": [
+        "data_centric_ai",
+        "multimodal_training"
+      ],
+      "domain_tags": [
+        "annotation",
+        "visual_descriptions"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dense curated visual descriptions clarifies high-quality curated annotations capture spatial, positional, material, and size information that incidental internet captions omit, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp23"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chaining_grounded_vlm_outputs_into_other_models",
+      "name": "Chaining grounded VLM outputs into other models",
+      "description": "Grounded outputs such as points can become prompts or control signals for models like SAM or robotics planners.",
+      "track_tags": [
+        "grounding",
+        "model_chaining"
+      ],
+      "domain_tags": [
+        "robotics",
+        "sam",
+        "vlm"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because chaining grounded VLM outputs into other models clarifies grounded outputs such as points can become prompts or control signals for models like SAM or robotics planners, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp24"
+      ]
+    },
+    {
+      "global_kp_id": "kp_sam_promptable_segmentation_architecture",
+      "name": "SAM promptable segmentation architecture",
+      "description": "SAM combines an image encoder, prompt encoder, and lightweight mask decoder to produce masks from text, points, boxes, or other prompts.",
+      "track_tags": [
+        "foundation_models",
+        "segmentation"
+      ],
+      "domain_tags": [
+        "promptable_segmentation",
+        "sam"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.92,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sAM promptable segmentation architecture formalizes how sAM combines an image encoder, prompt encoder, and lightweight mask decoder to produce masks from text, points, boxes, or other prompts, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp25"
+      ]
+    },
+    {
+      "global_kp_id": "kp_sam_ambiguity_handling_and_data_engine",
+      "name": "SAM ambiguity handling and data engine",
+      "description": "SAM handles ambiguous prompts by outputting multiple masks and relies on massive human/model-in-the-loop mask collection.",
+      "track_tags": [
+        "data_centric_ai",
+        "segmentation"
+      ],
+      "domain_tags": [
+        "mask_annotation",
+        "sam"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.96,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sAM ambiguity handling and data engine clarifies sAM handles ambiguous prompts by outputting multiple masks and relies on massive human/model-in-the-loop mask collection, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp26"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chaining_and_visual_programming",
+      "name": "Chaining and visual programming",
+      "description": "Systems such as VisProg use LLM-generated programs to call specialized vision models and combine their outputs for complex visual tasks.",
+      "track_tags": [
+        "model_chaining",
+        "visual_programming"
+      ],
+      "domain_tags": [
+        "agents",
+        "computer_vision",
+        "tool_use"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because chaining and visual programming synthesizes systems such as VisProg use LLM-generated programs to call specialized vision models and combine their outputs for complex visual tasks into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp27"
+      ]
+    },
+    {
+      "global_kp_id": "kp_verification_distillation_and_tool_building_frontiers",
+      "name": "Verification, distillation, and tool-building frontiers",
+      "description": "Current research tries to verify model outputs, distill chained capabilities into single models, and build new tools automatically when needed.",
+      "track_tags": [
+        "agents",
+        "research_frontiers"
+      ],
+      "domain_tags": [
+        "distillation",
+        "tool_use",
+        "verification"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 1.0,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because verification, distillation, and tool-building frontiers extends the core thread to current research tries to verify model outputs, distill chained capabilities into single models, and build new tools automatically when needed without being required for the main pipeline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp28"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L16_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture16-vision-and-language_transcript.txt"
+  }
+}

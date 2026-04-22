@@ -1,0 +1,78 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Lecture 9 - Pretraining",
+    "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg7",
+    "course_id": "<course_id>",
+    "name": "GPT-3, in-context learning, scaling laws, and prompting",
+    "description": "Explains how very large decoder-only models exhibit in-context learning, discusses compute/data scaling tradeoffs, and introduces chain-of-thought prompting along with broader capability and safety questions.",
+    "summary": "The final segment centers on GPT-3, a much larger decoder-only model that could sometimes perform new tasks without parameter updates, simply from examples placed in the prompt [ts=3995s] [ts=4052s]. This behavior is named in-context learning: the model infers a pattern from demonstrations in the current input—translation, addition, typo correction—and continues it without explicit fine-tuning [ts=4052s] [ts=4102s]. The lecture stresses that the mechanism is still poorly understood: some behavior may come from matching patterns seen during pretraining, while some appears to reflect nontrivial adaptation to the presented context [ts=4141s] [ts=4230s]. It then turns to scaling, noting that larger models trained on more data generally improved, but that compute must be allocated wisely; Chinchilla is cited as evidence that GPT-3 was over-parameterized relative to the amount of training data and that smaller models trained on more tokens can do better [ts=4234s] [ts=4290s]. Finally, the segment introduces chain-of-thought prompting as giving worked intermediate steps in the prompt, which often improves reasoning by letting the model generate a scratchpad, while also emphasizing open concerns about emergent behavior, bias, programming use, and continued domain-adaptive pretraining such as the \"Don't Stop Pretraining\" idea [ts=4310s] [ts=4634s].",
+    "key_points": [
+      {
+        "text": "GPT-3 can sometimes solve tasks from prompt examples alone, without gradient-based fine-tuning.",
+        "timestamp_s": 4023,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In-context learning means inferring and continuing a task pattern from demonstrations within the current input.",
+        "timestamp_s": 4052,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Whether in-context learning is memorized pattern matching or more general task learning remains an open research question.",
+        "timestamp_s": 4196,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Scaling requires balancing parameter count against training tokens; Chinchilla improved by using fewer parameters and more data.",
+        "timestamp_s": 4243,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Chain-of-thought prompting provides intermediate reasoning steps in the prompt and often improves answer accuracy.",
+        "timestamp_s": 4342,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Pretraining yields broad capabilities but also biases and hard-to-predict failures.",
+        "timestamp_s": 4459,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A practical extension is to continue pretraining on unlabeled in-domain text before final supervised fine-tuning.",
+        "timestamp_s": 4609,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=9",
+      "start_s": 3995,
+      "end_s": 4718
+    },
+    "difficulty": 0.71,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "transcript_slice": "01:06:35\nAnd then so, after GPT-2, we come to GPT-3.\n\n01:06:41\nAnd then, we come with up a different way\n\n01:06:45\nSo we've interacted with pretrained models in two ways\n\n01:06:48\nWe've sampled from the distribution that they define.\n\n01:06:57\nor you fine-tune them on a task that we care about,\n\n01:07:03\nBut GPT-3 seems to have an interesting new ability.\n\n01:07:14\nwithout any sort of fine-tuning whatsoever.\n\n01:07:19\nSo we went from GPT 100-ish million parameters.\n\n01:07:25\nGPT-3, 175 billion, much larger, trained\n\n01:07:32\nAnd this notion of in-context learning\n\n01:07:37\nor in the example that it's currently seeing\n\n01:07:44\nSo you've got the word \"thanks.\"\n\n01:07:48\n\"thanks\" goes to \"marci,\" and then \"hello\" goes to \"bonjour.\"\n\n01:07:53\nand ask it what \"otter\" should go to.\n\n01:08:00\nand say that this is the translation of \"otter.\"\n\n01:08:07\nthat I've given to my model.\n\n01:08:12\non translation or whatever.\n\n01:08:16\nAnd then it is able, to some extent,\n\n01:08:22\nThat's in-context learning.\n\n01:08:26\nMaybe you give it examples of addition,\n\n01:08:33\nYou give it-- in this case, this is sort of rewriting typos.\n\n01:08:39\nfor machine translation.\n\n01:08:43\nthat there were these emergent properties that showed up\n\n01:08:47\nAnd it wasn't clear when looking at the smaller models\n\n01:08:53\nthis qualitatively new behavior out of them.\n\n01:09:01\nGPT-3 is just trained on that decoder only,\n\n01:09:06\nthat it would, as a result of that training,\n\n01:09:12\nas a function of its context.\n\n01:09:17\nOne or two questions about that.\n\n01:09:29\nSo far, we said-- we've talked about good representations,\n\n01:09:34\nThis is some very, very high-level pattern matching.\n\n01:09:40\nand that one sequence of text that you've passed it so far\n\n01:09:47\nAnd you should think, what kinds of things can this solve?\n\n01:09:52\nWhat are its limitations?\n\n01:09:56\nWhat are the kinds of problems that you maybe\n\n01:09:59\nMaybe GPT-3 saw a ton of pairs of words, right?\n\n01:10:06\nin its training data.\n\n01:10:09\nOr is it doing something much more general,\n\n01:10:14\nThe actual story, we're not totally sure.\n\n01:10:18\nIt seems like it has to be tied to your training data\n\n01:10:24\nBut there's also a non-trivial ability\n\n01:10:30\njust from the context.\n\n01:10:34\nNow, we've talked a lot about the size of these models\n\n01:10:37\nAnd as models have gotten larger,\n\n01:10:40\nWe trained them on more data, right?\n\n01:10:46\nand it was 175 billion parameters.\n\n01:10:54\nto build these things.\n\n01:10:57\ngetting the best use out of your money,\n\n01:11:01\nof the number of parameters?\n\n01:11:06\nis roughly you take the number of parameters,\n\n01:11:09\nthat you're going to train it on, the number of words.\n\n01:11:15\nthe citation on this-- some folks at DeepMind\n\n01:11:20\nthat actually GPT-3 was just comically oversized.\n\n01:11:27\nis less than half the size and works better,\n\n01:11:34\nAnd this is an interesting of trade-off about how\n\n01:11:39\nYou can't do this more than a handful of times,\n\n01:11:43\nSo open questions there as well.\n\n01:11:50\nwith these networks that has come out recently\n\n01:11:55\nSo the prefix, right, we saw in the in-context learning slide\n\n01:12:02\ntrying to solve right now.\n\n01:12:05\nSo here's standard sort of prompting.\n\n01:12:11\nSo you have a question and then an example answer.\n\n01:12:17\nAnd then you have a new question,\n\n01:12:20\nand it generates it wrong.\n\n01:12:26\nabout in the example?\n\n01:12:30\nand then we give this sort of decomposition\n\n01:12:36\nSo I'm actually writing this out as part of the input.\n\n01:12:40\nto say, oh, to solve this sort of word problem,\n\n01:12:47\nAnd then I give it a new question.\n\n01:12:51\nI'm supposed to first generate a sequence of steps,\n\n01:12:59\nand then say what the answer is.\n\n01:13:04\nbe very surprising, that the model can\n\n01:13:10\nand then much more frequently generates the correct answer\n\n01:13:16\nthe answer by itself.\n\n01:13:20\nYou can think of this as increasing\n\n01:13:25\nto solve the problem.\n\n01:13:28\nAs I generate each word of this continuation here,\n\n01:13:35\nAnd so maybe it just, yeah, allows\n\n01:13:43\nproblems, which is more able to solve each.\n\n01:13:51\nAt this point, with networks that are this large,\n\n01:13:57\nand exceptionally hard to understand\n\n01:14:04\nwhat its capabilities are, and what its limitations are,\n\n01:14:08\nSo why do we think pretraining is teaching?\n\n01:14:14\nbeyond what I've written in this slide, which I mostly\n\n01:14:19\nSo it can teach you trivia, and syntax,\n\n01:14:23\nand sentiment and some reasoning,\n\n01:14:27\nthought even three years ago.\n\n01:14:34\nall manner of biases.\n\n01:14:40\nThe generality of this is really, I think,\n\n01:14:44\nAnd so, increasingly, these objects\n\n01:14:50\nbut studied for the sake of understanding anything\n\n01:14:57\nYeah.\n\n01:15:05\nHas anyone tried benchmarking GPT for programming tasks\n\n01:15:13\nYeah, the question is, has anyone\n\n01:15:18\nHas anyone seen how well it does?\n\n01:15:25\nfor simple programming things and then the modern\n\n01:15:34\non ideas from language modeling.\n\n01:15:40\nmodels themselves.\n\n01:15:46\nthen you get some very interesting emergent behaviors\n\n01:15:50\nAnd so yeah, I think all of the best systems\n\n01:15:56\nSo lots of benchmarking there for sure.\n\n01:16:02\nThe question is, is this the basis?\n\n01:16:06\nCopilot system?\n\n01:16:10\nWe don't know exactly what it is in terms of details,\n\n01:16:15\nWhat if you have a situation where\n\n01:16:20\nand then you have also a large amount of data\n\n01:16:24\nAt what point is it better to train a new model\n\n01:16:30\nYeah, the question is, what if you\n\n01:16:33\nand a large amount of data for fine-tuning?\n\n01:16:38\non just the fine-tuning data?\n\n01:16:43\nIf you have a bunch of data for the task\n\n01:16:49\nis three-part training where you pre-train\n\n01:16:54\nThen, you sort of continue to pre-train using something\n\n01:17:00\nversion of the labeled data that you have.\n\n01:17:05\nand do language modeling on that,\n\n01:17:09\nand then do the final stage of fine-tuning with the labels\n\n01:17:12\nAnd that works even better.\n\n01:17:19\nNice.\n\n01:17:21\nJust one question, sorry.\n\n01:17:25\nSomeone new with a question?\n\n01:17:30\nYeah, I was wondering, do you know\n\n01:17:36\ndo some task that it has not seen before, even\n\n01:17:40\nYeah, so are there any instances of where a pretrained model can\n\n01:17:46\nThe question is, what does \"it hasn't seen before\" mean,\n\n01:17:50\nThese models, especially GPT-3 and similar very large models,\n\n01:17:58\nlike this sort of word problem arithmetic?\n\n01:18:02\nMaybe not, it's actually sort of unclear.\n\n01:18:06\nof bits and pieces of tasks that it saw implicitly\n\n01:18:11\nWe saw the same thing with trivia, right?\n\n01:18:15\nwhere you just read the first paragraph of a Wikipedia page,\n\n01:18:21\nquestions about where someone was born and when.\n\n01:18:26\nAnd it's actually still kind of astounding\n\n01:18:29\ndon't seem like they should have shown up all that directly\n\n01:18:33\nQuantifying that extent is an open research problem.\n\n01:18:38\nLet's call it.",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.56,
+    0.86
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L9_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture09-pretraining_transcript.txt"
+  }
+}

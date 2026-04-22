@@ -1,0 +1,194 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_9",
+    "lecture_title": "Detection, Segmentation, Visualization, and Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4"
+  },
+  "unit": {
+    "unit_id": "local::lecture_9::seg4",
+    "course_id": "cs231n_spring_2025",
+    "name": "Single-stage and transformer detectors: YOLO and DETR",
+    "description": "Covers faster one-stage detection with YOLO and then shows how transformer encoder-decoder designs can be repurposed for detection with learned object queries.",
+    "summary": "To avoid the two-stage cost of R-CNN-style detectors, the lecture introduces single-stage detection and uses YOLO as the canonical example: the image is divided into an S x S grid, each cell predicts B bounding boxes plus objectness and class probabilities, and postprocessing uses thresholding and non-maximum suppression to keep the best detections [ts=2675s] [ts=2738s] [ts=2772s] [ts=2851s]. The segment then presents DETR as a transformer-based detector built from encoder tokens with positional encodings plus a decoder that receives learned object queries rather than proposal boxes [ts=2940s] [ts=2997s] [ts=3006s] [ts=3052s]. Each query outputs either a class and bounding box or a no-object prediction, supervision still uses class labels and box losses, and the instructor emphasizes that queries are trainable parameters rather than image patches; more queries can be used when more objects are expected [ts=3104s] [ts=3121s] [ts=3208s] [ts=3275s] [ts=3449s] [ts=3460s].",
+    "key_points": [
+      {
+        "text": "YOLO divides the image into an S x S grid for one-pass detection.",
+        "timestamp_s": 2738,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Each grid cell predicts B boxes together with objectness and class probabilities.",
+        "timestamp_s": 2772,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Thresholding and non-maximum suppression are used to keep the highest-confidence YOLO detections.",
+        "timestamp_s": 2851,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "DETR reuses a transformer encoder-decoder architecture for object detection.",
+        "timestamp_s": 2940,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "DETR uses learned object queries in the decoder to request up to N detected objects.",
+        "timestamp_s": 3052,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Each object query outputs either a class-plus-box prediction or a no-object label.",
+        "timestamp_s": 3121,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Object queries are learned parameters, not image patches or predefined boxes.",
+        "timestamp_s": 3275,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=PTypu6GqEd4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=9",
+      "start_s": 2621,
+      "end_s": 3380
+    },
+    "difficulty": 0.78,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 13,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "transcript_slice": "00:43:46\nit's important to go through the details.\n\n00:43:55\nthat would be very good.\n\n00:44:01\nare not being used anymore these days because they\n\n00:44:07\nAlthough it's important to understand how\n\n00:44:11\nBut those are for many reasons.\n\n00:44:19\nregion proposal network, and then one classification and box\n\n00:44:26\nSo it's like at least two passes for detecting objects\n\n00:44:35\nThat's why there has been advances\n\n00:44:45\nand one of the most popular ones is called YOLO.\n\n00:44:55\nproblem, you've heard about YOLO even to date.\n\n00:45:04\nits earlier versions.\n\n00:45:10\nYOLO is being used as the base for object detection\n\n00:45:19\nAnd it's very good in terms of detecting the objects.\n\n00:45:30\na little bit about.\n\n00:45:34\non the image.\n\n00:45:38\nHow it does it is it maps, it divides the image into grid of S\n\n00:45:52\nWhat happens is that for each single box in that grid,\n\n00:46:02\nthat outputs the probability of an object being\n\n00:46:12\nSo it generates B bounding boxes, a new hyperparameters,\n\n00:46:20\nis present in that box.\n\n00:46:27\nprobabilities.\n\n00:46:33\nit generates just two bounding boxes\n\n00:46:38\nIt does this for all of the boxes at the same time.\n\n00:46:45\nthat is generating something as the output for each\n\n00:46:52\nAnd it does generate a number of different options\n\n00:47:00\nAnd as I said, each of those boxes\n\n00:47:05\nAnd in this example, the probability\n\n00:47:13\nAnd for these many different bounding boxes and object\n\n00:47:21\nAnd also, there is an algorithm that they use in the paper.\n\n00:47:31\nnon-maximum suppression, and some algorithms\n\n00:47:41\nhave the highest probabilities.\n\n00:47:48\nof the object detection.\n\n00:47:58\nIf you have time, to spend with the repositories of YOLO.\n\n00:48:05\nthat is being used for many applications in medicine,\n\n00:48:13\nSo the question is, how do we get this second image?\n\n00:48:18\nAs I said, for each of the grids,\n\n00:48:23\nFor this one, we generated two, for all others,\n\n00:48:28\nThis bee is, again, a probability vector/ and each\n\n00:48:36\nan object in them.\n\n00:48:41\nI have so many boxes.\n\n00:48:51\nPerfect\n\n00:49:00\nAnd one of the more recent approaches for object detection\n\n00:49:09\nThis is purely based on transformers and the topic\n\n00:49:17\nAnd also I started today, same type\n\n00:49:25\ncould also generate some object detections and bounding\n\n00:49:32\nAnd how this works?\n\n00:49:36\n2020, almost five years ago.\n\n00:49:41\nNobody uses this for real applications.\n\n00:49:48\nto use transformers for object detection.\n\n00:49:55\nwe've explained earlier.\n\n00:50:01\nAnd then those patches are passed through CNNs\n\n00:50:06\nThen we add positional encoding the same way\n\n00:50:12\nAnd those define our tokens for the inputs, which\n\n00:50:22\nagain, a bunch of self-attention layer\n\n00:50:28\nas well as MLP layers that generates\n\n00:50:38\nThen, in order to generate the bounding boxes,\n\n00:50:45\nthat it does take the encoder output tokens\n\n00:50:52\nbut we also define some queries, which\n\n00:50:59\nthat each of those, for example, if I add five 5 queries as input\n\n00:51:08\nI'm seeking up to 20 objects to be detected in that image.\n\n00:51:17\nof self-attention layers in the beginning of this transformer\n\n00:51:30\noutput.\n\n00:51:39\nit generates the output values for each of these queries, which\n\n00:51:48\nto generate either class labels and the bounding boxes,\n\n00:52:01\nin some cases, it just says there is no object\n\n00:52:07\nAnd at the end, we have the bounding boxes\n\n00:52:16\nSo the question is, are we inputting every possible box\n\n00:52:20\nNo.\n\n00:52:23\nthat are representing-- they are queries asking\n\n00:52:34\nin place of this input query.\n\n00:52:40\nIt's part of the output that it generates the class\n\n00:52:46\nSo the question is, if the queries are formed in a way\n\n00:52:56\nin the image.\n\n00:53:02\nis defined by class labels, which are predefined,\n\n00:53:08\nSo our supervision is based on the class labels.\n\n00:53:13\nSame way that we defined it for the other algorithms.\n\n00:53:20\nto look for.\n\n00:53:25\nagain, these outputs are supervised.\n\n00:53:31\nL2 loss of the ground truth boxes.\n\n00:53:41\nto look for any of the objects.\n\n00:53:49\nIf there are any losses, any errors,\n\n00:53:55\nSo basically, we are not determining anything\n\n00:54:02\nSo the question was the query is give me up to nine objects.\n\n00:54:14\nAnd through the self-attention and cross-attention,\n\n00:54:22\nare turned into class and box coordinates\n\n00:54:29\nYour question is, if the query is over there,\n\n00:54:35\nNo, they are not image patches.\n\n00:54:44\nYou put them in to generate the outputs.\n\n00:54:51\nAnd that value is turned into class and box coordinates.\n\n00:54:58\nThey are trainable learnable parameters.\n\n00:55:02\nThe network finds the best values for them.\n\n00:55:09\nThe question is, if there is any intuition,\n\n00:55:14\nThe short answer to that is, no, there's nothing\n\n00:55:22\nI mean, we're not including anything\n\n00:55:28\nBut remember, that there are so many self-attention\n\n00:55:34\nthat they are actually interacting with each other\n\n00:55:41\nwith one of the output layer.\n\n00:55:46\nAnd we also have control over supervising those FNNs as well.\n\n00:55:57\nsegmentations as part of the training.\n\n00:56:08\nIt's only supervised based on class labels and bounding boxes.\n\n00:56:15\nyou can always turn the pixel level segmentations\n\n00:56:20\nbut it doesn't necessarily require that.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_9::seg4",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_9::seg4",
+      "global_kp_id": "kp_yolo_one_stage_detection",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_9::seg4",
+      "global_kp_id": "kp_detr_object_queries",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "name": "Object detection as joint classification and localization",
+      "description": "Detection extends classification by predicting both an object category and bounding-box coordinates for each object.",
+      "track_tags": [
+        "computer_vision",
+        "detection"
+      ],
+      "domain_tags": [
+        "multitask_learning",
+        "object_detection"
+      ],
+      "career_path_tags": [
+        "cv_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because object detection as joint classification and localization formalizes how detection extends classification by predicting both an object category and bounding-box coordinates for each object, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_yolo_one_stage_detection",
+      "name": "YOLO one-stage detection",
+      "description": "YOLO predicts boxes and classes for all grid cells in a single pass and then filters them with confidence-based postprocessing.",
+      "track_tags": [
+        "detection",
+        "real_time_vision"
+      ],
+      "domain_tags": [
+        "single_stage_detection",
+        "yolo"
+      ],
+      "career_path_tags": [
+        "cv_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because yOLO one-stage detection clarifies yOLO predicts boxes and classes for all grid cells in a single pass and then filters them with confidence-based postprocessing, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_detr_object_queries",
+      "name": "DETR object queries",
+      "description": "DETR uses learned decoder queries to emit a set of object predictions, each containing a class, a box, or a no-object output.",
+      "track_tags": [
+        "detection",
+        "transformers"
+      ],
+      "domain_tags": [
+        "detr",
+        "object_queries"
+      ],
+      "career_path_tags": [
+        "cv_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dETR object queries clarifies dETR uses learned decoder queries to emit a set of object predictions, each containing a class, a box, or a no-object output, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp10"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.63,
+    0.93
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L9_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture09-object-detection-image-segmentation-visualizing_transcript.txt"
+  }
+}

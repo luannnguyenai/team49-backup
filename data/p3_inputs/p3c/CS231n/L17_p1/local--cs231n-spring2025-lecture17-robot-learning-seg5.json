@@ -1,0 +1,152 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "unit": {
+    "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+    "course_id": "stanford::cs231n::spring_2025",
+    "name": "RL successes, sim-to-real transfer, and model-free limitations",
+    "description": "Uses games and robotics case studies to show what model-free reinforcement learning can achieve and why sample efficiency, safety, and interpretability remain major bottlenecks.",
+    "summary": "The segment illustrates RL’s strengths through case studies. In Breakout, the agent first learns reliable control and later discovers a non-obvious tunnel strategy that accelerates scoring [ts=1542s] [ts=1599s] [ts=1615s]. Li then sketches the progression from AlphaGo to AlphaGo Zero, AlphaZero, and MuZero to argue that simple scalable recipes and, later, learned latent dynamics can produce very strong game-playing systems [ts=1757s] [ts=1779s] [ts=1826s]. In robotics, he highlights sim-to-real locomotion results showing that imperfect simulations can still transfer if they are randomized enough, while noting that manipulation remains less mature and often unreliable [ts=1921s] [ts=1957s] [ts=2002s] [ts=2040s]. He closes by identifying model-free RL’s core weaknesses: massive interaction cost, safety issues, limited interpretability, and the absence of the predictive internal models humans use for planning [ts=2110s] [ts=2147s] [ts=2180s] [ts=2199s].",
+    "key_points": [
+      {
+        "text": "Breakout agents can discover a tunnel strategy that outperforms naive play after extended exploration.",
+        "timestamp_s": 1599,
+        "evidence_type": "example"
+      },
+      {
+        "text": "AlphaGo-family systems show the value of scalable RL recipes, with MuZero adding planning through a learned latent dynamics model.",
+        "timestamp_s": 1826,
+        "evidence_type": "example"
+      },
+      {
+        "text": "For locomotion, sim-to-real transfer can work well even when the simulator omits details like bushes or snow.",
+        "timestamp_s": 1957,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Robot locomotion is close to solved by reinforcement learning, but dexterous manipulation is still less reliable and less general.",
+        "timestamp_s": 2002,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Model-free RL needs extensive interaction, can be unsafe on real hardware, and is hard to interpret or correct when it fails.",
+        "timestamp_s": 2110,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Humans rely on predictive internal models of the world, motivating a shift toward learned models for planning.",
+        "timestamp_s": 2199,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=17",
+      "start_s": 1757,
+      "end_s": 2229
+    },
+    "difficulty": 0.66,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "transcript_slice": "00:29:17\nYes, this is when AlphaGo came out.\n\n00:29:22\nbeen a lot of developments and evolutions\n\n00:29:28\nSo then later, there's AlphaGo Zero.\n\n00:29:34\nthen no longer using any imitation learning\n\n00:29:39\nAnd it's able to beat, at that time, the number one\n\n00:29:45\nSo this is actually one thing, one lesson people learned\n\n00:29:51\nyou can call it the bitter lesson from the Rich Sutton,\n\n00:29:57\nis the most and best compatible with the scaling.\n\n00:30:04\nAnd sometimes, making this method simpler\n\n00:30:09\nby making it more compatible with whatever infrastructure\n\n00:30:15\nAnd then later, they develop Alpha Zero\n\n00:30:21\ninto not just chess--\n\n00:30:26\nAnd then they designed MuZero that\n\n00:30:32\nlearning, but it's able to learn a latent space dynamics\n\n00:30:40\nSo for this specific domain, I would say, especially\n\n00:30:47\nand developments in how people can do better and more assembly\n\n00:30:54\nlearning agents.\n\n00:31:01\nannounce his retirement.\n\n00:31:05\nit's just not possible, at that time, for any human players\n\n00:31:14\nAnd obviously, since then, there has\n\n00:31:20\nthat shows that as long as you put enough compute, as long\n\n00:31:28\nfor you to do the reinforcement learning,\n\n00:31:33\nare actually noticeably and orders of magnitude\n\n00:31:39\nSo I would say, if you have a game, a reasonably designed\n\n00:31:45\nif you put the sufficient resource,\n\n00:31:51\nSo not just in games, people have also\n\n00:31:55\nalgorithms and agents that can work directly\n\n00:32:01\nSo this, on the left, is a work from ETH\n\n00:32:08\nThat essentially changed my mind about how useful reinforcement\n\n00:32:14\nbecause before it was just mostly\n\n00:32:17\nIn games, there's a lot of--\n\n00:32:23\nBut for the real world, there's always sim-to-real gap,\n\n00:32:28\nyou are also testing on the same game.\n\n00:32:32\nhow much does the sim-to-real gap matters for the agents\n\n00:32:37\nAnd this paper really convinced me\n\n00:32:42\nmay not matter that much.\n\n00:32:46\nWe are not simulating the snows.\n\n00:32:50\nthat training simulation, can give you\n\n00:32:54\nin the real physical world, like snows and [INAUDIBLE] very, very\n\n00:33:00\nOn the right is a very recent video\n\n00:33:07\nfor locomotions that can do this sim-to-real transfer,\n\n00:33:14\nand dynamic behaviors.\n\n00:33:19\nI would say, in the domain of robot locomotion,\n\n00:33:26\nAnd the solution to this problem is exactly\n\n00:33:30\nSo this is about locomotion.\n\n00:33:37\nhas to manipulate the objects in the real physical world.\n\n00:33:44\ntouch upon robotics, they designed the systems\n\n00:33:51\nThey are able to do the reinforcement learning\n\n00:33:56\nallows these kind of robots to solve this Rubik's cube.\n\n00:34:04\nAlthough these videos seem to be very beautifully done,\n\n00:34:08\nAnd if you really look at the papers,\n\n00:34:14\nAnd given that number, possibly the reliability\n\n00:34:19\nBut still, since then, people have\n\n00:34:27\nand allow the robots to do enhanced dexterous manipulation\n\n00:34:33\nand into different target configurations.\n\n00:34:40\nlearning.\n\n00:34:47\nand in hand manipulation, it doesn't really\n\n00:34:51\nfold the clothes for you or do the laundry for you\n\n00:34:55\nFor manipulation, still in this kind of very isolated domains,\n\n00:35:03\nSo this is actually some of the key challenges and bottlenecks\n\n00:35:10\nIt is mostly learned from the trials and error\n\n00:35:16\nwith the world.\n\n00:35:20\nit actually learns from 3,000 years of human knowledge in 40\n\n00:35:26\nBut it still requires many, many years\n\n00:35:32\nfor the agents to learn.\n\n00:35:37\nand you want to do the reinforcement learning\n\n00:35:43\nfor learning this reinforcement learning agents\n\n00:35:47\nAnd also, of course, if there is sim-to-real gap, if you only\n\n00:35:52\nthere's a lot of safety concerns.\n\n00:35:57\nthis kind of learning progressions\n\n00:36:02\nforwards.\n\n00:36:04\nprocess, although at the very end,\n\n00:36:08\nbut there's a lot of very weird behaviors\n\n00:36:12\nthis agent on the real physical robots,\n\n00:36:17\nAnd it also have a very limited interpretabilities.\n\n00:36:24\nwhen things go wrong.\n\n00:36:28\nthink about how humans learn to interact\n\n00:36:34\nyou realize that we humans have a very intuitive understanding\n\n00:36:39\nWe can imagine how the environment\n\n00:36:44\nSo it's exactly this predictive capabilities\n\n00:36:50\nsome specific targets.\n\n00:36:55\nfrom we human's physical interactions\n\n00:37:02\nSo going beyond the reinforcement learning,\n\n00:37:06\nbe how we can endow the robots with similar capabilities",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+      "global_kp_id": "kp_reinforcement_learning_through_trial_and_error",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "name": "Model-free RL successes and sim-to-real limitations",
+      "description": "RL has produced dramatic wins in games and locomotion, yet still suffers from sample inefficiency, safety concerns, and limited robustness in many manipulation settings.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "model_free_rl",
+        "robot_locomotion",
+        "sim_to_real"
+      ],
+      "career_path_tags": [
+        "rl_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because model-free RL successes and sim-to-real limitations clarifies rL has produced dramatic wins in games and locomotion, yet still suffers from sample inefficiency, safety concerns, and limited robustness in many manipulation settings, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reinforcement_learning_through_trial_and_error",
+      "name": "Reinforcement learning through trial and error",
+      "description": "Reinforcement learning trains an agent by repeatedly interacting with an environment and shifting behavior toward actions that produce higher return.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "policy_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "rl_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reinforcement learning through trial and error formalizes how reinforcement learning trains an agent by repeatedly interacting with an environment and shifting behavior toward actions that produce higher return, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.51,
+    0.81
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

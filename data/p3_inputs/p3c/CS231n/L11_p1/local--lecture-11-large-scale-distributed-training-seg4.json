@@ -1,0 +1,153 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_11_large_scale_distributed_training",
+    "lecture_title": "Stanford CS231N Lecture 11: Large-Scale Distributed Training",
+    "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Data parallelism as the baseline distributed-training algorithm",
+    "description": "Introduces the four transformer axes of parallelism and then derives data parallelism as the exact baseline method built on minibatch gradient linearity.",
+    "summary": "The lecture first frames transformer computation as a stack of L layers operating on tensors with batch, sequence, and model-dimension axes, yielding four main ways to split work: batch/data parallelism, sequence/context parallelism, layer/pipeline parallelism, and dim/tensor parallelism [ts=1673s] [ts=1721s]. It then develops data parallelism in detail. Because loss is averaged over minibatch examples and gradients are linear, a macrobatch of M×N examples can be split across M GPUs, each computing a local gradient on N samples, with the average gradient matching the single-device computation exactly rather than approximately [ts=1777s] [ts=1875s]. Operationally, every GPU keeps its own full copy of the model and optimizer, loads a different minibatch, runs forward and backward locally, and then participates in an all-reduce so all devices obtain the same averaged gradient before making identical updates [ts=1900s] [ts=2049s]. A practical nuance is that gradient communication can be overlapped with backward computation layer by layer, so the communication does not have to appear as a separate fully serialized phase [ts=2059s] [ts=2099s].",
+    "key_points": [
+      {
+        "text": "Transformers expose four main split axes: layers for pipeline parallelism, batch for data parallelism, sequence for context parallelism, and hidden dimension for tensor parallelism.",
+        "timestamp_s": 1708,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Data parallelism uses a macrobatch of M×N samples split into N-sample local minibatches across M GPUs.",
+        "timestamp_s": 1777,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Because gradients are linear, averaging per-GPU gradients yields exactly the same gradient as computing over the whole macrobatch on one device.",
+        "timestamp_s": 1797,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Each GPU must load a different minibatch; accidentally duplicating the same minibatch across GPUs is a correctness bug.",
+        "timestamp_s": 1922,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "After local backward passes, GPUs all-reduce gradients so every device can apply the same update to its local weight copy.",
+        "timestamp_s": 1979,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Backward computation for one layer can overlap with all-reduce communication for another layer.",
+        "timestamp_s": 2059,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+      "start_s": 1740,
+      "end_s": 2460
+    },
+    "difficulty": 0.58,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 12,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "transcript_slice": "00:29:00\nSo the first one is Data Parallelism, or DP.\n\n00:29:06\nSo remember, when we're training neural networks,\n\n00:29:12\nWe're always taking a minibatch of elements.\n\n00:29:17\ndepending on whatever our training task is.\n\n00:29:21\ntypically an average of the gradients\n\n00:29:26\nSo in most neural network architectures,\n\n00:29:30\nand then computing the gradient is\n\n00:29:34\nSo this is something that seems trivially parallelizable.\n\n00:29:40\nfit a minibatch of N examples on a single GPU\n\n00:29:45\nwe're going to train our model with a giant minibatch of M\n\n00:29:52\ninto a little tiny, smaller minibatch of N samples\n\n00:29:57\nAnd if you think about mathematically\n\n00:30:01\nSo in practice, if you're computing a single scalar\n\n00:30:07\nof some individual losses computed on each of our--\n\n00:30:14\nbatch I guess we'll call it.\n\n00:30:19\nThen typically the loss that you're\n\n00:30:22\nis an average of the losses on each\n\n00:30:26\nAnd then if you take the gradient\n\n00:30:30\nthat's the thing we need to compute in order\n\n00:30:33\nThen that is actually going to split.\n\n00:30:37\nget to choose in what order do we want to do the sum?\n\n00:30:41\nDo we want to do the averaging?\n\n00:30:44\nthe gradient in this particular formulation\n\n00:30:49\nin blue, which is basically a normal for backward\n\n00:30:54\nAnd these can be computed in parallel on different GPUs.\n\n00:31:00\nwe need to take an average of the gradients\n\n00:31:07\nSo that's what's happening from a mathematical perspective.\n\n00:31:13\nThis is basically exactly the same mathematically\n\n00:31:18\nWe've just been clever with our algebra\n\n00:31:22\nBut this is not an approximation.\n\n00:31:25\nas we would have done on a single larger GPU.\n\n00:31:30\nis that we have M GPUs.\n\n00:31:36\ncan sensibly fit on the slide.\n\n00:31:40\nThen each one of those GPUs actually maintains\n\n00:31:45\nweights of the optimizer state and of the gradients.\n\n00:31:50\nwill load in parallel a different minibatch of data.\n\n00:31:56\na minibatch of three elements.\n\n00:32:00\nneed to load different minibatches of data.\n\n00:32:04\ncode, where they actually accidentally load\n\n00:32:07\nThat's not going to help you.\n\n00:32:09\nDon't make that mistake.\n\n00:32:14\nload different minibatches of data.\n\n00:32:20\non its own minibatch of data to compute its own local loss\n\n00:32:25\nAnd these can all operate totally independently.\n\n00:32:30\nThen each network will do its own backward pass\n\n00:32:36\nwith respect to all the weights of the model.\n\n00:32:40\nbecause each model, remember, has its--\n\n00:32:45\nIt can do its own forward backward pass\n\n00:32:49\nBut now after the backward pass is done,\n\n00:32:52\nRemember, we said we needed to compute\n\n00:32:57\nparticipating in our training.\n\n00:33:00\nSo this is where we do an all reduce operation.\n\n00:33:09\nSo there's two things happening simultaneously.\n\n00:33:15\nAnd then two, each GPU needs to collect the gradients\n\n00:33:22\nSo this is an allreduce operation.\n\n00:33:28\non in the number of GPUs.\n\n00:33:32\nthen each GPU now has an average of all the gradients\n\n00:33:39\nSo at this point, the communication has happened.\n\n00:33:43\nof the gradients that have been all reduced\n\n00:33:46\nSo now at the beginning of the training iteration,\n\n00:33:51\nof the model weights.\n\n00:33:55\nidentical copy of the gradients across the entire macro\n\n00:33:59\nSo now at this point, each GPU can make a weight update\n\n00:34:05\nAnd because they started with the same weights\n\n00:34:09\nthey're going to have the same weights after the local weight\n\n00:34:15\nAnd also, by the way, then this is really important.\n\n00:34:22\nWe said that there's actually two things here\n\n00:34:25\nOne is the backward pass where each GPU computes\n\n00:34:30\nand the other is the communication of the gradients\n\n00:34:34\nAnd these things in practice will typically\n\n00:34:37\nSo that means that each model will start off\n\n00:34:42\nand then compute its own local gradient.\n\n00:34:45\nonto computing backward pass for the second\n\n00:34:49\nAnd while the compute elements are\n\n00:34:54\nthen the GPUs will simultaneously\n\n00:34:59\nSo this means that these things chunk along communication\n\n00:35:05\nAnd they can just chunk along in parallel so that hopefully\n\n00:35:10\nand by the time the backward pass is done,\n\n00:35:13\nacross all the devices.\n\n00:35:17\nwithout waiting.\n\n00:35:21\nthe communication is relatively slow.\n\n00:35:24\nis figuring out ways to hide the communication costs\n\n00:35:29\nThe question is, is four or five going to be the bottleneck?\n\n00:35:32\nIt depends entirely on how fast your device is.\n\n00:35:36\nHow big is your minibatch?\n\n00:35:40\nWhen you get to this large-scale distributed training,\n\n00:35:44\nAnd you need to benchmark for your situation.\n\n00:35:49\nThat's actually a really cool idea.\n\n00:35:54\nthat people used a while back called asynchronous SGD where\n\n00:35:59\nhave a bunch of different model replicas,\n\n00:36:03\nand then try to average them every once in a while.\n\n00:36:07\nActually Google used to do this before they developed the TPU\n\n00:36:10\nAnd some of their earlier networks in the early 2010s were\n\n00:36:14\nBut one, it tends to just be a lot more unstable.\n\n00:36:20\nAnd it just tends to work a little bit worse.\n\n00:36:26\nBut in practice, if you can do everything synchronously,\n\n00:36:30\nto understand, easier to reason about.\n\n00:36:34\nwith synchronous gradient updates,\n\n00:36:37\nBut actually, I would personally not\n\n00:36:42\nin the next couple of years at some point,\n\n00:36:47\ntraining.\n\n00:36:50\nAll these things are independent devices\n\n00:36:52\nThere's no driver that can take a God's eye view\n\n00:36:58\nAll that computation has to happen somewhere.\n\n00:37:01\nI said, as you're overlapping communication and compute,\n\n00:37:05\nor does the hardware do this automatically?\n\n00:37:08\nThe hardware is not smart enough to understand\n\n00:37:10\nThe hardware, like we said, it understands these little matrix\n\n00:37:14\nIt understands pretty low-level stuff.\n\n00:37:19\nyou need to take care of in software.\n\n00:37:24\nPyTorch ships with it for you.\n\n00:37:27\na PyTorch class called DistributedDataParallel\n\n00:37:33\ntransparently on top of otherwise\n\n00:37:37\nAlthough actually that is really interesting\n\n00:37:41\nbecause if you're programming an individual GPU in CUDA, which\n\n00:37:47\nthen actually the hardware does take\n\n00:37:51\nBut at the cluster level, it typically doesn't.\n\n00:37:55\nSo there actually is a little bit\n\n00:37:59\non the individual device level, where a lot of that\n\n00:38:04\nlevel where it needs to be orchestrated in software.\n\n00:38:09\nwhere different parts of the system\n\n00:38:12\nSo there's going to be low-level device\n\n00:38:15\nexecutes inside the GPU.\n\n00:38:18\nwhich is it's a C-like language that\n\n00:38:23\nBut then those individual GPU kernels will get wrapped up.\n\n00:38:29\nAnd this is basically how PyTorch works.\n\n00:38:34\nlots of interesting stuff on the GPU,\n\n00:38:39\nkernels and makes it more user-friendly to program.\n\n00:38:45\nin black by itself.\n\n00:38:49\ncomputed via an allreduce across all the GPUs in parallel.\n\n00:38:55\nis dependent on the gradients from the previous layer.\n\n00:39:02\non its own minibatch.\n\n00:39:05\nof the gradient at each layer that you\n\n00:39:07\nThere's the local gradients about the gradient\n\n00:39:12\nto my network weights.\n\n00:39:14\nis the derivative of the total loss\n\n00:39:20\nIn order to compute a backward pass,\n\n00:39:24\nof its upstream gradient.\n\n00:39:27\nrequires communication.\n\n00:39:33\nAnd there's actually a bit of problem\n\n00:39:36\nto parallelize GPU computation.\n\n00:39:39\nstarted parallelizing GPU computation in neural network\n\n00:39:42\nBut we quickly hit a bottleneck on the model size.\n\n00:39:48\nits own independent copy of the model parameters,\n\n00:39:52\nwant to have really big models.\n\n00:39:56\nyou basically need to keep track of four numbers--\n\n00:40:02\nand the optimizer state.\n\n00:40:05\na beta, that's a beta 1 and a beta 2 per parameter\n\n00:40:08\nAnd sometimes you'll also have an exponential moving average\n\n00:40:12\nSo typically, you'll have four to five scalars\n\n00:40:17\nin your network.\n\n00:40:20\nwhich is pretty common these days,\n\n00:40:25\nBut let's talk about 16-bit as a lower bound.\n\n00:40:29\nSo that means that we need four numbers,\n\n00:40:34\nin the network to keep track of.\n\n00:40:40\nis going to take about 8 gigabytes of GPU memory\n\n00:40:44\nAnd we said the whole GPU only has 80 gigabytes\n\n00:40:48\nSo that means that the biggest model you could ever\n\n00:40:52\nlike 10 billion parameters.\n\n00:40:54\nWe want really big models.\n\n00:40:58\nsize in telling us how big of models we're allowed to train.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+      "global_kp_id": "kp_data_parallelism",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_data_parallelism",
+      "name": "Data Parallelism",
+      "description": "A baseline scaling method where each GPU processes a different minibatch shard, computes a local gradient, and synchronizes gradients across replicas.",
+      "track_tags": [
+        "distributed_training",
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "parallel_algorithms"
+      ],
+      "career_path_tags": [
+        "distributed_systems_engineer",
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because data Parallelism formalizes how a baseline scaling method where each GPU processes a different minibatch shard, computes a local gradient, and synchronizes gradients across replicas, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_11_large_scale_distributed_training::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "name": "Model FLOPs Utilization (MFU)",
+      "description": "A system-level efficiency metric measuring how much of a device's theoretical compute is turned into useful model forward/backward work in the actual training loop.",
+      "track_tags": [
+        "distributed_training",
+        "performance"
+      ],
+      "domain_tags": [
+        "performance_engineering",
+        "training_systems"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure_engineer",
+        "performance_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because model FLOPs Utilization (MFU) clarifies a system-level efficiency metric measuring how much of a device's theoretical compute is turned into useful model forward/backward work in the actual training loop, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_11_large_scale_distributed_training::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.43,
+    0.73
+  ],
+  "source_trace": {
+    "p1_artifact": "data/CS231n/processed_sanitized/L11_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS231n/transcripts/cs231n-2025-lecture11-large-scale-distributed-training_transcript.txt"
+  }
+}
