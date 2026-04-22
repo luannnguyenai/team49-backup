@@ -1,0 +1,294 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture21-after-dpo",
+    "lecture_title": "Lecture 21 - After DPO",
+    "youtube_url": "https://www.youtube.com/watch?v=dnF463_Ar9I"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture21-after-dpo::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Post-training alignment context, definitions, RLHF, and DPO",
+      "description": "Frames the talk, motivates post-training, defines core alignment vocabulary, and introduces the RLHF objective and DPO.",
+      "summary": "Nathan Lambert is introduced as an RLHF/post-training expert, and he frames the talk as asking what alignment research should focus on after DPO [ts=19s]. He emphasizes the data-scale gap: Chatbot Arena had about 800,000 data points, while Llama 2 reported about 1.5 million purchased comparisons, suggesting closed labs have far larger post-training datasets [ts=116s]. After a compressed language-model history from Shannon through Transformers, GPT/BERT, scaling laws, Stochastic Parrots, and ChatGPT, he argues that pretraining is necessary but RLHF/post-training is needed to make the most important chat models useful [ts=211s]. He defines instruction fine-tuning as training a model to follow instructions, supervised fine-tuning as more domain-specific, alignment as mirroring user wants, and RLHF as one human-feedback/preference-based tool for alignment [ts=447s]. The RLHF objective is described as policy π maximizing reward with a KL constraint that limits drift; reward modeling is linked to Bradley-Terry pairwise choice probabilities used as scalar rewards [ts=598s]. DPO is introduced as directly optimizing the preference objective with gradient methods, making it much easier to implement and debug than a full PPO-style RLHF stack while still being a different algorithm from PPO/Reinforce [ts=715s].",
+      "key_points": [
+        {
+          "text": "Post-training data scale is a central open-vs-industry bottleneck for alignment research.",
+          "timestamp_s": 168,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pretraining is necessary, but RLHF/post-training shifts models into useful chat assistants.",
+          "timestamp_s": 323,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Instruction fine-tuning trains instruction following; supervised fine-tuning is more domain-specific.",
+          "timestamp_s": 447,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "RLHF optimizes a policy for reward while using a KL constraint to avoid excessive drift.",
+          "timestamp_s": 598,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Bradley-Terry pairwise preference probabilities are reused as scalar reward signals.",
+          "timestamp_s": 653,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "DPO directly optimizes a preference-derived objective and is simpler than PPO-style RLHF infrastructure.",
+          "timestamp_s": 722,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=dnF463_Ar9I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=16",
+        "start_s": 5,
+        "end_s": 899
+      },
+      "difficulty": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Open alignment history and DPO adoption",
+      "description": "Traces open alignment from early instruction-tuned models and scarce human data to Zephyr, UltraFeedback, and Tulu 2.",
+      "summary": "Lambert explains that DPO’s paper appeared months before popular DPO-trained models; the community first moved through April 2023 instruction-tuned systems such as Alpaca, Vicuna, Koala, and Dolly, many built from synthetic data and Llama [ts=899s]. Vicuna’s ShareGPT use gave academic alignment researchers human prompts, though with legal/provenance concerns; LMSYS/WildChat-style data later aimed for more permissive consent-based collection [ts=956s]. Open Assistant is presented as a rare high-effort community dataset with prompts, responses, preference pairs, controls, voting, and ranking, and its difficulty explains why few comparable human datasets exist [ts=1014s]. CarperAI had an early RLHF model that outperformed Vicuna, but the work did not catch on because open artifacts also need resources, data, and usable codebases [ts=1067s]. The Llama 2 refusal backlash produced “uncensored” non-refusal research artifacts, while Lambert distinguishes research use from deployment responsibility [ts=1117s]. Zephyr’s September 2023 success made DPO credible by combining UltraFeedback, GPT-4-labeled synthetic preference data, and an unusually low 5e-7 learning rate; Tulu 2 then scaled a similar recipe to 70B and helped open the floodgates for many DPO models [ts=1239s].",
+      "key_points": [
+        {
+          "text": "Early open alignment models included Alpaca, Vicuna, Koala, and Dolly, mostly using instruction tuning and synthetic data.",
+          "timestamp_s": 929,
+          "evidence_type": "example"
+        },
+        {
+          "text": "ShareGPT gave human prompts to academic alignment but had legal/provenance concerns.",
+          "timestamp_s": 956,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Open Assistant showed high-quality community human preference data is valuable but hard to create.",
+          "timestamp_s": 1014,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Open releases need usable resources, data, and codebases; success alone does not guarantee adoption.",
+          "timestamp_s": 1086,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Llama 2 refusal behavior motivated non-refusal research artifacts but raises deployment safety questions.",
+          "timestamp_s": 1117,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Zephyr’s DPO success depended on UltraFeedback and a very low learning rate around 5e-7.",
+          "timestamp_s": 1279,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Tulu 2 showed the UltraFeedback/low-learning-rate DPO recipe could scale to 70B.",
+          "timestamp_s": 1335,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=dnF463_Ar9I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=16",
+        "start_s": 899,
+        "end_s": 1455
+      },
+      "difficulty": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg3",
+      "course_id": "cs224n-2024",
+      "name": "RewardBench, reward-model evaluation, safety, and DPO reward caveat",
+      "description": "Introduces RewardBench, explains pairwise reward-model training, summarizes findings, and explains why released DPO models are hard to reuse as reward models.",
+      "summary": "Lambert asks how alignment work can be evaluated systematically and argues for local evaluation because waiting for Chatbot Arena can take about a month [ts=1491s]. RewardBench is introduced as a transparency tool for reward models, since industry treats reward models as crucial but open researchers lacked ways to measure what makes one good [ts=1558s]. He explains the RLHF feedback loop—policy completions are scored by a reward model—and then describes reward-model training from a prompt, chosen completion, and rejected completion passed through a scalar-output language model; the pairwise loss increases the chosen/rejected score margin [ts=1632s]. He notes quirks such as one-epoch training, low-looking accuracy, ensembles or margin losses, and about 70% annotator agreement, which may reflect real preference diversity rather than pure noise [ts=1710s]. RewardBench manually creates chosen/rejected answers and checks reward-model agreement with human-created preferences, drawing on tasks such as AlpacaEval, MT-Bench, XSTest, and LLMBar [ts=1763s]. Results include fast leaderboard movement, LLM-as-a-judge baselines where Cohere’s specialized reward model beats GPT-4/GPT-4o in this closed domain, a non-saturated Chat Hard subset, and safety/refusal patterns such as over-refusal or answering everything [ts=1888s]. The key DPO caveat is that DPO’s reward is a policy/reference log-probability ratio, not a simple scalar head; without the reference checkpoint, released DPO models cannot reliably be used as reward models and scores plummet [ts=2190s].",
+      "key_points": [
+        {
+          "text": "RewardBench was built because researchers needed local evaluation tools for reward models.",
+          "timestamp_s": 1558,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Reward models train on prompt/chosen/rejected triples and output scalar scores.",
+          "timestamp_s": 1632,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The pairwise reward-model loss separates chosen and rejected scalar outputs into a preference margin.",
+          "timestamp_s": 1676,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "About 70% annotator agreement may be signal because human preferences differ.",
+          "timestamp_s": 1733,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "LLM-as-a-judge asks a model which answer is better; specialized reward models can outperform general chat models on this evaluation.",
+          "timestamp_s": 1920,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Safety evaluation distinguishes correct refusal, over-refusal, and answer-everything behavior.",
+          "timestamp_s": 2113,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "DPO’s implicit reward depends on policy/reference log-probability ratios, so the reference checkpoint matters.",
+          "timestamp_s": 2190,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=dnF463_Ar9I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=16",
+        "start_s": 1455,
+        "end_s": 2420
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 16,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg4",
+      "course_id": "cs224n-2024",
+      "name": "DPO versus PPO, online preference optimization, and future directions",
+      "description": "Compares DPO and PPO empirically, explains online data, introduces D2PO-style methods, and interprets industry post-training recipes.",
+      "summary": "Lambert moves from reward-model evaluation to whether the final aligned policy improves, describing empirical DPO-versus-PPO work starting from an instruction-tuned Llama 2 13B [ts=2390s]. Instruction tuning gives the largest jump on reasoning, coding, and chat tasks; DPO with Anthropic Helpful-Harmless gives a small bump, while switching only to UltraFeedback gives a larger 0–2% style gain, showing how important data is [ts=2424s]. PPO reliably gives about 1% better average results than DPO in the shown 13B experiments, but bigger reward models and added code/reasoning prompts do not cleanly improve the full average, and PPO has many knobs such as regularization, value-function learning, warmup, and size parameters [ts=2501s]. Its major bottleneck is online generation of fresh responses during training, making it much slower than DPO, so the extra signal may or may not be worth the effort for small teams [ts=2678s]. He then defines online alignment in terms of freshly generated data and refreshed chosen/rejected labels, contrasting UltraFeedback’s mixture of many models’ generations with PPO’s repeated sampling from the current policy [ts=2828s]. Recent papers are said to converge on the importance of online data, and newer DPO variants include self-rewarding LMs, batched relabeling, and D2PO, which compares standard DPO, reward-model relabeling, and reward-model retraining over time [ts=2941s]. The section connects this to industry: Llama 2-style pipelines collect new human data from previous checkpoints, and Meta’s Llama 3 recipe combining SFT, rejection sampling, PPO, and DPO is interpreted as a practical iterative process [ts=3211s]. Future directions include fresh data, more DPO variants, changing the reference model/loss, studying more model sizes including small models, better targeted evaluations, and personalization [ts=3372s].",
+      "key_points": [
+        {
+          "text": "Instruction tuning gives the largest capability jump before preference optimization.",
+          "timestamp_s": 2424,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "UltraFeedback improves DPO more than noisy Anthropic Helpful-Harmless data in the shown recipe.",
+          "timestamp_s": 2476,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "PPO gives roughly 1% better average results than DPO but is much harder and slower to tune.",
+          "timestamp_s": 2501,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "PPO’s major bottleneck is generating new model responses during training to refresh data.",
+          "timestamp_s": 2678,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Online alignment separates fresh policy-generated text from refreshed chosen/rejected labels.",
+          "timestamp_s": 2865,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Self-rewarding language models and D2PO try to make DPO more online through relabeling and reward-model updates.",
+          "timestamp_s": 2995,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Industry post-training appears iterative, combining SFT, rejection sampling, DPO, PPO, and repeated human-data collection.",
+          "timestamp_s": 3262,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Future alignment work should target data, DPO variants, smaller scales, evaluation specificity, and personalization.",
+          "timestamp_s": 3372,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=dnF463_Ar9I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=16",
+        "start_s": 2420,
+        "end_s": 3505
+      },
+      "difficulty": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 18,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture21-after-dpo::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Q&A: online DPO, preference formats, dataset creation, organizations, and reward hacking",
+      "description": "Summarizes public Q&A clarifications after the lecture.",
+      "summary": "In Q&A, Lambert says online DPO with a good reward model sounds plausible, but prompt/distribution matching is the hard part: PPO often grades answers on the same prompt distribution used to train the reward model, while off-the-shelf reward models may break under distribution shift [ts=3505s]. Asked whether RLHF must use pairwise preferences, he lists alternatives: KTO-style one-sided preference data, yes/no user feedback, K-wise ranking such as Starling, and fine-grained labels like conciseness, helpfulness, and honesty [ts=3661s]. Asked how fine-tuning can exceed human performance, he points to search/exploration and synthetic data, with humans helping push through cases the system cannot solve alone [ts=3804s]. On dataset creation, he says community efforts such as Open Assistant are impactful but exhausting, and suggests demos, academic workshops, competitions, and recurring contribution cycles as more sustainable mechanisms [ts=3859s]. He contrasts Hugging Face as ecosystem-building with Ai2 as science/understanding/communication focused [ts=3958s]. Finally, on reward hacking, he says reward models face the fundamental RL problem that powerful optimizers exploit incomplete reward representations, sometimes producing degenerate failures such as always answering “JavaScript” [ts=4023s].",
+      "key_points": [
+        {
+          "text": "Online DPO is limited by prompt/distribution matching between reward-model training and policy rollouts.",
+          "timestamp_s": 3505,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "One-sided/KTO-style data can use yes/no feedback instead of pairwise comparisons.",
+          "timestamp_s": 3661,
+          "evidence_type": "example"
+        },
+        {
+          "text": "K-wise preference learning ranks multiple answers per prompt, as in Starling-style models.",
+          "timestamp_s": 3704,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Fine-grained preferences can label conciseness, helpfulness, and honesty.",
+          "timestamp_s": 3741,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Search and exploration may help models generate synthetic data beyond human-labeled examples.",
+          "timestamp_s": 3804,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Community datasets are valuable but hard to sustain; workshops, competitions, and demos are possible mechanisms.",
+          "timestamp_s": 3859,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Reward hacking occurs because an optimizer finds flaws in an incomplete reward specification.",
+          "timestamp_s": 4023,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=dnF463_Ar9I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=16",
+        "start_s": 3505,
+        "end_s": 4130
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 5,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L21_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture21-after-dpo_transcript.txt"
+  }
+}

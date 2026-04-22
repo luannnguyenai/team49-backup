@@ -102,7 +102,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 5,
         "end_s": 256
       },
@@ -152,7 +152,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 256,
         "end_s": 590
       },
@@ -202,7 +202,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 590,
         "end_s": 875
       },
@@ -252,7 +252,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 875,
         "end_s": 1215
       },
@@ -302,7 +302,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 1215,
         "end_s": 1559
       },
@@ -352,7 +352,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 1559,
         "end_s": 2130
       },
@@ -402,7 +402,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 2130,
         "end_s": 2491
       },
@@ -457,7 +457,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 2491,
         "end_s": 3247
       },
@@ -512,7 +512,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 3247,
         "end_s": 3624
       },
@@ -572,7 +572,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=16",
+        "video_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
         "start_s": 3624,
         "end_s": 4184
       },
@@ -887,7 +887,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture18::kp2",
+        "local::lecture22-nlp-linguistics::kp2",
         "local::lecture_16::kp1"
       ]
     },
@@ -992,7 +992,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture16_multimodal_deep_learning::kp5",
+        "local::lecture18-multimodal::kp5",
         "local::lecture_16::kp4"
       ]
     },
@@ -1066,7 +1066,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp14",
+        "local::lecture04-wordvecs-lm::kp14",
         "local::lecture_12::kp3",
         "local::lecture_16::kp6"
       ]
@@ -1209,8 +1209,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture10-posttraining::kp1",
-        "local::lecture09-pretraining::kp11",
+        "local::lecture13-posttraining::kp1",
+        "local::lecture11-pretraining::kp11",
         "local::lecture_16::kp10"
       ]
     },
@@ -1348,7 +1348,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture16_multimodal_deep_learning::kp8",
+        "local::lecture18-multimodal::kp8",
         "local::lecture_16::kp14"
       ]
     },

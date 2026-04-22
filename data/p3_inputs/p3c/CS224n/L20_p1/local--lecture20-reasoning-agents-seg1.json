@@ -1,0 +1,249 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture20-reasoning-agents",
+    "lecture_title": "Lecture 20 - Reasoning and Agents",
+    "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture20-reasoning-agents::seg1",
+    "course_id": "cs224n-2024",
+    "name": "Reasoning taxonomy and prompt-based reasoning",
+    "description": "Defines the kinds of reasoning used in the lecture and introduces prompting methods that elicit stepwise reasoning from language models.",
+    "summary": "The lecture frames reasoning as using facts and logic to reach answers, then distinguishes deductive, inductive, and abductive reasoning with simple examples, while noting that the lecture will mainly focus on informal deductive reasoning [ts=80s][ts=177s]. It then asks whether large language models can reason and introduces chain-of-thought prompting as a way to have the model emit intermediate reasoning before the answer, either through in-context exemplars or the zero-shot cue \"let's think step by step\" [ts=248s][ts=283s]. Two extensions are covered: self-consistency, which samples multiple rationales and selects the most common answer because agreement across diverse rationales is treated as a correctness signal [ts=305s][ts=355s], and least-to-most prompting, which decomposes a harder problem into sub-questions, answers each sub-question, and conditions the final answer on those results; this can generalize from short demonstrations to problems with many more steps, although strong prompt engineering can sometimes match it [ts=449s][ts=562s].",
+    "key_points": [
+      {
+        "text": "Deductive reasoning derives a firm conclusion from premises and logic, while inductive and abductive reasoning infer likely conclusions or explanations from observations.",
+        "timestamp_s": 91,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "For the rest of the lecture, reasoning mainly means informal deductive reasoning with multiple steps.",
+        "timestamp_s": 205,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Chain-of-thought prompting asks the model to produce a reasoning step before the final answer, either from demonstrations or with the cue \"let's think step by step.\"",
+        "timestamp_s": 248,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Self-consistency samples multiple rationales and chooses the most common answer instead of greedily decoding one rationale.",
+        "timestamp_s": 305,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Least-to-most prompting first decomposes a question into sub-problems, answers them, and then composes the final answer from those sub-answers.",
+        "timestamp_s": 457,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=15",
+      "start_s": 8,
+      "end_s": 600
+    },
+    "difficulty": 0.46,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture frames reasoning as using facts and logic to reach answers, then distinguishes deductive, inductive, and abductive reasoning with simple examples, while noting that the lecture will mainly focus on informal deductive reasoning [ts=80s][ts=177s]. It then asks whether large language models can reason and introduces chain-of-thought prompting as a way to have the model emit intermediate reasoning before the answer, either through in-context exemplars or the zero-shot cue \"let's think step by step\" [ts=248s][ts=283s]. Two extensions are covered: self-consistency, which samples multiple rationales and selects the most common answer because agreement across diverse rationales is treated as a correctness signal [ts=305s][ts=355s], and least-to-most prompting, which decomposes a harder problem into sub-questions, answers each sub-question, and conditions the final answer on those results; this can generalize from short demonstrations to problems with many more steps, although strong prompt engineering can sometimes match it [ts=449s][ts=562s].",
+  "target_kp_ids": [
+    "kp_chain_of_thought_prompting",
+    "kp_self_consistency_decoding",
+    "kp_least_to_most_prompting"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "transcript_slice": "00:00:08\nWelcome to lecture 14, everyone.\n\n00:00:17\nall of the various deadlines.\n\n00:00:24\nof language models.\n\n00:00:29\nto reason in domains like math, geometry, doing things\n\n00:00:35\nAnd then in the second half of the lecture,\n\n00:00:39\nuse language models to take actions\n\n00:00:44\nOK.\n\n00:00:48\nA lot of the content today is research\n\n00:00:54\nSo there's plenty of questions, plenty of unanswered questions,\n\n00:01:00\nSo let's-- maybe we can have more of a discussion around\n\n00:01:08\nOK.\n\n00:01:12\nSo experts like to start a lecture on reasoning\n\n00:01:18\nso I'm going to do that here, OK?\n\n00:01:23\nto arrive at an answer, OK?\n\n00:01:28\nof reasoning that we can talk about.\n\n00:01:34\nare familiar with, is deductive reasoning,\n\n00:01:43\nwith a firm conclusion.\n\n00:01:47\nhave the sentence all mammals have kidneys and all whales\n\n00:01:52\nAnd then we can come up with the conclusion,\n\n00:01:56\nAnd we could do multiple such steps of reasoning, OK?\n\n00:02:03\nwhere given observations, we derive conclusions, OK?\n\n00:02:12\nthat every time we see a creature with wings,\n\n00:02:17\nAnd let's say we observe a state where\n\n00:02:24\nAnd using our using our experience,\n\n00:02:28\nthat the creature is likely to be a bird.\n\n00:02:32\nAnd finally, we have abductive reasoning\n\n00:02:39\nstart drawing possible explanations, OK?\n\n00:02:45\nand there's a puddle of liquid under the engine.\n\n00:02:53\nSo one of them could be that the car has a leak in the radiator,\n\n00:02:57\nAll right.\n\n00:03:01\nthink of reasoning in formal and informal terms,\n\n00:03:07\naxioms and rules of formal logic to derive truth conditions, OK?\n\n00:03:17\ndo every day.\n\n00:03:22\nand use common sense to derive conclusions.\n\n00:03:27\nI will mean informal deductive reasoning,\n\n00:03:35\nOK.\n\n00:03:40\nSo we've learned in lectures 9, 10, 11\n\n00:03:47\nor large language models are really, really good\n\n00:03:52\nreflect human preferences and constraints.\n\n00:04:01\nSo one of the most basic ways we can try to answer this question\n\n00:04:09\nAnd we've probably already seen this.\n\n00:04:14\nchain of thought prompting, where you get a language\n\n00:04:21\nAnd we could do this by providing\n\n00:04:28\nthat the language model can then mimic at test time.\n\n00:04:32\nSo that's chain of thought prompting.\n\n00:04:39\nis that sometimes you don't even have\n\n00:04:43\nand you could just prompt them with the sentence,\n\n00:04:47\ncan get these reasoning rationales\n\n00:04:53\nOK.\n\n00:04:56\nBut let's keep going, OK?\n\n00:05:03\nis we are self-consistency.\n\n00:05:11\na rationale followed by an answer,\n\n00:05:16\nand correspondingly multiple answers, OK?\n\n00:05:24\nand then what you would normally do\n\n00:05:28\ndecode a rationale and then condition on the rationale\n\n00:05:33\nWith self-consistency, we are going to sample multiple times\n\n00:05:38\nThey are all going to lead to multiple answers,\n\n00:05:44\nWith the idea being that if an answer keeps\n\n00:05:49\nthe majority of the rationales agree on,\n\n00:05:55\nAnd the authors of self-consistency\n\n00:06:02\nif you add this simple idea of self-consistency\n\n00:06:08\nmajority voting, that improves performance pretty drastically\n\n00:06:15\nAnd interestingly, when I saw this result the first time,\n\n00:06:22\nwhere we learned this in CS229.\n\n00:06:28\nI'm going to produce, like, 10 classifiers\n\n00:06:33\nAnd I'm going to produce a classification decision,\n\n00:06:37\nBut it turns out that it's doing maybe a little bit more\n\n00:06:42\nSo the authors also compared an ensembling approach where\n\n00:06:49\nand then you do majority voting there,\n\n00:06:54\nthan just simple ensembling.\n\n00:07:00\nSo earlier today, I said that I'll\n\n00:07:05\nSo far, we've looked at sort of math problems, but not--\n\n00:07:11\nmulti-step reasoning.\n\n00:07:17\ninvolves breaking down a large problem into several subparts,\n\n00:07:23\nand answering each of the subparts\n\n00:07:29\nSo there's this kind of decomposition strategy\n\n00:07:35\nleast to most prompting.\n\n00:07:39\nis, like I said, given a question,\n\n00:07:45\nas shown here.\n\n00:07:51\nthe language model will sort of answer each of the sub questions\n\n00:07:57\nto the sub questions is going to generate the final answer.\n\n00:08:07\nof a math reasoning problem.\n\n00:08:10\nyou would have a question followed\n\n00:08:17\nwhich is this decomposition strategy.\n\n00:08:22\ninstead of directly producing a rationale,\n\n00:08:27\ninto problems.\n\n00:08:32\nand then you start answering both of those sub-problems\n\n00:08:39\nto those sub-problems.\n\n00:08:43\nSo that's just like a prompting method, right?\n\n00:08:49\nwas showing that you can sometimes\n\n00:08:54\nto a much larger number of reasoning steps.\n\n00:09:01\nthere's two reasoning steps.\n\n00:09:06\nsort of as in-context example, we\n\n00:09:13\non examples that require more than five steps of reasoning\n\n00:09:22\nBut it's not entirely clear if structuring inference\n\n00:09:28\nOne of the other results they reported\n\n00:09:35\nso the rows corresponding to best, normal chain of thought\n\n00:09:43\nBut it's kind of an interesting idea\n\n00:09:47\nsolving the sub-problems and then sort of building up\n\n00:09:54\nOK.\n\n00:09:58\nto get reasoning behavior out of language models.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture20-reasoning-agents::seg1",
+      "global_kp_id": "kp_reasoning_taxonomy_and_informal_deductive_reasoning",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture20-reasoning-agents::seg1",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture20-reasoning-agents::seg1",
+      "global_kp_id": "kp_self_consistency_decoding",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture20-reasoning-agents::seg1",
+      "global_kp_id": "kp_least_to_most_prompting",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_reasoning_taxonomy_and_informal_deductive_reasoning",
+      "name": "Reasoning taxonomy and informal deductive reasoning",
+      "description": "The lecture distinguishes deductive, inductive, and abductive reasoning and then narrows its focus to informal deductive multi-step reasoning.",
+      "track_tags": [
+        "reasoning"
+      ],
+      "domain_tags": [
+        "llm_reasoning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reasoning taxonomy and informal deductive reasoning clarifies the lecture distinguishes deductive, inductive, and abductive reasoning and then narrows its focus to informal deductive multi-step reasoning, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture20-reasoning-agents::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "name": "Chain-of-thought prompting",
+      "description": "A prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting. Prompting with worked intermediate reasoning steps so the model generates a scratchpad before the final answer.",
+      "track_tags": [
+        "llm",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "llms",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "ml_engineer",
+        "nlp_researcher",
+        "product_ml",
+        "prompt_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because chain-of-thought prompting formalizes how a prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting, which later units use as core machinery rather than background context while roles split between capstone and gateway and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp3",
+        "local::lecture20-reasoning-agents::kp2",
+        "local::lecture11-pretraining::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_self_consistency_decoding",
+      "name": "Self-consistency decoding",
+      "description": "Sample multiple rationales and answers, then choose the most frequent answer as a more reliable prediction.",
+      "track_tags": [
+        "decoding",
+        "reasoning"
+      ],
+      "domain_tags": [
+        "llm_reasoning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because self-consistency decoding clarifies sample multiple rationales and answers, then choose the most frequent answer as a more reliable prediction, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture20-reasoning-agents::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_least_to_most_prompting",
+      "name": "Least-to-most prompting",
+      "description": "A decomposition strategy where the model first breaks a problem into sub-problems, solves them, and then composes the final answer.",
+      "track_tags": [
+        "decomposition",
+        "prompting",
+        "reasoning"
+      ],
+      "domain_tags": [
+        "llm_reasoning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because least-to-most prompting clarifies a decomposition strategy where the model first breaks a problem into sub-problems, solves them, and then composes the final answer, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture20-reasoning-agents::kp4"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.31,
+    0.61
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L20_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture20-reasoning-agents_transcript.txt"
+  }
+}

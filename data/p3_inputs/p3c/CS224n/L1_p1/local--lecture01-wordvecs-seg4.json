@@ -2,7 +2,7 @@
   "lecture_context": {
     "course_id": "CS224n",
     "lecture_id": "lecture01-wordvecs",
-    "lecture_title": "Stanford CS224N Lecture 1: Intro and Word Vectors",
+    "lecture_title": "Lecture 1 - Intro and Word Vectors",
     "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I"
   },
   "unit": {
@@ -55,6 +55,13 @@
     "ordering_index": 4,
     "is_template": false
   },
+  "unit_summary_for_generation": "In Q&A, Manning explicitly acknowledges a limitation of the first embedding model: each word string gets one vector, so the representation is not contextual and cannot directly separate senses such as Hollywood star versus astronomical star [ts=2529s] [ts=2556s]. He adds that even static embeddings can still position a polysemous word near neighborhoods evoked by its different senses in high-dimensional space [ts=2561s] [ts=2586s]. He also explains that 2D visualizations shown earlier are produced by nonlinear dimensionality reduction such as t-SNE rather than by the raw embedding space itself [ts=2604s] [ts=2623s]. Finally, he notes that dimensionality is usually chosen empirically and that semantic structure is expressed not only by distance but also by directions in the space; individual vector entries need not be bounded, though regularization often keeps them small [ts=2640s] [ts=2711s] [ts=2732s].",
+  "target_kp_ids": [
+    "kp_contextual_embeddings",
+    "kp_word_vectors_and_embedding_spaces"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
   "video_clip_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
   "transcript_slice": "00:41:26\nYes.\n\n00:41:31\nhave the contact information.\n\n00:41:36\nwhere the similar meanings might depend on context.\n\n00:41:44\n[INAUDIBLE].\n\n00:41:49\nbut we try to understand the similarity with some [INAUDIBLE]\n\n00:41:54\nBut if you're looking at context, right,\n\n00:41:57\nthen those two words may not be similar.\n\n00:42:04\nYes, correct.\n\n00:42:06\nYou can keep it for a few weeks to some extent.\n\n00:42:11\nwe're just going to learn one word vector for a string.\n\n00:42:20\nAnd we're going to learn one word vector for it.\n\n00:42:26\nof a word in context.\n\n00:42:30\nmeaning a Hollywood star or an astronomical star\n\n00:42:36\nAnd so later on, we're going to get on to contextual meaning\n\n00:42:40\nSo wait for that.\n\n00:42:43\ngoing along with what I said about high dimensional spaces\n\n00:42:48\nBut the cool thing that we will already find\n\n00:42:54\nbe very close to the representations\n\n00:43:03\nand what every other astronomical words you know.\n\n00:43:10\nclose to words that mean something like a Hollywood star.\n\n00:43:18\nKnow any words that mean something similar?\n\n00:43:21\nCelebrity, that's a good one.\n\n00:43:24\nHow are you reducing the embeddings to a lower\n\n00:43:31\nSo that pictures I was showing, you\n\n00:43:37\nwhich is a nonlinear dimensionality reduction that\n\n00:43:43\nrepresentations than PCA, which you might know.\n\n00:43:49\nYes?\n\n00:43:52\nis optimal to produce like a dense enough or, I guess,\n\n00:43:59\nI mean, that's something that people have worked on.\n\n00:44:05\nit depends on how much data you've\n\n00:44:10\nSo normally, it's worked out either empirically\n\n00:44:17\non how big vectors you want to work on.\n\n00:44:24\nstart to work well when you get to 100 dimensional space.\n\n00:44:31\nbecause that seemed to work pretty well.\n\n00:44:37\nwith way, way more data, it's now become increasingly common\n\n00:44:44\nYeah?\n\n00:44:47\nOK, [INAUDIBLE].\n\n00:44:53\nas well as large areas of the embedding.\n\n00:44:58\ndifferent structures will come up.\n\n00:45:02\nas the single metric for closeness, which doesn't\n\n00:45:06\nLike, distance between this and that in space three\n\n00:45:10\nSo how will that--\n\n00:45:13\nWe also use directions in the space\n\n00:45:18\nAnd I'll show an example of that soon.\n\n00:45:21\nSo I was wondering for the entries within the word vector,\n\n00:45:27\nIs there a reason for that, or do we have bounds\n\n00:45:32\nSo good question.\n\n00:45:38\nAnd the way we're going to learn them, they're not bounded.\n\n00:45:45\nSometimes, people length normalize so that the vectors\n\n00:45:50\nBut at any rate, normally in this work,\n\n00:45:56\nthat tries to keep coefficients small so that they're generally\n\n00:46:02\nYeah?\n\n00:46:06\nwe used as before in the previous slides,\n\n00:46:14\na single embedding for each word,\n\n00:46:19\nSo what we're doing at the moment, each word,\n\n00:46:27\nAnd what you can think of that embedding as an average over all\n\n00:46:36\nSo for example, like bank, it can\n\n00:46:41\nor it can also mean like the river bank.\n\n00:46:47\nThe interesting thing is you'll find\n\n00:46:52\nwhere our learned representation, because it's\n\n00:46:57\nend up similar to words that are semantically\n\n00:47:03\nI think I probably about go on at this point.",
   "unit_kp_map_rows": [
@@ -105,7 +112,7 @@
       ],
       "merged_from_local_ids": [
         "local::lecture01-wordvecs::kp8",
-        "local::lecture09-pretraining::kp2"
+        "local::lecture11-pretraining::kp2"
       ]
     },
     {
@@ -140,12 +147,18 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
   "target_difficulty_range": [
     0.41,
     0.71
   ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L1_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",

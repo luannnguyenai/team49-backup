@@ -99,15 +99,20 @@
       "name": "LSTM gates and cell state",
       "description": "Gated recurrent architecture that selectively writes, forgets, outputs, and preserves information.",
       "track_tags": [
-        "sequence_modeling"
+        "sequence_modeling",
+        "rnns",
+        "architectures"
       ],
       "domain_tags": [
         "lstm",
-        "rnn"
+        "rnn",
+        "deep_learning",
+        "nlp"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "research_scientist"
+        "research_scientist",
+        "research"
       ],
       "difficulty_level": 0.8,
       "difficulty_source": "llm_single_pass",
@@ -119,10 +124,13 @@
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
-        "CS231n"
+        "CS231n",
+        "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture_7::kp13"
+        "local::lecture_7::kp13",
+        "local::lecture08-seq2seq::kp6",
+        "local::lecture08-seq2seq::kp7"
       ]
     }
   ],

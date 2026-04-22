@@ -89,7 +89,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 5,
         "end_s": 714
       },
@@ -139,7 +139,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 714,
         "end_s": 1474
       },
@@ -194,7 +194,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 1474,
         "end_s": 1953
       },
@@ -244,7 +244,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 1953,
         "end_s": 2318
       },
@@ -299,7 +299,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 2318,
         "end_s": 2919
       },
@@ -349,7 +349,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 2919,
         "end_s": 3525
       },
@@ -409,7 +409,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+        "video_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
         "start_s": 3525,
         "end_s": 4113
       },
@@ -757,7 +757,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture05-rnns::kp2",
+        "local::lecture07-rnns::kp2",
         "local::lecture_3::kp4",
         "local::lecture_4_neural_networks_and_backpropagation::kp6"
       ]
@@ -907,7 +907,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture03-backprop::kp12",
+        "local::lecture05-backprop::kp12",
         "local::lecture_3::kp8"
       ]
     },
@@ -950,9 +950,9 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp1",
-        "local::lecture02::kp2",
-        "local::lecture03-backprop::kp3",
+        "local::lecture04-wordvecs-lm::kp1",
+        "local::lecture04-wordvecs-lm::kp2",
+        "local::lecture05-backprop::kp3",
         "local::lecture_3::kp9"
       ]
     },

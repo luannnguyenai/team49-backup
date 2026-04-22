@@ -90,7 +90,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 5,
         "end_s": 576
       },
@@ -135,7 +135,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 577,
         "end_s": 970
       },
@@ -180,7 +180,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 971,
         "end_s": 1305
       },
@@ -225,7 +225,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 1306,
         "end_s": 1741
       },
@@ -270,7 +270,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 1742,
         "end_s": 2527
       },
@@ -315,7 +315,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 2528,
         "end_s": 2949
       },
@@ -370,7 +370,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 2950,
         "end_s": 3478
       },
@@ -425,7 +425,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+        "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
         "start_s": 3479,
         "end_s": 4260
       },
@@ -690,7 +690,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture05-rnns::kp3",
+        "local::lecture07-rnns::kp3",
         "local::lecture_6::kp3"
       ]
     },
@@ -729,7 +729,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture03-backprop::kp2",
+        "local::lecture05-backprop::kp2",
         "local::lecture_4_neural_networks_and_backpropagation::kp3",
         "local::lecture_4_neural_networks_and_backpropagation::kp4",
         "local::lecture_6::kp4"
@@ -775,16 +775,21 @@
         "architecture_design",
         "deep_learning",
         "optimization",
-        "transformers"
+        "transformers",
+        "architectures"
       ],
       "domain_tags": [
         "optimization",
         "residual_connections",
-        "resnet"
+        "resnet",
+        "deep_learning",
+        "vision",
+        "nlp"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "research_scientist"
+        "research_scientist",
+        "research"
       ],
       "difficulty_level": 0.64,
       "difficulty_source": "llm_single_pass",
@@ -800,8 +805,9 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp9",
-        "local::lecture_6::kp6"
+        "local::lecture10-transformers::kp9",
+        "local::lecture_6::kp6",
+        "local::lecture08-seq2seq::kp9"
       ]
     },
     {
@@ -936,7 +942,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture09-pretraining::kp3",
+        "local::lecture11-pretraining::kp3",
         "local::lecture_6::kp10"
       ]
     },

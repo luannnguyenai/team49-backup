@@ -1,0 +1,172 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture20-reasoning-agents",
+    "lecture_title": "Lecture 20 - Reasoning and Agents",
+    "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture20-reasoning-agents::seg3",
+    "course_id": "cs224n-2024",
+    "name": "Evaluating faithfulness and systematicity in reasoning",
+    "description": "Presents skepticism about apparent reasoning by testing whether rationales causally matter and whether performance survives out-of-distribution changes.",
+    "summary": "After showing ways to induce reasoning-like behavior, the lecture asks whether the resulting rationales are faithful, meaning whether the model's answer actually depends on the rationale it produced [ts=1252s][ts=1276s]. Two diagnostic experiments are described: early exit, where the rationale is cut off after one or more sentences before forcing an answer, and rationale corruption, where mistakes are inserted partway through the rationale; when accuracy barely changes, the rationale is interpreted as a post-hoc explanation rather than a causal computation trace [ts=1306s][ts=1477s]. The lecture then proposes counterfactual or out-of-distribution evaluation by changing the setting while preserving the abstract skill, such as moving from base-10 arithmetic to base-9 arithmetic or changing world facts in logic problems, and reports sizable performance drops even on simple logic tasks [ts=1517s][ts=1642s]. A final example on analogical reasoning shows that changing the alphabet or the transformation rule sharply reduces model performance while humans degrade very little, leading to the cautious conclusion that current systems show some reasoning and some memorization but not robust systematic generalization [ts=1662s][ts=1782s].",
+    "key_points": [
+      {
+        "text": "A rationale is faithful only if the model's final answer actually depends on that rationale.",
+        "timestamp_s": 1255,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Early-exit testing forces the model to answer after only part of its rationale; unchanged accuracy suggests the omitted steps were not doing real work.",
+        "timestamp_s": 1306,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Corrupting an intermediate reasoning step and observing little answer change is another sign that the rationale may be post-hoc.",
+        "timestamp_s": 1403,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Base-9 arithmetic and altered-logic worlds are used as out-of-distribution tests for whether the model learned the underlying rule rather than memorized training patterns.",
+        "timestamp_s": 1517,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Analogical reasoning experiments show large drops for models under task or alphabet changes, while humans show little decrease.",
+        "timestamp_s": 1662,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=15",
+      "start_s": 1215,
+      "end_s": 1803
+    },
+    "difficulty": 0.74,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "After showing ways to induce reasoning-like behavior, the lecture asks whether the resulting rationales are faithful, meaning whether the model's answer actually depends on the rationale it produced [ts=1252s][ts=1276s]. Two diagnostic experiments are described: early exit, where the rationale is cut off after one or more sentences before forcing an answer, and rationale corruption, where mistakes are inserted partway through the rationale; when accuracy barely changes, the rationale is interpreted as a post-hoc explanation rather than a causal computation trace [ts=1306s][ts=1477s]. The lecture then proposes counterfactual or out-of-distribution evaluation by changing the setting while preserving the abstract skill, such as moving from base-10 arithmetic to base-9 arithmetic or changing world facts in logic problems, and reports sizable performance drops even on simple logic tasks [ts=1517s][ts=1642s]. A final example on analogical reasoning shows that changing the alphabet or the transformation rule sharply reduces model performance while humans degrade very little, leading to the cautious conclusion that current systems show some reasoning and some memorization but not robust systematic generalization [ts=1662s][ts=1782s].",
+  "target_kp_ids": [
+    "kp_faithfulness_and_counterfactual_evaluation_of_reasoning"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=I0tj4Y7xaOQ",
+  "transcript_slice": "00:20:15\nLet's kind of start revisiting the question\n\n00:20:21\nin language models, OK?\n\n00:20:28\ncan apply all these methods, and we can look at benchmarks.\n\n00:20:34\nis to be more systematic, come up with counterfactual tasks\n\n00:20:44\nAnd I'm going to show some results around that.\n\n00:20:52\nAnd maybe the first question to ask\n\n00:20:58\nwith chain of thought faithful?\n\n00:21:03\nproduces some rationale, and then it produces an answer.\n\n00:21:09\nthat it produced, right?\n\n00:21:15\nand Jerry has 4 apples.\n\n00:21:16\nIt produced was, OK, Tom has 3 apples, Jerry has 4,\n\n00:21:23\nSo in a case like that, you'd say that the model was not\n\n00:21:29\nAnd so what we see in this plot is a very careful experiment\n\n00:21:44\nSo OK.\n\n00:21:46\nSo for every question, the model produces a rationale,\n\n00:21:53\nAnd what we're going to do is we're\n\n00:22:00\nfrom its rationalization and just,\n\n00:22:04\nSo if it produced four rationales,\n\n00:22:10\nand ask it to produce an answer.\n\n00:22:13\nask it to produce an answer, and so on.\n\n00:22:17\nis the model's accuracy after early exiting in this procedure.\n\n00:22:27\nand the model produced exactly the same answer\n\n00:22:35\nThen maybe we can conclude that the kind of reasoning\n\n00:22:41\nLike, it doesn't matter if the model sees the full rationale\n\n00:22:46\nAnd if you take that to the extreme maybe\n\n00:22:52\nit produces the same answer.\n\n00:22:56\nbut we see that there are enough data sets where it\n\n00:23:03\nif the model sees the full rationale before answering,\n\n00:23:06\nsort of early exit.\n\n00:23:11\nmeans that sometimes these rationales may\n\n00:23:19\nAnother experiment that tries to answer this exact same question\n\n00:23:26\nand then you can start corrupting them.\n\n00:23:31\nAnd then I generate the first rationale, the second rationale\n\n00:23:37\nAnd then the fourth rationale, and then I\n\n00:23:41\nIf it turns out that no matter how much I corrupt my rationale,\n\n00:23:47\nthen I can conclude that, again, the answer kind of\n\n00:23:53\nSo on the x-axis, we are looking at the number\n\n00:24:00\nbefore I add sort of a mistake in the rationale, OK?\n\n00:24:10\nsort of trend where if I add a mistake after the very\n\n00:24:18\nto change the answer a lot.\n\n00:24:21\nthat maybe doesn't change the answer all that much.\n\n00:24:27\nit so happens that you can add a mistake in the first sentence\n\n00:24:33\ngoing to change all that much.\n\n00:24:37\nthat maybe these rationales are sort of post-hoc explanations\n\n00:24:44\nSo yeah.\n\n00:24:46\nSo if anyone has questions, see a few blank faces\n\n00:24:58\nOK.\n\n00:25:02\nOK.\n\n00:25:06\nwhether, sorry, chain of thought expresses kind of a reasoning\n\n00:25:11\nAnother question you could ask is,\n\n00:25:16\nSo my model, let's say, I observe\n\n00:25:22\nso it's able to answer something like 12 plus 14,\n\n00:25:28\nor maybe there was just this exact same example\n\n00:25:35\nSo one way you could test for this\n\n00:25:40\nbased on our understanding of the data,\n\n00:25:45\nin the training data.\n\n00:25:50\nyou could do addition in base 9.\n\n00:25:55\nthen you can conclude that maybe this model has\n\n00:26:00\nSimilarly for logic, maybe the reason\n\n00:26:08\nis because it has seen something very similar\n\n00:26:11\nSo what if I construct a world where, I don't know,\n\n00:26:20\nOK.\n\n00:26:27\ndrop when you move from--\n\n00:26:30\nSorry, could you define what the counterfactual-- why\n\n00:26:37\nSo it's a counterfactual--\n\n00:26:45\naddition is like frequently observed in training data,\n\n00:26:51\nAnd so there's going to be much fewer examples of this\n\n00:26:54\nSo it's more so out-of-distribution rather\n\n00:26:57\nYeah, yeah.\n\n00:27:05\nAnd yeah.\n\n00:27:07\nwe see is there's this drop in performance even for very\n\n00:27:15\nmultiple steps of reasoning.\n\n00:27:22\nwhich maybe suggests that there is not that much reasoning,\n\n00:27:28\nYeah.\n\n00:27:35\nsettings so that it starts looking\n\n00:27:42\nAnd this is exactly what was done in this paper that\n\n00:27:48\nSo basically, the setup is something like this.\n\n00:27:55\ntransformations.\n\n00:28:00\nOK?\n\n00:28:05\nand the output is abcde and then given ijkl, the model\n\n00:28:13\nAnd so on.\n\n00:28:18\ninto a counterfactual or something that is out\n\n00:28:27\nthe extent sequence task is.\n\n00:28:32\nmaybe the model has to output abcdf, OK?\n\n00:28:40\nsort of one more--\n\n00:28:46\nThe other kind of counterfactual you could add\n\n00:28:54\nyou could modify the alphabet completely.\n\n00:28:58\nmaybe you start at xy and so on.\n\n00:29:08\nso we find two things.\n\n00:29:12\na significant drop in performance\n\n00:29:17\nproblem to one of these counterfactuals\n\n00:29:22\nwe change the description of the task\n\n00:29:27\nOn the other hand, the authors also\n\n00:29:32\nwhere they find very little decrease in performance, OK?\n\n00:29:42\nis maybe there is some reasoning,\n\n00:29:48\nOK?\n\n00:29:54\nwill find that if you change your prompt a little bit,\n\n00:29:59\nBut this is kind of the current lay of the land.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture20-reasoning-agents::seg3",
+      "global_kp_id": "kp_faithfulness_and_counterfactual_evaluation_of_reasoning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture20-reasoning-agents::seg3",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_faithfulness_and_counterfactual_evaluation_of_reasoning",
+      "name": "Faithfulness and counterfactual evaluation of reasoning",
+      "description": "Reasoning quality should be tested by whether rationales causally affect answers and whether performance survives distribution shifts.",
+      "track_tags": [
+        "evaluation",
+        "reasoning",
+        "robustness"
+      ],
+      "domain_tags": [
+        "llm_evaluation",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "eval_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because faithfulness and counterfactual evaluation of reasoning clarifies reasoning quality should be tested by whether rationales causally affect answers and whether performance survives distribution shifts, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture20-reasoning-agents::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "name": "Chain-of-thought prompting",
+      "description": "A prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting. Prompting with worked intermediate reasoning steps so the model generates a scratchpad before the final answer.",
+      "track_tags": [
+        "llm",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "llms",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "ml_engineer",
+        "nlp_researcher",
+        "product_ml",
+        "prompt_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because chain-of-thought prompting formalizes how a prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting, which later units use as core machinery rather than background context while roles split between capstone and gateway and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp3",
+        "local::lecture20-reasoning-agents::kp2",
+        "local::lecture11-pretraining::kp12"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.59,
+    0.89
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L20_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture20-reasoning-agents_transcript.txt"
+  }
+}

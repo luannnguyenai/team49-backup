@@ -106,7 +106,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture12_efficient_training::kp8",
+        "local::lecture16-efficient-training::kp8",
         "local::lecture_11_large_scale_distributed_training::kp6"
       ]
     },

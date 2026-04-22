@@ -1,1465 +1,1013 @@
 {
   "lecture_context": {
     "course_id": "CS224n",
-    "lecture_id": "lecture02",
-    "lecture_title": "Stanford CS224N Lecture 2: Word Vectors and Language Models",
-    "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ"
+    "lecture_id": "lecture02-python-review",
+    "lecture_title": "Lecture 2 - Python Review Session",
+    "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74"
   },
   "table_of_contents": [
     {
       "section_index": 1,
-      "title": "Optimization basics, SGD, and word2vec initialization",
-      "start_s": 5,
-      "end_s": 609
+      "title": "Orientation, why Python, and language basics",
+      "start_s": 0,
+      "end_s": 397
     },
     {
       "section_index": 2,
-      "title": "Word2vec parameters, bag-of-words context prediction, and GloVe analogy demo",
-      "start_s": 609,
-      "end_s": 1483
+      "title": "Colab demo: Python containers and iteration",
+      "start_s": 397,
+      "end_s": 1054
     },
     {
       "section_index": 3,
-      "title": "Word2vec implementation details: two vectors, softmax variants, and negative sampling",
-      "start_s": 1483,
-      "end_s": 2016
+      "title": "NumPy motivation, arrays, matrices, vectors, tensors, and shapes",
+      "start_s": 1054,
+      "end_s": 1613
     },
     {
       "section_index": 4,
-      "title": "Count-based word vectors, SVD, COALS, and the GloVe objective",
-      "start_s": 2016,
-      "end_s": 2753
+      "title": "NumPy reductions, matrix operations, dot products, and indexing",
+      "start_s": 1613,
+      "end_s": 2295
     },
     {
       "section_index": 5,
-      "title": "Evaluating word vectors: intrinsic vs extrinsic evaluation",
-      "start_s": 2762,
-      "end_s": 3131
-    },
-    {
-      "section_index": 6,
-      "title": "Word senses, polysemy, and sparse coding",
-      "start_s": 3138,
-      "end_s": 3786
-    },
-    {
-      "section_index": 7,
-      "title": "Neural window classifiers, supervised learning, and cross-entropy loss",
-      "start_s": 3789,
-      "end_s": 4449
-    },
-    {
-      "section_index": 8,
-      "title": "Artificial neurons and multi-layer neural networks",
-      "start_s": 4449,
-      "end_s": 4742
+      "title": "Broadcasting rules and vectorized NumPy performance",
+      "start_s": 2295,
+      "end_s": 2826
     }
   ],
   "units": [
     {
-      "unit_id": "local::lecture02::seg1",
-      "course_id": "CS224N",
-      "name": "Optimization basics for learning word vectors",
-      "description": "Connects the previous lecture's word2vec derivative work to gradient descent, stochastic gradient descent, and random initialization.",
-      "summary": "The lecture begins with the plan for finishing word vectors, then shifts from the previous word2vec loss derivatives to the optimization loop: minimize a cost function by computing its gradient, moving a small amount downhill, and repeating [ts=202s]. The update uses a learning rate alpha, typically small, subtracting a scaled gradient from parameters so steps do not overshoot or reach a worse point [ts=294s]. Full-batch gradient descent is described as too expensive because it requires evaluating the objective and gradient on the entire training set before one update [ts=361s]. Stochastic or mini-batch gradient descent instead uses a small subset such as 16 or 32 examples, giving a noisy gradient estimate that is much faster and can improve neural network optimization through useful noise [ts=413s]. The word2vec recap stresses random small-number initialization: all-zero vectors create false symmetries and prevent learning, while gradient updates adjust vectors to predict surrounding words better [ts=508s].",
+      "unit_id": "local::lecture02-python-review::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Python motivation and core language basics",
+      "description": "Introduces the tutorial goal, why Python is used in CS224N-style NLP/deep learning work, and essential Python syntax basics.",
+      "summary": "The session is framed as a Python and NumPy review for CS224N, especially for homework 2 and later assignments, while still being accessible to students with little programming background [ts=10s]. Python is motivated as a high-level, English-like language with scientific-computing support, efficient math/matrix frameworks through NumPy, and direct interfaces to common deep learning frameworks such as PyTorch and TensorFlow [ts=95s]. Setup material such as package installation and Conda environments is noted but skipped so the lecture can focus on language basics first [ts=132s]. The segment covers dynamic variable assignment, where a variable can be assigned an integer and later reassigned to a string without declaring its type in advance [ts=166s]. It also reviews arithmetic operators, exponentiation with double asterisks, type casting to float/int/string, capitalized Boolean values, None as Python's null-like value distinct from 0, English-like logical operators and/or/not, equality testing with == versus assignment with =, and indentation by consistent spaces or tabs instead of braces [ts=205s] [ts=269s] [ts=361s] [ts=370s].",
       "key_points": [
         {
-          "text": "Gradient descent minimizes a loss by computing the gradient and repeatedly stepping downhill.",
-          "timestamp_s": 202,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "The learning rate alpha scales the gradient step; too large a step can overshoot or worsen the objective.",
-          "timestamp_s": 294,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Full-batch gradient descent is usually impractical for neural nets because it waits for an objective and gradient over all training data.",
-          "timestamp_s": 361,
+          "text": "The tutorial goal is to review Python and NumPy basics needed for homework 2 and later CS224N work.",
+          "timestamp_s": 10,
           "evidence_type": "claim"
         },
         {
-          "text": "Stochastic or mini-batch gradient descent uses a small subset such as 16 or 32 items as a noisy gradient estimate.",
-          "timestamp_s": 413,
+          "text": "Python is preferred in ML/NLP because it is high-level, readable, scientifically useful, and integrates with PyTorch and TensorFlow.",
+          "timestamp_s": 95,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Python variables do not require fixed type declarations; the same variable can later hold a value of a different type.",
+          "timestamp_s": 166,
           "evidence_type": "definition"
         },
         {
-          "text": "Word vectors should be initialized with random small numbers; all zeros cause symmetry and prevent learning.",
-          "timestamp_s": 508,
+          "text": "Python supports exponentiation with double asterisks and explicit casting with float(), int(), or str().",
+          "timestamp_s": 205,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Boolean values are capitalized True/False, and None is the null-like value but is not the same as 0.",
+          "timestamp_s": 269,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Use == for equality checking and = for assignment.",
+          "timestamp_s": 361,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Python code blocks are determined by consistent indentation rather than braces; inconsistent indentation throws an error.",
+          "timestamp_s": 370,
           "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 5,
-        "end_s": 609
+        "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+        "start_s": 0,
+        "end_s": 397
       },
-      "difficulty": 2.4,
+      "difficulty": 1.2,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 10,
+      "difficulty_confidence": "high",
+      "duration_min": 7,
       "ordering_index": 1,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture02::seg2",
-      "course_id": "CS224N",
-      "name": "Word2vec mechanics and word-vector analogy behavior",
-      "description": "Explains the bag-of-words word2vec model and demonstrates learned vector similarity and analogies with GloVe embeddings.",
-      "summary": "The word2vec model is summarized as having only word-vector parameters: separate outside-word and center-word vectors whose dot products yield a probability distribution over possible context words, with error coming from comparison to the true outside word [ts=618s]. The lecturer emphasizes that this is a bag-of-words model: it does not model sentence structure or left-versus-right position, but predicts what kinds of words appear around a center word [ts=660s]. A Jupyter demo loads 100-dimensional GloVe vectors and shows that semantically related words such as bread and croissant have similar vector components, while nearest-neighbor queries for USA, banana, and croissant return sensible related words [ts=748s]. Taking the negative of a single word vector is not useful for antonyms and tends to return odd tokens [ts=894s]. The important property is linear semantic components: vector arithmetic such as King minus man plus woman finds Queen, motivating analogy tasks [ts=966s]. Additional examples show cultural and syntactic regularities, such as Australia:beer::Russia:vodka and tall:tallest::long:longest, illustrating that even a simple bag-of-words model captures word meaning and some world knowledge [ts=1140s]. Q&A clarifies that vector differences can represent relation directions, that the two word2vec vectors for a word are commonly averaged, and that analogy chaining can fail [ts=1287s].",
+      "unit_id": "local::lecture02-python-review::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Python containers, slicing, dictionaries, and loops",
+      "description": "Uses a Colab/Jupyter-style live walkthrough to demonstrate Python lists, tuples, dictionaries, and iteration idioms.",
+      "summary": "The lecture moves into a Colab demonstration, explaining that Colab is like a Jupyter Notebook hosted on Google's servers where code can be run cell by cell, intermediate outputs inspected, and descriptions placed near code for debugging and project exploration [ts=397s]. Lists are introduced as mutable arrays optimized for frequent changes: students see zero-indexing, append rather than add, len(), list concatenation with plus/plus-equals, heterogeneous list contents including integers, sublists, floats, and None, and slicing where the first index is included but the last is excluded [ts=452s] [ts=497s] [ts=589s]. A full colon slice is described as taking everything while creating a separate copy in memory, and negative indexing is introduced as indexing from the end of the list, with -1 referring to the final element [ts=649s] [ts=681s]. Tuples are contrasted with lists as immutable arrays that can be indexed but cannot be changed after creation [ts=727s]. Dictionaries are described as hash-map-like structures for fast key-to-value mapping, especially useful in NLP for mapping strings or items to numerical indices; membership checks prevent errors before indexing missing keys, and del deletes entries [ts=784s] [ts=832s]. The segment ends with loops: range() generates numeric iteration, Python can directly iterate over list elements, enumerate() provides both index and value, and dictionary iteration can access keys, values(), or items() [ts=891s] [ts=960s] [ts=998s].",
       "key_points": [
         {
-          "text": "Word2vec uses center and outside word vectors; dot products define probabilities for outside words, and error comes from the actual context word.",
-          "timestamp_s": 618,
+          "text": "Colab/Jupyter notebooks let users run code cell by cell, inspect intermediate outputs, and mix code with descriptions.",
+          "timestamp_s": 397,
           "evidence_type": "definition"
         },
         {
-          "text": "The skip-gram setup described here is a bag-of-words model that ignores sentence structure and left/right context position.",
-          "timestamp_s": 660,
-          "evidence_type": "claim"
+          "text": "Lists are mutable arrays optimized for adding, deleting, and changing elements.",
+          "timestamp_s": 452,
+          "evidence_type": "definition"
         },
         {
-          "text": "Nearest-neighbor search over GloVe vectors returns semantically related words such as banana with coconut, mango, and fruit.",
-          "timestamp_s": 837,
-          "evidence_type": "example"
+          "text": "Python lists are zero-indexed, so index 0 refers to the first element.",
+          "timestamp_s": 497,
+          "evidence_type": "definition"
         },
         {
-          "text": "A negative single word vector is not an antonym finder; negative banana returns odd or unhelpful tokens.",
-          "timestamp_s": 900,
+          "text": "List slicing includes the first index and excludes the last index.",
+          "timestamp_s": 589,
           "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Word-vector analogies work by adding and subtracting semantic directions, as in King - man + woman ≈ Queen.",
-          "timestamp_s": 966,
-          "evidence_type": "formula"
+          "text": "A full colon slice can make a separate copy in memory, so later changes do not affect the original list.",
+          "timestamp_s": 649,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Analogy examples show both semantic/cultural and syntactic regularities, but the method has failures.",
-          "timestamp_s": 1260,
-          "evidence_type": "claim"
+          "text": "Tuples are immutable arrays: they can be indexed but not changed after instantiation.",
+          "timestamp_s": 727,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Dictionaries behave like hash maps and are useful for mapping strings/items to numerical indices in NLP.",
+          "timestamp_s": 784,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "enumerate() returns both the element and its index during iteration.",
+          "timestamp_s": 976,
+          "evidence_type": "definition"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 609,
-        "end_s": 1483
+        "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+        "start_s": 397,
+        "end_s": 1054
       },
-      "difficulty": 2.8,
+      "difficulty": 1.8,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 15,
+      "difficulty_confidence": "high",
+      "duration_min": 11,
       "ordering_index": 2,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture02::seg3",
-      "course_id": "CS224N",
-      "name": "Word2vec variants and negative sampling",
-      "description": "Covers why word2vec keeps two vectors, the skip-gram and CBOW family, naive softmax, and negative sampling with sigmoid losses.",
-      "summary": "After warning students not to follow an old assignment that asked for a from-scratch word2vec implementation, the lecturer answers why word2vec uses two vector sets: using the same vector for center and outside words creates a quadratic self-term when the center word appears in the normalization, making the math messier; disjoint vectors keep the derivation simple and are usually averaged afterward [ts=1537s]. The original Mikolov family is framed as two model structures: skip-gram predicts surrounding words from an inside word, while continuous bag of words predicts the center word from its context [ts=1622s]. The training objective previously presented is naive softmax, which sums over every vocabulary word, requiring many dot products and exponentiations for large vocabularies [ts=1662s]. Negative sampling replaces full softmax with simple logistic regressions: make the true context word high probability and a few randomly sampled words low probability [ts=1741s]. The sigmoid/logistic function maps real-valued dot products to probabilities from 0 to 1, making positive dot products favorable for real outside words and unfavorable for negative samples [ts=1810s]. Negative examples are not sampled uniformly; word2vec uses unigram probabilities raised to the 3/4 power, which increases the relative chance of less frequent words while still favoring common words [ts=1924s].",
+      "unit_id": "local::lecture02-python-review::seg3",
+      "course_id": "cs224n-2024",
+      "name": "NumPy motivation, numerical arrays, and shape conventions",
+      "description": "Explains why NumPy matters for NLP/deep learning, then introduces arrays, matrices, vectors, tensors, shapes, and reshape operations.",
+      "summary": "NumPy is introduced as the central tool for the rest of the tutorial: an optimized mathematical library that uses fast lower-level C/C++ subroutines to speed up operations on large numerical data [ts=1061s] [ts=1128s]. The lecturer emphasizes that this matters in NLP because operations such as those over co-occurrence matrices can be very large, making optimized numerical computation important [ts=1133s]. NumPy arrays are distinguished from Python lists: lists can be converted to arrays with np.array(), but NumPy operations apply to NumPy arrays rather than ordinary lists directly [ts=1148s]. The segment then reviews mathematical structures: matrices are rectangular numerical structures with special operation rules, vectors are conventionally one-dimensional matrix-like objects such as row or column vectors, and tensors are higher-dimensional objects, a term that becomes concrete in PyTorch for GPU-optimized deep learning operations [ts=1201s] [ts=1231s] [ts=1283s]. Shape notation is emphasized through the difference between (3,), (1,3), and (3,1): one bracket/list versus list-of-lists changes how NumPy interprets rows, columns, and later broadcasting behavior [ts=1336s]. Reshape is introduced as a way to reinterpret the same values into dimensions whose product matches the original size, such as reshaping 10 values into 5x2, 2x5, 10x1, or 1x10 but not 3x5 [ts=1553s] [ts=1569s].",
       "key_points": [
         {
-          "text": "Using separate center and outside vectors avoids a messy quadratic self-term in the softmax normalization.",
-          "timestamp_s": 1537,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "The word2vec family includes skip-gram, which predicts context from center, and CBOW, which predicts center from context.",
-          "timestamp_s": 1622,
+          "text": "NumPy is an optimized library for mathematical operations.",
+          "timestamp_s": 1061,
           "evidence_type": "definition"
         },
         {
-          "text": "Naive softmax sums over every vocabulary word, which is expensive for vocabularies with hundreds of thousands of words.",
-          "timestamp_s": 1662,
+          "text": "NumPy gains speed by calling C/C++ subroutines that are more efficient for low-level computation than pure Python.",
+          "timestamp_s": 1128,
           "evidence_type": "claim"
         },
         {
-          "text": "Negative sampling trains the model to like the true context word and dislike a small number of sampled non-context words.",
-          "timestamp_s": 1741,
+          "text": "Large NLP objects such as co-occurrence matrices motivate NumPy's optimized operations.",
+          "timestamp_s": 1133,
+          "evidence_type": "example"
+        },
+        {
+          "text": "NumPy operations require NumPy arrays; Python lists must first be converted with np.array().",
+          "timestamp_s": 1148,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A matrix is a rectangular structure of numbers with rules for operations such as matrix multiplication.",
+          "timestamp_s": 1201,
           "evidence_type": "definition"
         },
         {
-          "text": "The logistic sigmoid maps any real dot product to a probability between 0 and 1.",
-          "timestamp_s": 1810,
+          "text": "A vector is conventionally a one-dimensional matrix-like object, such as a row or column vector.",
+          "timestamp_s": 1231,
           "evidence_type": "definition"
         },
         {
-          "text": "Negative samples are drawn from unigram probability raised to the 3/4 power, partially flattening the frequency distribution.",
-          "timestamp_s": 1945,
-          "evidence_type": "formula"
+          "text": "A tensor is conventionally a higher-dimensional object beyond two dimensions.",
+          "timestamp_s": 1283,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "reshape() requires the target dimensions to multiply to the original number of elements.",
+          "timestamp_s": 1569,
+          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 1483,
-        "end_s": 2016
+        "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+        "start_s": 1054,
+        "end_s": 1613
       },
-      "difficulty": 3.5,
+      "difficulty": 2.3,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
+      "difficulty_confidence": "high",
       "duration_min": 9,
       "ordering_index": 3,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture02::seg4",
-      "course_id": "CS224N",
-      "name": "Count-based vectors, SVD, and GloVe",
-      "description": "Compares predictive word2vec-style embeddings with count-based co-occurrence methods and derives the intuition behind GloVe.",
-      "summary": "The lecture asks whether a more direct route to word vectors is possible by counting how often words occur in each other's contexts, using a context window to form a co-occurrence count matrix [ts=2023s]. A toy corpus produces a word-by-word matrix whose rows can be treated as vectors, but raw count vectors are huge: with a 400,000-word vocabulary, the matrix is 400,000 by 400,000 rather than vocabulary size by a modest embedding dimension [ts=2153s]. Dimensionality reduction via singular value decomposition is introduced as a way to rewrite any matrix as U, singular values, and V, then truncate smaller singular values to obtain lower-dimensional word representations [ts=2213s]. Earlier methods such as latent semantic analysis and COALS partly worked; COALS improved raw SVD by using log frequencies, ramped windows that weight closer context more, and Pearson correlations, and it also discovered linear semantic components before word2vec became famous [ts=2329s]. GloVe is introduced as Stanford's count-based model aimed at obtaining linear meaning components from count matrices [ts=2481s]. Its key intuition is that ratios of co-occurrence probabilities encode meaning differences: comparing contexts of ice and steam makes solid versus gas directions emerge, while unrelated words remain near ratio 1 [ts=2521s]. By taking logs, ratios become differences, so a log-bilinear dot-product model can make vector differences correspond to log ratios of co-occurrence probabilities, with bias and threshold details treated as secondary [ts=2648s].",
+      "unit_id": "local::lecture02-python-review::seg4",
+      "course_id": "cs224n-2024",
+      "name": "NumPy reductions, linear algebra operations, and indexing",
+      "description": "Covers axis-based reductions, keepdims, elementwise versus matrix multiplication, dot products, and array indexing techniques.",
+      "summary": "The segment starts with NumPy reduction operations such as np.max: applying max to a full array returns one scalar, while applying it with an axis reduces over a chosen dimension [ts=1613s]. The key diagnostic rule is that the axis is the dimension being compared/reduced over, not the shape of the final result; the lecturer describes axis 0 as the row axis and axis 1 as the column axis, while also recommending shape inspection and experimentation with min/max to build intuition [ts=1648s] [ts=1698s] [ts=1715s]. keepdims is introduced as a way to preserve the original number of dimensions, e.g. returning a 3x1-style result rather than a plain one-dimensional list-like result after reducing across columns [ts=1768s]. The lecturer then distinguishes elementwise multiplication using * from matrix multiplication: elementwise multiplication compares corresponding entries and requires matching shapes, whereas matrix multiplication multiplies rows of one matrix by columns of another and requires the second dimension of the first matrix to match the first dimension of the second [ts=1808s] [ts=1835s]. np.matmul and the @ operator are given as matrix multiplication options [ts=1903s]. Dot products are explained as multiplying corresponding vector entries and summing them, but np.dot on higher-dimensional matrices is treated like matrix multiplication, so shape alignment matters [ts=1936s] [ts=1976s]. The segment ends with indexing: a colon takes all values in a dimension and returns a copy, row/column selections can be specified separately, Boolean indexing extracts values satisfying a condition such as x > 0.5, and np.newaxis-style expansion adds a dimension for reshaping-like behavior [ts=2095s] [ts=2129s] [ts=2196s] [ts=2232s].",
       "key_points": [
         {
-          "text": "A co-occurrence matrix counts how often each word appears in the context window of other words.",
-          "timestamp_s": 2095,
+          "text": "np.max over a full array returns one value, while axis-specific max reduces over a chosen dimension.",
+          "timestamp_s": 1613,
           "evidence_type": "definition"
         },
         {
-          "text": "Raw co-occurrence vectors are ungainly because a large vocabulary creates a massive square matrix.",
-          "timestamp_s": 2161,
-          "evidence_type": "claim"
+          "text": "The axis argument names the dimension to reduce or compare over, not the shape of the output.",
+          "timestamp_s": 1648,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "SVD factorizes a matrix into U, singular values, and V, and truncating small singular values yields low-dimensional representations.",
-          "timestamp_s": 2224,
+          "text": "keepdims preserves the original number of dimensions after a reduction.",
+          "timestamp_s": 1768,
           "evidence_type": "definition"
         },
         {
-          "text": "COALS improved count-based vectors with log frequencies, ramped context windows, and correlations.",
-          "timestamp_s": 2369,
-          "evidence_type": "example"
+          "text": "The * operator performs elementwise multiplication, not matrix multiplication, and requires same-sized matrices.",
+          "timestamp_s": 1808,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "GloVe seeks vector-space linear components by using ratios of co-occurrence probabilities.",
-          "timestamp_s": 2521,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Taking logs turns probability ratios into differences, enabling a log-bilinear dot-product model.",
-          "timestamp_s": 2648,
+          "text": "For matrix multiplication A-by-B times B-by-C, the inner dimensions must match.",
+          "timestamp_s": 1835,
           "evidence_type": "formula"
+        },
+        {
+          "text": "np.matmul and the @ operator both perform matrix multiplication.",
+          "timestamp_s": 1903,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A vector dot product multiplies corresponding entries and sums them, e.g. 1*1 + 2*10 + 3*100.",
+          "timestamp_s": 1936,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Boolean indexing can extract all entries satisfying a condition such as x > 0.5.",
+          "timestamp_s": 2196,
+          "evidence_type": "definition"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 2016,
-        "end_s": 2753
+        "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+        "start_s": 1613,
+        "end_s": 2295
       },
-      "difficulty": 3.8,
+      "difficulty": 3.2,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 12,
+      "difficulty_confidence": "high",
+      "duration_min": 11,
       "ordering_index": 4,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture02::seg5",
-      "course_id": "CS224N",
-      "name": "Intrinsic and extrinsic evaluation of word vectors",
-      "description": "Defines evaluation strategies for embeddings and illustrates them with analogy, word similarity, and named entity recognition tasks.",
-      "summary": "After the GloVe demo, the lecturer emphasizes that NLP systems need evaluation to determine what is better or worse [ts=2766s]. Intrinsic evaluation is defined as scoring a specific internal subtask; it is fast and helps understand the component, but may be distant from the downstream task and may not translate to end performance [ts=2793s]. Extrinsic evaluation tests whether a modeling component helps a real downstream task such as question answering, summarization, machine translation, or web search, although running the full system can make effects harder to diagnose [ts=2825s]. For word vectors, intrinsic evaluations include analogies and word similarity judgments: analogy sets count the percentage of successful vector arithmetic cases, while similarity tasks compare model scores to averaged human judgments such as tiger/tiger, book/paper, plane/car, and stock/jaguar [ts=2898s]. The table discussed shows plain SVD performing poorly, log-count SVD improving, and word2vec/GloVe variants getting stronger scores [ts=3031s]. As an extrinsic example, named entity recognition labels strings like Chris Manning as a person and Palo Alto as a place; adding word vectors to a baseline symbolic probabilistic NER system substantially improves performance [ts=3075s].",
+      "unit_id": "local::lecture02-python-review::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Broadcasting and vectorized NumPy code",
+      "description": "Explains NumPy broadcasting rules, connects broadcasting to batched deep learning computation, and closes with a vectorization performance example.",
+      "summary": "Broadcasting is introduced as one of NumPy's most useful and defining features because it lets arrays of different but compatible shapes interact efficiently without manually constructing duplicated arrays [ts=2299s]. The lecturer explains that a vector such as [1,2,3] can be duplicated along either a row or column dimension on the backend, allowing elementwise operations with a larger matrix without explicit loops or manual array construction [ts=2337s] [ts=2390s]. The central rule is that every dimension between the two arrays must be compatible: either the dimension sizes are equal or one of them is 1 [ts=2439s]. Examples include a 3x4 array with a 3x1 array, where NumPy duplicates along the column dimension to get a 3x4-compatible array, and a 1x4 array, where it duplicates along the row dimension [ts=2462s] [ts=2518s]. The lecture connects this to deep learning batches: the same weight matrix may be applied to many batch elements without manually duplicating the weights hundreds or thousands of times; homework 2 will implement a feed-forward network in NumPy using weights and biases [ts=2548s] [ts=2576s]. Additional examples show that a 3x1 vector plus its 1x3 transpose can broadcast because each dimension is either equal or 1, while dimensions such as 6 and 3 are not compatible merely because one divides the other [ts=2644s] [ts=2694s] [ts=2724s]. The session ends with a performance tip: avoid Python loops over large data matrices when NumPy vectorization can express the same operation, since loops are described as often about 100 times slower; an example adds 5 to rows 100 onward of a 1000x1000 matrix using NumPy indexing/arange instead of looping [ts=2758s] [ts=2776s].",
       "key_points": [
         {
-          "text": "Intrinsic evaluation scores a specific internal subtask and is usually fast but may not predict downstream impact.",
-          "timestamp_s": 2793,
+          "text": "Broadcasting lets NumPy operate on arrays of different shapes when repeated backend duplication can make them compatible.",
+          "timestamp_s": 2299,
           "evidence_type": "definition"
         },
         {
-          "text": "Extrinsic evaluation runs a real downstream task to test whether a model component helps final task accuracy.",
-          "timestamp_s": 2825,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Word-vector analogy evaluation measures what percentage of analogy questions are solved correctly.",
-          "timestamp_s": 2898,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Word-similarity evaluation correlates model similarity scores with averaged human judgments.",
-          "timestamp_s": 2955,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Named entity recognition can serve as a downstream task where adding GloVe vectors improves a baseline system.",
-          "timestamp_s": 3075,
-          "evidence_type": "example"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 2762,
-        "end_s": 3131
-      },
-      "difficulty": 2.6,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 6,
-      "ordering_index": 5,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::lecture02::seg6",
-      "course_id": "CS224N",
-      "name": "Polysemy, word senses, and sparse recovery from embeddings",
-      "description": "Explains why single word vectors are problematic for ambiguous words and how sense clustering and sparse coding address polysemy.",
-      "summary": "The lecturer moves to polysemy, emphasizing that most words have multiple meanings, with bank, star, and pike as examples [ts=3145s]. Audience examples for pike include fish, spear, road/turnpike, fraternity name, diving position, verb use, idioms like coming down the pike, and an Australian sense meaning to chicken out [ts=3182s]. One approach is multi-prototype embeddings: cluster word tokens by similarity of occurrence, treat each cluster as a sense, and learn word vectors for those sense clusters [ts=3319s]. The 2012 example shown separates senses such as bank 1/bank 2 and multiple Jaguar senses: car, Apple software, keyboard, and animal [ts=3358s]. However, the lecturer explains that modern practice usually keeps one vector per word because discrete sense boundaries are often artificial; dictionaries disagree on the number of senses, and words like field have related but not cleanly separated uses such as crop field, rock/ice field, sporting field, and mathematical field [ts=3543s]. A single word vector can be understood as an average over contexts, a view that connects to later contextual word vectors [ts=3635s]. Although ordinary linear algebra would suggest individual sense vectors cannot be recovered from a single summed vector, high-dimensional sparse spaces allow sparse coding methods to reconstruct sense vectors; Arora et al. examples recover multiple senses of tie [ts=3677s].",
-      "key_points": [
-        {
-          "text": "Most words have multiple meanings; pike illustrates polysemy across fish, weapon, road, diving, verb, idiom, and dialect uses.",
-          "timestamp_s": 3145,
+          "text": "Broadcasting can duplicate a vector along row or column dimensions instead of manually building a larger array.",
+          "timestamp_s": 2337,
           "evidence_type": "example"
         },
         {
-          "text": "A multi-sense embedding approach clusters word tokens by occurrence similarity, then learns vectors for each sense cluster.",
-          "timestamp_s": 3319,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Sense-cluster examples separate Jaguar into car, software, keyboard, and animal senses.",
-          "timestamp_s": 3358,
-          "evidence_type": "example"
-        },
-        {
-          "text": "Discrete word senses can be artificial because many meanings overlap and dictionaries disagree on sense counts.",
-          "timestamp_s": 3543,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A single word vector can be interpreted as an average of all contexts for that word.",
-          "timestamp_s": 3635,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Sparse coding can reconstruct sense vectors from a high-dimensional sparse whole-word vector.",
-          "timestamp_s": 3677,
-          "evidence_type": "claim"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 3138,
-        "end_s": 3786
-      },
-      "difficulty": 3.4,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 11,
-      "ordering_index": 6,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
-      "course_id": "CS224N",
-      "name": "Neural window classifiers and cross-entropy loss",
-      "description": "Introduces supervised neural classification with word-vector windows, nonlinear hidden representations, and cross-entropy loss.",
-      "summary": "The final technical arc starts by framing word2vec as already a simple classifier because it predicts which words are likely in a context [ts=3806s]. The main example is named entity recognition: words are assigned classes such as person, location, or not-a-named-entity, and the same surface words can have different classes depending on context, as in Paris Hilton versus a location use of Paris [ts=3824s]. The proposed model is a window classifier: take a target word plus context words on both sides, represent each with word vectors, concatenate the window, and feed it to a classifier that predicts location versus not-location [ts=3927s]. This is supervised learning: training data consists of inputs x_i and labels y_i, such as negative Paris Hilton and positive I visit Paris every spring [ts=3992s]. Traditional classifiers such as logistic regression, softmax classifiers, SVMs, and Naive Bayes are described as mostly linear classifiers over fixed inputs, whereas neural classifiers also learn distributed representations and can be nonlinear relative to the original input space [ts=4085s]. The concrete neural architecture concatenates five word embeddings into a high-dimensional vector, applies a matrix plus bias and a nonlinearity to form a hidden representation, then maps that hidden representation to a score and sigmoid probability for the location class [ts=4196s]. Cross-entropy loss is introduced as the PyTorch loss students will use; for one-hot target labels, all incorrect terms vanish and cross entropy becomes the log probability assigned to the correct class, used as negative log likelihood [ts=4354s].",
-      "key_points": [
-        {
-          "text": "Word2vec can be viewed as a simple classifier because it predicts likely context words.",
-          "timestamp_s": 3806,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Named entity recognition labels words with classes such as person, location, or not a named entity, using context to resolve ambiguity.",
-          "timestamp_s": 3824,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "A window classifier uses a target word plus surrounding context words represented by their word vectors.",
-          "timestamp_s": 3927,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Supervised classification uses labeled input examples x_i with class labels y_i.",
-          "timestamp_s": 3992,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Neural classifiers learn both weights and distributed word representations, making nonlinear classification possible in the original space.",
-          "timestamp_s": 4139,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A five-word window with 100-dimensional embeddings becomes a 500-dimensional concatenated input.",
-          "timestamp_s": 4224,
+          "text": "Broadcasting compatibility requires every dimension to be either equal or equal to 1 in one of the arrays.",
+          "timestamp_s": 2439,
           "evidence_type": "formula"
         },
         {
-          "text": "A hidden layer computes matrix times input plus bias, then applies a nonlinearity before output scoring.",
-          "timestamp_s": 4231,
-          "evidence_type": "formula"
+          "text": "For a 3x4 array and a 3x1 array, NumPy duplicates along the column dimension to enable addition.",
+          "timestamp_s": 2462,
+          "evidence_type": "example"
         },
         {
-          "text": "For one-hot targets, cross entropy reduces to the log probability assigned to the correct class and is used as negative log likelihood.",
-          "timestamp_s": 4354,
-          "evidence_type": "definition"
+          "text": "Broadcasting is useful in deep learning batches because a shared weight matrix can be applied across many inputs without manual duplication.",
+          "timestamp_s": 2548,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A 3x1 vector and its 1x3 transpose are broadcast-compatible because each compared dimension is equal or 1.",
+          "timestamp_s": 2694,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Dimension sizes such as 6 and 3 are not broadcast-compatible merely because they are divisible.",
+          "timestamp_s": 2724,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Prefer vectorized NumPy operations over loops for large matrices because loops are described as about 100 times slower.",
+          "timestamp_s": 2758,
+          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 3789,
-        "end_s": 4449
+        "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+        "start_s": 2295,
+        "end_s": 2826
       },
       "difficulty": 3.7,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 11,
-      "ordering_index": 7,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::lecture02::seg8",
-      "course_id": "CS224N",
-      "name": "Artificial neurons and why depth helps",
-      "description": "Connects biological neuron inspiration to logistic regression units and multi-layer neural networks that learn hidden features.",
-      "summary": "The lecture ends with the biological inspiration for neural networks: human neurons have outputs along axons, connections through synapses, many inputs from other neurons, and a combined activation process that sends spikes when enough positive input arrives [ts=4454s]. Artificial neural networks simplify spike rates into real-valued activation levels [ts=4533s]. Binary logistic regression is presented as a simple artificial neuron: multiple inputs may have positive excitatory or negative inhibitory weights, are combined into an excitation value, and are passed through a nonlinearity [ts=4560s]. The lecturer cautions that human neurons are much more complex, but modern neural networks generally use the simplified model because it becomes convenient linear algebra [ts=4602s]. A single logistic-function neuron is identical to logistic regression, but neural networks stack many such units and feed them into further logistic regressions [ts=4632s]. The important learning claim is that intermediate units do not need human-defined meanings; by training toward an eventual output such as location versus not-location, hidden layers learn useful internal features themselves [ts=4662s]. More layers let networks build up functions and representations that make data easier to classify or interpret downstream [ts=4700s].",
-      "key_points": [
-        {
-          "text": "Biological neurons inspired neural networks through many inputs, synapses, axon outputs, and activation/spiking behavior.",
-          "timestamp_s": 4454,
-          "evidence_type": "example"
-        },
-        {
-          "text": "Artificial neural networks simplify neural spike rates into real-valued activation levels.",
-          "timestamp_s": 4533,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Binary logistic regression resembles a neuron that combines positive and negative weighted inputs and applies a nonlinearity.",
-          "timestamp_s": 4560,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "A single logistic-function neuron is identical to logistic regression.",
-          "timestamp_s": 4632,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Neural networks stack many logistic-regression-like units and let intermediate units learn useful functions automatically.",
-          "timestamp_s": 4650,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "More layers allow models to learn representations that make classification or downstream interpretation easier.",
-          "timestamp_s": 4700,
-          "evidence_type": "claim"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
-        "start_s": 4449,
-        "end_s": 4742
-      },
-      "difficulty": 2.9,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 5,
-      "ordering_index": 8,
+      "difficulty_confidence": "high",
+      "duration_min": 9,
+      "ordering_index": 5,
       "is_template": false
     }
   ],
   "section_flags": [
     {
-      "unit_id": "local::lecture02::seg1",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
+      "unit_id": "local::lecture02-python-review::seg1",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
       "formula_heavy": false,
       "demo_heavy": false,
-      "rationale": "Foundational training mechanics for word2vec and neural networks; includes learning-rate and initialization diagnostics [ts=294s]."
+      "rationale": "Foundational Python syntax and course motivation are important for beginners, but the segment is mostly conceptual setup rather than dense applied NumPy."
     },
     {
-      "unit_id": "local::lecture02::seg2",
+      "unit_id": "local::lecture02-python-review::seg2",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
       "formula_heavy": false,
       "demo_heavy": true,
-      "rationale": "Live Jupyter/GloVe demo of nearest neighbors and analogies provides strong examples for retrieval and assessment [ts=711s]."
+      "rationale": "The segment is a Colab-based walkthrough of lists, tuples, dictionaries, and loops, with many testable definitions and common-error tips."
     },
     {
-      "unit_id": "local::lecture02::seg3",
+      "unit_id": "local::lecture02-python-review::seg3",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
       "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "Negative sampling, sigmoid probabilities, and unigram^3/4 distribution are formula-centered word2vec variants [ts=1741s]."
+      "demo_heavy": true,
+      "rationale": "NumPy motivation and shape conventions are core prerequisites for later array operations, with shape notation and reshape constraints that are suitable for retrieval and assessment."
     },
     {
-      "unit_id": "local::lecture02::seg4",
+      "unit_id": "local::lecture02-python-review::seg4",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
       "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "Co-occurrence matrices, SVD, and GloVe log-ratio modeling are mathematically central alternatives to word2vec [ts=2213s]."
+      "demo_heavy": true,
+      "rationale": "Axis reductions, keepdims, elementwise multiplication, matrix multiplication, dot products, and indexing are central practical NumPy skills with many diagnostic pitfalls."
     },
     {
-      "unit_id": "local::lecture02::seg5",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Intrinsic/extrinsic evaluation is explicitly said to recur throughout the course, with concrete word-vector benchmarks [ts=2766s]."
-    },
-    {
-      "unit_id": "local::lecture02::seg6",
-      "importance_flag": "medium",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "medium",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Polysemy and sparse coding are conceptually important but less central than core training and evaluation mechanics [ts=3145s]."
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
+      "unit_id": "local::lecture02-python-review::seg5",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
       "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "Introduces supervised neural classification, window models, affine hidden layers, sigmoid output, and cross entropy [ts=4196s]."
-    },
-    {
-      "unit_id": "local::lecture02::seg8",
-      "importance_flag": "high",
-      "review_worthiness": "medium",
-      "item_generation_worthiness": "medium",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Provides the conceptual bridge from logistic regression to multi-layer neural networks and hidden feature learning [ts=4632s]."
+      "demo_heavy": true,
+      "rationale": "Broadcasting is explicitly called a defining NumPy feature, connected to deep learning batches and homework 2, and reinforced with performance guidance against loops."
     }
   ],
   "unit_kp_map": [
     {
-      "unit_id": "local::lecture02::seg1",
-      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "unit_id": "local::lecture02-python-review::seg1",
+      "global_kp_id": "kp_python_for_nlp_and_deep_learning",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture02::seg1",
-      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "unit_id": "local::lecture02-python-review::seg1",
+      "global_kp_id": "kp_dynamic_variables_and_basic_python_operations",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture02::seg1",
-      "global_kp_id": "kp_parameter_initialization",
+      "unit_id": "local::lecture02-python-review::seg1",
+      "global_kp_id": "kp_python_truth_values_none_operators_and_indentation",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg2",
+      "global_kp_id": "kp_colab_and_notebook_workflow",
       "planner_role": "support",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::lecture02::seg1",
-      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "unit_id": "local::lecture02-python-review::seg2",
+      "global_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg2",
+      "global_kp_id": "kp_tuples_and_immutability",
       "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg2",
+      "global_kp_id": "kp_dictionaries_for_fast_key_value_mapping",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg2",
+      "global_kp_id": "kp_python_loops_and_iteration_idioms",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg3",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg3",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg3",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "planner_role": "prereq",
       "coverage_level": "mention"
     },
     {
-      "unit_id": "local::lecture02::seg2",
-      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_axis_based_reductions_and_keepdims",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture02::seg2",
-      "global_kp_id": "kp_word_vector_nearest_neighbor_similarity",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg2",
-      "global_kp_id": "kp_linear_semantic_components_and_analogies",
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_elementwise_multiplication_matrix_multiplication_and_dot_products",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::lecture02::seg2",
-      "global_kp_id": "kp_two_vector_word2vec_parameterization",
-      "planner_role": "support",
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_numpy_indexing_boolean_masks_and_new_axes",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "planner_role": "prereq",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::lecture02::seg3",
-      "global_kp_id": "kp_two_vector_word2vec_parameterization",
-      "planner_role": "support",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg3",
-      "global_kp_id": "kp_naive_softmax_vs_word2vec_model_variants",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg3",
-      "global_kp_id": "kp_negative_sampling_with_sigmoid_objectives",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture02::seg3",
-      "global_kp_id": "kp_unigram_distribution_to_the_3_4_power",
-      "planner_role": "support",
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "planner_role": "prereq",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::lecture02::seg4",
-      "global_kp_id": "kp_co_occurrence_matrix_word_representations",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg4",
-      "global_kp_id": "kp_svd_dimensionality_reduction_for_word_vectors",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg4",
-      "global_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::lecture02::seg4",
-      "global_kp_id": "kp_linear_semantic_components_and_analogies",
-      "planner_role": "support",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::lecture02::seg5",
-      "global_kp_id": "kp_downstream_transfer_evaluation",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture02::seg5",
-      "global_kp_id": "kp_word_vector_analogy_and_similarity_benchmarks",
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_vectorization",
       "planner_role": "main",
       "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg5",
-      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg6",
-      "global_kp_id": "kp_polysemy_and_multi_sense_embeddings",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture02::seg6",
-      "global_kp_id": "kp_single_vector_averages_and_sparse_coding_for_senses",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg6",
-      "global_kp_id": "kp_linear_semantic_components_and_analogies",
-      "planner_role": "support",
-      "coverage_level": "mention"
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
-      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
-      "planner_role": "support",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
-      "global_kp_id": "kp_supervised_window_classification",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
-      "global_kp_id": "kp_neural_classifiers_as_learned_nonlinear_representations",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
-      "global_kp_id": "kp_feedforward_neural_networks",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg7",
-      "global_kp_id": "kp_cross_entropy_loss",
-      "planner_role": "support",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::lecture02::seg8",
-      "global_kp_id": "kp_artificial_neuron_as_logistic_regression",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture02::seg8",
-      "global_kp_id": "kp_depth_and_hidden_feature_learning",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture02::seg8",
-      "global_kp_id": "kp_feedforward_neural_networks",
-      "planner_role": "support",
-      "coverage_level": "partial"
     }
   ],
   "kp_catalog": [
     {
-      "global_kp_id": "kp_gradient_descent_and_sgd",
-      "name": "Gradient descent and stochastic gradient descent",
-      "description": "Neural networks are trained by computing the gradient of an objective and updating parameters with stochastic gradient descent. Gradient-based optimization updates parameters by subtracting a scaled gradient, with the learning rate controlling step size.",
+      "global_kp_id": "kp_python_for_nlp_and_deep_learning",
+      "name": "Python for NLP and deep learning",
+      "description": "Why Python is used in CS224N-style work: readability, scientific computation, and integration with deep learning frameworks.",
       "track_tags": [
         "deep_learning",
-        "optimization",
-        "training"
+        "nlp",
+        "python"
       ],
       "domain_tags": [
-        "gradient_descent",
-        "gradients",
-        "learning_rate",
         "machine_learning",
-        "minibatch",
-        "sgd"
+        "natural_language_processing",
+        "scientific_computing"
       ],
       "career_path_tags": [
-        "computer_vision_engineer",
+        "data_scientist",
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.22,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because python for NLP and deep learning clarifies why Python is used in CS224N-style work: readability, scientific computation, and integration with deep learning frameworks, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "name": "Dynamic variables and basic Python operations",
+      "description": "Variable assignment, dynamic typing, arithmetic, exponentiation, and type casting in Python.",
+      "track_tags": [
+        "programming_foundations",
+        "python"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.24,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dynamic variables and basic Python operations clarifies variable assignment, dynamic typing, arithmetic, exponentiation, and type casting in Python, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_python_truth_values_none_operators_and_indentation",
+      "name": "Python truth values, None, operators, and indentation",
+      "description": "True/False capitalization, None, logical operators, equality versus assignment, and consistent indentation.",
+      "track_tags": [
+        "debugging",
+        "python"
+      ],
+      "domain_tags": [
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.26,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because python truth values, None, operators, and indentation clarifies true/False capitalization, None, logical operators, equality versus assignment, and consistent indentation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_colab_and_notebook_workflow",
+      "name": "Colab and notebook workflow",
+      "description": "Interactive notebook execution for running code cell by cell and debugging with intermediate outputs.",
+      "track_tags": [
+        "debugging",
+        "notebooks",
+        "python"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.24,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because colab and notebook workflow clarifies interactive notebook execution for running code cell by cell and debugging with intermediate outputs, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_python_lists_slicing_copying_and_negative_indexing",
+      "name": "Python lists, slicing, copying, and negative indexing",
+      "description": "Mutable lists, zero-indexing, append, len, concatenation, slicing semantics, copy behavior, and negative indexing.",
+      "track_tags": [
+        "data_structures",
+        "python"
+      ],
+      "domain_tags": [
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because python lists, slicing, copying, and negative indexing clarifies mutable lists, zero-indexing, append, len, concatenation, slicing semantics, copy behavior, and negative indexing, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_tuples_and_immutability",
+      "name": "Tuples and immutability",
+      "description": "Tuple creation, indexing, immutability, and single-element tuple notation.",
+      "track_tags": [
+        "data_structures",
+        "python"
+      ],
+      "domain_tags": [
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because tuples and immutability clarifies tuple creation, indexing, immutability, and single-element tuple notation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dictionaries_for_fast_key_value_mapping",
+      "name": "Dictionaries for fast key-value mapping",
+      "description": "Dictionary/hash-map behavior, membership checks, deletion, and mapping strings/items to numeric indices.",
+      "track_tags": [
+        "data_structures",
+        "nlp",
+        "python"
+      ],
+      "domain_tags": [
+        "natural_language_processing",
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dictionaries for fast key-value mapping clarifies dictionary/hash-map behavior, membership checks, deletion, and mapping strings/items to numeric indices, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_python_loops_and_iteration_idioms",
+      "name": "Python loops and iteration idioms",
+      "description": "range, direct iteration over elements, enumerate, and dictionary key/value/item iteration.",
+      "track_tags": [
+        "programming_foundations",
+        "python"
+      ],
+      "domain_tags": [
+        "programming"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because python loops and iteration idioms clarifies range, direct iteration over elements, enumerate, and dictionary key/value/item iteration, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "name": "NumPy as an optimized numerical library",
+      "description": "NumPy's role in efficient mathematical, matrix, and vector operations through optimized lower-level routines.",
+      "track_tags": [
+        "nlp",
+        "numpy",
+        "scientific_computing"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "natural_language_processing",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because numPy as an optimized numerical library formalizes how numPy's role in efficient mathematical, matrix, and vector operations through optimized lower-level routines, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "name": "Tensor shapes and broadcasting",
+      "description": "Reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication. Core shape vocabulary for rectangular matrices, one-dimensional vectors, higher-dimensional tensors, and NumPy shape notation.",
+      "track_tags": [
+        "broadcasting",
+        "debugging",
+        "deep_learning",
+        "linear_algebra",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "linear_algebra",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
         "data_scientist",
         "machine_learning_engineer",
         "ml_engineer",
         "nlp_engineer",
-        "research_scientist"
+        "research_engineer"
       ],
-      "difficulty_level": 0.57,
+      "difficulty_level": 0.56,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
       "importance_level": "critical",
       "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because gradient descent and stochastic gradient descent formalizes how neural networks are trained by computing the gradient of an objective and updating parameters with stochastic gradient descent, which later units use as core machinery rather than background context.",
-      "importance_scope": "curriculum_global",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because tensor shapes and broadcasting formalizes how reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
-        "CS224n",
-        "CS231n"
+        "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp1",
-        "local::lecture02::kp2",
-        "local::lecture03-backprop::kp3",
-        "local::lecture_3::kp9"
+        "local::lecture02-python-review::kp10",
+        "local::lecture02-python-review::kp15",
+        "local::lecture03-pytorch::kp2"
       ]
     },
     {
-      "global_kp_id": "kp_parameter_initialization",
-      "name": "Parameter initialization and symmetry breaking",
-      "description": "Word-vector parameters must start as small random values rather than all zeros to avoid false symmetries. Choosing non-constant initial weights so learning can break symmetry and remain numerically stable.",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "name": "Reshaping and indexing",
+      "description": "PyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures. How (3,), (1,3), and (3,1) differ, and how reshape changes array dimensions when element counts match.",
       "track_tags": [
-        "deep_learning_fundamentals",
-        "optimization"
+        "array_shapes",
+        "data_manipulation",
+        "numpy",
+        "tensor_programming"
       ],
       "domain_tags": [
-        "deep_learning",
-        "neural_network_training",
-        "optimization"
+        "array_ops",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
       ],
       "career_path_tags": [
+        "data_scientist",
         "machine_learning_engineer",
-        "ml_engineer",
-        "nlp_engineer",
-        "research_scientist"
+        "ml_engineer"
       ],
       "difficulty_level": 0.5,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
-      "importance_confidence": "medium",
-      "importance_rationale": "Important because parameter initialization and symmetry breaking clarifies word-vector parameters must start as small random values rather than all zeros to avoid false symmetries, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reshaping and indexing clarifies pyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp3",
-        "local::lecture05-rnns::kp5"
+        "local::lecture02-python-review::kp11",
+        "local::lecture03-pytorch::kp3"
       ]
     },
     {
-      "global_kp_id": "kp_word2vec_skipgram_objective",
-      "name": "Word2vec skip-gram objective",
-      "description": "Word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus. The skip-gram model predicts context words from a center word using dot products between center and outside vectors.",
+      "global_kp_id": "kp_axis_based_reductions_and_keepdims",
+      "name": "Axis-based reductions and keepdims",
+      "description": "Using axis arguments to reduce over dimensions and keepdims to preserve dimensionality.",
       "track_tags": [
-        "nlp",
-        "word2vec"
+        "array_operations",
+        "numpy"
       ],
       "domain_tags": [
-        "natural_language_processing",
-        "nlp",
-        "representation_learning"
+        "machine_learning",
+        "scientific_computing"
       ],
       "career_path_tags": [
-        "machine_learning_engineer",
-        "ml_engineer",
-        "nlp_engineer",
-        "nlp_researcher"
-      ],
-      "difficulty_level": 0.63,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because word2vec skip-gram objective formalizes how word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus, which later units use as core machinery rather than background context.",
-      "importance_scope": "course_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture01-wordvecs::kp9",
-        "local::lecture02::kp4"
-      ]
-    },
-    {
-      "global_kp_id": "kp_word_vector_nearest_neighbor_similarity",
-      "name": "Word vector nearest-neighbor similarity",
-      "description": "Semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.48,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because word vector nearest-neighbor similarity clarifies semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp5"
-      ]
-    },
-    {
-      "global_kp_id": "kp_linear_semantic_components_and_analogies",
-      "name": "Linear semantic components and analogies",
-      "description": "Vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
+        "data_scientist",
+        "machine_learning_engineer"
       ],
       "difficulty_level": 0.62,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because linear semantic components and analogies formalizes how vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp6"
-      ]
-    },
-    {
-      "global_kp_id": "kp_two_vector_word2vec_parameterization",
-      "name": "Two-vector word2vec parameterization",
-      "description": "Word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.6,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "medium",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because two-vector word2vec parameterization clarifies word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because axis-based reductions and keepdims clarifies using axis arguments to reduce over dimensions and keepdims to preserve dimensionality, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp7"
+        "local::lecture02-python-review::kp12"
       ]
     },
     {
-      "global_kp_id": "kp_naive_softmax_vs_word2vec_model_variants",
-      "name": "Naive softmax vs word2vec model variants",
-      "description": "Word2vec includes skip-gram and CBOW structures, and naive softmax computes a full vocabulary normalization.",
+      "global_kp_id": "kp_elementwise_multiplication_matrix_multiplication_and_dot_products",
+      "name": "Elementwise multiplication, matrix multiplication, and dot products",
+      "description": "Distinguishing *, np.matmul/@, and np.dot behavior with attention to dimensional compatibility.",
       "track_tags": [
-        "nlp"
+        "linear_algebra",
+        "numpy"
       ],
       "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.64,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because naive softmax vs word2vec model variants clarifies word2vec includes skip-gram and CBOW structures, and naive softmax computes a full vocabulary normalization, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp8"
-      ]
-    },
-    {
-      "global_kp_id": "kp_negative_sampling_with_sigmoid_objectives",
-      "name": "Negative sampling with sigmoid objectives",
-      "description": "Negative sampling replaces full softmax with logistic decisions that distinguish true context words from sampled noise words.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.72,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because negative sampling with sigmoid objectives formalizes how negative sampling replaces full softmax with logistic decisions that distinguish true context words from sampled noise words, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp9"
-      ]
-    },
-    {
-      "global_kp_id": "kp_unigram_distribution_to_the_3_4_power",
-      "name": "Unigram distribution to the 3/4 power",
-      "description": "The negative-sampling distribution uses unigram probabilities raised to 3/4 to upweight less frequent words relative to raw frequency.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.68,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "medium",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because unigram distribution to the 3/4 power clarifies the negative-sampling distribution uses unigram probabilities raised to 3/4 to upweight less frequent words relative to raw frequency, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp10"
-      ]
-    },
-    {
-      "global_kp_id": "kp_co_occurrence_matrix_word_representations",
-      "name": "Co-occurrence matrix word representations",
-      "description": "Count-based embeddings start by counting how often words occur in each other's context windows.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.54,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because co-occurrence matrix word representations clarifies count-based embeddings start by counting how often words occur in each other's context windows, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp11"
-      ]
-    },
-    {
-      "global_kp_id": "kp_svd_dimensionality_reduction_for_word_vectors",
-      "name": "SVD dimensionality reduction for word vectors",
-      "description": "SVD can reduce a large co-occurrence matrix into lower-dimensional word representations by truncating smaller singular values.",
-      "track_tags": [
-        "linear_algebra"
-      ],
-      "domain_tags": [
-        "machine_learning"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.72,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because sVD dimensionality reduction for word vectors formalizes how sVD can reduce a large co-occurrence matrix into lower-dimensional word representations by truncating smaller singular values, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp12"
-      ]
-    },
-    {
-      "global_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
-      "name": "GloVe log-bilinear co-occurrence-ratio model",
-      "description": "GloVe uses log co-occurrence ratios so vector differences correspond to meaning differences.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.78,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because gloVe log-bilinear co-occurrence-ratio model formalizes how gloVe uses log co-occurrence ratios so vector differences correspond to meaning differences, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp13"
-      ]
-    },
-    {
-      "global_kp_id": "kp_downstream_transfer_evaluation",
-      "name": "Downstream transfer and extrinsic evaluation",
-      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
-      "track_tags": [
-        "computer_vision",
-        "evaluation",
-        "transfer_learning"
-      ],
-      "domain_tags": [
-        "computer_vision",
-        "downstream_adaptation",
-        "linear_probe",
-        "machine_learning",
-        "representation_learning"
-      ],
-      "career_path_tags": [
-        "computer_vision_engineer",
-        "machine_learning_engineer",
-        "ml_engineer",
-        "ml_engineering",
-        "nlp_engineer",
-        "research"
-      ],
-      "difficulty_level": 0.53,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "low",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "low",
-      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp14",
-        "local::lecture_12::kp3",
-        "local::lecture_16::kp6"
-      ]
-    },
-    {
-      "global_kp_id": "kp_word_vector_analogy_and_similarity_benchmarks",
-      "name": "Word-vector analogy and similarity benchmarks",
-      "description": "Embedding quality can be measured by analogy accuracy or correlation with human word-similarity judgments.",
-      "track_tags": [
-        "evaluation"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.56,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because word-vector analogy and similarity benchmarks clarifies embedding quality can be measured by analogy accuracy or correlation with human word-similarity judgments, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp15"
-      ]
-    },
-    {
-      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
-      "name": "Named entity recognition as an extrinsic embedding task",
-      "description": "NER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system.",
-      "track_tags": [
-        "nlp"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.54,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because named entity recognition as an extrinsic embedding task clarifies nER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp16"
-      ]
-    },
-    {
-      "global_kp_id": "kp_polysemy_and_multi_sense_embeddings",
-      "name": "Polysemy and multi-sense embeddings",
-      "description": "Words often have multiple related or unrelated meanings, and one approach clusters token occurrences into sense-specific embeddings.",
-      "track_tags": [
-        "semantics"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.6,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because polysemy and multi-sense embeddings clarifies words often have multiple related or unrelated meanings, and one approach clusters token occurrences into sense-specific embeddings, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp17"
-      ]
-    },
-    {
-      "global_kp_id": "kp_single_vector_averages_and_sparse_coding_for_senses",
-      "name": "Single-vector averages and sparse coding for senses",
-      "description": "A single word vector can average contexts, while sparse coding can sometimes recover sense vectors from high-dimensional sparse embeddings.",
-      "track_tags": [
-        "semantics"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.74,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "medium",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because single-vector averages and sparse coding for senses clarifies a single word vector can average contexts, while sparse coding can sometimes recover sense vectors from high-dimensional sparse embeddings, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp18"
-      ]
-    },
-    {
-      "global_kp_id": "kp_supervised_window_classification",
-      "name": "Supervised window classification",
-      "description": "A window classifier predicts a label for a target word using its surrounding context and word-vector features.",
-      "track_tags": [
-        "classification"
-      ],
-      "domain_tags": [
-        "natural_language_processing"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.6,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because supervised window classification formalizes how a window classifier predicts a label for a target word using its surrounding context and word-vector features, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp19"
-      ]
-    },
-    {
-      "global_kp_id": "kp_neural_classifiers_as_learned_nonlinear_representations",
-      "name": "Neural classifiers as learned nonlinear representations",
-      "description": "Neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space.",
-      "track_tags": [
-        "deep_learning"
-      ],
-      "domain_tags": [
-        "machine_learning"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.7,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because neural classifiers as learned nonlinear representations formalizes how neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp20"
-      ]
-    },
-    {
-      "global_kp_id": "kp_feedforward_neural_networks",
-      "name": "Feed-forward neural networks / MLPs",
-      "description": "Stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons. A neural layer concatenates embeddings, applies an affine transformation plus nonlinearity, and maps hidden features to output scores.",
-      "track_tags": [
-        "architectures",
         "deep_learning",
-        "neural_networks"
-      ],
-      "domain_tags": [
-        "computer_vision",
-        "deep_learning",
-        "machine_learning"
+        "machine_learning",
+        "scientific_computing"
       ],
       "career_path_tags": [
+        "data_scientist",
         "machine_learning_engineer",
-        "ml_engineer",
-        "nlp_engineer",
-        "research_scientist"
+        "nlp_engineer"
       ],
-      "difficulty_level": 0.62,
+      "difficulty_level": 0.66,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
+      "difficulty_confidence": "high",
       "importance_level": "critical",
       "structural_role": "gateway",
-      "importance_confidence": "low",
-      "importance_rationale": "Important because feed-forward neural networks / MLPs formalizes how stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
-      "importance_scope": "curriculum_global",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because elementwise multiplication, matrix multiplication, and dot products formalizes how distinguishing *, np.matmul/@, and np.dot behavior with attention to dimensional compatibility, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
-        "CS224n",
-        "CS231n"
+        "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp21",
-        "local::lecture_4_neural_networks_and_backpropagation::kp2"
+        "local::lecture02-python-review::kp13"
       ]
     },
     {
-      "global_kp_id": "kp_cross_entropy_loss",
-      "name": "Cross-entropy loss and negative log likelihood",
-      "description": "Transform raw class scores into probabilities with softmax and learn by minimizing the negative log probability of the correct class, equivalent here to maximum likelihood and cross-entropy under one-hot labels. For one-hot targets, cross entropy reduces to the model's log probability of the correct class and is optimized as negative log likelihood.",
+      "global_kp_id": "kp_numpy_indexing_boolean_masks_and_new_axes",
+      "name": "NumPy indexing, Boolean masks, and new axes",
+      "description": "Colon indexing, row/column selection, Boolean indexing, and adding singleton dimensions with newaxis-like syntax.",
       "track_tags": [
-        "deep_learning_basics",
-        "loss_functions",
-        "neural_networks"
+        "array_indexing",
+        "numpy"
       ],
       "domain_tags": [
-        "cross_entropy",
         "machine_learning",
-        "multiclass_logistic_regression",
-        "softmax"
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because numPy indexing, Boolean masks, and new axes clarifies colon indexing, row/column selection, Boolean indexing, and adding singleton dimensions with newaxis-like syntax, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vectorization",
+      "name": "Vectorization",
+      "description": "Implementing neural computation with vectors, matrices, and tensors instead of explicit loops. Using NumPy indexing and array operations instead of slow Python loops over large matrices.",
+      "track_tags": [
+        "deep_learning_fundamentals",
+        "numpy",
+        "performance",
+        "vectorization"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "numerical_computing",
+        "scientific_computing",
+        "systems_for_ml"
       ],
       "career_path_tags": [
         "data_scientist",
         "machine_learning_engineer",
         "ml_engineer",
-        "nlp_engineer",
-        "research_scientist"
+        "software_engineer"
       ],
-      "difficulty_level": 0.67,
+      "difficulty_level": 0.49,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "medium",
-      "importance_rationale": "Important because cross-entropy loss and negative log likelihood formalizes how transform raw class scores into probabilities with softmax and learn by minimizing the negative log probability of the correct class, equivalent here to maximum likelihood and cross-entropy under one-hot labels, which later units use as core machinery rather than background context though importance labels split between critical and high.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp22",
-        "local::lecture_2_image_classification_with_linear_classifiers::kp11"
-      ]
-    },
-    {
-      "global_kp_id": "kp_artificial_neuron_as_logistic_regression",
-      "name": "Artificial neuron as logistic regression",
-      "description": "A simplified neuron combines weighted inputs, applies a nonlinearity, and with logistic activation is equivalent to logistic regression.",
-      "track_tags": [
-        "deep_learning"
-      ],
-      "domain_tags": [
-        "machine_learning"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.56,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
+      "difficulty_confidence": "medium",
       "importance_level": "high",
       "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because artificial neuron as logistic regression clarifies a simplified neuron combines weighted inputs, applies a nonlinearity, and with logistic activation is equivalent to logistic regression, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because vectorization clarifies implementing neural computation with vectors, matrices, and tensors instead of explicit loops, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp23"
-      ]
-    },
-    {
-      "global_kp_id": "kp_depth_and_hidden_feature_learning",
-      "name": "Depth and hidden feature learning",
-      "description": "Multi-layer neural networks stack many simple units so intermediate layers learn useful representations automatically.",
-      "track_tags": [
-        "deep_learning"
-      ],
-      "domain_tags": [
-        "machine_learning"
-      ],
-      "career_path_tags": [
-        "machine_learning_engineer",
-        "nlp_engineer"
-      ],
-      "difficulty_level": 0.62,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because depth and hidden feature learning formalizes how multi-layer neural networks stack many simple units so intermediate layers learn useful representations automatically, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture02::kp24"
+        "local::lecture07-rnns::kp4",
+        "local::lecture02-python-review::kp16"
       ]
     }
   ],
@@ -1474,6 +1022,6 @@
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L2_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",
-    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture02-wordvecs-lm_transcript.txt"
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture02-python-review_transcript.txt"
   }
 }

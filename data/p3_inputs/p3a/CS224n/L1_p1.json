@@ -2,7 +2,7 @@
   "lecture_context": {
     "course_id": "CS224n",
     "lecture_id": "lecture01-wordvecs",
-    "lecture_title": "Stanford CS224N Lecture 1: Intro and Word Vectors",
+    "lecture_title": "Lecture 1 - Intro and Word Vectors",
     "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I"
   },
   "table_of_contents": [
@@ -84,7 +84,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 4,
         "end_s": 681
       },
@@ -134,7 +134,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 682,
         "end_s": 1698
       },
@@ -184,7 +184,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 1699,
         "end_s": 2480
       },
@@ -234,7 +234,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 2481,
         "end_s": 2826
       },
@@ -284,7 +284,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 2827,
         "end_s": 3300
       },
@@ -334,7 +334,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 3301,
         "end_s": 3898
       },
@@ -384,7 +384,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=1",
+        "video_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
         "start_s": 3899,
         "end_s": 4809
       },
@@ -634,8 +634,8 @@
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture18::kp10",
-        "local::cs224n-2024-lecture18::kp11",
+        "local::lecture22-nlp-linguistics::kp10",
+        "local::lecture22-nlp-linguistics::kp11",
         "local::lecture01-wordvecs::kp2"
       ]
     },
@@ -704,7 +704,7 @@
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture18::kp12",
+        "local::lecture22-nlp-linguistics::kp12",
         "local::lecture01-wordvecs::kp4"
       ]
     },
@@ -741,7 +741,7 @@
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture18::kp1",
+        "local::lecture22-nlp-linguistics::kp1",
         "local::lecture01-wordvecs::kp5"
       ]
     },
@@ -840,7 +840,7 @@
       ],
       "merged_from_local_ids": [
         "local::lecture01-wordvecs::kp8",
-        "local::lecture09-pretraining::kp2"
+        "local::lecture11-pretraining::kp2"
       ]
     },
     {
@@ -876,7 +876,7 @@
       ],
       "merged_from_local_ids": [
         "local::lecture01-wordvecs::kp9",
-        "local::lecture02::kp4"
+        "local::lecture04-wordvecs-lm::kp4"
       ]
     },
     {

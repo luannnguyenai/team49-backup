@@ -2,7 +2,7 @@
   "lecture_context": {
     "course_id": "CS224n",
     "lecture_id": "lecture01-wordvecs",
-    "lecture_title": "Stanford CS224N Lecture 1: Intro and Word Vectors",
+    "lecture_title": "Lecture 1 - Intro and Word Vectors",
     "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I"
   },
   "unit": {
@@ -55,6 +55,13 @@
     "ordering_index": 6,
     "is_template": false
   },
+  "unit_summary_for_generation": "Manning next defines the probability of an outside word given a center word using the dot product of their vectors, then exponentiates and normalizes across the vocabulary to obtain a legal probability distribution [ts=3366s] [ts=3460s] [ts=3507s]. He names this normalization the softmax function and notes that it is ubiquitous in deep learning whenever unconstrained scores must become probabilities [ts=3513s] [ts=3590s]. He then addresses the natural question of where the vectors come from: training starts with random vectors and treats the corpus objective as an optimization problem, adjusting vectors so the probabilities of observed contexts go up [ts=3618s] [ts=3660s]. To make the setup concrete, he explains gradient descent geometrically as following derivatives downhill in parameter space, and also reveals an important modeling detail: each vocabulary item actually has two vectors, one when serving as a center word and one when serving as an outside word, which greatly increases parameter count [ts=3679s] [ts=3750s] [ts=3810s].",
+  "target_kp_ids": [
+    "kp_softmax_probability_model_for_context_prediction",
+    "kp_gradient_based_learning_and_observed_minus_expected_updates"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
   "video_clip_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
   "transcript_slice": "00:55:04\nto calculate this probability.\n\n00:55:09\nSo we're going to define this probability\n\n00:55:15\nSo we're going to say each word type is represented\n\n00:55:21\nThese are hundreds real numbers.\n\n00:55:26\nthe probability simply in terms of the vectors for each word,\n\n00:55:35\nSo, over here I've shown this theta,\n\n00:55:40\nAnd all and only, the parameters of our model\n\n00:55:49\nThat's a lot of parameters because we have a lot of words.\n\n00:55:54\nBut they are the only parameters.\n\n00:56:03\nWe're going to say the probability of an outside word\n\n00:56:09\ndefined in terms of the dot product of the two word vectors.\n\n00:56:18\nAnd therefore, they'll have a high probability\n\n00:56:22\nWhere I mean similar in a kind of a weird sense.\n\n00:56:27\nhotel and motel are similar.\n\n00:56:34\nthe word \"the\" able to appear easily before the word\n\n00:56:39\nSo in some weird sense, \"the\" also has to be similar\n\n00:56:43\nThat has to be similar to basically any noun.\n\n00:56:51\nAnd then we do this funky little bit of math here,\n\n00:56:57\nSo let's just go through the funky bit of math.\n\n00:57:05\nSo what we're doing here is we're starting off\n\n00:57:11\nSo the dot product is you take the two vectors.\n\n00:57:18\nSo if they both the same sign, that increases your dot product.\n\n00:57:26\nSo that gives us a similarity between two vectors.\n\n00:57:33\nThat's just a real number.\n\n00:57:36\nBut what we'd like to get out is a probability.\n\n00:57:44\nBecause if we take e to the x for any x,\n\n00:57:51\nThat's what exponentiation does.\n\n00:57:58\nwe'd like it to be between 0 and 1.\n\n00:58:04\nin the dumbest way possible, which is we just normalize,\n\n00:58:12\nfor every possible context word.\n\n00:58:19\nand divide through by it.\n\n00:58:23\nof how likely different words are in this context.\n\n00:58:33\nis referred to as the softmax function.\n\n00:58:42\nput them through this little softmax trick\n\n00:58:47\nAnd what you'll get out is a probability distribution.\n\n00:58:54\na probability distribution over context words.\n\n00:59:01\nin my vocabulary will sum up to 1, by definition,\n\n00:59:09\nSo it's called the softmax function\n\n00:59:16\nthings.\n\n00:59:21\nBut it's soft because it's still assign some probability\n\n00:59:27\nBut it's sort of a funny name because when\n\n00:59:35\njust one thing.\n\n00:59:41\ninto a probability distribution.\n\n00:59:49\nAny time that we're wanting to turn things that are just\n\n00:59:55\nthrough a softmax function.\n\n01:00:09\nstill seems very abstract.\n\n01:00:17\nis because I've sort of said we have vectors for each word.\n\n01:00:30\nBut where do the vectors come from?\n\n01:00:37\nis we're going to turn this into an optimization problem.\n\n01:00:43\nAnd so therefore, we can hope to find word vectors that\n\n01:00:54\nas possible.\n\n01:00:58\nwe're going to start off with random vectors for every word.\n\n01:01:05\nso that the calculated probabilities of words\n\n01:01:11\nAnd we're going to keep fiddling until they stop going up\n\n01:01:18\nthat we can.\n\n01:01:25\nSo what we're going to do is conceptually\n\n01:01:31\nlike a two-dimensional space like the picture on the right.\n\n01:01:37\nin this two-dimensional space and you start off\n\n01:01:43\nlet me work out the derivatives of the function at the top left.\n\n01:01:51\nAnd so you can walk down in a bit to the right.\n\n01:01:57\nI am now, let me work out the derivatives.\n\n01:02:01\nAnd they're still pointing down, but a bit more to the right.\n\n01:02:06\nand you can keep on walking.\n\n01:02:12\nIn our case, we've got a lot more than two dimensions.\n\n01:02:22\nof all the word vectors.\n\n01:02:26\nexplained up until now.\n\n01:02:34\nWe assume one vector when they're the center word,\n\n01:02:40\nDoing that just makes the math a bit\n\n01:02:45\nSo if we say had 100 dimensional vectors,\n\n01:02:52\n100 parameters for \"a\" as an outside word,\n\n01:02:59\nand outside word.\n\n01:03:05\nword continuing down.\n\n01:03:13\ndimensional word vectors, that means we'd have 400,000 times 2\n\n01:03:21\nWe'd have 80 million parameters.\n\n01:03:28\nto optimize things.\n\n01:03:31\nAnd that's the kind of thing that we do.\n\n01:03:41\nWe're going to compute the gradients\n\n01:03:47\nAnd that will give us the answer of what we have.\n\n01:03:59\nI mean, it doesn't really seem like we could just\n\n01:04:04\nWe could start with random word vectors and a pile of text\n\n01:04:13\nBut the miracle of what happens in these deep learning spaces\n\n01:04:20\nWe can just minimize all of the parameters,\n\n01:04:29\nSo what I wanted to--\n\n01:04:33\nto the end of what I hoped to do today.\n\n01:04:44\nBut I wanted to take a few minutes to go through concretely\n\n01:04:53\nNow, lots of different people take CS224N, and some of way",
   "unit_kp_map_rows": [
@@ -173,16 +180,23 @@
       ],
       "merged_from_local_ids": [
         "local::lecture01-wordvecs::kp9",
-        "local::lecture02::kp4"
+        "local::lecture04-wordvecs-lm::kp4"
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.59,
     0.89
   ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L1_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",

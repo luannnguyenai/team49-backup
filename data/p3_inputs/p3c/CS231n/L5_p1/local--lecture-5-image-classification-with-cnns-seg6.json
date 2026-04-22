@@ -116,11 +116,16 @@
       "description": "Understanding filter count, kernel size, stride, padding, and the resulting input/output tensor shapes for convolution layers.",
       "track_tags": [
         "computer_vision",
-        "neural_networks"
+        "neural_networks",
+        "nlp",
+        "deep_learning"
       ],
       "domain_tags": [
         "cnn_hyperparameters",
-        "tensor_shapes"
+        "tensor_shapes",
+        "padding",
+        "stride",
+        "dilation"
       ],
       "career_path_tags": [
         "computer_vision_engineer",
@@ -136,10 +141,12 @@
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
-        "CS231n"
+        "CS231n",
+        "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture_5_image_classification_with_cnns::kp9"
+        "local::lecture_5_image_classification_with_cnns::kp9",
+        "local::lecture17-convnets::kp4"
       ]
     },
     {

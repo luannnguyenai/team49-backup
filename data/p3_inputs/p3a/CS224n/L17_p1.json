@@ -1,0 +1,997 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture17-convnets",
+    "lecture_title": "Lecture 17 - ConvNets and TreeRNNs for NLP",
+    "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "ConvNets for language: intuition and core operations",
+      "start_s": 0,
+      "end_s": 1101
+    },
+    {
+      "section_index": 2,
+      "title": "Kim CNN for sentence classification",
+      "start_s": 1101,
+      "end_s": 1822
+    },
+    {
+      "section_index": 3,
+      "title": "Deep CNN variants: batch norm, 1x1 conv, and VD-CNN",
+      "start_s": 1822,
+      "end_s": 2554
+    },
+    {
+      "section_index": 4,
+      "title": "Tree recursive neural networks and greedy parsing",
+      "start_s": 2554,
+      "end_s": 3302
+    },
+    {
+      "section_index": 5,
+      "title": "Recursive neural tensor networks and phrase-level supervision",
+      "start_s": 3302,
+      "end_s": 3810
+    },
+    {
+      "section_index": 6,
+      "title": "Negation, sentiment composition, and tree models vs transformers",
+      "start_s": 3810,
+      "end_s": 4308
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "course_id": "cs224n-2024",
+      "name": "ConvNets for language: intuition and core operations",
+      "description": "Introduces 1D convolutions over word sequences and the main pooling and receptive-field choices used in text CNNs.",
+      "summary": "After brief course housekeeping, the lecture frames CNNs as an alternative to sequential sentence modeling: instead of building a prefix representation left-to-right, a text CNN computes local n-gram features over word vectors [ts=24s][ts=297s]. The instructor maps the classic 2D vision convolution idea to 1D language by sliding a trigram-sized filter over adjacent word embeddings, taking a dot product, adding bias, and applying a nonlinearity to get features for each window [ts=383s][ts=530s]. He then explains padding for same-length or wider outputs, using multiple filters to produce richer position-wise representations, and pooling as the main way to summarize activations across the sentence [ts=586s][ts=629s][ts=678s]. Max pooling is motivated as feature detection anywhere in the text, average pooling as an alternative summary statistic, and the section closes with further design knobs including stride, local max pooling, k-max pooling, and dilation for larger receptive fields [ts=743s][ts=910s][ts=1026s].",
+      "key_points": [
+        {
+          "text": "Text CNNs build representations for local n-grams rather than only left-to-right prefixes.",
+          "timestamp_s": 344,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A 1D convolution computes a filter-window dot product over an n-gram, then adds bias and applies a nonlinearity.",
+          "timestamp_s": 530,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Zero padding preserves sequence length, and wider padding can increase output length.",
+          "timestamp_s": 586,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Using multiple filters yields a new vector representation at each position instead of a single scalar feature.",
+          "timestamp_s": 629,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Max pooling is useful when a filter acts like a feature detector that only needs to fire strongly somewhere in the text.",
+          "timestamp_s": 680,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Stride, local max pooling, k-max pooling, and dilation change overlap and receptive field in text convolutions.",
+          "timestamp_s": 910,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+        "start_s": 0,
+        "end_s": 1101
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 18,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Kim CNN for sentence classification",
+      "description": "Covers the classic 2014 CNN architecture for sentence classification and the embedding fine-tuning issue it addressed.",
+      "summary": "The lecture presents Yoon Kim's 2014 sentence-classification CNN as the canonical early NLP use of convolutions, mainly for sentiment analysis and related classification tasks [ts=1101s][ts=1153s]. The architecture applies separate filters over bigrams, trigrams, and 4-grams, max-pools each filter's activations over the sentence, concatenates the pooled values, and feeds the resulting fixed-size vector into a simple softmax classifier [ts=1195s][ts=1232s][ts=1303s]. A major training issue is then discussed: when fine-tuning pretrained word vectors on a small supervised dataset, words observed in training move while unseen but semantically similar words stay in place, which can distort sentiment boundaries [ts=1262s][ts=1367s]. Kim's workaround is a dual-channel setup that keeps one embedding channel frozen and another fine-tuned, combining the benefits of task adaptation with preservation of the original semantic geometry [ts=1473s][ts=1500s]. The section closes by noting that the model was surprisingly strong for its simplicity, though some of its experimental advantage likely came from using dropout when many earlier baselines had not [ts=1612s][ts=1716s].",
+      "key_points": [
+        {
+          "text": "Kim's model uses convolutional filters of multiple widths over word vectors for sentence classification.",
+          "timestamp_s": 1211,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "After sliding the filters across the sentence, max pooling keeps the strongest activation from each filter.",
+          "timestamp_s": 1232,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The concatenated pooled outputs are fed to a final softmax classifier for sentiment prediction.",
+          "timestamp_s": 1303,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Fine-tuning embeddings on a small labeled set can separate seen words from semantically similar unseen words and hurt generalization.",
+          "timestamp_s": 1367,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A two-channel embedding setup combines frozen pretrained vectors with fine-tuned vectors to get the best of both worlds.",
+          "timestamp_s": 1496,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+        "start_s": 1101,
+        "end_s": 1822
+      },
+      "difficulty": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Deep CNN variants: batch norm, 1x1 conv, and VD-CNN",
+      "description": "Places CNNs among other sequence models and introduces deeper character-level CNN architectures for text classification.",
+      "summary": "This segment situates CNNs in the broader modeling toolkit: bag-of-vectors and window models are simple baselines, CNNs are good for classification and easy to parallelize, RNNs are sequential, and transformers have become the dominant NLP model family [ts=1744s][ts=1791s]. The instructor then contrasts batch normalization with layer normalization, explaining that batch norm normalizes across the batch for each feature, whereas layer norm normalizes across the feature dimension [ts=1822s][ts=1888s]. He also explains why a size-1 convolution is meaningful: it acts like a position-wise fully connected layer that re-expresses a single token representation with fewer parameters than a sentence-wide dense layer [ts=1912s][ts=1969s]. The main case study is Conneau et al.'s 2017 very deep CNN for text classification, which starts from characters, stacks deep residual convolutional blocks with local pooling, expands channel depth as sequence length shrinks, and finishes with k-max pooling plus fully connected layers [ts=2013s][ts=2150s][ts=2278s][ts=2338s]. The paper's main result is that deeper models, especially the 29-layer version, performed best and sometimes reached or exceeded prior state of the art on text classification benchmarks [ts=2459s][ts=2520s].",
+      "key_points": [
+        {
+          "text": "CNNs are easy to parallelize for classification, whereas RNNs process sequences sequentially and transformers now dominate NLP.",
+          "timestamp_s": 1751,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Batch normalization normalizes each feature across the batch, unlike layer normalization which normalizes across features.",
+          "timestamp_s": 1888,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A size-1 convolution is equivalent to a position-wise fully connected transformation of a token representation.",
+          "timestamp_s": 1944,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "VD-CNN begins from character inputs and uses deep residual convolutional blocks with repeated local pooling.",
+          "timestamp_s": 2150,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The deepest 29-layer VD-CNN variant gave the strongest results in the reported experiments.",
+          "timestamp_s": 2462,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+        "start_s": 1822,
+        "end_s": 2554
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Tree recursive neural networks and greedy parsing",
+      "description": "Motivates tree-structured composition from syntax and shows the simplest recursive neural network parser.",
+      "summary": "The lecture pivots from CNNs to tree recursive neural networks, motivated by the recursive, hierarchical structure of human language and the linguistic principle of compositionality [ts=2555s][ts=2877s]. Instead of composing representations along a flat sequence, the model builds phrase and sentence vectors over a parse tree so that meanings of larger constituents are derived from child constituents and a shared composition rule [ts=2935s][ts=3000s]. In the simplest version, two child vectors are concatenated, multiplied by a learned matrix with bias and nonlinearity to form a parent vector, and a second learned parameter vector scores whether that combination is a plausible constituent [ts=3020s][ts=3060s]. This makes greedy parsing possible: the model repeatedly merges the best adjacent pair, creating a binary tree and a sentence representation that can also be used for downstream tasks like sentiment analysis [ts=3080s][ts=3150s]. The instructor then explains the main limitation: a single shared composition matrix cannot model the differing semantic roles seen in adjective-noun versus verb-object combinations, motivating richer tree-composition mechanisms [ts=3208s][ts=3240s].",
+      "key_points": [
+        {
+          "text": "Tree recursive neural networks are motivated by the recursive hierarchical structure of natural language.",
+          "timestamp_s": 2590,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Compositionality says phrase meaning is determined by word meanings plus the rules that combine them.",
+          "timestamp_s": 2877,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A parent phrase vector can be built by concatenating two child vectors and applying a shared neural composition layer.",
+          "timestamp_s": 3020,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A second learned scoring function estimates whether two children form a plausible constituent.",
+          "timestamp_s": 3046,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Greedy parsing repeatedly merges the highest-scoring adjacent pair to produce a binary parse tree.",
+          "timestamp_s": 3090,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Using one shared composition matrix everywhere limits the model's ability to express varied semantic interactions.",
+          "timestamp_s": 3211,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+        "start_s": 2554,
+        "end_s": 3302
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 13,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Recursive neural tensor networks and phrase-level supervision",
+      "description": "Introduces the recursive neural tensor network and the Stanford Sentiment Treebank used to train it.",
+      "summary": "To address the rigidity of a single shared composition matrix, the lecture introduces the recursive neural tensor network (RNTN), which models richer interactions between phrase components via multiplicative tensor-based composition [ts=3302s][ts=3344s]. The motivation is semantic asymmetry: adjective-noun combinations such as 'red ball' and verb-object combinations such as 'kick the ball' require different kinds of composition [ts=3316s][ts=3336s]. The tensor layer is described as learning multiple intermediate matrices that together form a tensor, enabling vector-tensor-vector interactions instead of only a linear transform over concatenated children [ts=3351s][ts=3388s]. The model is then tied to sentiment analysis through the Stanford Sentiment Treebank, where nearly 12,000 parsed sentences receive sentiment labels not just at the sentence level but on every phrase node in the tree [ts=3419s][ts=3595s]. Phrase-level supervision itself improves simpler baselines from 79% to 83%, and the RNTN further improves over bigram Naive Bayes by roughly 2.5%, showing that richer composition plus denser supervision can help [ts=3718s][ts=3785s].",
+      "key_points": [
+        {
+          "text": "RNTNs were introduced to model different kinds of composition more flexibly than a single shared matrix allows.",
+          "timestamp_s": 3302,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Adjective-noun and verb-object combinations require different semantic interactions.",
+          "timestamp_s": 3316,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The neural tensor layer replaces a purely linear child-composition step with vector-tensor-vector interactions.",
+          "timestamp_s": 3351,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The Stanford Sentiment Treebank labels every phrase node, not just whole sentences, with sentiment.",
+          "timestamp_s": 3595,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Phrase-level supervision boosts even simple baselines, and the RNTN improves further over bigram Naive Bayes.",
+          "timestamp_s": 3718,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+        "start_s": 3302,
+        "end_s": 3810
+      },
+      "difficulty": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Negation, sentiment composition, and tree models vs transformers",
+      "description": "Uses phrase-level sentiment examples to show what RNTNs capture well and why tree models lost out to transformers.",
+      "summary": "The final segment argues that the most interesting aspect of the RNTN is not just its aggregate accuracy but its ability to assign coherent sentiment judgments to intermediate phrases and compose them into a sentence-level decision [ts=3810s][ts=3833s]. On the example 'There are slow and repetitive parts, but it has just enough spice to keep it interesting,' the model marks the left phrase as negative, the right phrase as positive, and the whole review as positive after composition [ts=3836s][ts=3879s]. The instructor then focuses on negation and modification, showing that the model keeps 'incredibly dull' negative despite the positive association of 'incredible', and flips 'not dull' toward positive by modeling the composition of two negatives [ts=3976s][ts=4095s]. He argues that such behavior was not captured well by bigram Naive Bayes or earlier recursive models, and may still be imperfect in modern transformers [ts=4153s][ts=4191s]. The section closes by explaining why tree recursive models became uncompetitive: their information flow is constrained by a context-free tree backbone, whereas transformers allow every position to attend broadly; still, tree structure may better reflect certain aspects of compositional semantics such as negation and quantification [ts=4220s][ts=4272s].",
+      "key_points": [
+        {
+          "text": "RNTNs can assign sentiment to intermediate phrases and compose those judgments into a sentence-level prediction.",
+          "timestamp_s": 3813,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In the review example with 'slow and repetitive parts' versus 'enough spice to keep it interesting,' the model combines negative and positive subtrees into an overall positive judgment.",
+          "timestamp_s": 3836,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The model preserves the negativity of 'incredibly dull' despite 'incredible' often carrying positive sentiment by itself.",
+          "timestamp_s": 3976,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The hard case in sentiment analysis is negating a negative phrase, because 'not dull' should become more positive.",
+          "timestamp_s": 4153,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Transformers surpassed tree recursive models largely because they permit much broader information flow than a context-free tree backbone.",
+          "timestamp_s": 4220,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+        "start_s": 3810,
+        "end_s": 4308
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 6,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Foundational mechanics for text CNNs are derived and compared, including convolution, padding, pooling, stride, k-max, and dilation [ts=530s][ts=1026s]."
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This is the lecture's main historical case study of a successful NLP CNN architecture and includes a memorable transfer-learning pitfall [ts=1153s][ts=1367s]."
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The segment broadens architectural context and introduces deep character CNNs, but is less central than the core CNN and tree-recursive sections [ts=1822s][ts=2459s]."
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The core recursive formulation, constituent scoring, and greedy parser are introduced here and are essential to the second half of the lecture [ts=3020s][ts=3150s]."
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The RNTN tensor layer and phrase-labeled sentiment dataset are the key setup for the lecture's strongest compositional examples [ts=3351s][ts=3595s]."
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This closing segment gives the most pedagogically valuable examples: phrase-level sentiment composition, negation, and the comparison with transformers [ts=3833s][ts=4272s]."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "global_kp_id": "kp_text_cnn_framing",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "global_kp_id": "kp_1d_convolution_over_n_grams",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "global_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "global_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "global_kp_id": "kp_batch_normalization_and_pointwise_convolutions",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "global_kp_id": "kp_vd_cnn_character_level_text_classification",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg4",
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg4",
+      "global_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg4",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_text_cnn_framing",
+      "name": "Text CNN framing",
+      "description": "CNNs model language with local receptive fields over token sequences instead of sequential state updates.",
+      "track_tags": [
+        "nlp",
+        "deep_learning",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "convolutional_neural_networks",
+        "text_classification"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Text CNN framing captures the core idea that CNNs model language with local receptive fields over token sequences instead of sequential state updates.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_1d_convolution_over_n_grams",
+      "name": "1D convolution over n-grams",
+      "description": "A text convolution slides a learned filter over adjacent word-vector windows to compute local features.",
+      "track_tags": [
+        "nlp",
+        "deep_learning",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "convolution",
+        "n_grams",
+        "embeddings"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because 1D convolution over n-grams provides prerequisite machinery that later units build on directly.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "name": "Pooling strategies in text CNNs",
+      "description": "Max, average, local, and k-max pooling determine how local activations are summarized across a sentence.",
+      "track_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "pooling",
+        "feature_detection",
+        "cnn_design"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Pooling strategies in text CNNs captures the core idea that Max, average, local, and k-max pooling determine how local activations are summarized across a sentence.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_convolution_hyperparameters_and_tensor_shapes",
+      "name": "Convolution hyperparameters and tensor shapes",
+      "description": "Understanding filter count, kernel size, stride, padding, and the resulting input/output tensor shapes for convolution layers.",
+      "track_tags": [
+        "computer_vision",
+        "neural_networks",
+        "nlp",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "cnn_hyperparameters",
+        "tensor_shapes",
+        "padding",
+        "stride",
+        "dilation"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because convolution hyperparameters and tensor shapes clarifies understanding filter count, kernel size, stride, padding, and the resulting input/output tensor shapes for convolution layers, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_5_image_classification_with_cnns::kp9",
+        "local::lecture17-convnets::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "name": "Kim 2014 sentence-classification CNN",
+      "description": "A multi-filter text CNN with max pooling and softmax classification that became the canonical early NLP CNN baseline.",
+      "track_tags": [
+        "nlp",
+        "deep_learning",
+        "benchmarking"
+      ],
+      "domain_tags": [
+        "sentence_classification",
+        "sentiment_analysis",
+        "cnn_architecture"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Kim 2014 sentence-classification CNN captures the core idea that A multi-filter text CNN with max pooling and softmax classification that became the canonical early NLP CNN baseline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "name": "Frozen plus fine-tuned embedding channels",
+      "description": "Using both a static and an adaptive embedding channel mitigates harmful drift when fine-tuning on small labeled data.",
+      "track_tags": [
+        "nlp",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "embeddings",
+        "fine_tuning",
+        "generalization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Frozen plus fine-tuned embedding channels captures the core idea that Using both a static and an adaptive embedding channel mitigates harmful drift when fine-tuning on small labeled data.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_batch_normalization_and_pointwise_convolutions",
+      "name": "Batch normalization and 1x1 convolutions",
+      "description": "These CNN building blocks stabilize training and create position-wise feature transformations.",
+      "track_tags": [
+        "deep_learning",
+        "model_design"
+      ],
+      "domain_tags": [
+        "batch_norm",
+        "pointwise_convolution"
+      ],
+      "career_path_tags": [
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because Batch normalization and 1x1 convolutions captures the core idea that These CNN building blocks stabilize training and create position-wise feature transformations.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vd_cnn_character_level_text_classification",
+      "name": "VD-CNN character-level text classification",
+      "description": "A very deep residual CNN starting from characters can perform competitive text classification without pretrained word vectors.",
+      "track_tags": [
+        "nlp",
+        "deep_learning",
+        "architectures"
+      ],
+      "domain_tags": [
+        "character_models",
+        "deep_cnn",
+        "residual_connections"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because VD-CNN character-level text classification captures the core idea that A very deep residual CNN starting from characters can perform competitive text classification without pretrained word vectors.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "name": "Tree models versus transformers",
+      "description": "Tree recursive models may match linguistic structure better in some cases, but transformers win on flexible information flow and overall power.",
+      "track_tags": [
+        "nlp",
+        "architectures",
+        "model_comparison"
+      ],
+      "domain_tags": [
+        "transformers",
+        "tree_models",
+        "information_flow"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because Tree models versus transformers captures the core idea that Tree recursive models may match linguistic structure better in some cases, but transformers win on flexible information flow and overall power.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_compositional_tree_semantics",
+      "name": "Compositional tree semantics",
+      "description": "Phrase meanings can be built compositionally over parse trees rather than only over flat token sequences.",
+      "track_tags": [
+        "nlp",
+        "syntax",
+        "semantics"
+      ],
+      "domain_tags": [
+        "compositionality",
+        "parse_trees",
+        "recursive_models"
+      ],
+      "career_path_tags": [
+        "research",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Compositional tree semantics provides prerequisite machinery that later units build on directly.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_greedy_recursive_constituency_parsing",
+      "name": "Greedy tree recursive parser",
+      "description": "A recursive network can score and merge adjacent constituents greedily to build a binary parse and sentence representation.",
+      "track_tags": [
+        "nlp",
+        "parsing",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "greedy_parsing",
+        "constituency",
+        "recursive_nn"
+      ],
+      "career_path_tags": [
+        "research",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Greedy tree recursive parser captures the core idea that A recursive network can score and merge adjacent constituents greedily to build a binary parse and sentence representation.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "name": "Recursive neural tensor network",
+      "description": "An RNTN uses tensor-mediated interactions to model richer phrase composition than a standard recursive neural network.",
+      "track_tags": [
+        "nlp",
+        "semantics",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "rntn",
+        "tensor_layer",
+        "recursive_models"
+      ],
+      "career_path_tags": [
+        "research",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Recursive neural tensor network synthesizes earlier ideas into a higher-level mechanism or takeaway.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "name": "Phrase-level sentiment supervision",
+      "description": "Labeling every phrase node in a parse tree creates richer supervision than sentence-level labels alone.",
+      "track_tags": [
+        "nlp",
+        "datasets",
+        "supervision"
+      ],
+      "domain_tags": [
+        "stanford_sentiment_treebank",
+        "phrase_labels",
+        "sentiment_analysis"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Phrase-level sentiment supervision captures the core idea that Labeling every phrase node in a parse tree creates richer supervision than sentence-level labels alone.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "name": "Negation and compositional sentiment",
+      "description": "Modeling how modifiers and negation change sentiment requires structure-sensitive composition, not just keyword counts.",
+      "track_tags": [
+        "nlp",
+        "semantics",
+        "sentiment_analysis"
+      ],
+      "domain_tags": [
+        "negation",
+        "composition",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Negation and compositional sentiment synthesizes earlier ideas into a higher-level mechanism or takeaway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp13"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture17-convnets_transcript.txt"
+  }
+}

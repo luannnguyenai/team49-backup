@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from src.scripts import sanitize_p1_artifacts as sanitize_cli
+from src.scripts.pipeline import sanitize_p1_artifacts as sanitize_cli
 from src.services.p1_artifact_sanitizer import sanitize_p1_artifacts
 
 
@@ -95,4 +95,3 @@ def test_sanitize_p1_cli_fails_when_invalid_files_remain(tmp_path: Path) -> None
 
     assert result.exit_code == 1
     assert "invalid_files" in result.output
-

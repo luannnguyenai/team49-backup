@@ -109,7 +109,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture03-backprop::kp12",
+        "local::lecture05-backprop::kp12",
         "local::lecture_3::kp8"
       ]
     },
@@ -152,9 +152,9 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp1",
-        "local::lecture02::kp2",
-        "local::lecture03-backprop::kp3",
+        "local::lecture04-wordvecs-lm::kp1",
+        "local::lecture04-wordvecs-lm::kp2",
+        "local::lecture05-backprop::kp3",
         "local::lecture_3::kp9"
       ]
     }

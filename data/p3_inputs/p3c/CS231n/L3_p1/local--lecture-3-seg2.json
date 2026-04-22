@@ -156,7 +156,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture05-rnns::kp2",
+        "local::lecture07-rnns::kp2",
         "local::lecture_3::kp4",
         "local::lecture_4_neural_networks_and_backpropagation::kp6"
       ]

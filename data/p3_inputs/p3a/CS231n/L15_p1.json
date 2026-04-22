@@ -95,7 +95,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 5,
         "end_s": 671
       },
@@ -150,7 +150,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 672,
         "end_s": 1247
       },
@@ -190,7 +190,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 1248,
         "end_s": 1669
       },
@@ -235,7 +235,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 1670,
         "end_s": 2309
       },
@@ -280,7 +280,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 2310,
         "end_s": 2736
       },
@@ -335,7 +335,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 2737,
         "end_s": 3459
       },
@@ -385,7 +385,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 3460,
         "end_s": 4030
       },
@@ -430,7 +430,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+        "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
         "start_s": 4031,
         "end_s": 4303
       },

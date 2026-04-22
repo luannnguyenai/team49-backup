@@ -79,7 +79,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 5,
         "end_s": 180
       },
@@ -119,7 +119,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 180,
         "end_s": 440
       },
@@ -169,7 +169,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 440,
         "end_s": 1020
       },
@@ -219,7 +219,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 1020,
         "end_s": 1450
       },
@@ -269,7 +269,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 1450,
         "end_s": 2610
       },
@@ -324,7 +324,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 2610,
         "end_s": 3450
       },
@@ -374,7 +374,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+        "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
         "start_s": 3450,
         "end_s": 3765
       },
@@ -848,7 +848,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture05-rnns::kp1",
+        "local::lecture07-rnns::kp1",
         "local::lecture_18_human_centered_ai::kp4",
         "local::lecture_1_introduction::kp7"
       ]

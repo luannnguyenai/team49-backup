@@ -106,7 +106,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 5,
         "end_s": 552
       },
@@ -156,7 +156,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 553,
         "end_s": 947
       },
@@ -216,7 +216,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 948,
         "end_s": 1854
       },
@@ -266,7 +266,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 1855,
         "end_s": 2174
       },
@@ -326,7 +326,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 2175,
         "end_s": 2729
       },
@@ -386,7 +386,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 2730,
         "end_s": 3154
       },
@@ -446,7 +446,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 3155,
         "end_s": 3529
       },
@@ -506,7 +506,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 3530,
         "end_s": 3839
       },
@@ -566,7 +566,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+        "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
         "start_s": 3840,
         "end_s": 4319
       },

@@ -137,7 +137,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp14",
+        "local::lecture04-wordvecs-lm::kp14",
         "local::lecture_12::kp3",
         "local::lecture_16::kp6"
       ]

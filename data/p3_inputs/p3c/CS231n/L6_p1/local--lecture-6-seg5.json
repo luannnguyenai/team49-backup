@@ -75,16 +75,21 @@
         "architecture_design",
         "deep_learning",
         "optimization",
-        "transformers"
+        "transformers",
+        "architectures"
       ],
       "domain_tags": [
         "optimization",
         "residual_connections",
-        "resnet"
+        "resnet",
+        "deep_learning",
+        "vision",
+        "nlp"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "research_scientist"
+        "research_scientist",
+        "research"
       ],
       "difficulty_level": 0.64,
       "difficulty_source": "llm_single_pass",
@@ -100,8 +105,9 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp9",
-        "local::lecture_6::kp6"
+        "local::lecture10-transformers::kp9",
+        "local::lecture_6::kp6",
+        "local::lecture08-seq2seq::kp9"
       ]
     },
     {

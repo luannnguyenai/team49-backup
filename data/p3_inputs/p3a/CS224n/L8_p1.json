@@ -1,94 +1,89 @@
 {
   "lecture_context": {
     "course_id": "CS224n",
-    "lecture_id": "cs224n_lecture08_self_attention_transformers",
-    "lecture_title": "Self-Attention and Transformers",
-    "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA"
+    "lecture_id": "lecture08-seq2seq",
+    "lecture_title": "Lecture 8 - Sequence to Sequence Models",
+    "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw"
   },
   "table_of_contents": [
     {
       "section_index": 1,
-      "title": "Why RNNs fall short and why attention helps",
-      "start_s": 152,
-      "end_s": 711
+      "title": "Perplexity for evaluating language models",
+      "start_s": 5,
+      "end_s": 552
     },
     {
       "section_index": 2,
-      "title": "Self-attention as a fuzzy key-value lookup",
-      "start_s": 715,
-      "end_s": 1257
+      "title": "Why simple RNNs fail: vanishing and exploding gradients",
+      "start_s": 552,
+      "end_s": 1385
     },
     {
       "section_index": 3,
-      "title": "Adding order and nonlinearity to self-attention",
-      "start_s": 1261,
-      "end_s": 1970
+      "title": "LSTM history, memory state, and gates",
+      "start_s": 1385,
+      "end_s": 2331
     },
     {
       "section_index": 4,
-      "title": "Causal masking and the minimal self-attention block",
-      "start_s": 1979,
-      "end_s": 2475
+      "title": "Why LSTMs help gradient flow",
+      "start_s": 2331,
+      "end_s": 2898
     },
     {
       "section_index": 5,
-      "title": "Transformer decoder: multi-head attention and scaling",
-      "start_s": 2476,
-      "end_s": 3484
+      "title": "Using RNNs and LSTMs for NLP tasks",
+      "start_s": 2898,
+      "end_s": 3315
     },
     {
       "section_index": 6,
-      "title": "Residuals, layer norm, and encoder/decoder transformer variants",
-      "start_s": 3485,
-      "end_s": 4361
+      "title": "From early machine translation to statistical MT",
+      "start_s": 3315,
+      "end_s": 3921
     },
     {
       "section_index": 7,
-      "title": "Why transformers won and their remaining limitations",
-      "start_s": 4364,
-      "end_s": 4609
+      "title": "Neural machine translation as sequence-to-sequence learning",
+      "start_s": 3921,
+      "end_s": 4621
     }
   ],
   "units": [
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg1",
-      "course_id": "cs224n",
-      "name": "Why recurrence is replaced by attention",
-      "description": "Motivates the shift from LSTMs/RNNs to attention by isolating two core failures of recurrence: long interaction paths and poor parallelism.",
-      "summary": "The lecture first recaps the pre-transformer recipe—bidirectional LSTMs for encoding, unidirectional LSTMs for decoding, plus attention for flexible memory access in tasks like translation [ts=172s] [ts=206s]. It then explains why recurrence is limiting: long-distance dependencies such as relating \"chef\" to \"was\" require many recurrent steps and difficult gradient propagation, even with LSTMs [ts=278s] [ts=360s]. A second problem is that RNN states must be computed sequentially, so the model incurs O(sequence length) many unparallelizable operations, whereas attention can represent each token by looking across the whole sequence in one parallel step [ts=452s] [ts=599s] [ts=698s].",
+      "unit_id": "local::lecture08-seq2seq::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Perplexity for evaluating language models",
+      "description": "Defines perplexity, connects it to cross-entropy, and uses historical perplexity numbers to show why neural language models mattered.",
+      "summary": "The lecture finishes the language-model evaluation story by defining perplexity as the standard metric for scoring how well a model predicts held-out human text [ts=199s]. It explicitly links perplexity to the exponential of cross-entropy / per-word negative log-likelihood, while warning that comparisons depend on the log base being used [ts=247s] [ts=275s]. The segment also gives the historical arc from smoothed n-gram models to RNN/LSTM language models: interpolated Kneser-Ney n-grams are described around perplexity 67, early improved neural models around the 40s to 30s, and modern systems in the single digits, emphasizing that lower perplexity means better next-word prediction [ts=441s] [ts=537s].",
       "key_points": [
         {
-          "text": "A standard NLP baseline before transformers used a bidirectional LSTM encoder and a unidirectional LSTM decoder, often with attention.",
-          "timestamp_s": 175,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "RNNs suffer from linear interaction distance: words that are far apart need many recurrent steps to influence each other.",
-          "timestamp_s": 278,
+          "text": "Perplexity is the standard held-out evaluation measure for language models.",
+          "timestamp_s": 199,
           "evidence_type": "definition"
         },
         {
-          "text": "The long-distance dependency in \"the chef ... was\" is hard to learn because gradients must propagate across many intervening words.",
-          "timestamp_s": 406,
-          "evidence_type": "example"
+          "text": "Perplexity is the exponential of cross-entropy / per-word negative log-likelihood.",
+          "timestamp_s": 247,
+          "evidence_type": "formula"
         },
         {
-          "text": "RNN forward/backward passes require O(sequence length) many unparallelizable operations because later states depend on earlier ones.",
-          "timestamp_s": 454,
-          "evidence_type": "claim"
+          "text": "Perplexity values depend on the logarithm base, so numbers are not comparable unless the base matches.",
+          "timestamp_s": 275,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Attention can connect distant words directly and compute token representations in parallel across the whole sequence.",
-          "timestamp_s": 638,
+          "text": "Interpolated Kneser-Ney n-gram models were around perplexity 67, while LSTM language models pushed much lower and modern models reach single digits.",
+          "timestamp_s": 441,
           "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 152,
-        "end_s": 711
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 5,
+        "end_s": 552
       },
-      "difficulty": 0.42,
+      "difficulty": 0.34,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "duration_min": 9,
@@ -96,476 +91,559 @@
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg2",
-      "course_id": "cs224n",
-      "name": "Self-attention as fuzzy key-value lookup",
-      "description": "Introduces self-attention conceptually and mathematically as a soft lookup over keys and values generated from each token.",
-      "summary": "Attention is framed as a fuzzy lookup in a key-value store: instead of exactly matching one key, a query softly matches all keys, producing a weighted combination of values [ts=722s] [ts=768s]. The lecture then instantiates this for self-attention over a sentence, where every token embedding is transformed into a query, key, and value using learned matrices Q, K, and V [ts=912s] [ts=947s]. The attention score e_ij is the dot product between token i's query and token j's key, the weights are normalized with a softmax, and each output vector is the weighted sum of value vectors over the sequence [ts=986s] [ts=1010s] [ts=1033s].",
+      "unit_id": "local::lecture08-seq2seq::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Why simple RNNs fail: vanishing and exploding gradients",
+      "description": "Motivates LSTMs by analyzing backpropagation through time, long-distance dependencies, and gradient clipping.",
+      "summary": "The lecture motivates LSTMs by analyzing backpropagation through time in a simple RNN: gradients are multiplied step after step, and under the simplifying assumption of no nonlinearity the recurrence effectively raises the recurrent matrix to higher powers [ts=748s] [ts=794s]. Depending on the eigenvalues, this causes gradients to vanish or explode, which explains why simple RNNs either lose distant learning signal or make unstable updates [ts=801s] [ts=823s]. The segment stresses that vanishing gradients hurt language modeling because long-distance dependencies matter, illustrated with the printer/toner/tickets example where the correct next word depends on context about twenty words back [ts=913s] [ts=959s]. It then notes that plain RNNs effectively condition only about seven tokens back in practice, while exploding gradients are mitigated with gradient clipping by rescaling overly large gradient norms [ts=1028s] [ts=1168s].",
       "key_points": [
         {
-          "text": "Attention can be viewed as a fuzzy lookup in a key-value store rather than an exact dictionary lookup.",
-          "timestamp_s": 722,
-          "evidence_type": "definition"
+          "text": "In a simplified linear analysis, backpropagation through time repeatedly multiplies by the recurrent matrix, so powers of that matrix control gradient behavior.",
+          "timestamp_s": 748,
+          "evidence_type": "claim"
         },
         {
-          "text": "Each token embedding x_i is transformed into a query q_i, key k_i, and value v_i by learned matrices Q, K, and V.",
-          "timestamp_s": 912,
-          "evidence_type": "definition"
+          "text": "If recurrent-matrix eigenvalues are below 1 gradients vanish; if they are above 1 gradients explode.",
+          "timestamp_s": 801,
+          "evidence_type": "claim"
         },
         {
-          "text": "The compatibility score e_ij is computed as the dot product q_i^T k_j.",
-          "timestamp_s": 986,
-          "evidence_type": "formula"
+          "text": "Long-distance dependencies matter for prediction, as in the example where 'tickets' is recoverable only from earlier context about printing and toner.",
+          "timestamp_s": 913,
+          "evidence_type": "example"
         },
         {
-          "text": "The attention weight alpha_ij is the softmax-normalized version of e_ij over all positions j.",
-          "timestamp_s": 1012,
-          "evidence_type": "formula"
+          "text": "Simple RNNs were found to condition effectively only about seven tokens back.",
+          "timestamp_s": 1028,
+          "evidence_type": "claim"
         },
         {
-          "text": "The output o_i for token i is a weighted sum of all value vectors v_j using weights alpha_ij.",
-          "timestamp_s": 1033,
-          "evidence_type": "formula"
+          "text": "Exploding gradients can cause huge updates, infinities, and NaNs.",
+          "timestamp_s": 1131,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Whether a token attends strongly to itself is learned through Q and K rather than hard-coded.",
-          "timestamp_s": 1192,
+          "text": "Gradient clipping rescales the gradient when its norm is too large and is often essential in practice.",
+          "timestamp_s": 1168,
           "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 715,
-        "end_s": 1257
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 552,
+        "end_s": 1385
       },
-      "difficulty": 0.63,
+      "difficulty": 0.72,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 9,
+      "difficulty_confidence": "medium",
+      "duration_min": 14,
       "ordering_index": 2,
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg3",
-      "course_id": "cs224n",
-      "name": "Adding positional information and nonlinearity",
-      "description": "Shows why raw self-attention is insufficient and adds positional encodings plus a position-wise feed-forward network.",
-      "summary": "A central defect of plain self-attention is that it is permutation-invariant over the input set: the lecture uses \"Zuko made his uncle\" versus \"his uncle made Zuko\" to show that the same token multiset would otherwise get the same representations [ts=1306s] [ts=1352s]. To restore order, positional vectors p_i are added to token embeddings, with two options discussed: sinusoidal position encodings and learned position embeddings; learned embeddings are simpler and common in practice, but hard-limit the maximum sequence length and can fail on longer inputs [ts=1378s] [ts=1531s] [ts=1601s]. A second issue is that stacked self-attention layers without extra processing mostly keep re-averaging value vectors, so transformers add a position-wise feed-forward MLP after attention to inject nonlinearity and more expressive computation per token [ts=1830s] [ts=1867s] [ts=1945s].",
+      "unit_id": "local::lecture08-seq2seq::seg3",
+      "course_id": "cs224n-2024",
+      "name": "LSTM history, memory state, and gates",
+      "description": "Introduces LSTMs as a memory-preserving RNN with a cell state, a hidden state, and gating vectors.",
+      "summary": "This segment introduces Long Short-Term Memory networks as the response to the short-memory problem of simple RNNs, including the historical note that the core idea dates to Hochreiter and Schmidhuber (1997) and that the forget gate was added in later work that shaped the modern form [ts=1421s] [ts=1557s]. The architecture adds a cell state alongside the hidden state, then computes three sigmoid gate vectors—forget, input, and output—from the previous hidden state and the current input [ts=1739s] [ts=1774s]. The lecture walks through the update logic: a candidate cell update is computed, the old cell content is retained according to the forget gate, new content is written according to the input gate, and the hidden state is formed by applying an output gate to tanh of the new cell state [ts=1917s] [ts=1946s]. It also clarifies the interpretation of the cell as the primary memory and the hidden state as the part exposed for immediate generation/prediction [ts=2052s] [ts=2077s].",
       "key_points": [
         {
-          "text": "Plain self-attention has no notion of sequence order and acts on a set of token vectors.",
-          "timestamp_s": 1291,
+          "text": "LSTM stands for Long Short-Term Memory and was introduced to extend the short memory of simple RNNs.",
+          "timestamp_s": 1421,
           "evidence_type": "definition"
         },
         {
-          "text": "\"Zuko made his uncle\" and \"his uncle made Zuko\" illustrate that token order must be encoded explicitly.",
-          "timestamp_s": 1310,
-          "evidence_type": "example"
-        },
-        {
-          "text": "A positional vector p_i can be added to the word embedding x_i so the model knows both token identity and index.",
-          "timestamp_s": 1439,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Sinusoidal position encodings vary by dimension and period, but the instructor notes they do not reliably solve extrapolation in practice.",
-          "timestamp_s": 1504,
+          "text": "Modern LSTMs include a forget gate that was not present in the original 1997 version.",
+          "timestamp_s": 1557,
           "evidence_type": "claim"
         },
         {
-          "text": "Learned position embeddings are common but impose a maximum supported sequence length n.",
-          "timestamp_s": 1554,
-          "evidence_type": "diagnostic_tip"
+          "text": "An LSTM maintains both a hidden state and a cell state.",
+          "timestamp_s": 1739,
+          "evidence_type": "definition"
         },
         {
-          "text": "A position-wise feed-forward MLP after self-attention adds the nonlinear processing missing from repeated weighted averaging.",
-          "timestamp_s": 1867,
+          "text": "The forget, input, and output gates are sigmoid vectors between 0 and 1 that control information flow.",
+          "timestamp_s": 1774,
           "evidence_type": "definition"
+        },
+        {
+          "text": "The cell update combines remembered old cell content and gated candidate new content via elementwise products and addition.",
+          "timestamp_s": 1917,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The hidden state is produced by gating tanh of the cell state, exposing only some memory for current prediction.",
+          "timestamp_s": 1946,
+          "evidence_type": "formula"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 1261,
-        "end_s": 1970
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 1385,
+        "end_s": 2331
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 16,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Why LSTMs help gradient flow",
+      "description": "Explains the key additive design insight in LSTMs and relates it to residual-style connections in deeper networks.",
+      "summary": "After noting that LSTMs look architecturally complicated, the lecture isolates the main reason they work: the cell update contains an additive path rather than only repeated multiplicative transformations [ts=2502s] [ts=2549s]. That additive memory lets the model preserve information more directly, fixes gradient-flow problems, and becomes especially clear in the extreme case where the forget gate is 1 and the input gate is 0, so cell information is copied forward unchanged [ts=2582s] [ts=2602s]. The lecture also explains why the later forget gate mattered: pure accumulation without forgetting becomes dysfunctional over long sequences [ts=2552s] [ts=2572s]. It then generalizes the same design intuition to deep feed-forward networks, connecting LSTM-style direct paths to residual networks, DenseNet skip connections, and HighwayNet gating as methods for easier information and gradient transport [ts=2811s] [ts=2884s].",
+      "key_points": [
+        {
+          "text": "The crucial LSTM design feature is the additive update path in the cell state.",
+          "timestamp_s": 2502,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The forget gate was added because purely additive memory without forgetting becomes dysfunctional on long sequences.",
+          "timestamp_s": 2552,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "If the forget gate is 1 and the input gate is 0, the cell can pass information forward unchanged.",
+          "timestamp_s": 2602,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The same direct-path idea motivates residual networks, DenseNet-style skip connections, and gated HighwayNets.",
+          "timestamp_s": 2811,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 2331,
+        "end_s": 2898
+      },
+      "difficulty": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Using RNNs and LSTMs for NLP tasks",
+      "description": "Covers common RNN/LSTM use cases, conditional language models, bidirectional encoders, and stacked recurrent layers.",
+      "summary": "The lecture broadens from language modeling to general sequence tasks, showing that LSTMs can tag parts of speech or named entities, encode full sentences for sentiment classification, and support generation tasks like speech recognition, summarization, and translation as conditional language models [ts=2923s] [ts=3046s]. For sentence classification, it contrasts using the final hidden state with pooling over all hidden states by mean or elementwise max [ts=2979s] [ts=3004s]. It then introduces bidirectional LSTMs, where forward and backward recurrent states are concatenated so each token representation includes both left and right context, while noting such models are for analysis/encoding rather than generation [ts=3115s] [ts=3163s]. Finally, it presents stacked RNNs as a way to add vertical depth, observing that two or three LSTM layers were commonly useful in practice [ts=3214s] [ts=3251s].",
+      "key_points": [
+        {
+          "text": "LSTMs can be used for sequence labeling tasks such as part-of-speech tagging and named entity recognition.",
+          "timestamp_s": 2923,
+          "evidence_type": "example"
+        },
+        {
+          "text": "For sentiment classification, a sentence can be encoded by the final hidden state or by pooling over all hidden states.",
+          "timestamp_s": 2979,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Conditional language models generate text conditioned on another input source, such as speech or a source sentence.",
+          "timestamp_s": 3046,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A bidirectional LSTM concatenates forward and backward states so each token representation sees both left and right context.",
+          "timestamp_s": 3115,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Stacked RNNs add multiple recurrent layers, with two or three layers often giving practical gains.",
+          "timestamp_s": 3214,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 2898,
+        "end_s": 3315
+      },
+      "difficulty": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 7,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg6",
+      "course_id": "cs224n-2024",
+      "name": "From early machine translation to statistical MT",
+      "description": "Reviews the history of machine translation and explains the statistical phrase-based decomposition that preceded neural MT.",
+      "summary": "The machine-translation section starts with historical context: MT was one of the earliest NLP goals in the 1950s, inspired partly by code-breaking and Cold War interest, but it failed because linguistic theory and computing power were both immature [ts=3351s] [ts=3483s]. The lecture then describes the 1990s–2000s shift to statistical machine translation built from large parallel corpora such as EU and UN text [ts=3525s] [ts=3586s]. The core decomposition models translation with Bayes’ rule, treating target-language fluency as a language-model problem while using a simpler translation model for word/phrase correspondences [ts=3607s] [ts=3665s]. A Chinese example from a translated Jared Diamond sentence is used to show how phrase-based systems often fail on long-range modification and reordering, producing fluent fragments but incorrect attachment structure [ts=3736s] [ts=3849s].",
+      "key_points": [
+        {
+          "text": "Early machine translation in the 1950s was heavily funded but failed because linguistic knowledge and compute were inadequate.",
+          "timestamp_s": 3351,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Statistical machine translation used large parallel corpora collected from multilingual sources such as the EU and UN.",
+          "timestamp_s": 3525,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Phrase-based MT decomposed translation with Bayes' rule into a translation model and a target-language model.",
+          "timestamp_s": 3607,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The translation model handled likely word/phrase correspondences, while the language model handled target-language fluency.",
+          "timestamp_s": 3652,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Phrase-based MT often failed to preserve modification relationships and word-order structure, as shown by the Chinese example.",
+          "timestamp_s": 3785,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 3315,
+        "end_s": 3921
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 10,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg7",
+      "course_id": "cs224n-2024",
+      "name": "Neural machine translation as sequence-to-sequence learning",
+      "description": "Introduces end-to-end encoder-decoder NMT with LSTMs and explains why it replaced statistical MT.",
+      "summary": "The lecture presents neural machine translation as a single end-to-end neural system trained directly for the final task, rather than a hand-factored pipeline [ts=3936s] [ts=3981s]. The model is an LSTM sequence-to-sequence encoder-decoder: the encoder reads the source sentence into a representation, and the decoder uses that representation as initial context to generate the target sentence word by word [ts=3966s] [ts=4013s]. Training uses paired source-target sentences, computes prediction losses at each decoder position, averages them, and backpropagates through both decoder and encoder so the whole model is optimized jointly [ts=4120s] [ts=4140s]. The lecture closes by noting that multilayer stacked LSTMs helped these systems, and that neural MT improved quality so dramatically that Google and other companies replaced phrase-based systems within a few years [ts=4394s] [ts=4495s].",
+      "key_points": [
+        {
+          "text": "Neural machine translation was built as a single end-to-end neural network.",
+          "timestamp_s": 3936,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A sequence-to-sequence model uses one LSTM to encode the source sentence and another LSTM to decode the target sentence.",
+          "timestamp_s": 3966,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The decoder is conditioned on the encoder's final hidden-state representation and then generates the translation autoregressively.",
+          "timestamp_s": 4013,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Training computes losses across target positions and backpropagates through both decoder and encoder networks.",
+          "timestamp_s": 4120,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Neural machine translation rapidly displaced statistical MT because quality gains were obvious and large.",
+          "timestamp_s": 4495,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+        "start_s": 3921,
+        "end_s": 4621
       },
       "difficulty": 0.61,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
       "duration_min": 12,
-      "ordering_index": 3,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg4",
-      "course_id": "cs224n",
-      "name": "Causal masking and the minimal self-attention architecture",
-      "description": "Explains how to prevent information leakage from future tokens and assembles the minimal usable self-attention block.",
-      "summary": "For language modeling and decoder-side sequence generation, self-attention cannot look ahead to future tokens, so the lecture introduces causal masking by setting scores for future positions to negative infinity before softmax, which forces their attention weights to zero [ts=1999s] [ts=2023s]. The instructor illustrates this with a lower-triangular attention pattern where the representation of \"chef\" can see only start/the/chef and not future words like \"who,\" preventing training-time cheating when predicting the next token [ts=2078s] [ts=2100s]. With masking added to positional embeddings, self-attention, and a feed-forward network, the lecture defines a minimal self-attention architecture that can replace recurrence and be stacked into larger models [ts=2359s] [ts=2408s] [ts=2435s].",
-      "key_points": [
-        {
-          "text": "In autoregressive settings, future tokens must be masked so a token cannot use information from words that come later.",
-          "timestamp_s": 1999,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Causal masking is implemented by replacing future attention scores with negative infinity before the softmax.",
-          "timestamp_s": 2023,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "After softmax, masked future positions receive weight zero in the weighted sum.",
-          "timestamp_s": 2048,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "The lower-triangular visibility pattern lets \"chef\" attend only to earlier or current tokens, not to \"who.\"",
-          "timestamp_s": 2098,
-          "evidence_type": "example"
-        },
-        {
-          "text": "A minimal usable block consists of position embeddings, self-attention, masking when needed, and a feed-forward network.",
-          "timestamp_s": 2380,
-          "evidence_type": "definition"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 1979,
-        "end_s": 2475
-      },
-      "difficulty": 0.58,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 8,
-      "ordering_index": 4,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg5",
-      "course_id": "cs224n",
-      "name": "Multi-head attention and scaled dot-product attention",
-      "description": "Presents the main transformer innovation over the minimal block: multiple attention heads, efficient matrix implementation, and scaling of attention scores.",
-      "summary": "The transformer decoder upgrades single-head attention to masked multi-head self-attention so the model can look at different parts of the sequence for different reasons rather than forcing one average pattern of relevance [ts=2544s] [ts=2584s] [ts=2630s]. The lecture rewrites attention in sequence-stacked matrix form—computing XQ, XK, and XV for the whole sequence, forming all pairwise scores with one matrix multiplication, softmax-normalizing them, and multiplying by XV to get all outputs efficiently on GPUs [ts=2716s] [ts=2799s] [ts=2851s]. Multi-head attention then projects into h lower-dimensional subspaces, runs attention independently per head, concatenates the head outputs, and mixes them with a final linear map; this is described as empirically much better than one head [ts=2906s] [ts=2964s] [ts=3255s]. The section closes by motivating scaled dot-product attention: when dimensionality grows, raw dot products get too large and make softmax gradients small, so scores are divided by a dimension-based constant [ts=3399s] [ts=3427s] [ts=3472s].",
-      "key_points": [
-        {
-          "text": "Multi-head attention lets the model attend to different tokens for different reasons instead of collapsing everything into one pattern.",
-          "timestamp_s": 2544,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "In matrix form, self-attention computes all pairwise scores with XQ times (XK)^T, then applies softmax and multiplies by XV.",
-          "timestamp_s": 2795,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Each head uses its own Q, K, and V matrices and projects from model dimension d to a lower dimension d/h.",
-          "timestamp_s": 2906,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Head outputs are concatenated and then mixed by a final linear transformation.",
-          "timestamp_s": 2959,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Heads are expected to specialize, but this is not guaranteed and some redundancy remains.",
-          "timestamp_s": 2684,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Scaled dot-product attention divides scores by a dimension-based constant so large dot products do not saturate the softmax early in training.",
-          "timestamp_s": 3446,
-          "evidence_type": "diagnostic_tip"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 2476,
-        "end_s": 3484
-      },
-      "difficulty": 0.77,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 17,
-      "ordering_index": 5,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg6",
-      "course_id": "cs224n",
-      "name": "Residuals, layer norm, and transformer architectures",
-      "description": "Adds the optimization machinery that makes transformers train well, then distinguishes decoder-only, encoder-only, and encoder-decoder variants.",
-      "summary": "Two optimization components are added after attention and after the feed-forward layer: residual connections and layer normalization [ts=3498s] [ts=3505s]. Residual connections add a layer's input back to its output so gradients have a direct identity path and the network starts closer to an identity mapping [ts=3541s] [ts=3581s] [ts=3600s]. Layer normalization then normalizes each token vector independently across its hidden dimensions to reduce uninformative variation between layers, rather than sharing statistics across tokens or across the batch [ts=3662s] [ts=3720s] [ts=3924s]. The lecture then assembles the full decoder block (masked multi-head attention, add-and-norm, feed-forward, add-and-norm), explains padding/masking for variable lengths, shows that the encoder is the same architecture without causal masking, and finally introduces encoder-decoder transformers with cross-attention where decoder states provide queries and encoder outputs provide keys and values [ts=4004s] [ts=4176s] [ts=4233s] [ts=4313s].",
-      "key_points": [
-        {
-          "text": "Residual connections add a layer's input to its output so the layer learns a residual and gradients have a direct path.",
-          "timestamp_s": 3541,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Layer normalization standardizes each token vector using its own mean and standard deviation across hidden dimensions.",
-          "timestamp_s": 3720,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Layer norm in transformers does not share normalization statistics across sequence positions or across the batch.",
-          "timestamp_s": 3924,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "A transformer decoder block contains masked multi-head attention, add-and-norm, feed-forward, and add-and-norm.",
-          "timestamp_s": 4010,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Variable-length inputs are commonly padded, and pad tokens are masked out just like future tokens.",
-          "timestamp_s": 4097,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "In cross-attention, decoder states define queries while encoder outputs define keys and values.",
-          "timestamp_s": 4233,
-          "evidence_type": "definition"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 3485,
-        "end_s": 4361
-      },
-      "difficulty": 0.72,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 15,
-      "ordering_index": 6,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg7",
-      "course_id": "cs224n",
-      "name": "Transformer results, strengths, and open limitations",
-      "description": "Summarizes why transformers displaced LSTMs and highlights their major remaining bottlenecks and research directions.",
-      "summary": "The lecture closes by arguing that transformers first succeeded because parallelization let them train more efficiently and scale to much more data, giving strong machine translation results and then taking over document generation and pretraining-based NLP more broadly [ts=4372s] [ts=4404s] [ts=4424s]. The main drawback emphasized is quadratic cost in sequence length, since each block computes all-pairs token interactions through an n by n score matrix, making very long contexts expensive in memory and compute [ts=4465s] [ts=4510s] [ts=4540s]. The instructor also notes continuing work on better position representations and efficient variants, while remarking that the original transformer plus a few modifications has shown striking staying power [ts=4495s] [ts=4574s] [ts=4581s].",
-      "key_points": [
-        {
-          "text": "Transformers improved machine translation and later broader NLP largely because they train efficiently through parallelization.",
-          "timestamp_s": 4376,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Pretraining at scale became practical because transformers can use lots of data and compute effectively.",
-          "timestamp_s": 4424,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "The major downside is quadratic compute and memory growth with sequence length due to all-pairs interactions.",
-          "timestamp_s": 4465,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "The n by n attention-score matrix is the core source of long-context cost.",
-          "timestamp_s": 4510,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Despite many variants, the original transformer architecture remains very competitive with only modest modifications.",
-          "timestamp_s": 4581,
-          "evidence_type": "claim"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
-        "start_s": 4364,
-        "end_s": 4609
-      },
-      "difficulty": 0.46,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 4,
       "ordering_index": 7,
       "is_template": false
     }
   ],
   "section_flags": [
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg1",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "This unit sets up the lecture's main motivation by contrasting RNN limitations with attention's parallel all-pairs interaction [ts=278s] [ts=638s]."
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg2",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "The section defines the core Q/K/V self-attention computation and includes the main score, softmax, and weighted-sum equations [ts=912s] [ts=1033s]."
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg3",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "It introduces positional encoding and feed-forward layers, both essential fixes to raw self-attention, with explicit vector notation and architectural reasoning [ts=1439s] [ts=1867s]."
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg4",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "Masking is a core decoder mechanism and is explained both mathematically and with a concrete triangular visibility example [ts=2023s] [ts=2098s]."
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg5",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "This section contains the lecture's densest derivations: matrix-form attention, multi-head splitting/concatenation, and scaled dot-product attention [ts=2716s] [ts=3472s]."
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg6",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": true,
-      "demo_heavy": false,
-      "rationale": "Residuals, layer norm, and encoder/decoder variants are all central transformer components and are explained with formulas plus block diagrams [ts=3541s] [ts=4313s]."
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg7",
+      "unit_id": "local::lecture08-seq2seq::seg1",
       "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Contains the main evaluation metric and numeric comparisons that ground later discussion of neural language models [ts=199s] [ts=441s]."
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg2",
+      "importance_flag": "high",
       "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Core conceptual bottleneck for RNN learning, with optimization diagnostics and a canonical long-distance dependency example [ts=748s] [ts=1168s]."
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Introduces the main LSTM architecture, definitions, and update equations [ts=1739s] [ts=1946s]."
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Explains the mechanistic reason LSTMs work and links it to later skip-connection ideas [ts=2502s] [ts=2811s]."
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg5",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
       "item_generation_worthiness": "medium",
       "formula_heavy": false,
       "demo_heavy": false,
-      "rationale": "The closing section is conceptual rather than derivational, summarizing why transformers scale well and why quadratic long-context cost remains a concern [ts=4372s] [ts=4510s]."
+      "rationale": "Mostly application framing and architectural variants rather than one new derivation-heavy mechanism [ts=2923s] [ts=3214s]."
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg6",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Useful historical and comparative background for why seq2seq NMT mattered, including the Bayes decomposition of SMT [ts=3607s] [ts=3849s]."
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Presents the encoder-decoder seq2seq formulation and end-to-end training recipe that became the breakthrough neural MT approach [ts=3936s] [ts=4140s]."
     }
   ],
   "unit_kp_map": [
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg1",
-      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "unit_id": "local::lecture08-seq2seq::seg1",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg1",
-      "global_kp_id": "kp_self_attention",
+      "unit_id": "local::lecture08-seq2seq::seg1",
+      "global_kp_id": "kp_progress_from_n_gram_to_neural_language_models",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg2",
-      "global_kp_id": "kp_self_attention",
+      "unit_id": "local::lecture08-seq2seq::seg2",
+      "global_kp_id": "kp_vanishing_and_exploding_gradients",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg2",
+      "global_kp_id": "kp_gradient_clipping",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg2",
-      "global_kp_id": "kp_key_query_value_self_attention_equations",
+      "unit_id": "local::lecture08-seq2seq::seg2",
+      "global_kp_id": "kp_long_distance_dependencies_in_sequence_modeling",
       "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg3",
-      "global_kp_id": "kp_positional_encoding",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg3",
-      "global_kp_id": "kp_position_wise_feed_forward_network",
-      "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg4",
-      "global_kp_id": "kp_causal_self_attention",
+      "unit_id": "local::lecture08-seq2seq::seg3",
+      "global_kp_id": "kp_lstm_gates_and_cell_state",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg4",
-      "global_kp_id": "kp_self_attention",
+      "unit_id": "local::lecture08-seq2seq::seg3",
+      "global_kp_id": "kp_lstm_gates_and_cell_state",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg4",
+      "global_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg4",
+      "global_kp_id": "kp_residual_connections",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg5",
+      "global_kp_id": "kp_rnn_lstm_applications_and_conditional_language_models",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg5",
+      "global_kp_id": "kp_bidirectional_and_stacked_recurrent_networks",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg6",
+      "global_kp_id": "kp_statistical_machine_translation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg7",
+      "global_kp_id": "kp_neural_machine_translation_with_seq2seq_encoder_decoders",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg7",
+      "global_kp_id": "kp_rnn_lstm_applications_and_conditional_language_models",
       "planner_role": "prereq",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg5",
-      "global_kp_id": "kp_multi_head_self_attention",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg5",
-      "global_kp_id": "kp_key_query_value_self_attention_equations",
-      "planner_role": "prereq",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg5",
-      "global_kp_id": "kp_scaled_dot_product_attention",
+      "unit_id": "local::lecture08-seq2seq::seg7",
+      "global_kp_id": "kp_bidirectional_and_stacked_recurrent_networks",
       "planner_role": "support",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg6",
-      "global_kp_id": "kp_residual_connections",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg6",
-      "global_kp_id": "kp_layer_normalization",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg6",
-      "global_kp_id": "kp_transformer_architecture",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg7",
-      "global_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n_lecture08_self_attention_transformers::seg7",
-      "global_kp_id": "kp_transformer_architecture",
-      "planner_role": "support",
-      "coverage_level": "mention"
+      "coverage_level": "partial"
     }
   ],
   "kp_catalog": [
     {
-      "global_kp_id": "kp_rnn_linear_interaction_distance",
-      "name": "RNN linear interaction distance",
-      "description": "The recurrent path between two related tokens grows with the number of intervening positions, making long-distance dependencies harder to learn and slowing training.",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "name": "Perplexity as a proxy metric",
+      "description": "Pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient.",
       "track_tags": [
-        "deep_learning",
-        "nlp",
-        "sequence_models"
+        "language_modeling",
+        "metrics",
+        "evaluation"
       ],
       "domain_tags": [
-        "recurrent_neural_networks",
-        "sequence_modeling"
+        "evaluation",
+        "language_models",
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure",
+        "research",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because perplexity as a proxy metric clarifies pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp14",
+        "local::lecture08-seq2seq::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_progress_from_n_gram_to_neural_language_models",
+      "name": "Progress from n-gram models to neural language models",
+      "description": "Historical perplexity comparisons show why LSTMs and later models were seen as major advances over smoothed n-gram language models.",
+      "track_tags": [
+        "language_modeling",
+        "history"
+      ],
+      "domain_tags": [
+        "nlp"
+      ],
+      "career_path_tags": [
+        "research"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because Progress from n-gram models to neural language models captures the core idea that Historical perplexity comparisons show why LSTMs and later models were seen as major advances over smoothed n-gram language models.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture08-seq2seq::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vanishing_and_exploding_gradients",
+      "name": "Vanishing and exploding gradients",
+      "description": "Gradient-flow pathologies from repeated nonlinear and recurrent matrix multiplications.",
+      "track_tags": [
+        "sequence_modeling",
+        "optimization",
+        "rnns"
+      ],
+      "domain_tags": [
+        "gradients",
+        "optimization",
+        "rnn",
+        "deep_learning",
+        "nlp"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "nlp_researcher"
+        "research_scientist",
+        "research"
+      ],
+      "difficulty_level": 0.86,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because vanishing and exploding gradients formalizes how gradient-flow pathologies from repeated nonlinear and recurrent matrix multiplications, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp12",
+        "local::lecture08-seq2seq::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gradient_clipping",
+      "name": "Gradient clipping",
+      "description": "A practical fix for exploding gradients that rescales the gradient vector when its norm exceeds a threshold.",
+      "track_tags": [
+        "optimization",
+        "training_stability"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
       ],
       "difficulty_level": 0.42,
       "difficulty_source": "llm_single_pass",
@@ -573,283 +651,115 @@
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because rNN linear interaction distance clarifies the recurrent path between two related tokens grows with the number of intervening positions, making long-distance dependencies harder to learn and slowing training, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
+      "importance_rationale": "Important because Gradient clipping captures the core idea that A practical fix for exploding gradients that rescales the gradient vector when its norm exceeds a threshold.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp1"
+        "local::lecture08-seq2seq::kp4"
       ]
     },
     {
-      "global_kp_id": "kp_self_attention",
-      "name": "Self-attention",
-      "description": "Self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set. Each token can gather information from every token in the sequence in a single parallel operation, rather than relying on stepwise recurrence.",
+      "global_kp_id": "kp_long_distance_dependencies_in_sequence_modeling",
+      "name": "Long-distance dependencies",
+      "description": "Language models need mechanisms that preserve learning signal across many tokens so distant context can influence predictions.",
       "track_tags": [
-        "attention",
-        "deep_learning",
-        "nlp",
-        "self_attention",
-        "transformers"
+        "language_modeling",
+        "rnns"
       ],
       "domain_tags": [
-        "computer_vision",
-        "deep_learning",
-        "nlp",
-        "representation_learning",
-        "self_attention"
-      ],
-      "career_path_tags": [
-        "applied_ai_engineer",
-        "ml_engineer",
-        "nlp_researcher",
-        "research_scientist"
-      ],
-      "difficulty_level": 0.62,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because self-attention formalizes how self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set, which later units use as core machinery rather than background context.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp2",
-        "local::RQowiOF_FvQ::kp9"
-      ]
-    },
-    {
-      "global_kp_id": "kp_key_query_value_self_attention_equations",
-      "name": "Key-query-value self-attention equations",
-      "description": "Token embeddings are projected into queries, keys, and values; dot-product scores are softmax-normalized and used to compute weighted sums of value vectors.",
-      "track_tags": [
-        "attention",
-        "math_for_ml",
         "nlp"
       ],
-      "domain_tags": [
-        "self_attention",
-        "transformers"
-      ],
       "career_path_tags": [
         "ml_engineer",
-        "research_scientist"
-      ],
-      "difficulty_level": 0.68,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because key-query-value self-attention equations formalizes how token embeddings are projected into queries, keys, and values; dot-product scores are softmax-normalized and used to compute weighted sums of value vectors, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp3"
-      ]
-    },
-    {
-      "global_kp_id": "kp_positional_encoding",
-      "name": "Positional encoding",
-      "description": "Because self-attention alone ignores order, position information must be injected, commonly by adding sinusoidal or learned positional vectors to token embeddings. Because self-attention on its own does not care about order beyond corresponding shuffles, positional embeddings are added when order information matters.",
-      "track_tags": [
-        "nlp",
-        "self_attention",
-        "sequence_modeling",
-        "sequence_models",
-        "transformers"
-      ],
-      "domain_tags": [
-        "computer_vision",
-        "deep_learning",
-        "nlp",
-        "positional_encoding",
-        "transformers"
-      ],
-      "career_path_tags": [
-        "applied_ai_engineer",
-        "ml_engineer",
-        "nlp_researcher",
-        "research_scientist"
-      ],
-      "difficulty_level": 0.66,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because positional encoding clarifies because self-attention alone ignores order, position information must be injected, commonly by adding sinusoidal or learned positional vectors to token embeddings, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp4",
-        "local::RQowiOF_FvQ::kp10"
-      ]
-    },
-    {
-      "global_kp_id": "kp_position_wise_feed_forward_network",
-      "name": "Position-wise feed-forward network",
-      "description": "A per-token MLP applied after attention adds nonlinearity and extra compute so stacked layers do more than repeated weighted averaging.",
-      "track_tags": [
-        "deep_learning",
-        "nlp",
-        "transformers"
-      ],
-      "domain_tags": [
-        "feed_forward_networks",
-        "transformers"
-      ],
-      "career_path_tags": [
-        "ml_engineer",
-        "research_scientist"
+        "research"
       ],
       "difficulty_level": 0.55,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "medium",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because position-wise feed-forward network clarifies a per-token MLP applied after attention adds nonlinearity and extra compute so stacked layers do more than repeated weighted averaging, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
+      "importance_rationale": "Important because Long-distance dependencies captures the core idea that Language models need mechanisms that preserve learning signal across many tokens so distant context can influence predictions.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp5"
+        "local::lecture08-seq2seq::kp5"
       ]
     },
     {
-      "global_kp_id": "kp_causal_self_attention",
-      "name": "Causal masking and masked self-attention",
-      "description": "Masking blocks selected attention links by forcing their pre-softmax scores to negative infinity, which is essential for autoregressive language modeling. Future positions are masked in decoder self-attention so next-token prediction cannot cheat by reading words that come later in the sequence.",
+      "global_kp_id": "kp_lstm_gates_and_cell_state",
+      "name": "LSTM gates and cell state",
+      "description": "Gated recurrent architecture that selectively writes, forgets, outputs, and preserves information.",
       "track_tags": [
-        "language_modeling",
-        "nlp",
-        "self_attention",
-        "transformers"
+        "sequence_modeling",
+        "rnns",
+        "architectures"
       ],
       "domain_tags": [
-        "autoregressive_models",
-        "causal_masking",
+        "lstm",
+        "rnn",
         "deep_learning",
         "nlp"
       ],
       "career_path_tags": [
-        "applied_ai_engineer",
         "ml_engineer",
-        "nlp_researcher",
-        "research_scientist"
+        "research_scientist",
+        "research"
       ],
-      "difficulty_level": 0.64,
+      "difficulty_level": 0.8,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because lSTM gates and cell state formalizes how gated recurrent architecture that selectively writes, forgets, outputs, and preserves information, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp13",
+        "local::lecture08-seq2seq::kp6",
+        "local::lecture08-seq2seq::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_additive_memory_and_gradient_flow_in_lstms",
+      "name": "Additive memory and improved gradient flow in LSTMs",
+      "description": "The additive cell path explains why LSTMs can preserve information and avoid the worst gradient-flow failures of simple RNNs.",
+      "track_tags": [
+        "optimization",
+        "rnns"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because causal masking and masked self-attention clarifies masking blocks selected attention links by forcing their pre-softmax scores to negative infinity, which is essential for autoregressive language modeling, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "curriculum_global",
+      "importance_rationale": "Important because Additive memory and improved gradient flow in LSTMs captures the core idea that The additive cell path explains why LSTMs can preserve information and avoid the worst gradient-flow failures of simple RNNs.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
-        "CS224n",
-        "CS231n"
+        "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp6",
-        "local::RQowiOF_FvQ::kp11"
-      ]
-    },
-    {
-      "global_kp_id": "kp_multi_head_self_attention",
-      "name": "Multi-head self-attention",
-      "description": "Instead of one attention operation, transformers run several attention heads in parallel on lower-dimensional projections and then combine their outputs. Multi-head attention runs several independent attention heads in parallel and fuses them, increasing capacity while staying hardware-friendly.",
-      "track_tags": [
-        "deep_learning",
-        "nlp",
-        "scalable_ai",
-        "self_attention",
-        "transformers"
-      ],
-      "domain_tags": [
-        "deep_learning",
-        "multi_head_attention",
-        "systems_for_ml",
-        "transformers"
-      ],
-      "career_path_tags": [
-        "ml_engineer",
-        "nlp_researcher",
-        "research_scientist",
-        "systems_ml_engineer"
-      ],
-      "difficulty_level": 0.76,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "low",
-      "importance_rationale": "Important because multi-head self-attention formalizes how instead of one attention operation, transformers run several attention heads in parallel on lower-dimensional projections and then combine their outputs, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp7",
-        "local::RQowiOF_FvQ::kp12"
-      ]
-    },
-    {
-      "global_kp_id": "kp_scaled_dot_product_attention",
-      "name": "Scaled dot-product attention",
-      "description": "Using a dot product as similarity and scaling it by the square root of the feature dimension stabilizes softmax behavior and gradient flow. Attention scores are divided by a dimension-based constant so large dot products do not saturate the softmax and kill useful gradients.",
-      "track_tags": [
-        "attention",
-        "optimization",
-        "transformers"
-      ],
-      "domain_tags": [
-        "deep_learning",
-        "numerical_stability",
-        "optimization",
-        "scaled_dot_product_attention"
-      ],
-      "career_path_tags": [
-        "ml_engineer",
-        "research_scientist",
-        "systems_ml_engineer"
-      ],
-      "difficulty_level": 0.67,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "medium",
-      "importance_rationale": "Important because scaled dot-product attention clarifies using a dot product as similarity and scaling it by the square root of the feature dimension stabilizes softmax behavior and gradient flow, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp8",
-        "local::RQowiOF_FvQ::kp6"
+        "local::lecture08-seq2seq::kp8"
       ]
     },
     {
@@ -860,16 +770,21 @@
         "architecture_design",
         "deep_learning",
         "optimization",
-        "transformers"
+        "transformers",
+        "architectures"
       ],
       "domain_tags": [
         "optimization",
         "residual_connections",
-        "resnet"
+        "resnet",
+        "deep_learning",
+        "vision",
+        "nlp"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "research_scientist"
+        "research_scientist",
+        "research"
       ],
       "difficulty_level": 0.64,
       "difficulty_source": "llm_single_pass",
@@ -885,119 +800,136 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp9",
-        "local::lecture_6::kp6"
+        "local::lecture10-transformers::kp9",
+        "local::lecture_6::kp6",
+        "local::lecture08-seq2seq::kp9"
       ]
     },
     {
-      "global_kp_id": "kp_layer_normalization",
-      "name": "Layer normalization",
-      "description": "Each token vector is normalized across its hidden dimensions so later layers see more stable activations without depending on batch statistics.",
+      "global_kp_id": "kp_rnn_lstm_applications_and_conditional_language_models",
+      "name": "RNN/LSTM applications and conditional language models",
+      "description": "LSTMs can label sequences, encode whole sentences, and generate outputs conditioned on other inputs.",
       "track_tags": [
-        "deep_learning",
-        "optimization",
-        "transformers"
+        "applications",
+        "language_modeling"
       ],
       "domain_tags": [
-        "layer_normalization",
-        "optimization"
+        "nlp"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "research_scientist"
+        "applied_scientist"
       ],
-      "difficulty_level": 0.66,
+      "difficulty_level": 0.44,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because layer normalization clarifies each token vector is normalized across its hidden dimensions so later layers see more stable activations without depending on batch statistics, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
+      "importance_rationale": "Important because RNN/LSTM applications and conditional language models captures the core idea that LSTMs can label sequences, encode whole sentences, and generate outputs conditioned on other inputs.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp10"
+        "local::lecture08-seq2seq::kp10"
       ]
     },
     {
-      "global_kp_id": "kp_transformer_architecture",
-      "name": "Transformer block architecture",
-      "description": "The same core block yields a decoder-only model with masking, an encoder-only model without masking, and an encoder-decoder model with cross-attention. A transformer block combines self-attention, residual connections, normalization, and an MLP/FFN, and a full transformer is a stack of these blocks.",
+      "global_kp_id": "kp_bidirectional_and_stacked_recurrent_networks",
+      "name": "Bidirectional and stacked recurrent networks",
+      "description": "Forward-backward encoders and multi-layer recurrent stacks improve contextual representations and model capacity.",
       "track_tags": [
         "architectures",
-        "deep_learning",
-        "neural_architectures",
-        "nlp",
-        "transformers"
+        "rnns"
       ],
       "domain_tags": [
-        "computer_vision",
-        "cross_attention",
-        "deep_learning",
-        "encoder_decoder_models",
         "nlp",
-        "transformers"
-      ],
-      "career_path_tags": [
-        "applied_ai_engineer",
-        "ml_engineer",
-        "nlp_researcher",
-        "research_scientist"
-      ],
-      "difficulty_level": 0.69,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "capstone",
-      "importance_confidence": "medium",
-      "importance_rationale": "Important because transformer block architecture synthesizes the same core block yields a decoder-only model with masking, an encoder-only model without masking, and an encoder-decoder model with cross-attention into an end-to-end method or integrated recipe though importance labels split between critical and high.",
-      "importance_scope": "curriculum_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n",
-        "CS231n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp11",
-        "local::RQowiOF_FvQ::kp13"
-      ]
-    },
-    {
-      "global_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
-      "name": "Transformer scaling advantage and quadratic bottleneck",
-      "description": "Transformers win through parallelizable large-scale training, but all-pairs attention introduces quadratic sequence-length cost that makes long contexts expensive.",
-      "track_tags": [
-        "nlp",
-        "scaling",
-        "transformers"
-      ],
-      "domain_tags": [
-        "computational_complexity",
-        "long_context_modeling",
-        "transformers"
+        "deep_learning"
       ],
       "career_path_tags": [
         "ml_engineer",
-        "nlp_researcher",
-        "systems_ml_engineer"
+        "research"
       ],
-      "difficulty_level": 0.51,
+      "difficulty_level": 0.49,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
-      "structural_role": "capstone",
+      "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because transformer scaling advantage and quadratic bottleneck synthesizes transformers win through parallelizable large-scale training, but all-pairs attention introduces quadratic sequence-length cost that makes long contexts expensive into an end-to-end method or integrated recipe.",
+      "importance_rationale": "Important because Bidirectional and stacked recurrent networks captures the core idea that Forward-backward encoders and multi-layer recurrent stacks improve contextual representations and model capacity.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture08-seq2seq::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_statistical_machine_translation",
+      "name": "Statistical machine translation",
+      "description": "Pre-neural MT relied on parallel data, Bayes-style factorization, and phrase-based models that often struggled with reordering and attachment.",
+      "track_tags": [
+        "machine_translation",
+        "history"
+      ],
+      "domain_tags": [
+        "nlp"
+      ],
+      "career_path_tags": [
+        "research",
+        "applied_scientist"
+      ],
+      "difficulty_level": 0.47,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Statistical machine translation captures the core idea that Pre-neural MT relied on parallel data, Bayes-style factorization, and phrase-based models that often struggled with reordering and attachment.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp12"
+        "local::lecture08-seq2seq::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_neural_machine_translation_with_seq2seq_encoder_decoders",
+      "name": "Neural machine translation with sequence-to-sequence encoder-decoder models",
+      "description": "Neural MT uses an end-to-end encoder-decoder network that directly models target generation conditioned on a source sentence.",
+      "track_tags": [
+        "machine_translation",
+        "seq2seq"
+      ],
+      "domain_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research",
+        "applied_scientist"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Neural machine translation with sequence-to-sequence encoder-decoder models provides prerequisite machinery that later units build on directly.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture08-seq2seq::kp13"
       ]
     }
   ],
@@ -1012,6 +944,6 @@
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L8_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",
-    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture08-transformers_transcript.txt"
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture08-seq2seq_transcript.txt"
   }
 }

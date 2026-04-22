@@ -61,7 +61,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 5,
         "end_s": 286
       },
@@ -111,7 +111,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 288,
         "end_s": 904
       },
@@ -156,7 +156,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 905,
         "end_s": 1406
       },
@@ -206,7 +206,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 1417,
         "end_s": 1850
       },
@@ -251,7 +251,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 1851,
         "end_s": 2303
       },
@@ -301,7 +301,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 2304,
         "end_s": 2870
       },
@@ -346,7 +346,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 2871,
         "end_s": 3230
       },
@@ -401,7 +401,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
         "start_s": 3230,
         "end_s": 3905
       },
@@ -787,7 +787,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture05-rnns::kp1",
+        "local::lecture07-rnns::kp1",
         "local::lecture_18_human_centered_ai::kp4",
         "local::lecture_1_introduction::kp7"
       ]

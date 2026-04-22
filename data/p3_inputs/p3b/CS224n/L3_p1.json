@@ -1,264 +1,219 @@
 {
   "lecture_context": {
     "course_id": "CS224n",
-    "lecture_id": "lecture03-backprop",
-    "lecture_title": "Backpropagation and Neural Networks",
-    "youtube_url": "https://www.youtube.com/watch?v=HnliVHU2g9U"
+    "lecture_id": "lecture03-pytorch",
+    "lecture_title": "Lecture 3 - PyTorch Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg"
   },
   "units": [
     {
-      "unit_id": "local::lecture03-backprop::seg1",
+      "unit_id": "local::lecture03-pytorch::seg1",
       "course_id": "cs224n-2024",
-      "name": "Neural layers, self-organization, and activation choices",
-      "description": "Introduces assignment context, revisits feed-forward neural layers, and surveys why differentiable activations replaced threshold units.",
-      "summary": "The instructor frames assignment 2 as a combined exercise in neural-network math, dependency parsing, and first exposure to PyTorch [ts=50s][ts=87s]. He then revisits multilayer neural networks as cascades of logistic-regression-like units whose hidden layers learn useful intermediate representations for downstream decisions rather than relying only on hand-designed features [ts=243s][ts=285s]. The layer computation is written in vectorized form as z = Wx + b followed by an elementwise activation function f(z) [ts=394s][ts=420s]. He motivates differentiable nonlinearities by contrasting them with threshold units, which have no usable slope for gradient-based learning [ts=515s][ts=550s], and then surveys common choices—sigmoid, tanh, ReLU, leaky ReLU, and newer ReLU-like alternatives—highlighting the trade-off between dead regions and easier gradient flow [ts=590s][ts=690s][ts=813s][ts=847s].",
+      "name": "PyTorch overview and tensor basics",
+      "description": "Introduces PyTorch as a deep learning framework, explains tensors as PyTorch's multidimensional array abstraction, and covers tensor creation, dtypes, basic utilities, elementwise ops, broadcasting, and matrix multiplication.",
+      "summary": "The segment frames PyTorch around two main benefits: easy tensor manipulation with GPU support and convenient neural-network building blocks [ts=73s] [ts=86s]. It defines tensors as PyTorch's analogue of NumPy arrays and explains that course data and model computations are represented as multidimensional arrays, including examples such as images and batches of RGB images with batch, channel, width, and height dimensions [ts=133s] [ts=159s]. The instructor demonstrates creating tensors from Python list-of-lists, notes that tensors carry a dtype, and shows how float32 can be inferred or explicitly set [ts=211s] [ts=247s]. Basic constructors like zeros, ones, and arange are introduced for convenient initialization [ts=328s] [ts=374s]. The segment also emphasizes that scalar addition and multiplication are elementwise by default, while PyTorch follows NumPy-style broadcasting rules when shapes are compatible [ts=398s] [ts=427s]. A practical NLP note is that variable-length sequences are usually padded rather than represented as jagged tensors so computations can stay matrix-based [ts=458s] [ts=491s]. The section closes with matrix multiplication via matmul or the @ operator, including shape reasoning for multiplying a 3x2 tensor by a 2x4 tensor to get a 3x4 result, and a brief explanation that batched matmul preserves batch dimensions when broadcast semantics line up [ts=508s] [ts=600s].",
       "key_points": [
         {
-          "text": "Assignment 2 is meant to build neural-network math intuition while also introducing dependency parsing and PyTorch.",
-          "timestamp_s": 50,
+          "text": "PyTorch mainly helps with tensor/GPU manipulation and composing neural-network building blocks.",
+          "timestamp_s": 73,
           "evidence_type": "claim"
         },
         {
-          "text": "Hidden layers let the network self-organize intermediate representations that are useful for later computations.",
-          "timestamp_s": 243,
+          "text": "A tensor is the PyTorch equivalent of a NumPy multidimensional array used to represent data and neural-network computations.",
+          "timestamp_s": 133,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Tensor dtypes can be specified explicitly, and floating-point input can cause PyTorch to infer a floating dtype.",
+          "timestamp_s": 247,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "torch.zeros, torch.ones, and torch.arange are basic utilities for instantiating tensors of desired shapes or ranges.",
+          "timestamp_s": 328,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Simple arithmetic on tensors is elementwise by default, while broadcasting follows NumPy-compatible shape rules.",
+          "timestamp_s": 398,
           "evidence_type": "claim"
         },
         {
-          "text": "A layer is computed as z = Wx + b followed by an elementwise activation function h = f(z).",
-          "timestamp_s": 394,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Threshold activations make learning hard because flat regions provide no gradient.",
-          "timestamp_s": 515,
+          "text": "Variable-length sentence tensors are typically padded to fixed shapes so matrix operations remain feasible.",
+          "timestamp_s": 458,
           "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "ReLU became popular because its positive-region slope is always 1, making backward gradient flow simple and effective despite dead negative regions.",
-          "timestamp_s": 693,
-          "evidence_type": "claim"
+          "text": "Matrix multiplication uses torch.matmul or the @ operator, and a 3x2 tensor multiplied by a 2x4 tensor yields a 3x4 tensor.",
+          "timestamp_s": 508,
+          "evidence_type": "example"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
         "start_s": 5,
-        "end_s": 899
+        "end_s": 683
       },
-      "difficulty": 0.46,
+      "difficulty": 0.29,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 15,
+      "duration_min": 11,
       "ordering_index": 1,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture03-backprop::seg2",
+      "unit_id": "local::lecture03-pytorch::seg2",
       "course_id": "cs224n-2024",
-      "name": "Function approximation, gradients, Jacobians, and chain rule",
-      "description": "Explains why nonlinearities are required and builds the multivariable-calculus toolkit needed for gradient-based learning.",
-      "summary": "This segment first argues that neural networks are function approximators and that nonlinearities are essential because a stack of pure matrix multiplies collapses to a single linear transform, giving no extra representational power [ts=903s][ts=939s][ts=952s]. The lecture then introduces stochastic gradient descent as the core learning update and asks how to compute gradients for arbitrary composed functions [ts=1028s][ts=1046s]. To make that possible, multivariable calculus is reframed as single-variable calculus carried out with vectors and matrices [ts=1228s]. The instructor reviews scalar derivatives, then defines gradients as vectors of partial derivatives for scalar-output functions and Jacobians as matrices of partial derivatives for multi-output functions [ts=1388s][ts=1400s][ts=1463s]. The section ends by showing that composition is handled by the chain rule, with Jacobians multiplying just as ordinary derivatives do in the scalar case [ts=1536s][ts=1615s].",
+      "name": "Tensor shapes, reshaping, reduction, and indexing",
+      "description": "Covers shape inspection as a debugging strategy, reshaping/view operations, vectorized reductions such as sum and mean, and NumPy-like indexing and slicing semantics for higher-dimensional tensors.",
+      "summary": "This segment begins by stressing that printing tensor shapes is one of the most useful debugging practices in PyTorch, especially once operations are stacked and internal reshaping can obscure the real source of an error [ts=683s] [ts=727s]. It then introduces reshape as a way to reorganize data for batching or sequence modeling, such as turning a flat list into batched examples or tensors with batch, sequence, and embedding dimensions [ts=770s] [ts=823s]. The instructor notes a distinction between view and reshape, describing view as producing a view of underlying storage and reshape as modifying the tensor layout more directly [ts=845s] [ts=855s]. The segment next motivates tensors through vectorized operations and demonstrates reductions such as sum over a chosen dimension, explaining that the specified dimension is the one being collapsed [ts=904s] [ts=967s]. That same intuition is extended to averages: preserving rows means reducing over dim=1, while preserving columns means reducing over dim=0 [ts=1140s] [ts=1208s]. The latter half walks through indexing on a 3x2x2 tensor, showing that selecting x[0] collapses the first dimension to a 2x2 tensor and that more elaborate slicing or list indexing can select ranges or multiple rows at once [ts=1266s] [ts=1499s]. The segment ends with a practical scalar-conversion reminder: some operations expect Python scalars rather than tensors, and .item() extracts a scalar from a 1x1 tensor [ts=1572s] [ts=1618s].",
       "key_points": [
         {
-          "text": "Without nonlinearities, composing multiple matrix multiplies is equivalent to a single linear transform, so depth adds no representational power.",
-          "timestamp_s": 939,
+          "text": "Printing tensor shapes is a primary debugging strategy because stacked operations and PyTorch internals can obscure shape mistakes.",
+          "timestamp_s": 697,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "reshape reorganizes tensors to support batching or other downstream operations on differently structured data.",
+          "timestamp_s": 770,
           "evidence_type": "claim"
         },
         {
-          "text": "Learning is presented through the stochastic gradient descent update using the gradient of the objective function.",
-          "timestamp_s": 1028,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "For a scalar-output function with n inputs, the gradient is the vector of partial derivatives with respect to each input.",
-          "timestamp_s": 1388,
+          "text": "The reduction dimension in operations like sum is the dimension being collapsed.",
+          "timestamp_s": 960,
           "evidence_type": "definition"
         },
         {
-          "text": "For a function with n inputs and m outputs, the Jacobian is the matrix of output-by-input partial derivatives.",
-          "timestamp_s": 1463,
-          "evidence_type": "definition"
+          "text": "For a 2x3 tensor, row averages use dim=1 and column averages use dim=0.",
+          "timestamp_s": 1140,
+          "evidence_type": "example"
         },
         {
-          "text": "For composed multivariable functions, the chain rule multiplies the relevant Jacobians.",
-          "timestamp_s": 1615,
-          "evidence_type": "formula"
+          "text": "Indexing x[0] into a 3x2x2 tensor yields a 2x2 tensor because the first dimension is selected away.",
+          "timestamp_s": 1266,
+          "evidence_type": "example"
+        },
+        {
+          "text": "List indexing can retrieve multiple selected rows at once by indexing with a list of row indices.",
+          "timestamp_s": 1468,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Calling .item() converts a 1x1 tensor into a Python scalar when downstream code expects a scalar value.",
+          "timestamp_s": 1572,
+          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
-        "start_s": 900,
-        "end_s": 1639
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 683,
+        "end_s": 1620
       },
-      "difficulty": 0.67,
+      "difficulty": 0.42,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 12,
+      "duration_min": 16,
       "ordering_index": 2,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture03-backprop::seg3",
+      "unit_id": "local::lecture03-pytorch::seg3",
       "course_id": "cs224n-2024",
-      "name": "Vectorized derivatives for a neural-network layer",
-      "description": "Derives Jacobians and parameter gradients for activations, affine layers, and the score function, including delta reuse and shape conventions.",
-      "summary": "The lecture now derives the gradients for specific neural-network building blocks. For an elementwise activation h = f(z), the Jacobian is diagonal because each output coordinate depends only on the matching input coordinate, so the diagonal entries are f'(z_i) and off-diagonal entries are zero [ts=1644s][ts=1715s]. For affine computation z = Wx + b, the derivative with respect to x is W and the derivative with respect to b is the identity matrix [ts=1763s][ts=1809s]. Using the small network example, the score derivative is expanded with the chain rule as ds/db = ds/dh · dh/dz · dz/db [ts=1997s], which simplifies using a Hadamard product for elementwise multiplication [ts=2081s]. The instructor then names the shared upstream gradient/error signal δ so it can be reused across parameter derivatives instead of recomputed [ts=2206s], derives the weight gradient as an outer-product style combination of upstream gradient and local input [ts=2417s], and warns that practical implementations follow a shape convention so gradient tensors match the shapes of the parameters they update [ts=2594s][ts=2620s].",
+      "name": "Autograd and gradient accumulation",
+      "description": "Explains PyTorch autograd, requires_grad, backward passes, gradient storage in .grad, and why gradients accumulate unless explicitly zeroed.",
+      "summary": "The segment introduces autograd as PyTorch's automatic differentiation system: when the forward pass defines computations over tensors, PyTorch tracks dependencies so that a later backward pass can apply the chain rule and cache gradients needed for optimization [ts=1623s] [ts=1688s]. A tensor with requires_grad participates in gradient tracking, and the instructor motivates disabling gradients at inference time because they add computation when no parameter updates are needed [ts=1706s] [ts=1745s]. The core example defines y = 3x^2 for x = 2, calls backward, and explains that x.grad becomes 12 because dy/dx = 6x and x=2 [ts=1779s] [ts=1805s]. Repeating a backward pass on another expression with the same dependency raises x.grad to 24, which is used to show that PyTorch accumulates rather than overwrites gradients by default [ts=1822s] [ts=1868s]. The instructor then connects this to minibatch training: accumulated gradients are desirable across examples before a parameter update, but they must be reset between training iterations so previous batches do not contaminate later updates [ts=1881s] [ts=2049s].",
       "key_points": [
         {
-          "text": "The Jacobian of an elementwise activation is diagonal, with f'(z_i) on the diagonal and zeros elsewhere.",
-          "timestamp_s": 1715,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "For z = Wx + b, the derivative with respect to x is W.",
-          "timestamp_s": 1763,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "For z = Wx + b, the derivative with respect to b is the identity matrix.",
-          "timestamp_s": 1809,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "The score derivative with respect to the bias is decomposed as ds/db = ds/dh times dh/dz times dz/db.",
-          "timestamp_s": 1997,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "The Hadamard product denotes elementwise multiplication in neural-network gradient formulas.",
-          "timestamp_s": 2081,
+          "text": "Autograd automatically applies the chain rule over the computation graph and caches gradients for optimization.",
+          "timestamp_s": 1623,
           "evidence_type": "definition"
         },
         {
-          "text": "The shared upstream gradient delta should be computed once and reused across ds/db and ds/dW calculations.",
-          "timestamp_s": 2206,
+          "text": "requires_grad controls whether PyTorch stores gradients for a tensor, and gradients can be disabled at inference time to avoid unnecessary computation.",
+          "timestamp_s": 1706,
           "evidence_type": "claim"
         },
         {
-          "text": "The weight gradient is formed from the upstream gradient and the local input in an outer-product pattern.",
-          "timestamp_s": 2417,
+          "text": "For y = 3x^2 with x = 2, calling backward produces x.grad = 12.",
+          "timestamp_s": 1779,
           "evidence_type": "formula"
         },
         {
-          "text": "The shape convention stores gradients in the same shapes as their corresponding parameter tensors.",
-          "timestamp_s": 2620,
-          "evidence_type": "definition"
+          "text": "Calling backward multiple times on quantities depending on the same tensor accumulates gradients instead of overwriting them.",
+          "timestamp_s": 1822,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Training loops must zero gradients between iterations to prevent previous updates from being double-counted.",
+          "timestamp_s": 1881,
+          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
-        "start_s": 1640,
-        "end_s": 2699
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 1620,
+        "end_s": 2078
       },
-      "difficulty": 0.83,
+      "difficulty": 0.53,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 18,
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
       "ordering_index": 3,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture03-backprop::seg4",
+      "unit_id": "local::lecture03-pytorch::seg4",
       "course_id": "cs224n-2024",
-      "name": "Backpropagation on computation graphs",
-      "description": "Recasts neural networks as computation graphs and derives backward-pass rules from local gradients and branch structure.",
-      "summary": "Backpropagation is distilled to two ideas: apply the chain rule and store intermediate results so repeated work is avoided [ts=2711s][ts=2733s]. The network is redrawn as a computation graph whose forward pass computes values node by node—for example x to Wx to z to h to s [ts=2776s][ts=2811s]. The backward pass starts from ds/ds = 1 and sends gradients backward by multiplying each node's upstream gradient by its local gradient [ts=2867s][ts=2947s]. The instructor then uses a toy graph f(x,y,z) = (x + y) * max(y,z) with x = 1, y = 2, z = 0 to show how forward values are computed [ts=3044s][ts=3083s], how local derivatives are assigned for plus, max, and multiply [ts=3125s][ts=3191s], and why branch outputs require summing incoming gradient contributions at shared variables [ts=3379s][ts=3412s].",
+      "name": "Neural-network modules and the training loop",
+      "description": "Shows how to define layers with torch.nn, compose them into blocks and custom modules, inspect parameters, choose losses and optimizers, and implement a full PyTorch training loop.",
+      "summary": "This final segment moves from tensors to neural-network construction. It introduces torch.nn and explains nn.Linear as a layer parameterized by input and output dimensions that maps the last dimension of its input to the specified output size, effectively acting like an affine transformation with optional bias [ts=2098s] [ts=2163s]. A worked example passes a 2x3x4 tensor through a linear layer with output size 2 and obtains a 2x3x2 tensor; a mismatched input dimension example is used to argue again for printing shapes when debugging layer errors [ts=2183s] [ts=2286s]. The instructor shows that model parameters, including weights and bias, can be inspected and that they store gradients to be updated during training [ts=2383s] [ts=2419s]. Other module building blocks are briefly surveyed, including convolutions, batch normalization, upsampling, and pooling [ts=2424s] [ts=2451s]. The segment then adds nonlinearities with sigmoid and uses nn.Sequential to compose a linear layer and activation into a reusable block [ts=2474s] [ts=2528s]. A custom multilayer perceptron is implemented by subclassing nn.Module, defining parameters in **init**, and defining the computation in forward [ts=2531s] [ts=2632s]. Finally, optimization is introduced through torch.optim: the model, Adam optimizer, and cross-entropy loss are instantiated, and the canonical training loop is demonstrated as zero_grad, forward pass, loss computation, backward, and optimizer step [ts=2645s] [ts=2762s]. The segment ends by emphasizing that PyTorch abstracts away manual backpropagation and optimizer details so students can focus on assembling architectures from reusable components [ts=2769s] [ts=2813s].",
       "key_points": [
         {
-          "text": "Backpropagation is just the chain rule plus caching of intermediate results.",
-          "timestamp_s": 2711,
+          "text": "nn.Linear takes an input dimension and output dimension and transforms the last input dimension to the output size, with an optional bias term.",
+          "timestamp_s": 2108,
           "evidence_type": "definition"
         },
         {
-          "text": "A neural network can be represented as a computation graph whose source nodes are inputs and whose interior nodes are operations.",
-          "timestamp_s": 2776,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "The backward pass starts from ds/ds = 1 and computes downstream gradients as upstream gradient times local gradient.",
-          "timestamp_s": 2947,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "For nodes with multiple inputs, a separate local gradient is taken with respect to each input.",
-          "timestamp_s": 2992,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "In the toy graph example, the forward pass evaluates f(x,y,z) = (x + y) * max(y,z) to 6 when x=1, y=2, z=0.",
-          "timestamp_s": 3044,
+          "text": "Passing a 2x3x4 tensor through a linear layer with output size 2 yields a 2x3x2 output tensor.",
+          "timestamp_s": 2183,
           "evidence_type": "example"
         },
         {
-          "text": "At graph branches, gradient contributions from different paths are summed at the shared variable.",
-          "timestamp_s": 3379,
-          "evidence_type": "diagnostic_tip"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
-        "start_s": 2700,
-        "end_s": 3599
-      },
-      "difficulty": 0.72,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 15,
-      "ordering_index": 4,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::lecture03-backprop::seg5",
-      "course_id": "cs224n-2024",
-      "name": "Efficient reverse-mode autodiff and gradient checking",
-      "description": "Generalizes backpropagation to arbitrary DAGs, connects it to autodiff frameworks, and finishes with practical gradient checking.",
-      "summary": "The final segment generalizes backpropagation from layered networks to any acyclic computation graph. The algorithm topologically sorts nodes for the forward pass and then visits them in reverse order for the backward pass, propagating gradients with upstream-times-local computations [ts=3616s][ts=3646s][ts=3693s]. A correct implementation should have backward complexity in the same Big-O class as the forward calculation, because extra cost usually means recomputation [ts=3736s]. The lecture then explains how modern frameworks manage the computation graph automatically but still expect humans to specify forward behavior and local derivatives for new operations or layers, typically caching forward inputs for use during backward [ts=3866s][ts=3968s][ts=4065s]. It closes with numeric gradient checking via the central-difference estimate (f(x+h) - f(x-h)) / (2h), recommending h around 10^-4 and rough agreement within about 10^-2 when validating a backward implementation [ts=4119s][ts=4175s][ts=4198s]. The wrap-up restates that backprop is efficient chain-rule application and motivates understanding it to debug later phenomena such as exploding and vanishing gradients [ts=4285s][ts=4368s].",
-      "key_points": [
-        {
-          "text": "Forward propagation on a general computation graph proceeds in topological order over a DAG.",
-          "timestamp_s": 3616,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Backward propagation visits nodes in reverse topological order and computes downstream gradients from upstream gradients and local gradients.",
-          "timestamp_s": 3693,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "If implemented correctly, backward propagation should have the same Big-O complexity class as the forward computation.",
-          "timestamp_s": 3736,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Modern deep-learning frameworks manage the computation graph but rely on user-defined forward and local-gradient logic for custom operations.",
-          "timestamp_s": 3866,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A common implementation trick is to cache forward inputs so the backward method can use them when computing gradients.",
-          "timestamp_s": 4065,
+          "text": "Printing shapes is an effective way to debug layer mismatch errors because internal error messages may flatten or reinterpret tensor shapes.",
+          "timestamp_s": 2255,
           "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Numeric gradient checking uses the central-difference estimate (f(x+h) - f(x-h)) / (2h), often with h around 10^-4.",
-          "timestamp_s": 4119,
-          "evidence_type": "formula"
+          "text": "Neural-network parameters include both weights and bias and are accessible for inspection through the layer's parameters.",
+          "timestamp_s": 2383,
+          "evidence_type": "claim"
         },
         {
-          "text": "Backpropagation is the chain rule applied efficiently.",
-          "timestamp_s": 4285,
+          "text": "nn.Sequential can compose layers such as a linear transform followed by sigmoid into a single callable block.",
+          "timestamp_s": 2498,
+          "evidence_type": "example"
+        },
+        {
+          "text": "To define a custom network in PyTorch, subclass nn.Module, initialize components in **init**, and implement the forward pass in forward.",
+          "timestamp_s": 2531,
           "evidence_type": "definition"
+        },
+        {
+          "text": "A standard training loop is: optimizer.zero_grad(), predictions = model(x), compute loss, loss.backward(), optimizer.step().",
+          "timestamp_s": 2705,
+          "evidence_type": "example"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=HnliVHU2g9U&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=3",
-        "start_s": 3600,
-        "end_s": 4399
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 2078,
+        "end_s": 2813
       },
-      "difficulty": 0.61,
+      "difficulty": 0.55,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 13,
-      "ordering_index": 5,
+      "duration_min": 12,
+      "ordering_index": 4,
       "is_template": false
     }
   ],
@@ -269,6 +224,6 @@
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L3_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",
-    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture03-backprop_transcript.txt"
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture03-pytorch_transcript.txt"
   }
 }

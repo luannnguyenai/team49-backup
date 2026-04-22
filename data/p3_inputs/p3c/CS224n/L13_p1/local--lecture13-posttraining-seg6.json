@@ -1,0 +1,224 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture13-posttraining",
+    "lecture_title": "Lecture 13 - Post-training",
+    "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4"
+  },
+  "unit": {
+    "unit_id": "local::lecture13-posttraining::seg6",
+    "course_id": "CS224N",
+    "name": "RLHF reward modeling and KL control",
+    "description": "Introduces preference optimization, Bradley-Terry reward modeling, reward hacking, and KL regularization.",
+    "summary": "RLHF is introduced as an attempt to satisfy human preferences directly rather than rely on token prediction [ts=2347s] [ts=2394s]. Using summarization, the instructor writes the desired objective as maximizing expected reward over outputs sampled from the language model; this is different from pretraining and SFT because the model samples its own completions and the reward may be non-differentiable [ts=2449s] [ts=2498s]. The pipeline is instruction tuning, reward-model estimation, and then optimization of the language model against that reward model [ts=2503s] [ts=2548s]. Since absolute human scores are noisy and uncalibrated, humans instead compare outputs and rank which completion is better [ts=2694s] [ts=2777s]. Bradley-Terry modeling turns pairwise preferences into a loss where preference probability is the sigmoid of the reward difference between winning and losing completions [ts=2822s] [ts=2889s]. A learned reward can be hacked, so the model is penalized for drifting too far from the initial model using a beta log-ratio term whose expectation is KL divergence [ts=3034s] [ts=3183s]. RLHF then samples completions, scores them, and updates probabilities toward high-reward regions [ts=3268s] [ts=3301s].",
+    "key_points": [
+      {
+        "text": "RLHF optimizes expected human preference reward over model-sampled outputs.",
+        "timestamp_s": 2449,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The RLHF pipeline is instruction tuning, reward model estimation, and reward optimization.",
+        "timestamp_s": 2503,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Pairwise ranking is easier and more stable than absolute human scoring.",
+        "timestamp_s": 2741,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Bradley-Terry models preference probability as sigmoid of the reward difference.",
+        "timestamp_s": 2842,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Optimizing a learned reward model can cause reward hacking.",
+        "timestamp_s": 3034,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A beta log-ratio penalty keeps the optimized model close to the initial model; its expectation is KL divergence.",
+        "timestamp_s": 3141,
+        "evidence_type": "formula"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=35X6zlhoCy4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=11",
+      "start_s": 2347,
+      "end_s": 3360
+    },
+    "difficulty": 4.6,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 17,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "RLHF is introduced as an attempt to satisfy human preferences directly rather than rely on token prediction [ts=2347s] [ts=2394s]. Using summarization, the instructor writes the desired objective as maximizing expected reward over outputs sampled from the language model; this is different from pretraining and SFT because the model samples its own completions and the reward may be non-differentiable [ts=2449s] [ts=2498s]. The pipeline is instruction tuning, reward-model estimation, and then optimization of the language model against that reward model [ts=2503s] [ts=2548s]. Since absolute human scores are noisy and uncalibrated, humans instead compare outputs and rank which completion is better [ts=2694s] [ts=2777s]. Bradley-Terry modeling turns pairwise preferences into a loss where preference probability is the sigmoid of the reward difference between winning and losing completions [ts=2822s] [ts=2889s]. A learned reward can be hacked, so the model is penalized for drifting too far from the initial model using a beta log-ratio term whose expectation is KL divergence [ts=3034s] [ts=3183s]. RLHF then samples completions, scores them, and updates probabilities toward high-reward regions [ts=3268s] [ts=3301s].",
+  "target_kp_ids": [
+    "kp_rlhf_preference_optimization",
+    "kp_reward_modeling_from_pairwise_preferences",
+    "kp_reward_hacking"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "video_clip_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "transcript_slice": "00:39:07\nSo as this whole thing alludes to,\n\n00:39:14\nhuman preferences directly.\n\n00:39:19\nand try to do some kind of a token level prediction loss.\n\n00:39:25\nand that is the general field of RLHF,\n\n00:39:32\na model like ChatGPT.\n\n00:39:37\nexpensive, and there's still a broad mismatch between the LLM\n\n00:39:41\ngoing to try and optimize for human preferences directly.\n\n00:39:49\nTo concretely establish that.\n\n00:39:54\nwhich is summarization.\n\n00:40:00\nand we want to satisfy human preferences,\n\n00:40:03\nable to prescribe a reward for a specific summary.\n\n00:40:09\nassign, say like reward.\n\n00:40:19\nSo in this specific case, we have\n\n00:40:27\nSo this is a news article that we want to summarize.\n\n00:40:33\nand we want to optimize this.\n\n00:40:39\nan earthquake hit and so on, and we assign a reward of 8.0,\n\n00:40:45\nGenerally speaking, like the objective that we want to set up\n\n00:40:51\nwe want to take our language model\n\n00:40:58\nand we want to maximize the reward of r\n\n00:41:04\nsummary in the specific task.\n\n00:41:12\nhere.\n\n00:41:15\nthat we have done in one very specific way.\n\n00:41:22\nIf you see we're using y from p theta,\n\n00:41:26\nis sampled from some other source\n\n00:41:30\nin supervised fine-tuning, and we're\n\n00:41:34\nBut now we're explicitly sampling from our model\n\n00:41:42\nCool.\n\n00:41:47\nand first step is still instruction-tuning,\n\n00:41:51\nwe take our pretrained model, we instruction-tune\n\n00:41:56\nget something which starts responding to our desired intent\n\n00:42:01\nBut there are two more steps after this,\n\n00:42:05\nlike InstructGPT.\n\n00:42:09\nof a reward model, something which tells us,\n\n00:42:14\nor how much would a human hate this answer.\n\n00:42:19\nbut I didn't talk about how do we even get something like that.\n\n00:42:23\nAnd then we take this reward model,\n\n00:42:27\nthat I suggested earlier.\n\n00:42:30\nunder your language model.\n\n00:42:35\nin the second and third steps.\n\n00:42:39\nis, how do we even get a reward model for about what\n\n00:42:45\nThis is a very ill-defined problem generally speaking.\n\n00:42:51\nthat we're going to address.\n\n00:42:55\nSo let's say if I ask a model to generate an answer\n\n00:43:02\nI'm doing this over millions of completions.\n\n00:43:06\nI don't want to sit around and label millions of examples.\n\n00:43:12\nWe're in a machine learning class,\n\n00:43:15\nWhat we're going to do is we're going\n\n00:43:19\nor what a human might not like.\n\n00:43:23\nthis is essentially a machine learning problem\n\n00:43:27\nand we try to train a reward model to predict,\n\n00:43:33\nlook like.\n\n00:43:38\nyou might have seen this earlier.\n\n00:43:44\nNow there's a bigger problem here, and--\n\n00:43:47\nGo ahead.\n\n00:43:53\nor do we use a real language model to do that?\n\n00:43:58\nGenerally, what we do is we still typically need\n\n00:44:03\nthe text really well, so like bigger models,\n\n00:44:08\nmodel that you trained pretrained as well.\n\n00:44:13\nand do some kind of a prediction that we'll talk about,\n\n00:44:18\nHow do you-- if you're doing that,\n\n00:44:21\nLike how does the language model know which parts [INAUDIBLE]?\n\n00:44:25\nIt can put the x and y.\n\n00:44:29\nso it doesn't need to typically see it separate.\n\n00:44:33\nOK.\n\n00:44:35\nThe x and y is more for notational convenience\n\n00:44:40\nX is a question user asks, and why is\n\n00:44:44\nAnd you shut the whole thing into it.\n\n00:44:46\nYes.\n\n00:44:49\nNow this is the bigger problem here,\n\n00:44:54\nWe've talked about we want to assign a score to a completion.\n\n00:45:00\nSo if I give you a summary like this,\n\n00:45:05\nIf you ask me on different days, I'll\n\n00:45:12\nthis number is not calibrated in any meaningful way.\n\n00:45:18\nand different humans would just simply assign different scores.\n\n00:45:23\nYou can calibrate humans, you can give them a specific rubric,\n\n00:45:29\nand still there's a lot of room for judgment,\n\n00:45:35\nIf your labels can vary a lot, it's just hard to predict.\n\n00:45:44\nof trying to predict the reward label directly,\n\n00:45:49\ndifferent way.\n\n00:45:51\nis give them two answers, or maybe many answers\n\n00:45:58\nSo this is where the idea of asking humans to rank answers\n\n00:46:03\nSo if I give you a whole news article\n\n00:46:08\nyou might be able to give me a ranking\n\n00:46:11\nbut the first one is better and the third one\n\n00:46:15\nSo you get a ranking, which gives you\n\n00:46:20\nAnd, hopefully, I mean, you can see the idea that\n\n00:46:26\nwe have some kind of a consistent utility function,\n\n00:46:31\nto something and know that which is better than this,\n\n00:46:37\nAnd that's where the signal from something like this\n\n00:46:41\nNow, how do we get--\n\n00:46:45\nwe get this kind of a preference data,\n\n00:46:50\nAnd we shove in our input, we shove in a summary as well,\n\n00:46:55\nbut it's not clearly obvious to me\n\n00:47:02\nIn comes our pretty good friends named Bradley-Terry,\n\n00:47:11\nlike many in economics and psychology,\n\n00:47:18\nin specific case.\n\n00:47:22\nsays that a probability that a human chooses answer y1 over y2\n\n00:47:32\nthat humans assign internally, and then you\n\n00:47:35\nSo if you've looked at binary classification before,\n\n00:47:41\nbetween the reward of some y1 minus y2, or the difference\n\n00:47:52\nIs everybody with me till this point?\n\n00:48:01\ngiven y1 and y2 where y1 is a winning completion,\n\n00:48:09\nthe winning completion should score higher\n\n00:48:13\nGo ahead.\n\n00:48:15\nIs that a log or--\n\n00:48:19\nWhat is the type of j, this number here that we're\n\n00:48:23\nIs it a log prob or what is it?\n\n00:48:27\nSo it will be a scalar at the end.\n\n00:48:32\nlet's say you have a reward model which gives a score r1\n\n00:48:40\nyou get another number, you put it into sigmoid,\n\n00:48:45\na logit into probability, and then\n\n00:48:50\ntake the expectation of everything\n\n00:48:53\ntells you how good your reward model is\n\n00:48:57\nSo a good model of humans should behave like this.\n\n00:49:04\nSo it would generally assign a higher reward to the winning\n\n00:49:10\nto the losing completion.\n\n00:49:15\nThe math is just beginning, so hold on to your seats.\n\n00:49:22\nSo now let's see where we are.\n\n00:49:27\nand we got this fancy reward model\n\n00:49:33\nand it can tell us which answer they like,\n\n00:49:39\nNow to do RLHF, generally, I mean,\n\n00:49:44\nWe will copy our pretrained model\n\n00:49:48\nwill optimize the parameters for those models.\n\n00:49:54\nis the expected reward when we sample completions from p theta.\n\n00:50:03\nof the true reward model, which humans\n\n00:50:06\nDo you guys see any problem with this?\n\n00:50:14\nor that might go wrong if we do something along these lines?\n\n00:50:24\nThe model will collapse.\n\n00:50:30\nBut generally, at least from my intuition,\n\n00:50:34\nand you have-- you're optimizing some learned metric,\n\n00:50:39\nfunctions are very clearly defined,\n\n00:50:43\nWhen it's learned, it means it will have errors.\n\n00:50:46\nYes.\n\n00:50:50\nIt will generalize as well, but it will have errors,\n\n00:50:57\nit will tend to hack the reward model.\n\n00:51:00\nthe reward model might erroneously\n\n00:51:06\nIf your policy learns, or if your language model\n\n00:51:10\nhack that and start generating those gibberish completions.\n\n00:51:18\nif you're optimizing a learned metric,\n\n00:51:21\nand make sure that it's actually reliable.\n\n00:51:28\nI mean, if you start optimizing this objective,\n\n00:51:32\nvery quickly.\n\n00:51:35\nwant to add some kind of a penalty\n\n00:51:40\nAnd why do we want to do that?\n\n00:51:45\nwe know the initialization of the model is a decent language\n\n00:51:52\nreward model too much, and we also know that the reward model\n\n00:52:00\nmodel is.\n\n00:52:04\nwe have trained it on certain completions, which are sampled\n\n00:52:08\nSo we know the reward model will be somewhat\n\n00:52:11\nSo we're just going to simply add\n\n00:52:15\ndrift too far away from the initial distribution.\n\n00:52:21\nto maximize the objective where we have our RL phi, which\n\n00:52:27\ngoing to add this term beta log ratio,\n\n00:52:34\nand our initial model, ppt.\n\n00:52:40\nto certain completion as compared\n\n00:52:44\nto add an increasingly large penalty to it.\n\n00:52:49\nfor drifting too far from your initial distribution.\n\n00:52:54\nthe expectation of this quantity is exactly\n\n00:53:00\nbetween p theta and ppt.\n\n00:53:06\nGo for it.\n\n00:53:08\nShouldn't you also do this, add a penalty\n\n00:53:14\nor is this only relevant for the RL HF?\n\n00:53:18\nSo I think people do add some kinds of regularization\n\n00:53:24\nIt's not nearly not as critical when you're doing this with RL,\n\n00:53:32\npossible.\n\n00:53:37\nit's doing really well, but the true reward models\n\n00:53:40\nSo it's much more important in this optimization.\n\n00:53:48\nSo now this assume does-- this course does not\n\n00:53:55\nSo we're not going to go into reinforcement learning,\n\n00:53:59\nthis works.\n\n00:54:02\njust used for language models.\n\n00:54:06\ngame-playing agents, robotics, developing chip designs, and so\n\n00:54:13\nAnd the interest between RL and models,\n\n00:54:20\nbut it's been really successful recently and especially\n\n00:54:27\nThe general idea is that we're going\n\n00:54:30\nto generate several completions for an instruction.\n\n00:54:37\nmodel, and then we're going to simply try and update\n\n00:54:44\ncompletions.\n\n00:54:47\nof varying quality, and we'll see\n\n00:54:51\nsome bad summaries for our task, and we'll\n\n00:54:55\nsuch that the reward for--\n\n00:55:01\nin the high reward region.\n\n00:55:08\nCool.\n\n00:55:12\nI think this is a very good example of--\n\n00:55:15\nIs the same summarization example,\n\n00:55:21\nthat the performance improves by increasing the model\n\n00:55:26\nWe have seen this in many different examples,\n\n00:55:31\noutperform human completions if you train it with RLHF,\n\n00:55:37\nThe reference summaries are human generated,\n\n00:55:41\nwhen you ask humans, which ones they prefer,\n\n00:55:45\nover the human generated summary,\n\n00:55:49\nEven at small scales-- and, again, the same scaling\n\n00:55:53\nBigger models do become more responsive, but RLHF itself\n\n00:56:00\nCool.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture13-posttraining::seg6",
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture13-posttraining::seg6",
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture13-posttraining::seg6",
+      "global_kp_id": "kp_reward_hacking",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "name": "RLHF preference optimization",
+      "description": "The RLHF reward-maximization objective with KL regularization and Bradley-Terry-style pairwise rewards. Optimizing language models for learned human preference rewards over model-generated outputs.",
+      "track_tags": [
+        "bradley_terry",
+        "kl",
+        "llm",
+        "nlp",
+        "rlhf"
+      ],
+      "domain_tags": [
+        "llm_alignment",
+        "preference_optimization",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "ai_safety_researcher",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rLHF preference optimization formalizes how the RLHF reward-maximization objective with KL regularization and Bradley-Terry-style pairwise rewards, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp7",
+        "local::lecture21-after-dpo::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_modeling_from_pairwise_preferences",
+      "name": "Reward modeling from pairwise preferences",
+      "description": "Turning pairwise human preferences into a reward-model objective based on reward differences. Pairwise reward-model training and RewardBench as local evaluation for reward models.",
+      "track_tags": [
+        "llm",
+        "nlp",
+        "reward_modeling",
+        "rewardbench",
+        "rlhf"
+      ],
+      "domain_tags": [
+        "bradley_terry",
+        "nlp_evaluation",
+        "reward_modeling",
+        "rlhf"
+      ],
+      "career_path_tags": [
+        "ai_evaluation_engineer",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reward modeling from pairwise preferences formalizes how turning pairwise human preferences into a reward-model objective based on reward differences, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp8",
+        "local::lecture21-after-dpo::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_hacking",
+      "name": "Reward hacking and KL regularization",
+      "description": "The risk of exploiting learned rewards and the KL-style penalty that keeps the policy near the reference model. Optimizers exploiting incomplete reward specifications in reward-model-based alignment.",
+      "track_tags": [
+        "ai_safety",
+        "alignment",
+        "llm",
+        "nlp",
+        "reward_hacking"
+      ],
+      "domain_tags": [
+        "ai_safety",
+        "kl_divergence",
+        "reinforcement_learning",
+        "reward_hacking"
+      ],
+      "career_path_tags": [
+        "ai_safety_researcher",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.81,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because reward hacking and KL regularization formalizes how the risk of exploiting learned rewards and the KL-style penalty that keeps the policy near the reference model, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp9",
+        "local::lecture21-after-dpo::kp12"
+      ]
+    }
+  ],
+  "question_intent": "procedural",
+  "target_item_count": 6,
+  "target_difficulty_range": [
+    4.45,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture13-posttraining_transcript.txt"
+  }
+}

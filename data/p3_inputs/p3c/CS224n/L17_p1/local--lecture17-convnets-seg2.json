@@ -1,0 +1,200 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture17-convnets",
+    "lecture_title": "Lecture 17 - ConvNets and TreeRNNs for NLP",
+    "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture17-convnets::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Kim CNN for sentence classification",
+    "description": "Covers the classic 2014 CNN architecture for sentence classification and the embedding fine-tuning issue it addressed.",
+    "summary": "The lecture presents Yoon Kim's 2014 sentence-classification CNN as the canonical early NLP use of convolutions, mainly for sentiment analysis and related classification tasks [ts=1101s][ts=1153s]. The architecture applies separate filters over bigrams, trigrams, and 4-grams, max-pools each filter's activations over the sentence, concatenates the pooled values, and feeds the resulting fixed-size vector into a simple softmax classifier [ts=1195s][ts=1232s][ts=1303s]. A major training issue is then discussed: when fine-tuning pretrained word vectors on a small supervised dataset, words observed in training move while unseen but semantically similar words stay in place, which can distort sentiment boundaries [ts=1262s][ts=1367s]. Kim's workaround is a dual-channel setup that keeps one embedding channel frozen and another fine-tuned, combining the benefits of task adaptation with preservation of the original semantic geometry [ts=1473s][ts=1500s]. The section closes by noting that the model was surprisingly strong for its simplicity, though some of its experimental advantage likely came from using dropout when many earlier baselines had not [ts=1612s][ts=1716s].",
+    "key_points": [
+      {
+        "text": "Kim's model uses convolutional filters of multiple widths over word vectors for sentence classification.",
+        "timestamp_s": 1211,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "After sliding the filters across the sentence, max pooling keeps the strongest activation from each filter.",
+        "timestamp_s": 1232,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The concatenated pooled outputs are fed to a final softmax classifier for sentiment prediction.",
+        "timestamp_s": 1303,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Fine-tuning embeddings on a small labeled set can separate seen words from semantically similar unseen words and hurt generalization.",
+        "timestamp_s": 1367,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A two-channel embedding setup combines frozen pretrained vectors with fine-tuned vectors to get the best of both worlds.",
+        "timestamp_s": 1496,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=17",
+      "start_s": 1101,
+      "end_s": 1822
+    },
+    "difficulty": 0.52,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture presents Yoon Kim's 2014 sentence-classification CNN as the canonical early NLP use of convolutions, mainly for sentiment analysis and related classification tasks [ts=1101s][ts=1153s]. The architecture applies separate filters over bigrams, trigrams, and 4-grams, max-pools each filter's activations over the sentence, concatenates the pooled values, and feeds the resulting fixed-size vector into a simple softmax classifier [ts=1195s][ts=1232s][ts=1303s]. A major training issue is then discussed: when fine-tuning pretrained word vectors on a small supervised dataset, words observed in training move while unseen but semantically similar words stay in place, which can distort sentiment boundaries [ts=1262s][ts=1367s]. Kim's workaround is a dual-channel setup that keeps one embedding channel frozen and another fine-tuned, combining the benefits of task adaptation with preservation of the original semantic geometry [ts=1473s][ts=1500s]. The section closes by noting that the model was surprisingly strong for its simplicity, though some of its experimental advantage likely came from using dropout when many earlier baselines had not [ts=1612s][ts=1716s].",
+  "target_kp_ids": [
+    "kp_kim_2014_sentence_classification_cnn"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "transcript_slice": "00:18:24\nabout a couple of pieces of work that\n\n00:18:31\nI guess this is a decade old now because this is from 2014.\n\n00:18:40\nthat made use of convolutional neural networks\n\n00:18:45\nAnd Yoon Kim is now an assistant professor at MIT.\n\n00:18:55\nBut I guess, he got in early with the idea of, hey,\n\n00:19:03\nand did a kind of a clear example of that\n\n00:19:08\nAnd so this piece of work is very well known.\n\n00:19:18\nSo looking at a sentence and deciding whether it's\n\n00:19:24\nAnd actually, for both the kind of models\n\n00:19:27\nwe're going to use examples that are\n\n00:19:33\nHe also considered other tasks subjective or objective\n\n00:19:39\nas to what they were about.\n\n00:19:43\nSo what you're going to be doing--\n\n00:19:52\nbut it's exactly the same as we've just been talking about,\n\n00:19:58\nYou're going to be multiplying them by a convolution\n\n00:20:06\nAnd it's going to be done in his model\n\n00:20:11\nSo he's going to have some convolutional filters that look\n\n00:20:19\nat 4-grams.\n\n00:20:29\nThen having done that, it then does\n\n00:20:35\nwhich gives a single number coming out of each filter.\n\n00:20:44\nare then going to be used as a classifier\n\n00:20:53\nThere's one other thing that came up\n\n00:21:00\nto be aware of.\n\n00:21:05\nwhich is the following, that it's a very common case that\n\n00:21:15\nI guess this, again, occurs less with\n\n00:21:20\nBut for the classic case of models\n\n00:21:25\nwere training some neural network\n\n00:21:32\nwas this following pitfall of what happened when\n\n00:21:38\nAnd so the setting is we've started off\n\n00:21:47\nor whatever it is.\n\n00:21:54\nand that we're going to train a sentiment classifier.\n\n00:22:03\nof our sentiment classifier, but also, we\n\n00:22:11\nAnd if you do that, I mean, it seems\n\n00:22:19\nvectors aren't specially attuned to predicting sentiment\n\n00:22:25\nThey're more tuned to meaning of words\n\n00:22:33\nAnd so it seems like it should help you\n\n00:22:40\nand change them as you go along.\n\n00:22:46\nAnd the problem is what you'll find\n\n00:22:54\ndata set.\n\n00:23:00\nthese word vectors will move.\n\n00:23:06\nand they're going to stay exactly where they\n\n00:23:11\nnothing to move them around.\n\n00:23:18\nwhere all of \"tedious,\" \"dull,\" and \"plodding\"\n\n00:23:24\nindicators of something negative.\n\n00:23:32\nas part of backprop we've moved over here,\n\n00:23:37\nand the classification boundary has moved over here.\n\n00:23:43\nso it's just sitting exactly where it was at the start\n\n00:23:47\nAnd now it's being treated as a positive word, which\n\n00:23:52\nAnd so that's tended to have the result\n\n00:24:01\nnetwork on a small supervised data set,\n\n00:24:11\ninto the word vectors would help because you could specialize\n\n00:24:16\nBut sometimes it would hurt you because of this kind of effect,\n\n00:24:23\napplied over that were captured reasonably well\n\n00:24:29\nSo the way that Yoon Kim dealt with that\n\n00:24:36\nHe just doubled his number of channels.\n\n00:24:45\nin his convolutional neural network.\n\n00:24:53\nAnd for one of them, it kept the original word vectors.\n\n00:25:00\nOK.\n\n00:25:08\nand this picture actually comes from a follow-on paper which\n\n00:25:14\nSo we start off with a sentence \"I like this movie very much,\"\n\n00:25:21\nSo we have words and their word vectors.\n\n00:25:29\nboth bigram filters, trigram filters, and 4-gram filters.\n\n00:25:37\ngoing to have ones that work on the unfine-tuned word\n\n00:25:44\nAnd so you're going to put these filters\n\n00:25:54\nAnd the way he's doing this, the filters are done without padding\n\n00:26:02\ncoming out.\n\n00:26:07\nAnd so then for each of these, you're\n\n00:26:14\nvalue from it.\n\n00:26:17\nfrom the ones with the fine tuning of the word\n\n00:26:22\nAnd so you're getting one feature out of each filter.\n\n00:26:33\ntogether, so you can then one vector\n\n00:26:39\nthe number of filters.\n\n00:26:43\nas a straightforward linear classifier\n\n00:26:49\na probability of a positive or negative.\n\n00:26:56\nAnd the interesting thing was this actually worked pretty well\n\n00:27:05\nSo this is a big table of results from his paper.\n\n00:27:15\nTreebank, two versions of that.\n\n00:27:20\nThere's a subjectivity classifier.\n\n00:27:27\nSo various data sets.\n\n00:27:39\nI guess all of these Socher et al. results were ones\n\n00:27:47\non various of these data sets.\n\n00:27:53\nthis simple convolutional neural network,\n\n00:28:00\nthan any of these other models that\n\n00:28:06\nNow, there was at least one way in which maybe that comparison\n\n00:28:15\nSo because if you remember back when we were doing drop out\n\n00:28:24\nI mean, Dropout, I think, came out in 2012,\n\n00:28:29\nSo the reality is a lot of these other methods were being written\n\n00:28:36\nwhereas he was using Dropout, and that gave him an advantage\n\n00:28:44\nto compare to redo the other models with Dropout,\n\n00:28:50\nBut nevertheless, it shows that you\n\n00:28:57\nwith just a very simple architecture.\n\n00:29:02\nSo that's one more thing that you can do.\n\n00:29:07\nis we have this sort of toolkit of ways that you can do things.\n\n00:29:15\nof vectors, which you could use for simple classification.\n\n00:29:22\nand your window models are sort of\n\n00:29:28\nbut more ad hoc.\n\n00:29:34\nwhich are definitely good for classification\n\n00:29:40\nThen we talked about recurrent neural networks,\n\n00:29:45\nreading through sentences from left to right\n\n00:29:51\nAnd then we've talked about transformers,\n\n00:29:58\nand is being used everywhere.\n\n00:30:02\nthat things are going in reverse and people are increasingly\n\n00:30:10\nthink, more debate in the vision world as between CNNs\n\n00:30:17\nhave complementary advantages.\n\n00:30:22\nA couple of other just facts on the side, and then I'll",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "global_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_kim_2014_sentence_classification_cnn",
+      "name": "Kim 2014 sentence-classification CNN",
+      "description": "A multi-filter text CNN with max pooling and softmax classification that became the canonical early NLP CNN baseline.",
+      "track_tags": [
+        "nlp",
+        "deep_learning",
+        "benchmarking"
+      ],
+      "domain_tags": [
+        "sentence_classification",
+        "sentiment_analysis",
+        "cnn_architecture"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Kim 2014 sentence-classification CNN captures the core idea that A multi-filter text CNN with max pooling and softmax classification that became the canonical early NLP CNN baseline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_frozen_and_fine_tuned_embedding_channels",
+      "name": "Frozen plus fine-tuned embedding channels",
+      "description": "Using both a static and an adaptive embedding channel mitigates harmful drift when fine-tuning on small labeled data.",
+      "track_tags": [
+        "nlp",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "embeddings",
+        "fine_tuning",
+        "generalization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Frozen plus fine-tuned embedding channels captures the core idea that Using both a static and an adaptive embedding channel mitigates harmful drift when fine-tuning on small labeled data.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pooling_strategies_in_text_cnns",
+      "name": "Pooling strategies in text CNNs",
+      "description": "Max, average, local, and k-max pooling determine how local activations are summarized across a sentence.",
+      "track_tags": [
+        "nlp",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "pooling",
+        "feature_detection",
+        "cnn_design"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Pooling strategies in text CNNs captures the core idea that Max, average, local, and k-max pooling determine how local activations are summarized across a sentence.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp3"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.37,
+    0.67
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture17-convnets_transcript.txt"
+  }
+}

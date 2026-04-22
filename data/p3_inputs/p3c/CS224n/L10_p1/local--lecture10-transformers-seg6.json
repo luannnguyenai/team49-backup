@@ -1,0 +1,227 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture10-transformers",
+    "lecture_title": "Lecture 10 - Self-Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA"
+  },
+  "unit": {
+    "unit_id": "local::lecture10-transformers::seg6",
+    "course_id": "cs224n",
+    "name": "Residuals, layer norm, and transformer architectures",
+    "description": "Adds the optimization machinery that makes transformers train well, then distinguishes decoder-only, encoder-only, and encoder-decoder variants.",
+    "summary": "Two optimization components are added after attention and after the feed-forward layer: residual connections and layer normalization [ts=3498s] [ts=3505s]. Residual connections add a layer's input back to its output so gradients have a direct identity path and the network starts closer to an identity mapping [ts=3541s] [ts=3581s] [ts=3600s]. Layer normalization then normalizes each token vector independently across its hidden dimensions to reduce uninformative variation between layers, rather than sharing statistics across tokens or across the batch [ts=3662s] [ts=3720s] [ts=3924s]. The lecture then assembles the full decoder block (masked multi-head attention, add-and-norm, feed-forward, add-and-norm), explains padding/masking for variable lengths, shows that the encoder is the same architecture without causal masking, and finally introduces encoder-decoder transformers with cross-attention where decoder states provide queries and encoder outputs provide keys and values [ts=4004s] [ts=4176s] [ts=4233s] [ts=4313s].",
+    "key_points": [
+      {
+        "text": "Residual connections add a layer's input to its output so the layer learns a residual and gradients have a direct path.",
+        "timestamp_s": 3541,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Layer normalization standardizes each token vector using its own mean and standard deviation across hidden dimensions.",
+        "timestamp_s": 3720,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Layer norm in transformers does not share normalization statistics across sequence positions or across the batch.",
+        "timestamp_s": 3924,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A transformer decoder block contains masked multi-head attention, add-and-norm, feed-forward, and add-and-norm.",
+        "timestamp_s": 4010,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Variable-length inputs are commonly padded, and pad tokens are masked out just like future tokens.",
+        "timestamp_s": 4097,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In cross-attention, decoder states define queries while encoder outputs define keys and values.",
+        "timestamp_s": 4233,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
+      "start_s": 3485,
+      "end_s": 4361
+    },
+    "difficulty": 0.72,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 15,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Two optimization components are added after attention and after the feed-forward layer: residual connections and layer normalization [ts=3498s] [ts=3505s]. Residual connections add a layer's input back to its output so gradients have a direct identity path and the network starts closer to an identity mapping [ts=3541s] [ts=3581s] [ts=3600s]. Layer normalization then normalizes each token vector independently across its hidden dimensions to reduce uninformative variation between layers, rather than sharing statistics across tokens or across the batch [ts=3662s] [ts=3720s] [ts=3924s]. The lecture then assembles the full decoder block (masked multi-head attention, add-and-norm, feed-forward, add-and-norm), explains padding/masking for variable lengths, shows that the encoder is the same architecture without causal masking, and finally introduces encoder-decoder transformers with cross-attention where decoder states provide queries and encoder outputs provide keys and values [ts=4004s] [ts=4176s] [ts=4233s] [ts=4313s].",
+  "target_kp_ids": [
+    "kp_transformer_architecture",
+    "kp_residual_connections",
+    "kp_layer_normalization"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "video_clip_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "transcript_slice": "00:58:05\nSo now in the transformer decoder.\n\n00:58:08\nthat I have unfaded out here.\n\n00:58:15\nI should say really, because these are quite important.\n\n00:58:20\nWe've got residual connections and layer normalization.\n\n00:58:26\nthey're often written together as this add and norm box.\n\n00:58:34\nI'm going to apply masked multi-head attention\n\n00:58:41\nthen I'll do a feed forward application\n\n00:58:44\nSo this is quite important, so let's go over these two\n\n00:58:51\nThe first is residual connections.\n\n00:58:55\nbefore, right?\n\n00:58:57\nBut it's really a good trick to help models train better.\n\n00:59:04\ninstead of having this sort of-- you have a layer i minus 1,\n\n00:59:11\nmaybe it's a feed-forward network,\n\n00:59:16\nI'm going to add the result of layer i\n\n00:59:22\nSo now I'm saying I'm just going to compute the layer,\n\n00:59:27\nso that I only have to learn the residual\n\n00:59:32\nSo I've got this connection here,\n\n00:59:38\nOK, right?\n\n00:59:39\nAnd you should think that the gradient is just\n\n00:59:43\nLike if ah, I've got vanishing or exploding gradient--\n\n00:59:49\nwell, I can at least learn everything behind it\n\n00:59:54\nthe gradient is 1, because it's the identity.\n\n00:59:59\nAnd it also maybe is like a bias-- at least\n\n01:00:04\nlike the identity function now, right?\n\n01:00:08\nis somewhat small because all of your weights are small,\n\n01:00:13\nmaybe the whole thing looks a little bit\n\n01:00:17\na good sort of place to start.\n\n01:00:22\nI just love this visualization.\n\n01:00:26\nSo your gradient descent, and you're\n\n01:00:30\nThis is like the parameter space,\n\n01:00:34\nAnd it's really hard, so you get stuck in some local optima,\n\n01:00:41\nAnd then this is your residual connections.\n\n01:00:47\nIt's not actually I guess really how it works all the time,\n\n01:00:51\nIt's great.\n\n01:00:58\nSo yeah, we've seen residual connections,\n\n01:01:02\nSo layer norm is another thing to help your model\n\n01:01:08\nAnd the intuitions around layer normalization and sort\n\n01:01:17\naren't perfectly like, let's say, connected.\n\n01:01:25\nthat we want to, say, there's variation within each layer.\n\n01:01:32\nThat's not actually informative because of variations\n\n01:01:43\nin my layers that I can't totally control,\n\n01:01:47\nnicely where everything stays roughly the same norm, maybe\n\n01:01:54\nAnd I want to cut down on sort of uninformative variation\n\n01:02:00\nSo I'm going to let x and Rd be an individual word\n\n01:02:05\nSo this is like at a single index one vector.\n\n01:02:12\nNormalize it in the sense of it's got a bunch of variation,\n\n01:02:17\nI'm going to normalize it to unit\n\n01:02:21\nSo I'm going to estimate the mean here across--\n\n01:02:30\nSo j equals 1 to the model dimensionality.\n\n01:02:34\nSo I've got this one big word vector,\n\n01:02:37\nDivision by d here, right?\n\n01:02:40\nI'm going to have my estimate of the standard deviation.\n\n01:02:45\nThis is my simple estimate of the standard deviation\n\n01:02:50\nAnd I'm just going to--\n\n01:02:58\nto try to scale back out in terms of multiplicatively\n\n01:03:05\nWe're going to compute this standardization, right?\n\n01:03:09\nsubtract out the mean, divide by the standard deviation,\n\n01:03:14\nIf there's not a lot of variation,\n\n01:03:17\nSo I'm going to have this epsilon there.\n\n01:03:21\nSo this part here, x minus mu over square root\n\n01:03:28\nand sort of normalize it to unit mean and standard deviation.\n\n01:03:36\nand then maybe add an offset beta that I've learned.\n\n01:03:42\ndiscuss this in the lecture notes, in practice,\n\n01:03:47\nBut so layer normalization, yeah, you're--\n\n01:03:54\nnormalization, it's going to be--\n\n01:03:57\nsimilar to the next layer independent of what's\n\n01:04:01\nmean and standard deviation.\n\n01:04:04\nto learn off of for the next layer.\n\n01:04:09\nAny questions for residual or layer norm?\n\n01:04:13\n[INAUDIBLE] to subtract the [INAUDIBLE] the vector x?\n\n01:04:18\nWhen I subtract the scalar mu from the vector x,\n\n01:04:27\nYeah, good point.\n\n01:04:29\nThat was unclear.\n\n01:04:38\nShould it be divided by d or [INAUDIBLE]??\n\n01:04:43\nIn the fourth bullet point when you're calculating the mean,\n\n01:04:49\nor maybe I'm just [INAUDIBLE].\n\n01:04:52\nYeah, cool.\n\n01:04:58\nof all of the-- yeah.\n\n01:05:01\nSo if you have five words in the sentence [INAUDIBLE] norm,\n\n01:05:09\nor just one word [INAUDIBLE]?\n\n01:05:14\ndo I normalize by sort of aggregating\n\n01:05:20\nwords, share their statistics or do independently for each word?\n\n01:05:26\nthat discuss transformers is under-specified.\n\n01:05:33\nis somewhat confusing to me.\n\n01:05:39\nYou could have shared across the five words\n\n01:05:43\nare just based on all five, but you do not.\n\n01:05:51\n[INAUDIBLE] extension of that [INAUDIBLE]\n\n01:06:00\n[INAUDIBLE]?\n\n01:06:02\nThe question is, if you have a batch of sequences, right?\n\n01:06:09\ndo you for a single word, now we don't share across a sequence\n\n01:06:14\nbut do you share across the batch?\n\n01:06:17\nYou also do not share across the batch.\n\n01:06:22\ninvented as a replacement for batch normalization\n\n01:06:26\nAnd the issue with batch normalization\n\n01:06:30\nthat you don't like on examples that should be not related\n\n01:06:35\nAnd so yeah, you don't share statistics across the batch.\n\n01:06:41\nCool.\n\n01:06:48\nand we have our blocks.\n\n01:06:53\nsays repeat for number of encoder or, sorry, decoder\n\n01:07:00\nI pass it through self-attention.\n\n01:07:04\nSo I've got this residual connection here\n\n01:07:10\nand then a feed-forward layer and then another add and norm.\n\n01:07:17\nI apply for some number of times, number of blocks,\n\n01:07:23\nAnd that's it, that's the transformer decoder as it is.\n\n01:07:32\nSo that's a whole architecture right there.\n\n01:07:36\nwe've solved things like not being\n\n01:07:42\nsolved a lot of different optimization problems.\n\n01:07:44\nYes.\n\n01:07:48\nYes.\n\n01:07:51\nYeah.\n\n01:07:55\nd over h as well.\n\n01:08:03\nSo the question is, how do these models\n\n01:08:08\nYeah, so if you have--\n\n01:08:17\nis going to be a constant length.\n\n01:08:24\nAnd in order to not look at the future, the stuff that's\n\n01:08:30\ncan mask out the pad tokens.\n\n01:08:34\nfor not looking at the future in general,\n\n01:08:39\nto zero or the scores to negative infinity\n\n01:08:47\nYeah, exactly.\n\n01:08:52\nNow, in practice-- so the question was,\n\n01:08:55\nbe, be that maximum length?\n\n01:09:00\nby setting it to something smaller and everything--\n\n01:09:06\nYou just have to code it properly so it can handle--\n\n01:09:11\nif everything is shorter than length 5,\n\n01:09:15\nAll of the self-attention operations just work.\n\n01:09:21\nHow many layers are in the feed-forward normally?\n\n01:09:27\nYeah.\n\n01:09:29\nI've got a couple more things and not very much time.\n\n01:09:33\nBut I'll be here after the class as well.\n\n01:09:36\nso the transformer encoder is almost identical.\n\n01:09:41\nand so we just don't do the masking, right?\n\n01:09:46\nI've got no masking.\n\n01:09:51\nOK?\n\n01:09:53\nSo that's called the transformer encoder.\n\n01:09:57\nAnd then finally, we've got the transformer encoder\n\n01:10:04\npresented in this paper Attention Is All You Need.\n\n01:10:10\nHere's the encoder.\n\n01:10:13\nfor machine translation; It's multi-headed attention\n\n01:10:17\nAnd I have a decoder to decode out my sentence.\n\n01:10:24\nI have my masked multi-head self-attention\n\n01:10:29\nbut now I have an extra operation which\n\n01:10:35\ngoing to use my decoder vectors as my queries,\n\n01:10:43\nas my keys and values.\n\n01:10:48\nI'm looking at all the possible words in the output of all\n\n01:10:53\nYes.\n\n01:10:59\nlike the keys and the values.\n\n01:11:03\nfrom the output, because didn't we collapse those\n\n01:11:07\nSo we will-- sorry, how will we get the keys and values out?\n\n01:11:15\ndidn't we collapse like the keys and values\n\n01:11:19\nSo the output--\n\n01:11:21\nYeah, the question is, how do you\n\n01:11:24\nof single collapsed output?\n\n01:11:27\nis just this weighted average of the value\n\n01:11:33\nAnd then from that output, for the next layer,\n\n01:11:38\nto each of them for the next layer of self-attention.\n\n01:11:43\n--key and the value to the output.\n\n01:11:47\ntaking from the [INAUDIBLE]?\n\n01:11:51\nof whatever came before it.\n\n01:11:53\nAnd so just in a little bit of math, right?\n\n01:12:00\nthat are the output of the encoder, right,\n\n01:12:07\nSo I've got these z's I'm calling the output\n\n01:12:13\nand my values from the encoder vectors, these h's.\n\n01:12:22\nand then I define the queries from my decoder.\n\n01:12:27\nSo this is why two of the arrows come from the encoder,\n\n01:12:32\nI've got my z's here and my queries, my keys and values\n\n01:12:39\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "global_kp_id": "kp_residual_connections",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "global_kp_id": "kp_layer_normalization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "global_kp_id": "kp_transformer_architecture",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_residual_connections",
+      "name": "Residual connections",
+      "description": "Skip connections add a layer's input back to its transformed output, making identity mappings easy and enabling stable optimization of deeper networks.",
+      "track_tags": [
+        "architecture_design",
+        "deep_learning",
+        "optimization",
+        "transformers",
+        "architectures"
+      ],
+      "domain_tags": [
+        "optimization",
+        "residual_connections",
+        "resnet",
+        "deep_learning",
+        "vision",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "research"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because residual connections formalizes how skip connections add a layer's input back to its transformed output, making identity mappings easy and enabling stable optimization of deeper networks, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp9",
+        "local::lecture_6::kp6",
+        "local::lecture08-seq2seq::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_layer_normalization",
+      "name": "Layer normalization",
+      "description": "Each token vector is normalized across its hidden dimensions so later layers see more stable activations without depending on batch statistics.",
+      "track_tags": [
+        "deep_learning",
+        "optimization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "layer_normalization",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because layer normalization clarifies each token vector is normalized across its hidden dimensions so later layers see more stable activations without depending on batch statistics, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_transformer_architecture",
+      "name": "Transformer block architecture",
+      "description": "The same core block yields a decoder-only model with masking, an encoder-only model without masking, and an encoder-decoder model with cross-attention. A transformer block combines self-attention, residual connections, normalization, and an MLP/FFN, and a full transformer is a stack of these blocks.",
+      "track_tags": [
+        "architectures",
+        "deep_learning",
+        "neural_architectures",
+        "nlp",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "cross_attention",
+        "deep_learning",
+        "encoder_decoder_models",
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because transformer block architecture synthesizes the same core block yields a decoder-only model with masking, an encoder-only model without masking, and an encoder-decoder model with cross-attention into an end-to-end method or integrated recipe though importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp11",
+        "local::lecture_8::kp13"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.57,
+    0.87
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture10-transformers_transcript.txt"
+  }
+}

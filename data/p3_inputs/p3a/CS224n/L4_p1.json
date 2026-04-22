@@ -1,780 +1,1465 @@
 {
   "lecture_context": {
     "course_id": "CS224n",
-    "lecture_id": "lecture04-dependency-parsing",
-    "lecture_title": "Dependency Parsing",
-    "youtube_url": "https://www.youtube.com/watch?v=KVKvde-_MYc"
+    "lecture_id": "lecture04-wordvecs-lm",
+    "lecture_title": "Lecture 4 - Word Vectors and Language Models",
+    "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ"
   },
   "table_of_contents": [
     {
       "section_index": 1,
-      "title": "From phrase structure to dependency structure",
+      "title": "Optimization basics, SGD, and word2vec initialization",
       "start_s": 5,
-      "end_s": 889
+      "end_s": 609
     },
     {
       "section_index": 2,
-      "title": "Why syntax matters: ambiguity and practical interpretation",
-      "start_s": 889,
-      "end_s": 1755
+      "title": "Word2vec parameters, bag-of-words context prediction, and GloVe analogy demo",
+      "start_s": 609,
+      "end_s": 1483
     },
     {
       "section_index": 3,
-      "title": "Dependency syntax, history, and annotated treebanks",
-      "start_s": 1755,
-      "end_s": 2790
+      "title": "Word2vec implementation details: two vectors, softmax variants, and negative sampling",
+      "start_s": 1483,
+      "end_s": 2016
     },
     {
       "section_index": 4,
-      "title": "What parsers need to know: locality, valency, and projectivity",
-      "start_s": 2790,
-      "end_s": 3212
+      "title": "Count-based word vectors, SVD, COALS, and the GloVe objective",
+      "start_s": 2016,
+      "end_s": 2753
     },
     {
       "section_index": 5,
-      "title": "Transition-based parsing with stack, buffer, and arcs",
-      "start_s": 3212,
-      "end_s": 3870
+      "title": "Evaluating word vectors: intrinsic vs extrinsic evaluation",
+      "start_s": 2762,
+      "end_s": 3131
     },
     {
       "section_index": 6,
-      "title": "Evaluation, neural transition parsers, and graph-based alternatives",
-      "start_s": 3870,
-      "end_s": 4729
+      "title": "Word senses, polysemy, and sparse coding",
+      "start_s": 3138,
+      "end_s": 3786
+    },
+    {
+      "section_index": 7,
+      "title": "Neural window classifiers, supervised learning, and cross-entropy loss",
+      "start_s": 3789,
+      "end_s": 4449
+    },
+    {
+      "section_index": 8,
+      "title": "Artificial neurons and multi-layer neural networks",
+      "start_s": 4449,
+      "end_s": 4742
     }
   ],
   "units": [
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg1",
-      "course_id": "cs224n-2024",
-      "name": "Phrase structure and dependency structure as views of syntax",
-      "description": "Introduces the lecture, connects it to Assignment 2, reviews constituency/phrase-structure grammar, and contrasts it with dependency grammar as a head-dependent representation.",
-      "summary": "The lecture opens by framing dependency parsing as the core task behind the second half of Assignment 2 and noting that students will build the decision-making component of a neural dependency parser in PyTorch [ts=64s] [ts=72s]. It then reviews phrase structure grammar: words belong to parts of speech such as nouns, adjectives, determiners, and prepositions, and these combine into larger constituents like noun phrases and prepositional phrases [ts=149s] [ts=304s]. The instructor gives CFG-style rewrite rules for noun phrases, including determiner plus noun, optional adjectives, repeated adjectives, and noun phrases followed by prepositional phrases [ts=367s] [ts=423s]. He then contrasts this with dependency structure, where the sentence is organized around head words and their modifiers or arguments, illustrated with look in the large crate in the kitchen by the door [ts=604s] [ts=676s]. The segment closes by arguing that humans and NLP systems must recover which words modify which others in order to understand meaning, and foreshadows that transformers later encode similar structure implicitly even without explicit parses [ts=759s] [ts=868s].",
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "course_id": "CS224N",
+      "name": "Optimization basics for learning word vectors",
+      "description": "Connects the previous lecture's word2vec derivative work to gradient descent, stochastic gradient descent, and random initialization.",
+      "summary": "The lecture begins with the plan for finishing word vectors, then shifts from the previous word2vec loss derivatives to the optimization loop: minimize a cost function by computing its gradient, moving a small amount downhill, and repeating [ts=202s]. The update uses a learning rate alpha, typically small, subtracting a scaled gradient from parameters so steps do not overshoot or reach a worse point [ts=294s]. Full-batch gradient descent is described as too expensive because it requires evaluating the objective and gradient on the entire training set before one update [ts=361s]. Stochastic or mini-batch gradient descent instead uses a small subset such as 16 or 32 examples, giving a noisy gradient estimate that is much faster and can improve neural network optimization through useful noise [ts=413s]. The word2vec recap stresses random small-number initialization: all-zero vectors create false symmetries and prevent learning, while gradient updates adjust vectors to predict surrounding words better [ts=508s].",
       "key_points": [
         {
-          "text": "Phrase structure grammar models syntax with parts of speech and larger constituents such as noun phrases and prepositional phrases.",
-          "timestamp_s": 149,
+          "text": "Gradient descent minimizes a loss by computing the gradient and repeatedly stepping downhill.",
+          "timestamp_s": 202,
           "evidence_type": "definition"
         },
         {
-          "text": "A noun phrase can be described with rules like determiner plus adjective-star plus noun, optionally followed by a prepositional phrase.",
-          "timestamp_s": 367,
-          "evidence_type": "formula"
+          "text": "The learning rate alpha scales the gradient step; too large a step can overshoot or worsen the objective.",
+          "timestamp_s": 294,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Dependency structure represents a sentence through head words and the words that modify or depend on them.",
-          "timestamp_s": 604,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Understanding language requires recovering what modifies what, not just reading a linear sequence of words or sounds.",
-          "timestamp_s": 839,
+          "text": "Full-batch gradient descent is usually impractical for neural nets because it waits for an objective and gradient over all training data.",
+          "timestamp_s": 361,
           "evidence_type": "claim"
+        },
+        {
+          "text": "Stochastic or mini-batch gradient descent uses a small subset such as 16 or 32 items as a noisy gradient estimate.",
+          "timestamp_s": 413,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Word vectors should be initialized with random small numbers; all zeros cause symmetry and prevent learning.",
+          "timestamp_s": 508,
+          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
         "start_s": 5,
-        "end_s": 889
+        "end_s": 609
       },
-      "difficulty": 0.38,
+      "difficulty": 2.4,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 15,
+      "duration_min": 10,
       "ordering_index": 1,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg2",
-      "course_id": "cs224n-2024",
-      "name": "Syntactic ambiguity and why parses matter",
-      "description": "Shows how attachment and coordination ambiguities create multiple readings, and motivates syntax as a practical tool for interpretation and information extraction.",
-      "summary": "This segment motivates parsing through ambiguity. Using headline examples such as Scientists count whales from space, the lecture shows that a prepositional phrase can attach either to the verb event or to a nearby noun, yielding different meanings [ts=929s] [ts=978s]. The instructor emphasizes that English prepositional phrases frequently create globally ambiguous structures, and with multiple successive PPs the number of readings grows quickly according to Catalan-style noncrossing choices, reaching 13 readings for four PPs in the example sentence about an acquisition [ts=1165s] [ts=1311s]. He then broadens the discussion to coordination scope, apposition, and infinitival attachment with additional newspaper headlines, stressing that different languages realize ambiguity differently rather than avoiding it entirely [ts=1355s] [ts=1621s]. The segment ends with a practical NLP use case: dependency patterns can be used to extract structured facts such as protein-protein interactions from biomedical text by locating verbs like interacts and their arguments and coordinated entities [ts=1635s] [ts=1718s].",
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "course_id": "CS224N",
+      "name": "Word2vec mechanics and word-vector analogy behavior",
+      "description": "Explains the bag-of-words word2vec model and demonstrates learned vector similarity and analogies with GloVe embeddings.",
+      "summary": "The word2vec model is summarized as having only word-vector parameters: separate outside-word and center-word vectors whose dot products yield a probability distribution over possible context words, with error coming from comparison to the true outside word [ts=618s]. The lecturer emphasizes that this is a bag-of-words model: it does not model sentence structure or left-versus-right position, but predicts what kinds of words appear around a center word [ts=660s]. A Jupyter demo loads 100-dimensional GloVe vectors and shows that semantically related words such as bread and croissant have similar vector components, while nearest-neighbor queries for USA, banana, and croissant return sensible related words [ts=748s]. Taking the negative of a single word vector is not useful for antonyms and tends to return odd tokens [ts=894s]. The important property is linear semantic components: vector arithmetic such as King minus man plus woman finds Queen, motivating analogy tasks [ts=966s]. Additional examples show cultural and syntactic regularities, such as Australia:beer::Russia:vodka and tall:tallest::long:longest, illustrating that even a simple bag-of-words model captures word meaning and some world knowledge [ts=1140s]. Q&A clarifies that vector differences can represent relation directions, that the two word2vec vectors for a word are commonly averaged, and that analogy chaining can fail [ts=1287s].",
       "key_points": [
         {
-          "text": "Prepositional phrase attachment can change meaning, as in Scientists count whales from space.",
-          "timestamp_s": 929,
-          "evidence_type": "example"
+          "text": "Word2vec uses center and outside word vectors; dot products define probabilities for outside words, and error comes from the actual context word.",
+          "timestamp_s": 618,
+          "evidence_type": "definition"
         },
         {
-          "text": "Multiple PP attachments create many possible readings, with counts growing combinatorially under noncrossing constraints.",
-          "timestamp_s": 1285,
+          "text": "The skip-gram setup described here is a bag-of-words model that ignores sentence structure and left/right context position.",
+          "timestamp_s": 660,
           "evidence_type": "claim"
         },
         {
-          "text": "Coordination scope ambiguity can make a phrase describe one entity or multiple entities.",
-          "timestamp_s": 1355,
+          "text": "Nearest-neighbor search over GloVe vectors returns semantically related words such as banana with coconut, mango, and fruit.",
+          "timestamp_s": 837,
           "evidence_type": "example"
         },
         {
-          "text": "Dependency patterns support information extraction by identifying verbs and their syntactic arguments, including coordinated arguments.",
-          "timestamp_s": 1675,
-          "evidence_type": "example"
+          "text": "A negative single word vector is not an antonym finder; negative banana returns odd or unhelpful tokens.",
+          "timestamp_s": 900,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Word-vector analogies work by adding and subtracting semantic directions, as in King - man + woman ≈ Queen.",
+          "timestamp_s": 966,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Analogy examples show both semantic/cultural and syntactic regularities, but the method has failures.",
+          "timestamp_s": 1260,
+          "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
-        "start_s": 889,
-        "end_s": 1755
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 609,
+        "end_s": 1483
       },
-      "difficulty": 0.45,
+      "difficulty": 2.8,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 14,
+      "duration_min": 15,
       "ordering_index": 2,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg3",
-      "course_id": "cs224n-2024",
-      "name": "Dependency grammar formalism, history, and treebanks",
-      "description": "Defines typed dependency trees, gives terminology and historical context, and explains why annotated treebanks became central to modern NLP.",
-      "summary": "The lecture formalizes dependency syntax as asymmetric head-dependent relations, often typed with labels such as subject, oblique, appositional modifier, or case marker [ts=1792s] [ts=1860s]. It introduces standard vocabulary like head, dependent, governor, and modifier, and states the usual tree assumptions: dependencies form a connected, acyclic structure with a single root, often implemented with an artificial ROOT node for parsing convenience [ts=1926s] [ts=2330s]. The instructor then places dependency grammar in historical context, highlighting Panini and later Arabic grammatical traditions as early dependency-based analyses, while noting that phrase-structure grammars are much more recent and tied to twentieth-century formal work such as Chomsky's hierarchy [ts=2025s] [ts=2169s]. Finally, the segment explains the move from handwritten grammars to annotated resources because ambiguity requires learned preferences, and presents Universal Dependencies as a multilingual treebank resource that supports parser training, crosslinguistic research, and systematic evaluation [ts=2391s] [ts=2581s].",
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "course_id": "CS224N",
+      "name": "Word2vec variants and negative sampling",
+      "description": "Covers why word2vec keeps two vectors, the skip-gram and CBOW family, naive softmax, and negative sampling with sigmoid losses.",
+      "summary": "After warning students not to follow an old assignment that asked for a from-scratch word2vec implementation, the lecturer answers why word2vec uses two vector sets: using the same vector for center and outside words creates a quadratic self-term when the center word appears in the normalization, making the math messier; disjoint vectors keep the derivation simple and are usually averaged afterward [ts=1537s]. The original Mikolov family is framed as two model structures: skip-gram predicts surrounding words from an inside word, while continuous bag of words predicts the center word from its context [ts=1622s]. The training objective previously presented is naive softmax, which sums over every vocabulary word, requiring many dot products and exponentiations for large vocabularies [ts=1662s]. Negative sampling replaces full softmax with simple logistic regressions: make the true context word high probability and a few randomly sampled words low probability [ts=1741s]. The sigmoid/logistic function maps real-valued dot products to probabilities from 0 to 1, making positive dot products favorable for real outside words and unfavorable for negative samples [ts=1810s]. Negative examples are not sampled uniformly; word2vec uses unigram probabilities raised to the 3/4 power, which increases the relative chance of less frequent words while still favoring common words [ts=1924s].",
       "key_points": [
         {
-          "text": "Dependencies are typed relations between a head and a dependent, such as subject or oblique.",
-          "timestamp_s": 1860,
+          "text": "Using separate center and outside vectors avoids a messy quadratic self-term in the softmax normalization.",
+          "timestamp_s": 1537,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The word2vec family includes skip-gram, which predicts context from center, and CBOW, which predicts center from context.",
+          "timestamp_s": 1622,
           "evidence_type": "definition"
         },
         {
-          "text": "A dependency parse is usually treated as a connected, acyclic tree with a single root, often augmented with a fake ROOT node.",
-          "timestamp_s": 1946,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Dependency grammar has a much longer history than phrase-structure grammar, with Panini as a canonical early example.",
-          "timestamp_s": 2025,
+          "text": "Naive softmax sums over every vocabulary word, which is expensive for vocabularies with hundreds of thousands of words.",
+          "timestamp_s": 1662,
           "evidence_type": "claim"
         },
         {
-          "text": "Annotated treebanks such as Universal Dependencies provide reusable supervision and evaluation data for parsers.",
-          "timestamp_s": 2581,
-          "evidence_type": "example"
+          "text": "Negative sampling trains the model to like the true context word and dislike a small number of sampled non-context words.",
+          "timestamp_s": 1741,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The logistic sigmoid maps any real dot product to a probability between 0 and 1.",
+          "timestamp_s": 1810,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Negative samples are drawn from unigram probability raised to the 3/4 power, partially flattening the frequency distribution.",
+          "timestamp_s": 1945,
+          "evidence_type": "formula"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
-        "start_s": 1755,
-        "end_s": 2790
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 1483,
+        "end_s": 2016
       },
-      "difficulty": 0.49,
+      "difficulty": 3.5,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 17,
+      "duration_min": 9,
       "ordering_index": 3,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg4",
-      "course_id": "cs224n-2024",
-      "name": "Parsing cues, valency, and projectivity constraints",
-      "description": "Identifies what information helps a parser decide dependencies and explains the difference between projective and nonprojective structures.",
-      "summary": "Before presenting a parser, the lecture asks what evidence should guide dependency decisions. The main cues are lexical plausibility between the words at the ends of an arc, the distance between them, what appears in between them, and the valency patterns of heads such as verbs that normally expect certain numbers and arrangements of arguments [ts=2798s] [ts=2875s]. The segment also notes a structural regularity: many dependencies nest cleanly, but human languages can also exhibit crossing dependencies, as in displaced wh-questions or cases where one modifier belongs inside another span [ts=3132s] [ts=3189s]. These crossing cases are called nonprojective dependencies, but the parser used in the assignment will simplify matters by handling only projective dependency parsing [ts=3162s] [ts=3212s].",
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "course_id": "CS224N",
+      "name": "Count-based vectors, SVD, and GloVe",
+      "description": "Compares predictive word2vec-style embeddings with count-based co-occurrence methods and derives the intuition behind GloVe.",
+      "summary": "The lecture asks whether a more direct route to word vectors is possible by counting how often words occur in each other's contexts, using a context window to form a co-occurrence count matrix [ts=2023s]. A toy corpus produces a word-by-word matrix whose rows can be treated as vectors, but raw count vectors are huge: with a 400,000-word vocabulary, the matrix is 400,000 by 400,000 rather than vocabulary size by a modest embedding dimension [ts=2153s]. Dimensionality reduction via singular value decomposition is introduced as a way to rewrite any matrix as U, singular values, and V, then truncate smaller singular values to obtain lower-dimensional word representations [ts=2213s]. Earlier methods such as latent semantic analysis and COALS partly worked; COALS improved raw SVD by using log frequencies, ramped windows that weight closer context more, and Pearson correlations, and it also discovered linear semantic components before word2vec became famous [ts=2329s]. GloVe is introduced as Stanford's count-based model aimed at obtaining linear meaning components from count matrices [ts=2481s]. Its key intuition is that ratios of co-occurrence probabilities encode meaning differences: comparing contexts of ice and steam makes solid versus gas directions emerge, while unrelated words remain near ratio 1 [ts=2521s]. By taking logs, ratios become differences, so a log-bilinear dot-product model can make vector differences correspond to log ratios of co-occurrence probabilities, with bias and threshold details treated as secondary [ts=2648s].",
       "key_points": [
         {
-          "text": "Useful parsing evidence includes the lexical compatibility of a candidate head-dependent pair.",
-          "timestamp_s": 2806,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Dependency distance and intervening material matter because most dependencies are short and rarely span verbs or punctuation.",
-          "timestamp_s": 2840,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Valency captures how many arguments a head tends to take and on which sides.",
-          "timestamp_s": 2875,
+          "text": "A co-occurrence matrix counts how often each word appears in the context window of other words.",
+          "timestamp_s": 2095,
           "evidence_type": "definition"
         },
         {
-          "text": "Nonprojective dependencies involve crossings, but the lecture's parser restricts itself to projective parsing.",
-          "timestamp_s": 3162,
+          "text": "Raw co-occurrence vectors are ungainly because a large vocabulary creates a massive square matrix.",
+          "timestamp_s": 2161,
           "evidence_type": "claim"
+        },
+        {
+          "text": "SVD factorizes a matrix into U, singular values, and V, and truncating small singular values yields low-dimensional representations.",
+          "timestamp_s": 2224,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "COALS improved count-based vectors with log frequencies, ramped context windows, and correlations.",
+          "timestamp_s": 2369,
+          "evidence_type": "example"
+        },
+        {
+          "text": "GloVe seeks vector-space linear components by using ratios of co-occurrence probabilities.",
+          "timestamp_s": 2521,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Taking logs turns probability ratios into differences, enabling a log-bilinear dot-product model.",
+          "timestamp_s": 2648,
+          "evidence_type": "formula"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
-        "start_s": 2790,
-        "end_s": 3212
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 2016,
+        "end_s": 2753
       },
-      "difficulty": 0.57,
+      "difficulty": 3.8,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 7,
+      "duration_min": 12,
       "ordering_index": 4,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg5",
-      "course_id": "cs224n-2024",
-      "name": "Transition-based dependency parsing",
-      "description": "Walks through shift, left-arc, and right-arc parsing with a stack and buffer, then explains Nivre's greedy linear-time parsing idea and the older symbolic feature-based version.",
-      "summary": "The parser used for the assignment is introduced as transition-based parsing, operating over a buffer of unread words, a stack of partial structure, and a set of built arcs [ts=3212s] [ts=3333s]. Using the toy sentence I ate fish, the lecture demonstrates the three core actions: shift moves the next buffer word onto the stack, left-arc makes the top stack item the head of the item below it, and right-arc makes the lower item the head of the top item, popping the dependent after each arc is created [ts=3390s] [ts=3512s]. The key idea is that a sequence of local transition decisions determines the whole parse, and Nivre's contribution was to let machine learning predict each next transition greedily, yielding linear-time parsing instead of more expensive cubic-time context-free parsing methods [ts=3543s] [ts=3687s]. The segment then explains that the pre-neural version used symbolic indicator features over local parser configurations, but conjunctions of words and tags produced millions of sparse features [ts=3764s] [ts=3853s].",
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "course_id": "CS224N",
+      "name": "Intrinsic and extrinsic evaluation of word vectors",
+      "description": "Defines evaluation strategies for embeddings and illustrates them with analogy, word similarity, and named entity recognition tasks.",
+      "summary": "After the GloVe demo, the lecturer emphasizes that NLP systems need evaluation to determine what is better or worse [ts=2766s]. Intrinsic evaluation is defined as scoring a specific internal subtask; it is fast and helps understand the component, but may be distant from the downstream task and may not translate to end performance [ts=2793s]. Extrinsic evaluation tests whether a modeling component helps a real downstream task such as question answering, summarization, machine translation, or web search, although running the full system can make effects harder to diagnose [ts=2825s]. For word vectors, intrinsic evaluations include analogies and word similarity judgments: analogy sets count the percentage of successful vector arithmetic cases, while similarity tasks compare model scores to averaged human judgments such as tiger/tiger, book/paper, plane/car, and stock/jaguar [ts=2898s]. The table discussed shows plain SVD performing poorly, log-count SVD improving, and word2vec/GloVe variants getting stronger scores [ts=3031s]. As an extrinsic example, named entity recognition labels strings like Chris Manning as a person and Palo Alto as a place; adding word vectors to a baseline symbolic probabilistic NER system substantially improves performance [ts=3075s].",
       "key_points": [
         {
-          "text": "A transition-based parser maintains a buffer, a stack, and a set of constructed dependency arcs.",
-          "timestamp_s": 3310,
+          "text": "Intrinsic evaluation scores a specific internal subtask and is usually fast but may not predict downstream impact.",
+          "timestamp_s": 2793,
           "evidence_type": "definition"
         },
         {
-          "text": "Shift moves the next buffer token to the stack; left-arc and right-arc build dependencies between the top two stack items.",
-          "timestamp_s": 3393,
+          "text": "Extrinsic evaluation runs a real downstream task to test whether a model component helps final task accuracy.",
+          "timestamp_s": 2825,
           "evidence_type": "definition"
         },
         {
-          "text": "In the I ate fish walkthrough, left-arc makes I depend on ate, and right-arc later makes fish depend on ate and ate depend on ROOT.",
-          "timestamp_s": 3450,
+          "text": "Word-vector analogy evaluation measures what percentage of analogy questions are solved correctly.",
+          "timestamp_s": 2898,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Word-similarity evaluation correlates model similarity scores with averaged human judgments.",
+          "timestamp_s": 2955,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Named entity recognition can serve as a downstream task where adding GloVe vectors improves a baseline system.",
+          "timestamp_s": 3075,
           "evidence_type": "example"
-        },
-        {
-          "text": "Greedy transition prediction gives a linear-time parser because each step predicts one local action.",
-          "timestamp_s": 3675,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Older transition parsers relied on symbolic indicator-feature conjunctions that were numerous and sparse.",
-          "timestamp_s": 3784,
-          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
-        "start_s": 3212,
-        "end_s": 3870
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 2762,
+        "end_s": 3131
       },
-      "difficulty": 0.63,
+      "difficulty": 2.6,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 11,
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
       "ordering_index": 5,
       "is_template": false
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg6",
-      "course_id": "cs224n-2024",
-      "name": "Evaluating parses and moving to neural and graph-based parsers",
-      "description": "Defines UAS/LAS, motivates neural transition-based parsing with embeddings and a multilayer classifier, and ends with graph-based parsing as a more accurate alternative.",
-      "summary": "The final segment first explains parser evaluation. A gold dependency tree is compared against a predicted tree by checking whether each word gets the correct head; unlabeled dependency accuracy measures head correctness, while labeled accuracy additionally checks relation labels such as subject or object [ts=3870s] [ts=3966s]. The lecture then motivates neural parsing by noting that symbolic features are sparse, incomplete, and expensive to compute, so neural models can replace brittle local conjunctions with dense learned representations [ts=3987s] [ts=4027s]. The neural transition-based parser embeds words, parts of speech, and dependency labels, extracts the key stack and buffer items, concatenates their vectors, passes them through hidden layers with ReLU, and uses a softmax to predict shift, left-arc, or right-arc [ts=4164s] [ts=4337s]. This yields a nonlinear classifier that was both accurate and fast enough to scale, leading to later beam-search improvements like Parsey McParseface [ts=4341s] [ts=4470s]. The lecture closes by sketching graph-based parsing, where each possible dependency arc is scored and a tree algorithm such as minimum spanning tree selects a well-formed parse; these models were slower earlier on but can be more accurate, and the speaker notes neural graph-based parsing as the more accurate method in Stanza [ts=4520s] [ts=4716s].",
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "course_id": "CS224N",
+      "name": "Polysemy, word senses, and sparse recovery from embeddings",
+      "description": "Explains why single word vectors are problematic for ambiguous words and how sense clustering and sparse coding address polysemy.",
+      "summary": "The lecturer moves to polysemy, emphasizing that most words have multiple meanings, with bank, star, and pike as examples [ts=3145s]. Audience examples for pike include fish, spear, road/turnpike, fraternity name, diving position, verb use, idioms like coming down the pike, and an Australian sense meaning to chicken out [ts=3182s]. One approach is multi-prototype embeddings: cluster word tokens by similarity of occurrence, treat each cluster as a sense, and learn word vectors for those sense clusters [ts=3319s]. The 2012 example shown separates senses such as bank 1/bank 2 and multiple Jaguar senses: car, Apple software, keyboard, and animal [ts=3358s]. However, the lecturer explains that modern practice usually keeps one vector per word because discrete sense boundaries are often artificial; dictionaries disagree on the number of senses, and words like field have related but not cleanly separated uses such as crop field, rock/ice field, sporting field, and mathematical field [ts=3543s]. A single word vector can be understood as an average over contexts, a view that connects to later contextual word vectors [ts=3635s]. Although ordinary linear algebra would suggest individual sense vectors cannot be recovered from a single summed vector, high-dimensional sparse spaces allow sparse coding methods to reconstruct sense vectors; Arora et al. examples recover multiple senses of tie [ts=3677s].",
       "key_points": [
         {
-          "text": "Unlabeled dependency accuracy checks whether each word's head is correct, while labeled accuracy also checks the dependency label.",
-          "timestamp_s": 3905,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Symbolic parsing features were sparse, incomplete, and expensive enough that feature computation dominated runtime.",
-          "timestamp_s": 3987,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "The neural parser embeds words, POS tags, and dependency labels from the stack and buffer, concatenates them, and feeds them to a neural network.",
-          "timestamp_s": 4200,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "A softmax over parser actions predicts shift, left-arc, and right-arc, giving a nonlinear transition classifier.",
-          "timestamp_s": 4330,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Graph-based parsing scores candidate arcs for each word and then selects a tree, for example with a minimum spanning tree algorithm.",
-          "timestamp_s": 4620,
+          "text": "Most words have multiple meanings; pike illustrates polysemy across fish, weapon, road, diving, verb, idiom, and dialect uses.",
+          "timestamp_s": 3145,
           "evidence_type": "example"
+        },
+        {
+          "text": "A multi-sense embedding approach clusters word tokens by occurrence similarity, then learns vectors for each sense cluster.",
+          "timestamp_s": 3319,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Sense-cluster examples separate Jaguar into car, software, keyboard, and animal senses.",
+          "timestamp_s": 3358,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Discrete word senses can be artificial because many meanings overlap and dictionaries disagree on sense counts.",
+          "timestamp_s": 3543,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A single word vector can be interpreted as an average of all contexts for that word.",
+          "timestamp_s": 3635,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Sparse coding can reconstruct sense vectors from a high-dimensional sparse whole-word vector.",
+          "timestamp_s": 3677,
+          "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
-        "start_s": 3870,
-        "end_s": 4729
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 3138,
+        "end_s": 3786
       },
-      "difficulty": 0.72,
+      "difficulty": 3.4,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "duration_min": 14,
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
       "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "course_id": "CS224N",
+      "name": "Neural window classifiers and cross-entropy loss",
+      "description": "Introduces supervised neural classification with word-vector windows, nonlinear hidden representations, and cross-entropy loss.",
+      "summary": "The final technical arc starts by framing word2vec as already a simple classifier because it predicts which words are likely in a context [ts=3806s]. The main example is named entity recognition: words are assigned classes such as person, location, or not-a-named-entity, and the same surface words can have different classes depending on context, as in Paris Hilton versus a location use of Paris [ts=3824s]. The proposed model is a window classifier: take a target word plus context words on both sides, represent each with word vectors, concatenate the window, and feed it to a classifier that predicts location versus not-location [ts=3927s]. This is supervised learning: training data consists of inputs x_i and labels y_i, such as negative Paris Hilton and positive I visit Paris every spring [ts=3992s]. Traditional classifiers such as logistic regression, softmax classifiers, SVMs, and Naive Bayes are described as mostly linear classifiers over fixed inputs, whereas neural classifiers also learn distributed representations and can be nonlinear relative to the original input space [ts=4085s]. The concrete neural architecture concatenates five word embeddings into a high-dimensional vector, applies a matrix plus bias and a nonlinearity to form a hidden representation, then maps that hidden representation to a score and sigmoid probability for the location class [ts=4196s]. Cross-entropy loss is introduced as the PyTorch loss students will use; for one-hot target labels, all incorrect terms vanish and cross entropy becomes the log probability assigned to the correct class, used as negative log likelihood [ts=4354s].",
+      "key_points": [
+        {
+          "text": "Word2vec can be viewed as a simple classifier because it predicts likely context words.",
+          "timestamp_s": 3806,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Named entity recognition labels words with classes such as person, location, or not a named entity, using context to resolve ambiguity.",
+          "timestamp_s": 3824,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A window classifier uses a target word plus surrounding context words represented by their word vectors.",
+          "timestamp_s": 3927,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Supervised classification uses labeled input examples x_i with class labels y_i.",
+          "timestamp_s": 3992,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Neural classifiers learn both weights and distributed word representations, making nonlinear classification possible in the original space.",
+          "timestamp_s": 4139,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A five-word window with 100-dimensional embeddings becomes a 500-dimensional concatenated input.",
+          "timestamp_s": 4224,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A hidden layer computes matrix times input plus bias, then applies a nonlinearity before output scoring.",
+          "timestamp_s": 4231,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "For one-hot targets, cross entropy reduces to the log probability assigned to the correct class and is used as negative log likelihood.",
+          "timestamp_s": 4354,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 3789,
+        "end_s": 4449
+      },
+      "difficulty": 3.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "course_id": "CS224N",
+      "name": "Artificial neurons and why depth helps",
+      "description": "Connects biological neuron inspiration to logistic regression units and multi-layer neural networks that learn hidden features.",
+      "summary": "The lecture ends with the biological inspiration for neural networks: human neurons have outputs along axons, connections through synapses, many inputs from other neurons, and a combined activation process that sends spikes when enough positive input arrives [ts=4454s]. Artificial neural networks simplify spike rates into real-valued activation levels [ts=4533s]. Binary logistic regression is presented as a simple artificial neuron: multiple inputs may have positive excitatory or negative inhibitory weights, are combined into an excitation value, and are passed through a nonlinearity [ts=4560s]. The lecturer cautions that human neurons are much more complex, but modern neural networks generally use the simplified model because it becomes convenient linear algebra [ts=4602s]. A single logistic-function neuron is identical to logistic regression, but neural networks stack many such units and feed them into further logistic regressions [ts=4632s]. The important learning claim is that intermediate units do not need human-defined meanings; by training toward an eventual output such as location versus not-location, hidden layers learn useful internal features themselves [ts=4662s]. More layers let networks build up functions and representations that make data easier to classify or interpret downstream [ts=4700s].",
+      "key_points": [
+        {
+          "text": "Biological neurons inspired neural networks through many inputs, synapses, axon outputs, and activation/spiking behavior.",
+          "timestamp_s": 4454,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Artificial neural networks simplify neural spike rates into real-valued activation levels.",
+          "timestamp_s": 4533,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Binary logistic regression resembles a neuron that combines positive and negative weighted inputs and applies a nonlinearity.",
+          "timestamp_s": 4560,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A single logistic-function neuron is identical to logistic regression.",
+          "timestamp_s": 4632,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Neural networks stack many logistic-regression-like units and let intermediate units learn useful functions automatically.",
+          "timestamp_s": 4650,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "More layers allow models to learn representations that make classification or downstream interpretation easier.",
+          "timestamp_s": 4700,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+        "start_s": 4449,
+        "end_s": 4742
+      },
+      "difficulty": 2.9,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 5,
+      "ordering_index": 8,
       "is_template": false
     }
   ],
   "section_flags": [
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg1",
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
       "formula_heavy": false,
       "demo_heavy": false,
-      "rationale": "Foundational contrast between constituency and dependency formalisms, with concrete grammar rules and head-dependent interpretation [ts=149s] [ts=604s]."
+      "rationale": "Foundational training mechanics for word2vec and neural networks; includes learning-rate and initialization diagnostics [ts=294s]."
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg2",
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Live Jupyter/GloVe demo of nearest neighbors and analogies provides strong examples for retrieval and assessment [ts=711s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Negative sampling, sigmoid probabilities, and unigram^3/4 distribution are formula-centered word2vec variants [ts=1741s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Co-occurrence matrices, SVD, and GloVe log-ratio modeling are mathematically central alternatives to word2vec [ts=2213s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
       "formula_heavy": false,
       "demo_heavy": false,
-      "rationale": "Dense set of ambiguity examples that directly motivate parsing as disambiguation for meaning and extraction [ts=929s] [ts=1675s]."
+      "rationale": "Intrinsic/extrinsic evaluation is explicitly said to recur throughout the course, with concrete word-vector benchmarks [ts=2766s]."
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg3",
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
       "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Polysemy and sparse coding are conceptually important but less central than core training and evaluation mechanics [ts=3145s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Introduces supervised neural classification, window models, affine hidden layers, sigmoid output, and cross entropy [ts=4196s]."
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "importance_flag": "high",
       "review_worthiness": "medium",
       "item_generation_worthiness": "medium",
       "formula_heavy": false,
       "demo_heavy": false,
-      "rationale": "Important background on dependency notation, historical context, and treebanks, but less algorithmically central than later segments [ts=1860s] [ts=2581s]."
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg4",
-      "importance_flag": "medium",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Covers the decision cues and structural constraints that explain why the parser is designed the way it is, especially projectivity [ts=2806s] [ts=3212s]."
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg5",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Core homework-relevant algorithm: shift, left-arc, right-arc, greedy decoding, and linear-time transition parsing [ts=3333s] [ts=3687s]."
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg6",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Contains the standard evaluation metrics, the neural parser architecture students are expected to implement conceptually, and the graph-based comparison [ts=3905s] [ts=4620s]."
+      "rationale": "Provides the conceptual bridge from logistic regression to multi-layer neural networks and hidden feature learning [ts=4632s]."
     }
   ],
   "unit_kp_map": [
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg1",
-      "global_kp_id": "kp_phrase_structure_grammar",
-      "planner_role": "support",
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg1",
-      "global_kp_id": "kp_dependency_grammar",
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
       "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg2",
-      "global_kp_id": "kp_syntactic_ambiguity_and_attachment",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg2",
-      "global_kp_id": "kp_dependency_grammar",
-      "planner_role": "prereq",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg3",
-      "global_kp_id": "kp_dependency_grammar",
-      "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg3",
-      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_parameter_initialization",
       "planner_role": "support",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg3",
-      "global_kp_id": "kp_annotated_treebanks",
-      "planner_role": "main",
-      "coverage_level": "dominant"
+      "unit_id": "local::lecture04-wordvecs-lm::seg1",
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "planner_role": "support",
+      "coverage_level": "mention"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg4",
-      "global_kp_id": "kp_local_parser_state_and_features",
-      "planner_role": "support",
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg4",
-      "global_kp_id": "kp_dependency_trees_and_projectivity",
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_word_vector_nearest_neighbor_similarity",
       "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg5",
-      "global_kp_id": "kp_transition_based_dependency_parsing",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg5",
-      "global_kp_id": "kp_local_parser_state_and_features",
-      "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg6",
-      "global_kp_id": "kp_uas_and_las_evaluation",
-      "planner_role": "support",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::lecture04-dependency-parsing::seg6",
-      "global_kp_id": "kp_neural_transition_based_parser",
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_linear_semantic_components_and_analogies",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg6",
-      "global_kp_id": "kp_local_parser_state_and_features",
-      "planner_role": "prereq",
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_two_vector_word2vec_parameterization",
+      "planner_role": "support",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::lecture04-dependency-parsing::seg6",
-      "global_kp_id": "kp_graph_based_dependency_parsing",
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "global_kp_id": "kp_two_vector_word2vec_parameterization",
       "planner_role": "support",
       "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "global_kp_id": "kp_naive_softmax_vs_word2vec_model_variants",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "global_kp_id": "kp_negative_sampling_with_sigmoid_objectives",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg3",
+      "global_kp_id": "kp_unigram_distribution_to_the_3_4_power",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "global_kp_id": "kp_co_occurrence_matrix_word_representations",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "global_kp_id": "kp_svd_dimensionality_reduction_for_word_vectors",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "global_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg4",
+      "global_kp_id": "kp_linear_semantic_components_and_analogies",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "global_kp_id": "kp_word_vector_analogy_and_similarity_benchmarks",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg5",
+      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "global_kp_id": "kp_polysemy_and_multi_sense_embeddings",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "global_kp_id": "kp_single_vector_averages_and_sparse_coding_for_senses",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg6",
+      "global_kp_id": "kp_linear_semantic_components_and_analogies",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_supervised_window_classification",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_neural_classifiers_as_learned_nonlinear_representations",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_cross_entropy_loss",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "global_kp_id": "kp_artificial_neuron_as_logistic_regression",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "global_kp_id": "kp_depth_and_hidden_feature_learning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg8",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "planner_role": "support",
+      "coverage_level": "partial"
     }
   ],
   "kp_catalog": [
     {
-      "global_kp_id": "kp_phrase_structure_grammar",
-      "name": "Phrase structure grammar",
-      "description": "A constituency-based view of syntax in which parts of speech combine into hierarchical phrases through rewrite rules such as noun phrase and verb phrase rules.",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "name": "Gradient descent and stochastic gradient descent",
+      "description": "Neural networks are trained by computing the gradient of an objective and updating parameters with stochastic gradient descent. Gradient-based optimization updates parameters by subtracting a scaled gradient, with the learning rate controlling step size.",
       "track_tags": [
-        "parsing",
-        "syntax"
+        "deep_learning",
+        "optimization",
+        "training"
       ],
       "domain_tags": [
-        "linguistics",
-        "natural_language_processing"
+        "gradient_descent",
+        "gradients",
+        "learning_rate",
+        "machine_learning",
+        "minibatch",
+        "sgd"
       ],
       "career_path_tags": [
+        "computer_vision_engineer",
+        "data_scientist",
+        "machine_learning_engineer",
         "ml_engineer",
-        "nlp_researcher"
+        "nlp_engineer",
+        "research_scientist"
       ],
-      "difficulty_level": 0.34,
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gradient descent and stochastic gradient descent formalizes how neural networks are trained by computing the gradient of an objective and updating parameters with stochastic gradient descent, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp1",
+        "local::lecture04-wordvecs-lm::kp2",
+        "local::lecture05-backprop::kp3",
+        "local::lecture_3::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_parameter_initialization",
+      "name": "Parameter initialization and symmetry breaking",
+      "description": "Word-vector parameters must start as small random values rather than all zeros to avoid false symmetries. Choosing non-constant initial weights so learning can break symmetry and remain numerically stable.",
+      "track_tags": [
+        "deep_learning_fundamentals",
+        "optimization"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "neural_network_training",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.5,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "medium",
+      "importance_level": "high",
       "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because phrase structure grammar clarifies a constituency-based view of syntax in which parts of speech combine into hierarchical phrases through rewrite rules such as noun phrase and verb phrase rules, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because parameter initialization and symmetry breaking clarifies word-vector parameters must start as small random values rather than all zeros to avoid false symmetries, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp1"
+        "local::lecture04-wordvecs-lm::kp3",
+        "local::lecture07-rnns::kp5"
       ]
     },
     {
-      "global_kp_id": "kp_dependency_grammar",
-      "name": "Dependency grammar",
-      "description": "A syntactic representation built from head-dependent relations, where each word is linked to the word it modifies or depends on.",
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "name": "Word2vec skip-gram objective",
+      "description": "Word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus. The skip-gram model predicts context words from a center word using dot products between center and outside vectors.",
       "track_tags": [
-        "dependency_parsing",
-        "syntax"
+        "nlp",
+        "word2vec"
       ],
       "domain_tags": [
-        "linguistics",
         "natural_language_processing",
-        "structured_prediction"
+        "nlp",
+        "representation_learning"
       ],
       "career_path_tags": [
-        "computational_linguist",
+        "machine_learning_engineer",
         "ml_engineer",
+        "nlp_engineer",
         "nlp_researcher"
       ],
-      "difficulty_level": 0.42,
+      "difficulty_level": 0.63,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "critical",
       "structural_role": "gateway",
       "importance_confidence": "high",
-      "importance_rationale": "Important because dependency grammar formalizes how a syntactic representation built from head-dependent relations, where each word is linked to the word it modifies or depends on, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
+      "importance_rationale": "Important because word2vec skip-gram objective formalizes how word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp2"
+        "local::lecture01-wordvecs::kp9",
+        "local::lecture04-wordvecs-lm::kp4"
       ]
     },
     {
-      "global_kp_id": "kp_syntactic_ambiguity_and_attachment",
-      "name": "Syntactic ambiguity and attachment",
-      "description": "The fact that one surface word sequence can support multiple syntactic analyses, especially through PP attachment, coordination scope, and modifier scope.",
+      "global_kp_id": "kp_word_vector_nearest_neighbor_similarity",
+      "name": "Word vector nearest-neighbor similarity",
+      "description": "Semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word.",
       "track_tags": [
-        "disambiguation",
-        "syntax"
+        "nlp"
       ],
       "domain_tags": [
-        "linguistics",
-        "natural_language_processing",
-        "semantics"
-      ],
-      "career_path_tags": [
-        "applied_scientist",
-        "nlp_researcher"
-      ],
-      "difficulty_level": 0.46,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because syntactic ambiguity and attachment clarifies the fact that one surface word sequence can support multiple syntactic analyses, especially through PP attachment, coordination scope, and modifier scope, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp3"
-      ]
-    },
-    {
-      "global_kp_id": "kp_dependency_trees_and_projectivity",
-      "name": "Dependency trees and projectivity",
-      "description": "The structural constraints on dependency parses, including single-root trees, nesting dependencies, and the distinction between projective and nonprojective arcs.",
-      "track_tags": [
-        "syntax",
-        "tree_structures"
-      ],
-      "domain_tags": [
-        "graph_theory",
-        "natural_language_processing",
-        "structured_prediction"
-      ],
-      "career_path_tags": [
-        "ml_engineer",
-        "nlp_researcher"
-      ],
-      "difficulty_level": 0.58,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because dependency trees and projectivity clarifies the structural constraints on dependency parses, including single-root trees, nesting dependencies, and the distinction between projective and nonprojective arcs, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp4"
-      ]
-    },
-    {
-      "global_kp_id": "kp_annotated_treebanks",
-      "name": "Annotated treebanks",
-      "description": "Human-annotated collections of parsed sentences used to train, compare, and evaluate dependency parsers, including Universal Dependencies.",
-      "track_tags": [
-        "datasets",
-        "parsing"
-      ],
-      "domain_tags": [
-        "annotation",
-        "evaluation",
         "natural_language_processing"
       ],
       "career_path_tags": [
-        "applied_scientist",
-        "data_scientist",
-        "nlp_researcher"
+        "machine_learning_engineer",
+        "nlp_engineer"
       ],
-      "difficulty_level": 0.39,
+      "difficulty_level": 0.48,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because annotated treebanks clarifies human-annotated collections of parsed sentences used to train, compare, and evaluate dependency parsers, including Universal Dependencies, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because word vector nearest-neighbor similarity clarifies semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp5"
+        "local::lecture04-wordvecs-lm::kp5"
       ]
     },
     {
-      "global_kp_id": "kp_local_parser_state_and_features",
-      "name": "Local parser state and features",
-      "description": "The representation of a parser decision state using the stack, buffer, nearby words, parts of speech, dependency labels, and other local structural cues.",
+      "global_kp_id": "kp_linear_semantic_components_and_analogies",
+      "name": "Linear semantic components and analogies",
+      "description": "Vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen.",
       "track_tags": [
-        "feature_representation",
-        "parsing_algorithms"
+        "nlp"
       ],
       "domain_tags": [
-        "machine_learning",
-        "natural_language_processing",
-        "representation_learning"
+        "natural_language_processing"
       ],
       "career_path_tags": [
-        "ml_engineer",
-        "nlp_researcher"
+        "machine_learning_engineer",
+        "nlp_engineer"
       ],
       "difficulty_level": 0.62,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
-      "structural_role": "supporting",
+      "structural_role": "gateway",
       "importance_confidence": "high",
-      "importance_rationale": "Important because local parser state and features clarifies the representation of a parser decision state using the stack, buffer, nearby words, parts of speech, dependency labels, and other local structural cues, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because linear semantic components and analogies formalizes how vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen, which later units use as core machinery rather than background context.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp7"
+        "local::lecture04-wordvecs-lm::kp6"
       ]
     },
     {
-      "global_kp_id": "kp_transition_based_dependency_parsing",
-      "name": "Transition-based dependency parsing",
-      "description": "A parsing strategy that builds a dependency tree through a sequence of local actions such as shift, left-arc, and right-arc over stack-buffer state.",
+      "global_kp_id": "kp_two_vector_word2vec_parameterization",
+      "name": "Two-vector word2vec parameterization",
+      "description": "Word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training.",
       "track_tags": [
-        "parsing_algorithms",
-        "structured_prediction"
+        "nlp"
       ],
       "domain_tags": [
-        "algorithms",
-        "machine_learning",
         "natural_language_processing"
       ],
       "career_path_tags": [
-        "ml_engineer",
-        "nlp_researcher",
-        "software_engineer"
+        "machine_learning_engineer",
+        "nlp_engineer"
       ],
-      "difficulty_level": 0.66,
+      "difficulty_level": 0.6,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "critical",
+      "importance_level": "medium",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because transition-based dependency parsing clarifies a parsing strategy that builds a dependency tree through a sequence of local actions such as shift, left-arc, and right-arc over stack-buffer state, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because two-vector word2vec parameterization clarifies word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp6"
+        "local::lecture04-wordvecs-lm::kp7"
       ]
     },
     {
-      "global_kp_id": "kp_uas_and_las_evaluation",
-      "name": "UAS and LAS evaluation",
-      "description": "Standard parsing metrics that compare predicted dependency trees to gold trees by head correctness alone or by head-plus-label correctness.",
+      "global_kp_id": "kp_naive_softmax_vs_word2vec_model_variants",
+      "name": "Naive softmax vs word2vec model variants",
+      "description": "Word2vec includes skip-gram and CBOW structures, and naive softmax computes a full vocabulary normalization.",
       "track_tags": [
-        "evaluation",
-        "parsing"
+        "nlp"
       ],
       "domain_tags": [
-        "benchmarking",
         "natural_language_processing"
       ],
       "career_path_tags": [
-        "applied_scientist",
-        "ml_engineer",
-        "nlp_researcher"
+        "machine_learning_engineer",
+        "nlp_engineer"
       ],
-      "difficulty_level": 0.36,
+      "difficulty_level": 0.64,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because uAS and LAS evaluation clarifies standard parsing metrics that compare predicted dependency trees to gold trees by head correctness alone or by head-plus-label correctness, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because naive softmax vs word2vec model variants clarifies word2vec includes skip-gram and CBOW structures, and naive softmax computes a full vocabulary normalization, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp8"
+        "local::lecture04-wordvecs-lm::kp8"
       ]
     },
     {
-      "global_kp_id": "kp_neural_transition_based_parser",
-      "name": "Neural transition-based parser",
-      "description": "A transition parser that replaces sparse symbolic features with embeddings and a nonlinear neural classifier over parser actions.",
+      "global_kp_id": "kp_negative_sampling_with_sigmoid_objectives",
+      "name": "Negative sampling with sigmoid objectives",
+      "description": "Negative sampling replaces full softmax with logistic decisions that distinguish true context words from sampled noise words.",
       "track_tags": [
-        "neural_nlp",
-        "parsing_algorithms"
+        "nlp"
       ],
       "domain_tags": [
-        "deep_learning",
-        "natural_language_processing",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because negative sampling with sigmoid objectives formalizes how negative sampling replaces full softmax with logistic decisions that distinguish true context words from sampled noise words, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_unigram_distribution_to_the_3_4_power",
+      "name": "Unigram distribution to the 3/4 power",
+      "description": "The negative-sampling distribution uses unigram probabilities raised to 3/4 to upweight less frequent words relative to raw frequency.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because unigram distribution to the 3/4 power clarifies the negative-sampling distribution uses unigram probabilities raised to 3/4 to upweight less frequent words relative to raw frequency, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_co_occurrence_matrix_word_representations",
+      "name": "Co-occurrence matrix word representations",
+      "description": "Count-based embeddings start by counting how often words occur in each other's context windows.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because co-occurrence matrix word representations clarifies count-based embeddings start by counting how often words occur in each other's context windows, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_svd_dimensionality_reduction_for_word_vectors",
+      "name": "SVD dimensionality reduction for word vectors",
+      "description": "SVD can reduce a large co-occurrence matrix into lower-dimensional word representations by truncating smaller singular values.",
+      "track_tags": [
+        "linear_algebra"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sVD dimensionality reduction for word vectors formalizes how sVD can reduce a large co-occurrence matrix into lower-dimensional word representations by truncating smaller singular values, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "name": "GloVe log-bilinear co-occurrence-ratio model",
+      "description": "GloVe uses log co-occurrence ratios so vector differences correspond to meaning differences.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gloVe log-bilinear co-occurrence-ratio model formalizes how gloVe uses log co-occurrence ratios so vector differences correspond to meaning differences, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "name": "Downstream transfer and extrinsic evaluation",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
+      "track_tags": [
+        "computer_vision",
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "downstream_adaptation",
+        "linear_probe",
+        "machine_learning",
         "representation_learning"
       ],
       "career_path_tags": [
-        "applied_scientist",
+        "computer_vision_engineer",
+        "machine_learning_engineer",
         "ml_engineer",
-        "nlp_researcher"
+        "ml_engineering",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp14",
+        "local::lecture_12::kp3",
+        "local::lecture_16::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_word_vector_analogy_and_similarity_benchmarks",
+      "name": "Word-vector analogy and similarity benchmarks",
+      "description": "Embedding quality can be measured by analogy accuracy or correlation with human word-similarity judgments.",
+      "track_tags": [
+        "evaluation"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because word-vector analogy and similarity benchmarks clarifies embedding quality can be measured by analogy accuracy or correlation with human word-similarity judgments, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "name": "Named entity recognition as an extrinsic embedding task",
+      "description": "NER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because named entity recognition as an extrinsic embedding task clarifies nER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_polysemy_and_multi_sense_embeddings",
+      "name": "Polysemy and multi-sense embeddings",
+      "description": "Words often have multiple related or unrelated meanings, and one approach clusters token occurrences into sense-specific embeddings.",
+      "track_tags": [
+        "semantics"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because polysemy and multi-sense embeddings clarifies words often have multiple related or unrelated meanings, and one approach clusters token occurrences into sense-specific embeddings, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_single_vector_averages_and_sparse_coding_for_senses",
+      "name": "Single-vector averages and sparse coding for senses",
+      "description": "A single word vector can average contexts, while sparse coding can sometimes recover sense vectors from high-dimensional sparse embeddings.",
+      "track_tags": [
+        "semantics"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
       ],
       "difficulty_level": 0.74,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "capstone",
+      "importance_level": "medium",
+      "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because neural transition-based parser synthesizes a transition parser that replaces sparse symbolic features with embeddings and a nonlinear neural classifier over parser actions into an end-to-end method or integrated recipe.",
+      "importance_rationale": "Important because single-vector averages and sparse coding for senses clarifies a single word vector can average contexts, while sparse coding can sometimes recover sense vectors from high-dimensional sparse embeddings, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp9"
+        "local::lecture04-wordvecs-lm::kp18"
       ]
     },
     {
-      "global_kp_id": "kp_graph_based_dependency_parsing",
-      "name": "Graph-based dependency parsing",
-      "description": "A parsing approach that scores candidate arcs globally and then selects a well-formed tree, often with a tree optimization algorithm.",
+      "global_kp_id": "kp_supervised_window_classification",
+      "name": "Supervised window classification",
+      "description": "A window classifier predicts a label for a target word using its surrounding context and word-vector features.",
       "track_tags": [
-        "graphs",
-        "parsing_algorithms"
+        "classification"
       ],
       "domain_tags": [
-        "graph_algorithms",
-        "natural_language_processing",
-        "structured_prediction"
+        "natural_language_processing"
       ],
       "career_path_tags": [
-        "ml_engineer",
-        "nlp_researcher"
+        "machine_learning_engineer",
+        "nlp_engineer"
       ],
-      "difficulty_level": 0.73,
+      "difficulty_level": 0.6,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "medium",
-      "structural_role": "optional",
+      "importance_level": "critical",
+      "structural_role": "gateway",
       "importance_confidence": "high",
-      "importance_rationale": "Important because graph-based dependency parsing extends the core thread to a parsing approach that scores candidate arcs globally and then selects a well-formed tree, often with a tree optimization algorithm without being required for the main pipeline.",
+      "importance_rationale": "Important because supervised window classification formalizes how a window classifier predicts a label for a target word using its surrounding context and word-vector features, which later units use as core machinery rather than background context.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture04-dependency-parsing::kp10"
+        "local::lecture04-wordvecs-lm::kp19"
+      ]
+    },
+    {
+      "global_kp_id": "kp_neural_classifiers_as_learned_nonlinear_representations",
+      "name": "Neural classifiers as learned nonlinear representations",
+      "description": "Neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because neural classifiers as learned nonlinear representations formalizes how neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp20"
+      ]
+    },
+    {
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "name": "Feed-forward neural networks / MLPs",
+      "description": "Stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons. A neural layer concatenates embeddings, applies an affine transformation plus nonlinearity, and maps hidden features to output scores.",
+      "track_tags": [
+        "architectures",
+        "deep_learning",
+        "neural_networks"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because feed-forward neural networks / MLPs formalizes how stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp21",
+        "local::lecture_4_neural_networks_and_backpropagation::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cross_entropy_loss",
+      "name": "Cross-entropy loss and negative log likelihood",
+      "description": "Transform raw class scores into probabilities with softmax and learn by minimizing the negative log probability of the correct class, equivalent here to maximum likelihood and cross-entropy under one-hot labels. For one-hot targets, cross entropy reduces to the model's log probability of the correct class and is optimized as negative log likelihood.",
+      "track_tags": [
+        "deep_learning_basics",
+        "loss_functions",
+        "neural_networks"
+      ],
+      "domain_tags": [
+        "cross_entropy",
+        "machine_learning",
+        "multiclass_logistic_regression",
+        "softmax"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because cross-entropy loss and negative log likelihood formalizes how transform raw class scores into probabilities with softmax and learn by minimizing the negative log probability of the correct class, equivalent here to maximum likelihood and cross-entropy under one-hot labels, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp22",
+        "local::lecture_2_image_classification_with_linear_classifiers::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_artificial_neuron_as_logistic_regression",
+      "name": "Artificial neuron as logistic regression",
+      "description": "A simplified neuron combines weighted inputs, applies a nonlinearity, and with logistic activation is equivalent to logistic regression.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because artificial neuron as logistic regression clarifies a simplified neuron combines weighted inputs, applies a nonlinearity, and with logistic activation is equivalent to logistic regression, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp23"
+      ]
+    },
+    {
+      "global_kp_id": "kp_depth_and_hidden_feature_learning",
+      "name": "Depth and hidden feature learning",
+      "description": "Multi-layer neural networks stack many simple units so intermediate layers learn useful representations automatically.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because depth and hidden feature learning formalizes how multi-layer neural networks stack many simple units so intermediate layers learn useful representations automatically, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp24"
       ]
     }
   ],
@@ -789,6 +1474,6 @@
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L4_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",
-    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture04-dep-parsing_transcript.txt"
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture04-wordvecs-lm_transcript.txt"
   }
 }

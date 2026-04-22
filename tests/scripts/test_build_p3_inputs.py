@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.scripts import build_p3_inputs as build_p3_inputs_cli
+from src.scripts.pipeline import build_p3_inputs as build_p3_inputs_cli
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -123,6 +123,16 @@ def _make_p1_artifact() -> dict:
     }
 
 
+def _make_placeholder_p1_artifact() -> dict:
+    artifact = _make_p1_artifact()
+    artifact["units"][0]["unit_id"] = "local::<lecture_id>::seg1"
+    artifact["units"][0]["course_id"] = "<course_id>"
+    artifact["units"][0]["content_ref"]["video_url"] = "https://www.youtube.com/watch?v=abc123&list=demo&index=7"
+    artifact["section_flags"][0]["unit_id"] = "local::<lecture_id>::seg1"
+    artifact["unit_kp_map_local"][0]["unit_id"] = "local::<lecture_id>::seg1"
+    return artifact
+
+
 def _make_p2_output() -> dict:
     return {
         "run_id": "demo",
@@ -206,6 +216,46 @@ def _make_p2_output() -> dict:
     }
 
 
+def _make_p3_output() -> dict:
+    return {
+        "output_filename": "p3a__cs224n__lecture07_attention.json",
+        "run_id": "run_cs224n_lecture07_attention",
+        "stage_id": "p3a",
+        "course_id": "CS224n",
+        "lecture_id": "lecture07-attention",
+        "learning_salience": [
+            {
+                "unit_id": "local::lecture07-attention::seg1",
+                "is_worth_learning": True,
+                "salience_score": "medium",
+                "rationale": "Attention bottleneck setup.",
+                "target_kp_ids": ["kp_seq2seq_bottleneck"],
+                "question_intent": "conceptual",
+                "content_type": "core_theory",
+                "content_type_confidence": "high",
+                "override_critical_kp": False,
+                "expected_item_count": 2,
+                "salience_confidence": "high",
+                "provenance": "llm_single_pass",
+            },
+            {
+                "unit_id": "local::lecture07-attention::seg2",
+                "is_worth_learning": True,
+                "salience_score": "high",
+                "rationale": "Cross attention mechanics.",
+                "target_kp_ids": ["kp_cross_attention"],
+                "question_intent": "procedural",
+                "content_type": "core_theory",
+                "content_type_confidence": "high",
+                "override_critical_kp": False,
+                "expected_item_count": 4,
+                "salience_confidence": "high",
+                "provenance": "llm_single_pass",
+            },
+        ],
+    }
+
+
 def test_build_p3_inputs_creates_p3a_p3b_and_p3c_files(tmp_path: Path) -> None:
     course_dir = tmp_path / "CS224n"
     processed_dir = course_dir / "processed_sanitized"
@@ -280,7 +330,114 @@ def test_build_p3_inputs_creates_p3a_p3b_and_p3c_files(tmp_path: Path) -> None:
     assert p3c["video_clip_url"] == "https://www.youtube.com/watch?v=abc123"
     assert p3c["question_intent"] is None
     assert p3c["target_item_count"] is None
+    assert p3c["target_kp_ids"] == []
+    assert p3c["assessment_purpose"] == "lecture_reinforcement"
+    assert p3c["youtube_url"] == "https://www.youtube.com/watch?v=abc123"
+    assert p3c["allowed_item_types"] == ["concept_mcq"]
+    assert p3c["allow_code_mcq"] is False
+    assert p3c["code_evidence"] == []
     assert p3c["target_difficulty_range"] == [0.55, 0.85]
     assert "00:00:45" in p3c["transcript_slice"]
     assert "Cross attention uses weighted sums." in p3c["transcript_slice"]
     assert {row["global_kp_id"] for row in p3c["unit_kp_map_rows"]} == {"kp_seq2seq_bottleneck", "kp_cross_attention"}
+
+
+def test_build_p3_inputs_sanitizes_p3a_placeholder_metadata(tmp_path: Path) -> None:
+    course_dir = tmp_path / "CS224n"
+    processed_dir = course_dir / "processed_sanitized"
+    transcript_dir = course_dir / "transcripts"
+    processed_dir.mkdir(parents=True)
+    transcript_dir.mkdir(parents=True)
+
+    _write_json(processed_dir / "L7_p1.json", _make_placeholder_p1_artifact())
+    (transcript_dir / "cs224n-2024-lecture07-attention_transcript.txt").write_text(
+        "\n".join(
+            [
+                "Title: Lecture 7",
+                "URL: https://www.youtube.com/watch?v=abc123",
+                "Video ID: abc123",
+                "============================================================",
+                "",
+                "00:00:05",
+                "Intro to attention starts here.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    p2_output = tmp_path / "p2_output.json"
+    _write_json(p2_output, _make_p2_output())
+
+    output_dir = tmp_path / "p3_inputs"
+    build_p3_inputs_cli.build_p3_inputs(
+        course_dirs=[course_dir],
+        p2_output_path=p2_output,
+        output_dir=output_dir,
+    )
+
+    p3a = json.loads((output_dir / "p3a" / "CS224n" / "L7_p1.json").read_text(encoding="utf-8"))
+    assert p3a["lecture_context"]["lecture_id"] == "cs224n-2024-lecture07-attention"
+    assert p3a["units"][0]["unit_id"] == "local::cs224n-2024-lecture07-attention::seg1"
+    assert p3a["units"][0]["course_id"] == "CS224n"
+    assert p3a["units"][0]["content_ref"]["video_url"] == "https://www.youtube.com/watch?v=abc123"
+    assert p3a["section_flags"][0]["unit_id"] == "local::cs224n-2024-lecture07-attention::seg1"
+    assert p3a["unit_kp_map"][0]["unit_id"] == "local::cs224n-2024-lecture07-attention::seg1"
+
+
+def test_build_p3_inputs_hydrates_p3c_from_processed_p3(tmp_path: Path) -> None:
+    course_dir = tmp_path / "CS224n"
+    processed_dir = course_dir / "processed_sanitized"
+    transcript_dir = course_dir / "transcripts"
+    processed_p3_dir = course_dir / "processed" / "P3"
+    processed_dir.mkdir(parents=True)
+    transcript_dir.mkdir(parents=True)
+    processed_p3_dir.mkdir(parents=True)
+
+    artifact = _make_p1_artifact()
+    artifact["units"][1]["name"] = "PyTorch attention implementation"
+    artifact["units"][1]["summary"] = "PyTorch tensor code [ts=40s] weighted sum [ts=70s]"
+    _write_json(processed_dir / "L7_p1.json", artifact)
+    _write_json(processed_p3_dir / "L7.json", _make_p3_output())
+    (transcript_dir / "lecture07_transcript.txt").write_text(
+        "\n".join(
+            [
+                "Title: Lecture 7",
+                "URL: https://www.youtube.com/watch?v=abc123",
+                "Video ID: abc123",
+                "============================================================",
+                "",
+                "00:00:45",
+                "Cross attention uses weighted sums.",
+                "",
+                "00:01:05",
+                "In PyTorch we implement this with tensor operations.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    p2_output = tmp_path / "p2_output.json"
+    _write_json(p2_output, _make_p2_output())
+
+    output_dir = tmp_path / "p3_inputs"
+    build_p3_inputs_cli.build_p3_inputs(
+        course_dirs=[course_dir],
+        p2_output_path=p2_output,
+        output_dir=output_dir,
+    )
+
+    p3c = json.loads(
+        (output_dir / "p3c" / "CS224n" / "L7_p1" / "local--lecture07-attention-seg2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert p3c["question_intent"] == "procedural"
+    assert p3c["target_item_count"] == 4
+    assert p3c["target_kp_ids"] == ["kp_cross_attention"]
+    assert p3c["assessment_purpose"] == "lecture_reinforcement"
+    assert p3c["unit_summary_for_generation"] == "PyTorch tensor code [ts=40s] weighted sum [ts=70s]"
+    assert p3c["youtube_url"] == "https://www.youtube.com/watch?v=abc123"
+    assert p3c["allow_code_mcq"] is True
+    assert p3c["allowed_item_types"] == ["concept_mcq", "code_mcq"]
+    assert p3c["forbidden_question_patterns"] == []
+    assert p3c["code_evidence"] == []

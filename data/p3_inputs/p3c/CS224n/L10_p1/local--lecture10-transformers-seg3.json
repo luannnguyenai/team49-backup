@@ -1,0 +1,175 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture10-transformers",
+    "lecture_title": "Lecture 10 - Self-Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA"
+  },
+  "unit": {
+    "unit_id": "local::lecture10-transformers::seg3",
+    "course_id": "cs224n",
+    "name": "Adding positional information and nonlinearity",
+    "description": "Shows why raw self-attention is insufficient and adds positional encodings plus a position-wise feed-forward network.",
+    "summary": "A central defect of plain self-attention is that it is permutation-invariant over the input set: the lecture uses \"Zuko made his uncle\" versus \"his uncle made Zuko\" to show that the same token multiset would otherwise get the same representations [ts=1306s] [ts=1352s]. To restore order, positional vectors p_i are added to token embeddings, with two options discussed: sinusoidal position encodings and learned position embeddings; learned embeddings are simpler and common in practice, but hard-limit the maximum sequence length and can fail on longer inputs [ts=1378s] [ts=1531s] [ts=1601s]. A second issue is that stacked self-attention layers without extra processing mostly keep re-averaging value vectors, so transformers add a position-wise feed-forward MLP after attention to inject nonlinearity and more expressive computation per token [ts=1830s] [ts=1867s] [ts=1945s].",
+    "key_points": [
+      {
+        "text": "Plain self-attention has no notion of sequence order and acts on a set of token vectors.",
+        "timestamp_s": 1291,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "\"Zuko made his uncle\" and \"his uncle made Zuko\" illustrate that token order must be encoded explicitly.",
+        "timestamp_s": 1310,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A positional vector p_i can be added to the word embedding x_i so the model knows both token identity and index.",
+        "timestamp_s": 1439,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Sinusoidal position encodings vary by dimension and period, but the instructor notes they do not reliably solve extrapolation in practice.",
+        "timestamp_s": 1504,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Learned position embeddings are common but impose a maximum supported sequence length n.",
+        "timestamp_s": 1554,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A position-wise feed-forward MLP after self-attention adds the nonlinear processing missing from repeated weighted averaging.",
+        "timestamp_s": 1867,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
+      "start_s": 1261,
+      "end_s": 1970
+    },
+    "difficulty": 0.61,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "A central defect of plain self-attention is that it is permutation-invariant over the input set: the lecture uses \"Zuko made his uncle\" versus \"his uncle made Zuko\" to show that the same token multiset would otherwise get the same representations [ts=1306s] [ts=1352s]. To restore order, positional vectors p_i are added to token embeddings, with two options discussed: sinusoidal position encodings and learned position embeddings; learned embeddings are simpler and common in practice, but hard-limit the maximum sequence length and can fail on longer inputs [ts=1378s] [ts=1531s] [ts=1601s]. A second issue is that stacked self-attention layers without extra processing mostly keep re-averaging value vectors, so transformers add a position-wise feed-forward MLP after attention to inject nonlinearity and more expressive computation per token [ts=1830s] [ts=1867s] [ts=1945s].",
+  "target_kp_ids": [
+    "kp_positional_encoding",
+    "kp_position_wise_feed_forward_network"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "video_clip_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "transcript_slice": "00:21:05\nbut there are a bunch of barriers to using it\n\n00:21:10\nAnd so what we're going to do for this portion of the lecture\n\n00:21:14\nthat we need in order to use self-attention as this very\n\n00:21:21\nSo we can't use it as it stands as I've presented it\n\n00:21:26\nthat we need to solve or fix.\n\n00:21:31\norder in self-attention.\n\n00:21:37\nIf I have a sentence, like when I move over here\n\n00:21:42\nI'll write quite large.\n\n00:21:55\nand let's say his uncle made Zuko.\n\n00:22:07\nright, using its embedding matrix,\n\n00:22:14\nof the word.\n\n00:22:19\nis over here and uncle, right?\n\n00:22:23\nand there's a lot more on this in the lecture notes that\n\n00:22:32\nwill give you exactly the same representations\n\n00:22:37\nhis uncle made Zuko.\n\n00:22:41\nthat mean different things.\n\n00:22:46\nis an operation on sets.\n\n00:22:50\ngoing to perform self-attention on\n\n00:22:55\ninto play directly.\n\n00:23:02\nthrough the keys, queries, and values that we have.\n\n00:23:09\nour sequences are going from 1 to n-- as a vector.\n\n00:23:17\nbut you can imagine representing the number one,\n\n00:23:21\ntwo, the position three as a vector in the dimensionality D\n\n00:23:28\nAnd so these are position vectors.\n\n00:23:36\nthe information represented by these positions\n\n00:23:42\nadd these vectors, these pi vectors to the inputs, right?\n\n00:23:53\nis the word at position i but really just represents-- oh,\n\n00:23:57\nNow I can say that, oh, it's the word Zuko,\n\n00:24:03\nposition 5.\n\n00:24:11\nAnd we might only have to do this once.\n\n00:24:16\nand then that is sort of sufficient.\n\n00:24:19\nbecause it sort of knows from the input.\n\n00:24:25\nis look at these sinusoidal position representations.\n\n00:24:32\nso this is a vector pi, which is in dimensionality d, right,\n\n00:24:40\nmodify it by some constant, and you pass it to the sine\n\n00:24:47\nAnd you get these sort of of values that\n\n00:24:52\ndiffering periods depending on the dimensionality.\n\n00:24:57\nwhere d is the vertical dimension,\n\n00:25:01\nAnd you can see that there's sort of like, oh,\n\n00:25:07\ngoing up and down and each of the dimensions\n\n00:25:11\nAnd so together, you can represent\n\n00:25:15\nand it gives this intuition that, oh,\n\n00:25:22\nYou've got this sort of periodicity of the sines\n\n00:25:27\nto longer sequences.\n\n00:25:31\nBut this is sort of like an early notion\n\n00:25:35\nfor how to represent position in transformers\n\n00:25:42\nSo that's one idea.\n\n00:25:48\nA little bit unintuitive.\n\n00:25:54\nSo we're just going to say, oh, you know, I've\n\n00:25:59\nand I'm just going to learn a matrix that's dimensionality\n\n00:26:05\nand I'm going to learn it as a parameter,\n\n00:26:08\nAnd what do they mean?\n\n00:26:15\nAnd so you just sort of add this matrix to the xi,\n\n00:26:24\nSo whatever representation of position\n\n00:26:30\ncan learn.\n\n00:26:33\ncan't represent anything that's longer than n words long.\n\n00:26:39\nYou can handle because--\n\n00:26:44\nAnd so in practice, you'll get a model error.\n\n00:26:50\nlength n, it will just sort of crash and say, I can't--\n\n00:26:56\nAnd so this is what most systems nowadays use.\n\n00:27:02\nincluding a couple in the lecture notes.\n\n00:27:07\nor words before or after each other but not\n\n00:27:11\nThere's also some representations\n\n00:27:16\nbecause like, oh, maybe words that\n\n00:27:19\nshould be the things that are sort\n\n00:27:24\nOK, questions?\n\n00:27:31\nn large enough that we don't run into the issue of having\n\n00:27:38\nSo the question is, in practice, do we just\n\n00:27:43\nwhere we're going to look at a text longer than n.\n\n00:27:47\na problem, even today, even in the largest\n\n00:27:55\nprompt into ChatGPT or whatever is the thing that you\n\n00:27:59\nI mean, these continue to be issues.\n\n00:28:04\nand we'll get into this later in the lecture--\n\n00:28:09\nSo you're going to spend n squared sort of memory budget\n\n00:28:15\nSo in practice, this might be on a large model, say 4,000 or so.\n\n00:28:23\nfeels like a lot, but it's not going to fit a novel.\n\n00:28:29\nAnd there are models that do longer sequences for sure,\n\n00:28:35\nbut no, this actually is an issue.\n\n00:28:43\nis the position that is not any other without [INAUDIBLE]??\n\n00:28:49\nSo how do you know that the p that you've learned,\n\n00:28:53\nas opposed to anything else?\n\n00:28:57\nis position, right?\n\n00:29:00\nwhen I'm adding this p matrix to my x matrix,\n\n00:29:06\nand the words that show up at each index\n\n00:29:11\nin the example, but the p matrix never differs.\n\n00:29:16\nAnd so it's the only thing in the data\n\n00:29:19\nSo you're sort of learning it implicitly.\n\n00:29:22\nat index 1 for every example, for every gradient update,\n\n00:29:31\nYeah.\n\n00:29:34\nbut it definitely allows you to know,\n\n00:29:38\nYeah.\n\n00:29:42\nYeah.\n\n00:29:47\nis this sequence right now defined as a sequence--\n\n00:29:53\nI'm trying to figure out what the unit is you're using.\n\n00:29:57\nSo the question is, when this is quadratic in the sequence,\n\n00:30:01\nYeah, think of it as a sequence of words.\n\n00:30:05\nare smaller than words, which we'll\n\n00:30:08\nthink of this as a sequence of words\n\n00:30:11\nmaybe for an entire paragraph or an entire document or something\n\n00:30:17\nOK, but the attention piece is word-based.\n\n00:30:23\nOK.\n\n00:30:24\nI'm going to move on.\n\n00:30:30\nAnother is that based on the presentation of self-attention\n\n00:30:37\nof deep learning magic; we're just\n\n00:30:44\nSo if I apply self-attention and then apply self-attention\n\n00:30:50\nshould get-- you should look at the next lecture\n\n00:30:53\nthat's actually quite cool.\n\n00:30:56\nvalue vectors together.\n\n00:31:00\nand it ends up looking like one big self-attention.\n\n00:31:05\nwant sort of the traditional deep learning magic.\n\n00:31:10\neach output vector.\n\n00:31:13\nof the output of self-attention, and I'm\n\n00:31:17\nI'm calling it a multi-layer perceptron MLP.\n\n00:31:23\nand it's taking in as input a vector in rd,\n\n00:31:29\nright?\n\n00:31:32\npass it through a non-linearity, multiply it by another matrix.\n\n00:31:35\nAnd so what this looks like in self-attention\n\n00:31:40\ndot dot dot food, and I've got my embeddings for it.\n\n00:31:46\nwhich looks at the whole sequence\n\n00:31:50\nand then I pass each one individually through a feed\n\n00:31:55\nSo this embedding, that's sort of the output\n\n00:31:59\nis passed independently through a multi-layer perceptron here,\n\n00:32:04\nas sort of combining together or processing\n\n00:32:11\nSo there's a number of reasons why we do this.\n\n00:32:16\nstack a ton of computation into these feed-forward networks\n\n00:32:22\nfor GPUs.\n\n00:32:25\nSo you do self-attention, and then\n\n00:32:30\nforward layer, right?\n\n00:32:33\nby this feed forward network to process the result.\n\n00:32:42\nnon-linearities for self-attention.\n\n00:32:48\nof no non-linearities problem in self-attention,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "global_kp_id": "kp_positional_encoding",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "global_kp_id": "kp_position_wise_feed_forward_network",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_positional_encoding",
+      "name": "Positional encoding",
+      "description": "Because self-attention alone ignores order, position information must be injected, commonly by adding sinusoidal or learned positional vectors to token embeddings. Because self-attention on its own does not care about order beyond corresponding shuffles, positional embeddings are added when order information matters.",
+      "track_tags": [
+        "nlp",
+        "self_attention",
+        "sequence_modeling",
+        "sequence_models",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "nlp",
+        "positional_encoding",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because positional encoding clarifies because self-attention alone ignores order, position information must be injected, commonly by adding sinusoidal or learned positional vectors to token embeddings, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp4",
+        "local::lecture_8::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_position_wise_feed_forward_network",
+      "name": "Position-wise feed-forward network",
+      "description": "A per-token MLP applied after attention adds nonlinearity and extra compute so stacked layers do more than repeated weighted averaging.",
+      "track_tags": [
+        "deep_learning",
+        "nlp",
+        "transformers"
+      ],
+      "domain_tags": [
+        "feed_forward_networks",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because position-wise feed-forward network clarifies a per-token MLP applied after attention adds nonlinearity and extra compute so stacked layers do more than repeated weighted averaging, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp5"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.46,
+    0.76
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture10-transformers_transcript.txt"
+  }
+}

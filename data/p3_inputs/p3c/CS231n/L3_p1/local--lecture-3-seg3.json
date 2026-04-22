@@ -155,7 +155,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture03-backprop::kp12",
+        "local::lecture05-backprop::kp12",
         "local::lecture_3::kp8"
       ]
     }

@@ -152,8 +152,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture10-posttraining::kp1",
-        "local::lecture09-pretraining::kp11",
+        "local::lecture13-posttraining::kp1",
+        "local::lecture11-pretraining::kp11",
         "local::lecture_16::kp10"
       ]
     },

@@ -1,0 +1,175 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture10-transformers",
+    "lecture_title": "Lecture 10 - Self-Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA"
+  },
+  "unit": {
+    "unit_id": "local::lecture10-transformers::seg2",
+    "course_id": "cs224n",
+    "name": "Self-attention as fuzzy key-value lookup",
+    "description": "Introduces self-attention conceptually and mathematically as a soft lookup over keys and values generated from each token.",
+    "summary": "Attention is framed as a fuzzy lookup in a key-value store: instead of exactly matching one key, a query softly matches all keys, producing a weighted combination of values [ts=722s] [ts=768s]. The lecture then instantiates this for self-attention over a sentence, where every token embedding is transformed into a query, key, and value using learned matrices Q, K, and V [ts=912s] [ts=947s]. The attention score e_ij is the dot product between token i's query and token j's key, the weights are normalized with a softmax, and each output vector is the weighted sum of value vectors over the sequence [ts=986s] [ts=1010s] [ts=1033s].",
+    "key_points": [
+      {
+        "text": "Attention can be viewed as a fuzzy lookup in a key-value store rather than an exact dictionary lookup.",
+        "timestamp_s": 722,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Each token embedding x_i is transformed into a query q_i, key k_i, and value v_i by learned matrices Q, K, and V.",
+        "timestamp_s": 912,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The compatibility score e_ij is computed as the dot product q_i^T k_j.",
+        "timestamp_s": 986,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The attention weight alpha_ij is the softmax-normalized version of e_ij over all positions j.",
+        "timestamp_s": 1012,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The output o_i for token i is a weighted sum of all value vectors v_j using weights alpha_ij.",
+        "timestamp_s": 1033,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Whether a token attends strongly to itself is learned through Q and K rather than hard-coded.",
+        "timestamp_s": 1192,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
+      "start_s": 715,
+      "end_s": 1257
+    },
+    "difficulty": 0.63,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 9,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Attention is framed as a fuzzy lookup in a key-value store: instead of exactly matching one key, a query softly matches all keys, producing a weighted combination of values [ts=722s] [ts=768s]. The lecture then instantiates this for self-attention over a sentence, where every token embedding is transformed into a query, key, and value using learned matrices Q, K, and V [ts=912s] [ts=947s]. The attention score e_ij is the dot product between token i's query and token j's key, the weights are normalized with a softmax, and each output vector is the weighted sum of value vectors over the sequence [ts=986s] [ts=1010s] [ts=1033s].",
+  "target_kp_ids": [
+    "kp_key_query_value_self_attention_equations",
+    "kp_self_attention"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "video_clip_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "transcript_slice": "00:11:59\nOne thing that you might think of with attention\n\n00:12:07\nSo you have a bunch of keys, a bunch of values,\n\n00:12:12\nSo in an actual lookup table, just\n\n00:12:18\nYou have a table of keys that each key maps to a value,\n\n00:12:23\nAnd the query matches one of the keys,\n\n00:12:27\nSo I've got a bunch of keys here,\n\n00:12:33\nSo I return the value.\n\n00:12:36\nOK, good.\n\n00:12:44\nthe query matches all keys softly.\n\n00:12:48\nYou compute some similarity between the key\n\n00:12:54\nand then you weight the results.\n\n00:12:57\nYou've got a bunch of keys.\n\n00:13:04\nand you will sort of measure that similarity between 0 and 1\n\n00:13:12\nYou average them via the weights of the similarity\n\n00:13:18\nYou do a weighted sum with those weights,\n\n00:13:21\nSo it really is quite a lookup table\n\n00:13:29\nSo I'm really doing some kind of accessing\n\n00:13:35\nbut I'm sort of softly looking at all of the results.\n\n00:13:45\nCool, so what might this look like?\n\n00:13:50\nI went to Stanford CS224N and learned--\n\n00:13:58\nI have a key for each word.\n\n00:14:04\nI have a key for each word.\n\n00:14:06\nI've got the query for learned, and I've\n\n00:14:11\nwhich might say how much you're going to try\n\n00:14:15\nLike, oh, maybe 224N is not that important.\n\n00:14:20\nStanford and then learned, maybe that's\n\n00:14:25\nSo you look across at the whole sentence\n\n00:14:30\nacross the sentence in order to represent learned in context.\n\n00:14:38\nSo let's get into the math.\n\n00:14:43\nThat's W1 to N. Sequence of words in a vocabulary.\n\n00:14:49\nThat's a good sequence.\n\n00:14:53\nmatrix just like we've been doing in this class, right?\n\n00:14:58\nsize to the dimensionality D. So each word\n\n00:15:06\nword embedding, and now I'm going\n\n00:15:11\nmatrices.\n\n00:15:16\nSo I have a matrix Q, which is in R D to D.\n\n00:15:23\nto another vector of dimensionality D,\n\n00:15:28\nSo it takes an xi and it sort of rotates it, shuffles it around,\n\n00:15:35\nand now it's a query.\n\n00:15:37\nk, so that's another matrix, I'm going to come up with my keys.\n\n00:15:45\nI'm going to come up with my values, right?\n\n00:15:49\neach of these xi's and I'm transforming each of them\n\n00:15:55\nmy key for that word, and my value for that word.\n\n00:16:03\nNext, I'm going to compute all pairs of similarities\n\n00:16:08\nSo in the toy example we saw, I was computing the similarity\n\n00:16:14\nof the keys for the entire sentence.\n\n00:16:20\nbetween all keys and all values because I want\n\n00:16:25\nSo I've got this dot--\n\n00:16:29\nvectors, right?\n\n00:16:31\nSo this is saying the query for word i dotted with the key\n\n00:16:40\nIt might be very large negative, might be zero,\n\n00:16:44\nAnd so that's like how much should I\n\n00:16:49\nAnd then I do the softmax, right?\n\n00:16:52\nSo I say that the actual weight that I'm\n\n00:16:59\nof the possible indices.\n\n00:17:02\nand j normalized by the affinity between i\n\n00:17:10\nAnd then my output is just the weighted sum of values.\n\n00:17:15\nSo maybe i is 1 for Zuko, and I'm\n\n00:17:23\nSo Zuko and made and his and uncle and tea,\n\n00:17:30\nI'm looking from i to j as much as alpha ij.\n\n00:17:39\nOh, WI, you can either think of it as a symbol in vocab V.\n\n00:17:48\nyeah, in this case, we are, I guess, thinking of it as this.\n\n00:17:54\nSo in the matrix e, you see that it's\n\n00:18:01\nSo when I do e multiplied by Wi that's\n\n00:18:08\nby W, which is v, and returning a vector that's dimensionality\n\n00:18:12\nSo W in that first line, like W1n,\n\n00:18:20\nlike a column for every word in that sentence and each column\n\n00:18:25\nYeah, usually, I guess we think of it as having a--\n\n00:18:31\nyou might think of it as having a row for each word.\n\n00:18:36\nand then the second dimension would be V,\n\n00:18:40\nAnd then that gets mapped to this thing, which\n\n00:18:46\nWhy do we learn two different matrices, q and k,\n\n00:18:53\njust one matrix [INAUDIBLE]?\n\n00:18:57\nIt ends up being because this will end up\n\n00:19:02\nSo it is for computational efficiency reasons,\n\n00:19:07\nof nice in the presentation.\n\n00:19:11\nis having a very low-rank approximation to QK transpose.\n\n00:19:17\nThat's a good question.\n\n00:19:25\nSorry, could you repeat that for me?\n\n00:19:32\nby itself, does it look like an identity\n\n00:19:37\nThat's a good question.\n\n00:19:40\nSo does eii for j equal to i, so looking at itself,\n\n00:19:46\nDoes it look like the identity?\n\n00:19:48\nOK, so it's unclear actually.\n\n00:19:54\nfor representing yourself.\n\n00:20:00\nIf I didn't have Q and K in there,\n\n00:20:05\nK is identity, then this would be dot product with yourself,\n\n00:20:11\nYou're pointing in the same direction as yourself,\n\n00:20:19\ndifferent from each other because Q could be the identity\n\n00:20:27\nfor example, so that you don't look at yourself.\n\n00:20:32\nit can sort of decide by learning\n\n00:20:37\nor not, and that's some of the flexibility\n\n00:20:43\nwouldn't be there if I just used xi's everywhere\n\n00:20:49\nI'm going to try to move on, I'm afraid,\n\n00:20:53\nkeep talking about self-attention.\n\n00:20:57\nI can also potentially return back.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "global_kp_id": "kp_self_attention",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "global_kp_id": "kp_key_query_value_self_attention_equations",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_self_attention",
+      "name": "Self-attention",
+      "description": "Self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set. Each token can gather information from every token in the sequence in a single parallel operation, rather than relying on stepwise recurrence.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "nlp",
+        "self_attention",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "nlp",
+        "representation_learning",
+        "self_attention"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because self-attention formalizes how self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp2",
+        "local::lecture_8::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_key_query_value_self_attention_equations",
+      "name": "Key-query-value self-attention equations",
+      "description": "Token embeddings are projected into queries, keys, and values; dot-product scores are softmax-normalized and used to compute weighted sums of value vectors.",
+      "track_tags": [
+        "attention",
+        "math_for_ml",
+        "nlp"
+      ],
+      "domain_tags": [
+        "self_attention",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because key-query-value self-attention equations formalizes how token embeddings are projected into queries, keys, and values; dot-product scores are softmax-normalized and used to compute weighted sums of value vectors, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp3"
+      ]
+    }
+  ],
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.48,
+    0.78
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture10-transformers_transcript.txt"
+  }
+}

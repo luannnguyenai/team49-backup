@@ -109,7 +109,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 5,
         "end_s": 302
       },
@@ -159,7 +159,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 303,
         "end_s": 912
       },
@@ -204,7 +204,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 913,
         "end_s": 1739
       },
@@ -254,7 +254,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 1740,
         "end_s": 2460
       },
@@ -304,7 +304,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 2461,
         "end_s": 2930
       },
@@ -359,7 +359,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 2931,
         "end_s": 3500
       },
@@ -414,7 +414,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 3501,
         "end_s": 3811
       },
@@ -474,7 +474,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+        "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
         "start_s": 3812,
         "end_s": 4364
       },
@@ -779,7 +779,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture12_efficient_training::kp2",
+        "local::lecture16-efficient-training::kp2",
         "local::lecture_11_large_scale_distributed_training::kp3"
       ]
     },
@@ -916,7 +916,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture12_efficient_training::kp8",
+        "local::lecture16-efficient-training::kp8",
         "local::lecture_11_large_scale_distributed_training::kp6"
       ]
     },

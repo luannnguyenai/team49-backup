@@ -1,0 +1,184 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture07-rnns",
+    "lecture_title": "Lecture 7 - Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4"
+  },
+  "unit": {
+    "unit_id": "local::lecture07-rnns::seg4",
+    "course_id": "cs224n-2024",
+    "name": "Language models and n-gram fundamentals",
+    "description": "Defines language models formally and begins the classical n-gram solution based on counting local contexts.",
+    "summary": "A language model is defined as a system that assigns a probability distribution to the next token given the previous context, and equivalently as a model that assigns probability to an entire sequence via a chain-rule decomposition into next-token conditionals [ts=1714s] [ts=1777s] [ts=1821s]. The lecture stresses that language models long predate ChatGPT and underlie autocomplete and query suggestion systems [ts=1862s] [ts=1882s] [ts=1928s]. It then introduces n-gram language models, where a Markov assumption keeps only the most recent n-1 words and predicts the next word from relative frequencies of observed short contexts [ts=1975s] [ts=2106s] [ts=2157s].",
+    "key_points": [
+      {
+        "text": "A language model predicts a probability distribution over the next word given the preceding context.",
+        "timestamp_s": 1714,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A language model also assigns probability to a whole text by chain-rule factorization into conditional next-word probabilities.",
+        "timestamp_s": 1821,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Autocomplete and query suggestion are presented as longstanding applications of language models.",
+        "timestamp_s": 1897,
+        "evidence_type": "example"
+      },
+      {
+        "text": "An n-gram language model predicts from short word subsequences such as unigrams, bigrams, and trigrams.",
+        "timestamp_s": 1975,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The Markov assumption keeps only the most recent n-1 words and discards older context.",
+        "timestamp_s": 2106,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Relative-frequency counts of n-grams provide the probability estimate for the next word.",
+        "timestamp_s": 2157,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "In the running example, a four-gram model would estimate next-word probabilities from counts after 'students open their'.",
+        "timestamp_s": 2183,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+      "start_s": 1495,
+      "end_s": 2315
+    },
+    "difficulty": 0.46,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 14,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "A language model is defined as a system that assigns a probability distribution to the next token given the previous context, and equivalently as a model that assigns probability to an entire sequence via a chain-rule decomposition into next-token conditionals [ts=1714s] [ts=1777s] [ts=1821s]. The lecture stresses that language models long predate ChatGPT and underlie autocomplete and query suggestion systems [ts=1862s] [ts=1882s] [ts=1928s]. It then introduces n-gram language models, where a Markov assumption keeps only the most recent n-1 words and predicts the next word from relative frequencies of observed short contexts [ts=1975s] [ts=2106s] [ts=2157s].",
+  "target_kp_ids": [
+    "kp_autoregressive_language_modeling",
+    "kp_n_gram_language_models"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "video_clip_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "transcript_slice": "00:24:58\nSo in some sense, language model is just two English words.\n\n00:25:08\nwe mean it as a technical term that has a particular meaning.\n\n00:25:17\nsomething that can predict, well,\n\n00:25:24\nit's going to put a probability distribution\n\n00:25:28\nSo the students opened their--\n\n00:25:35\nBags.\n\n00:25:37\nLaptops.\n\n00:25:41\nNotebooks.\n\n00:25:43\nI have some of those at least.\n\n00:25:47\nYeah.\n\n00:25:53\nAnd if on top of those we put a probability on each one,\n\n00:26:00\nSo formally we've got a context of preceding items.\n\n00:26:08\nover the next item, which means that the sum of the estimates\n\n00:26:17\nAnd if we've defined a P like this that predicts probabilities\n\n00:26:28\nAn alternative way that you can think of a language model\n\n00:26:36\nassigns a probability to a piece of text.\n\n00:26:44\nmodel can take any piece of text and give it a probability.\n\n00:26:51\nSo if I want to know the probability of any stretch\n\n00:26:58\nof language model, easy.\n\n00:27:01\nProbability of x1 with a null preceding context\n\n00:27:10\nI can do this chain rule decomposition\n\n00:27:16\nare precisely what the language model, as I defined it\n\n00:27:21\nOK, so language models are this essential technology for NLP.\n\n00:27:31\nforward where people do things with human language\n\n00:27:39\nIn particular, they weren't something\n\n00:27:45\nLanguage models have been central to NLP,\n\n00:27:51\nThe idea of them goes back to at least the 50s.\n\n00:27:57\nand it's making suggestions of next words,\n\n00:28:03\nthose suggestions are being generated\n\n00:28:10\na compact, not very good language model\n\n00:28:17\napplication.\n\n00:28:23\nand it's telling you stuff that could come after it to complete\n\n00:28:30\ngenerated by a language model.\n\n00:28:35\nSo before getting into neural language models,\n\n00:28:41\nabout the old days of language modeling.\n\n00:28:46\nbuilt from 1975 until effectively around about 2012.\n\n00:29:03\nAnd the way we're going to do it is we're\n\n00:29:10\nAnd so this is meaning we're going\n\n00:29:15\nand use them to predict.\n\n00:29:20\nshort are the word sequences that we're\n\n00:29:24\nSo if we just look at the probabilities\n\n00:29:31\nIf we look at probabilities of pairs of words, bigram language\n\n00:29:40\nprobabilities of more than three words,\n\n00:29:45\nfive-gram language models, six-gram language models.\n\n00:29:51\nthis is horrific of course.\n\n00:29:56\nare correct because gram is a Greek root,\n\n00:30:04\nSo you should have monograms and diagrams.\n\n00:30:09\nintroduced the idea of n gram models\n\n00:30:14\ninformation theory, the same guy that did cross entropy\n\n00:30:18\nAnd if you look at his 1951 paper, he uses diagrams,\n\n00:30:26\nthis is what people say in practice.\n\n00:30:31\nI like it and I see a practical notation.\n\n00:30:39\nwe're just going to count how often different n-grams appear\n\n00:30:49\nAnd in particular, our trick is that we\n\n00:30:54\nSo that if we're predicting the next word based\n\n00:31:02\nWe're not going to use all of it.\n\n00:31:09\nSo we have this big context and we throw most of it away.\n\n00:31:18\nthe preceding n minus 1 words, well then we can make\n\n00:31:26\nthe fly, whatever it is.\n\n00:31:37\nby a bigram down here.\n\n00:31:43\nof the different terms.\n\n00:31:50\nhow often n-grams occur in a large amount of text\n\n00:31:59\nand that gives us a relative frequency\n\n00:32:06\nDoes that make sense?\n\n00:32:09\nOK, so suppose we're learning a four-gram language model\n\n00:32:19\nthe clock, the students open their.\n\n00:32:26\ngoing to throw away all but the preceding three words.\n\n00:32:34\nAnd so we're going to work out the probabilities\n\n00:32:39\nopen their W and counts of students open their.\n\n00:32:47\ntheir occurred 1,000 times, students open their books\n\n00:32:53\nAnd so we'd say the probability estimate\n\n00:32:58\nIf exams occurred 100 times, the probability estimate\n\n00:33:08\nAnd well, you can see that this is bad.\n\n00:33:15\nthe next word in a simple way, looking\n\n00:33:21\nto look at.\n\n00:33:27\nknown that the prior text was as the Proctor started\n\n00:33:33\nhave been exams, where since you're estimating just based\n\n00:33:38\nbe more likely to choose books because it's more common.\n\n00:33:49\nIt's a crude estimate that could be problematic in other ways.\n\n00:33:59\nthis probability estimate?\n\n00:34:06\nSo there are a lot of n-grams.\n\n00:34:10\nand therefore there are a lot of n-grams.\n\n00:34:13\nSo that's a problem.\n\n00:34:16\nAnything else?\n\n00:34:18\nThe word W might not even show up in the training data\n\n00:34:23\nYeah.\n\n00:34:26\nSo if we're counting over any reasonable sized corpus,\n\n00:34:35\ngoing to have seen that they never\n\n00:34:42\nSo if you start thinking students open their,\n\n00:34:49\nStudents open their accounts or if the students\n\n00:34:55\nmaybe students open their frogs.\n\n00:34:59\nThere are lots of words that in some context\n\n00:35:06\nthat we won't have seen.\n\n00:35:11\nAnd that tends to be an especially bad thing\n\n00:35:15\nhave a probability estimate of 0,\n\n00:35:19\nthat will instantly go to 0.\n\n00:35:24\nSo for that sparsity problem, yeah,\n\n00:35:34\nand so simply done, we get a probability estimate of 0.\n\n00:35:42\nhacked the counts a little to make it non-zero.\n\n00:35:47\nbut the easiest way is you just added a little delta like 0.252\n\n00:35:55\nSo things that you never saw got a count of 0.25 in total,\n\n00:36:02\nand then there are no zeros anymore.\n\n00:36:07\nYou could think then there's a second problem that, wait,\n\n00:36:14\nAnd so that means your denominator is just undefined\n\n00:36:23\nSo you need to do something different there.\n\n00:36:28\nwas that you did back off.\n\n00:36:35\ntheir, you'd just worked out the estimates for words\n\n00:36:41\nAnd if I couldn't estimate that, you just\n\n00:36:47\nSo you use less and less context until you could get an estimate\n\n00:36:53\nBut something to note is that we've\n\n00:37:00\nif you want to come up with a better estimate\n\n00:37:07\nto have a larger n-gram.\n\n00:37:18\nwell, the storage size problem someone mentioned\n\n00:37:25\nto know about is going up exponentially\n\n00:37:31\nyour sparseness problems are getting way,\n\n00:37:36\nto be ending up seeing zeros.\n\n00:37:42\ntended to max out was five.\n\n00:37:50\nBut most of the time, between the sparseness\n\n00:37:56\nwas the largest thing people dealt with.\n\n00:38:05\ndecade that Google released was Google n-grams, which\n\n00:38:15\nand it gave counts of n-grams up to n equals 5.\n\n00:38:21\nOK.\n\n00:38:24\nThe storage problem is, well, to do this,\n\n00:38:28\nThe number of counts is going up exponentially\n\n00:38:35\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "global_kp_id": "kp_n_gram_language_models",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp7",
+        "local::lecture11-pretraining::kp4",
+        "local::lecture14-nlg::kp3",
+        "local::lecture13-generative-models-1::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_n_gram_language_models",
+      "name": "N-gram language models",
+      "description": "Count-based next-word models that use a short Markov context, smoothing, and backoff.",
+      "track_tags": [
+        "nlp_foundations"
+      ],
+      "domain_tags": [
+        "classical_nlp",
+        "language_modeling"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because n-gram language models clarifies count-based next-word models that use a short Markov context, smoothing, and backoff, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp8"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.31,
+    0.61
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-rnns_transcript.txt"
+  }
+}

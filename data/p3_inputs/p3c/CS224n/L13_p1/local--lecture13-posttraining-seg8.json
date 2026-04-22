@@ -1,0 +1,223 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture13-posttraining",
+    "lecture_title": "Lecture 13 - Post-training",
+    "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4"
+  },
+  "unit": {
+    "unit_id": "local::lecture13-posttraining::seg8",
+    "course_id": "CS224N",
+    "name": "InstructGPT, ChatGPT, and remaining risks",
+    "description": "Connects the algorithms to deployed assistants and discusses open-source DPO and alignment failures.",
+    "summary": "The final section connects the pipeline to practical assistant systems. InstructGPT is presented as the model family that defined the instruction-tuning plus RLHF pipeline, scaling toward roughly 30,000 tasks and using labeler data, reward modeling, and reinforcement learning [ts=4353s] [ts=4389s]. It improves on base GPT-3 by inferring user intent, such as explaining the moon landing to a six-year-old instead of continuing with unrelated questions [ts=4400s] [ts=4419s]. ChatGPT follows essentially the same core algorithmic pipeline but is optimized more specifically for dialogue and user interaction, with data quality described as the key practical game [ts=4436s] [ts=4462s]. DPO is described as important for open-source and production models because it is simpler and efficient; the instructor mentions Hugging Face leaderboards, Mistral, and Llama 3 [ts=4508s] [ts=4544s]. RLHF often produces more detailed and organized answers than SFT because humans prefer those properties [ts=4557s] [ts=4584s]. The lecture ends with warnings: reward hacking can optimize the wrong behavior, humans may prefer authoritative or long answers over truthful ones, and hallucinations do not disappear with RLHF [ts=4615s] [ts=4749s].",
+    "key_points": [
+      {
+        "text": "InstructGPT is presented as the first model family defining the SFT plus RLHF pipeline.",
+        "timestamp_s": 4353,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "ChatGPT uses the same core algorithmic ideas but is optimized for dialogue.",
+        "timestamp_s": 4436,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "DPO is described as widely useful in open-source and production post-training.",
+        "timestamp_s": 4508,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "RLHF can make answers more detailed and better organized than SFT alone.",
+        "timestamp_s": 4567,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Reward hacking is illustrated by an agent repeatedly crashing a boat for points.",
+        "timestamp_s": 4615,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Preference optimization can favor authoritative or long answers over truthful or concise answers.",
+        "timestamp_s": 4660,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "RLHF does not eliminate hallucinations.",
+        "timestamp_s": 4747,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=35X6zlhoCy4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=11",
+      "start_s": 4351,
+      "end_s": 4775
+    },
+    "difficulty": 3.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The final section connects the pipeline to practical assistant systems. InstructGPT is presented as the model family that defined the instruction-tuning plus RLHF pipeline, scaling toward roughly 30,000 tasks and using labeler data, reward modeling, and reinforcement learning [ts=4353s] [ts=4389s]. It improves on base GPT-3 by inferring user intent, such as explaining the moon landing to a six-year-old instead of continuing with unrelated questions [ts=4400s] [ts=4419s]. ChatGPT follows essentially the same core algorithmic pipeline but is optimized more specifically for dialogue and user interaction, with data quality described as the key practical game [ts=4436s] [ts=4462s]. DPO is described as important for open-source and production models because it is simpler and efficient; the instructor mentions Hugging Face leaderboards, Mistral, and Llama 3 [ts=4508s] [ts=4544s]. RLHF often produces more detailed and organized answers than SFT because humans prefer those properties [ts=4557s] [ts=4584s]. The lecture ends with warnings: reward hacking can optimize the wrong behavior, humans may prefer authoritative or long answers over truthful ones, and hallucinations do not disappear with RLHF [ts=4615s] [ts=4749s].",
+  "target_kp_ids": [
+    "kp_instructgpt_and_chatgpt_post_training_pipeline"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "video_clip_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "transcript_slice": "01:12:33\nSo, yeah, I mean, let's see we went\n\n01:12:38\nwhat do we get?\n\n01:12:45\nIt defined this pipeline.\n\n01:12:49\nRemember when we were doing like only one task and now we have\n\n01:12:55\nmany, many different examples, so that's where we are with\n\n01:13:02\nIn this case, they're following a specific RLHF pipeline\n\n01:13:07\nand then do some kind of a reinforcement learning\n\n01:13:13\nAnd, yeah, the task collected from labelers\n\n01:13:17\nI'll leave it to your imagination\n\n01:13:20\nBut how we started off with this model was something\n\n01:13:28\nlanding to a six-year and it does not really following\n\n01:13:33\nsomething which is meaningful.\n\n01:13:37\nfrom the specific instruction, and it's\n\n01:13:44\nAnd, yeah, these are just more examples\n\n01:13:48\nwould do, whereas your base model might not\n\n01:13:56\nAnd yeah, we went from InstructGPT to ChatGPT,\n\n01:14:02\nThe key difference here is that it is still\n\n01:14:06\nis more optimized for dialogue, more optimized\n\n01:14:11\nSo the core algorithmic techniques\n\n01:14:17\nbut you have to be really careful about the data you're\n\n01:14:20\nAnd that's really the whole game,\n\n01:14:26\nAnd yeah, it follows the same pipeline as well,\n\n01:14:33\nI'm sure you all have interacted with it in some form or not,\n\n01:14:38\nlook like.\n\n01:14:45\nthe idea here is that it's very good at responding\n\n01:14:49\nThis is not something that we could\n\n01:14:53\nThese are instructions are hard to come examples for,\n\n01:14:58\nyou're trained on either, but it's able to infer the intent\n\n01:15:03\nAnd that's something I find personally very remarkable.\n\n01:15:08\nAnd there's been a lot of progress\n\n01:15:12\nSo DPO is much simpler and much more efficient,\n\n01:15:18\nare using DPO, so this is a leaderboard\n\n01:15:23\nSo, I mean, 9 out of 10 models here are trained with DPO.\n\n01:15:30\ncommunity to instruction-tune their model betters as well.\n\n01:15:36\nMistral is using DPO.\n\n01:15:39\nSo these are very, very strong models\n\n01:15:44\nstarting to use these algorithms as well.\n\n01:15:49\nis we went through all this optimization\n\n01:15:55\nchanging in the behavior.\n\n01:16:00\nsimply ask an instruction for--\n\n01:16:05\nyou'll get something like this.\n\n01:16:09\nget a lot more details in your answer,\n\n01:16:13\nAnd this is something that they maybe humans prefer.\n\n01:16:20\nBut it's something that's a very clear difference between simply\n\n01:16:30\nSo, yeah, we discussed this whole RLHF routine\n\n01:16:38\nand we are generalizing beyond label data,\n\n01:16:42\ntricky to correctly implement.\n\n01:16:48\nand we briefly also touched upon the idea of reward model\n\n01:16:55\nAnd when you're optimizing for learned reward models,\n\n01:16:59\nthat there is a way for it to just simply crash into the--\n\n01:17:08\nto get more and more points.\n\n01:17:12\nSo this is a very common example that\n\n01:17:17\nIf you do not specify a rewards well,\n\n01:17:22\nare not your desired intent.\n\n01:17:26\nPart of the reason is reinforcement learning\n\n01:17:30\nIt's at the heart of AlphaGo, AlphaZero, which\n\n01:17:36\nSo you have to be careful about how you specify things.\n\n01:17:40\nfor human preferences is often not the right thing,\n\n01:17:46\nare in their best interest.\n\n01:17:49\nlike authoritative and helpful answers,\n\n01:17:55\nSo one property that happens is that they\n\n01:18:02\nis maybe not something nice.\n\n01:18:04\n[INAUDIBLE] besides, I'm curious if maybe like ChatGPT being\n\n01:18:10\nchange how people really raise their voice because I,\n\n01:18:16\nand I have something that gives me\n\n01:18:19\nsometimes I'm just annoyed by that.\n\n01:18:21\nBut maybe in the original reward function\n\n01:18:25\npreferred that and now prefer less.\n\n01:18:31\nintegrate more and more into our systems,\n\n01:18:34\nand they will pick up on things, maybe undesirable things\n\n01:18:40\nAs far as I understand, ChatGPT is really cutting down\n\n01:18:45\nthat all of these models are trying to cut down on,\n\n01:18:49\nPart of the reason why that emerges\n\n01:18:53\npeople are not necessarily reading the answers.\n\n01:18:58\nand that's a property that actually goes into these models,\n\n01:19:04\nas they get more feedback.\n\n01:19:07\nthat is going to go away with RL,\n\n01:19:10\nas well, biases from things and so on.\n\n01:19:18\nis we started with pretrained models.\n\n01:19:24\nand hopefully, it's a little more clearer\n\n01:19:31\nAnd I'll end here.\n\n01:19:35\n[APPLAUSE]",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture13-posttraining::seg8",
+      "global_kp_id": "kp_instructgpt_and_chatgpt_post_training_pipeline",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture13-posttraining::seg8",
+      "global_kp_id": "kp_dpo",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture13-posttraining::seg8",
+      "global_kp_id": "kp_reward_hacking",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_instructgpt_and_chatgpt_post_training_pipeline",
+      "name": "InstructGPT and ChatGPT post-training pipeline",
+      "description": "The practical assistant-building pipeline and its remaining preference-alignment risks.",
+      "track_tags": [
+        "applications",
+        "llm",
+        "nlp"
+      ],
+      "domain_tags": [
+        "alignment_risks",
+        "chatgpt",
+        "instructgpt"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "llm_evaluator"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because instructGPT and ChatGPT post-training pipeline synthesizes the practical assistant-building pipeline and its remaining preference-alignment risks into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dpo",
+      "name": "Direct Preference Optimization",
+      "description": "A direct classification-style preference objective that avoids a separate RLHF optimization loop. DPO as a simpler preference-optimization method that avoids full PPO-style RL infrastructure.",
+      "track_tags": [
+        "dpo",
+        "llm",
+        "nlp",
+        "preference_optimization"
+      ],
+      "domain_tags": [
+        "llm_alignment",
+        "optimization",
+        "post_training",
+        "preference_optimization"
+      ],
+      "career_path_tags": [
+        "ai_engineer",
+        "llm_engineer",
+        "ml_researcher",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.86,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because direct Preference Optimization formalizes how a direct classification-style preference objective that avoids a separate RLHF optimization loop, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp10",
+        "local::lecture21-after-dpo::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_hacking",
+      "name": "Reward hacking and KL regularization",
+      "description": "The risk of exploiting learned rewards and the KL-style penalty that keeps the policy near the reference model. Optimizers exploiting incomplete reward specifications in reward-model-based alignment.",
+      "track_tags": [
+        "ai_safety",
+        "alignment",
+        "llm",
+        "nlp",
+        "reward_hacking"
+      ],
+      "domain_tags": [
+        "ai_safety",
+        "kl_divergence",
+        "reinforcement_learning",
+        "reward_hacking"
+      ],
+      "career_path_tags": [
+        "ai_safety_researcher",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.81,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because reward hacking and KL regularization formalizes how the risk of exploiting learned rewards and the KL-style penalty that keeps the policy near the reference model, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp9",
+        "local::lecture21-after-dpo::kp12"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 3,
+  "target_difficulty_range": [
+    3.65,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture13-posttraining_transcript.txt"
+  }
+}

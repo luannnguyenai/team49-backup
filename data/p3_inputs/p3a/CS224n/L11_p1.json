@@ -1,921 +1,769 @@
 {
   "lecture_context": {
     "course_id": "CS224n",
-    "lecture_id": "cs224n-2024-lecture11-benchmarking",
-    "lecture_title": "Lecture 11 - Benchmarking",
-    "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM"
+    "lecture_id": "lecture11-pretraining",
+    "lecture_title": "Lecture 11 - Pretraining",
+    "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w"
   },
   "table_of_contents": [
     {
       "section_index": 1,
-      "title": "Why evaluation changes across training, development, deployment, and publishing",
-      "start_s": 5,
-      "end_s": 478
+      "title": "Subword modeling and tokenization",
+      "start_s": 126,
+      "end_s": 895
     },
     {
       "section_index": 2,
-      "title": "Close-ended NLP tasks, metrics, and spurious correlations",
-      "start_s": 479,
-      "end_s": 1052
+      "title": "Why contextual pretraining matters",
+      "start_s": 896,
+      "end_s": 1486
     },
     {
       "section_index": 3,
-      "title": "Open-ended generation metrics: BLEU, ROUGE, BERTScore, BLEURT, and reference quality",
-      "start_s": 1053,
-      "end_s": 1979
+      "title": "Language modeling and the pretrain–fine-tune paradigm",
+      "start_s": 1487,
+      "end_s": 2154
     },
     {
       "section_index": 4,
-      "title": "Human evaluation as the gold standard and why it is difficult",
-      "start_s": 1980,
-      "end_s": 2603
+      "title": "Encoder pretraining and BERT-style masking",
+      "start_s": 2155,
+      "end_s": 3022
     },
     {
       "section_index": 5,
-      "title": "Chatbot evaluation, Chatbot Arena, LLM judges, and AlpacaEval",
-      "start_s": 2604,
-      "end_s": 3301
+      "title": "Using pretrained encoders: fine-tuning, RoBERTa, and PEFT",
+      "start_s": 3023,
+      "end_s": 3518
     },
     {
       "section_index": 6,
-      "title": "How current LLMs are evaluated: benchmark suites, MMLU, coding, agents, and perplexity",
-      "start_s": 3302,
-      "end_s": 3836
+      "title": "Encoder-decoders, T5, and decoder-only GPT models",
+      "start_s": 3519,
+      "end_s": 3994
     },
     {
       "section_index": 7,
-      "title": "Consistency, contamination, overfitting, and dynamic/private testing",
-      "start_s": 3837,
-      "end_s": 4269
-    },
-    {
-      "section_index": 8,
-      "title": "Monoculture, multilinguality, efficiency, fairness, bias, and incentive problems",
-      "start_s": 4270,
-      "end_s": 4719
-    },
-    {
-      "section_index": 9,
-      "title": "Takeaways and rubric-based thinking for model-as-a-judge evaluation",
-      "start_s": 4720,
-      "end_s": 5054
+      "title": "GPT-3, in-context learning, scaling, and prompting",
+      "start_s": 3995,
+      "end_s": 4718
     }
   ],
   "units": [
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg1",
-      "course_id": "cs224n-2024",
-      "name": "Evaluation goals differ across the ML lifecycle",
-      "description": "Introduces why evaluation is needed at training, development, model selection, deployment, and publishing, and why each stage wants different metric properties.",
-      "summary": "The lecture opens by framing evaluation as a stage-dependent design problem rather than a single universal metric. During training, metrics must be fast, cheap, differentiable, and resistant to shortcut optimization [ts=63s] [ts=176s]. During deployment, the requirements shift toward trustworthiness, task specificity, and absolute thresholds because production decisions need go/no-go judgments rather than just pairwise comparisons [ts=240s] [ts=266s]. The publishing setting is treated separately: academic benchmarks should be reproducible, standardized, easy to run, and directionally useful over years even if the metric is imperfect, with benchmark design balancing simplicity against difficulty so the task is neither random nor already saturated [ts=283s] [ts=332s] [ts=373s].",
+      "unit_id": "local::lecture11-pretraining::seg1",
+      "course_id": "CS224n",
+      "name": "Subword modeling and the vocabulary problem",
+      "description": "Explains why fixed word vocabularies fail on typos, morphological variants, and new words, and motivates subword tokenization as the practical alternative used in modern NLP.",
+      "summary": "The lecture opens by showing why a finite word vocabulary is brittle: models trained with whole-word embeddings cannot gracefully handle typos like \"laern,\" elongated spellings like \"taaaasty,\" or productive morphology like \"transformerify\" [ts=184s] [ts=198s]. The instructor argues that mapping all unseen words to a single UNK token throws away too much information, and the problem becomes worse in morphologically rich languages such as Swahili, where a single verb can have hundreds of conjugated forms [ts=254s] [ts=311s]. The solution is subword modeling: start from characters, iteratively merge common adjacent substrings, and tokenize each word into the fewest large known pieces possible [ts=395s] [ts=638s]. This preserves open-vocabulary coverage, lets common words remain intact, and gives useful representations for novel forms such as segmented versions of \"tasty\" or \"transformer\" + \"-ify\" [ts=444s] [ts=549s]. The segment also clarifies that punctuation is typically retained and that the model treats full words and subwords uniformly as vocabulary indices [ts=665s] [ts=736s].",
       "key_points": [
         {
-          "text": "Training, development, model selection, deployment, and publishing each require evaluation, but not with the same metric properties.",
-          "timestamp_s": 150,
+          "text": "Using a single UNK token for unseen words loses substantial lexical information.",
+          "timestamp_s": 254,
           "evidence_type": "claim"
         },
         {
-          "text": "Training-time metrics should be fast, cheap, differentiable, and hard to game through shortcuts.",
-          "timestamp_s": 180,
+          "text": "Morphologically rich languages make whole-word vocabularies especially inefficient because many related forms would get separate vectors.",
+          "timestamp_s": 311,
           "evidence_type": "claim"
         },
         {
-          "text": "Deployment metrics should be trustworthy, task-specific, and absolute enough to support thresholds like 'do not ship below 95%'.",
-          "timestamp_s": 255,
-          "evidence_type": "claim"
+          "text": "Subword vocabularies can be learned by starting from characters and repeatedly merging frequent adjacent substrings.",
+          "timestamp_s": 395,
+          "evidence_type": "definition"
         },
         {
-          "text": "Academic benchmarks should be reproducible and standardized so papers remain comparable over many years.",
-          "timestamp_s": 294,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A useful academic benchmark balances difficulty and simplicity: too hard gives random performance, too easy gives saturated baselines.",
-          "timestamp_s": 380,
+          "text": "At tokenization time, words are split into the largest available subwords so sequence length stays relatively small.",
+          "timestamp_s": 638,
           "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Modern NLP usually keeps punctuation and minimally preprocesses text so inputs stay close to real usage.",
+          "timestamp_s": 665,
+          "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 5,
-        "end_s": 478
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 126,
+        "end_s": 895
       },
-      "difficulty": 0.34,
+      "difficulty": 0.42,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 8,
+      "difficulty_confidence": "high",
+      "duration_min": 13,
       "ordering_index": 1,
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg2",
-      "course_id": "cs224n-2024",
-      "name": "Close-ended tasks and the traps inside standard metrics",
-      "description": "Covers close-ended NLP tasks, standard classification metrics, benchmark aggregation, and the risk of spurious dataset artifacts.",
-      "summary": "Close-ended tasks are defined as tasks with a small answer space, often one or a few correct labels, so they can usually be evaluated with standard classification tools such as accuracy, precision, recall, and F1 [ts=535s] [ts=668s]. The lecture surveys sentiment analysis, entailment, part-of-speech tagging, named entity recognition, coreference, question answering, and multi-task benchmarks such as SuperGLUE [ts=576s] [ts=702s]. Yann then emphasizes that 'standard ML' does not mean 'easy': metric choice changes model behavior, accuracy can be misleading under class imbalance as in spam filtering, averaging heterogeneous benchmark columns is often ill-posed, and label collection can introduce spurious correlations, illustrated by SNLI hypotheses where negation alone predicts non-entailment surprisingly well [ts=858s] [ts=894s] [ts=980s].",
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "course_id": "CS224n",
+      "name": "From static embeddings to contextual pretraining",
+      "description": "Motivates whole-model pretraining by contrasting static word embeddings with contextual representations and by showing what can be learned from reconstructing masked text.",
+      "summary": "This segment reframes the course’s earlier distributional hypothesis in contextual terms: word2vec gives one vector for a surface form like \"record,\" so noun and verb senses are blended into a single embedding, whereas contextual models can represent the token differently depending on surrounding words [ts=903s] [ts=956s]. The instructor then contrasts the old setup—pretrained word embeddings plus a randomly initialized task model—with modern pretraining, where the entire network is trained before downstream fine-tuning [ts=1039s] [ts=1065s]. Pretraining is presented as reconstructing corrupted input: mask part of a naturally occurring sentence and force the model to predict the missing content [ts=1207s] [ts=1246s]. Through examples, the lecture argues that this objective can teach syntax (what determiners fit), co-reference (\"her\" matching \"the woman\"), lexical semantics (which sea creatures fit a list), sentiment (predicting whether a movie was bad), and even simple world or reasoning structure such as physical location and numerical continuation [ts=1277s] [ts=1446s].",
       "key_points": [
         {
-          "text": "A close-ended NLP task has a limited answer space, often fewer than 10 options.",
-          "timestamp_s": 541,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Typical close-ended benchmarks include IMDb/SST for sentiment and SNLI for entailment.",
-          "timestamp_s": 590,
-          "evidence_type": "example"
-        },
-        {
-          "text": "Close-ended evaluation typically uses accuracy, precision, recall, and F1.",
-          "timestamp_s": 673,
+          "text": "Static embeddings collapse multiple senses of a word like \"record\" into one representation.",
+          "timestamp_s": 956,
           "evidence_type": "claim"
         },
         {
-          "text": "Accuracy can be deceptive on imbalanced data; a classifier predicting 'not spam' always could score 90% accuracy without solving the task.",
-          "timestamp_s": 858,
+          "text": "Whole-model pretraining means pretraining not only the input embeddings but also the contextual network on top of them.",
+          "timestamp_s": 1065,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A core self-supervised recipe is to mask part of real text and train the network to reconstruct the missing portion.",
+          "timestamp_s": 1207,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Masked prediction can teach syntax by constraining which words can legally fit a context.",
+          "timestamp_s": 1277,
           "evidence_type": "example"
         },
         {
-          "text": "Averaging columns that mix accuracy, F1, and correlation can yield misleading aggregate benchmark scores.",
-          "timestamp_s": 894,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "In SNLI, humans often wrote non-entailment hypotheses by inserting negation, creating a shortcut where models can do well from the hypothesis alone.",
-          "timestamp_s": 980,
-          "evidence_type": "diagnostic_tip"
+          "text": "Masked prediction can also surface sentiment and simple world knowledge from ordinary text.",
+          "timestamp_s": 1346,
+          "evidence_type": "example"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 479,
-        "end_s": 1052
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 896,
+        "end_s": 1486
       },
       "difficulty": 0.5,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
+      "difficulty_confidence": "high",
       "duration_min": 10,
       "ordering_index": 2,
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg3",
-      "course_id": "cs224n-2024",
-      "name": "Open-ended evaluation from overlap scores to learned judges",
-      "description": "Introduces open-ended tasks and walks through overlap metrics, embedding-based metrics, BLEURT, and the limitation that references themselves may be poor.",
-      "summary": "Open-ended tasks are contrasted with close-ended tasks by having many valid answers with graded quality, which makes standard right-or-wrong classification metrics inadequate [ts=1063s] [ts=1086s]. The lecture uses summarization, translation, and especially instruction-following as representative open-ended tasks, then categorizes evaluation methods into content overlap, model-based metrics, and human evaluation [ts=1105s] [ts=1199s]. Content-overlap metrics are introduced as word or n-gram comparison against human references; BLEU emphasizes precision with a length penalty, ROUGE emphasizes recall, and both can miss semantic equivalence or reward wrong answers with lexical overlap, as shown by the 'Heck yes!' examples [ts=1242s] [ts=1321s] [ts=1439s]. Learned metrics then move from word embeddings to contextual BERT representations in BERTScore and to fine-tuned evaluators in BLEURT, but the segment closes by arguing that reference-based evaluation is fundamentally bounded by reference quality, illustrated by weak ROUGE-human correlation on ordinary news summaries and improved correlation when experts write stronger references [ts=1595s] [ts=1646s] [ts=1754s] [ts=1833s].",
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "course_id": "CS224n",
+      "name": "Language modeling as pretraining and why fine-tuning works",
+      "description": "Defines language-model pretraining, explains the two-stage pretrain–fine-tune workflow, and discusses data scale, evaluation, and why pretrained initializations help.",
+      "summary": "Here pretraining is reduced to language modeling: train a model to predict the next token from the prefix, keep all learned weights, and reuse them as the initialization for a downstream task model [ts=1487s] [ts=1538s]. The lecture formalizes the now-standard two-step workflow: first learn broad linguistic regularities from abundant unlabeled text, then adapt the model to a smaller supervised task such as sentiment analysis with additional gradient updates [ts=1552s] [ts=1580s]. A major reason this helps is scale: unlabeled text is orders of magnitude more plentiful than labeled task data, especially in English, so pretraining can absorb generic knowledge about language and the world before fine-tuning specializes it [ts=1649s] [ts=1997s]. During development, perplexity is a practical proxy metric for pretraining quality, while benchmark suites serve as rough task-level checks of generality [ts=1758s] [ts=1774s]. The instructor also emphasizes that optimization matters: starting gradient descent from pretrained parameters often leads fine-tuning to better valleys than random initialization, even though the full theory remains open [ts=1812s] [ts=1875s].",
       "key_points": [
         {
-          "text": "Open-ended tasks have many valid answers and multiple levels of correctness.",
-          "timestamp_s": 1065,
+          "text": "Language-model pretraining predicts the next word from previous words and then reuses all learned parameters.",
+          "timestamp_s": 1499,
           "evidence_type": "definition"
         },
         {
-          "text": "Instruction-following can be viewed as a general interface that subsumes classification, summarization, and other tasks.",
-          "timestamp_s": 1155,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Content-overlap metrics compare model output to a human reference using lexical or n-gram overlap.",
-          "timestamp_s": 1242,
+          "text": "The standard workflow is pretraining on unlabeled text followed by fine-tuning on a smaller labeled task.",
+          "timestamp_s": 1552,
           "evidence_type": "definition"
         },
         {
-          "text": "BLEU tracks overlap precision with a length penalty, while ROUGE focuses on recall.",
-          "timestamp_s": 1321,
+          "text": "Unlabeled text is vastly more abundant than labeled task data, which is a core reason pretraining helps.",
+          "timestamp_s": 1649,
           "evidence_type": "claim"
         },
         {
-          "text": "BLEU can assign 0 to semantically correct outputs like 'Yup' and a high score to semantically wrong outputs like 'Heck no!'.",
-          "timestamp_s": 1435,
-          "evidence_type": "example"
-        },
-        {
-          "text": "BERTScore compares contextual BERT embeddings rather than raw lexical matches.",
-          "timestamp_s": 1610,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "BLEURT fine-tunes a pretrained BERT model to predict evaluation quality from examples with metric and human supervision.",
-          "timestamp_s": 1666,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Reference-based metrics are limited by the quality of the references themselves, not just by the scoring function.",
-          "timestamp_s": 1794,
+          "text": "Perplexity is a convenient training-time metric that often correlates with downstream performance.",
+          "timestamp_s": 1758,
           "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Fine-tuning works partly because optimization stays near strong pretrained parameters rather than starting from random weights.",
+          "timestamp_s": 1866,
+          "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 1053,
-        "end_s": 1979
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 1487,
+        "end_s": 2154
       },
-      "difficulty": 0.62,
+      "difficulty": 0.58,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 15,
+      "duration_min": 11,
       "ordering_index": 3,
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg4",
-      "course_id": "cs224n-2024",
-      "name": "Human evaluation is the gold standard but operationally fragile",
-      "description": "Explains why human evaluation remains the reference point for open-ended tasks while cataloging its practical and statistical failure modes.",
-      "summary": "Human evaluation is presented as the gold standard for open-ended generation and the target against which automatic metrics should be validated [ts=1980s] [ts=2016s]. But the lecture quickly shows why this 'gold standard' is difficult to use well: evaluators should score multiple axes such as fluency, coherence, common sense, grammaticality, and redundancy, and scores from different human studies are not directly comparable because the annotators and protocols differ [ts=2056s] [ts=2081s]. Yann then details the operational problems: human evaluation is slow and expensive, annotators disagree heavily even with detailed rubrics, the Alpaca Farm team only achieved 67% agreement among five trained researchers, many published human studies are not repeatable, humans only observe sampled outputs rather than the model's full recall, and crowdworker incentives often favor shortcuts such as preferring longer answers [ts=2101s] [ts=2210s] [ts=2310s] [ts=2438s].",
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "course_id": "CS224n",
+      "name": "Encoder pretraining and BERT",
+      "description": "Covers architecture-specific pretraining for encoders, explains masked language modeling, and introduces BERT’s training recipe and its impact on NLP.",
+      "summary": "The lecture next organizes pretraining by architecture—encoders, encoder-decoders, and decoders—and begins with encoders, which have bidirectional context and therefore cannot use ordinary left-to-right language modeling without trivially peeking at the answer [ts=2155s] [ts=2241s]. The workaround is masked language modeling: corrupt the input by blanking selected tokens, run the encoder over the full masked sequence, and compute loss only on the masked positions so the model learns to reconstruct missing words from both left and right context [ts=2269s] [ts=2327s]. This leads into BERT, introduced as the model that popularized masked language modeling and released pretrained transformer weights that became broadly useful for representation learning [ts=2448s] [ts=2470s]. BERT masks 15% of subword tokens, but mixes masking, random replacement, and unchanged tokens so the network learns to build contextual representations even when no explicit mask appears at test time [ts=2483s] [ts=2571s]. The segment also explains the next-sentence prediction task with segment embeddings, notes that later work found it unnecessary, and highlights how BERT-style pretraining outperformed many bespoke task-specific architectures on standard NLP benchmarks [ts=2608s] [ts=3005s].",
       "key_points": [
         {
-          "text": "Human evaluation is the gold standard for open-ended tasks and the target automatic metrics should correlate with.",
-          "timestamp_s": 1985,
+          "text": "Encoders cannot use plain next-word language modeling for pretraining because bidirectional attention leaks the target token.",
+          "timestamp_s": 2241,
           "evidence_type": "claim"
         },
         {
-          "text": "Humans should often score multiple dimensions such as fluency, coherence, style, grammaticality, and redundancy.",
-          "timestamp_s": 2062,
+          "text": "Masked language modeling trains an encoder to reconstruct masked tokens from both left and right context.",
+          "timestamp_s": 2269,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "BERT masks 15% of subword tokens and uses a mixture of true masks, random replacements, and unchanged tokens.",
+          "timestamp_s": 2483,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Next-sentence prediction asks whether segment B is the true continuation of segment A.",
+          "timestamp_s": 2616,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Longer contexts help contextual interpretation, which is one reason later work found next-sentence prediction unnecessary.",
+          "timestamp_s": 2726,
           "evidence_type": "claim"
         },
         {
-          "text": "Scores from different human-evaluation studies should not be directly compared because annotators and protocols differ.",
-          "timestamp_s": 2081,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Human evaluation is slow and expensive.",
-          "timestamp_s": 2106,
+          "text": "BERT-style pretraining largely displaced hand-crafted task-specific architectures across benchmark tasks.",
+          "timestamp_s": 2973,
           "evidence_type": "claim"
-        },
-        {
-          "text": "Even after detailed rubric discussion, five Alpaca Farm researchers agreed only 67% of the time.",
-          "timestamp_s": 2210,
-          "evidence_type": "example"
-        },
-        {
-          "text": "A survey paper found that only about 5% of human evaluations were repeatable from public descriptions.",
-          "timestamp_s": 2330,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Humans mainly evaluate precision on sampled outputs, not recall over the model's whole output distribution.",
-          "timestamp_s": 2374,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Annotator incentives can reward shortcuts, such as preferring longer answers when working quickly.",
-          "timestamp_s": 2460,
-          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 1980,
-        "end_s": 2603
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 2155,
+        "end_s": 3022
       },
-      "difficulty": 0.47,
+      "difficulty": 0.63,
       "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 10,
+      "difficulty_confidence": "high",
+      "duration_min": 14,
       "ordering_index": 4,
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg5",
-      "course_id": "cs224n-2024",
-      "name": "From Chatbot Arena to GPT-4 judges and AlpacaEval",
-      "description": "Covers pairwise chatbot evaluation, public arenas, model-as-a-judge methods, and the specific design of AlpacaEval.",
-      "summary": "The lecture next turns to chatbot evaluation, arguing that systems like ChatGPT are especially hard to score because they answer arbitrary tasks with arbitrary output length [ts=2610s] [ts=2628s]. The standard solution is pairwise comparison: two models answer the same prompt and a human or judge model chooses the preferred response; Chatbot Arena operationalizes this at scale with public side-by-side voting and Elo ratings derived from many pairwise matches [ts=2628s] [ts=2662s]. Yann then argues that LLM judges, especially GPT-4, make this much cheaper and faster while still correlating strongly with human-majority preferences because model judges have low variance, although they introduce systematic biases such as verbosity bias, position bias, and self-preference [ts=2770s] [ts=2878s] [ts=3000s] [ts=3013s]. AlpacaEval is presented as a concrete instantiation: GPT-4 compares a candidate model against a baseline on instructions, length bias is corrected by reweighting, the benchmark correlates about 98% with Chatbot Arena rankings, and evaluation takes only minutes and about ten dollars [ts=3044s] [ts=3075s] [ts=3110s].",
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "course_id": "CS224n",
+      "name": "Fine-tuning pretrained encoders and lightweight adaptation",
+      "description": "Shows how encoder representations are turned into downstream predictions, when BERT is appropriate, and how RoBERTa and parameter-efficient tuning refine the recipe.",
+      "summary": "After pretraining, an encoder yields one contextual vector per input token; to solve a downstream task, the pretraining prediction head is removed and a task-specific classifier is attached to one or more hidden states, then the model is fine-tuned end to end [ts=3056s] [ts=3133s]. The segment notes BERT model sizes and emphasizes the practical separation between expensive pretraining and relatively cheap downstream fine-tuning, which can often be done on modest hardware [ts=3141s] [ts=3189s]. It also clarifies where BERT fits best: because its objective is fill-in-the-blank reconstruction rather than left-to-right generation, it is strong for document or sentence representation tasks such as classification, but less natural for free-form text generation [ts=3211s] [ts=3247s]. Several improvements are then sketched: span masking can be harder and more useful than masking isolated subwords, and RoBERTa improves on BERT by dropping next-sentence prediction and training on more data [ts=3253s] [ts=3319s]. The lecture closes with parameter-efficient fine-tuning ideas such as prefix tuning, prompt tuning, and low-rank weight updates, all motivated by preserving strong pretrained weights while adapting cheaply to a new task [ts=3353s] [ts=3497s].",
       "key_points": [
         {
-          "text": "Chatbot evaluation is difficult because the model may be asked any task and may produce arbitrarily long text.",
-          "timestamp_s": 2612,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A common chatbot-evaluation setup compares two model responses to the same prompt and asks which is better.",
-          "timestamp_s": 2628,
+          "text": "For downstream tasks, remove the masked-token prediction head and add a task-specific classifier on top of encoder states.",
+          "timestamp_s": 3100,
           "evidence_type": "definition"
         },
         {
-          "text": "Chatbot Arena collects large-scale side-by-side human preferences and converts pairwise outcomes into Elo ratings.",
-          "timestamp_s": 2662,
-          "evidence_type": "example"
-        },
-        {
-          "text": "Using GPT-4 as a judge is roughly 100x faster and 100x cheaper than human evaluation in the Alpaca setting.",
-          "timestamp_s": 2770,
+          "text": "BERT is better suited to classification and representation tasks than to open-ended generation.",
+          "timestamp_s": 3218,
           "evidence_type": "claim"
         },
         {
-          "text": "Judge-model agreement with human-majority preferences can exceed the agreement of an individual human with the other humans.",
-          "timestamp_s": 2818,
+          "text": "Masking whole spans can be harder and more effective than masking isolated subwords.",
+          "timestamp_s": 3258,
           "evidence_type": "claim"
         },
         {
-          "text": "Model judges show biases including preference for longer outputs, sensitivity to left/right position, and some self-bias.",
-          "timestamp_s": 3000,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "AlpacaEval asks GPT-4 to compare model outputs against a baseline, reweights for length bias, and reports a win rate.",
-          "timestamp_s": 3102,
-          "evidence_type": "claim"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 2604,
-        "end_s": 3301
-      },
-      "difficulty": 0.57,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 12,
-      "ordering_index": 5,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg6",
-      "course_id": "cs224n-2024",
-      "name": "What people actually use today to evaluate LLMs",
-      "description": "Surveys current LLM evaluation practice across perplexity, aggregate benchmark suites, arena-style comparisons, and specialized tasks such as coding and agents.",
-      "summary": "Yann summarizes current LLM evaluation practice into three families: perplexity or validation loss, averages over many benchmark tasks, and arena-like pairwise comparisons [ts=3302s] [ts=3327s]. The 'average over everything' family includes large suites such as HELM and the Hugging Face Open LLM Leaderboard, which bundle automatically scored tasks including GSM8K, MMLU, LegalBench, and MedQA [ts=3370s] [ts=3395s]. MMLU is highlighted as the most widely believed benchmark, consisting of multiple-choice questions over 57 subject areas, while coding benchmarks are valued because they correlate with reasoning and support easy automatic evaluation via test cases [ts=3434s] [ts=3512s] [ts=3543s]. The segment also raises agent evaluation as an emerging challenge requiring sandboxed tool environments and notes that perplexity is often a surprisingly strong proxy for downstream averages in pretrained models, though it is not comparable across datasets or tokenizers and should be treated carefully [ts=3600s] [ts=3691s] [ts=3750s].",
-      "key_points": [
-        {
-          "text": "Current LLM evaluation commonly uses perplexity, average benchmark scores, or arena-like pairwise comparisons.",
-          "timestamp_s": 3308,
+          "text": "RoBERTa improves BERT mainly by removing next-sentence prediction and training on more text.",
+          "timestamp_s": 3305,
           "evidence_type": "claim"
         },
         {
-          "text": "HELM and the Hugging Face Open LLM Leaderboard are aggregate suites over many automatically evaluated tasks.",
-          "timestamp_s": 3370,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Common benchmark tasks include GSM8K, MMLU, LegalBench, and MedQA.",
-          "timestamp_s": 3395,
-          "evidence_type": "example"
-        },
-        {
-          "text": "MMLU is a 57-task multiple-choice benchmark that many people treat as a key indicator of general capability.",
-          "timestamp_s": 3434,
+          "text": "Prefix tuning freezes the pretrained network and learns a small set of prepended pseudo-token parameters instead.",
+          "timestamp_s": 3385,
           "evidence_type": "definition"
         },
         {
-          "text": "Coding is widely benchmarked because it correlates with reasoning and can be checked automatically with tests.",
-          "timestamp_s": 3512,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Agent benchmarks need sandboxed environments because evaluating real actions safely is difficult.",
-          "timestamp_s": 3600,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Perplexity on pretraining/validation data is often strongly correlated with average downstream benchmark performance.",
-          "timestamp_s": 3691,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Perplexity is not comparable across datasets or tokenizers.",
-          "timestamp_s": 3750,
-          "evidence_type": "diagnostic_tip"
+          "text": "Low-rank adaptation learns a small low-rank update added to frozen weight matrices.",
+          "timestamp_s": 3482,
+          "evidence_type": "definition"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 3302,
-        "end_s": 3836
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 3023,
+        "end_s": 3518
       },
       "difficulty": 0.61,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 9,
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "course_id": "CS224n",
+      "name": "Encoder-decoders, T5, and the rise of decoder-only GPT models",
+      "description": "Introduces span-corruption pretraining for encoder-decoders, connects it to T5 and implicit retrieval, then transitions to decoder-only GPT-style models and their generative strengths.",
+      "summary": "For encoder-decoders, the lecture contrasts a simple split-sequence language-model objective with span corruption, where spans are masked in the encoder input and the decoder generates the missing spans marked by sentinel tokens [ts=3519s] [ts=3594s]. This objective keeps bidirectional context on the input side while preserving generative training on the output side, which makes it attractive for tasks like machine translation and led to strong results in models such as T5 [ts=3597s] [ts=3647s]. The instructor then highlights a striking downstream effect: after salient span masking and fine-tuning on some question-answer examples, T5 could answer unseen trivia questions by apparently retrieving facts stored in its parameters, though fluent answers could still be wrong [ts=3654s] [ts=3739s]. The lecture then moves to decoder-only models, which are trained with ordinary next-token language modeling and are especially natural for generation [ts=3749s] [ts=3793s]. Early GPT is presented as a successful decoder-only precursor, and GPT-2 as a much larger model whose coherent prompt continuations made generative pretraining especially visible [ts=3843s] [ts=3983s].",
+      "key_points": [
+        {
+          "text": "Span corruption masks spans in the input and asks the decoder to generate the missing spans with sentinel markers.",
+          "timestamp_s": 3560,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Span corruption combines bidirectional input context with generative output prediction.",
+          "timestamp_s": 3594,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "T5’s salient span masking enabled some implicit retrieval of factual answers after fine-tuning for open-domain QA.",
+          "timestamp_s": 3682,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Decoder-only pretraining is standard next-token language modeling and is naturally suited to generation.",
+          "timestamp_s": 3753,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "GPT can be fine-tuned on tasks such as natural language inference by concatenating inputs and predicting a label.",
+          "timestamp_s": 3895,
+          "evidence_type": "example"
+        },
+        {
+          "text": "GPT-2 showed surprisingly coherent long-form continuation from prompts at a much larger scale than early GPT.",
+          "timestamp_s": 3943,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 3519,
+        "end_s": 3994
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
       "ordering_index": 6,
       "is_template": false
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg7",
-      "course_id": "cs224n-2024",
-      "name": "Implementation consistency, contamination, and keeping test sets alive",
-      "description": "Explains why benchmark results can change with formatting and implementation details, then discusses contamination, overfitting, and mitigations such as private or dynamic test sets.",
-      "summary": "This segment argues that even apparently simple benchmarks can be unstable. For multiple-choice tasks, changing how answers are formatted can change generations and model rankings, and MMLU historically had multiple incompatible implementations that differed in prompting and answer-selection procedures such as constrained decoding versus token or log-likelihood scoring [ts=3840s] [ts=3878s] [ts=3916s]. Yann then moves to contamination: benchmark scores can be inflated when test data or close variants appear in pretraining, illustrated by code-benchmark anecdotes where GPT-4 did very well on older Codeforces problems but failed on newer ones [ts=4032s] [ts=4063s]. The lecture separates contamination from broader overfitting to public test sets, then suggests mitigations including private or regenerated test sets such as GSM1K, dynamic test sets such as Dynabench, and leakage detection heuristics such as unusually confident answers or sensitivity to the original order of examples [ts=4153s] [ts=4197s] [ts=4223s].",
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "course_id": "CS224n",
+      "name": "GPT-3, in-context learning, scaling laws, and prompting",
+      "description": "Explains how very large decoder-only models exhibit in-context learning, discusses compute/data scaling tradeoffs, and introduces chain-of-thought prompting along with broader capability and safety questions.",
+      "summary": "The final segment centers on GPT-3, a much larger decoder-only model that could sometimes perform new tasks without parameter updates, simply from examples placed in the prompt [ts=3995s] [ts=4052s]. This behavior is named in-context learning: the model infers a pattern from demonstrations in the current input—translation, addition, typo correction—and continues it without explicit fine-tuning [ts=4052s] [ts=4102s]. The lecture stresses that the mechanism is still poorly understood: some behavior may come from matching patterns seen during pretraining, while some appears to reflect nontrivial adaptation to the presented context [ts=4141s] [ts=4230s]. It then turns to scaling, noting that larger models trained on more data generally improved, but that compute must be allocated wisely; Chinchilla is cited as evidence that GPT-3 was over-parameterized relative to the amount of training data and that smaller models trained on more tokens can do better [ts=4234s] [ts=4290s]. Finally, the segment introduces chain-of-thought prompting as giving worked intermediate steps in the prompt, which often improves reasoning by letting the model generate a scratchpad, while also emphasizing open concerns about emergent behavior, bias, programming use, and continued domain-adaptive pretraining such as the \"Don't Stop Pretraining\" idea [ts=4310s] [ts=4634s].",
       "key_points": [
         {
-          "text": "Multiple-choice rankings can change if you relabel the answer options or alter the exact formatting.",
-          "timestamp_s": 3843,
+          "text": "GPT-3 can sometimes solve tasks from prompt examples alone, without gradient-based fine-tuning.",
+          "timestamp_s": 4023,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In-context learning means inferring and continuing a task pattern from demonstrations within the current input.",
+          "timestamp_s": 4052,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Whether in-context learning is memorized pattern matching or more general task learning remains an open research question.",
+          "timestamp_s": 4196,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scaling requires balancing parameter count against training tokens; Chinchilla improved by using fewer parameters and more data.",
+          "timestamp_s": 4243,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Chain-of-thought prompting provides intermediate reasoning steps in the prompt and often improves answer accuracy.",
+          "timestamp_s": 4342,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Pretraining yields broad capabilities but also biases and hard-to-predict failures.",
+          "timestamp_s": 4459,
           "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "MMLU once had multiple mainstream implementations that produced different scores because prompting and scoring conventions differed.",
-          "timestamp_s": 3890,
-          "evidence_type": "example"
-        },
-        {
-          "text": "Constrained decoding, raw-token prediction, and likelihood-based scoring can yield substantially different benchmark results.",
-          "timestamp_s": 3916,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A sharp performance drop from old to new benchmark items can indicate contamination from pretraining on the benchmark data.",
-          "timestamp_s": 4032,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Closed models and massive pretraining corpora make contamination hard to verify directly.",
-          "timestamp_s": 4092,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Rapid achievement of 'human-level' scores on public benchmarks may reflect contamination or repeated tuning on the test set.",
-          "timestamp_s": 4117,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Mitigations include private or regenerated test sets like GSM1K and dynamic benchmarks like Dynabench.",
-          "timestamp_s": 4153,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Possible leakage checks include looking for overconfident answer probabilities or drops when example order is scrambled.",
-          "timestamp_s": 4223,
+          "text": "A practical extension is to continue pretraining on unlabeled in-domain text before final supervised fine-tuning.",
+          "timestamp_s": 4609,
           "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 3837,
-        "end_s": 4269
+        "video_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+        "start_s": 3995,
+        "end_s": 4718
       },
-      "difficulty": 0.68,
+      "difficulty": 0.71,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 7,
+      "duration_min": 12,
       "ordering_index": 7,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg8",
-      "course_id": "cs224n-2024",
-      "name": "Benchmark monoculture, English bias, fairness, and incentive failures",
-      "description": "Broadens the critique from single benchmarks to the field-wide incentive structure around English-centric, accuracy-only evaluation.",
-      "summary": "The lecture next argues that NLP benchmarking suffers from monoculture: many top papers evaluate only English and often only raw performance, leaving multilinguality, efficiency, interpretability, and fairness under-measured even though multilingual benchmarks already exist [ts=4270s] [ts=4337s] [ts=4390s]. Yann also criticizes single-number evaluation, noting that real deployments care about computational efficiency, harmful bias, and the unequal value of different examples rather than just average accuracy [ts=4455s] [ts=4512s]. He gives concrete alternatives such as MLPerf for speed-and-accuracy tradeoffs and DiscrimEval for bias probes under controlled demographic template changes [ts=4440s] [ts=4558s] [ts=4578s]. The segment closes by stressing that English-centric metrics like BLEU and ROUGE can break down in languages with different word-boundary conventions, and that LLM-based evaluators can amplify the default preferences of a single judge model across the whole field, all while academic incentives keep legacy metrics in place because they are standardized and reviewer-friendly [ts=4647s] [ts=4660s] [ts=4676s].",
-      "key_points": [
-        {
-          "text": "NLP benchmarking is dominated by English-only and performance-only evaluation.",
-          "timestamp_s": 4290,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Multilingual benchmarks such as MEGA, GlobalBench, and XTREME already exist, but the field lacks incentives to use them.",
-          "timestamp_s": 4390,
-          "evidence_type": "example"
-        },
-        {
-          "text": "Single-number averages ignore efficiency, fairness, interpretability, and differing real-world value across examples.",
-          "timestamp_s": 4455,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "MLPerf evaluates how fast a target level of performance can be reached, incorporating efficiency directly into benchmarking.",
-          "timestamp_s": 4440,
-          "evidence_type": "example"
-        },
-        {
-          "text": "DiscrimEval probes discriminatory model behavior by varying demographic attributes in templates.",
-          "timestamp_s": 4578,
-          "evidence_type": "example"
-        },
-        {
-          "text": "BLEU and ROUGE are English-centric because they assume word tokenization conventions that do not transfer cleanly to languages like Thai.",
-          "timestamp_s": 4647,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "LLM-based evaluation can scale one judge model's demographic and cultural biases across the NLP community.",
-          "timestamp_s": 4660,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Academic incentives keep flawed legacy metrics alive because they support comparability and satisfy reviewers.",
-          "timestamp_s": 4676,
-          "evidence_type": "claim"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 4270,
-        "end_s": 4719
-      },
-      "difficulty": 0.59,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 8,
-      "ordering_index": 8,
-      "is_template": false
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg9",
-      "course_id": "cs224n-2024",
-      "name": "Takeaways and a more rubric-driven future for GPT-4 judges",
-      "description": "Wraps up the lecture with a recap and an audience discussion about how to trust judge models without blindly following them.",
-      "summary": "The closing recap revisits the full taxonomy: different stages of model work want different evaluation properties; close-ended tasks are standard ML but still demand careful metric design; open-ended tasks rely on BLEU, ROUGE, BERTScore, human judgment, and increasingly LLM-based judges; and the main practical threats are consistency problems, contamination, and bias [ts=4720s] [ts=4746s] [ts=4768s]. Yann's most practical advice is to inspect outputs directly instead of trusting leaderboard numbers blindly [ts=4777s]. In the final Q&A, he acknowledges tension between human inspection and human bias, argues that GPT-4's danger is not one person's bias but a single scalable monoculture, and suggests a better future in which judge models apply explicit, detailed rubrics rather than vague prompts such as 'how good is this summary out of five?' [ts=4880s] [ts=4940s] [ts=5010s].",
-      "key_points": [
-        {
-          "text": "Different evaluation settings want different metric properties.",
-          "timestamp_s": 4722,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "The lecture's three major challenge themes are consistency, contamination, and bias.",
-          "timestamp_s": 4768,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A core practical rule is to inspect model outputs rather than trust numbers blindly.",
-          "timestamp_s": 4777,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "The danger of GPT-4 judging is scalable monoculture bias rather than the idiosyncratic bias of a single human.",
-          "timestamp_s": 4899,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "A better judge-model setup would use a detailed rubric specifying what a good answer must contain.",
-          "timestamp_s": 5010,
-          "evidence_type": "diagnostic_tip"
-        }
-      ],
-      "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
-        "start_s": 4720,
-        "end_s": 5054
-      },
-      "difficulty": 0.41,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "medium",
-      "duration_min": 6,
-      "ordering_index": 9,
       "is_template": false
     }
   ],
   "section_flags": [
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg1",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Foundational framing for the whole lecture; concept-heavy rather than formula-heavy, with no live demo."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg2",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Covers standard benchmark types, metric pitfalls, and shortcut artifacts that are strong targets for comprehension questions."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg3",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Core treatment of open-ended evaluation methods, including historically important metrics and their failure modes."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg4",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "medium",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Important methodological cautions about human evaluation; dense with examples and caveats but less formulaic."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg5",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Central modern content on chatbot evaluation, judge models, and AlpacaEval; very useful for retrieval and assessment."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg6",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Surveys the benchmark ecosystem and practical evaluation modes used for current LLMs."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg7",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "high",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "High-value cautionary material on benchmark instability, contamination, and mitigation strategies."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg8",
-      "importance_flag": "high",
-      "review_worthiness": "high",
-      "item_generation_worthiness": "medium",
-      "formula_heavy": false,
-      "demo_heavy": false,
-      "rationale": "Synthesizes technical and sociotechnical limitations of current benchmarking, especially multilinguality and incentives."
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg9",
+      "unit_id": "local::lecture11-pretraining::seg1",
       "importance_flag": "medium",
       "review_worthiness": "medium",
       "item_generation_worthiness": "medium",
       "formula_heavy": false,
       "demo_heavy": false,
-      "rationale": "Closing recap plus Q&A clarifies the lecture’s main lessons and proposes rubric-driven judge prompts."
+      "rationale": "Foundational tokenization segment with several concrete examples but limited derivation; useful mainly as setup for later pretraining objectives [ts=184s] [ts=444s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Establishes the core motivation for contextual pretraining through multiple masked-prediction examples spanning syntax, semantics, sentiment, and reasoning [ts=1207s] [ts=1446s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Central conceptual segment defining the pretrain–fine-tune pipeline, optimization intuition, and evaluation ideas like perplexity [ts=1499s] [ts=1758s] [ts=1812s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Dense architecture-specific content on encoder pretraining, masked language modeling, and BERT; strong candidate for assessment items [ts=2241s] [ts=2483s] [ts=2973s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Practically important segment on how pretrained encoders are adapted, including RoBERTa and efficient fine-tuning variants [ts=3211s] [ts=3305s] [ts=3385s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Introduces encoder-decoder span corruption, T5-style retrieval behavior, and the transition to decoder-only GPT models [ts=3560s] [ts=3682s] [ts=3843s]."
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Capstone segment covering GPT-3, in-context learning, scaling, chain-of-thought prompting, and open questions about capability and bias [ts=4023s] [ts=4243s] [ts=4342s] [ts=4469s]."
     }
   ],
   "unit_kp_map": [
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg1",
-      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "unit_id": "local::lecture11-pretraining::seg1",
+      "global_kp_id": "kp_subword_tokenization",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg1",
-      "global_kp_id": "kp_academic_benchmark_design_tradeoffs",
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "global_kp_id": "kp_contextual_embeddings",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg2",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg2",
-      "global_kp_id": "kp_close_ended_nlp_evaluation",
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg2",
-      "global_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
+      "unit_id": "local::lecture11-pretraining::seg3",
+      "global_kp_id": "kp_autoregressive_language_modeling",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg2",
-      "global_kp_id": "kp_spurious_correlations_from_dataset_construction",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg3",
-      "global_kp_id": "kp_open_ended_generation",
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "global_kp_id": "kp_masked_language_modeling",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg3",
-      "global_kp_id": "kp_bleu_overlap_metrics",
-      "planner_role": "support",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg3",
-      "global_kp_id": "kp_bertscore_and_bleurt",
+      "unit_id": "local::lecture11-pretraining::seg4",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg3",
-      "global_kp_id": "kp_reference_based_eval_limitations",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg4",
-      "global_kp_id": "kp_human_evaluation_design_and_disagreement",
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg5",
-      "global_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
-      "planner_role": "main",
-      "coverage_level": "substantial"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg5",
-      "global_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg6",
-      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg6",
-      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_peft",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg7",
-      "global_kp_id": "kp_benchmark_contamination",
-      "planner_role": "main",
-      "coverage_level": "dominant"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg7",
-      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "unit_id": "local::lecture11-pretraining::seg5",
+      "global_kp_id": "kp_masked_language_modeling",
       "planner_role": "prereq",
-      "coverage_level": "mention"
+      "coverage_level": "partial"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg8",
-      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "global_kp_id": "kp_span_corruption_for_encoder_decoders",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg6",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_in_context_learning",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg8",
-      "global_kp_id": "kp_benchmark_contamination",
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
       "planner_role": "support",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg9",
-      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
-      "planner_role": "support",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg9",
-      "global_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
-      "planner_role": "support",
-      "coverage_level": "partial"
-    },
-    {
-      "unit_id": "local::cs224n-2024-lecture11-benchmarking::seg9",
-      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
-      "planner_role": "main",
       "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture11-pretraining::seg7",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
     }
   ],
   "kp_catalog": [
     {
-      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
-      "name": "Evaluation objectives by lifecycle stage",
-      "description": "Different phases such as training, development, deployment, and publishing need different evaluation properties.",
+      "global_kp_id": "kp_subword_tokenization",
+      "name": "Subword tokenization",
+      "description": "Representing text with learned subword units instead of a fixed whole-word vocabulary so models can cover unseen words, morphology, and typos.",
       "track_tags": [
-        "benchmarking",
-        "evaluation",
-        "ml_systems"
+        "representation_learning",
+        "tokenization"
       ],
       "domain_tags": [
-        "machine_learning",
+        "language_modeling",
         "nlp"
       ],
       "career_path_tags": [
-        "applied_ml",
-        "ml_infrastructure",
-        "research"
+        "ml_engineering",
+        "nlp_research"
       ],
-      "difficulty_level": 0.36,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because evaluation objectives by lifecycle stage formalizes how different phases such as training, development, deployment, and publishing need different evaluation properties, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp1"
-      ]
-    },
-    {
-      "global_kp_id": "kp_academic_benchmark_design_tradeoffs",
-      "name": "Academic benchmark design tradeoffs",
-      "description": "Academic benchmarks prioritize reproducibility, standardization, ease of use, and directional progress over perfect realism.",
-      "track_tags": [
-        "benchmarking",
-        "research_methods"
-      ],
-      "domain_tags": [
-        "evaluation",
-        "nlp"
-      ],
-      "career_path_tags": [
-        "benchmark_design",
-        "research"
-      ],
-      "difficulty_level": 0.4,
+      "difficulty_level": 0.38,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because academic benchmark design tradeoffs clarifies academic benchmarks prioritize reproducibility, standardization, ease of use, and directional progress over perfect realism, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because subword tokenization clarifies representing text with learned subword units instead of a fixed whole-word vocabulary so models can cover unseen words, morphology, and typos, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp2"
+        "local::lecture11-pretraining::kp1"
       ]
     },
     {
-      "global_kp_id": "kp_close_ended_nlp_evaluation",
-      "name": "Close-ended NLP evaluation",
-      "description": "Tasks with a small answer space can often be evaluated with standard classification metrics.",
+      "global_kp_id": "kp_contextual_embeddings",
+      "name": "Contextual representations and embeddings",
+      "description": "A single embedding per word string cannot fully disambiguate sense by context, though it can average across senses in a useful way. Representations whose meaning depends on the surrounding sequence rather than assigning one static vector to each surface form.",
       "track_tags": [
-        "classification",
-        "evaluation"
+        "context_modeling",
+        "polysemy_context",
+        "representation_learning"
       ],
       "domain_tags": [
         "nlp",
-        "supervised_learning"
+        "semantics"
       ],
       "career_path_tags": [
-        "applied_ml",
-        "research"
-      ],
-      "difficulty_level": 0.42,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because close-ended NLP evaluation formalizes how tasks with a small answer space can often be evaluated with standard classification metrics, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp3"
-      ]
-    },
-    {
-      "global_kp_id": "kp_metric_choice_and_aggregation_pitfalls",
-      "name": "Metric choice and aggregation pitfalls",
-      "description": "Accuracy, precision, recall, F1, and aggregate leaderboard averages can mislead when class balance or metric semantics differ.",
-      "track_tags": [
-        "benchmarking",
-        "metrics"
-      ],
-      "domain_tags": [
-        "evaluation",
-        "machine_learning"
-      ],
-      "career_path_tags": [
-        "applied_ml",
-        "data_science",
-        "research"
+        "applied_science",
+        "language_technologist",
+        "nlp_research",
+        "nlp_researcher"
       ],
       "difficulty_level": 0.53,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because contextual representations and embeddings formalizes how a single embedding per word string cannot fully disambiguate sense by context, though it can average across senses in a useful way, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture01-wordvecs::kp8",
+        "local::lecture11-pretraining::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "name": "Pretraining, fine-tuning, and transfer learning",
+      "description": "Two-stage learning in which a model first learns generic language structure from large unlabeled corpora and is then adapted to a supervised downstream task. Reusing pretrained CNN features or pretrained weights to solve a new task more effectively when target data is limited.",
+      "track_tags": [
+        "computer_vision",
+        "practical_ml",
+        "pretraining",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "nlp",
+        "pretraining",
+        "transfer_learning"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because pretraining, fine-tuning, and transfer learning formalizes how two-stage learning in which a model first learns generic language structure from large unlabeled corpora and is then adapted to a supervised downstream task, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture11-pretraining::kp3",
+        "local::lecture_6::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp7",
+        "local::lecture11-pretraining::kp4",
+        "local::lecture14-nlg::kp3",
+        "local::lecture13-generative-models-1::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_masked_language_modeling",
+      "name": "Masked language modeling",
+      "description": "Corrupting input text and training an encoder to reconstruct masked tokens using bidirectional context.",
+      "track_tags": [
+        "encoder_models",
+        "self_supervision"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because metric choice and aggregation pitfalls clarifies accuracy, precision, recall, F1, and aggregate leaderboard averages can mislead when class balance or metric semantics differ, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because masked language modeling clarifies corrupting input text and training an encoder to reconstruct masked tokens using bidirectional context, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp4"
+        "local::lecture11-pretraining::kp5"
       ]
     },
     {
-      "global_kp_id": "kp_spurious_correlations_from_dataset_construction",
-      "name": "Spurious correlations from dataset construction",
-      "description": "Benchmarks can contain shortcuts that let models exploit artifacts rather than solve the intended task.",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "name": "BERT and encoder transfer",
+      "description": "Using a pretrained bidirectional encoder such as BERT for downstream tasks by attaching lightweight prediction heads and fine-tuning.",
       "track_tags": [
-        "dataset_quality",
-        "evaluation"
+        "encoder_models",
+        "transfer_learning"
       ],
       "domain_tags": [
         "nlp",
-        "robustness"
+        "transformers"
       ],
       "career_path_tags": [
-        "dataset_curation",
-        "research"
+        "applied_science",
+        "ml_engineering"
       ],
       "difficulty_level": 0.55,
       "difficulty_source": "llm_single_pass",
@@ -923,398 +771,245 @@
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because spurious correlations from dataset construction clarifies benchmarks can contain shortcuts that let models exploit artifacts rather than solve the intended task, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because bERT and encoder transfer clarifies using a pretrained bidirectional encoder such as BERT for downstream tasks by attaching lightweight prediction heads and fine-tuning, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp5"
+        "local::lecture11-pretraining::kp6"
       ]
     },
     {
-      "global_kp_id": "kp_open_ended_generation",
-      "name": "Open-ended generation and evaluation",
-      "description": "A way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness. Open-ended tasks have many valid answers and graded quality, so evaluation must move beyond exact labels.",
+      "global_kp_id": "kp_peft",
+      "name": "Parameter-efficient fine-tuning",
+      "description": "Fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk. Adapting pretrained models by changing only a small number of parameters, such as prefixes, prompts, or low-rank weight updates.",
       "track_tags": [
-        "evaluation",
-        "generation",
-        "task_formulation"
+        "adaptation",
+        "model_adaptation",
+        "training_efficiency",
+        "transfer_learning"
       ],
       "domain_tags": [
-        "information_theory",
-        "language_models",
-        "nlg",
-        "nlp"
-      ],
-      "career_path_tags": [
-        "applied_llm",
-        "applied_science",
-        "nlp_research",
-        "research"
-      ],
-      "difficulty_level": 0.44,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "gateway",
-      "importance_confidence": "low",
-      "importance_rationale": "Important because open-ended generation and evaluation formalizes how a way to categorize generation tasks by how many valid outputs they permit, with entropy used as a formal intuition for openness, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
-      "importance_scope": "course_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp6",
-        "local::lecture11_nlg::kp2"
-      ]
-    },
-    {
-      "global_kp_id": "kp_bleu_overlap_metrics",
-      "name": "BLEU and overlap-based text evaluation",
-      "description": "Automatic MT evaluation based on matching candidate n-grams against one or more reference translations, with a brevity penalty. Reference-based overlap metrics compare generated text to human references using lexical or n-gram overlap.",
-      "track_tags": [
-        "evaluation",
-        "generation",
-        "machine_translation",
-        "metrics"
-      ],
-      "domain_tags": [
-        "evaluation",
+        "efficient_ml",
         "nlp",
-        "sequence_models"
+        "transfer_learning"
       ],
       "career_path_tags": [
-        "applied_llm",
-        "ml_research",
-        "nlp_engineering",
-        "research"
+        "applied_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "systems_ml"
       ],
-      "difficulty_level": 0.44,
+      "difficulty_level": 0.52,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
       "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because bLEU and overlap-based text evaluation clarifies automatic MT evaluation based on matching candidate n-grams against one or more reference translations, with a brevity penalty, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "course_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp7",
-        "local::lecture07-attention::kp1"
-      ]
-    },
-    {
-      "global_kp_id": "kp_bertscore_and_bleurt",
-      "name": "BERTScore and BLEURT",
-      "description": "Embedding-based and learned evaluation metrics use contextual representations or supervised fine-tuning to improve over lexical overlap.",
-      "track_tags": [
-        "generation",
-        "learned_metrics"
-      ],
-      "domain_tags": [
-        "language_models",
-        "nlp"
-      ],
-      "career_path_tags": [
-        "applied_llm",
-        "research"
-      ],
-      "difficulty_level": 0.64,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "medium",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because bERTScore and BLEURT clarifies embedding-based and learned evaluation metrics use contextual representations or supervised fine-tuning to improve over lexical overlap, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp8"
-      ]
-    },
-    {
-      "global_kp_id": "kp_reference_based_eval_limitations",
-      "name": "Limitations of reference-based evaluation",
-      "description": "BLEU is useful but imperfect because translation is many-to-many and local string overlap does not fully capture meaning or grammatical role. Even a decent scoring metric can fail if the human references used as gold outputs are weak or noisy.",
-      "track_tags": [
-        "dataset_quality",
-        "evaluation",
-        "generation",
-        "machine_translation"
-      ],
-      "domain_tags": [
-        "evaluation",
-        "nlp"
-      ],
-      "career_path_tags": [
-        "dataset_curation",
-        "ml_research",
-        "research"
-      ],
-      "difficulty_level": 0.5,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "medium",
-      "importance_rationale": "Important because limitations of reference-based evaluation clarifies bLEU is useful but imperfect because translation is many-to-many and local string overlap does not fully capture meaning or grammatical role, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
-      "importance_scope": "course_global",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp9",
-        "local::lecture07-attention::kp2"
-      ]
-    },
-    {
-      "global_kp_id": "kp_human_evaluation_design_and_disagreement",
-      "name": "Human evaluation design and disagreement",
-      "description": "Human evaluation remains the gold standard but suffers from cost, slowness, disagreement, and protocol sensitivity.",
-      "track_tags": [
-        "annotation",
-        "human_eval"
-      ],
-      "domain_tags": [
-        "evaluation",
-        "nlp"
-      ],
-      "career_path_tags": [
-        "annotation_ops",
-        "applied_llm",
-        "research"
-      ],
-      "difficulty_level": 0.49,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because human evaluation design and disagreement clarifies human evaluation remains the gold standard but suffers from cost, slowness, disagreement, and protocol sensitivity, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp10"
-      ]
-    },
-    {
-      "global_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
-      "name": "Pairwise chatbot evaluation and Elo ranking",
-      "description": "Modern chat systems are commonly evaluated by side-by-side preferences aggregated into rankings such as Elo scores.",
-      "track_tags": [
-        "llm_eval",
-        "pairwise_preference"
-      ],
-      "domain_tags": [
-        "evaluation",
-        "language_models"
-      ],
-      "career_path_tags": [
-        "applied_llm",
-        "research"
-      ],
-      "difficulty_level": 0.54,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "high",
-      "structural_role": "supporting",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because pairwise chatbot evaluation and Elo ranking clarifies modern chat systems are commonly evaluated by side-by-side preferences aggregated into rankings such as Elo scores, sharpening later modeling, analysis, or evaluation choices.",
-      "importance_scope": "lecture_local",
-      "importance_source": "llm_single_pass",
-      "source_course_ids": [
-        "CS224n"
-      ],
-      "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp11"
-      ]
-    },
-    {
-      "global_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
-      "name": "LLM-as-a-judge and AlpacaEval",
-      "description": "Judge models such as GPT-4 can replace or augment humans for fast pairwise evaluation, but introduce systematic biases.",
-      "track_tags": [
-        "llm_eval",
-        "model_as_a_judge"
-      ],
-      "domain_tags": [
-        "evaluation",
-        "language_models"
-      ],
-      "career_path_tags": [
-        "applied_llm",
-        "ml_systems",
-        "research"
-      ],
-      "difficulty_level": 0.63,
-      "difficulty_source": "llm_single_pass",
-      "difficulty_confidence": "high",
-      "importance_level": "critical",
       "structural_role": "gateway",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because lLM-as-a-judge and AlpacaEval formalizes how judge models such as GPT-4 can replace or augment humans for fast pairwise evaluation, but introduce systematic biases, which later units use as core machinery rather than background context.",
-      "importance_scope": "lecture_local",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because parameter-efficient fine-tuning formalizes how fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between high and medium.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp12"
+        "local::lecture16-efficient-training::kp10",
+        "local::lecture11-pretraining::kp7"
       ]
     },
     {
-      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
-      "name": "Current LLM benchmark suites and task coverage",
-      "description": "Modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains.",
+      "global_kp_id": "kp_span_corruption_for_encoder_decoders",
+      "name": "Span corruption for encoder-decoders",
+      "description": "Pretraining an encoder-decoder by masking contiguous spans in the input and generating the missing spans on the output side.",
       "track_tags": [
-        "benchmark_suites",
-        "llm_eval"
+        "encoder_decoder_models",
+        "self_supervision"
       ],
       "domain_tags": [
-        "evaluation",
-        "language_models"
+        "nlp",
+        "transformers"
       ],
       "career_path_tags": [
-        "applied_llm",
-        "research"
+        "applied_science",
+        "nlp_research"
       ],
-      "difficulty_level": 0.51,
+      "difficulty_level": 0.62,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
       "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "high",
-      "importance_rationale": "Important because current LLM benchmark suites and task coverage clarifies modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because span corruption for encoder-decoders clarifies pretraining an encoder-decoder by masking contiguous spans in the input and generating the missing spans on the output side, sharpening later modeling, analysis, or evaluation choices.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp13"
+        "local::lecture11-pretraining::kp8"
       ]
     },
     {
-      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
-      "name": "Perplexity as a proxy metric",
-      "description": "Pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient.",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "name": "Decoder-only pretraining",
+      "description": "Training a causal decoder with next-token prediction, the foundation of GPT-style generative models.",
       "track_tags": [
-        "language_modeling",
-        "metrics"
+        "decoder_models",
+        "language_modeling"
       ],
       "domain_tags": [
-        "evaluation",
-        "language_models"
+        "large_language_models",
+        "nlp"
       ],
       "career_path_tags": [
-        "ml_infrastructure",
-        "research"
+        "ml_engineering",
+        "nlp_research"
       ],
       "difficulty_level": 0.57,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "medium",
-      "structural_role": "supporting",
+      "importance_level": "critical",
+      "structural_role": "gateway",
       "importance_confidence": "high",
-      "importance_rationale": "Important because perplexity as a proxy metric clarifies pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_rationale": "Important because decoder-only pretraining formalizes how training a causal decoder with next-token prediction, the foundation of GPT-style generative models, which later units use as core machinery rather than background context.",
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp14"
+        "local::lecture11-pretraining::kp9"
       ]
     },
     {
-      "global_kp_id": "kp_benchmark_contamination",
-      "name": "Benchmark contamination and overfitting",
-      "description": "Benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests. The problem that benchmark examples may leak into pretraining data, undermining claims of true generalization.",
+      "global_kp_id": "kp_in_context_learning",
+      "name": "In-context learning",
+      "description": "Solving a task from examples placed directly in the prompt, without updating model parameters. Task behavior induced by prompts and examples without parameter updates.",
       "track_tags": [
-        "benchmark_validity",
-        "benchmarks",
-        "evaluation",
-        "llms",
-        "robustness"
+        "few_shot_learning",
+        "llm",
+        "nlp",
+        "prompting"
       ],
       "domain_tags": [
-        "evaluation",
-        "language_models",
-        "machine_learning",
-        "natural_language_processing"
+        "in_context_learning",
+        "large_language_models",
+        "nlp"
       ],
       "career_path_tags": [
-        "applied_llm",
-        "benchmark_design",
-        "evaluation_engineer",
-        "research",
-        "research_scientist"
+        "ai_product_engineer",
+        "applied_science",
+        "llm_engineer",
+        "product_ml"
       ],
-      "difficulty_level": 0.62,
+      "difficulty_level": 0.65,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "critical",
+      "importance_level": "high",
       "structural_role": "supporting",
       "importance_confidence": "medium",
-      "importance_rationale": "Important because benchmark contamination and overfitting clarifies benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests, sharpening later modeling, analysis, or evaluation choices though importance labels split between critical and high.",
+      "importance_rationale": "Important because in-context learning clarifies solving a task from examples placed directly in the prompt, without updating model parameters, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
       "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp15",
-        "local::cs224n-2024-lecture18::kp6"
+        "local::lecture13-posttraining::kp2",
+        "local::lecture11-pretraining::kp10"
       ]
     },
     {
-      "global_kp_id": "kp_monoculture_multilinguality_fairness_efficiency_and_incentives",
-      "name": "Monoculture, multilinguality, fairness, efficiency, and incentives",
-      "description": "Benchmarking choices are shaped by field-wide incentives, often producing English-centric, accuracy-only evaluations that miss important deployment concerns.",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "name": "Pretraining scaling and compute-data tradeoffs",
+      "description": "Large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale. This scaling view also appears in vision-language systems such as CLIP, where larger models and more image-text data improve performance.",
       "track_tags": [
-        "benchmarking",
-        "efficiency",
-        "fairness",
-        "multilinguality"
+        "foundation_models",
+        "llm",
+        "model_efficiency",
+        "nlp",
+        "scaling",
+        "scaling_laws"
       ],
       "domain_tags": [
-        "evaluation",
-        "language_models",
-        "responsible_ai"
+        "data_scale",
+        "large_language_models",
+        "model_scale",
+        "nlp",
+        "pretraining",
+        "scaling_laws"
       ],
       "career_path_tags": [
-        "applied_llm",
-        "ml_systems",
-        "policy",
-        "research"
+        "llm_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_engineering",
+        "research_scientist",
+        "systems_ml"
       ],
-      "difficulty_level": 0.62,
+      "difficulty_level": 0.66,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "high",
-      "importance_level": "critical",
-      "structural_role": "capstone",
-      "importance_confidence": "high",
-      "importance_rationale": "Important because monoculture, multilinguality, fairness, efficiency, and incentives synthesizes benchmarking choices are shaped by field-wide incentives, often producing English-centric, accuracy-only evaluations that miss important deployment concerns into an end-to-end method or integrated recipe.",
-      "importance_scope": "lecture_local",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because pretraining scaling and compute-data tradeoffs clarifies large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale, sharpening later modeling, analysis, or evaluation choices while importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp1",
+        "local::lecture11-pretraining::kp11",
+        "local::lecture_16::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "name": "Chain-of-thought prompting",
+      "description": "A prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting. Prompting with worked intermediate reasoning steps so the model generates a scratchpad before the final answer.",
+      "track_tags": [
+        "llm",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "llms",
+        "nlp",
+        "prompting",
+        "reasoning"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "ml_engineer",
+        "nlp_researcher",
+        "product_ml",
+        "prompt_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because chain-of-thought prompting formalizes how a prompting strategy that asks the model to generate intermediate reasoning before answering, either via exemplars or zero-shot prompting, which later units use as core machinery rather than background context while roles split between capstone and gateway and importance labels split between critical and high.",
+      "importance_scope": "course_global",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
         "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n-2024-lecture11-benchmarking::kp16"
+        "local::lecture13-posttraining::kp3",
+        "local::lecture20-reasoning-agents::kp2",
+        "local::lecture11-pretraining::kp12"
       ]
     }
   ],
@@ -1329,6 +1024,6 @@
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L11_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",
-    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture11-benchmarking_transcript.txt"
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture11-pretraining_transcript.txt"
   }
 }

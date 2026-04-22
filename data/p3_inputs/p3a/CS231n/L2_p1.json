@@ -78,7 +78,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
         "start_s": 5,
         "end_s": 899
       },
@@ -123,7 +123,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
         "start_s": 900,
         "end_s": 1562
       },
@@ -168,7 +168,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
         "start_s": 1563,
         "end_s": 2122
       },
@@ -218,7 +218,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
         "start_s": 2123,
         "end_s": 2785
       },
@@ -263,7 +263,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
         "start_s": 2786,
         "end_s": 3303
       },
@@ -313,7 +313,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
         "start_s": 3304,
         "end_s": 4014
       },
@@ -853,7 +853,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp22",
+        "local::lecture04-wordvecs-lm::kp22",
         "local::lecture_2_image_classification_with_linear_classifiers::kp11"
       ]
     }

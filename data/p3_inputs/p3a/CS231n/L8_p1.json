@@ -1,7 +1,7 @@
 {
   "lecture_context": {
     "course_id": "CS231n",
-    "lecture_id": "RQowiOF_FvQ",
+    "lecture_id": "lecture_8",
     "lecture_title": "Lecture 8: Attention and Transformers",
     "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ"
   },
@@ -45,7 +45,7 @@
   ],
   "units": [
     {
-      "unit_id": "local::RQowiOF_FvQ::seg1",
+      "unit_id": "local::lecture_8::seg1",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "RNN sequence-to-sequence translation and the fixed-context bottleneck",
       "description": "Introduces attention and transformers through the historical starting point of encoder-decoder RNNs for machine translation, then motivates why a single context vector becomes a bottleneck.",
@@ -83,7 +83,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
         "start_s": 0,
         "end_s": 539
       },
@@ -95,7 +95,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg2",
+      "unit_id": "local::lecture_8::seg2",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Attention inside sequence-to-sequence RNNs",
       "description": "Derives the original attention mechanism for encoder-decoder RNNs by computing alignment scores, softmax attention weights, and a fresh context vector at every decoder step.",
@@ -133,7 +133,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
         "start_s": 540,
         "end_s": 1259
       },
@@ -145,7 +145,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg3",
+      "unit_id": "local::lecture_8::seg3",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Attention maps and the abstract attention operator",
       "description": "Shows how attention weights can be visualized to interpret learned alignments, then abstracts attention away from RNNs into a stand-alone query/data/output operator.",
@@ -178,7 +178,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
         "start_s": 1260,
         "end_s": 1919
       },
@@ -190,7 +190,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg4",
+      "unit_id": "local::lecture_8::seg4",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Scaled dot-product attention, keys and values, and cross-attention",
       "description": "Generalizes attention into a scalable matrix-based layer using scaled dot products, multiple queries in parallel, and learned key/value projections.",
@@ -228,7 +228,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
         "start_s": 1920,
         "end_s": 2759
       },
@@ -240,7 +240,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Self-attention, positional embeddings, masking, and multi-head computation",
       "description": "Builds self-attention from Q/K/V projections of the same input vectors, explains order issues and positional encodings, then adds masking and multiple heads.",
@@ -288,7 +288,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
         "start_s": 2760,
         "end_s": 3449
       },
@@ -300,7 +300,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg6",
+      "unit_id": "local::lecture_8::seg6",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Transformer blocks and why transformers scale across domains",
       "description": "Compares RNNs, convolutions, and attention, then assembles the transformer block and applies it to language models and vision transformers.",
@@ -348,7 +348,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+        "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
         "start_s": 3450,
         "end_s": 3984
       },
@@ -362,7 +362,7 @@
   ],
   "section_flags": [
     {
-      "unit_id": "local::RQowiOF_FvQ::seg1",
+      "unit_id": "local::lecture_8::seg1",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "medium",
@@ -371,7 +371,7 @@
       "rationale": "This segment sets up the entire lecture by contrasting RNN sequence processing with the fixed-context bottleneck that attention is meant to solve [ts=73s][ts=435s]."
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg2",
+      "unit_id": "local::lecture_8::seg2",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -380,7 +380,7 @@
       "rationale": "The section walks through the main attention derivation step by step with alignment-score, softmax, and weighted-sum formulas, then repeats the procedure across decoder steps [ts=590s][ts=738s][ts=1094s]."
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg3",
+      "unit_id": "local::lecture_8::seg3",
       "importance_flag": "medium",
       "review_worthiness": "high",
       "item_generation_worthiness": "medium",
@@ -389,7 +389,7 @@
       "rationale": "The segment is conceptually important because it interprets attention maps and then redefines attention as a reusable operator, but it is less algebra-heavy than the derivation segments [ts=1313s][ts=1716s]."
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg4",
+      "unit_id": "local::lecture_8::seg4",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -398,7 +398,7 @@
       "rationale": "This unit introduces the scalable mathematical form of attention, including scaled dot products, batched matrix operations, and learned key/value projections [ts=2010s][ts=2160s][ts=2417s]."
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -407,7 +407,7 @@
       "rationale": "The segment contains the core transformer-era ideas of self-attention, positional handling, masking, and multi-head computation, all tied to matrix-based implementation [ts=2797s][ts=3177s][ts=3251s][ts=3332s]."
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg6",
+      "unit_id": "local::lecture_8::seg6",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -418,103 +418,103 @@
   ],
   "unit_kp_map": [
     {
-      "unit_id": "local::RQowiOF_FvQ::seg1",
+      "unit_id": "local::lecture_8::seg1",
       "global_kp_id": "kp_seq2seq_attention_bottleneck",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg2",
+      "unit_id": "local::lecture_8::seg2",
       "global_kp_id": "kp_attention_scoring",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg2",
+      "unit_id": "local::lecture_8::seg2",
       "global_kp_id": "kp_context_vector_as_a_weighted_sum",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg2",
+      "unit_id": "local::lecture_8::seg2",
       "global_kp_id": "kp_seq2seq_attention_bottleneck",
       "planner_role": "prereq",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg3",
+      "unit_id": "local::lecture_8::seg3",
       "global_kp_id": "kp_attention_heatmaps_as_learned_alignments",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg3",
+      "unit_id": "local::lecture_8::seg3",
       "global_kp_id": "kp_attention_as_a_query_to_data_operator",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg3",
+      "unit_id": "local::lecture_8::seg3",
       "global_kp_id": "kp_attention_scoring",
       "planner_role": "support",
       "coverage_level": "partial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg4",
+      "unit_id": "local::lecture_8::seg4",
       "global_kp_id": "kp_scaled_dot_product_attention",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg4",
+      "unit_id": "local::lecture_8::seg4",
       "global_kp_id": "kp_keys_and_values",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg4",
+      "unit_id": "local::lecture_8::seg4",
       "global_kp_id": "kp_cross_attention",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "global_kp_id": "kp_self_attention",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "global_kp_id": "kp_positional_encoding",
       "planner_role": "support",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "global_kp_id": "kp_causal_self_attention",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "global_kp_id": "kp_multi_head_self_attention",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg6",
+      "unit_id": "local::lecture_8::seg6",
       "global_kp_id": "kp_transformer_architecture",
       "planner_role": "main",
       "coverage_level": "dominant"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg6",
+      "unit_id": "local::lecture_8::seg6",
       "global_kp_id": "kp_transformers_as_a_cross_domain_backbone",
       "planner_role": "main",
       "coverage_level": "substantial"
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg6",
+      "unit_id": "local::lecture_8::seg6",
       "global_kp_id": "kp_self_attention",
       "planner_role": "prereq",
       "coverage_level": "partial"
@@ -556,8 +556,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture07-attention::kp3",
-        "local::RQowiOF_FvQ::kp1"
+        "local::lecture09-attention::kp3",
+        "local::lecture_8::kp1"
       ]
     },
     {
@@ -594,8 +594,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture07-attention::kp5",
-        "local::RQowiOF_FvQ::kp2"
+        "local::lecture09-attention::kp5",
+        "local::lecture_8::kp2"
       ]
     },
     {
@@ -629,7 +629,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::RQowiOF_FvQ::kp3"
+        "local::lecture_8::kp3"
       ]
     },
     {
@@ -663,7 +663,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::RQowiOF_FvQ::kp4"
+        "local::lecture_8::kp4"
       ]
     },
     {
@@ -697,7 +697,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::RQowiOF_FvQ::kp5"
+        "local::lecture_8::kp5"
       ]
     },
     {
@@ -734,8 +734,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp8",
-        "local::RQowiOF_FvQ::kp6"
+        "local::lecture10-transformers::kp8",
+        "local::lecture_8::kp6"
       ]
     },
     {
@@ -769,7 +769,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::RQowiOF_FvQ::kp7"
+        "local::lecture_8::kp7"
       ]
     },
     {
@@ -808,8 +808,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture07-attention::kp4",
-        "local::RQowiOF_FvQ::kp8"
+        "local::lecture09-attention::kp4",
+        "local::lecture_8::kp8"
       ]
     },
     {
@@ -850,8 +850,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp2",
-        "local::RQowiOF_FvQ::kp9"
+        "local::lecture10-transformers::kp2",
+        "local::lecture_8::kp9"
       ]
     },
     {
@@ -892,8 +892,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp4",
-        "local::RQowiOF_FvQ::kp10"
+        "local::lecture10-transformers::kp4",
+        "local::lecture_8::kp10"
       ]
     },
     {
@@ -932,8 +932,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp6",
-        "local::RQowiOF_FvQ::kp11"
+        "local::lecture10-transformers::kp6",
+        "local::lecture_8::kp11"
       ]
     },
     {
@@ -973,8 +973,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp7",
-        "local::RQowiOF_FvQ::kp12"
+        "local::lecture10-transformers::kp7",
+        "local::lecture_8::kp12"
       ]
     },
     {
@@ -1016,8 +1016,8 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::cs224n_lecture08_self_attention_transformers::kp11",
-        "local::RQowiOF_FvQ::kp13"
+        "local::lecture10-transformers::kp11",
+        "local::lecture_8::kp13"
       ]
     },
     {
@@ -1052,7 +1052,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::RQowiOF_FvQ::kp14"
+        "local::lecture_8::kp14"
       ]
     }
   ],

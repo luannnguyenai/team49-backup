@@ -2,7 +2,7 @@
   "lecture_context": {
     "course_id": "CS224n",
     "lecture_id": "lecture01-wordvecs",
-    "lecture_title": "Stanford CS224N Lecture 1: Intro and Word Vectors",
+    "lecture_title": "Lecture 1 - Intro and Word Vectors",
     "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I"
   },
   "unit": {
@@ -55,6 +55,12 @@
     "ordering_index": 5,
     "is_template": false
   },
+  "unit_summary_for_generation": "This segment introduces word2vec as Mikolov et al.’s 2013 method, notable not for being the first or last embedding method but for being especially simple and fast [ts=2827s] [ts=2861s]. Manning defines the training data as a corpus, briefly clarifies corpus versus corpora, and explains that the model assigns one vector to each word type rather than each token occurrence [ts=2875s] [ts=2940s] [ts=3000s]. He then describes the core skip-gram-style setup: move through the text position by position, treat each word as a center word, gather a narrow context window of outside words, and learn vectors that make the observed nearby words probable [ts=2964s] [ts=3044s]. The intuitive target is that words like crises should receive higher probability near banking than unrelated words like skillet, and this is formalized as maximizing context-word likelihood across the corpus, or equivalently minimizing average negative log likelihood after applying a minus sign and a log [ts=3110s] [ts=3131s] [ts=3234s].",
+  "target_kp_ids": [
+    "kp_word2vec_skipgram_objective"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
   "video_clip_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
   "transcript_slice": "00:47:12\nof learning word vectors that was thought up\n\n00:47:21\nIt wasn't the first method.\n\n00:47:25\nof learning word vectors that go back to about\n\n00:47:30\nIt wasn't the last.\n\n00:47:34\nBut it was a particularly simple one and a particularly fast\n\n00:47:41\nAnd so it really caught people's attention.\n\n00:47:48\nwith a large amount of text.\n\n00:47:55\nAnd in NLP, we refer to that as a corpus.\n\n00:48:02\nSo it's exactly the same as if you have\n\n00:48:06\nThat's a corpus.\n\n00:48:09\nYeah, so it's just a body.\n\n00:48:15\nor sorry, a dead person.\n\n00:48:21\nsince there isn't very good classical education these days.\n\n00:48:31\nnoun, and that means the plural of corpus is not corpi.\n\n00:48:42\nSo I'm sure some time later in this class,\n\n00:48:48\nwhere it refers to corpi, and I will\n\n00:48:56\nOr else, they should have said corpora.\n\n00:49:03\nI should move on.\n\n00:49:07\nThen we know that we're going to represent each word.\n\n00:49:15\nSo star, or bank, et cetera, so for wherever\n\n00:49:22\nAnd so what we're going to do in this algorithm\n\n00:49:28\nAnd so at each position in the text, which is a list of words,\n\n00:49:36\nAnd then what we're going to do is\n\n00:49:42\nfor C and the outside words to calculate the probability\n\n00:49:49\nAnd then we just keep fiddling, and we learn word vectors.\n\n00:49:55\nI'll show you this more concretely.\n\n00:49:59\nSo here's the idea.\n\n00:50:05\nSo a word type means the word problems wherever it occurs,\n\n00:50:11\ntoken, which is this instance of the word problems.\n\n00:50:18\nAnd so I'm going to want to know, look, in this text,\n\n00:50:28\nHow likely should that have been to happen?\n\n00:50:35\nof the word \"turning\" occurring close to the word \"into.\"\n\n00:50:44\nIn the example here, I'm saying, I'm\n\n00:50:49\nAnd what I want to do is make those probability estimates\n\n00:50:55\nSo in particular, I want the probability of co-occurrence\n\n00:51:00\ndo occur within the nearby context of each other.\n\n00:51:08\nand once I've done it for that word,\n\n00:51:13\nfor the next word.\n\n00:51:20\nAnd so what we want to do is come up with vector\n\n00:51:30\nprobabilities, quote unquote, \"well.\"\n\n00:51:38\ngot a simple model.\n\n00:51:42\nI can't tell you that the word \"into\" is going to occur before\n\n00:51:46\nBut I want to do it as well as possible.\n\n00:51:54\ncrises is pretty likely.\n\n00:52:03\nAnd if I can do that, I'm doing a good job.\n\n00:52:11\nHere's how we do it, turn it into a piece of math.\n\n00:52:17\nevery position in the corpus.\n\n00:52:22\nm which was 2 in my example.\n\n00:52:27\nis have the probability of words in the context being\n\n00:52:34\nSo we want to maximize this likelihood\n\n00:52:40\nand then we're going through every word in the context\n\n00:52:48\nSo conceptually, that's what we're doing.\n\n00:52:56\nWe use two little tricks here.\n\n00:53:05\nit really makes no difference.\n\n00:53:11\nmaximizing things.\n\n00:53:14\nreferred to as gradient descent, as you'll see in a moment.\n\n00:53:22\nso that we can minimize it rather than maximize it.\n\n00:53:27\nBut the second part is, here, we have this enormous product.\n\n00:53:33\nis more difficult for the math.\n\n00:53:39\nAnd so once we take the log of the likelihood, that then,\n\n00:53:50\nAnd so now, we can sum over each word position, the text,\n\n00:53:58\nand then sum these log probabilities.\n\n00:54:04\nSo we want to minimize the sum of log probabilities.\n\n00:54:11\nto look at the negative log likelihood.\n\n00:54:18\nis to-- since this will get bigger,\n\n00:54:25\nwe divide through by the number of words in the corpus.\n\n00:54:32\nlikelihood.\n\n00:54:37\nwe are maximizing the probability\n\n00:54:42\nWe're almost there.\n\n00:54:48\nWe've got a couple more tricks that we want to get through.\n\n00:54:54\nto maximize this probability.\n\n00:55:00\nWhat is this probability?",
   "unit_kp_map_rows": [
@@ -105,7 +111,7 @@
       ],
       "merged_from_local_ids": [
         "local::lecture01-wordvecs::kp9",
-        "local::lecture02::kp4"
+        "local::lecture04-wordvecs-lm::kp4"
       ]
     },
     {
@@ -140,12 +146,18 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.51,
     0.81
   ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L1_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",

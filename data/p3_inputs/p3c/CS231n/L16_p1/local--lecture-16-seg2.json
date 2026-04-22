@@ -154,7 +154,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture16_multimodal_deep_learning::kp5",
+        "local::lecture18-multimodal::kp5",
         "local::lecture_16::kp4"
       ]
     },
@@ -228,7 +228,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp14",
+        "local::lecture04-wordvecs-lm::kp14",
         "local::lecture_12::kp3",
         "local::lecture_16::kp6"
       ]

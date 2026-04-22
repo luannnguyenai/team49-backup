@@ -1,0 +1,178 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture10-transformers",
+    "lecture_title": "Lecture 10 - Self-Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA"
+  },
+  "unit": {
+    "unit_id": "local::lecture10-transformers::seg4",
+    "course_id": "cs224n",
+    "name": "Causal masking and the minimal self-attention architecture",
+    "description": "Explains how to prevent information leakage from future tokens and assembles the minimal usable self-attention block.",
+    "summary": "For language modeling and decoder-side sequence generation, self-attention cannot look ahead to future tokens, so the lecture introduces causal masking by setting scores for future positions to negative infinity before softmax, which forces their attention weights to zero [ts=1999s] [ts=2023s]. The instructor illustrates this with a lower-triangular attention pattern where the representation of \"chef\" can see only start/the/chef and not future words like \"who,\" preventing training-time cheating when predicting the next token [ts=2078s] [ts=2100s]. With masking added to positional embeddings, self-attention, and a feed-forward network, the lecture defines a minimal self-attention architecture that can replace recurrence and be stacked into larger models [ts=2359s] [ts=2408s] [ts=2435s].",
+    "key_points": [
+      {
+        "text": "In autoregressive settings, future tokens must be masked so a token cannot use information from words that come later.",
+        "timestamp_s": 1999,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Causal masking is implemented by replacing future attention scores with negative infinity before the softmax.",
+        "timestamp_s": 2023,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "After softmax, masked future positions receive weight zero in the weighted sum.",
+        "timestamp_s": 2048,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The lower-triangular visibility pattern lets \"chef\" attend only to earlier or current tokens, not to \"who.\"",
+        "timestamp_s": 2098,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A minimal usable block consists of position embeddings, self-attention, masking when needed, and a feed-forward network.",
+        "timestamp_s": 2380,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
+      "start_s": 1979,
+      "end_s": 2475
+    },
+    "difficulty": 0.58,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 8,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "For language modeling and decoder-side sequence generation, self-attention cannot look ahead to future tokens, so the lecture introduces causal masking by setting scores for future positions to negative infinity before softmax, which forces their attention weights to zero [ts=1999s] [ts=2023s]. The instructor illustrates this with a lower-triangular attention pattern where the representation of \"chef\" can see only start/the/chef and not future words like \"who,\" preventing training-time cheating when predicting the next token [ts=2078s] [ts=2100s]. With masking added to positional embeddings, self-attention, and a feed-forward network, the lecture defines a minimal self-attention architecture that can replace recurrence and be stacked into larger models [ts=2359s] [ts=2408s] [ts=2435s].",
+  "target_kp_ids": [
+    "kp_causal_self_attention",
+    "kp_self_attention"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "video_clip_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "transcript_slice": "00:32:59\nAnd that's that-- when I've been writing out\n\n00:33:04\nyou can sort of look at the entire sequence, right?\n\n00:33:12\nor language modeling, whenever you\n\n00:33:16\nyou can't cheat and look at the future.\n\n00:33:24\nthe set of keys and queries and values\n\n00:33:31\nbear with me.\n\n00:33:34\nSo instead, we compute the entire n by n matrix\n\n00:33:41\nand then I mask out words in the future.\n\n00:33:47\nby n pairs of words, is equal to whatever\n\n00:33:57\nis an index that is less than or equal to where you are,\n\n00:34:04\notherwise if it's in the future.\n\n00:34:08\ngets mapped to zero.\n\n00:34:13\nmy weighted average is zero on the future,\n\n00:34:18\nWhat does this look like?\n\n00:34:23\nand maybe the start symbol there,\n\n00:34:29\nThat's all pairs of words.\n\n00:34:32\nI sort of negative infinity out the words I can't look at.\n\n00:34:37\nI can just look at the start symbol; when encoding the,\n\n00:34:43\nI can look at start the chef, but I can't look at who.\n\n00:34:52\nthat is only looking at start the chef,\n\n00:34:57\nusing this vector that allows me to predict\n\n00:35:02\nlooking ahead and seeing that, well, who is the next word.\n\n00:35:11\nSo it says we're using it in decoders.\n\n00:35:17\nlayer, or for the encoding layer,\n\n00:35:21\nThe question is it says here that we're\n\n00:35:24\nDo we also use it in the encoder?\n\n00:35:30\nand a unidirectional LSTM, right?\n\n00:35:37\nyou probably don't use it.\n\n00:35:40\nsentence of your machine translation problem,\n\n00:35:44\nbecause it's probably good to let\n\n00:35:47\nAnd then whenever you do need to use it,\n\n00:35:50\nof probability of word 1, probability of 2\n\n00:35:56\nSo traditionally, yes, in decoders\n\n00:36:02\nYes.\n\n00:36:07\nHow humans actually generate sentences\n\n00:36:14\nbefore they say the words that-- or before\n\n00:36:25\nor writing, generating?\n\n00:36:27\nSo the question is, isn't looking ahead a little bit\n\n00:36:33\nthat you might say in the future how humans generate language\n\n00:36:39\nIs that what you're--\n\n00:36:41\nSo right, trying to plan ahead to see what I should do is\n\n00:36:49\nthe network, I can't--\n\n00:36:55\nand if I give it the answer, it's not\n\n00:36:59\nSo in practice, when I'm generating text,\n\n00:37:04\ninto the future or have a high level plan or something,\n\n00:37:11\nabout how humans generate sequences of language\n\n00:37:17\nat least because then it's just too easy.\n\n00:37:21\nYeah.\n\n00:37:24\nthe network like a hint as to what kind of thing\n\n00:37:28\nBut that's out of scope for this.\n\n00:37:31\nYeah, question over here.\n\n00:37:34\nwant to mask the future for stuff like language models,\n\n00:37:39\nLike why would we use it there?\n\n00:37:43\nwe're going to come over to this board\n\n00:37:49\nYes.\n\n00:37:59\nand I want to be able to translate it [FRENCH]..\n\n00:38:09\nAnd so when I'm looking at the I like pizza, right?\n\n00:38:16\nAnd so I want self-attention without masking\n\n00:38:27\nand like to look at pizza, and I want it all.\n\n00:38:31\nif my tokens are like [FRENCH],, I want to-- in encoding this\n\n00:38:40\nand we'll talk about encoder-decoder architectures\n\n00:38:46\nbut I want to be able to look at myself none of the future\n\n00:38:49\nAnd so what I'm talking about right now in this masking case\n\n00:38:57\nall of these words.\n\n00:39:02\nelse should be negative infinity.\n\n00:39:06\nDoes that answer your question?\n\n00:39:07\nGreat.\n\n00:39:11\nOK.\n\n00:39:16\nwith self-attention.\n\n00:39:19\nis my personal opinion, a minimal self-attention building\n\n00:39:22\nYou have self-attention, the basis of the method,\n\n00:39:29\nand maybe we had the inputs to the sequence here,\n\n00:39:34\nand then you add position embeddings, right?\n\n00:39:38\nusing the key, the value, and the query,\n\n00:39:44\nThis is often how you see these diagrams, right?\n\n00:39:50\nwith the position representation, right?\n\n00:39:55\nbecause otherwise, you'd have no idea what\n\n00:39:59\nYou have the non-linearities in the teal feed-forward network\n\n00:40:05\nand sort of deep learning expressivity,\n\n00:40:10\nto have parallelizable operations that\n\n00:40:15\nOK?\n\n00:40:18\nAnd then up at the top above here, so you have this thing;\n\n00:40:23\nand feed forward many times.\n\n00:40:27\nself-attention, feed forward, that's what\n\n00:40:30\nAnd then maybe at the end of it, you predict something.\n\n00:40:34\nWe haven't really talked about that.\n\n00:40:37\nand then you predict the next word\n\n00:40:40\nSo this is like a self-attention architecture.\n\n00:40:46\nSo are there any questions?\n\n00:40:48\n[INAUDIBLE] just for encoders?\n\n00:40:53\nWe will use masking for decoders,\n\n00:41:00\nan informational constraint.\n\n00:41:04\nI cannot have the information of the future.\n\n00:41:08\nYeah.\n\n00:41:13\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "global_kp_id": "kp_causal_self_attention",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "global_kp_id": "kp_self_attention",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_causal_self_attention",
+      "name": "Causal masking and masked self-attention",
+      "description": "Masking blocks selected attention links by forcing their pre-softmax scores to negative infinity, which is essential for autoregressive language modeling. Future positions are masked in decoder self-attention so next-token prediction cannot cheat by reading words that come later in the sequence.",
+      "track_tags": [
+        "language_modeling",
+        "nlp",
+        "self_attention",
+        "transformers"
+      ],
+      "domain_tags": [
+        "autoregressive_models",
+        "causal_masking",
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because causal masking and masked self-attention clarifies masking blocks selected attention links by forcing their pre-softmax scores to negative infinity, which is essential for autoregressive language modeling, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp6",
+        "local::lecture_8::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_self_attention",
+      "name": "Self-attention",
+      "description": "Self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set. Each token can gather information from every token in the sequence in a single parallel operation, rather than relying on stepwise recurrence.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "nlp",
+        "self_attention",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "nlp",
+        "representation_learning",
+        "self_attention"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because self-attention formalizes how self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp2",
+        "local::lecture_8::kp9"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.43,
+    0.73
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture10-transformers_transcript.txt"
+  }
+}

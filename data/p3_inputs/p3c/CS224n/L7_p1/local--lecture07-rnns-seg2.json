@@ -1,0 +1,182 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture07-rnns",
+    "lecture_title": "Lecture 7 - Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4"
+  },
+  "unit": {
+    "unit_id": "local::lecture07-rnns::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Modern regularization and dropout",
+    "description": "Explains how regularization is viewed in modern deep learning and then develops dropout as a practical regularization method.",
+    "summary": "This segment starts from L2 regularization, where the loss is augmented to prefer smaller parameter values, and contrasts the classical overfitting picture with a modern view in which huge networks can nearly memorize the training set yet still generalize if regularized well [ts=517s] [ts=719s] [ts=807s]. It then introduces dropout: at training time a random binary mask zeroes parts of an internal representation, while at test time the network keeps all units and rescales activations, encouraging robustness instead of reliance on a few co-adapted features [ts=928s] [ts=1020s] [ts=1054s].",
+    "key_points": [
+      {
+        "text": "L2 regularization adds a squared-parameter term to the loss to prefer smaller weights.",
+        "timestamp_s": 565,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The lecture argues that in modern large neural networks the simple classical picture of overfitting no longer matches practice.",
+        "timestamp_s": 719,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Large models can drive training loss essentially to zero and still generalize if regularization is done well.",
+        "timestamp_s": 807,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Dropout samples a random mask of zeros and ones and applies it to hidden representations during training.",
+        "timestamp_s": 928,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "At test time dropout keeps all units active and rescales instead of deleting activations.",
+        "timestamp_s": 1024,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Dropout can be interpreted as preventing feature co-adaptation or as approximating a large model ensemble.",
+        "timestamp_s": 1054,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+      "start_s": 477,
+      "end_s": 1063
+    },
+    "difficulty": 0.57,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "This segment starts from L2 regularization, where the loss is augmented to prefer smaller parameter values, and contrasts the classical overfitting picture with a modern view in which huge networks can nearly memorize the training set yet still generalize if regularized well [ts=517s] [ts=719s] [ts=807s]. It then introduces dropout: at training time a random binary mask zeroes parts of an internal representation, while at test time the network keeps all units and rescales activations, encouraging robustness instead of reliance on a few co-adapted features [ts=928s] [ts=1020s] [ts=1054s].",
+  "target_kp_ids": [
+    "kp_regularization_and_generalization",
+    "kp_dropout"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "video_clip_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "transcript_slice": "00:08:00\nof a yawn in some sense, is doing better regularization\n\n00:08:07\nSo regularization is the idea that beyond just having\n\n00:08:18\nwe want to, in some other ways, manipulate what\n\n00:08:26\nAnd so normally we have some more complex loss function\n\n00:08:35\nThe most common way of doing this\n\n00:08:42\nsquared term at the end.\n\n00:08:49\nbe good to find a model with small parameter weights.\n\n00:08:57\nwill explain your data well.\n\n00:09:05\nthese losses.\n\n00:09:10\nlike CS229, machine learning.\n\n00:09:16\nThis is a machine learning theory class.\n\n00:09:24\nvery relevant to what's happened in recent neural networks work.\n\n00:09:35\nwas we needed this kind of regularization\n\n00:09:42\nmeaning that they would do a very good job at modeling\n\n00:09:51\nto new data that was shown.\n\n00:09:55\nwas this, that as you train on some training data,\n\n00:10:04\nHowever, after some point, you start\n\n00:10:11\nthat happen to turn up in those training examples\n\n00:10:17\ngood for the training examples.\n\n00:10:23\nyou see at test time.\n\n00:10:29\nset and you traced out the error or loss on that validation\n\n00:10:39\nit would start to go up again.\n\n00:10:44\nIt's just meant to go up.\n\n00:10:49\nyou have overfit to your training data.\n\n00:10:55\nis meant to lessen the extent to which you\n\n00:11:00\nThis is not a picture that modern neural network\n\n00:11:08\nInstead, the picture is changed like this.\n\n00:11:17\nBut what we are concerned about is\n\n00:11:25\nso that when we train--\n\n00:11:32\nthat you could train billions of parameters\n\n00:11:40\nbecause you could not possibly estimate those parameters well.\n\n00:11:48\nBut what's actually been found is that yeah, it's true.\n\n00:11:56\nis an interesting averaging function\n\n00:12:01\nAnd if you do it right, what happens\n\n00:12:09\nit might look like you're starting to overfit.\n\n00:12:16\nyour training loss continue to go down very infinitesimally,\n\n00:12:25\nAnd so on huge networks these days,\n\n00:12:36\nalmost completely.\n\n00:12:42\nyou can essentially train them to get 0 loss.\n\n00:12:50\nbut you can train them to get 0 loss because you've got such\n\n00:12:54\nYou can perfectly fit, memorize the entire training set.\n\n00:13:01\nbecause you've overfit the training data.\n\n00:13:05\nit's not seen as a disaster because providing\n\n00:13:13\ngeneralize well to different data.\n\n00:13:20\nthis kind of L2 regularization or similar ones\n\n00:13:27\nto achieve that effect.\n\n00:13:31\nturned to other methods of regularization, of which\n\n00:13:37\nSo this is one of the things that's on the assignment.\n\n00:13:46\napologize or something because the way drop out is done,\n\n00:13:54\nis the original formulation.\n\n00:13:57\non the assignment is the way it's now normally done\n\n00:14:01\nSo there are a couple of details that vary a bit.\n\n00:14:11\nabout the details of the math.\n\n00:14:17\nevery time you are doing a piece of training\n\n00:14:24\nis inside the middle layers of the neural network,\n\n00:14:31\nAnd so technically, the way you do this is\n\n00:14:37\neach time of zeros and ones.\n\n00:14:43\nSo some of the data items go to 0\n\n00:14:49\nSo for the next thing, I've now masked out something\n\n00:14:56\nAnd so you're just sort of randomly throwing away\n\n00:15:01\nAnd the effect of this is that you're training the model,\n\n00:15:10\nas much use of every input as it can.\n\n00:15:18\n17 of the vector because sometimes it's just\n\n00:15:23\nSo if there are other features that you could use instead\n\n00:15:29\nyou should also know how to make use of those features.\n\n00:15:36\nAt test time for efficiency, but also quality of the answer,\n\n00:15:42\nYou keep all of your weights, but you just\n\n00:15:47\nthat you used to be dropping things.\n\n00:15:53\ncan think of explaining this.\n\n00:15:58\nis that this prevents feature co-adaptation.\n\n00:16:06\ncomplex functions of feature seven, eight and 11\n\n00:16:13\nmight be missing.\n\n00:16:19\nAnother way of thinking of it is that there's\n\n00:16:24\nwhere you can mix together different models\n\n00:16:30\nIf you're training with dropout, it's\n\n00:16:35\nbecause you're training with the ensemble of the power\n\n00:16:42\nof features all at once.\n\n00:16:48\nSo there are different ways of thinking about it.\n\n00:16:54\nmodels before, I think a nice way to think of it\n\n00:17:02\nbecause for a Naive Bayes models,\n\n00:17:06\nbased on the data statistics.\n\n00:17:10\nIn a logistic regression, weights\n\n00:17:15\nAnd with dropout, you're somewhere in between.\n\n00:17:21\nof the other features, but different ones\n\n00:17:25\nBut following work that was done at Stanford\n\n00:17:34\npeople regard dropout as a form of feature\n\n00:17:39\nAnd he shows some theoretical results",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "global_kp_id": "kp_dropout",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_regularization_and_generalization",
+      "name": "Regularization and generalization",
+      "description": "The idea that more neurons increase expressive power and overfitting risk, so regularization—not shrinking the architecture by default—should control generalization. The view that very large networks can fit training data closely yet still generalize when regularization is chosen appropriately.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "generalization",
+        "machine_learning",
+        "model_selection"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "generalization",
+        "machine_learning",
+        "overfitting",
+        "regularization"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because regularization and generalization clarifies the idea that more neurons increase expressive power and overfitting risk, so regularization—not shrinking the architecture by default—should control generalization, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical, high, and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp2",
+        "local::lecture_3::kp4",
+        "local::lecture_4_neural_networks_and_backpropagation::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dropout",
+      "name": "Dropout regularization",
+      "description": "A train-time masking technique that randomly zeros activations so the network cannot rely on brittle co-adapted features. A regularization method that randomly masks hidden activations during training and rescales at test time.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "regularization"
+      ],
+      "domain_tags": [
+        "dropout",
+        "generalization",
+        "neural_network_training",
+        "regularization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because dropout regularization clarifies a train-time masking technique that randomly zeros activations so the network cannot rely on brittle co-adapted features, sharpening later modeling, analysis, or evaluation choices while roles split between optional and supporting and importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp3",
+        "local::lecture_6::kp3"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.42,
+    0.72
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-rnns_transcript.txt"
+  }
+}

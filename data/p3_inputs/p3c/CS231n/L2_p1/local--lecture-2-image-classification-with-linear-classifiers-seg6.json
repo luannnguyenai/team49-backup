@@ -179,7 +179,7 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture02::kp22",
+        "local::lecture04-wordvecs-lm::kp22",
         "local::lecture_2_image_classification_with_linear_classifiers::kp11"
       ]
     }

@@ -1,0 +1,171 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture10-transformers",
+    "lecture_title": "Lecture 10 - Self-Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA"
+  },
+  "unit": {
+    "unit_id": "local::lecture10-transformers::seg1",
+    "course_id": "cs224n",
+    "name": "Why recurrence is replaced by attention",
+    "description": "Motivates the shift from LSTMs/RNNs to attention by isolating two core failures of recurrence: long interaction paths and poor parallelism.",
+    "summary": "The lecture first recaps the pre-transformer recipe—bidirectional LSTMs for encoding, unidirectional LSTMs for decoding, plus attention for flexible memory access in tasks like translation [ts=172s] [ts=206s]. It then explains why recurrence is limiting: long-distance dependencies such as relating \"chef\" to \"was\" require many recurrent steps and difficult gradient propagation, even with LSTMs [ts=278s] [ts=360s]. A second problem is that RNN states must be computed sequentially, so the model incurs O(sequence length) many unparallelizable operations, whereas attention can represent each token by looking across the whole sequence in one parallel step [ts=452s] [ts=599s] [ts=698s].",
+    "key_points": [
+      {
+        "text": "A standard NLP baseline before transformers used a bidirectional LSTM encoder and a unidirectional LSTM decoder, often with attention.",
+        "timestamp_s": 175,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "RNNs suffer from linear interaction distance: words that are far apart need many recurrent steps to influence each other.",
+        "timestamp_s": 278,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The long-distance dependency in \"the chef ... was\" is hard to learn because gradients must propagate across many intervening words.",
+        "timestamp_s": 406,
+        "evidence_type": "example"
+      },
+      {
+        "text": "RNN forward/backward passes require O(sequence length) many unparallelizable operations because later states depend on earlier ones.",
+        "timestamp_s": 454,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Attention can connect distant words directly and compute token representations in parallel across the whole sequence.",
+        "timestamp_s": 638,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8",
+      "start_s": 152,
+      "end_s": 711
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 9,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture first recaps the pre-transformer recipe—bidirectional LSTMs for encoding, unidirectional LSTMs for decoding, plus attention for flexible memory access in tasks like translation [ts=172s] [ts=206s]. It then explains why recurrence is limiting: long-distance dependencies such as relating \"chef\" to \"was\" require many recurrent steps and difficult gradient propagation, even with LSTMs [ts=278s] [ts=360s]. A second problem is that RNN states must be computed sequentially, so the model incurs O(sequence length) many unparallelizable operations, whereas attention can represent each token by looking across the whole sequence in one parallel step [ts=452s] [ts=599s] [ts=698s].",
+  "target_kp_ids": [
+    "kp_rnn_linear_interaction_distance",
+    "kp_self_attention"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "video_clip_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "transcript_slice": "00:02:38\nback into what we've done so far in this course\n\n00:02:47\nWhat was our strategy?\n\n00:02:50\nand you wanted to say, take your best effort attempt at it\n\n00:02:55\nOK, I'm going to have a bidirectional LSTM instead\n\n00:03:01\nI'm going to use an LSTM to encode my sentences.\n\n00:03:07\nhave an output that I'm trying to generate,\n\n00:03:12\ngoing to generate one by one.\n\n00:03:17\nAnd so maybe I've encoded in a bidirectional LSTM, the source\n\n00:03:24\nwith my uni-directional LSTM.\n\n00:03:30\nto give flexible access to memory if I felt like I needed\n\n00:03:38\nOK, and this was just working exceptionally well,\n\n00:03:44\nto do machine translation.\n\n00:03:47\nyou don't want to have to encode the whole source\n\n00:03:52\nOK, and in this lecture, we have the same goal.\n\n00:03:56\nthat we did previously, but we're\n\n00:04:00\nSo we're going to say if 2014 to 2017\n\n00:04:08\nand error, years later, we had these brand new building\n\n00:04:17\nand they're going to allow for just a huge range of much more\n\n00:04:24\nAnd so what are the issues with recurrent neural networks\n\n00:04:30\nthat we're going to use from this point moving forward.\n\n00:04:38\nis what we're going to call linear interaction distance.\n\n00:04:47\ndepending on the language and the direction.\n\n00:04:51\nof linear locality, which is useful\n\n00:04:55\nsometimes they're actually quite related.\n\n00:04:58\nThey're nearby, and in the recurrent neural network,\n\n00:05:05\nand you encode pizza.\n\n00:05:12\nbut you have this problem where very long distance dependencies\n\n00:05:18\nSo if I have this sentence, the chef, so those are nearby.\n\n00:05:27\nand then a bunch of stuff.\n\n00:05:30\nand picked up the ingredients and loves garlic and then was--\n\n00:05:40\nThis application of the recurrent weight matrix\n\n00:05:45\nthree times, right, as many times\n\n00:05:50\nbetween chef and what's, right?\n\n00:05:55\nis a long-distance dependency, should\n\n00:05:59\nthat we did in dependency syntax.\n\n00:06:06\nthat these words should be related.\n\n00:06:19\nit can be difficult to learn the dependencies between them.\n\n00:06:23\nLSTMs do a lot better at modeling the gradients\n\n00:06:30\nnetworks, but it's not perfect.\n\n00:06:36\nisn't the right way to think about sentences.\n\n00:06:46\nthen I might have a hard time doing it\n\n00:06:53\nand really, I'd like more direct connection between words\n\n00:06:59\nright, even if these are going to get much longer.\n\n00:07:06\nWe would like words that might be related\n\n00:07:11\ncomputation sort of graph more easily than sort of being\n\n00:07:20\nthese long-distance dependencies better.\n\n00:07:24\nthat, again, comes back to the recurrent neural networks\n\n00:07:29\ninto the sequence, often called a dependence on time.\n\n00:07:35\nthe forward and backward passes have O of sequence length many.\n\n00:07:41\nin this case, just sequence length\n\n00:07:45\nSo we know GPUs are great.\n\n00:07:50\nonce as long as there's no dependency\n\n00:07:54\nbut you have to compute one and then compute the other.\n\n00:07:59\nyou can't actually compute the RNN hidden state for time step\n\n00:08:06\nor time step three, right?\n\n00:08:11\nif I want to compute this hidden state, so I've got some word,\n\n00:08:17\ncan compute this state.\n\n00:08:20\ncan compute this state.\n\n00:08:26\nI've got three operations I need to do before I can compute\n\n00:08:31\nthis and this and that.\n\n00:08:37\nthat I'm sort of glomming all the matrix multiplies\n\n00:08:40\nSo one, two, three, and of course,\n\n00:08:45\nSo down over here, so as the sequence length grows,\n\n00:08:50\nI can't just have a big GPU just kachunk with the matrix\n\n00:08:58\nthe previous states beforehand.\n\n00:09:03\nSo those are these two related problems\n\n00:09:08\nYeah.\n\n00:09:11\nI thought that was the whole point of the attention network\n\n00:09:17\nduring the training of the actual cells\n\n00:09:21\nCan't we do something like the attention\n\n00:09:26\nSo the question is with the linear interaction distance,\n\n00:09:30\nthat it gets around that?\n\n00:09:33\nto help or does that just help?\n\n00:09:37\nAnd in fact, everything we do in the rest of this lecture\n\n00:09:42\nand just do attention more or less.\n\n00:09:48\nAny other questions?\n\n00:09:58\njust a slide a slide back.\n\n00:10:04\nbut just for the second, attention\n\n00:10:08\nas a query to access and incorporate information\n\n00:10:12\nSo previously, we were in a decoder.\n\n00:10:17\nand we attended to the encoder so\n\n00:10:21\nof the source sentence into a single vector.\n\n00:10:26\nwithin a single sentence.\n\n00:10:31\nthrough word T, in this case, and right\n\n00:10:36\nwriting out the number of unparallelizable operations\n\n00:10:41\nSo for each word, you can independently\n\n00:10:46\nbecause the embedding just depends on the word identity.\n\n00:10:53\nto build an attention representation of this word\n\n00:10:57\nthat's one big operation.\n\n00:11:02\nSo the attention for this word I can\n\n00:11:06\nI don't need to walk left to right like I did for an RNN.\n\n00:11:10\nbut this, you should have the intuition\n\n00:11:16\nproblem and the non-parallelizability problem\n\n00:11:22\nI am potentially interacting.\n\n00:11:28\nindependent of how far away you are,\n\n00:11:32\nthe sequence linearly long.\n\n00:11:38\nSo the intuition is that attention\n\n00:11:42\nand it doesn't have this dependence on the sequence\n\n00:11:47\nAnd so now the rest of the lecture,\n\n00:11:51\nSo maybe let's just move on.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "global_kp_id": "kp_self_attention",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rnn_linear_interaction_distance",
+      "name": "RNN linear interaction distance",
+      "description": "The recurrent path between two related tokens grows with the number of intervening positions, making long-distance dependencies harder to learn and slowing training.",
+      "track_tags": [
+        "deep_learning",
+        "nlp",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "recurrent_neural_networks",
+        "sequence_modeling"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rNN linear interaction distance clarifies the recurrent path between two related tokens grows with the number of intervening positions, making long-distance dependencies harder to learn and slowing training, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_self_attention",
+      "name": "Self-attention",
+      "description": "Self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set. Each token can gather information from every token in the sequence in a single parallel operation, rather than relying on stepwise recurrence.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "nlp",
+        "self_attention",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "nlp",
+        "representation_learning",
+        "self_attention"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because self-attention formalizes how self-attention applies attention within one set of vectors by projecting each input into a query, key, and value so every element can mix information from the whole set, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture10-transformers::kp2",
+        "local::lecture_8::kp9"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture10-transformers_transcript.txt"
+  }
+}

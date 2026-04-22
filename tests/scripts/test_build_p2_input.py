@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src.scripts import build_p2_input as build_p2_input_cli
+from src.scripts.pipeline import build_p2_input as build_p2_input_cli
 
 
 def _write_json(path: Path, payload: dict) -> None:

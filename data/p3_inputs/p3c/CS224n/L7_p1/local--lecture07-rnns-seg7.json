@@ -1,0 +1,189 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture07-rnns",
+    "lecture_title": "Lecture 7 - Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4"
+  },
+  "unit": {
+    "unit_id": "local::lecture07-rnns::seg7",
+    "course_id": "cs224n-2024",
+    "name": "RNN architecture, strengths, and weaknesses",
+    "description": "Presents the recurrent neural network as a shared-parameter sequence model and explains both its advantages over fixed windows and its practical limitations.",
+    "summary": "An RNN is introduced as a family of networks that reuse one set of weights across time steps, updating a hidden state as each token is read [ts=3471s] [ts=3516s] [ts=3600s]. The hidden state starts from an initial value, combines the previous state with the current word embedding, adds a bias, applies a nonlinearity such as tanh, and the final hidden state is fed through a softmax to predict the next word [ts=3616s] [ts=3646s] [ts=3691s] [ts=3779s]. This gives variable-length context with fixed model size and shared processing, but it remains sequentially slow and simple RNNs tend to let distant information fade too quickly [ts=3816s] [ts=3850s] [ts=3898s] [ts=3977s].",
+    "key_points": [
+      {
+        "text": "RNNs reuse the same weights across successive time steps in a sequence.",
+        "timestamp_s": 3516,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The hidden state is updated from the previous hidden state and the current word embedding at each step.",
+        "timestamp_s": 3627,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Bias terms and a nonlinearity, commonly tanh, are part of the recurrent update.",
+        "timestamp_s": 3687,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The final hidden state is passed through a softmax to produce a next-word distribution.",
+        "timestamp_s": 3779,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "RNNs handle arbitrary context length without increasing model size, because context is summarized in a fixed-size hidden vector.",
+        "timestamp_s": 3816,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Recurrent computation is slow because it is inherently sequential.",
+        "timestamp_s": 3865,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Simple RNNs forget information from far back in the sequence too quickly.",
+        "timestamp_s": 3977,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+      "start_s": 3050,
+      "end_s": 3507
+    },
+    "difficulty": 0.71,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "An RNN is introduced as a family of networks that reuse one set of weights across time steps, updating a hidden state as each token is read [ts=3471s] [ts=3516s] [ts=3600s]. The hidden state starts from an initial value, combines the previous state with the current word embedding, adds a bias, applies a nonlinearity such as tanh, and the final hidden state is fed through a softmax to predict the next word [ts=3616s] [ts=3646s] [ts=3691s] [ts=3779s]. This gives variable-length context with fixed model size and shared processing, but it remains sequentially slow and simple RNNs tend to let distant information fade too quickly [ts=3816s] [ts=3850s] [ts=3898s] [ts=3977s].",
+  "target_kp_ids": [
+    "kp_rnn_basics"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "video_clip_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "transcript_slice": "00:50:50\nRecurrent neural networks.\n\n00:51:01\nof neural networks.\n\n00:51:06\narchitectures.\n\n00:51:12\nwas word2vec.\n\n00:51:20\nThe second family we saw was feedforward\n\n00:51:30\nAnd the third family we're going to see\n\n00:51:35\nAnd then we'll go on and go on to transformer models.\n\n00:51:43\nis that you've got one set of weights\n\n00:51:51\nin time, i.e.\n\n00:51:56\nAnd as you do that, you're going to update the parameters\n\n00:52:01\nWe'll go through this in quite a bit of detail.\n\n00:52:06\nSo we've got the students open their\n\n00:52:12\nthat we're going to do it--\n\n00:52:16\nI've still got four words in my example.\n\n00:52:21\nBut there could have been 24 words\n\n00:52:26\nwith any length of context.\n\n00:52:32\nas just words or one hot vectors and we can look up their word\n\n00:52:39\nOK, but now to compute probabilities for the next word,\n\n00:52:47\nSo our hidden layer is going to be recurrent.\n\n00:52:53\nto change a hidden state at each time step\n\n00:53:01\nSo we're going to start off with an h0, which\n\n00:53:08\nbe all zeros.\n\n00:53:14\nis we're going to multiply the previous hidden state\n\n00:53:21\nWe're going to take a word embedding\n\n00:53:26\nand then we're going to sum the results of those two things,\n\n00:53:32\nSo that hidden state will then store a memory of everything\n\n00:53:40\nSo we'll do that and then we'll continue along.\n\n00:53:46\nby the same weight matrix, we.\n\n00:53:54\nby the same weight matrix, Wh and we add them together\n\n00:54:02\nI've only said this bit, so I've left out a bit.\n\n00:54:08\nYou're adding on a bias term because we usually\n\n00:54:12\nAnd you're putting things through a non-linearity.\n\n00:54:17\nAnd for recurrent neural networks,\n\n00:54:23\nbeen the tanh function.\n\n00:54:27\nAnd so keep on doing that through each step.\n\n00:54:34\nthis h4's hidden state is a hidden state,\n\n00:54:41\nIt's seen all of the students open their\n\n00:54:46\nin any of these positions, it will\n\n00:54:53\ninto the hidden state.\n\n00:54:57\nway of incorporating in the information that's seen.\n\n00:55:04\nAnd to predict the next word I'm then going to do,\n\n00:55:11\nI did thing I did before.\n\n00:55:17\nand add another bias and stick that through a softmax\n\n00:55:26\nWell, the softmax will give me a language model,\n\n00:55:31\nand I can sample from it to generate the next word.\n\n00:55:39\nOK, recurrent neural networks.\n\n00:55:50\nSo for recurrent neural networks,\n\n00:55:56\nand we'll just put more and more stuff in our hidden state.\n\n00:56:07\nback.\n\n00:56:15\nWe have to do more computation for a long context,\n\n00:56:21\njust remains this fixed size hidden vector,\n\n00:56:27\nSo there's no exponential blow out anymore.\n\n00:56:33\nSo there's a symmetry in how inputs are processed.\n\n00:56:39\nThe biggest catch in practice is that recurrent computation\n\n00:56:45\nSo for the feedforward layer, we just had an input vector.\n\n00:56:51\nWe multiplied it by a matrix however many times,\n\n00:56:56\nWhereas here, we've stuck with this sequentiality\n\n00:57:04\nIn fact, this is going against what\n\n00:57:09\ndoing a for loop.\n\n00:57:14\nand then you're generating a term each hidden vector.\n\n00:57:20\nthat have led them to fall out of favor.\n\n00:57:27\nlook at more is that in theory, this is perfect.\n\n00:57:36\nin your hidden vector.\n\n00:57:41\nbecause although stuff you saw back here is in some sense\n\n00:57:51\nthat your memory of it gets more and more distant.\n\n00:57:57\nthat dominate the hidden state.\n\n00:58:01\nbecause the recent stuff is the most important stuff that's\n\n00:58:05\nIt's the same with human beings.\n\n00:58:11\nBut RNNs, especially in the simple form that I've just\n\n00:58:20\nand we'll come back to that again in Thursday's class.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "global_kp_id": "kp_rnn_basics",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rnn_basics",
+      "name": "Recurrent neural networks",
+      "description": "Shared-parameter sequence models that update a hidden state over time to summarize prior context. Updating a hidden state from current input and previous hidden state at every time step.",
+      "track_tags": [
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "recurrent_neural_networks",
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because recurrent neural networks formalizes how shared-parameter sequence models that update a hidden state over time to summarize prior context, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp10",
+        "local::lecture_7::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp7",
+        "local::lecture11-pretraining::kp4",
+        "local::lecture14-nlg::kp3",
+        "local::lecture13-generative-models-1::kp6"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 6,
+  "target_difficulty_range": [
+    0.56,
+    0.86
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-rnns_transcript.txt"
+  }
+}

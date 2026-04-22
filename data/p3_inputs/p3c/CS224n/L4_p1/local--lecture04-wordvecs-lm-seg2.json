@@ -1,0 +1,241 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture04-wordvecs-lm",
+    "lecture_title": "Lecture 4 - Word Vectors and Language Models",
+    "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture04-wordvecs-lm::seg2",
+    "course_id": "CS224N",
+    "name": "Word2vec mechanics and word-vector analogy behavior",
+    "description": "Explains the bag-of-words word2vec model and demonstrates learned vector similarity and analogies with GloVe embeddings.",
+    "summary": "The word2vec model is summarized as having only word-vector parameters: separate outside-word and center-word vectors whose dot products yield a probability distribution over possible context words, with error coming from comparison to the true outside word [ts=618s]. The lecturer emphasizes that this is a bag-of-words model: it does not model sentence structure or left-versus-right position, but predicts what kinds of words appear around a center word [ts=660s]. A Jupyter demo loads 100-dimensional GloVe vectors and shows that semantically related words such as bread and croissant have similar vector components, while nearest-neighbor queries for USA, banana, and croissant return sensible related words [ts=748s]. Taking the negative of a single word vector is not useful for antonyms and tends to return odd tokens [ts=894s]. The important property is linear semantic components: vector arithmetic such as King minus man plus woman finds Queen, motivating analogy tasks [ts=966s]. Additional examples show cultural and syntactic regularities, such as Australia:beer::Russia:vodka and tall:tallest::long:longest, illustrating that even a simple bag-of-words model captures word meaning and some world knowledge [ts=1140s]. Q&A clarifies that vector differences can represent relation directions, that the two word2vec vectors for a word are commonly averaged, and that analogy chaining can fail [ts=1287s].",
+    "key_points": [
+      {
+        "text": "Word2vec uses center and outside word vectors; dot products define probabilities for outside words, and error comes from the actual context word.",
+        "timestamp_s": 618,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The skip-gram setup described here is a bag-of-words model that ignores sentence structure and left/right context position.",
+        "timestamp_s": 660,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Nearest-neighbor search over GloVe vectors returns semantically related words such as banana with coconut, mango, and fruit.",
+        "timestamp_s": 837,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A negative single word vector is not an antonym finder; negative banana returns odd or unhelpful tokens.",
+        "timestamp_s": 900,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Word-vector analogies work by adding and subtracting semantic directions, as in King - man + woman ≈ Queen.",
+        "timestamp_s": 966,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Analogy examples show both semantic/cultural and syntactic regularities, but the method has failures.",
+        "timestamp_s": 1260,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+      "start_s": 609,
+      "end_s": 1483
+    },
+    "difficulty": 2.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 15,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The word2vec model is summarized as having only word-vector parameters: separate outside-word and center-word vectors whose dot products yield a probability distribution over possible context words, with error coming from comparison to the true outside word [ts=618s]. The lecturer emphasizes that this is a bag-of-words model: it does not model sentence structure or left-versus-right position, but predicts what kinds of words appear around a center word [ts=660s]. A Jupyter demo loads 100-dimensional GloVe vectors and shows that semantically related words such as bread and croissant have similar vector components, while nearest-neighbor queries for USA, banana, and croissant return sensible related words [ts=748s]. Taking the negative of a single word vector is not useful for antonyms and tends to return odd tokens [ts=894s]. The important property is linear semantic components: vector arithmetic such as King minus man plus woman finds Queen, motivating analogy tasks [ts=966s]. Additional examples show cultural and syntactic regularities, such as Australia:beer::Russia:vodka and tall:tallest::long:longest, illustrating that even a simple bag-of-words model captures word meaning and some world knowledge [ts=1140s]. Q&A clarifies that vector differences can represent relation directions, that the two word2vec vectors for a word are commonly averaged, and that analogy chaining can fail [ts=1287s].",
+  "target_kp_ids": [
+    "kp_linear_semantic_components_and_analogies",
+    "kp_word2vec_skipgram_objective",
+    "kp_word_vector_nearest_neighbor_similarity",
+    "kp_two_vector_word2vec_parameterization"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "transcript_slice": "00:10:13\nBut before we do that, so let me just mention--\n\n00:10:23\nare these word vectors.\n\n00:10:29\nwhich we actually treat as disjoint,\n\n00:10:33\nAnd when we do the computations, we're\n\n00:10:40\noutside words with our center word,\n\n00:10:48\nover how likely the model thinks that different outside words\n\n00:10:53\nAnd then we're comparing that to the actual outside word\n\n00:10:57\nAnd that gives us our source of error.\n\n00:11:01\nto in NLP as a bag of words model,\n\n00:11:08\nor even what's to the left and what's to the right.\n\n00:11:15\nto the left or right, but it's wanting\n\n00:11:20\nin the context of the center word.\n\n00:11:30\nlet's see, not that one.\n\n00:11:41\nthat this really does work.\n\n00:11:54\nAnd here, I'm using a package gensim which we don't continue\n\n00:12:02\nBut it's one package that lets you load\n\n00:12:07\nAnd the word vectors I'm going to use here\n\n00:12:13\nAnd actually, glove was a model we built at Stanford.\n\n00:12:20\nSo strictly speaking, these aren't exactly\n\n00:12:31\nSo now it's loaded up my word vectors\n\n00:12:35\nAnd so as we've discussed, for a word that the representation\n\n00:12:43\nhere's bread is just a vector of real numbers.\n\n00:12:52\nto keep things quicker for my class demo.\n\n00:12:58\nAnd then I can say, well, what's the representation\n\n00:13:05\nAnd this is croissant.\n\n00:13:12\nbit similar.\n\n00:13:16\nthe second components are both positive,\n\n00:13:22\nthe fourth components are both positive.\n\n00:13:27\nSo that seems kind of hopeful because that\n\n00:13:33\na bit similar to each other.\n\n00:13:40\nwhere rather than doing that by hand,\n\n00:13:45\nand say which ones are most similar.\n\n00:13:52\nare most similar to USA.\n\n00:13:57\nI should mention.\n\n00:14:03\nthen United States, Australia.\n\n00:14:08\nof most similar words, though you\n\n00:14:13\nover the USA with dots over it.\n\n00:14:20\nAnd I get coconut, mango, bananas, potato, pineapple,\n\n00:14:25\nAgain, pretty sensible.\n\n00:14:29\nOr I can go to croissant and ask what's the most similar to\n\n00:14:34\nThe most similar things to croissant isn't bread,\n\n00:14:40\nwhich sort of basically makes sense though he is putting here.\n\n00:14:47\noh, sorry.\n\n00:14:50\nSo with this most similar, you've got a positive word\n\n00:14:57\nsimilar in position to that.\n\n00:15:01\nwhich you can say is this is let me\n\n00:15:06\nand say what's most similar to the negative of it.\n\n00:15:12\nthat might be useful to find antonyms or something like that.\n\n00:15:18\nIf you ask for the things that are\n\n00:15:23\nand in most other vectors, it's the same--\n\n00:15:29\nthat you're not really sure if they're words at all,\n\n00:15:34\nOr some of them are names--\n\n00:15:37\nbut not very useful stuff.\n\n00:15:44\nBut it turns out that from there, we get\n\n00:15:51\nthere was observed for word2vec, which\n\n00:15:58\nand then put them together in interesting ways.\n\n00:16:06\nis start with a positive vector for King,\n\n00:16:12\nwe could use the negation to say subtract out the vector for man.\n\n00:16:20\nof add on the vector for woman.\n\n00:16:26\nover here in the space, what is the nearest\n\n00:16:32\nAnd so that's what this next thing does.\n\n00:16:41\nalso positive for Queen, where does that get you to.\n\n00:16:47\nYay!\n\n00:16:52\nthat was discovered with these word vectors\n\n00:16:58\nbut that they were good for doing these kind of meaning\n\n00:17:04\nAnd these got referred to as analogies\n\n00:17:12\nSo it's sort of like woman is to King--\n\n00:17:16\nMan is to King or King is to man as--\n\n00:17:22\nMan is to King as woman is to what in the analogies.\n\n00:17:30\nthat is now saying this little function just automates that\n\n00:17:37\nAnd so now, I can ask it in just this analogy format,\n\n00:17:44\nAnd that one was the canonical example.\n\n00:17:53\nAnd I mean, this is pretty old fashioned stuff.\n\n00:18:04\ntalking about how much fun we used\n\n00:18:09\nplays because basically no one uses this stuff anymore.\n\n00:18:17\nBut back in the day, when I was younger,\n\n00:18:25\nthis very simple model built on very simple data\n\n00:18:35\nand do quite good analogies.\n\n00:18:40\nand have a bit of fun.\n\n00:18:49\nFrance.\n\n00:18:54\nWine.\n\n00:18:56\nThe answer gives us champagne, but that\n\n00:19:00\nI could then put in Russia.\n\n00:19:04\nVodka!\n\n00:19:07\nIt can get back vodka.\n\n00:19:14\nI could do a different one.\n\n00:19:18\nI can do something like pencil is\n\n00:19:32\nphotographing.\n\n00:19:35\nSo we built this model in 2014.\n\n00:19:44\nSo we can't do the last decade of politics,\n\n00:19:50\nBut we could try out older politics questions.\n\n00:20:07\nif you remember your US World history class,\n\n00:20:14\nThere's a Bush one.\n\n00:20:18\nSome people have different opinions of Bill Clinton?\n\n00:20:24\nWhat it answers is Nixon, which I\n\n00:20:32\nYou can also get it to do some just sort of language syntactic\n\n00:20:39\nSo you can do something like tall is to tallest as long--\n\n00:20:55\nYeah, so with this simple method of learning,\n\n00:21:02\nit's enough to learn a lot about the semantics of words and stuff\n\n00:21:12\nlike our examples with Australia is\n\n00:21:17\nI mean, that's sort of cultural world knowledge, which\n\n00:21:22\nthink of as word meaning semantics,\n\n00:21:26\nYes.\n\n00:21:29\nlet's say like man and King, does that also\n\n00:21:34\nWould that give you back ruler or something\n\n00:21:39\nbetween two vectors does capture some concept [INAUDIBLE]\n\n00:21:46\nso man compared to King should be a ruler concept.\n\n00:21:52\nBecause then I'm taking the distance between man\n\n00:22:05\n[INAUDIBLE]\n\n00:22:07\nSo if you think of these words, depending\n\n00:22:14\nyou can think of it-- you've both got a vector, a difference\n\n00:22:25\nthat gives you a ruler analogy.\n\n00:22:30\nAny other questions?\n\n00:22:34\nIn the word2vec algorithm, we get two vectors\n\n00:22:42\nSo how do you go from two to one.\n\n00:22:47\nI mean, the commonest way in practice\n\n00:22:52\nAnd really, you find out that they end up very close,\n\n00:23:02\ngoing along every position of the text,\n\n00:23:09\nhas legs--\n\n00:23:13\nin the context, and a couple of time steps later,\n\n00:23:18\nin the context.\n\n00:23:22\nof the neural nets vary, basically they\n\n00:23:27\nYeah.\n\n00:23:29\nSo use this-- the answer of one to then\n\n00:23:36\nand see how far away you can go before it starts to break down?\n\n00:23:43\nSo you're wanting to--\n\n00:23:48\ncan you do before it starts providing\n\n00:23:56\nAre you wanting to make two steps from somewhere or--\n\n00:24:04\nyou go away from King before it starts failing?\n\n00:24:11\nI mean, there are certainly examples that are fail.\n\n00:24:18\nhave a predefined function that did it,\n\n00:24:22\nBut you could play with it at home\n\n00:24:28\nCurious, as the qualification, why\n\n00:24:34\nIs it just to get more parameters,\n\n00:24:38\nI'll get back to that.\n\n00:24:43\nLet me move on and kind just get through some more details",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_word_vector_nearest_neighbor_similarity",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_linear_semantic_components_and_analogies",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg2",
+      "global_kp_id": "kp_two_vector_word2vec_parameterization",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_word2vec_skipgram_objective",
+      "name": "Word2vec skip-gram objective",
+      "description": "Word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus. The skip-gram model predicts context words from a center word using dot products between center and outside vectors.",
+      "track_tags": [
+        "nlp",
+        "word2vec"
+      ],
+      "domain_tags": [
+        "natural_language_processing",
+        "nlp",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because word2vec skip-gram objective formalizes how word2vec learns embeddings by maximizing the probability of observed context words around a center word across a corpus, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture01-wordvecs::kp9",
+        "local::lecture04-wordvecs-lm::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_word_vector_nearest_neighbor_similarity",
+      "name": "Word vector nearest-neighbor similarity",
+      "description": "Semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because word vector nearest-neighbor similarity clarifies semantic similarity can be inspected by asking which vocabulary vectors are nearest to a query word, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_linear_semantic_components_and_analogies",
+      "name": "Linear semantic components and analogies",
+      "description": "Vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because linear semantic components and analogies formalizes how vector differences can encode relations, enabling analogies such as King - man + woman ≈ Queen, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_two_vector_word2vec_parameterization",
+      "name": "Two-vector word2vec parameterization",
+      "description": "Word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because two-vector word2vec parameterization clarifies word2vec usually learns separate center and outside vectors and averages or otherwise combines them after training, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp7"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    2.65,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L4_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture04-wordvecs-lm_transcript.txt"
+  }
+}

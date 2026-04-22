@@ -1,0 +1,126 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture18-multimodal",
+    "lecture_title": "Lecture 18 - Multimodal Deep Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0"
+  },
+  "unit": {
+    "unit_id": "local::lecture18-multimodal::seg2",
+    "course_id": "cs224n",
+    "name": "Early multimodal modeling patterns",
+    "description": "Surveys pre-transformer deep multimodal ideas built around shared embedding spaces, grounding, captioning, attention, and text-conditioned generation.",
+    "summary": "The early recipe is to encode vision and language separately and align them in a shared embedding space with a similarity score and margin-based objective so similar image-text items move together and dissimilar ones move apart [ts=476s][ts=491s]. Kiela then walks through bag-of-visual-words style grounding, CNN-plus-word-embedding multimodal word vectors, and skip-gram-style prediction of image features from words, arguing that grounding gives richer semantic representations [ts=598s][ts=680s]. He extends the story from words to sentences, where LSTM or recursive sentence encoders are aligned with images, and notes that sentence encoders trained to predict pictures transfer well to downstream NLP tasks [ts=720s][ts=780s]. The segment ends with encoder-decoder captioning, visual attention that aligns generated words to image regions, and text-conditioned GAN image generation as the early path toward modern text-to-image systems [ts=813s][ts=873s][ts=904s].",
+    "key_points": [
+      {
+        "text": "A basic early multimodal model aligns vision and language encoders in one embedding space using a similarity score and margin loss.",
+        "timestamp_s": 476,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Bag of visual words uses SIFT keypoints, local descriptors, clustering, and counts to form a visual analogue of bag of words.",
+        "timestamp_s": 598,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Predicting image features for words or sentences can yield richer grounded semantic representations.",
+        "timestamp_s": 680,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Image captioning emerges by replacing the source-language encoder in seq2seq with a ConvNet image encoder.",
+        "timestamp_s": 813,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Attention lets a captioning model align generated words like “stop” to the relevant image region such as a stop sign.",
+        "timestamp_s": 873,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "GANs enable text-conditioned image generation by training a generator to fool a discriminator while conditioning on text prompts.",
+        "timestamp_s": 904,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=19",
+      "start_s": 435,
+      "end_s": 944
+    },
+    "difficulty": 0.53,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The early recipe is to encode vision and language separately and align them in a shared embedding space with a similarity score and margin-based objective so similar image-text items move together and dissimilar ones move apart [ts=476s][ts=491s]. Kiela then walks through bag-of-visual-words style grounding, CNN-plus-word-embedding multimodal word vectors, and skip-gram-style prediction of image features from words, arguing that grounding gives richer semantic representations [ts=598s][ts=680s]. He extends the story from words to sentences, where LSTM or recursive sentence encoders are aligned with images, and notes that sentence encoders trained to predict pictures transfer well to downstream NLP tasks [ts=720s][ts=780s]. The segment ends with encoder-decoder captioning, visual attention that aligns generated words to image regions, and text-conditioned GAN image generation as the early path toward modern text-to-image systems [ts=813s][ts=873s][ts=904s].",
+  "target_kp_ids": [
+    "kp_cross_modal_alignment_and_grounding"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "video_clip_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "transcript_slice": "00:07:15\nSo, obviously, there's a lot of work\n\n00:07:19\nBut I think if you want to start from the deep learning\n\n00:07:26\nthen a good starting point is, for example, WSABI or DeVise\n\n00:07:35\nhas done some really cool early work\n\n00:07:40\nAnd the basic gist of this is that we have a vision model.\n\n00:07:47\nSo this really, I mean, the first lecture\n\n00:07:51\nSo that's just your basic word embedding model.\n\n00:07:56\nin the same multimodal space.\n\n00:08:01\nmetric, right, this score function\n\n00:08:04\nfrom a support vector machine literature perspective\n\n00:08:11\nloss, how you want to align these two\n\n00:08:16\nSo things that are similar, you want to bring them\n\n00:08:19\nyou want bring them further apart.\n\n00:08:25\nthat means that you can do interesting cross-modal\n\n00:08:31\nlike auto or like horse, and then\n\n00:08:36\nand now you've solved the retrieval problem.\n\n00:08:42\nAnd I think a lot of the stuff that I'm\n\n00:08:46\ngoing to see this thing come over and over again.\n\n00:08:50\nwith fancier models, but it's basically all the same stuff.\n\n00:08:57\nwhere you have images and text, but you can also\n\n00:09:03\nembedding.\n\n00:09:08\nof how humans understand word meaning because when we think\n\n00:09:14\nwe can go to Wikipedia and read that a cat is\n\n00:09:20\nor we can just go and look at pictures of cats\n\n00:09:24\nAnd I would argue actually that for a lot of people,\n\n00:09:28\nof the concept of cat.\n\n00:09:34\ntrying to do this is from Bruni et al.\n\n00:09:40\nthis very elegant approach called bag of visual words.\n\n00:09:48\nVery few people.\n\n00:09:49\nSo it's surprisingly simple.\n\n00:09:53\nIt's nicely elegant.\n\n00:09:56\nI think you can see it in the back, too, right?\n\n00:10:03\nso sort of where the difference between the pixels\n\n00:10:09\nthose are the spots you want to be looking at.\n\n00:10:15\nyou get feature descriptors.\n\n00:10:20\nIt depends kind of on the implementation of this.\n\n00:10:24\ndescriptors is you can cluster them using k means\n\n00:10:31\nso you can count how often they occur, right?\n\n00:10:34\nhave actually the count is-- oh yeah,\n\n00:10:38\nSo that's why the red dot one is three.\n\n00:10:45\nvery similar to the original bag of words model\n\n00:10:50\nin the first lecture.\n\n00:10:55\nAnd so if you do this and you then concatenate\n\n00:11:01\nis a word embedding that is much more representative\n\n00:11:08\nsets that people use to care about at the time.\n\n00:11:16\nwho tried to take these ideas and then really apply deep\n\n00:11:19\nSo some of the very early versions of this use\n\n00:11:25\nyou can transfer the features from your ConvNet\n\n00:11:30\nwhich you've seen in the first lecture,\n\n00:11:34\nyou have a multimodal word vector,\n\n00:11:38\nSo you've seen the skip-gram model.\n\n00:11:43\nonto image features, right?\n\n00:11:48\nlike the cute little cat sat on the mat, then when you see cat\n\n00:11:54\nSo super easy ideas, but it turned out\n\n00:11:59\nSo that's kind of cool.\n\n00:12:02\nWhat we really care about is not words but sentences.\n\n00:12:09\nrepresentations and how can we figure out\n\n00:12:15\nrepresentations and how do we align that with images.\n\n00:12:22\nwe saw with words and pictures but now\n\n00:12:27\nAnd so there's some really cool early papers\n\n00:12:32\nhad some work here.\n\n00:12:38\nembeddings we now have an LSTM in these papers\n\n00:12:44\nor in the case of this one, recursive neural network,\n\n00:12:51\nAnd so these three or four papers\n\n00:12:54\nThis one by me is less important but it's still\n\n00:13:00\nthat grounded sentence representation.\n\n00:13:04\nhere as a sentence encoder for NLP tasks,\n\n00:13:09\nalready gives you a really good sentence representation, right?\n\n00:13:15\ncan imagine what things look like\n\n00:13:20\nyou can then transfer to, I don't know,\n\n00:13:26\nAnd then of course, once we have sentence encoders\n\n00:13:33\nAnd so when the sequence-to-sequence\n\n00:13:37\nabout in this course, what you can do instead of having a text\n\n00:13:44\ntranslation is you can plug in a ConvNet instead of an LSTM\n\n00:13:51\nSo that's exactly what people did.\n\n00:13:56\nthen where we explained the LSTM and how that works.\n\n00:14:01\nThey do?\n\n00:14:02\n[INAUDIBLE]\n\n00:14:04\nThey might make a comeback, I think, at some point.\n\n00:14:09\nWe'll see.\n\n00:14:11\nAnd so one of the things that people figured out\n\n00:14:16\nis that you can do alignment of words\n\n00:14:21\nAnd you can do the same thing actually with images.\n\n00:14:28\nwith something in your picture, then you\n\n00:14:33\nAnd that approach, of course, is called attention.\n\n00:14:38\nprobably in this course.\n\n00:14:42\nof these systems as well where you\n\n00:14:47\nwhen it has to generate stop for the stop sign,\n\n00:14:52\nSo there's a really cool alignment\n\n00:14:58\nAnd so the final early model we should talk about a little bit\n\n00:15:04\nWho here has heard of GANs?\n\n00:15:07\nThat's a lot more than bag of visual words.\n\n00:15:12\nSo yeah, the basic idea of a GAN is really that you have this\n\n00:15:18\ngenerate images that the discriminator cannot\n\n00:15:23\nSo it cannot distinguish fake and real images, right?\n\n00:15:28\non a piece of text, and then you can generate\n\n00:15:34\nSo that's what the first versions of stable diffusion\n\n00:15:42\nto that model.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture18-multimodal::seg2",
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cross_modal_alignment_and_grounding",
+      "name": "Cross-modal alignment and grounding",
+      "description": "The idea that language and perception can be aligned in shared spaces or through predictive grounding objectives to improve semantic representations.",
+      "track_tags": [
+        "multimodal_ml",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ml_research",
+        "nlp_engineering"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because cross-modal alignment and grounding formalizes how the idea that language and perception can be aligned in shared spaces or through predictive grounding objectives to improve semantic representations, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture18-multimodal::kp2"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.38,
+    0.68
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L18_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture18-multimodal_transcript.txt"
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture14-nlg",
+    "lecture_title": "Lecture 14 - Natural Language Generation",
+    "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY"
+  },
+  "unit": {
+    "unit_id": "local::lecture14-nlg::seg3",
+    "course_id": "cs224n",
+    "name": "Greedy and beam decoding under repetition pressure",
+    "description": "Explains why maximizing model probability works for constrained tasks but degenerates for open-ended generation.",
+    "summary": "The segment defines decoding as the function that chooses a token from the model's next-token distribution [ts=915s]. It reviews greedy decoding and beam search as maximum-probability methods aimed at finding the most likely string, which is sensible for low-entropy tasks such as translation and summarization [ts=934s] [ts=968s]. The lecture then shows why this objective fails for open-ended generation: the most likely continuations become repetitive, and plots reveal a self-amplification effect in which repeated phrases receive increasingly favorable probability or lower negative log-likelihood as repetition continues [ts=1008s] [ts=1039s]. This degeneration appears in both LSTMs and transformers and does not disappear just by scaling to larger models [ts=1070s]. N-gram blocking is introduced as a simple heuristic, but it can wrongly ban legitimate reuse such as names appearing multiple times [ts=1098s]. The broader takeaway is that maximum-probability decoding does not match human uncertainty patterns, since human text shows fluctuating confidence while beam-decoded text is unrealistically overconfident [ts=1232s].",
+    "key_points": [
+      {
+        "text": "Greedy decoding chooses the highest-probability token at each time step, while beam search keeps multiple candidate continuations.",
+        "timestamp_s": 934,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Maximum-probability decoding is suitable for low-entropy tasks but encounters problems on open-ended generation.",
+        "timestamp_s": 968,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Repeated phrases can become more probable as they repeat, revealing a self-amplification repetition effect.",
+        "timestamp_s": 1039,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "N-gram blocking prevents exact repeated n-grams but can incorrectly ban valid reuse such as repeated names.",
+        "timestamp_s": 1098,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Human token probabilities fluctuate more than beam-decoded text, suggesting argmax-style decoding mismatches human generation patterns.",
+        "timestamp_s": 1232,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10",
+      "start_s": 904,
+      "end_s": 1344
+    },
+    "difficulty": 0.58,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The segment defines decoding as the function that chooses a token from the model's next-token distribution [ts=915s]. It reviews greedy decoding and beam search as maximum-probability methods aimed at finding the most likely string, which is sensible for low-entropy tasks such as translation and summarization [ts=934s] [ts=968s]. The lecture then shows why this objective fails for open-ended generation: the most likely continuations become repetitive, and plots reveal a self-amplification effect in which repeated phrases receive increasingly favorable probability or lower negative log-likelihood as repetition continues [ts=1008s] [ts=1039s]. This degeneration appears in both LSTMs and transformers and does not disappear just by scaling to larger models [ts=1070s]. N-gram blocking is introduced as a simple heuristic, but it can wrongly ban legitimate reuse such as names appearing multiple times [ts=1098s]. The broader takeaway is that maximum-probability decoding does not match human uncertainty patterns, since human text shows fluctuating confidence while beam-decoded text is unrealistically overconfident [ts=1232s].",
+  "target_kp_ids": [
+    "kp_degeneration_under_maximum_probability_decoding"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "video_clip_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "transcript_slice": "00:15:09\nSo it takes in preceding context y less than t and produce\n\n00:15:14\nAnd then we try to compute a probability distribution\n\n00:15:20\nto normalize them.\n\n00:15:25\nas this function g, which takes in the probability distribution\n\n00:15:31\nBasically, try to select a token from this probability\n\n00:15:34\nSo in the machine translation lecture,\n\n00:15:39\nselects the highest probability token of this p distribution.\n\n00:15:47\nwhich has the same objective as greedy decoding, which\n\n00:15:52\ndefined based on the model.\n\n00:15:57\nwe actually explore a wider range of candidates.\n\n00:16:02\nby keeping always like k candidates in the beam.\n\n00:16:11\nis good for low entropy tasks like machine translation\n\n00:16:15\nBut it actually encounters more problems\n\n00:16:19\nSo the most likely string is actually very repetitive\n\n00:16:26\nAs we can see in this example, the context\n\n00:16:30\nIt's about, I mean, a unicorn trying to speak English.\n\n00:16:36\nit looks great.\n\n00:16:38\nIt talks about science.\n\n00:16:41\nand it starts to repeat, I think, a institution's name.\n\n00:16:48\nIf we look at, for example, this plot\n\n00:16:56\nto the sequence \"I don't know,\" we can see here is the pattern.\n\n00:17:01\nBut if we keep repeating this phrase \"I don't know,\n\n00:17:06\nthen we can see that there is a decreasing\n\n00:17:11\nSo the y-axis is the negative log probability.\n\n00:17:15\nmeans that the model actually has\n\n00:17:20\nwhich is quite strange because it's suggesting that there\n\n00:17:25\nSo the more repeat we have, the more confident\n\n00:17:32\nAnd this keeps going on.\n\n00:17:35\nrepeats 100 times.\n\n00:17:39\nuntil the model is almost 100% sure\n\n00:17:45\nAnd sadly, this problem is not really solved by architecture.\n\n00:17:53\nand the blue curve is a transformer model.\n\n00:17:57\nsuffers from the same problem.\n\n00:18:01\nso we kind of believe that scale is the magical thing in NLP.\n\n00:18:09\nwill still suffer from repetition\n\n00:18:16\nSo how do we reduce repetition?\n\n00:18:21\nSo the principle is very simple.\n\n00:18:27\nIf we set n to be 3, then for any text\n\n00:18:31\nthe next time you see the prefix \"I\n\n00:18:36\nset the probability of happy to be 0 so that you will never\n\n00:18:42\nBut clearly, this n-gram blocking heuristic\n\n00:18:48\nis quite common for you to want to see a person's name appear\n\n00:18:53\nBut this n-gram blocking will eliminate that possibility.\n\n00:19:01\nFor example, we can use a different training objective.\n\n00:19:07\nby unlikelihood objective.\n\n00:19:12\npenalized for generating already-seen tokens.\n\n00:19:18\ninto training time.\n\n00:19:22\nat training time, we just decrease the probability\n\n00:19:26\nAnother training objective is coverage wells,\n\n00:19:32\nrepetition.\n\n00:19:35\nyour attention so that it's always\n\n00:19:39\nthen it is highly likely that you are not\n\n00:19:44\ntends to happen when you have similar attention patterns.\n\n00:19:51\nof searching for the most likely string,\n\n00:19:55\nSo maybe we can search for strings\n\n00:19:59\nprobabilities of two models.\n\n00:20:04\nminus log of small model.\n\n00:20:08\nso they kind of cancel out.\n\n00:20:12\nAnd after applying this new objective,\n\n00:20:17\nbe penalized because it cancels out.\n\n00:20:23\nIs finding the most likely string\n\n00:20:28\nThe answer is probably no because this doesn't really\n\n00:20:33\nSo we can see in this plot, the orange curve\n\n00:20:38\nis the machine-generated text using beam search.\n\n00:20:43\nthere are actually lots of uncertainty,\n\n00:20:49\nFor some words, we can be very certain.\n\n00:20:53\nWhereas here, for the model distribution,\n\n00:20:56\nIt's always assigning probability 1 to the sequence.\n\n00:21:03\nis a mismatch between the two distributions,\n\n00:21:08\nfor the most likely string is not the right decoding\n\n00:21:13\nAny questions so far before we move on?\n\n00:21:15\nSo is this the underlying mechanism\n\n00:21:21\ngenerated by ChatGPT?\n\n00:21:26\ndetect the really simple things that humans are also\n\n00:21:30\nSo in order to avoid the previous problems\n\n00:21:37\nfamilies that generate more robust text\n\n00:21:43\nlooks like the orange curve.\n\n00:21:49\nor detection.\n\n00:21:52\nOh, yeah.\n\n00:21:58\nof plotting the probabilities of human text\n\n00:22:03\nway of detecting whether some text is\n\n00:22:07\nAnd my answer is, I don't think so,\n\n00:22:15\nBecause I feel like there are more robust decoding approaches\n\n00:22:24\nSo yeah, let's talk about the decoding algorithm",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "global_kp_id": "kp_degeneration_under_maximum_probability_decoding",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg3",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_degeneration_under_maximum_probability_decoding",
+      "name": "Degeneration under maximum-probability decoding",
+      "description": "The failure mode where greedy or beam-style search produces repetitive, overconfident text in open-ended generation.",
+      "track_tags": [
+        "decoding",
+        "generation_quality"
+      ],
+      "domain_tags": [
+        "decoding",
+        "nlg"
+      ],
+      "career_path_tags": [
+        "applied_science",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because degeneration under maximum-probability decoding clarifies the failure mode where greedy or beam-style search produces repetitive, overconfident text in open-ended generation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture14-nlg::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp7",
+        "local::lecture11-pretraining::kp4",
+        "local::lecture14-nlg::kp3",
+        "local::lecture13-generative-models-1::kp6"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.43,
+    0.73
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture14-nlg_transcript.txt"
+  }
+}

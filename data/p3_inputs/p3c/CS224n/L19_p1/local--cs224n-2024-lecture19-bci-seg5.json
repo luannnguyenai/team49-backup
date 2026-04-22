@@ -1,0 +1,166 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "cs224n-2024-lecture19-bci",
+    "lecture_title": "Lecture 19 - Brain-Computer Interfaces",
+    "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8"
+  },
+  "unit": {
+    "unit_id": "local::cs224n-2024-lecture19-bci::seg5",
+    "course_id": "cs224n-2024",
+    "name": "Why speech decoding is harder and how T12's speech BCI works",
+    "description": "Moves from movement control to speech restoration, motivating phoneme decoding in speech motor cortex and presenting the T12 clinical speech-neuroprosthesis results.",
+    "summary": "To restore natural communication, the lecture shifts from generic movement decoding to speech, but first emphasizes that language processing spans many brain regions and that speech production is a rapid, high-dimensional motor process [ts=2203s][ts=2215s][ts=2292s]. Rather than decode every continuous articulator trajectory, the speaker motivates an intermediate phoneme-based target because spoken language can be decomposed into discrete consonant and vowel units linked to articulatory configurations [ts=2326s][ts=2337s]. He cites prior work showing that motor-cortex recordings can separate phonemes and highlights a 2021 UCSF ECOG system that decoded a 50-word vocabulary at roughly 75% accuracy, while noting ECOG's lower resolution compared with penetrating arrays [ts=2373s][ts=2410s]. The segment then presents the lab's participant T12, who has ALS, with four implanted arrays—two in motor cortex and two in Broca's area—to probe both speech execution and planning [ts=2476s][ts=2518s]. Their behavioral analyses found much stronger orofacial, phoneme, and word information in motor cortex than in Broca's area, and live demos showed accurate sentence copying, open-ended answering, and silent-speech decoding from neural activity [ts=2573s][ts=2660s][ts=2735s][ts=2860s].",
+    "key_points": [
+      {
+        "text": "Speech BCI starts from oral-facial motor cortex because speech output depends on motor planning and articulation, even though language is distributed across multiple brain regions.",
+        "timestamp_s": 2230,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The lecture proposes decoding discrete phonemes instead of continuous articulator trajectories.",
+        "timestamp_s": 2326,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A 2021 UCSF ECOG prototype decoded a 50-word speech vocabulary at about 75% accuracy.",
+        "timestamp_s": 2410,
+        "evidence_type": "example"
+      },
+      {
+        "text": "T12 was implanted with four arrays: two in motor cortex and two in Broca's area.",
+        "timestamp_s": 2518,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Motor-cortex arrays carried much stronger decoding signal for orofacial movements, phonemes, and words than the Broca's-area arrays.",
+        "timestamp_s": 2580,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The system could decode both attempted audible speech and silent speech from T12.",
+        "timestamp_s": 2836,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=14",
+      "start_s": 2203,
+      "end_s": 2884
+    },
+    "difficulty": 0.67,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 11,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "To restore natural communication, the lecture shifts from generic movement decoding to speech, but first emphasizes that language processing spans many brain regions and that speech production is a rapid, high-dimensional motor process [ts=2203s][ts=2215s][ts=2292s]. Rather than decode every continuous articulator trajectory, the speaker motivates an intermediate phoneme-based target because spoken language can be decomposed into discrete consonant and vowel units linked to articulatory configurations [ts=2326s][ts=2337s]. He cites prior work showing that motor-cortex recordings can separate phonemes and highlights a 2021 UCSF ECOG system that decoded a 50-word vocabulary at roughly 75% accuracy, while noting ECOG's lower resolution compared with penetrating arrays [ts=2373s][ts=2410s]. The segment then presents the lab's participant T12, who has ALS, with four implanted arrays—two in motor cortex and two in Broca's area—to probe both speech execution and planning [ts=2476s][ts=2518s]. Their behavioral analyses found much stronger orofacial, phoneme, and word information in motor cortex than in Broca's area, and live demos showed accurate sentence copying, open-ended answering, and silent-speech decoding from neural activity [ts=2573s][ts=2660s][ts=2735s][ts=2860s].",
+  "target_kp_ids": [
+    "kp_speech_motor_decoding_through_phonemes",
+    "kp_t12_speech_neuroprosthesis_findings"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "video_clip_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "transcript_slice": "00:36:43\nTo get there, I think there's a huge barrier here.\n\n00:36:53\nis a really complicated process.\n\n00:36:59\ninvolved in the language.\n\n00:37:02\nbut this is just our best guess at how language\n\n00:37:08\nOn the very right, you see that there is a lot of brain regions\n\n00:37:14\nIn the center is maybe an area that's\n\n00:37:21\nAnd on the very left is about the perception of speech\n\n00:37:29\nLanguage is really complex.\n\n00:37:36\nwith motor planning of language, because things\n\n00:37:41\ncortex can encode movements.\n\n00:37:47\nwe need to speak.\n\n00:37:51\ninto this part of the motor cortex that actually controls\n\n00:37:55\nAnd then trying to decode some information there\n\n00:38:05\nTo actually being able to restore speech is, I think,\n\n00:38:12\nSo what I'm trying to say here is that the production of speech\n\n00:38:19\nand it's really rapid.\n\n00:38:22\nto a certain directions.\n\n00:38:26\nthan just decoding out those movements of each articulators.\n\n00:38:36\nof each articulators because it's very hard, so also like\n\n00:38:41\nlike Howard or people like has lost speech,\n\n00:38:51\narticulator movements.\n\n00:38:57\nthis kind of discrete phonemes instead\n\n00:39:02\nbecause we know that all the languages has\n\n00:39:06\nof basic phonetic units.\n\n00:39:10\nthat there is a different vowels and different consonants.\n\n00:39:16\nand how you place your different speech articulators.\n\n00:39:22\nof decoding the actual articulator movements,\n\n00:39:25\nof discrete phonemic tokens.\n\n00:39:33\nthat if you put some electrodes on the motor cortex,\n\n00:39:41\nby measuring the-- tell differences\n\n00:39:44\nthe electric activities in the motor cortex.\n\n00:39:51\nfrom by just putting electrodes in the motor cortex here.\n\n00:40:02\nactually demonstrated that it's actually\n\n00:40:07\nwith this ECOG recording technology.\n\n00:40:14\nI just showed you guys is that whereas the microelectrode\n\n00:40:21\nbut the ECOG stays on the cortex,\n\n00:40:25\nstill record some average neural activity over a small region.\n\n00:40:31\nthey will have a slightly lower resolution.\n\n00:40:39\nthis kind of a small vocabulary BCI, which can only\n\n00:40:47\nbut this is still a very exciting work that\n\n00:40:52\na speech decoding using a--\n\n00:40:59\nAll right.\n\n00:41:03\ndone in our lab, which is to build a high performance speech\n\n00:41:09\nSo in 2022.\n\n00:41:20\nSo T12, she used to be a very active person.\n\n00:41:29\nBut because of ALS, a couple of years\n\n00:41:36\nthat she used to enjoy.\n\n00:41:43\nstarts with the oral facial movements first.\n\n00:41:49\nbut she cannot really speak intelligibly.\n\n00:41:58\ninto her brain, two arrays into her motor cortex,\n\n00:42:05\nis supposed to be involved with the language planning.\n\n00:42:12\nthe execution of speech, the production of speech,\n\n00:42:22\nand also maybe decode some high level planning about the speech.\n\n00:42:29\nregions here.\n\n00:42:35\nis that we did a behavior test to see what kind of information\n\n00:42:41\nSo here's the barrier.\n\n00:42:46\nwe got is that we are trying to classify different tasks here.\n\n00:42:54\nto using this four arrays to classify\n\n00:43:00\nSo this dashed line is the queue that she's actually executing\n\n00:43:07\nAnd then before this dashed line,\n\n00:43:13\nSo you can see that this two right line here\n\n00:43:20\nyou can classify-- you can predict those movements much\n\n00:43:28\nWhereas these two arrays in the Broca's area,\n\n00:43:32\npredict too much above chance, especially\n\n00:43:37\nAnd for single phonemes, which we instruct our participants\n\n00:43:45\nyou can also predict those things much higher, much higher\n\n00:43:53\nand also for the words, for single words.\n\n00:44:01\nwe have put into T12's mind, these two arrays\n\n00:44:06\nabout the phonemes being articulated,\n\n00:44:13\nin the Broca's area, which is supposed\n\n00:44:19\nproduction doesn't contain too much information,\n\n00:44:23\nAnd we're still trying to figure out why that's true.\n\n00:44:31\nwe're mostly using only these two arrays in the motor cortex\n\n00:44:35\nSo now, we know that there's a phonetic information is being\n\n00:44:43\nWhat we are going to do next is actually\n\n00:44:50\nSo what we're going to do is--\n\n00:44:55\nto get a sense of what the PCL is trying to build.\n\n00:45:05\nSo she is connected to our decoding machine\n\n00:45:12\nin real-time to a decoding machine.\n\n00:45:15\nthat there is a sentence here that we instructed her to copy,\n\n00:45:20\nAnd then once this red square turns green,\n\n00:45:28\nAnd then what you will see below here\n\n00:45:33\n[VIDEO PLAYBACK]\n\n00:45:43\n- I don't want to call her a babysitter.\n\n00:45:49\n- [INAUDIBLE]\n\n00:45:54\n[BEEPS]\n\n00:46:02\n- I did well in school.\n\n00:46:08\n- [INAUDIBLE]\n\n00:46:18\nAll right, so that's almost perfect,\n\n00:46:23\nAnd you can tell from the video that although she can vocalize,\n\n00:46:31\nor artificial muscle movements.\n\n00:46:36\nthat what she was trying to say.\n\n00:46:39\nso the task I just showed you is she's trying to copy a sentence,\n\n00:46:50\n- [INAUDIBLE]\n\n00:47:03\nAnd we also try to--\n\n00:47:08\nshe tries to attempting to articulate this--\n\n00:47:16\nsounds.\n\n00:47:20\nor move her articulators, but not vocalize.\n\n00:47:25\nAnd we can still decode pretty well\n\n00:47:33\n[BEEPS]\n\n00:47:42\n[BEEPS]\n\n00:47:59\nAll right.\n\n00:48:04\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs224n-2024-lecture19-bci::seg5",
+      "global_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs224n-2024-lecture19-bci::seg5",
+      "global_kp_id": "kp_t12_speech_neuroprosthesis_findings",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "name": "Speech-motor decoding through phonemes",
+      "description": "For speech neuroprostheses, the lecture proposes targeting oral-facial motor cortex and decoding discrete phonemes instead of continuous articulator trajectories.",
+      "track_tags": [
+        "phonology",
+        "speech"
+      ],
+      "domain_tags": [
+        "motor_speech",
+        "phonemes",
+        "speech_neuroprosthesis"
+      ],
+      "career_path_tags": [
+        "neuroengineering",
+        "speech_ml"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because speech-motor decoding through phonemes formalizes how for speech neuroprostheses, the lecture proposes targeting oral-facial motor cortex and decoding discrete phonemes instead of continuous articulator trajectories, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture19-bci::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_t12_speech_neuroprosthesis_findings",
+      "name": "T12 speech-neuroprosthesis findings",
+      "description": "The T12 case study shows where useful speech information appeared in the brain and demonstrates real-time attempted-speech and silent-speech decoding.",
+      "track_tags": [
+        "experimental_ml"
+      ],
+      "domain_tags": [
+        "als",
+        "brocas_area",
+        "motor_cortex"
+      ],
+      "career_path_tags": [
+        "clinical_research",
+        "neural_decoding"
+      ],
+      "difficulty_level": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because t12 speech-neuroprosthesis findings synthesizes the T12 case study shows where useful speech information appeared in the brain and demonstrates real-time attempted-speech and silent-speech decoding into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs224n-2024-lecture19-bci::kp8"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.52,
+    0.82
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/CS224n/processed_sanitized/L19_p1.json",
+    "p2_output": "data/p2_output_rationale_repaired.json",
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture19-bci_transcript.txt"
+  }
+}

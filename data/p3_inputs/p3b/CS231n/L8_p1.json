@@ -1,13 +1,13 @@
 {
   "lecture_context": {
     "course_id": "CS231n",
-    "lecture_id": "RQowiOF_FvQ",
+    "lecture_id": "lecture_8",
     "lecture_title": "Lecture 8: Attention and Transformers",
     "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ"
   },
   "units": [
     {
-      "unit_id": "local::RQowiOF_FvQ::seg1",
+      "unit_id": "local::lecture_8::seg1",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "RNN sequence-to-sequence translation and the fixed-context bottleneck",
       "description": "Introduces attention and transformers through the historical starting point of encoder-decoder RNNs for machine translation, then motivates why a single context vector becomes a bottleneck.",
@@ -57,7 +57,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg2",
+      "unit_id": "local::lecture_8::seg2",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Attention inside sequence-to-sequence RNNs",
       "description": "Derives the original attention mechanism for encoder-decoder RNNs by computing alignment scores, softmax attention weights, and a fresh context vector at every decoder step.",
@@ -107,7 +107,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg3",
+      "unit_id": "local::lecture_8::seg3",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Attention maps and the abstract attention operator",
       "description": "Shows how attention weights can be visualized to interpret learned alignments, then abstracts attention away from RNNs into a stand-alone query/data/output operator.",
@@ -152,7 +152,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg4",
+      "unit_id": "local::lecture_8::seg4",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Scaled dot-product attention, keys and values, and cross-attention",
       "description": "Generalizes attention into a scalable matrix-based layer using scaled dot products, multiple queries in parallel, and learned key/value projections.",
@@ -202,7 +202,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg5",
+      "unit_id": "local::lecture_8::seg5",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Self-attention, positional embeddings, masking, and multi-head computation",
       "description": "Builds self-attention from Q/K/V projections of the same input vectors, explains order issues and positional encodings, then adds masking and multiple heads.",
@@ -262,7 +262,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::RQowiOF_FvQ::seg6",
+      "unit_id": "local::lecture_8::seg6",
       "course_id": "stanford_cs231n_spring_2025",
       "name": "Transformer blocks and why transformers scale across domains",
       "description": "Compares RNNs, convolutions, and attention, then assembles the transformer block and applies it to language models and vision transformers.",

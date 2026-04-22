@@ -1,339 +1,454 @@
 {
   "lecture_context": {
     "course_id": "CS224n",
-    "lecture_id": "<lecture_id>",
-    "lecture_title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 7 - Attention, Final Projects and LLM Intro",
-    "youtube_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE"
+    "lecture_id": "lecture07-rnns",
+    "lecture_title": "Lecture 7 - Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4"
   },
   "units": [
     {
-      "unit_id": "local::<lecture_id>::seg1",
-      "course_id": "<course_id>",
-      "name": "Machine Translation Evaluation with BLEU",
-      "description": "Introduces automatic evaluation for machine translation, explains BLEU, and situates neural MT historically against phrase-based and syntax-based systems.",
-      "summary": "The segment explains why machine translation needs automatic evaluation and why BLEU became the dominant metric despite known flaws. BLEU scores candidate translations by overlap with one or more human reference translations using n-grams, while also adding a brevity penalty to discourage systems from translating only easy parts [ts=207s] [ts=451s]. The lecturer stresses that translation has many valid outputs, so BLEU can underrate good translations and still award partial credit to bad ones if local words match [ts=355s] [ts=417s]. He then uses BLEU trends to contrast stalled phrase-based and syntax-based MT with the steep improvement of neural MT after 2014–2016, noting modern systems can reach much higher BLEU ranges than earlier systems [ts=520s] [ts=689s].",
+      "unit_id": "local::lecture07-rnns::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Roadmap, scale, and the deep learning resurgence",
+      "description": "Sets up the lecture and motivates why sequence models matter by connecting modern language model scale to the historical difficulty of training deep neural networks.",
+      "summary": "The instructor frames the lecture as a short review of extra neural-net concepts before moving into language models and then recurrent neural networks, with transformers deferred to later lectures [ts=9s] [ts=56s]. He motivates the topic by noting that modern language models are enormous deep systems, then reviews how backprop enabled hidden-layer neural nets in the 1980s and 1990s but deeper networks were long believed too hard to train until late-2000s and 2010s ideas reversed that stagnation [ts=177s] [ts=354s] [ts=422s].",
       "key_points": [
         {
-          "text": "BLEU evaluates a system translation by n-gram overlap against human reference translations.",
-          "timestamp_s": 207,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "BLEU traditionally uses up to 4-gram matches, though the cutoff is a design choice rather than a law.",
-          "timestamp_s": 227,
+          "text": "The lecture roadmap is: extra neural-net concepts, then language models, then recurrent neural networks, with transformers later.",
+          "timestamp_s": 9,
           "evidence_type": "claim"
         },
         {
-          "text": "BLEU includes a brevity penalty so systems cannot score highly by translating only easy fragments.",
-          "timestamp_s": 451,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Translation has many valid outputs, so BLEU can miss good paraphrastic translations.",
-          "timestamp_s": 355,
+          "text": "Modern language models are described as huge deep models with over 100 billion parameters.",
+          "timestamp_s": 177,
           "evidence_type": "claim"
         },
         {
-          "text": "Neural machine translation rapidly surpassed phrase-based and syntax-based MT after 2015–2016.",
-          "timestamp_s": 689,
+          "text": "Historically, deep multilayer networks were widely seen as too difficult to train and often worse than one- or two-hidden-layer nets.",
+          "timestamp_s": 317,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A small set of seemingly modest ideas and tweaks helped restart progress in deep learning after years of stagnation.",
+          "timestamp_s": 458,
           "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 5,
-        "end_s": 716
+        "end_s": 476
       },
-      "difficulty": 0.38,
+      "difficulty": 0.34,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 12,
+      "duration_min": 8,
       "ordering_index": 1,
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg2",
-      "course_id": "<course_id>",
-      "name": "Why Attention Fixes the Seq2Seq Bottleneck",
-      "description": "Motivates attention in encoder-decoder translation and walks through the core decoder-time-step attention procedure before introducing the main equations.",
-      "summary": "This segment motivates attention as a fix for the seq2seq bottleneck where an encoder must compress an entire source sentence into a single hidden state before decoding [ts=793s] [ts=833s]. The lecturer argues that this is implausible for longer sentences and unlike human translation, where people repeatedly look back at the source as they produce target words [ts=856s] [ts=874s]. He then describes the decoding procedure: compare the current decoder state to each encoder state, turn the resulting scores into a softmax distribution over source positions, compute a weighted average of encoder states, and combine that context vector with the decoder hidden state to predict the next word [ts=935s] [ts=1019s]. The discussion closes by formalizing dot-product scoring, softmax-normalized attention weights, and context-vector concatenation before highlighting attention’s performance, interpretability, and gradient-flow benefits [ts=1146s] [ts=1401s].",
+      "unit_id": "local::lecture07-rnns::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Modern regularization and dropout",
+      "description": "Explains how regularization is viewed in modern deep learning and then develops dropout as a practical regularization method.",
+      "summary": "This segment starts from L2 regularization, where the loss is augmented to prefer smaller parameter values, and contrasts the classical overfitting picture with a modern view in which huge networks can nearly memorize the training set yet still generalize if regularized well [ts=517s] [ts=719s] [ts=807s]. It then introduces dropout: at training time a random binary mask zeroes parts of an internal representation, while at test time the network keeps all units and rescales activations, encouraging robustness instead of reliance on a few co-adapted features [ts=928s] [ts=1020s] [ts=1054s].",
       "key_points": [
         {
-          "text": "The original encoder-decoder setup forces all useful source information into one hidden vector.",
-          "timestamp_s": 813,
+          "text": "L2 regularization adds a squared-parameter term to the loss to prefer smaller weights.",
+          "timestamp_s": 565,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The lecture argues that in modern large neural networks the simple classical picture of overfitting no longer matches practice.",
+          "timestamp_s": 719,
           "evidence_type": "claim"
         },
         {
-          "text": "Attention lets the decoder look back at different source positions as needed during generation.",
-          "timestamp_s": 887,
+          "text": "Large models can drive training loss essentially to zero and still generalize if regularization is done well.",
+          "timestamp_s": 807,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Dropout samples a random mask of zeros and ones and applies it to hidden representations during training.",
+          "timestamp_s": 928,
           "evidence_type": "definition"
         },
         {
-          "text": "Attention scores are turned into a softmax distribution over encoder positions.",
-          "timestamp_s": 962,
-          "evidence_type": "formula"
+          "text": "At test time dropout keeps all units active and rescales instead of deleting activations.",
+          "timestamp_s": 1024,
+          "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "The attention output is a weighted average of encoder hidden states.",
-          "timestamp_s": 976,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "The decoder concatenates the context vector with its hidden state before predicting the next word.",
-          "timestamp_s": 1000,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Attention provides interpretability by showing which source words the model focuses on at each decoding step.",
-          "timestamp_s": 1424,
+          "text": "Dropout can be interpreted as preventing feature co-adaptation or as approximating a large model ensemble.",
+          "timestamp_s": 1054,
           "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
-        "start_s": 716,
-        "end_s": 1504
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 477,
+        "end_s": 1063
       },
-      "difficulty": 0.67,
+      "difficulty": 0.57,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 13,
+      "duration_min": 10,
       "ordering_index": 2,
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg3",
-      "course_id": "<course_id>",
-      "name": "Attention Variants and the Road to Transformers",
-      "description": "Compares dot-product, bilinear/multiplicative, low-rank, and additive attention, then connects these choices to transformer-style projected dot-product attention and positional-information questions.",
-      "summary": "The segment surveys how attention scores can be computed beyond plain dot products. Dot-product attention is simple but crude because an LSTM hidden state stores many kinds of information, not all of which should matter equally for lookup [ts=1556s] [ts=1626s]. Bilinear or multiplicative attention inserts a learned matrix between encoder and decoder states so the model can learn which subspaces should align, even when corresponding information lives in different dimensions [ts=1639s] [ts=1708s]. A low-rank factorization of that matrix leads to projecting vectors into a smaller space before applying dot-product attention, which the lecturer explicitly previews as the transformer pattern [ts=1784s] [ts=1866s]. He also reviews additive attention as the original Bahdanau formulation using a small neural net for score computation, notes the tradeoff between quality and speed, and explains why RNN-based attention did not require extra positional encodings in the same way transformers do [ts=1890s] [ts=2168s].",
+      "unit_id": "local::lecture07-rnns::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Vectorization, initialization, and optimizers",
+      "description": "Covers three implementation habits that make neural networks train effectively: tensorized computation, symmetry-breaking initialization, and adaptive optimization.",
+      "summary": "The instructor emphasizes vectorization as a core deep-learning habit: avoid Python for-loops, use vectors, matrices, and tensors, and exploit GPUs or NPUs for large speedups [ts=1064s] [ts=1207s] [ts=1238s]. He then explains why parameters should start as small random values rather than all zeros, since constant initialization creates symmetry and stalls learning, and mentions Xavier initialization as an older scale-aware scheme [ts=1294s] [ts=1375s] [ts=1428s]. The segment closes with adaptive optimizers, especially Adam, which track gradient history per parameter and are less fragile than plain SGD with respect to step-size tuning [ts=1478s] [ts=1558s] [ts=1615s].",
       "key_points": [
         {
-          "text": "Plain dot-product attention compares the full encoder and decoder hidden states directly.",
-          "timestamp_s": 1556,
+          "text": "Deep learning should be implemented with vectorized tensor operations rather than explicit for-loops.",
+          "timestamp_s": 1064,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Running vectorized computation on GPUs or NPUs yields orders-of-magnitude speedups.",
+          "timestamp_s": 1238,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Weights should be initialized to small random numbers to break symmetry and allow features to differentiate.",
+          "timestamp_s": 1294,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Xavier initialization chooses variance based on a layer's input and output sizes.",
+          "timestamp_s": 1428,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Adaptive optimizers estimate gradient scale for each parameter and use it to choose update sizes.",
+          "timestamp_s": 1558,
           "evidence_type": "definition"
         },
         {
-          "text": "Bilinear attention adds a learned matrix so relevant features can align across different dimensions.",
-          "timestamp_s": 1643,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Low-rank bilinear attention is equivalent to projecting vectors into a lower-dimensional space and then taking a dot product.",
-          "timestamp_s": 1824,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "Additive attention computes scores with a small neural network over encoder and decoder states.",
-          "timestamp_s": 1901,
-          "evidence_type": "formula"
-        },
-        {
-          "text": "In practice, projected dot-product style attention won because it is much simpler and faster.",
-          "timestamp_s": 1998,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "RNN encoder states already carry order information, so extra positional information was not essential in this setup.",
-          "timestamp_s": 2134,
-          "evidence_type": "claim"
+          "text": "Adam is recommended as the safe optimizer name to remember and try first.",
+          "timestamp_s": 1615,
+          "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
-        "start_s": 1505,
-        "end_s": 2225
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 1064,
+        "end_s": 1494
       },
-      "difficulty": 0.74,
+      "difficulty": 0.49,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 12,
+      "duration_min": 7,
       "ordering_index": 3,
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg4",
-      "course_id": "<course_id>",
-      "name": "Final Project Modes, Teams, and Value Add",
-      "description": "Shifts from neural-network content to course project policy, covering collaboration rules, expectations for different team sizes, and the choice between the default and custom final projects.",
-      "summary": "The lecturer transitions from model content to the course final project and emphasizes that using outside code is allowed, but students must document what they used and demonstrate their own value add rather than merely running an existing model [ts=2270s] [ts=2320s]. He frames the project choice as default versus custom, encourages teams of one to three, and explains that larger teams or multi-course/shared efforts are expected to produce proportionally more work [ts=2349s] [ts=2535s]. He also recommends talking with TAs about topic fit and explains the default project: complete and experiment with a minimal BERT implementation for sentiment analysis, then extend it in an open-ended way, for example with paraphrasing, contrastive learning, or LoRA-style adaptation [ts=2606s] [ts=2664s]. The segment contrasts that guided path with custom projects for students who already have a research idea or want the experience of scoping data, methods, and evaluation from scratch [ts=2672s] [ts=2759s].",
+      "unit_id": "local::lecture07-rnns::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Language models and n-gram fundamentals",
+      "description": "Defines language models formally and begins the classical n-gram solution based on counting local contexts.",
+      "summary": "A language model is defined as a system that assigns a probability distribution to the next token given the previous context, and equivalently as a model that assigns probability to an entire sequence via a chain-rule decomposition into next-token conditionals [ts=1714s] [ts=1777s] [ts=1821s]. The lecture stresses that language models long predate ChatGPT and underlie autocomplete and query suggestion systems [ts=1862s] [ts=1882s] [ts=1928s]. It then introduces n-gram language models, where a Markov assumption keeps only the most recent n-1 words and predicts the next word from relative frequencies of observed short contexts [ts=1975s] [ts=2106s] [ts=2157s].",
       "key_points": [
         {
-          "text": "Using existing code is allowed, but students must document it and contribute clear value add.",
-          "timestamp_s": 2280,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Larger teams are expected to deliver proportionally more work than smaller teams.",
-          "timestamp_s": 2392,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Shared projects across multiple classes are allowed, but the expected workload scales up accordingly.",
-          "timestamp_s": 2525,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "The default project centers on finishing and experimenting with a minimal BERT implementation for sentiment analysis.",
-          "timestamp_s": 2612,
+          "text": "A language model predicts a probability distribution over the next word given the preceding context.",
+          "timestamp_s": 1714,
           "evidence_type": "definition"
         },
         {
-          "text": "Custom projects are appropriate when students have a topic they are genuinely excited to investigate.",
-          "timestamp_s": 2729,
-          "evidence_type": "claim"
+          "text": "A language model also assigns probability to a whole text by chain-rule factorization into conditional next-word probabilities.",
+          "timestamp_s": 1821,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Autocomplete and query suggestion are presented as longstanding applications of language models.",
+          "timestamp_s": 1897,
+          "evidence_type": "example"
+        },
+        {
+          "text": "An n-gram language model predicts from short word subsequences such as unigrams, bigrams, and trigrams.",
+          "timestamp_s": 1975,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The Markov assumption keeps only the most recent n-1 words and discards older context.",
+          "timestamp_s": 2106,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Relative-frequency counts of n-grams provide the probability estimate for the next word.",
+          "timestamp_s": 2157,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "In the running example, a four-gram model would estimate next-word probabilities from counts after 'students open their'.",
+          "timestamp_s": 2183,
+          "evidence_type": "example"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
-        "start_s": 2226,
-        "end_s": 2804
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 1495,
+        "end_s": 2315
       },
-      "difficulty": 0.32,
+      "difficulty": 0.46,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 10,
+      "duration_min": 14,
       "ordering_index": 4,
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg5",
-      "course_id": "<course_id>",
-      "name": "Project Constraints, Resources, and Proposal Requirements",
-      "description": "Covers topic restrictions, compute options, LLM API resources, and the required elements of the project proposal and paper review.",
-      "summary": "This segment defines what counts as an acceptable CS224N project and what support students should plan around. Final projects must substantively involve both human language and neural networks, though multimodal combinations are allowed as long as language is central rather than incidental [ts=2770s] [ts=2827s]. The lecturer then reviews realistic compute options—cloud credits, notebook platforms, low-cost GPU services, and Together AI API credits for LLM experiments—while warning that model size strongly affects token budgets and feasibility [ts=2943s] [ts=3155s]. He next explains the project proposal: one per team, centered on both a project plan and a critical two-page research-paper review [ts=3206s] [ts=3260s]. For custom proposals in particular, students must make the data source and evaluation plan concrete, and all proposals now need an ethical-considerations paragraph about deployment risks and mitigations [ts=3308s] [ts=3386s].",
+      "unit_id": "local::lecture07-rnns::seg5",
+      "course_id": "cs224n-2024",
+      "name": "N-gram smoothing, backoff, and sampling",
+      "description": "Develops the main weaknesses of count-based language models and shows how they generate text by repeated sampling.",
+      "summary": "This segment focuses on the weaknesses of raw n-gram counts: unseen continuations get probability zero, unseen conditioning contexts make denominators undefined, and larger contexts worsen both sparsity and storage exponentially [ts=2345s] [ts=2433s] [ts=2520s]. The fixes are smoothing by adding a small delta to counts and backoff to shorter contexts when a longer one is missing [ts=2445s] [ts=2487s]. The instructor then shows how an n-gram model samples words one by one to generate text, producing output that is often grammatical but still globally incoherent, and argues that better models, not just more scale, are needed [ts=2752s] [ts=2838s] [ts=3017s].",
       "key_points": [
         {
-          "text": "A CS224N final project must substantively involve both human language and neural networks.",
-          "timestamp_s": 2776,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Cloud and notebook resources are limited, so students should plan projects around realistic compute budgets.",
-          "timestamp_s": 2943,
+          "text": "Unseen n-grams create zero probabilities, which are especially damaging because downstream probability computations collapse to zero.",
+          "timestamp_s": 2394,
           "evidence_type": "diagnostic_tip"
         },
         {
-          "text": "Together AI credits can support experiments on large language models via API access.",
-          "timestamp_s": 3144,
+          "text": "Add-delta smoothing assigns a small nonzero count to unseen events so every continuation remains possible.",
+          "timestamp_s": 2445,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Backoff replaces an unseen longer context with a shorter one until an estimate is available.",
+          "timestamp_s": 2487,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Using more conditioning words improves context but worsens sparsity and storage exponentially, so practice usually stopped around 5-grams.",
+          "timestamp_s": 2520,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "N-gram text generation samples from the next-word distribution repeatedly to roll out a sequence.",
+          "timestamp_s": 2752,
           "evidence_type": "example"
         },
         {
-          "text": "The project proposal includes a critical review of a key research paper plus a project plan.",
-          "timestamp_s": 3226,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Custom proposals must clearly specify data, evaluation, and an ethical-considerations paragraph.",
-          "timestamp_s": 3315,
-          "evidence_type": "diagnostic_tip"
+          "text": "Sampled n-gram text can look locally grammatical while remaining semantically incoherent.",
+          "timestamp_s": 2857,
+          "evidence_type": "example"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
-        "start_s": 2805,
-        "end_s": 3480
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 2316,
+        "end_s": 2663
       },
-      "difficulty": 0.36,
+      "difficulty": 0.58,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 11,
+      "duration_min": 6,
       "ordering_index": 5,
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg6",
-      "course_id": "<course_id>",
-      "name": "Baselines, Milestones, Reports, and Project Idea Patterns",
-      "description": "Explains how projects are evaluated, why baselines matter, what the milestone should demonstrate, and the main families of successful project ideas with concrete examples.",
-      "summary": "The lecturer emphasizes that every project needs an appropriate baseline; without a clear comparison point, it is impossible to tell whether a new method is actually good [ts=3494s] [ts=3554s]. He says the milestone should show that the team has data, code, and at least one runnable system that produces a measurable result, even if it is only a simple baseline [ts=3558s] [ts=3598s]. Final projects are judged largely through the report, which should read like a conference paper with related work, method, data, experiments, analysis, and conclusions [ts=3602s] [ts=3654s]. The segment then catalogs viable project types: task-driven systems, method-driven neural-network modifications, LLM-based system building, interpretability or behavior analysis, and occasional theoretical projects, illustrated with examples like deep poetry, differentiable neural-computer reimplementation, weight tying, quantized models, code-generation for Fortran, and image-to-text fashion cataloging [ts=3690s] [ts=4155s].",
+      "unit_id": "local::lecture07-rnns::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Fixed-window neural language models and why they fall short",
+      "description": "Introduces the first neural alternative to n-grams, then explains why a fixed-window architecture still misses the full language-modeling problem.",
+      "summary": "The lecture next replaces count tables with a neural classifier: concatenate embeddings from a fixed context window, pass them through a hidden layer, and apply a softmax over the vocabulary to get a next-word distribution [ts=3032s] [ts=3123s] [ts=3178s]. This early neural language model, associated with Bengio and colleagues, removes explicit sparsity and storage problems because the model stores learned parameters instead of all observed n-grams [ts=3205s] [ts=3212s] [ts=3303s]. But it still uses a Markov-style fixed window, and its position-specific weight matrix treats the same word differently depending on where it appears, motivating a shared-parameter sequence model instead [ts=3328s] [ts=3351s] [ts=3410s].",
       "key_points": [
         {
-          "text": "Every project should include a baseline that provides a meaningful comparison point.",
-          "timestamp_s": 3494,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "A milestone should show that the team has a working setup that can run and produce a number.",
-          "timestamp_s": 3583,
+          "text": "A fixed-window neural language model concatenates word embeddings from a local context and predicts the next word with a softmax classifier.",
+          "timestamp_s": 3123,
           "evidence_type": "definition"
         },
         {
-          "text": "The final report should be written like a conference paper with method, data, experiments, and analysis.",
-          "timestamp_s": 3622,
-          "evidence_type": "definition"
-        },
-        {
-          "text": "Successful custom projects can be task-driven, method-driven, interpretability-focused, or theoretical.",
-          "timestamp_s": 3685,
+          "text": "This architecture is essentially the first neural language model associated with early 2000s work by Bengio and colleagues.",
+          "timestamp_s": 3205,
           "evidence_type": "claim"
         },
         {
-          "text": "Reimplementing an interesting prior paper can be a valid project if it produces meaningful results.",
-          "timestamp_s": 3908,
-          "evidence_type": "example"
+          "text": "Neural language models remove the need to store all observed n-grams explicitly.",
+          "timestamp_s": 3303,
+          "evidence_type": "claim"
         },
         {
-          "text": "Recent projects increasingly use pretrained LLMs with PEFT or in-context learning rather than training from scratch.",
-          "timestamp_s": 4052,
+          "text": "The fixed-window model still makes a Markov assumption because it throws away far-back context.",
+          "timestamp_s": 3328,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The same word occurring in different input positions is handled by different subparts of the weight matrix, which is inefficient.",
+          "timestamp_s": 3351,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "These limitations motivate a variable-length, shared-parameter architecture: the recurrent neural network.",
+          "timestamp_s": 3410,
           "evidence_type": "claim"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
-        "start_s": 3481,
-        "end_s": 4279
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 2664,
+        "end_s": 3049
       },
-      "difficulty": 0.44,
+      "difficulty": 0.63,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 13,
+      "duration_min": 6,
       "ordering_index": 6,
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg7",
-      "course_id": "<course_id>",
-      "name": "Pretrained LLMs and Practical Project Design",
-      "description": "Places current project design in the era of large pretrained models, emphasizing practicality, lightweight adaptation, API usage, and research questions that go beyond simply calling a model.",
-      "summary": "The closing segment argues that the research landscape has shifted: earlier projects often tried to invent better architectures from scratch, but most modern work builds on large pretrained models whose architecture is largely fixed [ts=4280s] [ts=4377s]. For most practical projects, the lecturer recommends loading pretrained models—especially via Hugging Face—and adding analysis, adaptation, or surrounding system logic rather than reinventing the base network [ts=4399s] [ts=4428s]. He warns students to stay realistic about scale because many flashy papers rely on compute far beyond course budgets, which is why lightweight methods such as parameter-efficient fine-tuning are attractive [ts=4463s] [ts=4534s]. Finally, he explicitly permits API-based use of models like GPT-4, Gemini, Claude, and LLaMA-class systems, while insisting that a strong project must ask an interesting research question—such as prompting, in-context learning, bias analysis, or reasoning behavior—rather than merely piping documents through a model and stopping there [ts=4550s] [ts=4653s].",
+      "unit_id": "local::lecture07-rnns::seg7",
+      "course_id": "cs224n-2024",
+      "name": "RNN architecture, strengths, and weaknesses",
+      "description": "Presents the recurrent neural network as a shared-parameter sequence model and explains both its advantages over fixed windows and its practical limitations.",
+      "summary": "An RNN is introduced as a family of networks that reuse one set of weights across time steps, updating a hidden state as each token is read [ts=3471s] [ts=3516s] [ts=3600s]. The hidden state starts from an initial value, combines the previous state with the current word embedding, adds a bias, applies a nonlinearity such as tanh, and the final hidden state is fed through a softmax to predict the next word [ts=3616s] [ts=3646s] [ts=3691s] [ts=3779s]. This gives variable-length context with fixed model size and shared processing, but it remains sequentially slow and simple RNNs tend to let distant information fade too quickly [ts=3816s] [ts=3850s] [ts=3898s] [ts=3977s].",
       "key_points": [
         {
-          "text": "Modern projects usually build on large pretrained models rather than inventing new full architectures.",
-          "timestamp_s": 4334,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "For many practical NLP projects, loading a pretrained model and building analysis or adaptation around it is the sensible default.",
-          "timestamp_s": 4399,
-          "evidence_type": "diagnostic_tip"
-        },
-        {
-          "text": "Students should prefer practical, lightweight methods such as parameter-efficient fine-tuning under limited compute.",
-          "timestamp_s": 4516,
-          "evidence_type": "claim"
-        },
-        {
-          "text": "Using commercial or frontier models is acceptable when done through API access.",
-          "timestamp_s": 4550,
+          "text": "RNNs reuse the same weights across successive time steps in a sequence.",
+          "timestamp_s": 3516,
           "evidence_type": "definition"
         },
         {
-          "text": "A project is not complete just because a strong model produced good summaries; the research contribution must come from the surrounding question and analysis.",
-          "timestamp_s": 4641,
+          "text": "The hidden state is updated from the previous hidden state and the current word embedding at each step.",
+          "timestamp_s": 3627,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Bias terms and a nonlinearity, commonly tanh, are part of the recurrent update.",
+          "timestamp_s": 3687,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The final hidden state is passed through a softmax to produce a next-word distribution.",
+          "timestamp_s": 3779,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "RNNs handle arbitrary context length without increasing model size, because context is summarized in a fixed-size hidden vector.",
+          "timestamp_s": 3816,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Recurrent computation is slow because it is inherently sequential.",
+          "timestamp_s": 3865,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Simple RNNs forget information from far back in the sequence too quickly.",
+          "timestamp_s": 3977,
           "evidence_type": "diagnostic_tip"
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=J7ruSOIzhrE&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=7",
-        "start_s": 4280,
-        "end_s": 4657
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 3050,
+        "end_s": 3507
       },
-      "difficulty": 0.52,
+      "difficulty": 0.71,
       "difficulty_source": "llm_single_pass",
       "difficulty_confidence": "medium",
-      "duration_min": 6,
+      "duration_min": 8,
       "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg8",
+      "course_id": "cs224n-2024",
+      "name": "Training RNN language models with teacher forcing and BPTT",
+      "description": "Shows how to define the RNN language-model objective, how training is staged over segments, and how gradients are propagated through repeated weights.",
+      "summary": "Training starts by computing a next-word distribution at each time step and using cross-entropy, equivalently the negative log-likelihood of the actual next word, then averaging that loss per token across a segment [ts=3992s] [ts=4016s] [ts=4058s]. The lecture then explains teacher forcing: during training the model is not allowed to free-run, but is repeatedly fed the ground-truth next token so that each prediction is conditioned on real text prefixes [ts=4142s] [ts=4191s] [ts=4252s]. For optimization, long corpora are cut into manageable segments or fixed-length chunks for batched GPU training, and gradients through repeated recurrent weights are summed across time; in practice truncated backpropagation through time can stop the backward pass after a smaller number of steps [ts=4355s] [ts=4419s] [ts=4501s] [ts=4614s].",
+      "key_points": [
+        {
+          "text": "The RNN language-model objective is average per-token cross-entropy, i.e. negative log-likelihood of the actual next word.",
+          "timestamp_s": 4016,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Teacher forcing feeds the correct next token back into the model during training instead of using the model's own sampled output.",
+          "timestamp_s": 4191,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Training corpora are cut into manageable segments, and in practice fixed-length chunks are convenient for vectorized batching on GPUs.",
+          "timestamp_s": 4355,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "For a repeated recurrent weight matrix, the total gradient is the sum of the gradients from each time step where it appears.",
+          "timestamp_s": 4501,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Truncated backpropagation through time keeps the full forward context but shortens the backward pass to speed training.",
+          "timestamp_s": 4614,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 3508,
+        "end_s": 4115
+      },
+      "difficulty": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg9",
+      "course_id": "cs224n-2024",
+      "name": "RNN rollout generation and character/contextual variants",
+      "description": "Uses trained RNN language models to generate text and broadens the idea to character-level and contextual sequence generation.",
+      "summary": "To generate text, the model starts from an initial hidden state and a special start-of-sequence symbol, samples a next token from the softmax distribution, feeds that generated token back in, and continues until an end-of-sequence symbol is produced [ts=4644s] [ts=4694s] [ts=4728s] [ts=4772s]. The instructor notes that later systems such as ChatGPT use the same autoregressive rollout pattern, though with more complex architectures [ts=4790s] [ts=4806s]. Example outputs from Barack Obama speeches, Harry Potter, and recipe corpora show that simple RNNs can mimic local style and syntax but still struggle with global coherence [ts=4870s] [ts=5037s] [ts=5087s]. The final examples extend RNNs to character-level generation and contextual initialization, including generating paint-color names from RGB values [ts=5176s] [ts=5216s] [ts=5266s].",
+      "key_points": [
+        {
+          "text": "Generation begins with a start-of-sequence token and an initial hidden state.",
+          "timestamp_s": 4671,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Autoregressive rollout samples a word, feeds it back as the next input, and repeats until an end-of-sequence symbol is produced.",
+          "timestamp_s": 4728,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The lecture explicitly connects this rollout process to how later systems like ChatGPT generate responses.",
+          "timestamp_s": 4790,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "RNNs trained on Obama speeches, Harry Potter, or recipes generate stylistically plausible but imperfect text.",
+          "timestamp_s": 4870,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Character-level RNNs generate one letter at a time instead of one word at a time.",
+          "timestamp_s": 5176,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A contextual RNN can initialize the hidden state with side information such as RGB values to generate paint-color names.",
+          "timestamp_s": 5266,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 4116,
+        "end_s": 4723
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 9,
       "is_template": false
     }
   ],
@@ -344,6 +459,6 @@
   "source_trace": {
     "p1_artifact": "data/CS224n/processed_sanitized/L7_p1.json",
     "p2_output": "data/p2_output_rationale_repaired.json",
-    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-attention_transcript.txt"
+    "transcript_file": "data/CS224n/transcripts/cs224n-2024-lecture07-rnns_transcript.txt"
   }
 }

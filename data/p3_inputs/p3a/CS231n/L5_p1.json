@@ -94,7 +94,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 5,
         "end_s": 816
       },
@@ -144,7 +144,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 817,
         "end_s": 1396
       },
@@ -189,7 +189,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 1397,
         "end_s": 1846
       },
@@ -239,7 +239,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 1847,
         "end_s": 2599
       },
@@ -289,7 +289,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 2600,
         "end_s": 3144
       },
@@ -339,7 +339,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 3145,
         "end_s": 3572
       },
@@ -389,7 +389,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=5",
+        "video_url": "https://www.youtube.com/watch?v=f3g1zGdxptI",
         "start_s": 3573,
         "end_s": 4076
       },
@@ -742,9 +742,9 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture03-backprop::kp9",
-        "local::lecture03-backprop::kp11",
-        "local::tutorial02-pytorch::kp5",
+        "local::lecture05-backprop::kp9",
+        "local::lecture05-backprop::kp11",
+        "local::lecture03-pytorch::kp5",
         "local::lecture_4_neural_networks_and_backpropagation::kp7",
         "local::lecture_5_image_classification_with_cnns::kp4"
       ]
@@ -888,11 +888,16 @@
       "description": "Understanding filter count, kernel size, stride, padding, and the resulting input/output tensor shapes for convolution layers.",
       "track_tags": [
         "computer_vision",
-        "neural_networks"
+        "neural_networks",
+        "nlp",
+        "deep_learning"
       ],
       "domain_tags": [
         "cnn_hyperparameters",
-        "tensor_shapes"
+        "tensor_shapes",
+        "padding",
+        "stride",
+        "dilation"
       ],
       "career_path_tags": [
         "computer_vision_engineer",
@@ -908,10 +913,12 @@
       "importance_scope": "lecture_local",
       "importance_source": "llm_single_pass",
       "source_course_ids": [
-        "CS231n"
+        "CS231n",
+        "CS224n"
       ],
       "merged_from_local_ids": [
-        "local::lecture_5_image_classification_with_cnns::kp9"
+        "local::lecture_5_image_classification_with_cnns::kp9",
+        "local::lecture17-convnets::kp4"
       ]
     },
     {

@@ -120,9 +120,9 @@
         "CS231n"
       ],
       "merged_from_local_ids": [
-        "local::lecture03-backprop::kp9",
-        "local::lecture03-backprop::kp11",
-        "local::tutorial02-pytorch::kp5",
+        "local::lecture05-backprop::kp9",
+        "local::lecture05-backprop::kp11",
+        "local::lecture03-pytorch::kp5",
         "local::lecture_4_neural_networks_and_backpropagation::kp7",
         "local::lecture_5_image_classification_with_cnns::kp4"
       ]
