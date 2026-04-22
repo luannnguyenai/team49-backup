@@ -1,0 +1,31 @@
+{
+  "artifact_id": "cs224n_cs231n_v1",
+  "description": "Canonical final prompt-pipeline artifacts grouped for validation; raw course/P4 files remain at original paths.",
+  "required_files": [
+    "gpt54_edge_labels.json",
+    "p2_output_rationale_repaired.json",
+    "p5_output.json",
+    "p5_output_transitive_pruned.json"
+  ],
+  "optional_dirs": [
+    "model_experiments",
+    "kg_visualizations"
+  ],
+  "source_paths_preserved": [
+    "data/CS224n",
+    "data/CS231n",
+    "data/p3_inputs",
+    "data/p2_bundle",
+    "data/p5_inputs"
+  ],
+  "counts": {
+    "p2.concepts_kp_global": 470,
+    "p2.unit_kp_map_global": 775,
+    "p2.candidate_prerequisite_edges": 113,
+    "p5.clean_candidate_edges_before_transitive": 94,
+    "p5.pruned_edges_before_transitive": 19,
+    "p5.clean_candidate_edges_after_transitive": 93,
+    "p5.pruned_edges_after_transitive": 20,
+    "gpt54.edge_labels": 93
+  }
+}

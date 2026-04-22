@@ -1,0 +1,19 @@
+{
+  "source_p5_file": "data/p5_output_transitive_pruned.json",
+  "source_p5_input_file": "data/p5_inputs/p5_input_cs224n_cs231n.json",
+  "source_gpt54_labels_file": "data/gpt54_edge_labels.json",
+  "source_modernbert_large_scores_file": "data/modernbert_large_edge_scores_masked_v2.json",
+  "audit_edges": 93,
+  "kept_only_edges": 88,
+  "gpt54_prune_suggestions": 5,
+  "audit_nodes": 134,
+  "kept_only_nodes": 129,
+  "artifacts": {
+    "kg_p5_audit_dot": "data/kg_visualizations/kg_p5_audit.dot",
+    "kg_p5_audit_svg": "data/kg_visualizations/kg_p5_audit.svg",
+    "kg_p5_kept_only_dot": "data/kg_visualizations/kg_p5_kept_only.dot",
+    "kg_p5_kept_only_svg": "data/kg_visualizations/kg_p5_kept_only.svg",
+    "kg_modernbert_large_dot": "data/kg_visualizations/kg_modernbert_large.dot",
+    "kg_modernbert_large_svg": "data/kg_visualizations/kg_modernbert_large.svg"
+  }
+}
