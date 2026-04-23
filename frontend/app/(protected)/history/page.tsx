@@ -25,7 +25,7 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
-import { contentApi, historyApi } from "@/lib/api";
+import { historyApi, legacyContentApi } from "@/lib/api";
 import type {
   BloomLevel,
   HistoryItem,
@@ -524,7 +524,7 @@ export default function HistoryPage() {
 
   // ── Load modules for dropdown ─────────────────────────────────────────────
   useEffect(() => {
-    contentApi.modules().then(setModules).catch(() => {});
+    legacyContentApi.modules().then(setModules).catch(() => {});
   }, []);
 
   // ── Fetch history whenever filters / page change ──────────────────────────

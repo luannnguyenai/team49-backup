@@ -8,6 +8,10 @@ import axios, {
 } from "axios";
 import Cookies from "js-cookie";
 import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
+import {
+  buildCanonicalAssessmentStartPayload,
+  mapCourseCatalogItemToModuleListItem,
+} from "@/lib/canonical-content";
 
 // ---------------------------------------------------------------------------
 // Token cookie helpers
@@ -152,6 +156,8 @@ import type {
   AnswerInput,
   AssessmentResultResponse,
   AssessmentStartResponse,
+  CanonicalAssessmentStartPayload,
+  CourseCatalogItem,
   HistoryResponse,
   LoginPayload,
   ModuleDetail,
@@ -162,6 +168,7 @@ import type {
   CourseCatalogResponse,
   CourseCatalogView,
   CourseOverviewResponse,
+  CourseUnitListItem,
   LearningUnitResponse,
   OnboardingPayload,
   ForgotPasswordPayload,
@@ -196,7 +203,7 @@ export const assessmentApi = {
       .then((r) => r.data),
 };
 
-export const contentApi = {
+export const legacyContentApi = {
   modules: () =>
     api.get<ModuleListItem[]>("/api/modules").then((r) => r.data),
 
@@ -206,6 +213,8 @@ export const contentApi = {
   topicContent: (id: string) =>
     api.get<TopicContent>(`/api/topics/${id}/content`).then((r) => r.data),
 };
+
+export const contentApi = legacyContentApi;
 
 export const courseApi = {
   catalog: (params?: {
@@ -238,10 +247,48 @@ export const courseApi = {
 
   listUnits: (courseSlug: string) =>
     api
-      .get<{ units: { slug: string; title: string; status: string; unit_type: string; order_index: number }[] }>(
+      .get<{ units: CourseUnitListItem[] }>(
         `/api/courses/${courseSlug}/units`
       )
       .then((r) => r.data.units),
+};
+
+export const canonicalContentApi = {
+  catalogModules: (params?: {
+    view?: CourseCatalogView;
+    includeUnavailable?: boolean;
+  }) =>
+    courseApi.catalog(params).then((response) =>
+      response.items.map((course: CourseCatalogItem) =>
+        mapCourseCatalogItemToModuleListItem(course),
+      ),
+    ),
+};
+
+export const canonicalAssessmentApi = {
+  start: (payload: CanonicalAssessmentStartPayload | string[]) =>
+    api
+      .post<AssessmentStartResponse>(
+        "/api/assessment/start",
+        Array.isArray(payload)
+          ? buildCanonicalAssessmentStartPayload(payload)
+          : payload,
+      )
+      .then((r) => r.data),
+};
+
+export const canonicalQuizApi = {
+  start: (learningUnitId: string) =>
+    api
+      .post<QuizStartResponse>("/api/quiz/start", { topic_id: learningUnitId })
+      .then((r) => r.data),
+};
+
+export const canonicalModuleTestApi = {
+  start: (sectionId: string) =>
+    api
+      .post<ModuleTestStartResponse>("/api/module-test/start", { module_id: sectionId })
+      .then((r) => r.data),
 };
 
 export const quizApi = {
