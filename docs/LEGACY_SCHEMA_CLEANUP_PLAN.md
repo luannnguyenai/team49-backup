@@ -276,6 +276,7 @@ PYTHONPATH=. .venv/bin/pytest -q
 PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to_db.py --validate-only
 PYTHONPATH=. .venv/bin/python src/scripts/pipeline/check_canonical_runtime_parity.py
 PYTHONPATH=. .venv/bin/python src/scripts/pipeline/check_legacy_schema_usage.py --strict
+PYTHONPATH=. .venv/bin/python src/scripts/pipeline/check_legacy_cleanup_readiness.py
 ```
 
 If any gate fails, do not rename/drop legacy tables.
