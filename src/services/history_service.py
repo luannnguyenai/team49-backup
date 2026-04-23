@@ -223,7 +223,10 @@ async def get_session_detail(
             questions=[],
         )
 
-    # 3. Build QuestionResult list for the evaluator
+    # 3. Build QuestionResult list for the evaluator.
+    # Canonical-only interactions do not have legacy Bloom/KC/misconception
+    # fields, so they are still shown in detail but skipped for legacy
+    # bloom/weak-KC aggregation.
     qr_list: list[QuestionResult] = [
         QuestionResult(
             question_id=q.id,
@@ -238,7 +241,8 @@ async def get_session_detail(
             misconception_c_id=q.misconception_c_id,
             misconception_d_id=q.misconception_d_id,
         )
-        for inter, q, _ in rows
+        for inter, q, _, _ in rows
+        if q is not None
     ]
 
     # 4. Group by topic and evaluate each
@@ -269,25 +273,9 @@ async def get_session_detail(
     weak_kc_names = await _resolve_kc_names(db, list(all_weak_kc_ids))
 
     # 6. Build per-question detail list
-    questions_detail: list[QuestionInteractionDetail] = [
-        QuestionInteractionDetail(
-            question_id=q.id,
-            sequence_position=inter.sequence_position,
-            topic_name=topic_name or str(q.topic_id),
-            stem_text=q.stem_text,
-            bloom_level=q.bloom_level.value,
-            difficulty_bucket=q.difficulty_bucket.value,
-            option_a=q.option_a,
-            option_b=q.option_b,
-            option_c=q.option_c,
-            option_d=q.option_d,
-            selected_answer=(inter.selected_answer.value if inter.selected_answer else None),
-            correct_answer=q.correct_answer.value,
-            is_correct=inter.is_correct,
-            response_time_ms=inter.response_time_ms,
-            explanation_text=q.explanation_text,
-        )
-        for inter, q, topic_name in rows
+    questions_detail = [
+        _interaction_detail_from_row(inter, q, canonical_item, topic_name)
+        for inter, q, canonical_item, topic_name in rows
     ]
 
     return SessionDetailResponse(
@@ -322,3 +310,77 @@ async def _resolve_kc_names(
     repo = HistoryRepository(db)
     name_map = await repo.resolve_kc_names(valid)
     return [name_map.get(s, s) for s in kc_id_strs]
+
+
+def _answer_index_to_letter(index: int | None) -> str:
+    if index is None:
+        return ""
+    return {0: "A", 1: "B", 2: "C", 3: "D"}.get(index, "")
+
+
+def _interaction_detail_from_row(
+    inter: Interaction,
+    question: Question | None,
+    canonical_item,
+    topic_name: str | None,
+) -> QuestionInteractionDetail:
+    if question is not None:
+        return QuestionInteractionDetail(
+            question_id=question.id,
+            canonical_item_id=inter.canonical_item_id,
+            sequence_position=inter.sequence_position,
+            topic_name=topic_name or str(question.topic_id),
+            stem_text=question.stem_text,
+            bloom_level=question.bloom_level.value,
+            difficulty_bucket=question.difficulty_bucket.value,
+            option_a=question.option_a,
+            option_b=question.option_b,
+            option_c=question.option_c,
+            option_d=question.option_d,
+            selected_answer=(inter.selected_answer.value if inter.selected_answer else None),
+            correct_answer=question.correct_answer.value,
+            is_correct=inter.is_correct,
+            response_time_ms=inter.response_time_ms,
+            explanation_text=question.explanation_text,
+        )
+
+    if canonical_item is None:
+        return QuestionInteractionDetail(
+            question_id=None,
+            canonical_item_id=inter.canonical_item_id,
+            sequence_position=inter.sequence_position,
+            topic_name="canonical",
+            stem_text="",
+            bloom_level="",
+            difficulty_bucket="",
+            option_a="",
+            option_b="",
+            option_c="",
+            option_d="",
+            selected_answer=(inter.selected_answer.value if inter.selected_answer else None),
+            correct_answer="",
+            is_correct=inter.is_correct,
+            response_time_ms=inter.response_time_ms,
+            explanation_text=None,
+        )
+
+    choices = list(canonical_item.choices or [])
+    padded_choices = (choices + ["", "", "", ""])[:4]
+    return QuestionInteractionDetail(
+        question_id=None,
+        canonical_item_id=canonical_item.item_id,
+        sequence_position=inter.sequence_position,
+        topic_name=canonical_item.unit_id,
+        stem_text=canonical_item.question,
+        bloom_level=canonical_item.question_intent or "",
+        difficulty_bucket=canonical_item.difficulty or "",
+        option_a=padded_choices[0],
+        option_b=padded_choices[1],
+        option_c=padded_choices[2],
+        option_d=padded_choices[3],
+        selected_answer=(inter.selected_answer.value if inter.selected_answer else None),
+        correct_answer=_answer_index_to_letter(canonical_item.answer_index),
+        is_correct=inter.is_correct,
+        response_time_ms=inter.response_time_ms,
+        explanation_text=canonical_item.explanation,
+    )

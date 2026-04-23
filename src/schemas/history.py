@@ -75,7 +75,8 @@ class HistoryResponse(BaseModel):
 class QuestionInteractionDetail(BaseModel):
     """One question + user's answer within a session."""
 
-    question_id: uuid.UUID
+    question_id: uuid.UUID | None = None
+    canonical_item_id: str | None = None
     sequence_position: int
     topic_name: str
     stem_text: str

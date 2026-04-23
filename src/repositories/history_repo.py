@@ -11,6 +11,7 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.models.canonical import QuestionBankItem
 from src.models.content import KnowledgeComponent, Module, Question, Topic
 from src.models.learning import Interaction, Session
 
@@ -73,10 +74,16 @@ class HistoryRepository:
     async def fetch_session_detail_rows(
         self,
         session_id: uuid.UUID,
-    ) -> list[tuple[Interaction, Question, str | None]]:
+    ) -> list[tuple[Interaction, Question | None, QuestionBankItem | None, str | None]]:
         result = await self.session.execute(
-            select(Interaction, Question, Topic.name.label("topic_name"))
-            .join(Question, Interaction.question_id == Question.id)
+            select(
+                Interaction,
+                Question,
+                QuestionBankItem,
+                Topic.name.label("topic_name"),
+            )
+            .outerjoin(Question, Interaction.question_id == Question.id)
+            .outerjoin(QuestionBankItem, Interaction.canonical_item_id == QuestionBankItem.item_id)
             .outerjoin(Topic, Question.topic_id == Topic.id)
             .where(Interaction.session_id == session_id)
             .order_by(Interaction.sequence_position)

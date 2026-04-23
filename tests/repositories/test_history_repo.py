@@ -52,7 +52,7 @@ async def test_fetch_session_detail_rows_returns_query_rows():
 
     session = AsyncMock()
     result = Mock()
-    row = ("interaction", "question", "topic")
+    row = ("interaction", "question", "canonical_item", "topic")
     result.all.return_value = [row]
     session.execute.return_value = result
 
