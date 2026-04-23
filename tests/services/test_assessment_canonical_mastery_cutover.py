@@ -31,12 +31,18 @@ async def test_submit_canonical_assessment_writes_interaction_and_mastery(monkey
     db = AsyncMock()
     db.add = Mock()
 
-    item = Mock(item_id="item-1", answer_index=0)
+    item = Mock(item_id="item-1", answer_index=0, unit_id="unit-1")
     item_result = Mock()
     item_result.scalars.return_value.all.return_value = [item]
     seq_result = Mock()
     seq_result.scalar.return_value = 0
-    db.execute.side_effect = [item_result, seq_result]
+    unit_result = Mock()
+    unit_result.scalars.return_value.all.return_value = [
+        SimpleNamespace(id=uuid4(), canonical_unit_id="unit-1", title="Transformers"),
+    ]
+    weak_kp_result = Mock()
+    weak_kp_result.all.return_value = []
+    db.execute.side_effect = [item_result, seq_result, unit_result, weak_kp_result]
 
     updated = []
 
@@ -72,7 +78,7 @@ async def test_submit_canonical_assessment_writes_interaction_and_mastery(monkey
     )
 
     assert response.overall_score_percent == 100.0
-    assert response.topic_results == []
+    assert len(response.topic_results) == 1
     assert updated == [(user_id, "item-1", True)]
     interaction = db.add.call_args_list[0].args[0]
     assert interaction.question_id is None

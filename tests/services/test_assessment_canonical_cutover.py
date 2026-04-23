@@ -1,4 +1,7 @@
+from datetime import UTC, datetime
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
+from uuid import uuid4
 
 import pytest
 
@@ -62,15 +65,55 @@ def test_canonical_question_payload_preserves_item_and_unit_ids():
     assert payload.stem_text == "What is NLP?"
 
 
-def test_legacy_question_guard_blocks_when_disabled(monkeypatch):
-    monkeypatch.setattr(assessment_service.settings, "allow_legacy_question_reads", False)
+@pytest.mark.asyncio
+async def test_assessment_requires_canonical_unit_ids():
+    db = AsyncMock()
 
-    with pytest.raises(ValidationError, match="Legacy question reads are disabled"):
-        assessment_service._ensure_legacy_question_reads_allowed()
+    with pytest.raises(ValidationError, match="canonical_unit_ids"):
+        await assessment_service._resolve_canonical_unit_ids(
+            db,
+            topic_ids=[],
+            canonical_unit_ids=None,
+        )
 
 
-def test_legacy_mastery_guard_blocks_when_disabled(monkeypatch):
-    monkeypatch.setattr(assessment_service.settings, "allow_legacy_mastery_writes", False)
+@pytest.mark.asyncio
+async def test_build_canonical_assessment_response_groups_by_learning_unit():
+    unit_id = uuid4()
+    completed_at = datetime.now(UTC)
+    db = AsyncMock()
 
-    with pytest.raises(ValidationError, match="Legacy mastery writes are disabled"):
-        assessment_service._ensure_legacy_mastery_writes_allowed()
+    unit = SimpleNamespace(id=unit_id, canonical_unit_id="unit-1", title="Backpropagation")
+    db.execute.side_effect = [
+        SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [unit])),
+        SimpleNamespace(
+            all=lambda: [
+                ("unit-1", "Chain rule"),
+                ("unit-1", "Gradients"),
+            ]
+        ),
+    ]
+
+    rows = [
+        (
+            SimpleNamespace(is_correct=True),
+            SimpleNamespace(item_id="item-1", unit_id="unit-1"),
+        ),
+        (
+            SimpleNamespace(is_correct=False),
+            SimpleNamespace(item_id="item-2", unit_id="unit-1"),
+        ),
+    ]
+
+    response = await assessment_service._build_canonical_assessment_response(
+        db=db,
+        session_id=uuid4(),
+        completed_at=completed_at,
+        rows=rows,
+    )
+
+    assert response.overall_score_percent == 50.0
+    assert len(response.topic_results) == 1
+    assert response.topic_results[0].topic_id == unit_id
+    assert response.topic_results[0].topic_name == "Backpropagation"
+    assert response.topic_results[0].weak_kcs == ["Chain rule", "Gradients"]
