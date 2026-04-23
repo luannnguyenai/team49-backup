@@ -373,6 +373,8 @@ These are intentional gaps, not missing UI work:
 
 ## Freeze/Delete Policy
 
+Detailed legacy cleanup ownership and task order live in `docs/LEGACY_SCHEMA_CLEANUP_PLAN.md`.
+
 Old tables may only be frozen after canonical runtime parity is `ready` for two consecutive runs.
 
 Freeze means:

@@ -1836,3 +1836,5 @@ Nhánh `rin/implement` trong giai đoạn này đã làm được một việc q
 - triển khai runtime canonical cutover sau feature flags mà chưa xóa dữ liệu cũ
 
 Runtime ORM hiện vẫn chạy theo `module/topic/question/mastery_path` cũ là chính, nhưng đã có `course-first` layer khá rõ ở `src/models/course.py`. Canonical artifact layer mới là bước đệm để nối hai thế giới đó lại với nhau trong phase tiếp theo.
+
+Cleanup cụ thể cho các bảng legacy được tách riêng ở `docs/LEGACY_SCHEMA_CLEANUP_PLAN.md`. File đó là nguồn tham chiếu cho việc phân loại `authoritative / compatibility / deprecated`, thêm usage checker, archive dữ liệu cũ, và chỉ sau đó mới tạo migration rename/drop bảng legacy.
