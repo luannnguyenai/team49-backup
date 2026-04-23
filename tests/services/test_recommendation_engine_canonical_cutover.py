@@ -10,29 +10,19 @@ from src.services import recommendation_engine
 
 
 @pytest.mark.asyncio
-async def test_generate_learning_path_uses_canonical_branch_when_flag_enabled(monkeypatch):
+async def test_generate_learning_path_uses_canonical_branch(monkeypatch):
     captured = {}
 
     async def fake_generate_canonical_path(db, user, request):
         captured["called"] = True
         return "canonical-response"
 
-    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", True)
     monkeypatch.setattr(recommendation_engine, "_generate_canonical_learning_path", fake_generate_canonical_path)
 
     result = await recommendation_engine.generate_learning_path(object(), object(), object())
 
     assert result == "canonical-response"
     assert captured["called"] is True
-
-
-@pytest.mark.asyncio
-async def test_generate_learning_path_blocks_legacy_branch_when_disabled(monkeypatch):
-    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", False)
-    monkeypatch.setattr(recommendation_engine.settings, "allow_legacy_planner_writes", False)
-
-    with pytest.raises(ValidationError, match="Legacy planner writes are disabled"):
-        await recommendation_engine.generate_learning_path(object(), object(), object())
 
 
 def test_path_item_response_allows_canonical_unit_without_topic_id():
@@ -54,15 +44,8 @@ def test_path_item_response_allows_canonical_unit_without_topic_id():
     assert item.canonical_unit_id == "local::lecture01::seg1"
 
 
-def test_legacy_planner_access_guard_blocks_when_disabled(monkeypatch):
-    monkeypatch.setattr(recommendation_engine.settings, "allow_legacy_planner_writes", False)
-
-    with pytest.raises(ValidationError, match="Legacy learning_paths access is disabled"):
-        recommendation_engine._ensure_legacy_planner_access_allowed()
-
-
 @pytest.mark.asyncio
-async def test_get_learning_path_reads_latest_canonical_plan_when_enabled(monkeypatch):
+async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
     user_id = uuid4()
     unit_id = uuid4()
 
@@ -93,7 +76,6 @@ async def test_get_learning_path_reads_latest_canonical_plan_when_enabled(monkey
             assert learning_unit_ids == [unit_id]
             return {unit_id: SimpleNamespace(id=unit_id, title="Convolution Basics")}
 
-    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", True)
     monkeypatch.setattr(recommendation_engine, "PlannerAuditRepository", FakePlannerAuditRepository)
     monkeypatch.setattr(recommendation_engine, "CanonicalContentRepository", FakeCanonicalContentRepository)
 
@@ -138,10 +120,20 @@ async def test_get_learning_path_timeline_groups_canonical_non_skip_items(monkey
             ),
         ]
 
-    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", True)
     monkeypatch.setattr(recommendation_engine, "_get_canonical_learning_path_rows", fake_get_rows)
 
     grouped = await recommendation_engine.get_learning_path_timeline("db-session", user_id)
 
     assert sorted(grouped) == [1]
     assert grouped[1][0][1] == "Unit 1"
+
+
+@pytest.mark.asyncio
+async def test_update_path_status_rejects_removed_legacy_learning_path_write():
+    with pytest.raises(ValidationError, match="legacy learning_paths writes are removed"):
+        await recommendation_engine.update_path_status(
+            db=object(),
+            user_id=uuid4(),
+            path_id=uuid4(),
+            new_status=PathStatus.completed,
+        )
