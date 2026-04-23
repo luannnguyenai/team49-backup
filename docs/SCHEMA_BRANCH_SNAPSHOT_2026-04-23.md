@@ -201,6 +201,27 @@ Script này kiểm tra tối thiểu:
 
 Không được freeze/xóa bảng cũ nếu parity status chưa `ready`.
 
+### Legacy cleanup allowlist
+
+Nếu làm migration destructive trong phase sau, chỉ các bảng dưới đây được xem là cleanup candidates:
+
+- `modules`
+- `topics`
+- `knowledge_components`
+- `questions`
+- `mastery_scores`
+- `mastery_history`
+- `learning_paths`
+
+Các bảng dưới đây là dữ liệu mới hoặc shared runtime, **không được drop/rename/truncate** trong legacy cleanup:
+
+- canonical content: `concepts_kp`, `units`, `unit_kp_map`, `question_bank`, `item_calibration`, `item_phase_map`, `item_kp_map`, `prerequisite_edges`, `pruned_edges`
+- learner/planner runtime mới: `learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
+- product shell: `courses`, `course_sections`, `learning_units`, `course_assets`, `course_overviews`, `learning_progress_records`
+- shared runtime: `sessions`, `interactions`, `users`
+
+Trước khi viết hoặc chạy migration cleanup phải chạy preflight target check. Nếu target table không nằm trong allowlist hoặc đụng protected list, migration/script phải fail.
+
 ## A. Runtime ORM Schema
 
 ## A1. `users`
