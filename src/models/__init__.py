@@ -26,6 +26,7 @@ from src.models.learning import (  # noqa: F401
     LearningPath,
     MasteryScore,
     Session,
+    WaivedUnit,
 )
 
 # Original lecture models
@@ -66,4 +67,5 @@ __all__ = [
     "LearningPath",
     "LearnerMasteryKP",
     "GoalPreference",
+    "WaivedUnit",
 ]

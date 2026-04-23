@@ -71,8 +71,38 @@ def upgrade() -> None:
         unique=False,
     )
 
+    op.create_table(
+        "waived_units",
+        sa.Column("user_id", sa.UUID(), nullable=False),
+        sa.Column("learning_unit_id", sa.UUID(), nullable=False),
+        sa.Column("evidence_items", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("mastery_lcb_at_waive", sa.Float(), nullable=True),
+        sa.Column("skip_quiz_score", sa.Float(), nullable=True),
+        sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.CheckConstraint(
+            "mastery_lcb_at_waive IS NULL OR (mastery_lcb_at_waive >= 0 AND mastery_lcb_at_waive <= 1)",
+            name="ck_waived_units_mastery_lcb_range",
+        ),
+        sa.CheckConstraint(
+            "skip_quiz_score IS NULL OR (skip_quiz_score >= 0 AND skip_quiz_score <= 100)",
+            name="ck_waived_units_skip_quiz_score_range",
+        ),
+        sa.ForeignKeyConstraint(["learning_unit_id"], ["learning_units.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("user_id", "learning_unit_id", name="uq_waived_units_user_unit"),
+    )
+    op.create_index("ix_waived_units_user", "waived_units", ["user_id"], unique=False)
+    op.create_index("ix_waived_units_learning_unit", "waived_units", ["learning_unit_id"], unique=False)
+
 
 def downgrade() -> None:
+    op.drop_index("ix_waived_units_learning_unit", table_name="waived_units")
+    op.drop_index("ix_waived_units_user", table_name="waived_units")
+    op.drop_table("waived_units")
+
     op.drop_index("ix_goal_preferences_hash", table_name="goal_preferences")
     op.drop_index("ix_goal_preferences_user", table_name="goal_preferences")
     op.drop_table("goal_preferences")

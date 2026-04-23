@@ -40,6 +40,23 @@ class LearnerPlannerStubModelTests(unittest.TestCase):
         self.assertIn("learner_mastery_kp", migration)
         self.assertIn("goal_preferences", migration)
 
+    def test_waived_unit_stub_model_exists(self):
+        from src.models.learning import WaivedUnit
+
+        self.assertEqual(WaivedUnit.__tablename__, "waived_units")
+        self.assertTrue(hasattr(WaivedUnit, "user_id"))
+        self.assertTrue(hasattr(WaivedUnit, "learning_unit_id"))
+        self.assertTrue(hasattr(WaivedUnit, "evidence_items"))
+        self.assertTrue(hasattr(WaivedUnit, "mastery_lcb_at_waive"))
+        self.assertTrue(hasattr(WaivedUnit, "skip_quiz_score"))
+
+    def test_stub_migration_file_mentions_waived_units(self):
+        migration = Path(
+            "alembic/versions/20260423_learner_planner_stub_persistence.py"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("waived_units", migration)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -399,3 +399,39 @@ class GoalPreference(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         Index("ix_goal_preferences_user", "user_id"),
         Index("ix_goal_preferences_hash", "derived_from_course_set_hash"),
     )
+
+
+class WaivedUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Audit record for units explicitly waived/skipped by planner logic."""
+
+    __tablename__ = "waived_units"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    learning_unit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    evidence_items: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    mastery_lcb_at_waive: Mapped[float | None] = mapped_column(Float, nullable=True)
+    skip_quiz_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "learning_unit_id", name="uq_waived_units_user_unit"),
+        Index("ix_waived_units_user", "user_id"),
+        Index("ix_waived_units_learning_unit", "learning_unit_id"),
+        CheckConstraint(
+            "mastery_lcb_at_waive IS NULL OR (mastery_lcb_at_waive >= 0 AND mastery_lcb_at_waive <= 1)",
+            name="ck_waived_units_mastery_lcb_range",
+        ),
+        CheckConstraint(
+            "skip_quiz_score IS NULL OR (skip_quiz_score >= 0 AND skip_quiz_score <= 100)",
+            name="ck_waived_units_skip_quiz_score_range",
+        ),
+    )
