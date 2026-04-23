@@ -322,6 +322,7 @@ Question ownership must be preserved through joins:
 - lecture/unit ownership comes from `question_bank.course_id`, `question_bank.lecture_id`, `question_bank.unit_id`, and `question_bank.source_ref`
 - assessor/usage ownership comes from `item_phase_map.phase`, with allowed phases such as `placement`, `mini_quiz`, `skip_verification`, `bridge_check`, `final_quiz`, `transfer`, and `review`
 - KP evidence ownership comes from `item_kp_map.item_id -> kp_id`
+- history/detail ownership for canonical attempts comes from `interactions.canonical_item_id -> question_bank.item_id`
 
 Do not infer assessor usage from `question_bank` alone. A question can be valid for multiple phases, so runtime item selection must join `question_bank` with `item_phase_map` and filter by the active assessor phase.
 

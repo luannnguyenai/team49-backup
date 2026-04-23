@@ -1805,6 +1805,7 @@ Nguồn:
   - canonical submit ghi `interactions.canonical_item_id`
   - canonical mastery update ghi `learner_mastery_kp`
   - canonical planner branch đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
+  - history detail đọc được cả legacy `question_id` và canonical `canonical_item_id`
   - skip flow chưa ghi `waived_units`
 - Runtime vẫn còn cần parity/backfill trước khi bật read flags trong môi trường thật:
   - `alembic upgrade head`
