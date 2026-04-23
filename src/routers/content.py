@@ -118,7 +118,7 @@ async def api_get_learning_unit_content(
 
 
 # ---------------------------------------------------------------------------
-# GET /api/modules
+# Retired legacy route: GET /api/modules
 # ---------------------------------------------------------------------------
 
 
@@ -133,7 +133,7 @@ async def api_list_modules(
 
 
 # ---------------------------------------------------------------------------
-# GET /api/modules/{module_id}
+# Retired legacy route: GET /api/modules/{module_id}
 # ---------------------------------------------------------------------------
 
 
@@ -149,7 +149,7 @@ async def api_get_module(
 
 
 # ---------------------------------------------------------------------------
-# GET /api/topics/{topic_id}
+# Retired legacy route: GET /api/topics/{topic_id}
 # ---------------------------------------------------------------------------
 
 
@@ -165,7 +165,7 @@ async def api_get_topic(
 
 
 # ---------------------------------------------------------------------------
-# GET /api/topics/{topic_id}/content
+# Retired legacy route: GET /api/topics/{topic_id}/content
 # ---------------------------------------------------------------------------
 
 

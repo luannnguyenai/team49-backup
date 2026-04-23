@@ -132,7 +132,11 @@ async def get_learning_unit_content(
     )
 
 # ---------------------------------------------------------------------------
-# GET /api/modules
+# Retired legacy module/topic service adapters.
+#
+# Public routes now use canonical course section and learning-unit services.
+# These functions are kept temporarily for seed/dev compatibility until the
+# legacy ORM tables are fully removed.
 # ---------------------------------------------------------------------------
 
 
@@ -168,7 +172,7 @@ async def list_modules(db: AsyncSession) -> list[ModuleListItem]:
 
 
 # ---------------------------------------------------------------------------
-# GET /api/modules/{module_id}
+# Retired legacy adapter for module detail
 # ---------------------------------------------------------------------------
 
 
@@ -202,7 +206,7 @@ async def get_module_detail(db: AsyncSession, module_id: uuid.UUID) -> ModuleDet
 
 
 # ---------------------------------------------------------------------------
-# GET /api/topics/{topic_id}
+# Retired legacy adapter for topic detail
 # ---------------------------------------------------------------------------
 
 
@@ -242,7 +246,7 @@ async def get_topic_detail(db: AsyncSession, topic_id: uuid.UUID) -> TopicDetail
 
 
 # ---------------------------------------------------------------------------
-# GET /api/topics/{topic_id}/content
+# Retired legacy adapter for topic content
 # ---------------------------------------------------------------------------
 
 

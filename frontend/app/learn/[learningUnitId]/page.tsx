@@ -14,7 +14,7 @@ import {
   Play,
   Video,
 } from "lucide-react";
-import { learningUnitCompatApi } from "@/lib/api";
+import { learningUnitApi } from "@/lib/api";
 import type { LearningUnitContentById } from "@/types";
 import LearnMarkdown, { extractHeadings, type Heading } from "@/components/learn/LearnMarkdown";
 
@@ -51,7 +51,7 @@ export default function LearnTopicPage() {
   useEffect(() => {
     if (!learningUnitId) return;
     setLoading(true);
-    learningUnitCompatApi
+    learningUnitApi
       .contentById(learningUnitId)
       .then((data) => {
         setContent(data);

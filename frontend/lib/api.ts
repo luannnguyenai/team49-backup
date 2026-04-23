@@ -11,12 +11,6 @@ import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
 import {
   buildCanonicalAssessmentStartPayload,
   mapCourseCatalogItemToSectionCard,
-  mapLegacySectionDetail,
-  mapLegacySectionListItem,
-  mapLegacyTopicContent,
-  type LegacyModuleDetailResponse,
-  type LegacyModuleListItemResponse,
-  type LegacyTopicContentResponse,
 } from "@/lib/canonical-content";
 
 // ---------------------------------------------------------------------------
@@ -249,13 +243,13 @@ export const courseApi = {
 export const canonicalSectionApi = {
   list: () =>
     api
-      .get<LegacyModuleListItemResponse[]>("/api/modules")
-      .then((r) => r.data.map(mapLegacySectionListItem)),
+      .get<CourseSectionListItem[]>("/api/course-sections")
+      .then((r) => r.data),
 
   detail: (id: string) =>
     api
-      .get<LegacyModuleDetailResponse>(`/api/modules/${id}`)
-      .then((r) => mapLegacySectionDetail(r.data)),
+      .get<CourseSectionDetail>(`/api/course-sections/${id}`)
+      .then((r) => r.data),
 
   catalogCards: (params?: {
     view?: CourseCatalogView;
@@ -268,11 +262,11 @@ export const canonicalSectionApi = {
     ),
 };
 
-export const learningUnitCompatApi = {
+export const learningUnitApi = {
   contentById: (id: string) =>
     api
-      .get<LegacyTopicContentResponse>(`/api/topics/${id}/content`)
-      .then((r) => mapLegacyTopicContent(r.data)),
+      .get<LearningUnitContentById>(`/api/learning-units/${id}/content`)
+      .then((r) => r.data),
 };
 
 export const canonicalAssessmentApi = {

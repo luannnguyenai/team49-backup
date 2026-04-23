@@ -227,7 +227,10 @@ class QuestionSummary(BaseModel):
 
 
 # ===========================================================================
-# Content API response schemas  (GET /api/modules, /api/topics)
+# Retired legacy content response schemas.
+#
+# Public module/topic routes now return 410 Gone. These schemas remain only
+# while seed/dev compatibility code is being removed in a later cleanup.
 # ===========================================================================
 
 
@@ -246,7 +249,7 @@ class TopicSummary(BaseModel):
 
 
 class ModuleListItem(BaseModel):
-    """One row in GET /api/modules."""
+    """Legacy module row retained for internal compatibility only."""
 
     model_config = {"from_attributes": True}
 
@@ -259,7 +262,7 @@ class ModuleListItem(BaseModel):
 
 
 class ModuleDetailResponse(BaseModel):
-    """GET /api/modules/{id} — full module with topic list."""
+    """Legacy module detail retained for internal compatibility only."""
 
     model_config = {"from_attributes": True}
 
@@ -285,7 +288,7 @@ class PrerequisiteTopic(BaseModel):
 
 
 class TopicDetailResponse(BaseModel):
-    """GET /api/topics/{id} — topic detail + resolved prerequisite graph."""
+    """Legacy topic detail retained for internal compatibility only."""
 
     model_config = {"from_attributes": True}
 
@@ -306,7 +309,7 @@ class TopicDetailResponse(BaseModel):
 
 
 class TopicContentResponse(BaseModel):
-    """GET /api/topics/{id}/content — learning material + video."""
+    """Legacy topic content retained for internal compatibility only."""
 
     topic_id: uuid.UUID
     topic_name: str

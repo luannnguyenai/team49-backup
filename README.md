@@ -188,7 +188,7 @@ A20-App-049/
 │   │   └── learning.py           # Session, Interaction, MasteryScore, LearningPath
 │   ├── routers/                  # Thin API route handlers
 │   │   ├── auth.py               # /api/auth/*
-│   │   ├── content.py            # /api/modules/*, /api/topics/*
+│   │   ├── content.py            # /api/course-sections/*, /api/learning-units/*
 │   │   ├── quiz.py               # /api/quiz/*
 │   │   ├── assessment.py         # /api/assessment/*
 │   │   ├── module_test.py        # /api/module-test/*
@@ -475,10 +475,9 @@ make db-shell      # Mở psql trong database container
 
 | Method | Endpoint | Mô tả |
 |--------|----------|-------|
-| `GET` | `/api/modules` | Danh sách tất cả modules |
-| `GET` | `/api/modules/{id}` | Chi tiết module + danh sách topics |
-| `GET` | `/api/topics/{id}` | Chi tiết topic + prerequisite graph |
-| `GET` | `/api/topics/{id}/content` | Tài liệu học (markdown + videos) |
+| `GET` | `/api/course-sections` | Danh sách section canonical |
+| `GET` | `/api/course-sections/{id}` | Chi tiết section + danh sách learning units |
+| `GET` | `/api/learning-units/{id}/content` | Tài liệu học canonical (markdown + video) |
 
 ### AI Tutor (Lecture Q&A)
 
