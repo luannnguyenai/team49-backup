@@ -1379,7 +1379,7 @@ git commit -m "feat: add canonical runtime parity checks"
 
 - Review only unless tests expose bug.
 
-- [ ] **Step 1: Run focused test suite**
+- [x] **Step 1: Run focused test suite**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest \
@@ -1404,7 +1404,7 @@ Expected:
 
 - all pass.
 
-- [ ] **Step 2: Validate canonical import**
+- [x] **Step 2: Validate canonical import**
 
 ```bash
 PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to_db.py --validate-only
@@ -1414,7 +1414,7 @@ Expected:
 
 - counts match canonical manifest.
 
-- [ ] **Step 3: Verify no frontend files changed**
+- [x] **Step 3: Verify no frontend files changed**
 
 ```bash
 git diff --name-only HEAD~1..HEAD
@@ -1425,7 +1425,7 @@ Expected:
 - no files under frontend/UI paths.
 - no changes under `src/api/static/`.
 
-- [ ] **Step 4: Commit docs if verification notes changed**
+- [x] **Step 4: Commit docs if verification notes changed**
 
 ```bash
 git add docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md docs/SCHEMA_BRANCH_SNAPSHOT_2026-04-23.md docs/WORKLOG.md docs/JOURNAL.md
