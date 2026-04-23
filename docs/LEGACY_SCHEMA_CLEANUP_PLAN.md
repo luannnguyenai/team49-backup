@@ -264,6 +264,8 @@ Why rename first:
 - Breaks accidental runtime dependency loudly.
 - Allows one production cycle before final drop.
 
+Migration prepared: `alembic/versions/20260423_archive_legacy_runtime_tables.py`.
+
 Commit: `refactor: archive legacy runtime tables`.
 
 ### Task 7: Final Drop Migration
