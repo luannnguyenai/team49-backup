@@ -20,6 +20,7 @@ Trong nhánh `rin/implement`, phần việc dữ liệu/schema gần đây tập
 - chuẩn hóa dữ liệu course của `CS224n` và `CS231n`
 - sửa P1/P2/P3/P4/P5 để loại bỏ placeholder ID, timestamp drift, mapping lỗi
 - tạo canonical exporter để gom các artifact ingestion về một contract sạch, machine-readable
+- thêm lớp runtime stub cho learner/planner để chuẩn bị migrate từ grain `topic/module` sang `kp/unit`
 - xuất bộ canonical JSONL cuối cùng ở:
   - `data/final_artifacts/cs224n_cs231n_v1/canonical/`
 - xác nhận canonical bundle sạch:
@@ -65,6 +66,22 @@ Nằm trong:
 - `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`
 
 Đây chưa phải DB tables active, nhưng là contract sạch để ingest PostgreSQL sau này.
+
+### 4. Learner / planner stub persistence
+
+Nằm trong:
+
+- `src/models/learning.py`
+- `alembic/versions/20260423_learner_planner_stub_persistence.py`
+
+Đây là lớp mới vừa được thêm vào nhánh này để giữ chỗ cho:
+
+- mastery ở grain `user × kp`
+- goal profile chính thức
+- waived/skip audit
+- plan history / rationale / session state
+
+Nó chưa thay thế runtime cũ, mà là lớp sidecar để phase backend tiếp theo có điểm rơi rõ ràng.
 
 ## A. Runtime ORM Schema
 
@@ -822,6 +839,203 @@ Nguồn: `src/models/learning.py`
   - `estimated_hours = 0`
   - `status = skipped`
 
+## A21. `learner_mastery_kp`
+
+Nguồn: `src/models/learning.py`
+
+### Field và ý định
+
+- `user_id`
+  - user mà mastery row này thuộc về.
+
+- `kp_id`
+  - canonical KP/business key đang được theo dõi.
+  - đây là điểm khác biệt lớn nhất so với `mastery_scores.topic_id`.
+
+- `theta_mu`
+  - latent ability mean ở grain `user × kp`.
+  - chưa được service/runtime cũ sử dụng, nhưng là landing zone đúng cho planner/assessor đời sau.
+
+- `theta_sigma`
+  - uncertainty của latent ability.
+  - rất quan trọng nếu sau này cần lower-confidence-bound thay vì dùng một số point estimate duy nhất.
+
+- `mastery_mean_cached`
+  - xác suất mastery đã cache sẵn trong `[0,1]`.
+  - dùng để UI/planner đọc nhanh mà không phải tính lại từ `theta_mu/theta_sigma` mỗi lần.
+
+- `n_items_observed`
+  - số item evidence đã dùng để cập nhật row này.
+  - giúp phân biệt mastery mạnh/yếu về mặt bằng chứng.
+
+- `updated_by`
+  - cơ chế nào đã cập nhật row:
+    - backfill
+    - assessor
+    - synthetic bootstrap
+    - planner side-effect
+  - hiện mới là chỗ để provenance, chưa có convention cứng.
+
+### Nhận xét
+
+- Đây là bảng mới quan trọng nhất để bridge từ runtime cũ sang spec learner layer mới.
+- Nó chưa thay thế `mastery_scores`, nhưng cho phép cả hai cùng tồn tại trong giai đoạn chuyển tiếp.
+
+## A22. `goal_preferences`
+
+Nguồn: `src/models/learning.py`
+
+### Field và ý định
+
+- `user_id`
+  - mỗi user có tối đa một goal preference row.
+
+- `goal_weights_json`
+  - trọng số mục tiêu/hứng thú của user.
+  - dùng làm source-of-truth cho planner thay vì suy từ hành vi hoặc từ `users`.
+
+- `selected_course_ids`
+  - tập course user muốn theo.
+  - đây là mảnh còn thiếu trước đó để encode rõ “chỉ học CS231n”.
+
+- `goal_embedding`
+  - reserve cho vector hóa mục tiêu học tập.
+  - hiện là JSON để tránh khóa cứng representation quá sớm.
+
+- `goal_embedding_version`
+  - version của embedding/generator đã dùng.
+
+- `derived_from_course_set_hash`
+  - hash của selected course set.
+  - hữu ích để detect khi mục tiêu đã đổi và embedding cũ không còn hợp lệ.
+
+- `notes`
+  - chỗ để lưu ghi chú tự do hoặc planner-side explanation phụ.
+
+### Nhận xét
+
+- Bảng này chính thức lấp gap “users chưa có target_course_ids”.
+- Đây vẫn mới là persistence shell; chưa có onboarding/service wiring.
+
+## A23. `waived_units`
+
+Nguồn: `src/models/learning.py`
+
+### Field và ý định
+
+- `user_id`
+  - user được waive.
+
+- `learning_unit_id`
+  - unit bị waive.
+
+- `evidence_items`
+  - list item IDs đã làm căn cứ waive.
+  - cho phép audit quyết định skip thay vì chỉ nhìn `learning_paths.action = skip`.
+
+- `mastery_lcb_at_waive`
+  - lower-confidence-bound tại thời điểm waive.
+  - tách rõ “skip vì đủ chắc” với “skip vì rule heuristic”.
+
+- `skip_quiz_score`
+  - điểm của bài skip-verification nếu có.
+
+### Nhận xét
+
+- Đây là lớp audit đúng nghĩa cho skip/waive.
+- Nó không thay `learning_paths`, mà bổ sung evidence cho quyết định skip.
+
+## A24. `plan_history`
+
+Nguồn: `src/models/learning.py`
+
+### Field và ý định
+
+- `user_id`
+  - user sở hữu plan.
+
+- `parent_plan_id`
+  - plan cha nếu đây là replan.
+  - cho phép lần theo cây evolution của learning plan.
+
+- `trigger`
+  - nguyên nhân sinh plan:
+    - onboarding
+    - replan
+    - post-quiz
+    - manual refresh
+
+- `recommended_path_json`
+  - snapshot path được đề xuất ở thời điểm đó.
+
+- `goal_snapshot_json`
+  - ảnh chụp goal profile dùng khi sinh plan.
+
+- `weights_used_json`
+  - các trọng số scoring dùng ở run đó.
+
+### Nhận xét
+
+- Đây là planner audit shell, chưa phải planner engine.
+- Nó giúp phase sau có nơi lưu plan versioning thay vì mất dấu mỗi lần regenerate.
+
+## A25. `rationale_log`
+
+Nguồn: `src/models/learning.py`
+
+### Field và ý định
+
+- `plan_history_id`
+  - rationale này thuộc về planner run nào.
+
+- `learning_unit_id`
+  - unit mà rationale đang nói tới.
+
+- `rank`
+  - thứ hạng của unit trong plan.
+
+- `reason_code`
+  - mã ngắn cho lý do chọn/lọc.
+
+- `term_breakdown_json`
+  - breakdown các term scoring ở dạng JSON.
+
+- `rationale_text`
+  - giải thích human-readable.
+
+### Nhận xét
+
+- Đây là shell cho explainability của planner.
+- Rất hợp với UI/debugging, dù hiện chưa có service ghi dữ liệu vào.
+
+## A26. `planner_session_state`
+
+Nguồn: `src/models/learning.py`
+
+### Field và ý định
+
+- `user_id`
+  - user đang có planner session state.
+
+- `session_id`
+  - business/session token của planner session.
+
+- `last_plan_history_id`
+  - plan gần nhất gắn với state này.
+
+- `bridge_chain_depth`
+  - số bridge liên tiếp đang ở trong chain hiện tại.
+
+- `consecutive_bridge_count`
+  - counter để enforce cap logic nếu planner cần giới hạn bridge liên tục.
+
+- `state_json`
+  - state phụ mà planner cần giữ giữa các lần gọi.
+
+### Nhận xét
+
+- Bảng này chưa có logic runtime đi kèm, nhưng đã tạo được landing zone cho session-aware planner.
+
 ## B. Legacy Adapter Schema
 
 Nguồn: `src/models/store.py`
@@ -1452,6 +1666,13 @@ Nguồn:
   - session/interactions history
   - mastery snapshot + mastery audit
   - planner baseline với `skip`, `quick_review`, `deep_practice`
+- runtime giờ cũng đã có **stub foundation** cho learner/planner đời mới:
+  - `learner_mastery_kp`
+  - `goal_preferences`
+  - `waived_units`
+  - `plan_history`
+  - `rationale_log`
+  - `planner_session_state`
 - Canonical artifact layer đủ sạch để làm bước ingest PostgreSQL sau này.
 - P4/P5/P2 giờ đã có contract rõ hơn nhiều so với trạng thái trước của nhánh.
 
@@ -1459,10 +1680,15 @@ Nguồn:
 
 - Runtime mastery/path vẫn nghiêng về `topic/module`, chưa full canonical `kp/unit`.
 - Runtime `questions` còn gộp nhiều concern mà canonical đã tách riêng.
-- Chưa có first-class user preference cho:
-  - `target_courses`
-  - `active curriculum scope`
-  - `waived units`
+- Dù đã có stub tables, chúng **chưa được wire vào service/API**:
+  - onboarding chưa ghi `goal_preferences`
+  - planner chưa ghi `plan_history` / `rationale_log`
+  - skip flow chưa ghi `waived_units`
+  - assessor chưa cập nhật `learner_mastery_kp`
+- Runtime vẫn chưa có shared taxonomy end-to-end giữa:
+  - `sessions.session_type`
+  - canonical `item_phase_map.phase`
+  - planner/session-state semantics
 
 ## 3. Ý nghĩa thực tế cho phase tiếp theo
 
@@ -1479,5 +1705,6 @@ Nhánh `rin/implement` trong giai đoạn này đã làm được một việc q
 
 - biến dữ liệu course/question/prerequisite từ trạng thái rải rác, lệch format, nhiều debt
 - thành một canonical contract đủ sạch để ingest tiếp
+- đồng thời mở thêm một lớp runtime stub để learner/planner phase sau có chỗ bám đúng grain hơn
 
 Runtime ORM hiện vẫn chạy theo `module/topic/question/mastery_path` cũ là chính, nhưng đã có `course-first` layer khá rõ ở `src/models/course.py`. Canonical artifact layer mới là bước đệm để nối hai thế giới đó lại với nhau trong phase tiếp theo.
