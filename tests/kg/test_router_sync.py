@@ -23,6 +23,7 @@ async def test_kg_sync_returns_report_shape() -> None:
     app.dependency_overrides[get_settings] = lambda: SimpleNamespace(
         admin_token="secret",
         kg_phase=0,
+        allow_legacy_kg_routes=True,
     )
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(kg_router, "run_build_kg", fake_run_build_kg)
@@ -52,6 +53,7 @@ async def test_kg_sync_rejects_bad_admin_token() -> None:
     app.dependency_overrides[get_settings] = lambda: SimpleNamespace(
         admin_token="secret",
         kg_phase=0,
+        allow_legacy_kg_routes=True,
     )
     try:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -72,6 +74,7 @@ async def test_kg_sync_cycle_error_returns_500() -> None:
     app.dependency_overrides[get_settings] = lambda: SimpleNamespace(
         admin_token="secret",
         kg_phase=0,
+        allow_legacy_kg_routes=True,
     )
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(kg_router, "run_build_kg", fake_run_build_kg)

@@ -157,12 +157,14 @@ Flags:
 - `allow_legacy_mastery_writes`
 - `allow_legacy_planner_writes`
 - `allow_legacy_topic_content_reads`
+- `allow_legacy_kg_routes`
 
 Behavior:
 
 - Default should preserve current runtime until canonical parity is proven.
 - Production cleanup profile can set these to false.
 - When false, legacy-only path raises a clear backend error instead of silently writing old tables.
+- `allow_legacy_kg_routes=false` returns 410 for KG routes that still read `modules/topics/questions/knowledge_components`.
 
 Commit: `feat: add legacy runtime deprecation guards`.
 

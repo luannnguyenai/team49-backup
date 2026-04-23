@@ -49,6 +49,20 @@ def get_kg_service() -> KGService:
     return KGService(session_factory=async_session_factory, mastery=mastery, repo=None)
 
 
+async def require_legacy_kg_routes_enabled(
+    config: Annotated[Settings, Depends(get_settings)],
+) -> None:
+    """Disable old topic/KC-backed KG routes during canonical cleanup."""
+    if not config.allow_legacy_kg_routes:
+        raise HTTPException(
+            status_code=410,
+            detail=(
+                "Legacy KG routes are disabled because they read modules/topics/"
+                "questions/knowledge_components. Use canonical planner/content APIs."
+            ),
+        )
+
+
 async def require_admin(
     config: Annotated[Settings, Depends(get_settings)],
     x_admin_token: Annotated[str | None, Header(alias="X-Admin-Token")] = None,
@@ -97,6 +111,7 @@ async def get_kg_health(
 @router.post("/sync", response_model=SyncReport)
 async def sync_kg(
     _admin: Annotated[None, Depends(require_admin)],
+    _legacy_guard: Annotated[None, Depends(require_legacy_kg_routes_enabled)],
     db: Annotated[AsyncSession, Depends(get_async_db)],
     config: Annotated[Settings, Depends(get_settings)],
     body: KGSyncRequest | None = None,
@@ -116,6 +131,7 @@ async def kg_health(payload: Annotated[dict, Depends(get_kg_health)]) -> dict:
 
 @router.get("/topic/{slug}/context", response_model=TopicContext)
 async def kg_topic_context(
+    _legacy_guard: Annotated[None, Depends(require_legacy_kg_routes_enabled)],
     slug: str,
     service: Annotated[KGService, Depends(get_kg_service)],
     hops: int = 2,
@@ -129,6 +145,7 @@ async def kg_topic_context(
 
 @router.post("/path", response_model=LearningPath)
 async def kg_path(
+    _legacy_guard: Annotated[None, Depends(require_legacy_kg_routes_enabled)],
     body: KGPathRequest,
     service: Annotated[KGService, Depends(get_kg_service)],
 ) -> LearningPath:
@@ -145,6 +162,7 @@ async def kg_path(
 
 @router.get("/recommend/next", response_model=list[RankedCandidate])
 async def kg_recommend_next(
+    _legacy_guard: Annotated[None, Depends(require_legacy_kg_routes_enabled)],
     user_id: uuid.UUID,
     service: Annotated[KGService, Depends(get_kg_service)],
     candidate_limit: int = 20,

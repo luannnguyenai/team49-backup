@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import uuid
+from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 
 from src.api.app import app
@@ -126,3 +128,14 @@ async def test_kg_topic_context_returns_404_when_slug_missing() -> None:
         app.dependency_overrides.clear()
 
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_kg_legacy_guard_returns_410_when_disabled() -> None:
+    with pytest.raises(HTTPException) as exc_info:
+        await kg_router.require_legacy_kg_routes_enabled(
+            SimpleNamespace(allow_legacy_kg_routes=False)
+        )
+
+    assert exc_info.value.status_code == 410
+    assert "Legacy KG routes are disabled" in exc_info.value.detail

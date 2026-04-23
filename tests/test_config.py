@@ -63,6 +63,7 @@ def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch
         "ALLOW_LEGACY_MASTERY_WRITES",
         "ALLOW_LEGACY_PLANNER_WRITES",
         "ALLOW_LEGACY_TOPIC_CONTENT_READS",
+        "ALLOW_LEGACY_KG_ROUTES",
     ):
         monkeypatch.delenv(env_name, raising=False)
 
@@ -81,6 +82,7 @@ def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch
     assert settings.allow_legacy_mastery_writes is True
     assert settings.allow_legacy_planner_writes is True
     assert settings.allow_legacy_topic_content_reads is True
+    assert settings.allow_legacy_kg_routes is True
 
 
 def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch):
@@ -99,6 +101,7 @@ def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setenv("ALLOW_LEGACY_MASTERY_WRITES", "0")
     monkeypatch.setenv("ALLOW_LEGACY_PLANNER_WRITES", "FALSE")
     monkeypatch.setenv("ALLOW_LEGACY_TOPIC_CONTENT_READS", "no")
+    monkeypatch.setenv("ALLOW_LEGACY_KG_ROUTES", "false")
 
     settings = Settings(_env_file=None)
 
@@ -115,3 +118,4 @@ def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch)
     assert settings.allow_legacy_mastery_writes is False
     assert settings.allow_legacy_planner_writes is False
     assert settings.allow_legacy_topic_content_reads is False
+    assert settings.allow_legacy_kg_routes is False

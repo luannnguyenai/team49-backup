@@ -144,6 +144,10 @@ class Settings(BaseSettings):
         default=True,
         description="Allow legacy content APIs backed by modules/topics.",
     )
+    allow_legacy_kg_routes: bool = Field(
+        default=True,
+        description="Allow legacy KG routes backed by modules/topics/questions/knowledge_components.",
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod
