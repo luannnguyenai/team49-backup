@@ -87,6 +87,11 @@ def _normalize_text(value: str | None) -> str:
     return " ".join(str(value).lower().split())
 
 
+def _tokenize_for_overlap(value: str | None) -> set[str]:
+    normalized = _normalize_text(value)
+    return {token for token in normalized.split() if len(token) >= 4}
+
+
 def _parse_timestamp_to_seconds(value: str | int | float | None) -> int | None:
     if value is None:
         return None
@@ -146,6 +151,118 @@ def _transcript_path_for_lecture(course_dir: Path, lecture: dict[str, Any]) -> P
         return None
     path = course_dir / "transcripts" / transcript_name
     return path if path.exists() else None
+
+
+def _build_transcript_bundle(text: str) -> dict[str, Any]:
+    segments: list[dict[str, Any]] = []
+    current_timestamp: int | None = None
+    current_lines: list[str] = []
+
+    def flush_segment() -> None:
+        nonlocal current_lines
+        if current_timestamp is None:
+            current_lines = []
+            return
+        segment_text = " ".join(line.strip() for line in current_lines if line.strip())
+        segments.append(
+            {
+                "timestamp_s": current_timestamp,
+                "text": segment_text,
+                "normalized_text": _normalize_text(segment_text),
+            }
+        )
+        current_lines = []
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        parsed = _parse_timestamp_to_seconds(line)
+        if parsed is not None and 1 <= len(line.split(":")) <= 3:
+            flush_segment()
+            current_timestamp = parsed
+            continue
+        if current_timestamp is not None:
+            current_lines.append(line)
+    flush_segment()
+    return {
+        "text": text,
+        "normalized_text": _normalize_text(text),
+        "segments": segments,
+    }
+
+
+def _transcript_text(bundle: str | dict[str, Any] | None) -> str:
+    if isinstance(bundle, dict):
+        return str(bundle.get("text") or "")
+    return str(bundle or "")
+
+
+def _transcript_segments(bundle: str | dict[str, Any] | None) -> list[dict[str, Any]]:
+    if isinstance(bundle, dict):
+        return list(bundle.get("segments") or [])
+    return _build_transcript_bundle(_transcript_text(bundle)).get("segments", [])
+
+
+def _select_segment(
+    segments: list[dict[str, Any]],
+    *,
+    transcript_quotes: list[str],
+    preferred_timestamps: list[int],
+    window_start: int | None,
+    window_end: int | None,
+) -> dict[str, Any] | None:
+    if not segments:
+        return None
+
+    def in_window(segment: dict[str, Any]) -> bool:
+        ts = segment.get("timestamp_s")
+        if ts is None:
+            return False
+        if window_start is not None and ts < window_start:
+            return False
+        if window_end is not None and ts > window_end:
+            return False
+        return True
+
+    window_segments = [segment for segment in segments if in_window(segment)] or segments
+
+    normalized_quotes = [(quote, _normalize_text(quote)) for quote in transcript_quotes if quote.strip()]
+    for pool in (window_segments, segments):
+        for original_quote, normalized_quote in sorted(normalized_quotes, key=lambda item: len(item[1]), reverse=True):
+            if not normalized_quote:
+                continue
+            for segment in pool:
+                if normalized_quote in segment["normalized_text"]:
+                    return {
+                        "timestamp_s": segment["timestamp_s"],
+                        "evidence_span": segment["text"] or original_quote,
+                    }
+
+    if preferred_timestamps:
+        target = preferred_timestamps[0]
+        pool = [segment for segment in window_segments if segment.get("timestamp_s") is not None]
+        if pool:
+            nearest = min(pool, key=lambda segment: abs(segment["timestamp_s"] - target))
+            return {
+                "timestamp_s": nearest["timestamp_s"],
+                "evidence_span": nearest["text"],
+            }
+
+    quote_tokens = set().union(*(_tokenize_for_overlap(quote) for quote in transcript_quotes))
+    if quote_tokens:
+        scored_segments: list[tuple[int, int, dict[str, Any]]] = []
+        for segment in window_segments:
+            overlap = len(quote_tokens & _tokenize_for_overlap(segment.get("text")))
+            if overlap <= 0:
+                continue
+            scored_segments.append((overlap, len(segment.get("text") or ""), segment))
+        if scored_segments:
+            _, _, best = max(scored_segments, key=lambda item: (item[0], item[1]))
+            return {
+                "timestamp_s": best["timestamp_s"],
+                "evidence_span": best["text"],
+            }
+
+    return None
 
 
 def _build_course_context(courses_dir: Path, selected_courses: list[str] | None) -> tuple[list[dict[str, Any]], dict[tuple[str, int], dict[str, Any]]]:
@@ -323,43 +440,69 @@ def _build_unit_tables(
     return unit_rows, unit_kp_rows, unit_index, rejected
 
 
-def _load_transcript_cache(unit_rows: list[dict[str, Any]]) -> dict[str, str]:
-    cache: dict[str, str] = {}
+def _load_transcript_cache(unit_rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    cache: dict[str, dict[str, Any]] = {}
     for row in unit_rows:
         transcript_path = row.get("transcript_path")
         if not transcript_path or transcript_path in cache:
             continue
         path = Path(transcript_path)
-        cache[transcript_path] = path.read_text(encoding="utf-8") if path.exists() else ""
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        cache[transcript_path] = _build_transcript_bundle(text)
     return cache
 
 
-def _derive_source_ref(item: dict[str, Any], artifact: dict[str, Any], unit_row: dict[str, Any], transcript_text: str) -> dict[str, Any]:
+def _derive_source_ref(
+    item: dict[str, Any],
+    artifact: dict[str, Any],
+    unit_row: dict[str, Any],
+    transcript_bundle: str | dict[str, Any] | None,
+) -> dict[str, Any]:
     evidence = item.get("evidence") or {}
     transcript_quotes = [quote.strip() for quote in evidence.get("transcript_quotes", []) if str(quote).strip()]
-    normalized_transcript = _normalize_text(transcript_text)
-    evidence_span = None
-    for quote in sorted(transcript_quotes, key=len, reverse=True):
-        if _normalize_text(quote) in normalized_transcript:
-            evidence_span = quote
-            break
-    if evidence_span is None and transcript_quotes:
-        evidence_span = transcript_quotes[0]
-
     timestamp_values = [
         _parse_timestamp_to_seconds(value)
         for value in evidence.get("timestamps", [])
         if _parse_timestamp_to_seconds(value) is not None
     ]
-    timestamp_start = min(timestamp_values) if timestamp_values else None
-    timestamp_end = max(timestamp_values) if timestamp_values else None
+    content_ref = unit_row.get("content_ref") or {}
+    window_start = content_ref.get("start_s")
+    window_end = content_ref.get("end_s")
+    exact_timestamps = [
+        ts for ts in timestamp_values if window_start is None or window_end is None or (window_start <= ts <= window_end)
+    ]
+    segment_match = _select_segment(
+        _transcript_segments(transcript_bundle),
+        transcript_quotes=transcript_quotes,
+        preferred_timestamps=exact_timestamps or timestamp_values,
+        window_start=window_start,
+        window_end=window_end,
+    )
+
+    evidence_span = segment_match["evidence_span"] if segment_match else None
+    if evidence_span is None and transcript_quotes:
+        evidence_span = transcript_quotes[0]
+
+    timestamp_start = min(exact_timestamps) if exact_timestamps else None
+    timestamp_end = max(exact_timestamps) if exact_timestamps else None
+    if timestamp_start is None and segment_match:
+        timestamp_start = segment_match["timestamp_s"]
+    if timestamp_end is None and segment_match:
+        timestamp_end = segment_match["timestamp_s"]
+
+    multimodal_signals: list[str] = []
+    if evidence_span:
+        multimodal_signals.append("transcript")
+    code_block = item.get("code_block") or {}
+    if evidence.get("source") == "code" or code_block.get("snippet"):
+        multimodal_signals.append("code")
 
     return {
         "unit_id": unit_row["unit_id"],
         "timestamp_start": timestamp_start,
         "timestamp_end": timestamp_end,
         "evidence_span": evidence_span,
-        "multimodal_signals_used": ["transcript"] if evidence_span else [],
+        "multimodal_signals_used": multimodal_signals,
         "video_clip_ref": None,
         "video_url": _first_non_empty(artifact.get("youtube_url"), unit_row.get("content_ref", {}).get("video_url")),
     }
@@ -402,7 +545,7 @@ def _build_question_tables(
         p4_root = course_dir / "processed" / "P4"
         if not p4_root.exists():
             continue
-        for path in sorted(p4_root.rglob("*.json")):
+        for path in sorted(p4_root.rglob("*-p4.json")):
             artifact = _load_json(path)
             unit_id = artifact.get("unit_id")
             unit_row = unit_index.get(unit_id)
@@ -417,7 +560,7 @@ def _build_question_tables(
                     }
                 )
                 continue
-            transcript_text = transcript_cache.get(unit_row.get("transcript_path") or "", "")
+            transcript_bundle = transcript_cache.get(unit_row.get("transcript_path") or "")
             item_phase_map_by_id = {
                 row["item_id"]: row
                 for row in artifact.get("item_phase_map", [])
@@ -437,7 +580,7 @@ def _build_question_tables(
                 if not isinstance(item, dict):
                     continue
                 item_id = item["item_id"]
-                source_ref = _derive_source_ref(item, artifact, unit_row, transcript_text)
+                source_ref = _derive_source_ref(item, artifact, unit_row, transcript_bundle)
                 common = {
                     "course_id": unit_row["course_id"],
                     "lecture_id": unit_row["lecture_id"],
@@ -673,26 +816,27 @@ def validate_canonical_tables(
         start_s = content_ref.get("start_s")
         end_s = content_ref.get("end_s")
         key_points = row.get("key_points") or []
-        bad_keypoint = False
+        sanitized_key_points = []
         if start_s is not None and end_s is not None:
             for point in key_points:
                 ts = point.get("timestamp_s")
                 if ts is not None and not (start_s <= ts <= end_s):
                     _reject_row(
                         rejected,
-                        row_kind="units",
-                        row_id=row["unit_id"],
+                        row_kind="unit_key_point",
+                        row_id=f'{row["unit_id"]}::{ts}',
                         reason="key_point_timestamp_out_of_bounds",
                         source_file=row["source_file"],
                         payload=point,
                     )
-                    bad_keypoint = True
-                    break
-        if bad_keypoint:
-            continue
-        validated_units.append(row)
+                    continue
+                sanitized_key_points.append(point)
+        else:
+            sanitized_key_points = list(key_points)
+        validated_units.append({**row, "key_points": sanitized_key_points})
     unit_rows = validated_units
     valid_unit_ids = {row["unit_id"] for row in unit_rows}
+    unit_index = {row["unit_id"]: row for row in unit_rows}
 
     validated_unit_kp = []
     for row in unit_kp_rows:
@@ -731,11 +875,11 @@ def validate_canonical_tables(
             _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="missing_transcript_signal", source_file=row["source_file"], payload=row)
             continue
         evidence_span = source_ref.get("evidence_span")
-        transcript_text = transcript_cache.get(unit_rows[[u["unit_id"] for u in unit_rows].index(row["unit_id"])]["transcript_path"] or "", "")
+        unit_row = unit_index[row["unit_id"]]
+        transcript_text = _transcript_text(transcript_cache.get(unit_row.get("transcript_path") or ""))
         if not evidence_span or _normalize_text(evidence_span) not in _normalize_text(transcript_text):
             _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="evidence_span_not_in_transcript", source_file=row["source_file"], payload=row)
             continue
-        unit_row = next(unit for unit in unit_rows if unit["unit_id"] == row["unit_id"])
         content_ref = unit_row.get("content_ref") or {}
         start_s = content_ref.get("start_s")
         end_s = content_ref.get("end_s")
