@@ -76,6 +76,26 @@ Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, valid
 
 **Hệ quả:** Phase tiếp theo có thể tập trung vào service/repository/router integration mà không phải tranh luận lại source-of-truth. UI vẫn không bị đụng trong lượt DB hardening này.
 
+### [ADR-10] Runtime canonical cutover dùng feature flags, không xóa legacy data — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical content và learner/planner tables đã vào DB, bước kế tiếp là cho runtime bắt đầu đọc/ghi theo canonical data thay vì chỉ giữ schema foundation.
+
+**Quyết định:** Triển khai cutover theo hướng additive:
+
+- thêm bridge columns:
+  - `courses.canonical_course_id`
+  - `learning_units.canonical_unit_id`
+  - `sessions.canonical_phase`
+  - `interactions.canonical_item_id`
+- thêm canonical question selector đọc `question_bank` + `item_phase_map`
+- thêm canonical assessment submit ghi `interactions.canonical_item_id` và update `learner_mastery_kp`
+- thêm canonical planner branch đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
+- thêm parity checker trước khi freeze legacy tables
+
+Tất cả runtime branch mới đều nằm sau feature flags. Không drop/truncate bảng cũ trong lượt này.
+
+**Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật.
+
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".

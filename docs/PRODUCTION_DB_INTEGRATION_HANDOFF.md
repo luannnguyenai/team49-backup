@@ -143,7 +143,7 @@ Current writer:
 Current status:
 
 - Already writes a compatibility snapshot when `write_goal_preferences_enabled=true`.
-- This is not the final course-first goal contract yet.
+- This is not the final course-first goal contract yet unless `selected_course_ids` is populated by the integration/onboarding layer.
 
 Required final payload:
 
@@ -171,7 +171,8 @@ Target table: `learner_mastery_kp`
 
 Current writer:
 
-- repository exists, but no runtime service writes this yet
+- `src/services/canonical_mastery_service.py:update_kp_mastery_from_item`
+- called from canonical assessment submit when `write_canonical_interactions_enabled=true` and `write_learner_mastery_kp_enabled=true`
 
 Required final payload:
 
@@ -198,7 +199,8 @@ Correct input sources:
 Integration note:
 
 - Do not map legacy `topic_id` directly to fake `kp_id`.
-- If the assessor only has a topic-level result, keep writing compatibility `mastery_scores` until the item-to-KP bridge is available.
+- Canonical mastery writes require `canonical_item_id`, then resolve KP through `item_kp_map`.
+- If the assessor only has a topic-level result, keep writing compatibility `mastery_scores`.
 
 ### Waived Units
 
@@ -248,7 +250,9 @@ Current writer:
 Current status:
 
 - Already writes legacy topic-grain audit when `write_planner_audit_enabled=true`.
-- `rationale_log.learning_unit_id` is currently `null` for this compatibility path.
+- Also has a canonical unit-grain branch when `read_canonical_planner_enabled=true`.
+- Legacy audit keeps `rationale_log.learning_unit_id=null`.
+- Canonical branch writes real `rationale_log.learning_unit_id`.
 
 Required final `plan_history` payload:
 
@@ -353,10 +357,10 @@ The current importer validates columns/counts and verifies post-import row count
 These are intentional gaps, not missing UI work:
 
 - `goal_preferences.selected_course_ids` is not fully populated by current onboarding because the old flow is still topic/module-grain.
-- `learner_mastery_kp` is not written by runtime until assessor can process item-level evidence through `item_kp_map`.
+- `learner_mastery_kp` is only written by the canonical assessment branch; legacy topic assessment still writes `mastery_scores`.
 - `waived_units` is not written by runtime until skip logic can identify `learning_units.id`.
-- `plan_history` currently has a compatibility writer from legacy recommendation generation; final planner should write unit-grain paths.
-- `rationale_log.learning_unit_id` can be `null` only for compatibility audits. Final planner writes should populate it.
+- `plan_history` has both legacy compatibility audit and canonical unit-grain audit branches.
+- `rationale_log.learning_unit_id` can be `null` only for legacy compatibility audits.
 
 ## Do Not Do
 
@@ -387,10 +391,10 @@ PYTHONPATH=. python src/scripts/pipeline/check_canonical_runtime_parity.py
 
 ## Minimal Next Backend Tasks
 
-1. Run migrations and import canonical content in the target PostgreSQL environment.
-2. Add a bridge from runtime answer events to canonical `question_bank.item_id`.
-3. Update assessor to write `learner_mastery_kp` from `item_kp_map` and `item_calibration`.
-4. Update onboarding to write real `selected_course_ids` in `goal_preferences`.
-5. Replace topic-grain planner generation with unit-grain planner generation.
-6. Update skip verification to write `waived_units` with evidence.
-7. Flip read flags only after table parity checks pass.
+1. Run `alembic upgrade head` in the target PostgreSQL environment.
+2. Import canonical content with `src/scripts/pipeline/import_canonical_artifacts_to_db.py`.
+3. Backfill product links with `src/scripts/pipeline/backfill_product_canonical_links.py --apply`.
+4. Run parity check with `src/scripts/pipeline/check_canonical_runtime_parity.py`.
+5. Populate real `goal_preferences.selected_course_ids` from onboarding/integration.
+6. Enable read/write flags only after parity checks pass.
+7. Update skip verification to write `waived_units` with evidence.
