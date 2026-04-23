@@ -6,6 +6,17 @@ package to discover all tables.
 """
 
 from src.models.base import Base  # noqa: F401
+from src.models.canonical import (  # noqa: F401
+    CanonicalUnit,
+    ConceptKP,
+    ItemCalibration,
+    ItemKPMap,
+    ItemPhaseMap,
+    PrerequisiteEdge,
+    PrunedEdge,
+    QuestionBankItem,
+    UnitKPMap,
+)
 from src.models.content import KnowledgeComponent, Module, Question, Topic  # noqa: F401
 from src.models.course import (  # noqa: F401
     Course,
@@ -52,6 +63,16 @@ __all__ = [
     "Topic",
     "KnowledgeComponent",
     "Question",
+    # Canonical content artifact tables
+    "ConceptKP",
+    "CanonicalUnit",
+    "UnitKPMap",
+    "QuestionBankItem",
+    "ItemCalibration",
+    "ItemPhaseMap",
+    "ItemKPMap",
+    "PrerequisiteEdge",
+    "PrunedEdge",
     # Course platform
     "Course",
     "CourseOverview",
