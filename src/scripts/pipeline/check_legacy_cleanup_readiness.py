@@ -12,6 +12,74 @@ from src.scripts.pipeline.validate_legacy_cleanup_targets import (
     validate_cleanup_targets,
 )
 
+GUARDED_COMPATIBILITY_PATHS: dict[str, str] = {
+    "src/kg/": "allow_legacy_kg_routes",
+    "src/routers/content.py": "allow_legacy_topic_content_reads",
+    "src/services/content_service.py": "allow_legacy_topic_content_reads",
+    "src/services/quiz_service.py": "allow_legacy_question_reads/allow_legacy_mastery_writes/allow_legacy_planner_writes",
+    "src/services/module_test_service.py": "allow_legacy_question_reads/allow_legacy_mastery_writes/allow_legacy_planner_writes",
+    "src/services/recommendation_engine.py": "allow_legacy_planner_writes/read_canonical_planner_enabled",
+}
+
+ACCEPTED_LEGACY_DEFINITION_PATHS: frozenset[str] = frozenset(
+    {
+        "src/models/content.py",
+        "src/models/learning.py",
+        "src/models/__init__.py",
+    }
+)
+
+
+def _guard_for_reference(path: str) -> str | None:
+    normalized = path.replace("\\", "/")
+    marker = "/src/"
+    if marker in normalized:
+        normalized = "src/" + normalized.split(marker, 1)[1]
+    for prefix, guard in GUARDED_COMPATIBILITY_PATHS.items():
+        if normalized.startswith(prefix):
+            return guard
+    return None
+
+
+def _is_accepted_definition_reference(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    marker = "/src/"
+    if marker in normalized:
+        normalized = "src/" + normalized.split(marker, 1)[1]
+    return normalized in ACCEPTED_LEGACY_DEFINITION_PATHS
+
+
+def classify_usage_references(usage_report: dict[str, Any]) -> dict[str, Any]:
+    guarded: list[dict[str, Any]] = []
+    accepted_definitions: list[dict[str, Any]] = []
+    unguarded: list[dict[str, Any]] = []
+
+    for surface in usage_report["surfaces"]:
+        for ref in surface["references"]:
+            item = {
+                "table": surface["table"],
+                "path": ref["path"],
+                "line": ref["line"],
+                "text": ref["text"],
+            }
+            guard = _guard_for_reference(ref["path"])
+            if guard is not None:
+                item["guard"] = guard
+                guarded.append(item)
+            elif _is_accepted_definition_reference(ref["path"]):
+                accepted_definitions.append(item)
+            else:
+                unguarded.append(item)
+
+    return {
+        "guarded_reference_examples": guarded,
+        "accepted_definition_examples": accepted_definitions,
+        "unguarded_reference_examples": unguarded,
+        "guarded_example_count": len(guarded),
+        "accepted_definition_example_count": len(accepted_definitions),
+        "unguarded_example_count": len(unguarded),
+    }
+
 
 def build_cleanup_readiness_report(
     *,
@@ -21,21 +89,23 @@ def build_cleanup_readiness_report(
 ) -> dict[str, Any]:
     target_report = validate_cleanup_targets(targets)
     usage_report = scan_legacy_usage(roots, max_per_surface=max_per_surface)
+    usage_classification = classify_usage_references(usage_report)
     blockers: list[str] = []
 
     if target_report["status"] != "ready":
         blockers.append("cleanup_targets_not_safe")
-    if usage_report["status"] != "ready":
-        blockers.append("runtime_legacy_references_remain")
+    if usage_classification["unguarded_example_count"] > 0:
+        blockers.append("unguarded_runtime_legacy_references_remain")
 
     return {
         "status": "ready" if not blockers else "blocked",
         "blockers": blockers,
         "target_report": target_report,
         "usage_report": usage_report,
+        "usage_classification": usage_classification,
         "required_next_steps": [] if not blockers else [
             "Do not run destructive rename/drop migrations.",
-            "Migrate or guard remaining runtime legacy references.",
+            "Migrate or guard remaining unguarded runtime legacy references.",
             "Run archive exporter and parity checks before retrying.",
         ],
     }

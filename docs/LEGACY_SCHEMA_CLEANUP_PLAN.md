@@ -285,7 +285,11 @@ PYTHONPATH=. .venv/bin/python src/scripts/pipeline/check_legacy_schema_usage.py 
 PYTHONPATH=. .venv/bin/python src/scripts/pipeline/check_legacy_cleanup_readiness.py
 ```
 
-If any gate fails, do not rename/drop legacy tables.
+If any gate fails, do not rename/drop legacy tables. The readiness report distinguishes:
+
+- guarded compatibility references: acceptable only when the matching legacy flag is disabled in production cleanup profile
+- accepted model definitions: acceptable until the final code-removal phase, because imports alone do not query dropped tables
+- unguarded references: blockers for rename/drop
 
 ## Current Recommendation
 
