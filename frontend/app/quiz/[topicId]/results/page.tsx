@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { MasteryLevel, QuizCompleteResponse } from "@/types";
+import { buildQuizRuntimeRef } from "@/lib/canonical-learning-runtime";
 import { MASTERY_COLORS, BLOOM_COLORS } from "@/lib/ui/skillColors";
 
 // ---------------------------------------------------------------------------
@@ -132,12 +133,13 @@ function BloomRow({ label, value, color }: { label: string; value: string; color
 function QuizResultsInner() {
   const { topicId } = useParams<{ topicId: string }>();
   const router = useRouter();
+  const runtimeRef = buildQuizRuntimeRef(topicId);
 
   const [result, setResult] = useState<QuizCompleteResponse | null>(null);
   const [animReady, setAnimReady] = useState(false);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem(`quiz_result_${topicId}`);
+    const raw = sessionStorage.getItem(runtimeRef.resultStorageKey);
     if (raw) {
       try {
         setResult(JSON.parse(raw));
@@ -148,7 +150,7 @@ function QuizResultsInner() {
     // Trigger bar animations after a brief mount delay
     const t = setTimeout(() => setAnimReady(true), 150);
     return () => clearTimeout(t);
-  }, [topicId]);
+  }, [runtimeRef.resultStorageKey]);
 
   if (!result) {
     return (
@@ -188,7 +190,7 @@ function QuizResultsInner() {
         style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
       >
         <button
-          onClick={() => router.push(`/learn/${topicId}`)}
+          onClick={() => router.push(runtimeRef.learnHref)}
           className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
           style={{ color: "var(--text-secondary)" }}
           aria-label="Quay lại"
@@ -367,7 +369,7 @@ function QuizResultsInner() {
         {/* CTA buttons */}
         <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-3">
           <button
-            onClick={() => router.push(`/quiz/${topicId}`)}
+            onClick={() => router.push(runtimeRef.restartHref)}
             className="btn-secondary flex items-center justify-center gap-2"
           >
             <RotateCcw size={15} />
@@ -375,7 +377,7 @@ function QuizResultsInner() {
           </button>
 
           <button
-            onClick={() => router.push(`/learn/${topicId}`)}
+            onClick={() => router.push(runtimeRef.learnHref)}
             className="btn-secondary flex items-center justify-center gap-2"
           >
             <BookOpen size={15} />

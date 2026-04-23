@@ -25,7 +25,8 @@ import {
   Send,
   X,
 } from "lucide-react";
-import { moduleTestApi } from "@/lib/api";
+import { canonicalModuleTestApi, moduleTestApi } from "@/lib/api";
+import { buildModuleTestRuntimeRef } from "@/lib/canonical-learning-runtime";
 import type {
   ModuleTestAnswerInput,
   ModuleTestStartResponse,
@@ -213,6 +214,7 @@ type Phase = "loading" | "active" | "submitting" | "error";
 export default function ModuleTestPage() {
   const { moduleId } = useParams<{ moduleId: string }>();
   const router = useRouter();
+  const runtimeRef = buildModuleTestRuntimeRef(moduleId);
 
   // ── Core state ───────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<Phase>("loading");
@@ -236,9 +238,9 @@ export default function ModuleTestPage() {
 
   // ── Load session on mount ─────────────────────────────────────────────────
   useEffect(() => {
-    if (!moduleId) return;
-    moduleTestApi
-      .start(moduleId)
+    if (!runtimeRef.sectionId) return;
+    canonicalModuleTestApi
+      .start(runtimeRef.sectionId)
       .then((data) => {
         const flat = flattenQuestions(data.topics);
         setStartData(data);
@@ -258,7 +260,7 @@ export default function ModuleTestPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [moduleId]);
+  }, [runtimeRef.sectionId]);
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
@@ -319,10 +321,10 @@ export default function ModuleTestPage() {
     try {
       const result = await moduleTestApi.submit(sessionId, answerList);
       sessionStorage.setItem(
-        `module_test_result_${moduleId}`,
+        runtimeRef.resultStorageKey,
         JSON.stringify(result)
       );
-      router.push(`/module-test/${moduleId}/results`);
+      router.push(runtimeRef.resultsHref);
     } catch (err: unknown) {
       const d = (err as { response?: { data?: { detail?: string } } })?.response?.data
         ?.detail;

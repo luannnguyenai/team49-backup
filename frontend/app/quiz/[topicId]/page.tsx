@@ -14,7 +14,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { getOptionStyle } from "@/lib/ui/feedbackStyles";
-import { quizApi } from "@/lib/api";
+import { canonicalQuizApi, quizApi } from "@/lib/api";
+import { buildQuizRuntimeRef } from "@/lib/canonical-learning-runtime";
 import type {
   QuestionForQuiz,
   QuizAnswerResponse,
@@ -73,6 +74,7 @@ type Phase = "loading" | "quiz" | "feedback" | "completing" | "error";
 export default function QuizPage() {
   const { topicId } = useParams<{ topicId: string }>();
   const router = useRouter();
+  const runtimeRef = buildQuizRuntimeRef(topicId);
 
   // Session
   const [phase, setPhase] = useState<Phase>("loading");
@@ -96,10 +98,10 @@ export default function QuizPage() {
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
-    if (!topicId) return;
+    if (!runtimeRef.learningUnitId) return;
 
-    quizApi
-      .start(topicId)
+    canonicalQuizApi
+      .start(runtimeRef.learningUnitId)
       .then((data) => {
         setSessionId(data.session_id);
         setQuestions(data.questions);
@@ -121,7 +123,7 @@ export default function QuizPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [topicId]);
+  }, [runtimeRef.learningUnitId]);
 
   // ---------------------------------------------------------------------------
   // Keyboard: A/B/C/D to select, Enter to confirm when selected
@@ -186,8 +188,8 @@ export default function QuizPage() {
 
       try {
         const result = await quizApi.complete(sessionId);
-        sessionStorage.setItem(`quiz_result_${topicId}`, JSON.stringify(result));
-        router.push(`/quiz/${topicId}/results`);
+        sessionStorage.setItem(runtimeRef.resultStorageKey, JSON.stringify(result));
+        router.push(runtimeRef.resultsHref);
       } catch {
         setErrorMsg("Không thể hoàn thành quiz. Vui lòng thử lại.");
         setPhase("error");
@@ -199,7 +201,7 @@ export default function QuizPage() {
       setPhase("quiz");
       questionStartRef.current = Date.now();
     }
-  }, [currentIdx, questions.length, sessionId, topicId, router]);
+  }, [currentIdx, questions.length, sessionId, runtimeRef, router]);
 
   // ---------------------------------------------------------------------------
   // Derived values

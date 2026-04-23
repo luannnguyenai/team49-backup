@@ -32,6 +32,7 @@ import type {
   TopicTestResult,
   WrongAnswerDetail,
 } from "@/types";
+import { buildModuleTestRuntimeRef } from "@/lib/canonical-learning-runtime";
 import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
 
 // ---------------------------------------------------------------------------
@@ -272,6 +273,7 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
 function ModuleTestResultsInner() {
   const { moduleId } = useParams<{ moduleId: string }>();
   const router = useRouter();
+  const runtimeRef = buildModuleTestRuntimeRef(moduleId);
 
   const [result, setResult] = useState<ModuleTestResultResponse | null>(null);
   const [animReady, setAnimReady] = useState(false);
@@ -279,7 +281,7 @@ function ModuleTestResultsInner() {
   const confettiStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem(`module_test_result_${moduleId}`);
+    const raw = sessionStorage.getItem(runtimeRef.resultStorageKey);
     if (raw) {
       try {
         const parsed: ModuleTestResultResponse = JSON.parse(raw);
@@ -297,7 +299,7 @@ function ModuleTestResultsInner() {
       clearTimeout(t);
       if (confettiStopRef.current) clearTimeout(confettiStopRef.current);
     };
-  }, [moduleId]);
+  }, [runtimeRef.resultStorageKey]);
 
   if (!result) {
     return (
@@ -557,7 +559,7 @@ function ModuleTestResultsInner() {
         <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
           {!passed && (
             <button
-              onClick={() => router.push(`/module-test/${moduleId}`)}
+              onClick={() => router.push(runtimeRef.restartHref)}
               className="btn-secondary flex items-center justify-center gap-2"
             >
               <RotateCcw size={15} />
