@@ -25,11 +25,11 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 **Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
 
-### [ADR-7→10] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
+### [ADR-7] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
 
 **Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và learner/planner tables đã có landing zone, cùng một bài toán xuất hiện ở nhiều lớp: nếu runtime tiếp tục đọc/ghi theo `topic/module/questions/mastery_scores` cũ thì production sẽ bị kẹt ở schema legacy; nếu cắt thẳng sang canonical không kiểm soát thì dễ fabricate mapping hoặc phá web hiện tại.
 
-**Quyết định:** Gom cụm ADR 7-10 của phase production hardening thành một chiến lược additive, sau feature flags:
+**Quyết định:** Gom các quyết định canonical DB/runtime cutover của phase production hardening thành một chiến lược additive, sau feature flags:
 
 1. Materialize canonical content artifacts thành DB tables:
    - `concepts_kp`
