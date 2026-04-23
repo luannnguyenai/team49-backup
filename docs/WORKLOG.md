@@ -25,76 +25,42 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 **Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
 
-### [ADR-7] Runtime cutover chỉ nối những write-path có grain an toàn — 23/04/2026
+### [ADR-7→10] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
 
-**Bối cảnh:** Sau khi thêm các sidecar tables mới, nhu cầu kế tiếp là bắt đầu cutover runtime. Tuy nhiên runtime hiện vẫn ở grain `topic/module`, trong khi một phần schema mới (`learner_mastery_kp`, `waived_units`) đòi hỏi grain `kp/unit`.
+**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và learner/planner tables đã có landing zone, cùng một bài toán xuất hiện ở nhiều lớp: nếu runtime tiếp tục đọc/ghi theo `topic/module/questions/mastery_scores` cũ thì production sẽ bị kẹt ở schema legacy; nếu cắt thẳng sang canonical không kiểm soát thì dễ fabricate mapping hoặc phá web hiện tại.
 
-**Quyết định:** Chỉ nối các write-path nào có thể ghi **đúng grain** hoặc ít nhất **compatibility snapshot minh bạch**:
+**Quyết định:** Gom cụm ADR 7-10 của phase production hardening thành một chiến lược additive, sau feature flags:
 
-- nối `update_onboarding()` -> `goal_preferences`
-- nối `generate_learning_path()` -> `plan_history`, `rationale_log`, `planner_session_state`
-- **không** nối:
-  - `mastery_scores` -> `learner_mastery_kp`
-  - `learning_paths.status=skipped` -> `waived_units`
+1. Materialize canonical content artifacts thành DB tables:
+   - `concepts_kp`
+   - `units`
+   - `unit_kp_map`
+   - `question_bank`
+   - `item_calibration`
+   - `item_phase_map`
+   - `item_kp_map`
+   - `prerequisite_edges`
+   - `pruned_edges`
+2. Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, validate manifest counts và upsert idempotent bằng natural keys.
+3. Thêm bridge columns thay vì suy luận ngầm:
+   - `courses.canonical_course_id`
+   - `learning_units.canonical_unit_id`
+   - `sessions.canonical_phase`
+   - `interactions.canonical_item_id`
+4. Runtime chỉ nối các path có grain an toàn:
+   - onboarding ghi compatibility snapshot vào `goal_preferences`
+   - legacy planner ghi audit vào `plan_history`, `rationale_log`, `planner_session_state`
+   - canonical assessment đọc `question_bank` + `item_phase_map`
+   - canonical assessment submit ghi `interactions.canonical_item_id`
+   - canonical mastery update ghi `learner_mastery_kp` qua `item_kp_map`
+   - canonical planner đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
+5. Giữ `waived_units` chưa wire cho đến khi skip flow có `learning_unit_id` thật.
+6. Tạo handoff contract ở `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`.
+7. Thêm parity checker trước khi freeze legacy tables.
 
-cho đến khi có bridge authoritative từ runtime cũ sang canonical `kp_id` / `learning_unit_id`.
+Tất cả read/write path mới đều nằm sau feature flags. Không drop/truncate bảng cũ trong lượt này.
 
-**Hệ quả:** Runtime bắt đầu để lại audit trail hữu ích cho production migration mà không fabricate dữ liệu mới sai grain. Đổi lại, cutover chưa hoàn thành hết; hai flow mastery/waive vẫn phải chờ phase canonical-DB integration kế tiếp.
-
-### [ADR-8] Materialize canonical content artifacts thành bảng DB riêng — 23/04/2026
-
-**Bối cảnh:** Canonical JSONL đã sạch nhưng vẫn là file artifact. Nếu planner/assessor production tiếp tục đọc file, hệ sẽ khó transaction, khó query, khó enforce FK và khó nối runtime với `kp_id` / `unit_id` thật.
-
-**Quyết định:** Tạo ORM + Alembic riêng cho canonical content layer:
-
-- `concepts_kp`
-- `units`
-- `unit_kp_map`
-- `question_bank`
-- `item_calibration`
-- `item_phase_map`
-- `item_kp_map`
-- `prerequisite_edges`
-- `pruned_edges`
-
-Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, validate counts với manifest, và upsert idempotent bằng natural keys.
-
-**Hệ quả:** Production DB giờ có landing zone thật cho content graph và Q-matrix. Các flow `learner_mastery_kp` / `waived_units` vẫn chưa nên nối cho đến khi runtime có bridge đúng từ item/unit/KP canonical.
-
-### [ADR-9] Khóa integration handoff trước khi service/router cutover — 23/04/2026
-
-**Bối cảnh:** Sau khi có bảng mới, migration và importer, rủi ro lớn nhất chuyển sang phía integration: người nối backend có thể vô tình đọc/ghi lẫn giữa bảng compatibility cũ và bảng authoritative mới.
-
-**Quyết định:** Tạo handoff contract riêng ở `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`, mô tả rõ:
-
-- bảng nào authoritative
-- bảng nào compatibility-only
-- write contract cho `goal_preferences`, `learner_mastery_kp`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
-- read contract cho planner/assessor/progress
-- thứ tự migrate/import/cutover
-- các điều không được làm như fabricate `kp_id` từ `topic_id`
-
-**Hệ quả:** Phase tiếp theo có thể tập trung vào service/repository/router integration mà không phải tranh luận lại source-of-truth. UI vẫn không bị đụng trong lượt DB hardening này.
-
-### [ADR-10] Runtime canonical cutover dùng feature flags, không xóa legacy data — 23/04/2026
-
-**Bối cảnh:** Sau khi canonical content và learner/planner tables đã vào DB, bước kế tiếp là cho runtime bắt đầu đọc/ghi theo canonical data thay vì chỉ giữ schema foundation.
-
-**Quyết định:** Triển khai cutover theo hướng additive:
-
-- thêm bridge columns:
-  - `courses.canonical_course_id`
-  - `learning_units.canonical_unit_id`
-  - `sessions.canonical_phase`
-  - `interactions.canonical_item_id`
-- thêm canonical question selector đọc `question_bank` + `item_phase_map`
-- thêm canonical assessment submit ghi `interactions.canonical_item_id` và update `learner_mastery_kp`
-- thêm canonical planner branch đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
-- thêm parity checker trước khi freeze legacy tables
-
-Tất cả runtime branch mới đều nằm sau feature flags. Không drop/truncate bảng cũ trong lượt này.
-
-**Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật.
+**Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật. UI không bị đụng trong lượt DB/runtime cutover này.
 
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
