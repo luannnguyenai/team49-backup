@@ -67,7 +67,7 @@ class QuestionResult:
     correct_answer: CorrectAnswer
     selected_answer: SelectedAnswer | None
     is_correct: bool
-    kc_ids: list[str]  # UUID strings from Question.kc_ids JSON column
+    kc_ids: list[str]  # Concept/KP IDs attached to the answered item
     misconception_a_id: str | None
     misconception_b_id: str | None
     misconception_c_id: str | None

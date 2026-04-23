@@ -17,7 +17,6 @@ from src.models.canonical import (  # noqa: F401
     QuestionBankItem,
     UnitKPMap,
 )
-from src.models.content import KnowledgeComponent, Module, Question, Topic  # noqa: F401
 from src.models.course import (  # noqa: F401
     Course,
     CourseAsset,
@@ -34,8 +33,6 @@ from src.models.learning import (  # noqa: F401
     GoalPreference,
     Interaction,
     LearnerMasteryKP,
-    LearningPath,
-    MasteryScore,
     PlanHistory,
     PlannerSessionState,
     RationaleLog,
@@ -58,11 +55,6 @@ __all__ = [
     "QAHistory",
     # User
     "User",
-    # Content
-    "Module",
-    "Topic",
-    "KnowledgeComponent",
-    "Question",
     # Canonical content artifact tables
     "ConceptKP",
     "CanonicalUnit",
@@ -87,8 +79,6 @@ __all__ = [
     # Learning
     "Session",
     "Interaction",
-    "MasteryScore",
-    "LearningPath",
     "LearnerMasteryKP",
     "GoalPreference",
     "WaivedUnit",

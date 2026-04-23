@@ -24,6 +24,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime, timedelta
 
+from sqlalchemy import or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.learning import (
@@ -66,7 +67,12 @@ async def get_history(
         filters.append(Session.session_type == session_type)
 
     if module_id is not None:
-        filters.append(Session.module_id == module_id)
+        filters.append(
+            or_(
+                Session.module_id == module_id,
+                Session.canonical_section_id == module_id,
+            )
+        )
 
     if days is not None:
         cutoff = datetime.now(UTC) - timedelta(days=days)
@@ -110,9 +116,9 @@ def _session_to_item(
 
     # Determine display subject
     if sess.session_type == SessionType.module_test:
-        subject = module_name or str(sess.module_id or "—")
+        subject = module_name or str(sess.canonical_section_id or sess.module_id or "—")
     else:
-        subject = topic_name or module_name or "—"
+        subject = topic_name or module_name or sess.canonical_phase or "—"
 
     return HistoryItem(
         session_id=sess.id,
@@ -121,8 +127,8 @@ def _session_to_item(
         completed_at=sess.completed_at,
         duration_seconds=duration,
         subject=subject,
-        topic_id=sess.topic_id,
-        module_id=sess.module_id,
+        topic_id=sess.canonical_unit_id or sess.topic_id,
+        module_id=sess.canonical_section_id or sess.module_id,
         score_percent=sess.score_percent,
         correct_count=sess.correct_count,
         total_questions=sess.total_questions,

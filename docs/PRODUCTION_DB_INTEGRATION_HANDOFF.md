@@ -23,8 +23,9 @@ Implemented and committed:
 - learner/planner sidecar ORM tables and migration
 - canonical content ORM tables and migration
 - canonical JSONL importer with manifest validation and post-import DB count verification
-- safe write flags for the first cutover paths
-- compatibility writes for onboarding goal snapshots and planner audit snapshots
+- canonical-only assessment / quiz / module-test runtime reads-writes
+- hard drop migration for legacy curriculum/mastery/planner tables
+- canonical history filtering and subject rendering for section/unit-backed sessions
 
 Key files:
 
@@ -43,7 +44,7 @@ Key files:
 
 Validated on local Postgres on 2026-04-23:
 
-- `uv run alembic upgrade head` reached `20260423_item_cal_prior (head)`
+- `uv run alembic upgrade head` reached `20260423_drop_legacy (head)`
 - `PYTHONPATH=. uv run python src/scripts/pipeline/export_canonical_artifacts.py`
 - `PYTHONPATH=. uv run python src/scripts/pipeline/import_canonical_artifacts_to_db.py`
 - `PYTHONPATH=. uv run python src/scripts/pipeline/import_product_shell_to_db.py`
@@ -56,6 +57,16 @@ Observed parity status after import:
 - `unlinked_units = 0`
 - `missing_question_phase_maps = 0`
 - `missing_question_kp_maps = 0`
+
+Observed legacy-drop verification after migration:
+
+- `modules = false`
+- `topics = false`
+- `knowledge_components = false`
+- `questions = false`
+- `mastery_scores = false`
+- `mastery_history = false`
+- `learning_paths = false`
 
 Important contract corrections now enforced in code and DB:
 
@@ -125,20 +136,17 @@ Use these tables as the long-term source of truth:
 
 ## Compatibility-Only Tables
 
-These tables can remain during transition, but new production features should not treat them as the long-term source of truth:
+These tables remain in production runtime after the hard cutover:
 
-- `modules`
-- `topics`
-- `knowledge_components`
-- `questions`
 - `sessions`
 - `interactions`
-- `mastery_scores`
-- `mastery_history`
-- `learning_paths`
 - legacy tutor tables in `src/models/store.py`
 
-Do not remove them until read/write parity is proven. Do not add new semantics to them if the new schema already has a table for that concern.
+Notes:
+
+- `sessions` and `interactions` are still authoritative shared runtime tables, but now canonical fields are the only supported product path.
+- `topic_id`, `module_id`, and `question_id` remain nullable compatibility columns only; they no longer have active FK links to dropped legacy tables.
+- Do not reintroduce any new feature write/read path against dropped legacy tables.
 
 ## Feature Flags
 
@@ -150,12 +158,11 @@ Current flags live in `src/config.py`:
 - `write_planner_audit_enabled`
 - `read_goal_preferences_enabled`
 - `read_learner_mastery_kp_enabled`
+- `read_canonical_questions_enabled`
+- `write_canonical_interactions_enabled`
+- `read_canonical_planner_enabled`
 
-Cutover rule:
-
-- Write flags can be enabled first for audit/sidecar writes.
-- Read flags should only be enabled after the target table has been backfilled and verified.
-- Avoid silent dual-write. If a flow writes both old and new tables, document the old write as compatibility and define which read path wins.
+Legacy allow/deny flags have been removed because the fallback tables no longer exist.
 
 ## Write Contracts
 

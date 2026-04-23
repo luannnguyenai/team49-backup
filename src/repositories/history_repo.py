@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.canonical import QuestionBankItem
+from src.models.course import CourseSection, LearningUnit
 from src.models.learning import Interaction, Session
 
 HistoryDetailRow = tuple[Interaction, None, QuestionBankItem | None, None]
@@ -35,13 +36,15 @@ class HistoryRepository:
         page_size: int,
     ) -> list[tuple[Session, str | None, str | None]]:
         result = await self.session.execute(
-            select(Session)
+            select(Session, LearningUnit.title, CourseSection.title)
+            .outerjoin(LearningUnit, Session.canonical_unit_id == LearningUnit.id)
+            .outerjoin(CourseSection, Session.canonical_section_id == CourseSection.id)
             .where(*filters)
             .order_by(Session.started_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
         )
-        return [(session, None, None) for session in result.scalars().all()]
+        return result.all()
 
     async def fetch_sessions_for_summary(self, *, filters: list) -> list[Session]:
         result = await self.session.execute(

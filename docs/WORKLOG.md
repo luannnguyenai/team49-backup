@@ -222,3 +222,28 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 - Path runtime/test/script rõ vai trò hơn và ít nhầm artifact hơn.
 - Các final outputs dùng để ingest/review được gom đúng chỗ, không còn lẫn trong tree của từng course.
 - Đổi lại, nhiều file metadata và script mặc định phải được patch lại đồng bộ; việc review path cũ sau refactor trở thành bước bắt buộc.
+
+---
+
+### [ADR-9] Hard Canonical Cutover: drop legacy curriculum/mastery/planner tables — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical importer, product-shell backfill, learner/planner sidecar tables và parity checker đã ổn, phần còn lại của rủi ro production nằm ở chỗ runtime vẫn có thể vô tình đọc/ghi các bảng legacy như `modules`, `topics`, `questions`, `mastery_scores`, `learning_paths`. Giữ chúng quá lâu sẽ khiến team tiếp tục build nhầm lên schema cũ.
+
+**Quyết định:**
+- cắt assessment / quiz / module-test sang canonical-only runtime
+- bỏ package `src/kg/*` khỏi runtime codebase vì app không còn mount/use
+- xóa repository/service/test legacy không còn tác dụng
+- bỏ các config allow-flags cho legacy fallback
+- tạo migration `20260423_drop_legacy` để drop thật:
+  - `modules`
+  - `topics`
+  - `knowledge_components`
+  - `questions`
+  - `mastery_scores`
+  - `mastery_history`
+  - `learning_paths`
+
+**Hệ quả:**
+- source-of-truth production rõ hơn nhiều: product/content đi qua `courses/course_sections/learning_units` + canonical artifact tables; mastery/planner đi qua `learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
+- `sessions` và `interactions` vẫn được giữ, nhưng chỉ còn mang nghĩa shared runtime tables với canonical refs
+- đổi lại, mọi contract/document còn dùng từ vựng `topic/module/question` phải được rà lại để không đánh lừa người làm integration/frontend

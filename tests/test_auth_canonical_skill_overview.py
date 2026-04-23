@@ -8,8 +8,6 @@ from src.routers import auth
 
 @pytest.mark.asyncio
 async def test_user_skill_overview_always_uses_canonical_source(monkeypatch):
-    monkeypatch.setattr(auth.settings, "allow_legacy_mastery_reads", True)
-    monkeypatch.setattr(auth.settings, "allow_legacy_topic_content_reads", True)
     monkeypatch.setattr(
         auth,
         "_build_canonical_user_skill_overview",

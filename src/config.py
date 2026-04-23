@@ -128,30 +128,6 @@ class Settings(BaseSettings):
         default=True,
         description="Read planner candidates from canonical learning units and prerequisite graph.",
     )
-    allow_legacy_question_reads: bool = Field(
-        default=False,
-        description="Allow fallback reads from legacy questions/topics.",
-    )
-    allow_legacy_mastery_writes: bool = Field(
-        default=False,
-        description="Allow fallback writes into legacy mastery_scores.",
-    )
-    allow_legacy_mastery_reads: bool = Field(
-        default=False,
-        description="Allow fallback reads from legacy mastery_scores.",
-    )
-    allow_legacy_planner_writes: bool = Field(
-        default=False,
-        description="Allow fallback writes into legacy learning_paths.",
-    )
-    allow_legacy_topic_content_reads: bool = Field(
-        default=False,
-        description="Allow fallback content reads backed by legacy modules/topics.",
-    )
-    allow_legacy_kg_routes: bool = Field(
-        default=False,
-        description="Allow legacy KG routes backed by modules/topics/questions/knowledge_components.",
-    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod

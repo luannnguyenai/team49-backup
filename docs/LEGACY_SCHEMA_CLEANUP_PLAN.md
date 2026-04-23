@@ -2,6 +2,24 @@
 
 Mục tiêu của tài liệu này là làm rõ phần schema cũ còn tồn tại sau canonical DB/runtime cutover, tránh team tiếp tục build feature mới trên bảng legacy, và chuẩn bị một lộ trình drop/archive an toàn cho production.
 
+## Status Update — 2026-04-23
+
+Plan này đã được thực thi ở mức runtime + DB:
+
+- `src` không còn runtime reference production nào tới `modules`, `topics`, `knowledge_components`, `questions`, `mastery_scores`, `mastery_history`, `learning_paths`
+- legacy KG package `src/kg/*` đã được gỡ khỏi runtime codebase
+- Alembic head hiện là `20260423_drop_legacy`
+- các bảng legacy sau đã bị drop khỏi DB dev:
+  - `modules`
+  - `topics`
+  - `knowledge_components`
+  - `questions`
+  - `mastery_scores`
+  - `mastery_history`
+  - `learning_paths`
+
+Từ thời điểm này, tài liệu này nên được đọc như historical record + rationale cho cleanup đã hoàn thành, không còn là kế hoạch pending.
+
 ## Nguyên tắc
 
 1. Không drop bảng cũ khi chưa chứng minh runtime không còn dependency.
