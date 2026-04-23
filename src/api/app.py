@@ -42,7 +42,6 @@ from src.routers.module_test import module_test_router
 from src.routers.quiz import quiz_router
 from src.routers.test_support import test_support_router
 from src.config import settings
-from src.kg.router import router as kg_router
 
 logger = logging.getLogger(__name__)
 DATA_ROOT = Path("data").resolve()
@@ -109,7 +108,6 @@ app.include_router(learning_path_router)
 app.include_router(module_test_router)
 app.include_router(quiz_router)
 app.include_router(test_support_router)
-app.include_router(kg_router)
 
 
 # ---------------------------------------------------------------------------
