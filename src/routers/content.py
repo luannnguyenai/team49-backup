@@ -21,26 +21,18 @@ from src.schemas.content import (
     CourseSectionDetailResponse,
     CourseSectionListItem,
     LearningUnitContentResponse,
-    ModuleDetailResponse,
-    ModuleListItem,
-    TopicContentResponse,
-    TopicDetailResponse,
 )
 from src.services.content_service import (
     get_course_section_detail,
     get_learning_unit_content,
-    get_module_detail,
-    get_topic_content,
-    get_topic_detail,
     list_course_sections,
-    list_modules,
 )
 
 content_router = APIRouter(prefix="/api", tags=["Content"])
 
 
 def _use_canonical_content_compat() -> bool:
-    """Keep old frontend routes alive while sourcing rows from canonical tables."""
+    """Disable legacy seed/import behavior when canonical content cutover is active."""
     return not settings.allow_legacy_topic_content_reads
 
 
@@ -124,11 +116,9 @@ async def api_get_learning_unit_content(
 
 @content_router.get(
     "/modules",
-    response_model=list[ModuleListItem],
-    summary="List all curriculum modules with topic counts",
+    summary="Retired legacy module list endpoint",
 )
-async def api_list_modules(
-) -> list[ModuleListItem]:
+async def api_list_modules() -> None:
     _legacy_content_gone()
 
 
@@ -139,12 +129,9 @@ async def api_list_modules(
 
 @content_router.get(
     "/modules/{module_id}",
-    response_model=ModuleDetailResponse,
-    summary="Get a module with its ordered topic list",
+    summary="Retired legacy module detail endpoint",
 )
-async def api_get_module(
-    module_id: uuid.UUID,
-) -> ModuleDetailResponse:
+async def api_get_module(module_id: uuid.UUID) -> None:
     _legacy_content_gone()
 
 
@@ -155,12 +142,9 @@ async def api_get_module(
 
 @content_router.get(
     "/topics/{topic_id}",
-    response_model=TopicDetailResponse,
-    summary="Get topic detail with resolved prerequisite graph",
+    summary="Retired legacy topic detail endpoint",
 )
-async def api_get_topic(
-    topic_id: uuid.UUID,
-) -> TopicDetailResponse:
+async def api_get_topic(topic_id: uuid.UUID) -> None:
     _legacy_content_gone()
 
 
@@ -171,12 +155,9 @@ async def api_get_topic(
 
 @content_router.get(
     "/topics/{topic_id}/content",
-    response_model=TopicContentResponse,
-    summary="Get learning content (markdown + video) for a topic",
+    summary="Retired legacy topic content endpoint",
 )
-async def api_get_topic_content(
-    topic_id: uuid.UUID,
-) -> TopicContentResponse:
+async def api_get_topic_content(topic_id: uuid.UUID) -> None:
     _legacy_content_gone()
 
 
