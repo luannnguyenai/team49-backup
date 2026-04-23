@@ -147,7 +147,7 @@ def upgrade() -> None:
         sa.Column("course_id", sa.String(length=80), nullable=False),
         sa.Column("lecture_id", sa.String(length=160), nullable=True),
         sa.Column("unit_id", sa.String(length=220), nullable=False),
-        sa.Column("difficulty_prior", sa.String(length=80), nullable=True),
+        sa.Column("difficulty_prior", sa.Float(), nullable=True),
         sa.Column("discrimination_prior", sa.Float(), nullable=True),
         sa.Column("guessing_prior", sa.Float(), nullable=True),
         sa.Column("calibration_confidence", sa.String(length=40), nullable=True),

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from src.scripts.pipeline import export_canonical_artifacts as exporter
 from src.scripts.pipeline.export_canonical_artifacts import export_canonical_artifacts
 
 
@@ -332,3 +333,36 @@ def test_export_canonical_artifacts_smoke(tmp_path: Path) -> None:
         "validation_report.json",
     }
     assert expected_files.issubset({path.name for path in output_dir.iterdir()})
+
+
+def test_expand_phase_rows_supports_legacy_phase_map_shape() -> None:
+    rows = exporter._expand_phase_rows(
+        "mini-q1",
+        {
+            "eligible_phases": ["placement", "review"],
+            "recommended_phase": "placement",
+            "phase_weight_multipliers": {"placement": 1.0, "review": 0.7},
+        },
+        {"course_id": "CSMini"},
+    )
+
+    assert rows == [
+        {
+            "course_id": "CSMini",
+            "item_id": "mini-q1",
+            "phase": "placement",
+            "phase_multiplier": 1.0,
+            "suitability_score": "high",
+            "selection_priority": None,
+            "phase_rationale": None,
+        },
+        {
+            "course_id": "CSMini",
+            "item_id": "mini-q1",
+            "phase": "review",
+            "phase_multiplier": 0.7,
+            "suitability_score": "medium",
+            "selection_priority": None,
+            "phase_rationale": None,
+        },
+    ]

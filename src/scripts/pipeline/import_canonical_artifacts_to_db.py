@@ -33,6 +33,7 @@ from src.models.canonical import (
 
 DEFAULT_INPUT_DIR = CANONICAL_ARTIFACTS_DIR
 CHUNK_SIZE = 500
+_ORDINAL_SCORE_MAP = {"high": 1.0, "medium": 0.8, "low": 0.6}
 
 
 @dataclass(frozen=True)
@@ -84,6 +85,25 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def load_manifest(input_dir: Path) -> dict[str, Any]:
     path = input_dir / "manifest.json"
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def normalize_rows(table_name: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if table_name != "item_phase_map":
+        return rows
+
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        next_row = dict(row)
+        suitability_score = next_row.get("suitability_score")
+        if isinstance(suitability_score, str):
+            mapped = _ORDINAL_SCORE_MAP.get(suitability_score.strip().lower())
+            if mapped is None:
+                raise ValueError(
+                    f"item_phase_map suitability_score has unsupported value: {suitability_score!r}"
+                )
+            next_row["suitability_score"] = mapped
+        normalized.append(next_row)
+    return normalized
 
 
 def validate_rows(table_name: str, rows: list[dict[str, Any]], spec: ImportSpec) -> None:
@@ -216,6 +236,7 @@ def validate_canonical_artifacts(input_dir: Path = DEFAULT_INPUT_DIR) -> dict[st
 
     for table_name, spec in IMPORT_SPECS.items():
         rows = load_jsonl(input_dir / spec.filename)
+        rows = normalize_rows(table_name, rows)
         validate_rows(table_name, rows, spec)
         loaded[table_name] = rows
         counts[table_name] = len(rows)

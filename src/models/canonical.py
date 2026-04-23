@@ -162,7 +162,7 @@ class ItemCalibration(TimestampMixin, Base):
     unit_id: Mapped[str] = mapped_column(
         String(220), ForeignKey("units.unit_id", ondelete="CASCADE"), nullable=False
     )
-    difficulty_prior: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    difficulty_prior: Mapped[float | None] = mapped_column(Float, nullable=True)
     discrimination_prior: Mapped[float | None] = mapped_column(Float, nullable=True)
     guessing_prior: Mapped[float | None] = mapped_column(Float, nullable=True)
     calibration_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)

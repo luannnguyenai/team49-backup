@@ -511,6 +511,14 @@ def _derive_source_ref(
 def _expand_phase_rows(item_id: str, row: dict[str, Any], common: dict[str, Any]) -> list[dict[str, Any]]:
     suitability = row.get("suitability_by_phase", {})
     multipliers = row.get("phase_multiplier_by_phase", {})
+    if not suitability and isinstance(row.get("eligible_phases"), list):
+        recommended_phase = row.get("recommended_phase")
+        suitability = {
+            phase: "high" if phase == recommended_phase else "medium"
+            for phase in row.get("eligible_phases", [])
+        }
+    if not multipliers and isinstance(row.get("phase_weight_multipliers"), dict):
+        multipliers = row.get("phase_weight_multipliers", {})
     phases = sorted(set(suitability) | set(multipliers))
     output = []
     for phase in phases:

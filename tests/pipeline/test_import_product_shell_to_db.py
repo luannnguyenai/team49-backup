@@ -1,4 +1,5 @@
 import json
+import uuid
 from pathlib import Path
 
 from src.scripts.pipeline import import_product_shell_to_db as importer
@@ -118,3 +119,57 @@ def test_product_shell_import_uses_natural_conflict_keys():
     assert importer.conflict_columns_for_table("course_overviews") == ("course_id",)
     assert importer.conflict_columns_for_table("course_sections") == ("id",)
     assert importer.conflict_columns_for_table("learning_units") == ("course_id", "slug")
+
+
+def test_rebind_bundle_foreign_keys_uses_existing_course_and_section_ids():
+    source_course_id = uuid.uuid4()
+    source_section_id = uuid.uuid4()
+    actual_course_id = uuid.uuid4()
+    actual_section_id = uuid.uuid4()
+
+    bundle = {
+        "courses": [
+            {
+                "id": source_course_id,
+                "slug": "cs224n",
+            }
+        ],
+        "course_overviews": [
+            {
+                "id": uuid.uuid4(),
+                "course_id": source_course_id,
+            }
+        ],
+        "course_sections": [
+            {
+                "id": source_section_id,
+                "course_id": source_course_id,
+                "parent_section_id": None,
+                "title": "Lecture 1",
+                "kind": "lecture_group",
+                "sort_order": 1,
+            }
+        ],
+        "learning_units": [
+            {
+                "id": uuid.uuid4(),
+                "course_id": source_course_id,
+                "section_id": source_section_id,
+                "slug": "lecture01-intro-seg1",
+            }
+        ],
+    }
+
+    rebound = importer.rebind_bundle_foreign_keys(
+        bundle,
+        actual_course_ids_by_slug={"cs224n": actual_course_id},
+        existing_section_ids_by_identity={
+            (actual_course_id, None, "lecture_group", "Lecture 1", 1): actual_section_id
+        },
+    )
+
+    assert rebound["course_overviews"][0]["course_id"] == actual_course_id
+    assert rebound["course_sections"][0]["course_id"] == actual_course_id
+    assert rebound["course_sections"][0]["id"] == actual_section_id
+    assert rebound["learning_units"][0]["course_id"] == actual_course_id
+    assert rebound["learning_units"][0]["section_id"] == actual_section_id

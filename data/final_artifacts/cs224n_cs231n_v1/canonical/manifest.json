@@ -1,6 +1,6 @@
 {
   "bundle_id": "canonical",
-  "generated_at": "2026-04-23T03:40:52.395659+00:00",
+  "generated_at": "2026-04-23T16:32:17.079480+00:00",
   "source_files": {
     "courses_dir": "data/courses",
     "p2": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
@@ -21,7 +21,7 @@
     "unit_kp_map": 767,
     "question_bank": 985,
     "item_calibration": 985,
-    "item_phase_map": 6699,
+    "item_phase_map": 6838,
     "item_kp_map": 1171,
     "prerequisite_edges": 79,
     "pruned_edges": 34,
@@ -32,7 +32,7 @@
     "courses.jsonl": "304c666a410ff4c142ed92281c15c991a65981ebd09efa9cb3eaa02421b4697b",
     "item_calibration.jsonl": "8ad57d79eb1efc97fb49807a7f1b47ffea1630f129595707c0864b39bc87a3e4",
     "item_kp_map.jsonl": "6c41a9a80dbc6eb1ef54323ed85597ba5296964cee42856e990e54fbc538c22b",
-    "item_phase_map.jsonl": "1c25ceda9054fbedfc72a730be48738c115334c49206f8cdf98d359a4f070621",
+    "item_phase_map.jsonl": "1e8d34c742997b1e7e27b50d4f4cceebc3a61d4ff4f771256070407c4308c528",
     "prerequisite_edges.jsonl": "44d372dc03221bc7a12f1bbec043786700e42888352c7e12cd08986a1737f486",
     "pruned_edges.jsonl": "0e196b2c6346b7ba8f8af1d4143c3f84791b19e28ea37ffded61fcbbc47c0fed",
     "question_bank.jsonl": "edcec813a31f5e48e5bf4c28d197017b45e76e71472a7d6f8290912142ac1325",

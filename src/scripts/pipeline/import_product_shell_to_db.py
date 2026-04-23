@@ -232,6 +232,50 @@ def conflict_columns_for_table(table_name: str) -> tuple[str, ...]:
     return IMPORT_SPECS[table_name].pk_columns
 
 
+def _section_identity(row: dict[str, Any]) -> tuple[Any, ...]:
+    kind = row.get("kind")
+    return (
+        row.get("course_id"),
+        row.get("parent_section_id"),
+        getattr(kind, "value", kind),
+        row.get("title"),
+        row.get("sort_order"),
+    )
+
+
+def rebind_bundle_foreign_keys(
+    bundle: dict[str, list[dict[str, Any]]],
+    *,
+    actual_course_ids_by_slug: dict[str, uuid.UUID],
+    existing_section_ids_by_identity: dict[tuple[Any, ...], uuid.UUID] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    existing_section_ids_by_identity = existing_section_ids_by_identity or {}
+    rebound = {table_name: [dict(row) for row in rows] for table_name, rows in bundle.items()}
+
+    source_course_slug_by_id = {
+        row["id"]: row["slug"]
+        for row in bundle["courses"]
+    }
+
+    for table_name in ("course_overviews", "course_sections", "learning_units"):
+        for row in rebound[table_name]:
+            source_course_id = row["course_id"]
+            course_slug = source_course_slug_by_id[source_course_id]
+            row["course_id"] = actual_course_ids_by_slug[course_slug]
+
+    section_id_map: dict[uuid.UUID, uuid.UUID] = {}
+    for row in rebound["course_sections"]:
+        source_section_id = row["id"]
+        actual_section_id = existing_section_ids_by_identity.get(_section_identity(row), source_section_id)
+        row["id"] = actual_section_id
+        section_id_map[source_section_id] = actual_section_id
+
+    for row in rebound["learning_units"]:
+        row["section_id"] = section_id_map.get(row["section_id"], row["section_id"])
+
+    return rebound
+
+
 def _chunks(rows: list[dict[str, Any]], size: int) -> list[list[dict[str, Any]]]:
     return [rows[index : index + size] for index in range(0, len(rows), size)]
 
@@ -273,6 +317,50 @@ async def _import_table(
     return imported
 
 
+async def load_actual_course_ids(
+    session: AsyncSession,
+    *,
+    course_slugs: list[str],
+) -> dict[str, uuid.UUID]:
+    rows = (
+        await session.execute(
+            select(Course.slug, Course.id).where(Course.slug.in_(course_slugs))
+        )
+    ).all()
+    return {slug: course_id for slug, course_id in rows}
+
+
+async def load_existing_section_ids(
+    session: AsyncSession,
+    *,
+    course_ids: list[uuid.UUID],
+) -> dict[tuple[Any, ...], uuid.UUID]:
+    if not course_ids:
+        return {}
+    rows = (
+        await session.execute(
+            select(
+                CourseSection.id,
+                CourseSection.course_id,
+                CourseSection.parent_section_id,
+                CourseSection.kind,
+                CourseSection.title,
+                CourseSection.sort_order,
+            ).where(CourseSection.course_id.in_(course_ids))
+        )
+    ).all()
+    return {
+        (
+            course_id,
+            parent_section_id,
+            getattr(kind, "value", kind),
+            title,
+            sort_order,
+        ): section_id
+        for section_id, course_id, parent_section_id, kind, title, sort_order in rows
+    }
+
+
 async def import_product_shell(
     session: AsyncSession,
     *,
@@ -286,11 +374,32 @@ async def import_product_shell(
         overviews_path=overviews_path,
     )
     imported: dict[str, int] = {}
-    for table_name, rows in bundle.items():
+
+    imported["courses"] = await _import_table(
+        session,
+        table_name="courses",
+        rows=bundle["courses"],
+        spec=IMPORT_SPECS["courses"],
+    )
+
+    actual_course_ids_by_slug = await load_actual_course_ids(
+        session,
+        course_slugs=[row["slug"] for row in bundle["courses"]],
+    )
+    rebound_bundle = rebind_bundle_foreign_keys(
+        bundle,
+        actual_course_ids_by_slug=actual_course_ids_by_slug,
+        existing_section_ids_by_identity=await load_existing_section_ids(
+            session,
+            course_ids=list(actual_course_ids_by_slug.values()),
+        ),
+    )
+
+    for table_name in ("course_overviews", "course_sections", "learning_units"):
         imported[table_name] = await _import_table(
             session,
             table_name=table_name,
-            rows=rows,
+            rows=rebound_bundle[table_name],
             spec=IMPORT_SPECS[table_name],
         )
     return {

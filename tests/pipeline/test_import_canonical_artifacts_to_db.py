@@ -55,6 +55,20 @@ def test_validate_canonical_artifacts_checks_full_bundle_counts():
     assert "_loaded_rows" in report
 
 
+def test_normalize_rows_maps_item_phase_suitability_labels_to_scores():
+    rows = importer.normalize_rows(
+        "item_phase_map",
+        [
+            {"item_id": "q1", "phase": "placement", "suitability_score": "high"},
+            {"item_id": "q2", "phase": "review", "suitability_score": "medium"},
+            {"item_id": "q3", "phase": "final_quiz", "suitability_score": "low"},
+            {"item_id": "q4", "phase": "transfer", "suitability_score": 0.5},
+        ],
+    )
+
+    assert [row["suitability_score"] for row in rows] == [1.0, 0.8, 0.6, 0.5]
+
+
 @pytest.mark.asyncio
 async def test_import_table_executes_postgres_upsert(monkeypatch):
     session = AsyncMock()
