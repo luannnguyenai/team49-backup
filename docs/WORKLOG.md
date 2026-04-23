@@ -6,6 +6,25 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ## Các Quyết Định Kỹ Thuật (ADR)
 
+### [ADR-6] Ưu tiên Database-First Evolution cho phase production hardening — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và demo đã đủ chạy, nút thắt lớn nhất không còn nằm ở prompt/pipeline nữa mà nằm ở sự lệch giữa runtime schema cũ (`topic/module`) và target schema mới (`kp/unit + planner audit`). Nếu tiếp tục nối service trực tiếp lên runtime cũ thì càng về sau càng khó migrate.
+
+**Quyết định:** Khóa một hướng đi rõ ràng:
+
+1. Xem canonical JSONL là ingestion contract sạch.
+2. Xem course-first tables là business shell của sản phẩm.
+3. Thêm learner/planner stub tables làm landing zone production:
+   - `learner_mastery_kp`
+   - `goal_preferences`
+   - `waived_units`
+   - `plan_history`
+   - `rationale_log`
+   - `planner_session_state`
+4. Chưa wire logic service ngay trong lượt này; phần đó sẽ được làm có kiểm soát ở phase integration sau.
+
+**Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
+
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
