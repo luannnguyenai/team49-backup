@@ -24,8 +24,7 @@ from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.canonical import ConceptKP
-from src.models.content import Module, Topic
-from src.models.learning import LearnerMasteryKP, MasteryScore
+from src.models.learning import LearnerMasteryKP
 from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
 from src.redis_client import get_redis
@@ -143,43 +142,7 @@ async def _build_user_skill_overview(
     db: AsyncSession,
     user_id: uuid.UUID,
 ) -> UserSkillOverview:
-    if not settings.allow_legacy_mastery_reads or not settings.allow_legacy_topic_content_reads:
-        return await _build_canonical_user_skill_overview(db, user_id)
-
-    result = await db.execute(
-        select(MasteryScore, Topic, Module)
-        .join(Topic, MasteryScore.topic_id == Topic.id)
-        .join(Module, Topic.module_id == Module.id)
-        .where(
-            MasteryScore.user_id == user_id,
-            MasteryScore.kc_id.is_(None),
-        )
-    )
-
-    grouped: dict[str, list[float]] = {label: [] for label in _SKILL_LABELS}
-
-    for mastery, topic, module in result.all():
-        bucket = _resolve_skill_bucket(
-            topic.name,
-            topic.description,
-            module.name,
-            module.description,
-        )
-        if bucket is None:
-            continue
-        grouped[bucket].append(round(mastery.mastery_probability * 100, 1))
-
-    skills = []
-    for label in _SKILL_LABELS:
-        if grouped[label]:
-            value = round(sum(grouped[label]) / len(grouped[label]), 1)
-            level = classify_mastery(value)
-        else:
-            value = 0.0
-            level = "not_started"
-        skills.append(UserSkillSnapshot(label=label, value=value, level=level))
-
-    return UserSkillOverview(skills=skills)
+    return await _build_canonical_user_skill_overview(db, user_id)
 
 
 async def _build_canonical_user_skill_overview(

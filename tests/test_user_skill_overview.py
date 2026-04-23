@@ -3,8 +3,8 @@ import uuid
 import pytest
 from httpx import AsyncClient
 
-from src.models.content import Module, Topic
-from src.models.learning import MasteryLevel, MasteryScore
+from src.models.canonical import ConceptKP
+from src.models.learning import LearnerMasteryKP
 
 
 @pytest.mark.asyncio
@@ -29,33 +29,24 @@ async def test_user_skill_overview_returns_real_mastery_scores(
     )
     user_id = uuid.UUID(me.json()["id"])
 
-    module = Module(
-        name="CS224N: Natural Language Processing with Deep Learning",
-        description="NLP foundations",
-        order_index=1,
-        prerequisite_module_ids=[],
-    )
-    db_session.add(module)
-    await db_session.flush()
-
-    topic = Topic(
-        module_id=module.id,
+    kp = ConceptKP(
+        kp_id="kp_nlp_history",
         name="History of NLP",
-        description="Intro topic",
-        order_index=1,
-        prerequisite_topic_ids=[],
+        description="NLP foundations",
+        track_tags=["nlp"],
+        domain_tags=["natural language processing"],
     )
-    db_session.add(topic)
-    await db_session.flush()
+    db_session.add(kp)
 
     db_session.add(
-        MasteryScore(
+        LearnerMasteryKP(
             user_id=user_id,
-            topic_id=topic.id,
-            kc_id=None,
-            mastery_probability=0.42,
-            mastery_level=MasteryLevel.developing,
-            evidence_count=5,
+            kp_id=kp.kp_id,
+            theta_mu=0.0,
+            theta_sigma=1.0,
+            mastery_mean_cached=0.42,
+            n_items_observed=5,
+            updated_by="test",
         )
     )
     await db_session.flush()

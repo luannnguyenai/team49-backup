@@ -7,24 +7,9 @@ from src.routers import auth
 
 
 @pytest.mark.asyncio
-async def test_user_skill_overview_uses_canonical_when_legacy_mastery_reads_disabled(monkeypatch):
-    monkeypatch.setattr(auth.settings, "allow_legacy_mastery_reads", False)
-    monkeypatch.setattr(auth.settings, "allow_legacy_topic_content_reads", True)
-    monkeypatch.setattr(
-        auth,
-        "_build_canonical_user_skill_overview",
-        AsyncMock(return_value="canonical-skills"),
-    )
-
-    result = await auth._build_user_skill_overview(AsyncMock(), user_id="user-id")
-
-    assert result == "canonical-skills"
-
-
-@pytest.mark.asyncio
-async def test_user_skill_overview_uses_canonical_when_legacy_topic_reads_disabled(monkeypatch):
+async def test_user_skill_overview_always_uses_canonical_source(monkeypatch):
     monkeypatch.setattr(auth.settings, "allow_legacy_mastery_reads", True)
-    monkeypatch.setattr(auth.settings, "allow_legacy_topic_content_reads", False)
+    monkeypatch.setattr(auth.settings, "allow_legacy_topic_content_reads", True)
     monkeypatch.setattr(
         auth,
         "_build_canonical_user_skill_overview",
