@@ -165,6 +165,9 @@ Behavior:
 - Production cleanup profile can set these to false.
 - When false, legacy-only path raises a clear backend error instead of silently writing old tables.
 - `allow_legacy_kg_routes=false` returns 410 for KG routes that still read `modules/topics/questions/knowledge_components`.
+- `allow_legacy_question_reads=false` blocks legacy quiz/module-test question selection from `questions`.
+- `allow_legacy_mastery_writes=false` blocks legacy quiz/module-test writes into `mastery_scores`.
+- `allow_legacy_planner_writes=false` blocks legacy quiz/module-test writes into `learning_paths`.
 
 Commit: `feat: add legacy runtime deprecation guards`.
 

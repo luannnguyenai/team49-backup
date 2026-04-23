@@ -59,6 +59,7 @@ from src.exceptions import ConflictError, NotFoundError, ValidationError
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.models.content import (
     BloomLevel,
     DifficultyBucket,
@@ -109,6 +110,24 @@ PASS_THRESHOLD: float = 70.0  # total_score_percent ≥ 70 → PASS
 WEAK_THRESHOLD: float = 60.0  # topic score_percent  < 60 → weak topic
 
 
+def _ensure_legacy_module_test_question_reads_allowed() -> None:
+    if not settings.allow_legacy_question_reads:
+        raise ValidationError(
+            "Legacy module-test question reads are disabled. Use canonical question_bank module-test flow."
+        )
+
+
+def _ensure_legacy_module_test_mutations_allowed() -> None:
+    if not settings.allow_legacy_mastery_writes:
+        raise ValidationError(
+            "Legacy module-test mastery writes are disabled. Use learner_mastery_kp canonical updates."
+        )
+    if not settings.allow_legacy_planner_writes:
+        raise ValidationError(
+            "Legacy module-test learning_path writes are disabled. Use canonical planner audit/output."
+        )
+
+
 # ===========================================================================
 # POST /api/module-test/start
 # ===========================================================================
@@ -119,6 +138,7 @@ async def start_module_test(
     user_id: uuid.UUID,
     module_id: uuid.UUID,
 ) -> ModuleTestStartResponse:
+    _ensure_legacy_module_test_question_reads_allowed()
 
     # 1. Validate module ──────────────────────────────────────────────────────
     module = await _get_module_or_404(db, module_id)
@@ -230,6 +250,8 @@ async def submit_module_test(
     session_id: uuid.UUID,
     req: ModuleTestSubmitRequest,
 ) -> ModuleTestResultResponse:
+    _ensure_legacy_module_test_question_reads_allowed()
+    _ensure_legacy_module_test_mutations_allowed()
 
     # 1. Validate session ──────────────────────────────────────────────────────
     session = await _get_module_test_session(db, user_id, session_id)
@@ -336,6 +358,7 @@ async def get_module_test_results(
     user_id: uuid.UUID,
     session_id: uuid.UUID,
 ) -> ModuleTestResultResponse:
+    _ensure_legacy_module_test_question_reads_allowed()
 
     # 1. Validate session ──────────────────────────────────────────────────────
     session = await _get_module_test_session(db, user_id, session_id)

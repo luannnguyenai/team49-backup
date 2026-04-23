@@ -47,6 +47,7 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.content import (
     DifficultyBucket,
@@ -95,6 +96,24 @@ _DIFFICULTY_SLOTS: list[tuple[DifficultyBucket, int]] = [
 _RECENT_ASSESSMENT_LOOKBACK = 2
 
 
+def _ensure_legacy_quiz_question_reads_allowed() -> None:
+    if not settings.allow_legacy_question_reads:
+        raise ValidationError(
+            "Legacy quiz question reads are disabled. Use canonical question_bank quiz flow."
+        )
+
+
+def _ensure_legacy_quiz_mutations_allowed() -> None:
+    if not settings.allow_legacy_mastery_writes:
+        raise ValidationError(
+            "Legacy quiz mastery writes are disabled. Use learner_mastery_kp canonical updates."
+        )
+    if not settings.allow_legacy_planner_writes:
+        raise ValidationError(
+            "Legacy quiz learning_path writes are disabled. Use canonical planner audit/output."
+        )
+
+
 # ===========================================================================
 # POST /api/quiz/start
 # ===========================================================================
@@ -105,6 +124,7 @@ async def start_quiz(
     user_id: uuid.UUID,
     topic_id: uuid.UUID,
 ) -> QuizStartResponse:
+    _ensure_legacy_quiz_question_reads_allowed()
 
     # 1. Validate topic
     await _get_topic_or_404(db, topic_id)
@@ -181,6 +201,7 @@ async def answer_question(
     session_id: uuid.UUID,
     req: QuizAnswerRequest,
 ) -> QuizAnswerResponse:
+    _ensure_legacy_quiz_question_reads_allowed()
 
     # 1. Load and validate session
     session = await _get_quiz_session(db, user_id, session_id)
@@ -267,6 +288,8 @@ async def complete_quiz(
     user_id: uuid.UUID,
     session_id: uuid.UUID,
 ) -> QuizCompleteResponse:
+    _ensure_legacy_quiz_question_reads_allowed()
+    _ensure_legacy_quiz_mutations_allowed()
 
     # 1. Validate session
     session = await _get_quiz_session(db, user_id, session_id)
@@ -401,6 +424,7 @@ async def get_quiz_history(
     user_id: uuid.UUID,
     topic_id: uuid.UUID | None = None,
 ) -> QuizHistoryResponse:
+    _ensure_legacy_quiz_question_reads_allowed()
 
     stmt = (
         select(Session, Topic.name.label("topic_name"))
