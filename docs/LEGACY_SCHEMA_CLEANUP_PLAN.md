@@ -296,6 +296,7 @@ If any gate fails, do not rename/drop legacy tables. The readiness report distin
 - guarded compatibility references: acceptable only when the matching legacy flag is disabled in production cleanup profile
 - accepted model definitions: acceptable until the final code-removal phase, because imports alone do not query dropped tables
 - unguarded references: blockers for rename/drop
+- canonical parity checker blocks when no product `learning_units` are linked to canonical units, any product unit is unlinked, or `question_bank` items lack phase/KP maps. Planner/audit and canonical interaction counts are reported for visibility but are not hard blockers on a fresh DB with no learner activity.
 
 ## Current Recommendation
 
