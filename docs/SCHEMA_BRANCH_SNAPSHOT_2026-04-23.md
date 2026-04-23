@@ -72,8 +72,9 @@ Hiện đã có DB materialization tương ứng:
 - ORM: `src/models/canonical.py`
 - Migration: `alembic/versions/20260423_canonical_content_tables.py`
 - Importer: `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
+- Integration handoff: `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
 
-Importer chạy idempotent bằng natural keys và có `--validate-only` để kiểm tra manifest/counts trước khi ghi DB.
+Importer chạy idempotent bằng natural keys, có `--validate-only` để kiểm tra manifest/counts trước khi ghi DB, và verify DB row counts sau import thật.
 
 ### 4. Learner / planner stub persistence
 
@@ -1732,11 +1733,12 @@ Nguồn:
 
 - Runtime mastery/path vẫn nghiêng về `topic/module`, chưa full canonical `kp/unit`.
 - Runtime `questions` còn gộp nhiều concern mà canonical đã tách riêng.
-- Dù đã có stub tables, chúng **chưa được wire vào service/API**:
-  - onboarding chưa ghi `goal_preferences`
-  - planner chưa ghi `plan_history` / `rationale_log`
+- Stub tables đã được wire một phần, sau feature flag:
+  - onboarding ghi compatibility snapshot vào `goal_preferences`
+  - planner legacy ghi topic-grain audit vào `plan_history` / `rationale_log` / `planner_session_state`
   - skip flow chưa ghi `waived_units`
   - assessor chưa cập nhật `learner_mastery_kp`
+  - `learner_mastery_kp` và `waived_units` đang chờ bridge đúng sang canonical `kp_id` / `learning_unit_id`
 - Runtime vẫn chưa có shared taxonomy end-to-end giữa:
   - `sessions.session_type`
   - canonical `item_phase_map.phase`
@@ -1747,7 +1749,7 @@ Nguồn:
 - Nếu mục tiêu là demo:
   - schema hiện tại đủ dùng.
 - Nếu mục tiêu là ingest + production hóa dần:
-  - canonical artifact bây giờ là source tốt nhất để map vào PostgreSQL.
+  - canonical artifact đã có DB materialization và importer để map vào PostgreSQL.
 - Nếu mục tiêu là mastery/IRT/CDM tinh vi:
   - cần thêm wiring từ canonical `item_kp_map` / `unit_kp_map` vào runtime schema hoặc schema mới.
 
@@ -1758,5 +1760,6 @@ Nhánh `rin/implement` trong giai đoạn này đã làm được một việc q
 - biến dữ liệu course/question/prerequisite từ trạng thái rải rác, lệch format, nhiều debt
 - thành một canonical contract đủ sạch để ingest tiếp
 - đồng thời mở thêm một lớp runtime stub để learner/planner phase sau có chỗ bám đúng grain hơn
+- khóa thêm handoff contract để người nối backend/database có thể cutover mà không phải đoán source-of-truth
 
 Runtime ORM hiện vẫn chạy theo `module/topic/question/mastery_path` cũ là chính, nhưng đã có `course-first` layer khá rõ ở `src/models/course.py`. Canonical artifact layer mới là bước đệm để nối hai thế giới đó lại với nhau trong phase tiếp theo.

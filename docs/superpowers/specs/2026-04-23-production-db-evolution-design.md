@@ -114,6 +114,7 @@ Implementation hiện tại:
 - Migration: `alembic/versions/20260423_canonical_content_tables.py`
 - Importer: `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
 - Importer có `--validate-only` để kiểm tra JSONL + manifest counts trước khi ghi DB
+- Import mode kiểm tra DB row counts sau upsert để phát hiện import thiếu/thừa ngay trong cùng run
 
 ### 3. Learner/planner phải chuyển dần sang grain `kp/unit`
 
@@ -330,6 +331,10 @@ Các bảng này sẽ tiếp tục tồn tại trong giai đoạn chuyển tiế
 
 Đây là phần quan trọng nhất của tài liệu.
 
+Checklist chi tiết nằm ở:
+
+- `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
+
 ### 1. Đừng đoán source-of-truth
 
 Người nối code phải theo matrix này:
@@ -347,14 +352,31 @@ Người nối code phải theo matrix này:
 - phase selection: `item_phase_map`
 - prerequisite graph: `prerequisite_edges`
 
-### 2. Tránh double write không kiểm soát
+### 2. Dùng đúng feature flags khi cutover
+
+Các flag hiện có:
+
+- `write_goal_preferences_enabled`
+- `write_learner_mastery_kp_enabled`
+- `write_waived_units_enabled`
+- `write_planner_audit_enabled`
+- `read_goal_preferences_enabled`
+- `read_learner_mastery_kp_enabled`
+
+Nguyên tắc:
+
+- write flag có thể bật trước để tạo sidecar/audit data
+- read flag chỉ bật sau khi import/backfill và parity check pass
+- nếu vừa ghi bảng cũ vừa ghi bảng mới, phải document rõ bảng nào authoritative
+
+### 3. Tránh double write không kiểm soát
 
 Trong giai đoạn đầu:
 
 - nếu một flow đã bắt đầu viết vào bảng mới, phải document rõ nó còn có viết vào bảng cũ không
 - không để “có khi viết vào `mastery_scores`, có khi viết vào `learner_mastery_kp`” mà không có policy
 
-### 3. Chưa xóa compatibility layer
+### 4. Chưa xóa compatibility layer
 
 Người tích hợp không nên xóa ngay:
 
@@ -369,7 +391,7 @@ Cho tới khi:
 - write paths mới đã ổn
 - dashboard/query chính đã chuyển xong
 
-### 4. Tất cả backfill phải idempotent
+### 5. Tất cả backfill phải idempotent
 
 Backfill scripts sau này phải:
 
@@ -377,7 +399,7 @@ Backfill scripts sau này phải:
 - có dry-run mode
 - rerun được không sinh duplicate logic
 
-### 5. Planner integration phải ghi audit trước
+### 6. Planner integration phải ghi audit trước
 
 Khi nối planner mới:
 
@@ -419,6 +441,7 @@ Status:
 
 - Importer implemented
 - Commit: `e7547b2` `feat: add canonical content importer`
+- Commit: `89d141d` `fix: verify canonical import db counts`
 - Validate-only command:
 
 ```bash
@@ -436,6 +459,8 @@ PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to
   - `prerequisite_edges = 79`
   - `pruned_edges = 34`
 
+Import thật cũng verify row counts trong DB sau khi upsert. Nếu số row DB lệch khỏi manifest, importer fail thay vì báo thành công giả.
+
 ### Phase 4 — Read-path cutover
 
 Việc cần làm:
@@ -444,6 +469,13 @@ Việc cần làm:
 - assessor read từ `question_bank` + `item_kp_map` + `item_calibration`
 - goal read từ `goal_preferences`
 
+Điều kiện bật read path:
+
+- migration đã chạy
+- canonical importer đã chạy thành công
+- DB counts khớp manifest
+- backfill runtime cần thiết đã chạy nếu flow phụ thuộc learner-specific data
+
 ### Phase 5 — Write-path cutover
 
 Việc cần làm:
@@ -451,6 +483,13 @@ Việc cần làm:
 - learner mastery update vào `learner_mastery_kp`
 - planner run ghi vào `plan_history` / `rationale_log`
 - skip verification ghi vào `waived_units`
+
+Hiện đã có safe compatibility writes:
+
+- onboarding ghi snapshot vào `goal_preferences`
+- recommendation engine ghi topic-grain audit vào `plan_history` / `rationale_log` / `planner_session_state`
+
+Chưa ghi runtime vào `learner_mastery_kp` và `waived_units` vì cần bridge đúng grain sang canonical `kp_id` / `learning_unit_id`.
 
 ### Phase 6 — Compatibility deprecation
 
@@ -474,7 +513,7 @@ Nếu mục tiêu là production, việc đúng nhất bây giờ không phải 
 1. khóa source-of-truth mới
 2. materialize canonical layer vào DB
 3. coi các bảng stub learner/planner là production landing zone
-4. để người nối code làm cutover có kiểm soát
+4. để người nối code làm cutover có kiểm soát theo `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
 
 Tài liệu này nhằm đảm bảo người làm bước integration sau không phải đoán:
 

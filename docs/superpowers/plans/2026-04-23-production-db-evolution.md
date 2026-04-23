@@ -38,9 +38,9 @@ Plan này **không** giả định rằng cùng một người sẽ:
 - `docs/superpowers/specs/2026-04-23-production-db-evolution-design.md`
 - `data/final_artifacts/cs224n_cs231n_v1/canonical/manifest.json`
 
-### Files expected to be created in later implementation work
+### Files created during implementation
 
-- ORM models for:
+- ORM models:
   - `concepts_kp`
   - `unit_kp_map`
   - `question_bank`
@@ -49,9 +49,10 @@ Plan này **không** giả định rằng cùng một người sẽ:
   - `item_kp_map`
   - `prerequisite_edges`
   - `pruned_edges`
-- Alembic migrations for those tables
-- importer/backfill scripts
+- Alembic migration for those tables
+- importer/backfill script
 - validation checks for DB row counts vs canonical manifest
+- integration handoff checklist
 
 ## Migration principles
 
@@ -70,7 +71,7 @@ Plan này **không** giả định rằng cùng một người sẽ:
 - Review: `docs/superpowers/specs/2026-04-23-production-db-evolution-design.md`
 - Update when needed: handoff docs only
 
-- [ ] Confirm the authoritative table for each concern:
+- [x] Confirm the authoritative table for each concern:
   - goal selection → `goal_preferences`
   - KP mastery → `learner_mastery_kp`
   - skip audit → `waived_units`
@@ -81,8 +82,13 @@ Plan này **không** giả định rằng cùng một người sẽ:
   - concept graph → `concepts_kp`
   - Q-matrix → `item_kp_map`
   - prerequisite graph → `prerequisite_edges`
-- [ ] Record any deviations explicitly in docs before any service integration starts.
-- [ ] Commit documentation-only changes if ownership decisions move.
+- [x] Record any deviations explicitly in docs before any service integration starts.
+- [x] Commit documentation-only changes if ownership decisions move.
+
+Current status:
+- Done
+- Ownership matrix is documented in `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
+- Compatibility boundaries are documented in `docs/SCHEMA_BRANCH_SNAPSHOT_2026-04-23.md`
 
 ### Task 2: Materialize canonical content layer in PostgreSQL
 
@@ -91,7 +97,7 @@ Plan này **không** giả định rằng cùng một người sẽ:
 - Create: new Alembic migration(s)
 - Create: tests for model existence / Alembic shape
 
-- [ ] Add ORM tables for:
+- [x] Add ORM tables for:
   - `concepts_kp`
   - `unit_kp_map`
   - `question_bank`
@@ -100,22 +106,22 @@ Plan này **không** giả định rằng cùng một người sẽ:
   - `item_kp_map`
   - `prerequisite_edges`
   - `pruned_edges`
-- [ ] Preserve canonical provenance fields needed for audit:
+- [x] Preserve canonical provenance fields needed for audit:
   - `source_file`
   - `provenance`
   - `review_status` where applicable
   - `p5_trace` or equivalent adjudication trace
-- [ ] Add indexes around:
+- [x] Add indexes around:
   - `kp_id`
   - `unit_id`
   - `item_id`
   - `(source_kp_id, target_kp_id)`
-- [ ] Ensure the schema can hold nullable reserve fields such as:
+- [x] Ensure the schema can hold nullable reserve fields such as:
   - embeddings
   - edge strength
   - bidirectional score
   - future calibration timestamps
-- [ ] Commit after the migration and model tests pass.
+- [x] Commit after the migration and model tests pass.
 
 Current status:
 - Done
@@ -131,7 +137,7 @@ Current status:
 - Create: tests or verification scripts against canonical counts
 - Read: `data/final_artifacts/cs224n_cs231n_v1/canonical/manifest.json`
 
-- [ ] Implement import order that respects dependencies:
+- [x] Implement import order that respects dependencies:
   1. `courses` projection or course mapping
   2. `concepts_kp`
   3. `units`
@@ -142,14 +148,15 @@ Current status:
   8. `item_kp_map`
   9. `prerequisite_edges`
   10. `pruned_edges`
-- [ ] Make reruns idempotent with deterministic upsert keys.
-- [ ] Verify DB row counts against canonical manifest counts.
-- [ ] Fail loudly if FK-like references do not resolve.
-- [ ] Commit importer scripts and verification utilities.
+- [x] Make reruns idempotent with deterministic upsert keys.
+- [x] Verify DB row counts against canonical manifest counts.
+- [x] Fail loudly if FK-like references do not resolve.
+- [x] Commit importer scripts and verification utilities.
 
 Current status:
 - Done for canonical content tables
 - Commit: `e7547b2` `feat: add canonical content importer`
+- Commit: `89d141d` `fix: verify canonical import db counts`
 - Added `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
 - Added `tests/pipeline/test_import_canonical_artifacts_to_db.py`
 - Validate-only command passed on the real canonical bundle:
@@ -168,6 +175,7 @@ PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to
   - `item_kp_map = 1171`
   - `prerequisite_edges = 79`
   - `pruned_edges = 34`
+- Import mode also verifies DB table row counts after upsert.
 
 ### Task 4: Define compatibility mapping for old runtime tables
 
@@ -176,14 +184,19 @@ PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to
 - Review: `src/models/content.py`
 - Review: `src/models/learning.py`
 
-- [ ] Define how old runtime tables coexist during transition:
+- [x] Define how old runtime tables coexist during transition:
   - `mastery_scores` remains compatibility only
   - `learning_paths` remains compatibility only
   - `questions` remains compatibility only
   - `topics/modules` remain compatibility only
-- [ ] Define explicit “do not write here for new features” rules.
-- [ ] Define whether read adapters or DB views will be used during cutover.
-- [ ] Commit the compatibility note when finalized.
+- [x] Define explicit “do not write here for new features” rules.
+- [x] Define whether read adapters or DB views will be used during cutover.
+- [x] Commit the compatibility note when finalized.
+
+Current status:
+- Done in docs
+- Compatibility-only tables and “do not add new semantics here” rules are documented in `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
+- Read cutover is specified as feature-flagged service/repository work, not DB views for this phase.
 
 ### Task 5: Prepare learner/planner write contracts
 
@@ -191,19 +204,23 @@ PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to
 - Review: `src/models/learning.py`
 - Create/update: handoff docs for integrator
 
-- [ ] Define write contracts:
+- [x] Define write contracts:
   - onboarding writes `goal_preferences`
   - assessor writes `learner_mastery_kp`
   - skip verification writes `waived_units`
   - planner writes `plan_history`
   - planner writes `rationale_log`
   - planner updates `planner_session_state`
-- [ ] For each contract, document:
+- [x] For each contract, document:
   - trigger event
   - required payload
   - idempotency key or uniqueness rule
   - whether old tables are also written during transition
-- [ ] Commit documentation-only changes.
+- [x] Commit documentation-only changes.
+
+Current status:
+- Done in `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
+- Existing safe writers are explicitly marked compatibility-only where they still operate at legacy topic/module grain.
 
 ### Task 6: Handoff package for the code integrator
 
@@ -212,25 +229,28 @@ PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to
 - Update: `docs/superpowers/specs/2026-04-23-production-db-evolution-design.md`
 - Update or create: one concise integration checklist doc if needed
 
-- [ ] Produce a short checklist the integrator can follow:
+- [x] Produce a short checklist the integrator can follow:
   - which tables to read
   - which tables to write
   - which legacy tables not to touch
   - required migration ordering
   - required count/consistency checks
-- [ ] Ensure no table ownership is ambiguous by the end of the handoff.
-- [ ] Commit the handoff docs.
+- [x] Ensure no table ownership is ambiguous by the end of the handoff.
+- [x] Commit the handoff docs.
+
+Current status:
+- Done in `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
 
 ## Acceptance criteria
 
 This production DB improvement track is ready for the next engineer when:
 
-- [ ] all learner/planner stub tables exist in DB schema
-- [ ] canonical content graph tables exist in DB schema
-- [ ] canonical JSONL can be imported into DB reproducibly
-- [ ] authoritative ownership is documented table-by-table
-- [ ] compatibility tables are clearly marked as transitional
-- [ ] an integrator can wire services without guessing which table is the source-of-truth
+- [x] all learner/planner stub tables exist in DB schema
+- [x] canonical content graph tables exist in DB schema
+- [x] canonical JSONL can be imported into DB reproducibly
+- [x] authoritative ownership is documented table-by-table
+- [x] compatibility tables are clearly marked as transitional
+- [x] an integrator can wire services without guessing which table is the source-of-truth
 
 ## Explicit non-goals for the DB-only phase
 
@@ -246,7 +266,8 @@ The next engineer should not start from runtime code and infer the database shap
 
 1. `docs/superpowers/specs/2026-04-23-production-db-evolution-design.md`
 2. `docs/SCHEMA_BRANCH_SNAPSHOT_2026-04-23.md`
-3. canonical manifest/counts under `data/final_artifacts/cs224n_cs231n_v1/canonical/`
+3. `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
+4. canonical manifest/counts under `data/final_artifacts/cs224n_cs231n_v1/canonical/`
 
 Then wire code in this order:
 

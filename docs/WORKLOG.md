@@ -61,6 +61,21 @@ Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, valid
 
 **Hệ quả:** Production DB giờ có landing zone thật cho content graph và Q-matrix. Các flow `learner_mastery_kp` / `waived_units` vẫn chưa nên nối cho đến khi runtime có bridge đúng từ item/unit/KP canonical.
 
+### [ADR-9] Khóa integration handoff trước khi service/router cutover — 23/04/2026
+
+**Bối cảnh:** Sau khi có bảng mới, migration và importer, rủi ro lớn nhất chuyển sang phía integration: người nối backend có thể vô tình đọc/ghi lẫn giữa bảng compatibility cũ và bảng authoritative mới.
+
+**Quyết định:** Tạo handoff contract riêng ở `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`, mô tả rõ:
+
+- bảng nào authoritative
+- bảng nào compatibility-only
+- write contract cho `goal_preferences`, `learner_mastery_kp`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
+- read contract cho planner/assessor/progress
+- thứ tự migrate/import/cutover
+- các điều không được làm như fabricate `kp_id` từ `topic_id`
+
+**Hệ quả:** Phase tiếp theo có thể tập trung vào service/repository/router integration mà không phải tranh luận lại source-of-truth. UI vẫn không bị đụng trong lượt DB hardening này.
+
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
