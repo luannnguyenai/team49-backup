@@ -35,11 +35,11 @@ def selected_answer_to_index(selected_answer: str) -> int:
     return _INDEX_BY_ANSWER[str(selected_answer)]
 
 
-def canonical_item_to_quiz_question(item: Any, *, topic_id: uuid.UUID) -> QuestionForQuiz:
+def canonical_item_to_quiz_question(item: Any, *, learning_unit_id: uuid.UUID) -> QuestionForQuiz:
     return QuestionForQuiz(
         id=canonical_question_uuid(str(item.item_id)),
         item_id=str(item.item_id),
-        topic_id=topic_id,
+        learning_unit_id=learning_unit_id,
         bloom_level=_canonical_bloom_level(getattr(item, "question_intent", None)),
         difficulty_bucket=_canonical_difficulty(getattr(item, "difficulty", None)),
         stem_text=str(item.question),
@@ -51,11 +51,13 @@ def canonical_item_to_quiz_question(item: Any, *, topic_id: uuid.UUID) -> Questi
     )
 
 
-def canonical_item_to_module_test_question(item: Any, *, topic_id: uuid.UUID) -> QuestionForModuleTest:
+def canonical_item_to_module_test_question(
+    item: Any, *, learning_unit_id: uuid.UUID
+) -> QuestionForModuleTest:
     return QuestionForModuleTest(
         id=canonical_question_uuid(str(item.item_id)),
         item_id=str(item.item_id),
-        topic_id=topic_id,
+        learning_unit_id=learning_unit_id,
         bloom_level=_canonical_bloom_level(getattr(item, "question_intent", None)),
         difficulty_bucket=_canonical_difficulty(getattr(item, "difficulty", None)),
         stem_text=str(item.question),

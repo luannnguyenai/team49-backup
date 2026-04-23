@@ -2,9 +2,6 @@
 services/quiz_service.py
 ------------------------
 Canonical-only quiz runtime.
-
-The `/api/quiz/start` payload still uses `topic_id` for compatibility, but the
-value is interpreted as `learning_units.id`.
 """
 
 from __future__ import annotations
@@ -57,9 +54,9 @@ _RECENT_ASSESSMENT_LOOKBACK = 2
 async def start_quiz(
     db: AsyncSession,
     user_id: uuid.UUID,
-    topic_id: uuid.UUID,
+    learning_unit_id: uuid.UUID,
 ) -> QuizStartResponse:
-    return await _start_canonical_quiz(db, user_id, topic_id)
+    return await _start_canonical_quiz(db, user_id, learning_unit_id)
 
 
 async def answer_question(
@@ -88,7 +85,7 @@ async def complete_quiz(
 async def get_quiz_history(
     db: AsyncSession,
     user_id: uuid.UUID,
-    topic_id: uuid.UUID | None = None,
+    learning_unit_id: uuid.UUID | None = None,
 ) -> QuizHistoryResponse:
     stmt = (
         select(Session, LearningUnit.title)
@@ -100,16 +97,16 @@ async def get_quiz_history(
         )
         .order_by(Session.started_at.desc())
     )
-    if topic_id is not None:
-        stmt = stmt.where(Session.canonical_unit_id == topic_id)
+    if learning_unit_id is not None:
+        stmt = stmt.where(Session.canonical_unit_id == learning_unit_id)
 
     result = await db.execute(stmt)
     rows = result.all()
     items = [
         QuizHistorySummary(
             session_id=session.id,
-            topic_id=session.canonical_unit_id,
-            topic_name=unit_title or str(session.canonical_unit_id),
+            learning_unit_id=session.canonical_unit_id,
+            learning_unit_title=unit_title or str(session.canonical_unit_id),
             score_percent=session.score_percent,
             correct_count=session.correct_count,
             total_questions=session.total_questions,
@@ -161,9 +158,11 @@ async def _start_canonical_quiz(
 
     return QuizStartResponse(
         session_id=session.id,
-        topic_id=unit.id,
+        learning_unit_id=unit.id,
         total_questions=len(items),
-        questions=[canonical_item_to_quiz_question(item, topic_id=unit.id) for item in items],
+        questions=[
+            canonical_item_to_quiz_question(item, learning_unit_id=unit.id) for item in items
+        ],
     )
 
 
@@ -280,8 +279,8 @@ async def _complete_canonical_quiz(
 
     return QuizCompleteResponse(
         session_id=session.id,
-        topic_id=unit.id,
-        topic_name=unit.title,
+        learning_unit_id=unit.id,
+        learning_unit_title=unit.title,
         score=f"{correct_count}/{total_answered}",
         percent=quiz_score_percent,
         mastery_before=mastery_before,

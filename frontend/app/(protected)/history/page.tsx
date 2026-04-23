@@ -534,7 +534,7 @@ export default function HistoryPage() {
     try {
       const result = await historyApi.list({
         session_type: typeFilter || undefined,
-        module_id: moduleFilter || undefined,
+        section_id: moduleFilter || undefined,
         days: daysFilter || undefined,
         page,
         page_size: PAGE_SIZE,

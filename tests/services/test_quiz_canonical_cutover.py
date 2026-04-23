@@ -15,8 +15,8 @@ async def test_start_quiz_delegates_to_canonical_helper(monkeypatch):
     expected = SimpleNamespace(session_id=uuid4())
     captured = {}
 
-    async def fake_start(db, user_id, topic_id):
-        captured["args"] = (db, user_id, topic_id)
+    async def fake_start(db, user_id, learning_unit_id):
+        captured["args"] = (db, user_id, learning_unit_id)
         return expected
 
     monkeypatch.setattr(quiz_service, "_start_canonical_quiz", fake_start)
@@ -65,5 +65,5 @@ async def test_get_quiz_history_reads_canonical_unit_titles():
     response = await quiz_service.get_quiz_history(db, uuid4())
 
     assert response.total == 1
-    assert response.items[0].topic_id == unit_id
-    assert response.items[0].topic_name == "CNN basics"
+    assert response.items[0].learning_unit_id == unit_id
+    assert response.items[0].learning_unit_title == "CNN basics"

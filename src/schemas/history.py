@@ -32,10 +32,10 @@ class HistoryItem(BaseModel):
     completed_at: datetime | None
     duration_seconds: int | None  # None if session never completed
 
-    # Subject: topic name for quiz/assessment rows, module name for module_test
+    # Subject: learning unit title for quiz/assessment rows, section title for module_test
     subject: str
-    topic_id: uuid.UUID | None
-    module_id: uuid.UUID | None
+    learning_unit_id: uuid.UUID | None
+    section_id: uuid.UUID | None
 
     score_percent: float | None
     correct_count: int

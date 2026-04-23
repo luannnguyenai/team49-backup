@@ -2,9 +2,6 @@
 services/module_test_service.py
 --------------------------------
 Canonical-only module-test runtime.
-
-The `/api/module-test/start` payload still uses `module_id` for compatibility,
-but the value is interpreted as `course_sections.id`.
 """
 
 from __future__ import annotations
@@ -26,7 +23,7 @@ from src.schemas.module_test import (
     ModuleTestResultResponse,
     ModuleTestStartResponse,
     ModuleTestSubmitRequest,
-    NextModuleInfo,
+    NextSectionInfo,
     ReviewTopicSuggestion,
     TopicQuestionsGroup,
     TopicTestResult,
@@ -55,9 +52,9 @@ WEAK_THRESHOLD: float = 60.0
 async def start_module_test(
     db: AsyncSession,
     user_id: uuid.UUID,
-    module_id: uuid.UUID,
+    section_id: uuid.UUID,
 ) -> ModuleTestStartResponse:
-    return await _start_canonical_module_test(db, user_id, module_id)
+    return await _start_canonical_module_test(db, user_id, section_id)
 
 
 async def submit_module_test(
@@ -119,10 +116,10 @@ async def _start_canonical_module_test(
         total_question_count += len(items)
         topic_groups.append(
             TopicQuestionsGroup(
-                topic_id=unit.id,
-                topic_name=unit.title,
+                learning_unit_id=unit.id,
+                learning_unit_title=unit.title,
                 questions=[
-                    canonical_item_to_module_test_question(item, topic_id=unit.id)
+                    canonical_item_to_module_test_question(item, learning_unit_id=unit.id)
                     for item in items
                 ],
             )
@@ -144,11 +141,11 @@ async def _start_canonical_module_test(
 
     return ModuleTestStartResponse(
         session_id=session.id,
-        module_id=section.id,
-        module_name=section.title,
-        total_topics=len(topic_groups),
+        section_id=section.id,
+        section_title=section.title,
+        total_learning_units=len(topic_groups),
         total_questions=total_question_count,
-        topics=topic_groups,
+        learning_units=topic_groups,
     )
 
 
@@ -233,7 +230,7 @@ async def _build_canonical_module_test_result(
     correct = sum(1 for interaction, _ in rows if interaction.is_correct)
     total_score_pct = round(correct / total * 100, 1) if total else 0.0
     passed = total_score_pct >= PASS_THRESHOLD
-    per_topic: list[TopicTestResult] = []
+    per_learning_unit: list[TopicTestResult] = []
     review_suggestions: list[ReviewTopicSuggestion] = []
     wrong_answers: list[WrongAnswerDetail] = []
 
@@ -246,10 +243,10 @@ async def _build_canonical_module_test_result(
         unit_pct = round(unit_correct / unit_total * 100, 1)
         wrong_item_ids = [item.item_id for interaction, item in unit_rows if not interaction.is_correct]
         weak_kcs = await _canonical_kp_names(db, wrong_item_ids)
-        per_topic.append(
+        per_learning_unit.append(
             TopicTestResult(
-                topic_id=unit.id,
-                topic_name=unit.title,
+                learning_unit_id=unit.id,
+                learning_unit_title=unit.title,
                 score=f"{unit_correct}/{unit_total}",
                 score_percent=unit_pct,
                 bloom_max=None,
@@ -260,8 +257,8 @@ async def _build_canonical_module_test_result(
         if unit_pct < WEAK_THRESHOLD:
             review_suggestions.append(
                 ReviewTopicSuggestion(
-                    topic_id=unit.id,
-                    topic_name=unit.title,
+                    learning_unit_id=unit.id,
+                    learning_unit_title=unit.title,
                     weak_kcs=weak_kcs,
                     misconceptions=[],
                     estimated_review_hours=_unit_review_hours(unit),
@@ -270,12 +267,14 @@ async def _build_canonical_module_test_result(
         for interaction, item in unit_rows:
             if interaction.is_correct or interaction.selected_answer is None:
                 continue
-            question = canonical_item_to_module_test_question(item, topic_id=unit.id)
+            question = canonical_item_to_module_test_question(
+                item, learning_unit_id=unit.id
+            )
             wrong_answers.append(
                 WrongAnswerDetail(
                     question_id=question.id,
-                    topic_id=unit.id,
-                    topic_name=unit.title,
+                    learning_unit_id=unit.id,
+                    learning_unit_title=unit.title,
                     stem_text=question.stem_text,
                     option_a=question.option_a,
                     option_b=question.option_b,
@@ -307,16 +306,16 @@ async def _build_canonical_module_test_result(
 
     return ModuleTestResultResponse(
         session_id=session.id,
-        module_id=section.id,
-        module_name=section.title,
+        section_id=section.id,
+        section_title=section.title,
         total_score_percent=total_score_pct,
         passed=passed,
-        per_topic=per_topic,
+        per_learning_unit=per_learning_unit,
         recommended_review_topics=review_suggestions if not passed else [],
         estimated_review_hours=sum(item.estimated_review_hours for item in review_suggestions)
         if not passed
         else 0.0,
-        next_module=next_module,
+        next_section=next_module,
         wrong_answers=wrong_answers,
     )
 
@@ -399,7 +398,7 @@ def _unit_review_hours(unit: LearningUnit) -> float:
 async def _next_section_info(
     db: AsyncSession,
     section: CourseSection,
-) -> NextModuleInfo | None:
+) -> NextSectionInfo | None:
     result = await db.execute(
         select(CourseSection)
         .where(
@@ -412,9 +411,9 @@ async def _next_section_info(
     next_section = result.scalar_one_or_none()
     if next_section is None:
         return None
-    return NextModuleInfo(
-        module_id=next_section.id,
-        module_name=next_section.title,
+    return NextSectionInfo(
+        section_id=next_section.id,
+        section_title=next_section.title,
     )
 
 

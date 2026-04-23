@@ -22,7 +22,7 @@ def test_answer_index_and_selected_answer_mapping():
 
 
 def test_canonical_item_to_quiz_question_preserves_frontend_shape():
-    topic_id = uuid.uuid4()
+    learning_unit_id = uuid.uuid4()
     item = SimpleNamespace(
         item_id="item-1",
         question="What is attention?",
@@ -31,9 +31,9 @@ def test_canonical_item_to_quiz_question_preserves_frontend_shape():
         question_intent="conceptual",
     )
 
-    payload = canonical_item_to_quiz_question(item, topic_id=topic_id)
+    payload = canonical_item_to_quiz_question(item, learning_unit_id=learning_unit_id)
 
     assert payload.id == canonical_question_uuid("item-1")
-    assert payload.topic_id == topic_id
+    assert payload.learning_unit_id == learning_unit_id
     assert payload.difficulty_bucket == DifficultyBucket.easy
     assert payload.stem_text == "What is attention?"

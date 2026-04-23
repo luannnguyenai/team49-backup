@@ -5,7 +5,7 @@ Quiz System API.
 
 Endpoints
 ---------
-POST  /api/quiz/start                    Start a new quiz for a topic
+POST  /api/quiz/start                    Start a new quiz for a learning unit
 POST  /api/quiz/{session_id}/answer      Submit one answer (real-time feedback)
 POST  /api/quiz/{session_id}/complete    Finalize the quiz and get full results
 GET   /api/quiz/history                  List past quiz sessions
@@ -50,7 +50,7 @@ quiz_router = APIRouter(prefix="/api/quiz", tags=["Quiz"])
     "/start",
     response_model=QuizStartResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Start a new quiz session for a topic",
+    summary="Start a new quiz session for a learning unit",
     description=(
         "Selects 10 questions (3 Easy · 4 Medium · 3 Hard) filtered by "
         "usage_context='quiz'. Prioritises unanswered and previously-wrong "
@@ -62,7 +62,7 @@ async def api_start_quiz(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> QuizStartResponse:
-    return await start_quiz(db, user.id, body.topic_id)
+    return await start_quiz(db, user.id, body.learning_unit_id)
 
 
 # ---------------------------------------------------------------------------
@@ -123,11 +123,15 @@ async def api_complete_quiz(
     summary="List past quiz sessions for the current user",
 )
 async def api_quiz_history(
+    learning_unit_id: uuid.UUID | None = Query(
+        default=None,
+        description="Filter by learning unit UUID (optional)",
+    ),
     topic_id: uuid.UUID | None = Query(
         default=None,
-        description="Filter by topic UUID (optional)",
+        include_in_schema=False,
     ),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> QuizHistoryResponse:
-    return await get_quiz_history(db, user.id, topic_id)
+    return await get_quiz_history(db, user.id, learning_unit_id or topic_id)

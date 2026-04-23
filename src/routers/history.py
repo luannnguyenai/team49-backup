@@ -11,7 +11,7 @@ GET  /api/history/{session_id}/detail   Per-question breakdown for one session
 Query params for GET /api/history
 -----------------------------------
 session_type  : assessment | quiz | module_test  (optional, default = all)
-module_id     : UUID                             (optional)
+section_id    : UUID                             (optional)
 days          : 7 | 30                           (optional, default = all time)
 page          : int ≥ 1                          (default 1)
 page_size     : int 1–100                        (default 20)
@@ -56,9 +56,13 @@ async def api_get_history(
         default=None,
         description="Filter by session type (omit for all types)",
     ),
+    section_id: uuid.UUID | None = Query(
+        default=None,
+        description="Filter by canonical section UUID",
+    ),
     module_id: uuid.UUID | None = Query(
         default=None,
-        description="Filter by module UUID (matches session.module_id or topic.module_id)",
+        include_in_schema=False,
     ),
     days: int | None = Query(
         default=None,
@@ -74,7 +78,7 @@ async def api_get_history(
         db,
         user.id,
         session_type=session_type,
-        module_id=module_id,
+        section_id=section_id or module_id,
         days=days,
         page=page,
         page_size=page_size,

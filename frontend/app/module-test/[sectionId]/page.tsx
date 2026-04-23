@@ -74,7 +74,7 @@ function flattenQuestions(topics: TopicQuestionsGroup[]): QuestionForModuleTest[
 function buildTopicNameMap(topics: TopicQuestionsGroup[]): Record<string, string> {
   const m: Record<string, string> = {};
   for (const g of topics) {
-    for (const q of g.questions) m[q.id] = g.topic_name;
+    for (const q of g.questions) m[q.id] = g.learning_unit_title;
   }
   return m;
 }
@@ -242,11 +242,11 @@ export default function ModuleTestPage() {
     canonicalModuleTestApi
       .start(runtimeRef.sectionId)
       .then((data) => {
-        const flat = flattenQuestions(data.topics);
+        const flat = flattenQuestions(data.learning_units);
         setStartData(data);
         setAllQuestions(flat);
-        setTopicNameMap(buildTopicNameMap(data.topics));
-        setFirstQIds(buildTopicFirstQuestionIds(data.topics));
+        setTopicNameMap(buildTopicNameMap(data.learning_units));
+        setFirstQIds(buildTopicFirstQuestionIds(data.learning_units));
         setSessionId(data.session_id);
         setPhase("active");
         timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -381,14 +381,14 @@ export default function ModuleTestPage() {
     (Object.keys(answers).length / allQuestions.length) * 100
   );
 
-  // Build per-topic groups for the nav panel
-  const navGroups = startData.topics.map((g, gi) => {
+  // Build per-learning-unit groups for the nav panel
+  const navGroups = startData.learning_units.map((g, gi) => {
     // Find the global indices for questions in this group
-    const groupStart = startData.topics
+    const groupStart = startData.learning_units
       .slice(0, gi)
       .reduce((acc, t) => acc + t.questions.length, 0);
     return {
-      topic_name: g.topic_name,
+      learning_unit_title: g.learning_unit_title,
       questions: g.questions.map((q, qi) => ({
         id: q.id,
         globalIdx: groupStart + qi,
@@ -415,12 +415,12 @@ export default function ModuleTestPage() {
 
       <div className="flex-1 overflow-y-auto space-y-4 pr-1">
         {navGroups.map((group) => (
-          <div key={group.topic_name}>
+          <div key={group.learning_unit_title}>
             <p
               className="mb-2 text-xs font-semibold uppercase tracking-wide truncate"
               style={{ color: "var(--text-muted)" }}
             >
-              {group.topic_name}
+              {group.learning_unit_title}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {group.questions.map(({ id, globalIdx, num }) => (
@@ -508,7 +508,7 @@ export default function ModuleTestPage() {
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <Brain className="h-5 w-5 shrink-0 text-primary-500" />
             <span className="truncate text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              {startData.module_name}
+              {startData.section_title}
             </span>
           </div>
 

@@ -271,7 +271,7 @@ export interface LearningUnitQuizRef {
 export interface QuestionForQuiz {
   id: string;
   item_id: string;
-  topic_id: string;
+  learning_unit_id: string;
   bloom_level: BloomLevel;
   difficulty_bucket: DifficultyBucket;
   stem_text: string;
@@ -284,7 +284,7 @@ export interface QuestionForQuiz {
 
 export interface QuizStartResponse {
   session_id: string;
-  topic_id: string;
+  learning_unit_id: string;
   total_questions: number;
   questions: QuestionForQuiz[];
 }
@@ -299,8 +299,8 @@ export interface QuizAnswerResponse {
 
 export interface QuizCompleteResponse {
   session_id: string;
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   score: string; // e.g. "7/10"
   percent: number;
   mastery_before: number;
@@ -319,7 +319,7 @@ export interface QuizCompleteResponse {
 export interface QuestionForModuleTest {
   id: string;
   item_id: string;
-  topic_id: string;
+  learning_unit_id: string;
   bloom_level: BloomLevel;
   difficulty_bucket: DifficultyBucket;
   stem_text: string;
@@ -331,18 +331,18 @@ export interface QuestionForModuleTest {
 }
 
 export interface TopicQuestionsGroup {
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   questions: QuestionForModuleTest[];
 }
 
 export interface ModuleTestStartResponse {
   session_id: string;
-  module_id: string;
-  module_name: string;
-  total_topics: number;
+  section_id: string;
+  section_title: string;
+  total_learning_units: number;
   total_questions: number;
-  topics: TopicQuestionsGroup[];
+  learning_units: TopicQuestionsGroup[];
 }
 
 export interface ModuleTestAnswerInput {
@@ -352,8 +352,8 @@ export interface ModuleTestAnswerInput {
 }
 
 export interface TopicTestResult {
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   score: string;
   score_percent: number;
   bloom_max: string | null;
@@ -362,22 +362,22 @@ export interface TopicTestResult {
 }
 
 export interface ReviewTopicSuggestion {
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   weak_kcs: string[];
   misconceptions: string[];
   estimated_review_hours: number;
 }
 
-export interface NextModuleInfo {
-  module_id: string;
-  module_name: string;
+export interface NextSectionInfo {
+  section_id: string;
+  section_title: string;
 }
 
 export interface WrongAnswerDetail {
   question_id: string;
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   stem_text: string;
   option_a: string;
   option_b: string;
@@ -390,14 +390,14 @@ export interface WrongAnswerDetail {
 
 export interface ModuleTestResultResponse {
   session_id: string;
-  module_id: string;
-  module_name: string;
+  section_id: string;
+  section_title: string;
   total_score_percent: number;
   passed: boolean;
-  per_topic: TopicTestResult[];
+  per_learning_unit: TopicTestResult[];
   recommended_review_topics: ReviewTopicSuggestion[];
   estimated_review_hours: number;
-  next_module: NextModuleInfo | null;
+  next_section: NextSectionInfo | null;
   wrong_answers: WrongAnswerDetail[];
 }
 
@@ -412,8 +412,8 @@ export interface HistoryItem {
   completed_at: string | null;
   duration_seconds: number | null;
   subject: string;
-  topic_id: string | null;
-  module_id: string | null;
+  learning_unit_id: string | null;
+  section_id: string | null;
   score_percent: number | null;
   correct_count: number;
   total_questions: number;

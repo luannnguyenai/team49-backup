@@ -151,7 +151,7 @@ function TopicRow({ t }: { t: TopicTestResult }) {
   return (
     <tr className="border-t" style={{ borderColor: "var(--border)" }}>
       <td className="py-3 pr-4 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-        {t.topic_name}
+        {t.learning_unit_title}
       </td>
       <td className="py-3 pr-4 text-sm tabular-nums" style={{ color: "var(--text-secondary)" }}>
         {t.score}
@@ -197,7 +197,7 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
         <XCircle className="mt-0.5 shrink-0 text-red-400" size={16} />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>
-            {item.topic_name}
+            {item.learning_unit_title}
           </p>
           <div className="text-sm leading-relaxed line-clamp-2" style={{ color: "var(--text-primary)" }}>
             <MarkdownRenderer text={item.stem_text} />
@@ -319,8 +319,16 @@ function ModuleTestResultsInner() {
     );
   }
 
-  const { passed, total_score_percent, per_topic, recommended_review_topics,
-    estimated_review_hours, next_module, wrong_answers, module_name } = result;
+  const {
+    passed,
+    total_score_percent,
+    per_learning_unit,
+    recommended_review_topics,
+    estimated_review_hours,
+    next_section,
+    wrong_answers,
+    section_title,
+  } = result;
 
   return (
     <div className="min-h-screen pb-20" style={{ background: "var(--bg-primary)" }}>
@@ -339,7 +347,7 @@ function ModuleTestResultsInner() {
           <Home size={18} />
         </button>
         <h1 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-          Kết quả: {module_name}
+          Kết quả: {section_title}
         </h1>
       </header>
 
@@ -408,10 +416,10 @@ function ModuleTestResultsInner() {
                 </tr>
               </thead>
               <tbody className="px-5">
-                {per_topic.map((t) => (
-                  <tr key={t.topic_id} className="border-t" style={{ borderColor: "var(--border)" }}>
+                {per_learning_unit.map((t) => (
+                  <tr key={t.learning_unit_id} className="border-t" style={{ borderColor: "var(--border)" }}>
                     <td className="px-5 py-3 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {t.topic_name}
+                      {t.learning_unit_title}
                     </td>
                     <td className="py-3 pr-4 text-sm tabular-nums" style={{ color: "var(--text-secondary)" }}>
                       {t.score}
@@ -460,13 +468,13 @@ function ModuleTestResultsInner() {
             <div className="space-y-3">
               {recommended_review_topics.map((rt) => (
                 <div
-                  key={rt.topic_id}
+                  key={rt.learning_unit_id}
                   className="flex items-start justify-between gap-3 rounded-xl border p-3"
                   style={{ borderColor: "var(--border)" }}
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {rt.topic_name}
+                      {rt.learning_unit_title}
                     </p>
                     {rt.weak_kcs.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
@@ -485,7 +493,7 @@ function ModuleTestResultsInner() {
                     </p>
                   </div>
                   <button
-                    onClick={() => router.push(`/learn/${rt.topic_id}`)}
+                    onClick={() => router.push(`/learn/${rt.learning_unit_id}`)}
                     className="btn-secondary flex shrink-0 items-center gap-1.5 text-xs"
                   >
                     <BookOpen size={13} />
@@ -498,7 +506,7 @@ function ModuleTestResultsInner() {
         )}
 
         {/* ── PASS: next module card ──────────────────────────────────────── */}
-        {passed && next_module && (
+        {passed && next_section && (
           <div
             className="rounded-2xl border p-5 bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20"
             style={{ borderColor: "var(--color-primary-300, #93c5fd)" }}
@@ -510,10 +518,10 @@ function ModuleTestResultsInner() {
               </span>
             </div>
             <p className="text-base font-bold mb-3" style={{ color: "var(--text-primary)" }}>
-              {next_module.module_name}
+              {next_section.section_title}
             </p>
             <button
-              onClick={() => router.push(`/module-test/${next_module.module_id}`)}
+              onClick={() => router.push(`/module-test/${next_section.section_id}`)}
               className="btn-primary flex items-center gap-2"
             >
               Bắt đầu module
@@ -522,7 +530,7 @@ function ModuleTestResultsInner() {
           </div>
         )}
 
-        {passed && !next_module && (
+        {passed && !next_section && (
           <div
             className="rounded-2xl border p-5 text-center"
             style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}

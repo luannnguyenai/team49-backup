@@ -5,7 +5,7 @@ Business logic for the unified Learning History API.
 
 get_history
 -----------
-1.  Build a base Session query with filters: session_type, module_id, days back.
+1.  Build a base Session query with filters: session_type, section_id, days back.
 2.  Count total rows (for pagination).
 3.  Fetch one page sorted by started_at DESC.
 4.  Compute summary stats from ALL matching rows (not just the page).
@@ -53,7 +53,7 @@ async def get_history(
     user_id: uuid.UUID,
     *,
     session_type: SessionType | None = None,
-    module_id: uuid.UUID | None = None,
+    section_id: uuid.UUID | None = None,
     days: int | None = None,  # None = all time
     page: int = 1,
     page_size: int = 20,
@@ -66,11 +66,11 @@ async def get_history(
     if session_type is not None:
         filters.append(Session.session_type == session_type)
 
-    if module_id is not None:
+    if section_id is not None:
         filters.append(
             or_(
-                Session.module_id == module_id,
-                Session.canonical_section_id == module_id,
+                Session.module_id == section_id,
+                Session.canonical_section_id == section_id,
             )
         )
 
@@ -127,8 +127,8 @@ def _session_to_item(
         completed_at=sess.completed_at,
         duration_seconds=duration,
         subject=subject,
-        topic_id=sess.canonical_unit_id or sess.topic_id,
-        module_id=sess.canonical_section_id or sess.module_id,
+        learning_unit_id=sess.canonical_unit_id or sess.topic_id,
+        section_id=sess.canonical_section_id or sess.module_id,
         score_percent=sess.score_percent,
         correct_count=sess.correct_count,
         total_questions=sess.total_questions,

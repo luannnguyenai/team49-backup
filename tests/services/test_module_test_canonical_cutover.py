@@ -14,8 +14,8 @@ async def test_start_module_test_delegates_to_canonical_helper(monkeypatch):
     expected = SimpleNamespace(session_id=uuid4())
     captured = {}
 
-    async def fake_start(db, user_id, module_id):
-        captured["args"] = (db, user_id, module_id)
+    async def fake_start(db, user_id, section_id):
+        captured["args"] = (db, user_id, section_id)
         return expected
 
     monkeypatch.setattr(module_test_service, "_start_canonical_module_test", fake_start)
@@ -61,5 +61,5 @@ async def test_next_section_info_returns_next_sort_order():
     )
 
     assert response is not None
-    assert response.module_id == next_section.id
-    assert response.module_name == "Section 2"
+    assert response.section_id == next_section.id
+    assert response.section_title == "Section 2"

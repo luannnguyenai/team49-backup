@@ -284,14 +284,14 @@ export const canonicalAssessmentApi = {
 export const canonicalQuizApi = {
   start: (learningUnitId: string) =>
     api
-      .post<QuizStartResponse>("/api/quiz/start", { topic_id: learningUnitId })
+      .post<QuizStartResponse>("/api/quiz/start", { learning_unit_id: learningUnitId })
       .then((r) => r.data),
 };
 
 export const canonicalModuleTestApi = {
   start: (sectionId: string) =>
     api
-      .post<ModuleTestStartResponse>("/api/module-test/start", { module_id: sectionId })
+      .post<ModuleTestStartResponse>("/api/module-test/start", { section_id: sectionId })
       .then((r) => r.data),
 };
 
@@ -309,14 +309,14 @@ export const quizApi = {
 export const historyApi = {
   list: (params: {
     session_type?: SessionType;
-    module_id?: string;
+    section_id?: string;
     days?: number;
     page?: number;
     page_size?: number;
   }) => {
     const q = new URLSearchParams();
     if (params.session_type) q.set("session_type", params.session_type);
-    if (params.module_id) q.set("module_id", params.module_id);
+    if (params.section_id) q.set("section_id", params.section_id);
     if (params.days != null) q.set("days", String(params.days));
     if (params.page != null) q.set("page", String(params.page));
     if (params.page_size != null) q.set("page_size", String(params.page_size));

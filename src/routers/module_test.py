@@ -5,7 +5,7 @@ Module Test System API.
 
 Endpoints
 ---------
-POST  /api/module-test/start                  Start a new module test session
+POST  /api/module-test/start                  Start a new section test session
 POST  /api/module-test/{session_id}/submit    Submit all answers; receive graded results
 GET   /api/module-test/{session_id}/results   Retrieve results for a past session
 
@@ -13,12 +13,12 @@ All endpoints require a valid Bearer token.
 
 Business rules (enforced in the service layer)
 -----------------------------------------------
-* start    : user must have ≥ 1 completed quiz session for EVERY topic in the
-             module before the test may begin.
+* start    : user must have ≥ 1 completed quiz session for EVERY learning unit in the
+             section before the test may begin.
 * submit   : 2 Easy + 1 Medium + 2 Hard questions per topic (5 total).
              PASS  = total_score_percent ≥ 70 %
                → mastery updated to max(current, test_score) per topic
-               → next_module returned in response
+               → next_section returned in response
              FAIL  = total_score_percent < 70 %
                → weak topics (score < 60 %) added to learning_path as "remediate"
 * results  : read-only re-computation from stored interactions — no DB mutations.
@@ -58,7 +58,7 @@ module_test_router = APIRouter(prefix="/api/module-test", tags=["Module Test"])
     "/start",
     response_model=ModuleTestStartResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Start a new module test session",
+    summary="Start a new section test session",
     description=(
         "Validates that the user has completed at least one quiz for every topic "
         "in the module. Selects 5 questions per topic (2 Easy · 1 Medium · 2 Hard) "
@@ -71,7 +71,7 @@ async def api_start_module_test(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> ModuleTestStartResponse:
-    return await start_module_test(db, user.id, body.module_id)
+    return await start_module_test(db, user.id, body.section_id)
 
 
 # ---------------------------------------------------------------------------
