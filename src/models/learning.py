@@ -435,3 +435,101 @@ class WaivedUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
             name="ck_waived_units_skip_quiz_score_range",
         ),
     )
+
+
+class PlanHistory(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Planner run snapshot for audit, replay, and diffing."""
+
+    __tablename__ = "plan_history"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    parent_plan_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plan_history.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    trigger: Mapped[str] = mapped_column(String(80), nullable=False)
+    recommended_path_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_snapshot_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    weights_used_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
+    parent_plan: Mapped["PlanHistory | None"] = relationship(
+        "PlanHistory",
+        remote_side="PlanHistory.id",
+        lazy="select",
+    )
+
+    __table_args__ = (
+        Index("ix_plan_history_user", "user_id"),
+        Index("ix_plan_history_parent", "parent_plan_id"),
+        Index("ix_plan_history_trigger", "trigger"),
+    )
+
+
+class RationaleLog(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Per-unit rationale emitted by planner ranking logic."""
+
+    __tablename__ = "rationale_log"
+
+    plan_history_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plan_history.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    learning_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    rank: Mapped[int] = mapped_column(Integer, nullable=False)
+    reason_code: Mapped[str] = mapped_column(String(80), nullable=False)
+    term_breakdown_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    rationale_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    __table_args__ = (
+        Index("ix_rationale_log_plan", "plan_history_id"),
+        Index("ix_rationale_log_unit", "learning_unit_id"),
+        Index("ix_rationale_log_plan_rank", "plan_history_id", "rank"),
+    )
+
+
+class PlannerSessionState(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Planner-local session counters and sticky state across replans."""
+
+    __tablename__ = "planner_session_state"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    session_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    last_plan_history_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plan_history.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    bridge_chain_depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    consecutive_bridge_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    state_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "session_id", name="uq_planner_session_state_user_session"),
+        Index("ix_planner_session_state_user", "user_id"),
+        Index("ix_planner_session_state_last_plan", "last_plan_history_id"),
+        CheckConstraint(
+            "bridge_chain_depth >= 0",
+            name="ck_planner_session_state_bridge_depth_nonnegative",
+        ),
+        CheckConstraint(
+            "consecutive_bridge_count >= 0",
+            name="ck_planner_session_state_consecutive_bridge_nonnegative",
+        ),
+    )

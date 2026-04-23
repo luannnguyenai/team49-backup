@@ -57,6 +57,34 @@ class LearnerPlannerStubModelTests(unittest.TestCase):
 
         self.assertIn("waived_units", migration)
 
+    def test_planning_stub_models_exist(self):
+        from src.models.learning import PlanHistory, PlannerSessionState, RationaleLog
+
+        self.assertEqual(PlanHistory.__tablename__, "plan_history")
+        self.assertEqual(RationaleLog.__tablename__, "rationale_log")
+        self.assertEqual(PlannerSessionState.__tablename__, "planner_session_state")
+
+        self.assertTrue(hasattr(PlanHistory, "user_id"))
+        self.assertTrue(hasattr(PlanHistory, "parent_plan_id"))
+        self.assertTrue(hasattr(PlanHistory, "trigger"))
+        self.assertTrue(hasattr(PlanHistory, "recommended_path_json"))
+        self.assertTrue(hasattr(PlanHistory, "goal_snapshot_json"))
+        self.assertTrue(hasattr(PlanHistory, "weights_used_json"))
+
+        self.assertTrue(hasattr(RationaleLog, "plan_history_id"))
+        self.assertTrue(hasattr(RationaleLog, "learning_unit_id"))
+        self.assertTrue(hasattr(RationaleLog, "rank"))
+        self.assertTrue(hasattr(RationaleLog, "reason_code"))
+        self.assertTrue(hasattr(RationaleLog, "term_breakdown_json"))
+        self.assertTrue(hasattr(RationaleLog, "rationale_text"))
+
+        self.assertTrue(hasattr(PlannerSessionState, "user_id"))
+        self.assertTrue(hasattr(PlannerSessionState, "session_id"))
+        self.assertTrue(hasattr(PlannerSessionState, "last_plan_history_id"))
+        self.assertTrue(hasattr(PlannerSessionState, "bridge_chain_depth"))
+        self.assertTrue(hasattr(PlannerSessionState, "consecutive_bridge_count"))
+        self.assertTrue(hasattr(PlannerSessionState, "state_json"))
+
 
 if __name__ == "__main__":
     unittest.main()

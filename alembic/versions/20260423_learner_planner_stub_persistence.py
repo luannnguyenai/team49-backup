@@ -97,8 +97,97 @@ def upgrade() -> None:
     op.create_index("ix_waived_units_user", "waived_units", ["user_id"], unique=False)
     op.create_index("ix_waived_units_learning_unit", "waived_units", ["learning_unit_id"], unique=False)
 
+    op.create_table(
+        "plan_history",
+        sa.Column("user_id", sa.UUID(), nullable=False),
+        sa.Column("parent_plan_id", sa.UUID(), nullable=True),
+        sa.Column("trigger", sa.String(length=80), nullable=False),
+        sa.Column("recommended_path_json", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("goal_snapshot_json", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("weights_used_json", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.ForeignKeyConstraint(["parent_plan_id"], ["plan_history.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_index("ix_plan_history_user", "plan_history", ["user_id"], unique=False)
+    op.create_index("ix_plan_history_parent", "plan_history", ["parent_plan_id"], unique=False)
+    op.create_index("ix_plan_history_trigger", "plan_history", ["trigger"], unique=False)
+
+    op.create_table(
+        "rationale_log",
+        sa.Column("plan_history_id", sa.UUID(), nullable=False),
+        sa.Column("learning_unit_id", sa.UUID(), nullable=True),
+        sa.Column("rank", sa.Integer(), nullable=False),
+        sa.Column("reason_code", sa.String(length=80), nullable=False),
+        sa.Column("term_breakdown_json", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("rationale_text", sa.Text(), nullable=True),
+        sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.ForeignKeyConstraint(["learning_unit_id"], ["learning_units.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["plan_history_id"], ["plan_history.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_index("ix_rationale_log_plan", "rationale_log", ["plan_history_id"], unique=False)
+    op.create_index("ix_rationale_log_unit", "rationale_log", ["learning_unit_id"], unique=False)
+    op.create_index(
+        "ix_rationale_log_plan_rank",
+        "rationale_log",
+        ["plan_history_id", "rank"],
+        unique=False,
+    )
+
+    op.create_table(
+        "planner_session_state",
+        sa.Column("user_id", sa.UUID(), nullable=False),
+        sa.Column("session_id", sa.String(length=120), nullable=False),
+        sa.Column("last_plan_history_id", sa.UUID(), nullable=True),
+        sa.Column("bridge_chain_depth", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("consecutive_bridge_count", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("state_json", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.CheckConstraint(
+            "bridge_chain_depth >= 0",
+            name="ck_planner_session_state_bridge_depth_nonnegative",
+        ),
+        sa.CheckConstraint(
+            "consecutive_bridge_count >= 0",
+            name="ck_planner_session_state_consecutive_bridge_nonnegative",
+        ),
+        sa.ForeignKeyConstraint(["last_plan_history_id"], ["plan_history.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("user_id", "session_id", name="uq_planner_session_state_user_session"),
+    )
+    op.create_index("ix_planner_session_state_user", "planner_session_state", ["user_id"], unique=False)
+    op.create_index(
+        "ix_planner_session_state_last_plan",
+        "planner_session_state",
+        ["last_plan_history_id"],
+        unique=False,
+    )
+
 
 def downgrade() -> None:
+    op.drop_index("ix_planner_session_state_last_plan", table_name="planner_session_state")
+    op.drop_index("ix_planner_session_state_user", table_name="planner_session_state")
+    op.drop_table("planner_session_state")
+
+    op.drop_index("ix_rationale_log_plan_rank", table_name="rationale_log")
+    op.drop_index("ix_rationale_log_unit", table_name="rationale_log")
+    op.drop_index("ix_rationale_log_plan", table_name="rationale_log")
+    op.drop_table("rationale_log")
+
+    op.drop_index("ix_plan_history_trigger", table_name="plan_history")
+    op.drop_index("ix_plan_history_parent", table_name="plan_history")
+    op.drop_index("ix_plan_history_user", table_name="plan_history")
+    op.drop_table("plan_history")
+
     op.drop_index("ix_waived_units_learning_unit", table_name="waived_units")
     op.drop_index("ix_waived_units_user", table_name="waived_units")
     op.drop_table("waived_units")

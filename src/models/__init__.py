@@ -25,6 +25,9 @@ from src.models.learning import (  # noqa: F401
     LearnerMasteryKP,
     LearningPath,
     MasteryScore,
+    PlanHistory,
+    PlannerSessionState,
+    RationaleLog,
     Session,
     WaivedUnit,
 )
@@ -68,4 +71,7 @@ __all__ = [
     "LearnerMasteryKP",
     "GoalPreference",
     "WaivedUnit",
+    "PlanHistory",
+    "RationaleLog",
+    "PlannerSessionState",
 ]
