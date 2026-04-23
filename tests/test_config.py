@@ -49,7 +49,7 @@ def test_settings_default_tutor_models(monkeypatch: pytest.MonkeyPatch):
     assert settings.gemini_requests_per_minute == 15
 
 
-def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch):
+def test_settings_default_cutover_flags_are_production_canonical(monkeypatch: pytest.MonkeyPatch):
     from src.config import Settings
 
     for env_name in (
@@ -59,6 +59,9 @@ def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch
         "WRITE_PLANNER_AUDIT_ENABLED",
         "READ_GOAL_PREFERENCES_ENABLED",
         "READ_LEARNER_MASTERY_KP_ENABLED",
+        "READ_CANONICAL_QUESTIONS_ENABLED",
+        "WRITE_CANONICAL_INTERACTIONS_ENABLED",
+        "READ_CANONICAL_PLANNER_ENABLED",
         "ALLOW_LEGACY_QUESTION_READS",
         "ALLOW_LEGACY_MASTERY_READS",
         "ALLOW_LEGACY_MASTERY_WRITES",
@@ -70,21 +73,21 @@ def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch
 
     settings = Settings(_env_file=None)
 
-    assert settings.write_goal_preferences_enabled is False
-    assert settings.write_learner_mastery_kp_enabled is False
-    assert settings.write_waived_units_enabled is False
-    assert settings.write_planner_audit_enabled is False
-    assert settings.read_goal_preferences_enabled is False
-    assert settings.read_learner_mastery_kp_enabled is False
-    assert settings.read_canonical_questions_enabled is False
-    assert settings.write_canonical_interactions_enabled is False
-    assert settings.read_canonical_planner_enabled is False
-    assert settings.allow_legacy_question_reads is True
-    assert settings.allow_legacy_mastery_reads is True
-    assert settings.allow_legacy_mastery_writes is True
-    assert settings.allow_legacy_planner_writes is True
-    assert settings.allow_legacy_topic_content_reads is True
-    assert settings.allow_legacy_kg_routes is True
+    assert settings.write_goal_preferences_enabled is True
+    assert settings.write_learner_mastery_kp_enabled is True
+    assert settings.write_waived_units_enabled is True
+    assert settings.write_planner_audit_enabled is True
+    assert settings.read_goal_preferences_enabled is True
+    assert settings.read_learner_mastery_kp_enabled is True
+    assert settings.read_canonical_questions_enabled is True
+    assert settings.write_canonical_interactions_enabled is True
+    assert settings.read_canonical_planner_enabled is True
+    assert settings.allow_legacy_question_reads is False
+    assert settings.allow_legacy_mastery_reads is False
+    assert settings.allow_legacy_mastery_writes is False
+    assert settings.allow_legacy_planner_writes is False
+    assert settings.allow_legacy_topic_content_reads is False
+    assert settings.allow_legacy_kg_routes is False
 
 
 def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch):

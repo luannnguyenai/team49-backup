@@ -93,63 +93,63 @@ class Settings(BaseSettings):
         }
     )
     write_goal_preferences_enabled: bool = Field(
-        default=False,
-        description="Enable writes into goal_preferences during runtime cutover.",
+        default=True,
+        description="Write runtime goal preference snapshots to goal_preferences.",
     )
     write_learner_mastery_kp_enabled: bool = Field(
-        default=False,
-        description="Enable writes into learner_mastery_kp during runtime cutover.",
+        default=True,
+        description="Write mastery updates to learner_mastery_kp.",
     )
     write_waived_units_enabled: bool = Field(
-        default=False,
-        description="Enable writes into waived_units during runtime cutover.",
+        default=True,
+        description="Write skip/waive audit records to waived_units.",
     )
     write_planner_audit_enabled: bool = Field(
-        default=False,
-        description="Enable writes into plan_history, rationale_log, and planner_session_state during runtime cutover.",
+        default=True,
+        description="Write planner audit rows into plan_history, rationale_log, and planner_session_state.",
     )
     read_goal_preferences_enabled: bool = Field(
-        default=False,
-        description="Enable read path from goal_preferences during runtime cutover.",
+        default=True,
+        description="Read learner goals from goal_preferences.",
     )
     read_learner_mastery_kp_enabled: bool = Field(
-        default=False,
-        description="Enable read path from learner_mastery_kp during runtime cutover.",
+        default=True,
+        description="Read learner mastery from learner_mastery_kp.",
     )
     read_canonical_questions_enabled: bool = Field(
-        default=False,
-        description="Read assessment/quiz items from canonical question_bank during runtime cutover.",
+        default=True,
+        description="Read assessment/quiz items from canonical question_bank.",
     )
     write_canonical_interactions_enabled: bool = Field(
-        default=False,
-        description="Write canonical question item IDs into interactions during runtime cutover.",
+        default=True,
+        description="Write canonical question item IDs into interactions.",
     )
     read_canonical_planner_enabled: bool = Field(
-        default=False,
+        default=True,
         description="Read planner candidates from canonical learning units and prerequisite graph.",
     )
     allow_legacy_question_reads: bool = Field(
-        default=True,
-        description="Allow legacy reads from questions/topics for assessment compatibility.",
+        default=False,
+        description="Allow fallback reads from legacy questions/topics.",
     )
     allow_legacy_mastery_writes: bool = Field(
-        default=True,
-        description="Allow legacy writes into mastery_scores during compatibility.",
+        default=False,
+        description="Allow fallback writes into legacy mastery_scores.",
     )
     allow_legacy_mastery_reads: bool = Field(
-        default=True,
-        description="Allow legacy reads from mastery_scores during compatibility.",
+        default=False,
+        description="Allow fallback reads from legacy mastery_scores.",
     )
     allow_legacy_planner_writes: bool = Field(
-        default=True,
-        description="Allow legacy writes into learning_paths during compatibility.",
+        default=False,
+        description="Allow fallback writes into legacy learning_paths.",
     )
     allow_legacy_topic_content_reads: bool = Field(
-        default=True,
-        description="Allow legacy content APIs backed by modules/topics.",
+        default=False,
+        description="Allow fallback content reads backed by legacy modules/topics.",
     )
     allow_legacy_kg_routes: bool = Field(
-        default=True,
+        default=False,
         description="Allow legacy KG routes backed by modules/topics/questions/knowledge_components.",
     )
 
