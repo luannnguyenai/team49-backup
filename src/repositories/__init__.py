@@ -1,5 +1,6 @@
 from src.repositories.assessment_repo import AssessmentRepository
 from src.repositories.base import BaseRepository
+from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.course_recommendation_repo import CourseRecommendationRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
@@ -16,6 +17,7 @@ from src.repositories.waived_unit_repo import WaivedUnitRepository
 __all__ = [
     "AssessmentRepository",
     "BaseRepository",
+    "CanonicalContentRepository",
     "CanonicalQuestionRepository",
     "CourseRecommendationRepository",
     "GoalPreferenceRepository",

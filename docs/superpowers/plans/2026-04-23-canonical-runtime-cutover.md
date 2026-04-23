@@ -980,7 +980,7 @@ git commit -m "feat: write canonical learner mastery from assessment evidence"
 - Test: `tests/repositories/test_canonical_content_repo.py`
 - Test: `tests/services/test_canonical_planner_service.py`
 
-- [ ] **Step 1: Add service tests**
+- [x] **Step 1: Add service tests**
 
 Create `tests/services/test_canonical_planner_service.py`:
 
@@ -998,7 +998,7 @@ def test_classify_unit_action_uses_mastery_lcb():
     assert classify_unit_action(mastery_lcb=0.25) == "deep_practice"
 ```
 
-- [ ] **Step 2: Implement planner classifier**
+- [x] **Step 2: Implement planner classifier**
 
 Create `src/services/canonical_planner_service.py`:
 
@@ -1011,7 +1011,7 @@ def classify_unit_action(mastery_lcb: float) -> str:
     return "deep_practice"
 ```
 
-- [ ] **Step 3: Add content repository**
+- [x] **Step 3: Add content repository**
 
 Create `src/repositories/canonical_content_repo.py`:
 
@@ -1051,7 +1051,7 @@ class CanonicalContentRepository:
         return list(result.scalars().all())
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/services/test_canonical_planner_service.py tests/repositories/test_canonical_content_repo.py -q
@@ -1061,7 +1061,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/repositories/canonical_content_repo.py src/services/canonical_planner_service.py tests/repositories/test_canonical_content_repo.py tests/services/test_canonical_planner_service.py
