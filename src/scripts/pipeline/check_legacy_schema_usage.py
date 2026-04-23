@@ -73,6 +73,7 @@ DEFAULT_EXCLUDED_PARTS = {
     "data",
     "frontend",
     "node_modules",
+    "scripts",
 }
 
 
@@ -82,6 +83,8 @@ def _compile_surface_pattern(surface: LegacySurface) -> re.Pattern[str]:
 
 def _should_skip(path: Path, *, roots: tuple[Path, ...], excluded_parts: set[str]) -> bool:
     if path.name == "check_legacy_schema_usage.py":
+        return True
+    if path.name == "config.py":
         return True
     if path.suffix != ".py":
         return True

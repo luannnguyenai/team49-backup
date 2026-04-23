@@ -46,3 +46,18 @@ def test_iter_python_files_skips_default_excluded_parts(tmp_path: Path):
     files = iter_python_files([tmp_path / "src"])
 
     assert files == [included.resolve()]
+
+
+def test_iter_python_files_skips_config_and_pipeline_scripts(tmp_path: Path):
+    config = tmp_path / "src" / "config.py"
+    config.parent.mkdir()
+    config.write_text("ALLOW_LEGACY_QUESTION_READS = True\n", encoding="utf-8")
+    script = tmp_path / "src" / "scripts" / "pipeline" / "export.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("LEGACY_TABLES = ['questions']\n", encoding="utf-8")
+    service = tmp_path / "src" / "service.py"
+    service.write_text("print('runtime')\n", encoding="utf-8")
+
+    files = iter_python_files([tmp_path / "src"])
+
+    assert files == [service.resolve()]
