@@ -104,6 +104,10 @@ Compatibility-only after cutover:
 - [ ] Run config tests.
 - [ ] Commit.
 
+Current status:
+- Done
+- Commit: `ae24665` `feat: add cutover flags and planner stub repositories`
+
 ## Phase 1: Repository layer for new tables
 
 ### Task 1.1: Add goal preference repository
@@ -166,6 +170,10 @@ Compatibility-only after cutover:
 - [ ] Re-run tests.
 - [ ] Commit.
 
+Current status for Phase 1:
+- Done
+- Commit: `ae24665` `feat: add cutover flags and planner stub repositories`
+
 ## Phase 2: Write-path cutover
 
 ### Task 2.1: Wire onboarding to `goal_preferences`
@@ -186,6 +194,11 @@ Compatibility-only after cutover:
 - [ ] Re-run tests.
 - [ ] Commit.
 
+Current status:
+- Done in compatibility mode
+- `update_onboarding()` now writes a legacy onboarding snapshot into `goal_preferences`
+- `selected_course_ids` intentionally remains `null` until onboarding becomes course-first
+
 ### Task 2.2: Wire assessment/quiz mastery updates to `learner_mastery_kp`
 
 **Files:**
@@ -200,6 +213,10 @@ Compatibility-only after cutover:
 - [ ] Do **not** stop writing old `mastery_scores` yet unless parity is already checked.
 - [ ] Re-run tests.
 - [ ] Commit.
+
+Current status:
+- Not started by design
+- Blocked on missing authoritative runtime bridge from topic/KC grain to canonical `kp_id`
 
 ### Task 2.3: Wire skip flow to `waived_units`
 
@@ -219,6 +236,10 @@ Compatibility-only after cutover:
 - [ ] Re-run tests.
 - [ ] Commit.
 
+Current status:
+- Not started by design
+- Blocked on missing authoritative runtime bridge from topic-grain skip flow to `learning_unit_id`
+
 ### Task 2.4: Wire planner writes to audit tables
 
 **Files:**
@@ -235,6 +256,13 @@ Compatibility-only after cutover:
 - [ ] Ensure planner can still return its old response shape.
 - [ ] Re-run tests.
 - [ ] Commit.
+
+Current status:
+- Done in compatibility mode
+- `generate_learning_path()` now writes topic-grain audit rows into:
+  - `plan_history`
+  - `rationale_log`
+  - `planner_session_state`
 
 ## Phase 3: Read-path cutover
 

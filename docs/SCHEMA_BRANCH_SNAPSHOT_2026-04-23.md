@@ -83,6 +83,50 @@ Nằm trong:
 
 Nó chưa thay thế runtime cũ, mà là lớp sidecar để phase backend tiếp theo có điểm rơi rõ ràng.
 
+### Trạng thái wiring runtime hiện tại
+
+Hiện có 2 write-path đã được nối vào sidecar layer, đều nằm sau feature flag:
+
+- `goal_preferences`
+  - writer: `src/services/auth_service.py:update_onboarding`
+  - flag: `write_goal_preferences_enabled`
+  - dữ liệu hiện tại là **compatibility snapshot từ onboarding cũ**
+  - `goal_weights_json` đang giữ:
+    - `available_hours_per_week`
+    - `preferred_method`
+    - `legacy_desired_module_count`
+    - `legacy_known_topic_count`
+  - `notes` giữ JSON-encoded:
+    - `legacy_desired_module_ids`
+    - `legacy_known_topic_ids`
+  - `selected_course_ids` vẫn để `null` vì onboarding hiện còn ở grain `module/topic`, chưa phải `course-first`
+
+- `plan_history` / `rationale_log` / `planner_session_state`
+  - writer: `src/services/recommendation_engine.py:generate_learning_path`
+  - flag: `write_planner_audit_enabled`
+  - dữ liệu hiện tại là **legacy topic-grain audit**
+  - `recommended_path_json` lưu:
+    - `topic_id`
+    - `module_name`
+    - `action`
+    - `estimated_hours`
+    - `order_index`
+    - `week_number`
+  - `rationale_log.learning_unit_id` hiện để `null`
+  - `reason_code` được namespace theo dạng `legacy_topic_<action>`
+  - `planner_session_state.session_id` hiện cố định là `learning-path`
+
+Hai bảng sau vẫn mới chỉ dừng ở mức schema foundation, chưa nối runtime:
+
+- `learner_mastery_kp`
+  - chưa có bridge live từ `topic/module` runtime sang canonical `kp_id`
+  - nếu ép ghi ngay sẽ phải fabricate `kp_id` hoặc tạo drift giữa topic mastery và KP mastery
+
+- `waived_units`
+  - skip flow hiện tại vẫn ở grain `topic` qua `learning_paths.status=skipped`
+  - chưa có `learning_unit_id` authoritative tại đúng điểm runtime đó
+  - nếu ép ghi ngay sẽ tạo waive audit sai grain
+
 ## A. Runtime ORM Schema
 
 ## A1. `users`

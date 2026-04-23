@@ -5,6 +5,7 @@ Pure business logic for authentication and user management.
 No HTTP concerns here — can be tested independently.
 """
 
+import json
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -14,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.models.user import User
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.user_repo import UserRepository
 from src.schemas.auth import OnboardingRequest, RegisterRequest, TokenPayload
 
@@ -151,5 +153,48 @@ async def update_onboarding(
 
     db.add(user)
     await db.flush()
+    await _write_goal_preferences_if_enabled(db, user, data)
     await db.refresh(user)
     return user
+
+
+async def _write_goal_preferences_if_enabled(
+    db: AsyncSession,
+    user: User,
+    data: OnboardingRequest,
+) -> None:
+    """
+    Persist a compatibility goal-preference snapshot during runtime cutover.
+
+    Current onboarding is still module/topic-grain, so we intentionally store:
+    - legacy module/topic intent inside `goal_weights_json`
+    - no `selected_course_ids` yet
+    This preserves the user's stated objective without fabricating course IDs.
+    """
+    if not settings.write_goal_preferences_enabled:
+        return
+
+    repo = GoalPreferenceRepository(db)
+    goal_weights_json = {
+        "available_hours_per_week": data.available_hours_per_week,
+        "preferred_method": data.preferred_method.value,
+        "legacy_desired_module_count": len(data.desired_module_ids),
+        "legacy_known_topic_count": len(data.known_topic_ids),
+    }
+    notes = json.dumps(
+        {
+            "legacy_desired_module_ids": [str(module_id) for module_id in data.desired_module_ids],
+            "legacy_known_topic_ids": [str(topic_id) for topic_id in data.known_topic_ids],
+            "source": "auth_onboarding_legacy_runtime",
+        },
+        sort_keys=True,
+    )
+    await repo.upsert_for_user(
+        user_id=user.id,
+        goal_weights_json=goal_weights_json,
+        selected_course_ids=None,
+        goal_embedding=None,
+        goal_embedding_version=None,
+        derived_from_course_set_hash=None,
+        notes=notes,
+    )

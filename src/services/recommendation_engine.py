@@ -51,6 +51,7 @@ from sqlalchemy import delete, select
 from src.exceptions import NotFoundError, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.models.content import Module, Topic
 from src.models.learning import (
     Interaction,
@@ -61,6 +62,7 @@ from src.models.learning import (
     SelectedAnswer,
 )
 from src.models.user import User
+from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.schemas.learning_path import (
     GeneratePathRequest,
     GeneratePathResponse,
@@ -268,6 +270,16 @@ async def generate_learning_path(
     for lp in lp_records:
         await db.refresh(lp)
 
+    await _write_planner_audit_if_enabled(
+        db=db,
+        user_id=user.id,
+        now=now,
+        classified=classified,
+        timeline=timeline,
+        mastery_by_topic=mastery_by_topic,
+        misconception_topics=misconception_topics,
+    )
+
     # ── 9. Build response ─────────────────────────────────────────────────────
     items: list[PathItemResponse] = []
     for c, lp in zip(classified, lp_records):
@@ -292,6 +304,96 @@ async def generate_learning_path(
         required_hours_per_week=timeline.required_hours_per_week,
         warnings=timeline.warnings,
         items=items,
+    )
+
+
+async def _write_planner_audit_if_enabled(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    now: datetime,
+    classified: list,
+    timeline,
+    mastery_by_topic: dict[uuid.UUID, float],
+    misconception_topics: set[uuid.UUID],
+) -> None:
+    """
+    Persist planner audit rows using legacy topic-grain payloads.
+
+    This is intentionally compatibility-oriented: `learning_unit_id` remains null
+    because the current runtime planner still ranks topics, not canonical units.
+    The sidecar rows give the next integration phase an audit trail without
+    forcing a premature topic->unit mapping.
+    """
+    if not settings.write_planner_audit_enabled:
+        return
+
+    repo = PlannerAuditRepository(db)
+    recommended_path_json = []
+    for item in classified:
+        week_number = timeline.topic_week_map.get(item.topic.id)
+        recommended_path_json.append(
+            {
+                "topic_id": str(item.topic.id),
+                "module_name": item.module_name,
+                "action": item.action.value,
+                "estimated_hours": item.estimated_hours,
+                "order_index": item.order_index,
+                "week_number": week_number,
+            }
+        )
+
+    plan = await repo.create_plan(
+        user_id=user_id,
+        trigger="generate_learning_path",
+        recommended_path_json=recommended_path_json,
+        goal_snapshot_json={
+            "legacy_runtime": True,
+            "generated_at": now.isoformat(),
+        },
+        weights_used_json={
+            "legacy_planner": True,
+            "kg_phase": settings.kg_phase,
+        },
+    )
+
+    for rank, item in enumerate(classified, start=1):
+        week_number = timeline.topic_week_map.get(item.topic.id)
+        await repo.add_rationale(
+            plan_history_id=plan.id,
+            learning_unit_id=None,
+            rank=rank,
+            reason_code=f"legacy_topic_{item.action.value}",
+            term_breakdown_json={
+                "topic_id": str(item.topic.id),
+                "module_name": item.module_name,
+                "legacy_mastery_percent": mastery_by_topic.get(item.topic.id, 0.0),
+                "has_unresolved_misconception": item.topic.id in misconception_topics,
+                "week_number": week_number,
+                "estimated_hours": item.estimated_hours,
+            },
+            rationale_text=(
+                f"Legacy topic planner chose `{item.action.value}` for topic `{item.topic.name}` "
+                f"at order {item.order_index}."
+            ),
+        )
+
+    skipped_topic_ids = [
+        str(item.topic.id)
+        for item in classified
+        if item.action == PathAction.skip
+    ]
+    await repo.upsert_session_state(
+        user_id=user_id,
+        session_id="learning-path",
+        last_plan_history_id=plan.id,
+        bridge_chain_depth=0,
+        consecutive_bridge_count=0,
+        state_json={
+            "legacy_runtime": True,
+            "generated_at": now.isoformat(),
+            "topic_count": len(classified),
+            "skipped_topic_ids": skipped_topic_ids,
+        },
     )
 
 

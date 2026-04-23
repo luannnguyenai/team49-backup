@@ -25,6 +25,22 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 **Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
 
+### [ADR-7] Runtime cutover chỉ nối những write-path có grain an toàn — 23/04/2026
+
+**Bối cảnh:** Sau khi thêm các sidecar tables mới, nhu cầu kế tiếp là bắt đầu cutover runtime. Tuy nhiên runtime hiện vẫn ở grain `topic/module`, trong khi một phần schema mới (`learner_mastery_kp`, `waived_units`) đòi hỏi grain `kp/unit`.
+
+**Quyết định:** Chỉ nối các write-path nào có thể ghi **đúng grain** hoặc ít nhất **compatibility snapshot minh bạch**:
+
+- nối `update_onboarding()` -> `goal_preferences`
+- nối `generate_learning_path()` -> `plan_history`, `rationale_log`, `planner_session_state`
+- **không** nối:
+  - `mastery_scores` -> `learner_mastery_kp`
+  - `learning_paths.status=skipped` -> `waived_units`
+
+cho đến khi có bridge authoritative từ runtime cũ sang canonical `kp_id` / `learning_unit_id`.
+
+**Hệ quả:** Runtime bắt đầu để lại audit trail hữu ích cho production migration mà không fabricate dữ liệu mới sai grain. Đổi lại, cutover chưa hoàn thành hết; hai flow mastery/waive vẫn phải chờ phase canonical-DB integration kế tiếp.
+
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
