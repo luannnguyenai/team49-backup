@@ -142,6 +142,15 @@ async def _build_user_skill_overview(
     db: AsyncSession,
     user_id: uuid.UUID,
 ) -> UserSkillOverview:
+    if not settings.allow_legacy_mastery_reads or not settings.allow_legacy_topic_content_reads:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail=(
+                "Legacy skill overview is disabled. Use learner_mastery_kp with "
+                "canonical KP aggregation."
+            ),
+        )
+
     result = await db.execute(
         select(MasteryScore, Topic, Module)
         .join(Topic, MasteryScore.topic_id == Topic.id)

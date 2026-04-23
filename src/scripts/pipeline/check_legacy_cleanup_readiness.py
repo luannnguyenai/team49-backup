@@ -14,8 +14,19 @@ from src.scripts.pipeline.validate_legacy_cleanup_targets import (
 
 GUARDED_COMPATIBILITY_PATHS: dict[str, str] = {
     "src/kg/": "allow_legacy_kg_routes",
+    "src/repositories/assessment_repo.py": "allow_legacy_question_reads/allow_legacy_mastery_reads",
+    "src/repositories/history_repo.py": "allow_legacy_question_reads/allow_legacy_topic_content_reads",
+    "src/repositories/interaction_repo.py": "allow_legacy_question_reads",
+    "src/repositories/mastery_repo.py": "allow_legacy_mastery_reads/allow_legacy_mastery_writes",
+    "src/repositories/question_repo.py": "allow_legacy_question_reads",
+    "src/repositories/session_repo.py": "allow_legacy_topic_content_reads",
+    "src/routers/auth.py": "allow_legacy_mastery_reads/allow_legacy_topic_content_reads",
     "src/routers/content.py": "allow_legacy_topic_content_reads",
     "src/services/content_service.py": "allow_legacy_topic_content_reads",
+    "src/services/assessment_service.py": "allow_legacy_question_reads/allow_legacy_mastery_writes",
+    "src/services/history_service.py": "allow_legacy_question_reads/allow_legacy_topic_content_reads",
+    "src/services/mastery_evaluator.py": "legacy question compatibility model only",
+    "src/services/question_selector.py": "allow_legacy_question_reads",
     "src/services/quiz_service.py": "allow_legacy_question_reads/allow_legacy_mastery_writes/allow_legacy_planner_writes",
     "src/services/module_test_service.py": "allow_legacy_question_reads/allow_legacy_mastery_writes/allow_legacy_planner_writes",
     "src/services/recommendation_engine.py": "allow_legacy_planner_writes/read_canonical_planner_enabled",
@@ -25,6 +36,7 @@ ACCEPTED_LEGACY_DEFINITION_PATHS: frozenset[str] = frozenset(
     {
         "src/models/content.py",
         "src/models/learning.py",
+        "src/models/user.py",
         "src/models/__init__.py",
     }
 )

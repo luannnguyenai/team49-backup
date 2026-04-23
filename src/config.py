@@ -136,6 +136,10 @@ class Settings(BaseSettings):
         default=True,
         description="Allow legacy writes into mastery_scores during compatibility.",
     )
+    allow_legacy_mastery_reads: bool = Field(
+        default=True,
+        description="Allow legacy reads from mastery_scores during compatibility.",
+    )
     allow_legacy_planner_writes: bool = Field(
         default=True,
         description="Allow legacy writes into learning_paths during compatibility.",

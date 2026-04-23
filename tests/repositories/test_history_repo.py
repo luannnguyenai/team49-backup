@@ -60,3 +60,34 @@ async def test_fetch_session_detail_rows_returns_query_rows():
     rows = await repo.fetch_session_detail_rows(uuid4())
 
     assert rows == [row]
+
+
+@pytest.mark.asyncio
+async def test_fetch_session_detail_rows_canonical_only_does_not_require_legacy_question_join():
+    from src.repositories.history_repo import HistoryRepository
+
+    session = AsyncMock()
+    result = Mock()
+    row = ("interaction", "canonical_item")
+    result.all.return_value = [row]
+    session.execute.return_value = result
+
+    repo = HistoryRepository(session)
+    rows = await repo.fetch_session_detail_rows_canonical_only(uuid4())
+
+    assert rows == [("interaction", None, "canonical_item", None)]
+
+
+@pytest.mark.asyncio
+async def test_fetch_history_page_canonical_only_returns_sessions_without_legacy_labels():
+    from src.repositories.history_repo import HistoryRepository
+
+    session = AsyncMock()
+    result = Mock()
+    result.scalars.return_value.all.return_value = ["session"]
+    session.execute.return_value = result
+
+    repo = HistoryRepository(session)
+    rows = await repo.fetch_history_page_canonical_only(filters=[], page=1, page_size=20)
+
+    assert rows == [("session", None, None)]

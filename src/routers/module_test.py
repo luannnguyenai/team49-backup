@@ -87,7 +87,7 @@ async def api_start_module_test(
         "Grades the full test in one shot. "
         "PASS (≥ 70 %): updates mastery per topic to max(current, test_score) "
         "and returns the next module. "
-        "FAIL (< 70 %): inserts LearningPath(action=remediate) for each weak topic "
+        "FAIL (< 70 %): records legacy remediation entries for each weak topic "
         "(score < 60 %) and returns targeted review suggestions."
     ),
 )

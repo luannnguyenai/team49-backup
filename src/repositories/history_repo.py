@@ -15,6 +15,8 @@ from src.models.canonical import QuestionBankItem
 from src.models.content import KnowledgeComponent, Module, Question, Topic
 from src.models.learning import Interaction, Session
 
+HistoryDetailRow = tuple[Interaction, Question | None, QuestionBankItem | None, str | None]
+
 
 class HistoryRepository:
     def __init__(self, session: AsyncSession):
@@ -51,6 +53,22 @@ class HistoryRepository:
         )
         return result.all()
 
+    async def fetch_history_page_canonical_only(
+        self,
+        *,
+        filters: list,
+        page: int,
+        page_size: int,
+    ) -> list[tuple[Session, str | None, str | None]]:
+        result = await self.session.execute(
+            select(Session)
+            .where(*filters)
+            .order_by(Session.started_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        return [(session, None, None) for session in result.scalars().all()]
+
     async def fetch_sessions_for_summary(self, *, filters: list) -> list[Session]:
         result = await self.session.execute(
             select(Session).where(*filters).order_by(Session.started_at.asc())
@@ -74,7 +92,7 @@ class HistoryRepository:
     async def fetch_session_detail_rows(
         self,
         session_id: uuid.UUID,
-    ) -> list[tuple[Interaction, Question | None, QuestionBankItem | None, str | None]]:
+    ) -> list[HistoryDetailRow]:
         result = await self.session.execute(
             select(
                 Interaction,
@@ -89,6 +107,24 @@ class HistoryRepository:
             .order_by(Interaction.sequence_position)
         )
         return result.all()
+
+    async def fetch_session_detail_rows_canonical_only(
+        self,
+        session_id: uuid.UUID,
+    ) -> list[HistoryDetailRow]:
+        result = await self.session.execute(
+            select(
+                Interaction,
+                QuestionBankItem,
+            )
+            .outerjoin(QuestionBankItem, Interaction.canonical_item_id == QuestionBankItem.item_id)
+            .where(Interaction.session_id == session_id)
+            .order_by(Interaction.sequence_position)
+        )
+        return [
+            (interaction, None, canonical_item, None)
+            for interaction, canonical_item in result.all()
+        ]
 
     async def resolve_kc_names(self, kc_ids: list[uuid.UUID]) -> dict[str, str]:
         if not kc_ids:

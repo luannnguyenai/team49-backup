@@ -28,6 +28,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.models.content import (
     Module,
     Question,
@@ -81,12 +82,15 @@ async def get_history(
         # For quiz / assessment filter by topic.module_id, for module_test by session.module_id
         from sqlalchemy import or_
 
-        filters.append(
-            or_(
-                Session.module_id == module_id,
-                Session.topic_id.in_(select(Topic.id).where(Topic.module_id == module_id)),
+        if settings.allow_legacy_topic_content_reads:
+            filters.append(
+                or_(
+                    Session.module_id == module_id,
+                    Session.topic_id.in_(select(Topic.id).where(Topic.module_id == module_id)),
+                )
             )
-        )
+        else:
+            filters.append(Session.module_id == module_id)
 
     if days is not None:
         cutoff = datetime.now(UTC) - timedelta(days=days)
@@ -96,11 +100,18 @@ async def get_history(
     total = await repo.count_sessions(filters=filters)
 
     # ── Fetch page ─────────────────────────────────────────────────────────
-    page_rows = await repo.fetch_history_page(
-        filters=filters,
-        page=page,
-        page_size=page_size,
-    )
+    if settings.allow_legacy_topic_content_reads:
+        page_rows = await repo.fetch_history_page(
+            filters=filters,
+            page=page,
+            page_size=page_size,
+        )
+    else:
+        page_rows = await repo.fetch_history_page_canonical_only(
+            filters=filters,
+            page=page,
+            page_size=page_size,
+        )
 
     items: list[HistoryItem] = []
     for sess, topic_name, module_name in page_rows:
@@ -211,7 +222,10 @@ async def get_session_detail(
         raise ConflictError("Session has not been completed yet.")
 
     # 2. Load interactions + questions
-    rows = await repo.fetch_session_detail_rows(session_id)
+    if settings.allow_legacy_question_reads:
+        rows = await repo.fetch_session_detail_rows(session_id)
+    else:
+        rows = await repo.fetch_session_detail_rows_canonical_only(session_id)
 
     if not rows:
         return SessionDetailResponse(
@@ -306,6 +320,8 @@ async def _resolve_kc_names(
         except ValueError:
             pass
     if not valid:
+        return kc_id_strs
+    if not settings.allow_legacy_question_reads:
         return kc_id_strs
     repo = HistoryRepository(db)
     name_map = await repo.resolve_kc_names(valid)

@@ -73,6 +73,6 @@ def test_classify_usage_references_marks_guarded_and_model_definition_examples()
 
     result = classify_usage_references(usage_report)
 
-    assert result["guarded_example_count"] == 1
+    assert result["guarded_example_count"] == 2
     assert result["accepted_definition_example_count"] == 1
-    assert result["unguarded_example_count"] == 1
+    assert result["unguarded_example_count"] == 0
