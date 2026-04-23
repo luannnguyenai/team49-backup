@@ -214,6 +214,14 @@ Rules:
 - Read-only.
 - Manifest includes row counts and sha256 per file.
 - Do not commit archive payloads unless explicitly requested.
+- Reuse the legacy cleanup target guard so protected canonical/product tables cannot be exported or prepared for cleanup by mistake.
+
+Preflight examples:
+
+```bash
+PYTHONPATH=. .venv/bin/python src/scripts/pipeline/validate_legacy_cleanup_targets.py questions mastery_scores learning_paths
+PYTHONPATH=. .venv/bin/python src/scripts/pipeline/validate_legacy_cleanup_targets.py question_bank learning_units
+```
 
 Commit: `chore: add legacy data archive exporter`.
 
@@ -283,4 +291,3 @@ Proceed in this order:
 5. Archive legacy data.
 6. Rename legacy tables.
 7. Drop archived tables only after one stable cycle.
-

@@ -12,16 +12,12 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import async_session
-
-LEGACY_RUNTIME_TABLES: tuple[str, ...] = (
-    "modules",
-    "topics",
-    "knowledge_components",
-    "questions",
-    "mastery_scores",
-    "mastery_history",
-    "learning_paths",
+from src.scripts.pipeline.validate_legacy_cleanup_targets import (
+    LEGACY_CLEANUP_ALLOWLIST,
+    validate_cleanup_targets,
 )
+
+LEGACY_RUNTIME_TABLES: tuple[str, ...] = tuple(sorted(LEGACY_CLEANUP_ALLOWLIST))
 
 DEFAULT_OUTPUT_ROOT = Path("data/legacy_archive")
 
@@ -77,6 +73,10 @@ async def export_legacy_runtime_data(
     *,
     tables: tuple[str, ...] = LEGACY_RUNTIME_TABLES,
 ) -> dict[str, Any]:
+    target_report = validate_cleanup_targets(list(tables))
+    if target_report["status"] != "ready":
+        raise ValueError(f"Unsafe legacy export targets: {target_report}")
+
     output_dir.mkdir(parents=True, exist_ok=True)
     table_exports: dict[str, dict[str, Any]] = {}
     for table_name in tables:

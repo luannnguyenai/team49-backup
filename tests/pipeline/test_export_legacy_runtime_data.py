@@ -2,9 +2,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
+import pytest
+
 from src.scripts.pipeline.export_legacy_runtime_data import (
+    LEGACY_RUNTIME_TABLES,
     build_manifest,
     encode_json_line,
+    export_legacy_runtime_data,
     timestamped_output_dir,
     write_jsonl,
 )
@@ -58,3 +62,29 @@ def test_build_manifest_records_table_exports(tmp_path: Path):
 
     assert manifest["output_dir"] == str(tmp_path)
     assert manifest["tables"]["questions"]["rows"] == 2
+
+
+def test_legacy_runtime_tables_match_cleanup_allowlist_order():
+    assert LEGACY_RUNTIME_TABLES == (
+        "knowledge_components",
+        "learning_paths",
+        "mastery_history",
+        "mastery_scores",
+        "modules",
+        "questions",
+        "topics",
+    )
+
+
+@pytest.mark.asyncio
+async def test_export_legacy_runtime_data_rejects_protected_table(tmp_path: Path):
+    try:
+        await export_legacy_runtime_data(
+            session=object(),  # type: ignore[arg-type]
+            output_dir=tmp_path,
+            tables=("question_bank",),
+        )
+    except ValueError as exc:
+        assert "Unsafe legacy export targets" in str(exc)
+    else:
+        raise AssertionError("expected protected table export to fail")
