@@ -5,8 +5,7 @@ Business logic for the unified Learning History API.
 
 get_history
 -----------
-1.  Build a base query joining Session → Topic (optional) and Module (optional)
-    with filters: session_type, module_id, days back.
+1.  Build a base Session query with filters: session_type, module_id, days back.
 2.  Count total rows (for pagination).
 3.  Fetch one page sorted by started_at DESC.
 4.  Compute summary stats from ALL matching rows (not just the page).
@@ -15,8 +14,8 @@ get_history
 get_session_detail
 ------------------
 1.  Load Session, validate ownership.
-2.  Load all Interactions + Questions for the session (ordered by sequence_position).
-3.  Build bloom_breakdown, weak_kcs, misconceptions via mastery_evaluator helpers.
+2.  Load all Interactions + canonical question_bank items for the session.
+3.  Render canonical per-question details.
 4.  Return SessionDetailResponse.
 """
 
@@ -25,15 +24,8 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config import settings
-from src.models.content import (
-    Module,
-    Question,
-    Topic,
-)
 from src.models.learning import (
     Interaction,
     Session,
@@ -49,11 +41,6 @@ from src.schemas.history import (
 )
 from src.exceptions import ConflictError, NotFoundError
 from src.repositories.history_repo import HistoryRepository
-from src.services.mastery_evaluator import (
-    BloomLevel,
-    QuestionResult,
-    evaluate_topic,
-)
 
 # ---------------------------------------------------------------------------
 # GET /api/history
@@ -79,18 +66,7 @@ async def get_history(
         filters.append(Session.session_type == session_type)
 
     if module_id is not None:
-        # For quiz / assessment filter by topic.module_id, for module_test by session.module_id
-        from sqlalchemy import or_
-
-        if settings.allow_legacy_topic_content_reads:
-            filters.append(
-                or_(
-                    Session.module_id == module_id,
-                    Session.topic_id.in_(select(Topic.id).where(Topic.module_id == module_id)),
-                )
-            )
-        else:
-            filters.append(Session.module_id == module_id)
+        filters.append(Session.module_id == module_id)
 
     if days is not None:
         cutoff = datetime.now(UTC) - timedelta(days=days)
@@ -100,18 +76,11 @@ async def get_history(
     total = await repo.count_sessions(filters=filters)
 
     # ── Fetch page ─────────────────────────────────────────────────────────
-    if settings.allow_legacy_topic_content_reads:
-        page_rows = await repo.fetch_history_page(
-            filters=filters,
-            page=page,
-            page_size=page_size,
-        )
-    else:
-        page_rows = await repo.fetch_history_page_canonical_only(
-            filters=filters,
-            page=page,
-            page_size=page_size,
-        )
+    page_rows = await repo.fetch_history_page_canonical_only(
+        filters=filters,
+        page=page,
+        page_size=page_size,
+    )
 
     items: list[HistoryItem] = []
     for sess, topic_name, module_name in page_rows:
@@ -221,11 +190,8 @@ async def get_session_detail(
     if sess.completed_at is None:
         raise ConflictError("Session has not been completed yet.")
 
-    # 2. Load interactions + questions
-    if settings.allow_legacy_question_reads:
-        rows = await repo.fetch_session_detail_rows(session_id)
-    else:
-        rows = await repo.fetch_session_detail_rows_canonical_only(session_id)
+    # 2. Load interactions + canonical question_bank items
+    rows = await repo.fetch_session_detail_rows_canonical_only(session_id)
 
     if not rows:
         return SessionDetailResponse(
@@ -237,56 +203,7 @@ async def get_session_detail(
             questions=[],
         )
 
-    # 3. Build QuestionResult list for the evaluator.
-    # Canonical-only interactions do not have legacy Bloom/KC/misconception
-    # fields, so they are still shown in detail but skipped for legacy
-    # bloom/weak-KC aggregation.
-    qr_list: list[QuestionResult] = [
-        QuestionResult(
-            question_id=q.id,
-            topic_id=q.topic_id,
-            bloom_level=q.bloom_level,
-            correct_answer=q.correct_answer,
-            selected_answer=inter.selected_answer,
-            is_correct=inter.is_correct,
-            kc_ids=q.kc_ids or [],
-            misconception_a_id=q.misconception_a_id,
-            misconception_b_id=q.misconception_b_id,
-            misconception_c_id=q.misconception_c_id,
-            misconception_d_id=q.misconception_d_id,
-        )
-        for inter, q, _, _ in rows
-        if q is not None
-    ]
-
-    # 4. Group by topic and evaluate each
-    by_topic: dict[uuid.UUID, list[QuestionResult]] = {}
-    for qr in qr_list:
-        by_topic.setdefault(qr.topic_id, []).append(qr)
-
-    # Aggregate bloom across all topics
-    bloom_correct: dict[str, int] = {b.value: 0 for b in BloomLevel}
-    bloom_total: dict[str, int] = {b.value: 0 for b in BloomLevel}
-    all_weak_kc_ids: set[str] = set()
-    all_misconceptions: set[str] = set()
-
-    for tid, qrs in by_topic.items():
-        ev = evaluate_topic(qrs)
-        for level_str, fraction in ev.bloom_breakdown.items():
-            c, t = fraction.split("/")
-            bloom_correct[level_str] = bloom_correct.get(level_str, 0) + int(c)
-            bloom_total[level_str] = bloom_total.get(level_str, 0) + int(t)
-        all_weak_kc_ids.update(ev.weak_kc_ids)
-        all_misconceptions.update(ev.misconceptions_detected)
-
-    bloom_breakdown: dict[str, str] = {
-        k: f"{bloom_correct[k]}/{bloom_total[k]}" for k in bloom_correct if bloom_total[k] > 0
-    }
-
-    # 5. Resolve KC names
-    weak_kc_names = await _resolve_kc_names(db, list(all_weak_kc_ids))
-
-    # 6. Build per-question detail list
+    # 3. Build per-question detail list
     questions_detail = [
         _interaction_detail_from_row(inter, q, canonical_item, topic_name)
         for inter, q, canonical_item, topic_name in rows
@@ -295,9 +212,9 @@ async def get_session_detail(
     return SessionDetailResponse(
         session_id=session_id,
         session_type=sess.session_type,
-        bloom_breakdown=bloom_breakdown,
-        weak_kcs=weak_kc_names,
-        misconceptions=list(all_misconceptions),
+        bloom_breakdown={},
+        weak_kcs=[],
+        misconceptions=[],
         questions=questions_detail,
     )
 
@@ -305,27 +222,6 @@ async def get_session_detail(
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
-
-
-async def _resolve_kc_names(
-    db: AsyncSession,
-    kc_id_strs: list[str],
-) -> list[str]:
-    if not kc_id_strs:
-        return []
-    valid: list[uuid.UUID] = []
-    for s in kc_id_strs:
-        try:
-            valid.append(uuid.UUID(s))
-        except ValueError:
-            pass
-    if not valid:
-        return kc_id_strs
-    if not settings.allow_legacy_question_reads:
-        return kc_id_strs
-    repo = HistoryRepository(db)
-    name_map = await repo.resolve_kc_names(valid)
-    return [name_map.get(s, s) for s in kc_id_strs]
 
 
 def _answer_index_to_letter(index: int | None) -> str:
@@ -336,30 +232,10 @@ def _answer_index_to_letter(index: int | None) -> str:
 
 def _interaction_detail_from_row(
     inter: Interaction,
-    question: Question | None,
+    question,
     canonical_item,
     topic_name: str | None,
 ) -> QuestionInteractionDetail:
-    if question is not None:
-        return QuestionInteractionDetail(
-            question_id=question.id,
-            canonical_item_id=inter.canonical_item_id,
-            sequence_position=inter.sequence_position,
-            topic_name=topic_name or str(question.topic_id),
-            stem_text=question.stem_text,
-            bloom_level=question.bloom_level.value,
-            difficulty_bucket=question.difficulty_bucket.value,
-            option_a=question.option_a,
-            option_b=question.option_b,
-            option_c=question.option_c,
-            option_d=question.option_d,
-            selected_answer=(inter.selected_answer.value if inter.selected_answer else None),
-            correct_answer=question.correct_answer.value,
-            is_correct=inter.is_correct,
-            response_time_ms=inter.response_time_ms,
-            explanation_text=question.explanation_text,
-        )
-
     if canonical_item is None:
         return QuestionInteractionDetail(
             question_id=None,
