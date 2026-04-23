@@ -225,7 +225,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
         "start_s": 1920,
-        "end_s": 2759
+        "end_s": 3005
       },
       "difficulty": 0.74,
       "difficulty_source": "llm_single_pass",

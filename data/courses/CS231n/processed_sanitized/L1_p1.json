@@ -116,7 +116,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
         "start_s": 180,
-        "end_s": 440
+        "end_s": 450
       },
       "difficulty": 0.28,
       "difficulty_source": "vlm_estimate",
@@ -321,7 +321,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
         "start_s": 2610,
-        "end_s": 3450
+        "end_s": 3535
       },
       "difficulty": 0.59,
       "difficulty_source": "vlm_estimate",

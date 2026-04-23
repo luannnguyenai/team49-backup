@@ -188,7 +188,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 1064,
-        "end_s": 1494
+        "end_s": 1615
       },
       "difficulty": 0.49,
       "difficulty_source": "llm_single_pass",
@@ -293,7 +293,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 2316,
-        "end_s": 2663
+        "end_s": 2857
       },
       "difficulty": 0.58,
       "difficulty_source": "llm_single_pass",
@@ -343,7 +343,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 2664,
-        "end_s": 3049
+        "end_s": 3410
       },
       "difficulty": 0.63,
       "difficulty_source": "llm_single_pass",
@@ -398,7 +398,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 3050,
-        "end_s": 3507
+        "end_s": 3977
       },
       "difficulty": 0.71,
       "difficulty_source": "llm_single_pass",
@@ -443,7 +443,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 3508,
-        "end_s": 4115
+        "end_s": 4614
       },
       "difficulty": 0.79,
       "difficulty_source": "llm_single_pass",
@@ -493,7 +493,7 @@
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
         "start_s": 4116,
-        "end_s": 4723
+        "end_s": 5266
       },
       "difficulty": 0.61,
       "difficulty_source": "llm_single_pass",

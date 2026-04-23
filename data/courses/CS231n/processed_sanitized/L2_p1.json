@@ -119,7 +119,7 @@
       ],
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
-        "start_s": 900,
+        "start_s": 896,
         "end_s": 1562
       },
       "difficulty": 0.36,
@@ -309,7 +309,7 @@
       ],
       "content_ref": {
         "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
-        "start_s": 3304,
+        "start_s": 3258,
         "end_s": 4014
       },
       "difficulty": 0.68,
