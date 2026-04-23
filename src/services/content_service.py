@@ -226,6 +226,7 @@ async def _get_module_detail_from_canonical_section(
     topics = [
         TopicSummary(
             id=unit.id,
+            canonical_unit_id=unit.canonical_unit_id,
             name=unit.title,
             description=unit.content_body,
             order_index=unit.sort_order,

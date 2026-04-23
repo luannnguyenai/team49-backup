@@ -22,7 +22,12 @@ import StepDesiredModules from "@/components/onboarding/StepDesiredModules";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
-import { contentApi } from "@/lib/api";
+import { legacyContentApi } from "@/lib/api";
+import {
+  buildCanonicalAssessmentContext,
+  writePendingCanonicalAssessment,
+  ASSESSMENT_STORAGE_KEYS,
+} from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -100,10 +105,10 @@ export default function OnboardingPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const list = await contentApi.modules();
+        const list = await legacyContentApi.modules();
         // Fetch each module's full detail (with topics) in parallel
         const details = await Promise.all(
-          list.map((m) => contentApi.moduleDetail(m.id))
+          list.map((m) => legacyContentApi.moduleDetail(m.id))
         );
         setModules(details);
       } catch {
@@ -147,13 +152,24 @@ export default function OnboardingPage() {
     try {
       await onboard(data);
       const next = searchParams.get("next");
+      const canonicalContext = buildCanonicalAssessmentContext({
+        modules,
+        knownTopicIds: data.known_topic_ids,
+        desiredModuleIds: data.desired_module_ids,
+      });
 
       // Persist selected module IDs (used by learning-path generation)
-      sessionStorage.setItem("al_pending_module_ids", JSON.stringify(data.desired_module_ids));
+      sessionStorage.setItem(
+        ASSESSMENT_STORAGE_KEYS.moduleIds,
+        JSON.stringify(data.desired_module_ids),
+      );
 
-      // Persist the specific topic IDs the user chose for mastery assessment.
-      // The assessment page will test ONLY these topics (5 questions each).
-      sessionStorage.setItem("al_pending_topic_ids", JSON.stringify(data.known_topic_ids));
+      // Persist the selected legacy topic IDs as compatibility fallback while the
+      // assessment flow migrates to canonical unit IDs.
+      sessionStorage.setItem(
+        ASSESSMENT_STORAGE_KEYS.topicIds,
+        JSON.stringify(data.known_topic_ids),
+      );
 
       // Build a topic-name lookup so the assessment page can display names
       // without extra API calls.
@@ -165,7 +181,11 @@ export default function OnboardingPage() {
           }
         }
       }
-      sessionStorage.setItem("al_pending_topic_names", JSON.stringify(topicNameMap));
+      sessionStorage.setItem(
+        ASSESSMENT_STORAGE_KEYS.topicNames,
+        JSON.stringify(topicNameMap),
+      );
+      writePendingCanonicalAssessment(canonicalContext);
 
       if (data.known_topic_ids.length > 0) {
         const assessmentTarget = next

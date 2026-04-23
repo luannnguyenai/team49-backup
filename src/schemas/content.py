@@ -237,6 +237,7 @@ class TopicSummary(BaseModel):
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
+    canonical_unit_id: str | None = None
     name: str
     description: str | None
     order_index: int

@@ -66,6 +66,7 @@ export interface OnboardingPayload {
 /** @deprecated Use canonical course/section/unit types instead. */
 export interface TopicInModule {
   id: string;
+  canonical_unit_id?: string | null;
   name: string;
   description: string | null;
   order_index: number;
@@ -96,11 +97,13 @@ export type SelectedAnswer = "A" | "B" | "C" | "D";
 export type MasteryLevel = "not_started" | "novice" | "developing" | "proficient" | "mastered";
 
 export interface QuestionForAssessment {
-  id: string;
+  id: string | null;
   item_id: string;
-  topic_id: string;
-  bloom_level: BloomLevel;
-  difficulty_bucket: DifficultyBucket;
+  canonical_item_id?: string | null;
+  canonical_unit_id?: string | null;
+  topic_id: string | null;
+  bloom_level: BloomLevel | null;
+  difficulty_bucket: DifficultyBucket | null;
   stem_text: string;
   option_a: string;
   option_b: string;
@@ -120,7 +123,8 @@ export interface CanonicalAssessmentStartPayload {
 }
 
 export interface AnswerInput {
-  question_id: string;
+  question_id?: string | null;
+  canonical_item_id?: string | null;
   selected_answer: SelectedAnswer;
   response_time_ms: number | null;
 }
