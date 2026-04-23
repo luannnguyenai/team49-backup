@@ -168,6 +168,7 @@ Behavior:
 - `allow_legacy_question_reads=false` blocks legacy quiz/module-test question selection from `questions`.
 - `allow_legacy_mastery_writes=false` blocks legacy quiz/module-test writes into `mastery_scores`.
 - `allow_legacy_planner_writes=false` blocks legacy quiz/module-test writes into `learning_paths`.
+- `allow_legacy_planner_writes=false` also blocks legacy learning-path read/update endpoints backed by `learning_paths`.
 
 Commit: `feat: add legacy runtime deprecation guards`.
 

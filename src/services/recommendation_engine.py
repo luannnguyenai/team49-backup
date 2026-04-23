@@ -90,6 +90,13 @@ def _mastery_to_action(score_percent: float) -> PathAction:
     return PathAction.deep_practice
 
 
+def _ensure_legacy_planner_access_allowed() -> None:
+    if not settings.allow_legacy_planner_writes:
+        raise ValidationError(
+            "Legacy learning_paths access is disabled. Use canonical planner path/audit reads."
+        )
+
+
 def _pick_hours(topic: Topic, action: PathAction) -> float:
     """
     Return estimated_hours for a topic given the chosen action.
@@ -534,6 +541,7 @@ async def get_learning_path(
     Return all LearningPath rows for the user with topic_name + module_name.
     Returns list of (LearningPath, topic_name, module_name).
     """
+    _ensure_legacy_planner_access_allowed()
     result = await db.execute(
         select(
             LearningPath,
@@ -562,6 +570,7 @@ async def get_learning_path_timeline(
     Returns dict {week_number: [(LearningPath, topic_name, module_name)]}.
     Items with week_number IS NULL are placed in week 0 (skipped).
     """
+    _ensure_legacy_planner_access_allowed()
     result = await db.execute(
         select(
             LearningPath,
@@ -597,6 +606,7 @@ async def update_path_status(
     path_id: uuid.UUID,
     new_status: PathStatus,
 ) -> LearningPath:
+    _ensure_legacy_planner_access_allowed()
     result = await db.execute(
         select(LearningPath).where(
             LearningPath.id == path_id,

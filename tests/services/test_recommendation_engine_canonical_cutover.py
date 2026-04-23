@@ -51,3 +51,10 @@ def test_path_item_response_allows_canonical_unit_without_topic_id():
 
     assert item.topic_id is None
     assert item.canonical_unit_id == "local::lecture01::seg1"
+
+
+def test_legacy_planner_access_guard_blocks_when_disabled(monkeypatch):
+    monkeypatch.setattr(recommendation_engine.settings, "allow_legacy_planner_writes", False)
+
+    with pytest.raises(ValidationError, match="Legacy learning_paths access is disabled"):
+        recommendation_engine._ensure_legacy_planner_access_allowed()
