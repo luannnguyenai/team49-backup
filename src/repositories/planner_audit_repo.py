@@ -31,6 +31,18 @@ class PlannerAuditRepository:
         await self.session.refresh(obj)
         return obj
 
+    async def get_latest_plan_for_user(
+        self,
+        user_id: UUID,
+        *,
+        trigger: str | None = None,
+    ) -> PlanHistory | None:
+        stmt = select(PlanHistory).where(PlanHistory.user_id == user_id)
+        if trigger is not None:
+            stmt = stmt.where(PlanHistory.trigger == trigger)
+        result = await self.session.execute(stmt.order_by(PlanHistory.created_at.desc()).limit(1))
+        return result.scalar_one_or_none()
+
     async def get_session_state(
         self,
         user_id: UUID,

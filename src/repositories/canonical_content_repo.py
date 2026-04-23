@@ -37,6 +37,14 @@ class CanonicalContentRepository:
         )
         return list(result.scalars().all())
 
+    async def get_learning_units_by_ids(self, learning_unit_ids: list[UUID]) -> dict[UUID, LearningUnit]:
+        if not learning_unit_ids:
+            return {}
+        result = await self.session.execute(
+            select(LearningUnit).where(LearningUnit.id.in_(learning_unit_ids))
+        )
+        return {unit.id: unit for unit in result.scalars().all()}
+
     async def get_unit_kp_rows(self, canonical_unit_ids: list[str]) -> list[UnitKPMap]:
         if not canonical_unit_ids:
             return []

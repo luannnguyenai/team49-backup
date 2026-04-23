@@ -191,6 +191,7 @@ Required parity:
 - Assessment submit writes `interactions.canonical_item_id`.
 - Mastery update writes `learner_mastery_kp`.
 - Planner reads canonical/product units and writes `plan_history`/`rationale_log`.
+- Learning-path GET/timeline can read latest canonical `plan_history` when `read_canonical_planner_enabled=true`.
 - History can display canonical item attempts.
 - Product content APIs do not require `modules/topics`.
 

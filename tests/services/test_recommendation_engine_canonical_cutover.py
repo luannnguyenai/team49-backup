@@ -1,4 +1,5 @@
 from uuid import uuid4
+from types import SimpleNamespace
 
 import pytest
 
@@ -58,3 +59,89 @@ def test_legacy_planner_access_guard_blocks_when_disabled(monkeypatch):
 
     with pytest.raises(ValidationError, match="Legacy learning_paths access is disabled"):
         recommendation_engine._ensure_legacy_planner_access_allowed()
+
+
+@pytest.mark.asyncio
+async def test_get_learning_path_reads_latest_canonical_plan_when_enabled(monkeypatch):
+    user_id = uuid4()
+    unit_id = uuid4()
+
+    class FakePlannerAuditRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_latest_plan_for_user(self, actual_user_id, *, trigger=None):
+            assert actual_user_id == user_id
+            assert trigger == "generate_canonical_learning_path"
+            return SimpleNamespace(
+                recommended_path_json=[
+                    {
+                        "learning_unit_id": str(unit_id),
+                        "canonical_unit_id": "cs231n::u1",
+                        "action": "deep_practice",
+                        "estimated_hours": 0.5,
+                        "order_index": 2,
+                    }
+                ]
+            )
+
+    class FakeCanonicalContentRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_learning_units_by_ids(self, learning_unit_ids):
+            assert learning_unit_ids == [unit_id]
+            return {unit_id: SimpleNamespace(id=unit_id, title="Convolution Basics")}
+
+    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", True)
+    monkeypatch.setattr(recommendation_engine, "PlannerAuditRepository", FakePlannerAuditRepository)
+    monkeypatch.setattr(recommendation_engine, "CanonicalContentRepository", FakeCanonicalContentRepository)
+
+    rows = await recommendation_engine.get_learning_path("db-session", user_id)
+
+    lp, topic_name, module_name = rows[0]
+    assert lp.id == unit_id
+    assert lp.topic_id is None
+    assert lp.learning_unit_id == unit_id
+    assert lp.canonical_unit_id == "cs231n::u1"
+    assert lp.action == PathAction.deep_practice
+    assert lp.status == PathStatus.pending
+    assert topic_name == "Convolution Basics"
+    assert module_name == "canonical_unit"
+
+
+@pytest.mark.asyncio
+async def test_get_learning_path_timeline_groups_canonical_non_skip_items(monkeypatch):
+    user_id = uuid4()
+
+    async def fake_get_rows(db, actual_user_id):
+        assert db == "db-session"
+        assert actual_user_id == user_id
+        return [
+            (
+                SimpleNamespace(
+                    action=PathAction.deep_practice,
+                    week_number=None,
+                    order_index=0,
+                ),
+                "Unit 1",
+                "canonical_unit",
+            ),
+            (
+                SimpleNamespace(
+                    action=PathAction.skip,
+                    week_number=None,
+                    order_index=1,
+                ),
+                "Unit 2",
+                "canonical_unit",
+            ),
+        ]
+
+    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", True)
+    monkeypatch.setattr(recommendation_engine, "_get_canonical_learning_path_rows", fake_get_rows)
+
+    grouped = await recommendation_engine.get_learning_path_timeline("db-session", user_id)
+
+    assert sorted(grouped) == [1]
+    assert grouped[1][0][1] == "Unit 1"

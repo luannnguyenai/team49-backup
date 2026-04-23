@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 from sqlalchemy import delete, select
 from src.exceptions import NotFoundError, ValidationError
@@ -541,6 +542,9 @@ async def get_learning_path(
     Return all LearningPath rows for the user with topic_name + module_name.
     Returns list of (LearningPath, topic_name, module_name).
     """
+    if settings.read_canonical_planner_enabled:
+        return await _get_canonical_learning_path_rows(db, user_id)
+
     _ensure_legacy_planner_access_allowed()
     result = await db.execute(
         select(
@@ -570,6 +574,17 @@ async def get_learning_path_timeline(
     Returns dict {week_number: [(LearningPath, topic_name, module_name)]}.
     Items with week_number IS NULL are placed in week 0 (skipped).
     """
+    if settings.read_canonical_planner_enabled:
+        rows = await _get_canonical_learning_path_rows(db, user_id)
+        grouped: dict[int, list] = {}
+        for row in rows:
+            lp = row[0]
+            if lp.action == PathAction.skip:
+                continue
+            week = lp.week_number or 1
+            grouped.setdefault(week, []).append(row)
+        return grouped
+
     _ensure_legacy_planner_access_allowed()
     result = await db.execute(
         select(
@@ -593,6 +608,60 @@ async def get_learning_path_timeline(
         grouped.setdefault(week, []).append(row)
 
     return grouped
+
+
+async def _get_canonical_learning_path_rows(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+) -> list[tuple[SimpleNamespace, str, str]]:
+    audit_repo = PlannerAuditRepository(db)
+    plan = await audit_repo.get_latest_plan_for_user(
+        user_id,
+        trigger="generate_canonical_learning_path",
+    )
+    if plan is None or not plan.recommended_path_json:
+        return []
+
+    learning_unit_ids: list[uuid.UUID] = []
+    for item in plan.recommended_path_json:
+        if not isinstance(item, dict):
+            continue
+        raw_unit_id = item.get("learning_unit_id")
+        try:
+            learning_unit_ids.append(uuid.UUID(str(raw_unit_id)))
+        except (TypeError, ValueError):
+            continue
+
+    unit_by_id = await CanonicalContentRepository(db).get_learning_units_by_ids(learning_unit_ids)
+    rows: list[tuple[SimpleNamespace, str, str]] = []
+    for fallback_order, item in enumerate(plan.recommended_path_json):
+        if not isinstance(item, dict):
+            continue
+        try:
+            unit_id = uuid.UUID(str(item.get("learning_unit_id")))
+        except (TypeError, ValueError):
+            continue
+        unit = unit_by_id.get(unit_id)
+        action_value = str(item.get("action") or PathAction.deep_practice.value)
+        try:
+            action = PathAction(action_value)
+        except ValueError:
+            action = PathAction.deep_practice
+
+        row = SimpleNamespace(
+            id=unit_id,
+            topic_id=None,
+            action=action,
+            estimated_hours=item.get("estimated_hours"),
+            order_index=int(item.get("order_index", fallback_order)),
+            week_number=item.get("week_number"),
+            status=PathStatus.pending,
+            learning_unit_id=unit_id,
+            canonical_unit_id=item.get("canonical_unit_id"),
+        )
+        rows.append((row, unit.title if unit is not None else str(unit_id), "canonical_unit"))
+
+    return sorted(rows, key=lambda row: row[0].order_index)
 
 
 # ---------------------------------------------------------------------------
