@@ -272,7 +272,7 @@ git commit -m "feat: add runtime canonical bridge columns"
 - Create: `src/scripts/pipeline/backfill_product_canonical_links.py`
 - Test: `tests/pipeline/test_backfill_product_canonical_links.py`
 
-- [ ] **Step 1: Add failing tests**
+- [x] **Step 1: Add failing tests**
 
 Create `tests/pipeline/test_backfill_product_canonical_links.py`:
 
@@ -309,7 +309,7 @@ def test_match_learning_unit_returns_none_when_no_safe_match():
     assert script.match_canonical_unit(product_unit, "CS224n", canonical_units) is None
 ```
 
-- [ ] **Step 2: Run tests and verify they fail**
+- [x] **Step 2: Run tests and verify they fail**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/pipeline/test_backfill_product_canonical_links.py -q
@@ -319,7 +319,7 @@ Expected:
 
 - fails because script does not exist.
 
-- [ ] **Step 3: Implement deterministic matching script**
+- [x] **Step 3: Implement deterministic matching script**
 
 Create `src/scripts/pipeline/backfill_product_canonical_links.py` with:
 
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/pipeline/test_backfill_product_canonical_links.py -q
@@ -446,7 +446,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 5: Run dry-run locally**
+- [x] **Step 5: Run dry-run locally**
 
 ```bash
 PYTHONPATH=. .venv/bin/python src/scripts/pipeline/backfill_product_canonical_links.py
@@ -456,8 +456,9 @@ Expected:
 
 - prints counts.
 - does not write DB unless `--apply` is passed.
+- if the target DB has not run `alembic upgrade head`, dry-run fails before writing with missing bridge columns.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/scripts/pipeline/backfill_product_canonical_links.py tests/pipeline/test_backfill_product_canonical_links.py
