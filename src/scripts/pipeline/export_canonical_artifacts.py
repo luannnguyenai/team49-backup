@@ -545,8 +545,15 @@ def _build_question_tables(
         p4_root = course_dir / "processed" / "P4"
         if not p4_root.exists():
             continue
-        for path in sorted(p4_root.rglob("*-p4.json")):
+        for path in sorted(p4_root.rglob("*.json")):
             artifact = _load_json(path)
+            if not (
+                isinstance(artifact, dict)
+                and isinstance(artifact.get("repaired_question_bank"), list)
+                and isinstance(artifact.get("item_calibration_bootstrap"), list)
+                and isinstance(artifact.get("item_phase_map"), list)
+            ):
+                continue
             unit_id = artifact.get("unit_id")
             unit_row = unit_index.get(unit_id)
             if not unit_row:
