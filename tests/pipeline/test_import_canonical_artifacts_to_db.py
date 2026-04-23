@@ -89,10 +89,15 @@ async def test_import_canonical_artifacts_checks_counts(tmp_path: Path, monkeypa
         (tmp_path / f"{key}.jsonl").write_text("", encoding="utf-8")
 
     session = AsyncMock()
+    count_result = Mock()
+    count_result.scalar_one.return_value = 0
+    session.execute.return_value = count_result
+
     report = await importer.import_canonical_artifacts(session=session, input_dir=tmp_path)
 
     assert report["counts"] == manifest["counts"]
     assert report["imported"] == {key: 0 for key in importer.expected_count_keys()}
+    assert report["db_counts"] == {key: 0 for key in importer.expected_count_keys()}
 
 
 @pytest.mark.asyncio
@@ -109,3 +114,17 @@ async def test_import_canonical_artifacts_fails_on_count_mismatch(tmp_path: Path
 
     with pytest.raises(ValueError, match="count mismatch"):
         await importer.import_canonical_artifacts(session=Mock(), input_dir=tmp_path)
+
+
+@pytest.mark.asyncio
+async def test_verify_table_counts_fails_on_db_mismatch():
+    session = AsyncMock()
+    result = Mock()
+    result.scalar_one.return_value = 999
+    session.execute.return_value = result
+
+    with pytest.raises(ValueError, match="DB count mismatch"):
+        await importer.verify_table_counts(
+            session=session,
+            expected_counts={key: 0 for key in importer.expected_count_keys()},
+        )

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -162,6 +162,8 @@ def _check_manifest_counts(
 async def import_canonical_artifacts(
     session: AsyncSession,
     input_dir: Path = DEFAULT_INPUT_DIR,
+    *,
+    verify_db_counts: bool = True,
 ) -> dict[str, Any]:
     validation = validate_canonical_artifacts(input_dir)
     loaded = validation.pop("_loaded_rows")
@@ -175,11 +177,36 @@ async def import_canonical_artifacts(
             spec=spec,
         )
 
+    db_counts: dict[str, int] | None = None
+    if verify_db_counts:
+        db_counts = await verify_table_counts(
+            session=session,
+            expected_counts=validation["counts"],
+        )
+
     return {
         "input_dir": str(input_dir),
         "counts": validation["counts"],
         "imported": imported,
+        "db_counts": db_counts,
     }
+
+
+async def verify_table_counts(
+    session: AsyncSession,
+    expected_counts: dict[str, int],
+) -> dict[str, int]:
+    db_counts: dict[str, int] = {}
+    for table_name, spec in IMPORT_SPECS.items():
+        result = await session.execute(select(func.count()).select_from(spec.model))
+        count = int(result.scalar_one())
+        db_counts[table_name] = count
+        expected = expected_counts.get(table_name)
+        if expected != count:
+            raise ValueError(
+                f"DB count mismatch for {table_name}: expected={expected} db={count}"
+            )
+    return db_counts
 
 
 def validate_canonical_artifacts(input_dir: Path = DEFAULT_INPUT_DIR) -> dict[str, Any]:
