@@ -1,0 +1,111 @@
+import json
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock
+
+import pytest
+
+from src.scripts.pipeline import import_canonical_artifacts_to_db as importer
+
+
+def test_load_jsonl_reads_rows(tmp_path: Path):
+    path = tmp_path / "rows.jsonl"
+    path.write_text('{"id": 1}\n{"id": 2}\n', encoding="utf-8")
+
+    assert importer.load_jsonl(path) == [{"id": 1}, {"id": 2}]
+
+
+def test_load_jsonl_returns_empty_for_empty_file(tmp_path: Path):
+    path = tmp_path / "empty.jsonl"
+    path.write_text("", encoding="utf-8")
+
+    assert importer.load_jsonl(path) == []
+
+
+def test_validate_rows_rejects_unknown_columns():
+    spec = importer.IMPORT_SPECS["concepts_kp"]
+
+    with pytest.raises(ValueError, match="unknown columns"):
+        importer.validate_rows("concepts_kp", [{"kp_id": "kp_a", "name": "A", "bad": 1}], spec)
+
+
+def test_manifest_counts_match_canonical_bundle():
+    manifest = importer.load_manifest(importer.DEFAULT_INPUT_DIR)
+
+    assert manifest["counts"]["concepts_kp"] == 470
+    assert manifest["counts"]["question_bank"] == 985
+    assert importer.expected_count_keys() == [
+        "concepts_kp",
+        "units",
+        "unit_kp_map",
+        "question_bank",
+        "item_calibration",
+        "item_phase_map",
+        "item_kp_map",
+        "prerequisite_edges",
+        "pruned_edges",
+    ]
+
+
+def test_validate_canonical_artifacts_checks_full_bundle_counts():
+    report = importer.validate_canonical_artifacts(importer.DEFAULT_INPUT_DIR)
+
+    assert report["counts"]["concepts_kp"] == 470
+    assert report["counts"]["question_bank"] == 985
+    assert report["counts"]["prerequisite_edges"] == 79
+    assert "_loaded_rows" in report
+
+
+@pytest.mark.asyncio
+async def test_import_table_executes_postgres_upsert(monkeypatch):
+    session = AsyncMock()
+    spec = importer.IMPORT_SPECS["concepts_kp"]
+
+    await importer.import_table(
+        session=session,
+        table_name="concepts_kp",
+        rows=[
+            {
+                "kp_id": "kp_a",
+                "name": "A",
+                "description": "Desc",
+            }
+        ],
+        spec=spec,
+    )
+
+    assert session.execute.await_count == 1
+    assert session.flush.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_import_canonical_artifacts_checks_counts(tmp_path: Path, monkeypatch):
+    manifest = {
+        "counts": {
+            key: 0 for key in importer.expected_count_keys()
+        }
+    }
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    for key in importer.expected_count_keys():
+        (tmp_path / f"{key}.jsonl").write_text("", encoding="utf-8")
+
+    session = AsyncMock()
+    report = await importer.import_canonical_artifacts(session=session, input_dir=tmp_path)
+
+    assert report["counts"] == manifest["counts"]
+    assert report["imported"] == {key: 0 for key in importer.expected_count_keys()}
+
+
+@pytest.mark.asyncio
+async def test_import_canonical_artifacts_fails_on_count_mismatch(tmp_path: Path):
+    manifest = {
+        "counts": {
+            key: 0 for key in importer.expected_count_keys()
+        }
+    }
+    manifest["counts"]["concepts_kp"] = 1
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    for key in importer.expected_count_keys():
+        (tmp_path / f"{key}.jsonl").write_text("", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="count mismatch"):
+        await importer.import_canonical_artifacts(session=Mock(), input_dir=tmp_path)
