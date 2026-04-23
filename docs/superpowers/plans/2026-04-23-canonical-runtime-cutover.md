@@ -479,7 +479,7 @@ git commit -m "feat: backfill product canonical links"
 - Test: `tests/repositories/test_canonical_question_repo.py`
 - Test: `tests/services/test_canonical_question_selector.py`
 
-- [ ] **Step 1: Add repository tests**
+- [x] **Step 1: Add repository tests**
 
 Create `tests/repositories/test_canonical_question_repo.py`:
 
@@ -509,7 +509,7 @@ async def test_get_items_for_phase_executes_join_query():
     assert session.execute.await_count == 1
 ```
 
-- [ ] **Step 2: Add selector tests**
+- [x] **Step 2: Add selector tests**
 
 Create `tests/services/test_canonical_question_selector.py`:
 
@@ -550,7 +550,7 @@ async def test_selector_balances_difficulty_for_phase():
     assert [item.item_id for item in selected] == ["q-medium", "q-easy"]
 ```
 
-- [ ] **Step 3: Implement repository**
+- [x] **Step 3: Implement repository**
 
 Create `src/repositories/canonical_question_repo.py`:
 
@@ -590,7 +590,7 @@ class CanonicalQuestionRepository:
         return list(result.scalars().all())
 ```
 
-- [ ] **Step 4: Implement selector**
+- [x] **Step 4: Implement selector**
 
 Create `src/services/canonical_question_selector.py`:
 
@@ -626,7 +626,7 @@ class CanonicalQuestionSelector:
         return ranked[:count]
 ```
 
-- [ ] **Step 5: Export repository**
+- [x] **Step 5: Export repository**
 
 In `src/repositories/__init__.py`, export:
 
@@ -634,7 +634,7 @@ In `src/repositories/__init__.py`, export:
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/repositories/test_canonical_question_repo.py tests/services/test_canonical_question_selector.py -q
@@ -644,7 +644,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/repositories/canonical_question_repo.py src/services/canonical_question_selector.py src/repositories/__init__.py tests/repositories/test_canonical_question_repo.py tests/services/test_canonical_question_selector.py
