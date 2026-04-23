@@ -21,7 +21,10 @@ from src.schemas.course import (
 )
 from src.services.course_catalog_service import get_course_overview, list_course_catalog
 from src.services.course_entry_service import assert_learning_access, get_start_learning_decision
-from src.services.learning_unit_service import get_learning_unit_payload, list_course_units
+from src.services.learning_unit_service import (
+    get_learning_unit_payload,
+    list_course_units_db_first,
+)
 
 courses_router = APIRouter(prefix="/api/courses", tags=["Courses"])
 
@@ -121,7 +124,7 @@ async def api_start_course(
 
 @courses_router.get("/{course_slug}/units")
 async def api_list_course_units(course_slug: str) -> dict:
-    units = list_course_units(course_slug)
+    units = await list_course_units_db_first(course_slug)
     return {
         "units": [
             {

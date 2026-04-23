@@ -17,6 +17,9 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
+from sqlalchemy import select
+
+from src.models.course import Course, LearningUnit
 from src.exceptions import ForbiddenError, NotFoundError
 from src.schemas.course import StartLearningDecisionResponse
 from src.services.course_bootstrap_service import get_bootstrap_course
@@ -46,7 +49,9 @@ async def get_start_learning_decision(
     StartLearningDecisionResponse | None
         The decision response, or None if the course does not exist.
     """
-    course_row = get_bootstrap_course(course_slug)
+    course_row = await _get_course_gate_snapshot_from_db(course_slug)
+    if course_row is None:
+        course_row = get_bootstrap_course(course_slug)
     if course_row is None:
         return None
 
@@ -87,7 +92,9 @@ async def get_start_learning_decision(
         )
 
     # ── All gates pass: learning is ready ────────────────────────────────
-    first_unit_slug = get_first_unit_slug(course_slug)
+    first_unit_slug = await _get_first_unit_slug_from_db(course_slug)
+    if first_unit_slug is None:
+        first_unit_slug = get_first_unit_slug(course_slug)
     learning_target = (
         f"/courses/{course_slug}/learn/{first_unit_slug}"
         if first_unit_slug
@@ -110,7 +117,9 @@ async def assert_learning_access(
     This guards direct API/data access so callers cannot bypass `/start`
     by guessing canonical unit or asset URLs.
     """
-    course_row = get_bootstrap_course(course_slug)
+    course_row = await _get_course_gate_snapshot_from_db(course_slug)
+    if course_row is None:
+        course_row = get_bootstrap_course(course_slug)
     if course_row is None:
         raise NotFoundError(f"Course '{course_slug}' not found.")
 
@@ -155,3 +164,37 @@ async def _check_skill_test_completed(user_id: uuid.UUID) -> bool:
     except Exception:
         # During testing or bootstrap without DB, fall back to False
         return False
+
+
+async def _get_course_gate_snapshot_from_db(course_slug: str) -> dict | None:
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(select(Course).where(Course.slug == course_slug))
+            course = result.scalar_one_or_none()
+            if course is None:
+                return None
+            return {
+                "slug": course.slug,
+                "status": course.status.value,
+            }
+    except Exception:
+        return None
+
+
+async def _get_first_unit_slug_from_db(course_slug: str) -> str | None:
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(LearningUnit.slug)
+                .join(Course, LearningUnit.course_id == Course.id)
+                .where(Course.slug == course_slug)
+                .order_by(LearningUnit.sort_order, LearningUnit.slug)
+                .limit(1)
+            )
+            return result.scalar_one_or_none()
+    except Exception:
+        return None

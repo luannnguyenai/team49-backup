@@ -19,7 +19,12 @@ from pathlib import Path
 import re
 from typing import Any
 
+from sqlalchemy import select
+
 from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
+from src.data_paths import CS224N_DIR
+from src.models.canonical import CanonicalUnit
+from src.models.course import Course, LearningUnit
 from src.schemas.course import (
     LearningUnitContentPayload,
     LearningUnitCourseSummary,
@@ -97,6 +102,20 @@ def _available_slide_lectures() -> set[int]:
     return _available_lecture_numbers(SLIDES_DIR)
 
 
+def _available_transcript_lectures_for(course_slug: str) -> set[int]:
+    course_dir = _course_dir_for_slug(course_slug)
+    if course_dir is None:
+        return set()
+    return _available_lecture_numbers(course_dir / "transcripts")
+
+
+def _available_slide_lectures_for(course_slug: str) -> set[int]:
+    course_dir = _course_dir_for_slug(course_slug)
+    if course_dir is None:
+        return set()
+    return _available_lecture_numbers(course_dir / "slides")
+
+
 def get_bootstrap_unit(course_slug: str, unit_slug: str) -> dict[str, Any] | None:
     """Find a unit by course slug and unit slug."""
     for unit in load_bootstrap_units():
@@ -121,6 +140,13 @@ def list_course_units(course_slug: str) -> list[dict[str, Any]]:
     return units
 
 
+async def list_course_units_db_first(course_slug: str) -> list[dict[str, Any]]:
+    db_units = await _list_course_units_from_db(course_slug)
+    if db_units:
+        return db_units
+    return list_course_units(course_slug)
+
+
 # ---------------------------------------------------------------------------
 # Main service function
 # ---------------------------------------------------------------------------
@@ -136,6 +162,13 @@ async def get_learning_unit_payload(
     Resolves course info from bootstrap courses, unit info from bootstrap units,
     and constructs the video URL from the data directory.
     """
+    db_payload = await _get_learning_unit_payload_from_db(course_slug, unit_slug)
+    if db_payload is not None and (
+        db_payload["content"].get("video_url") is not None
+        or get_bootstrap_unit(course_slug, unit_slug) is None
+    ):
+        return LearningUnitResponse.model_validate(db_payload)
+
     course_row = get_bootstrap_course(course_slug)
     if course_row is None:
         return None
@@ -152,6 +185,14 @@ async def get_learning_unit_payload(
         video_path = CS231N_DIR / "videos" / video_filename
         if video_path.exists():
             video_url = build_signed_asset_url(f"courses/CS231n/videos/{video_filename}")
+    if video_url is None:
+        fallback_video_filename = _find_course_video_filename(course_slug, unit_row.get("order_index"))
+        if fallback_video_filename:
+            course_dir = _course_dir_for_slug(course_slug)
+            if course_dir is not None:
+                video_url = build_signed_asset_url(
+                    f"courses/{course_dir.name}/videos/{fallback_video_filename}"
+                )
 
     # Check transcript and slides availability
     lecture_num = unit_row.get("order_index", 0)
@@ -197,3 +238,131 @@ async def get_learning_unit_payload(
             legacy_lecture_id=tutor_bridge["legacy_lecture_id"],
         ),
     )
+
+
+async def _list_course_units_from_db(course_slug: str) -> list[dict[str, Any]]:
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(LearningUnit)
+                .join(Course, LearningUnit.course_id == Course.id)
+                .where(Course.slug == course_slug)
+                .order_by(LearningUnit.sort_order, LearningUnit.slug)
+            )
+            units = result.scalars().all()
+            return [
+                {
+                    "slug": unit.slug,
+                    "title": unit.title,
+                    "status": unit.status.value,
+                    "unit_type": unit.unit_type.value,
+                    "order_index": unit.sort_order,
+                }
+                for unit in units
+            ]
+    except Exception:
+        return []
+
+
+def _course_dir_for_slug(course_slug: str) -> Path | None:
+    if course_slug == "cs231n":
+        return CS231N_DIR
+    if course_slug == "cs224n":
+        return CS224N_DIR
+    return None
+
+
+def _find_course_video_filename(course_slug: str, lecture_num: int | None) -> str | None:
+    if lecture_num is None:
+        return None
+    course_dir = _course_dir_for_slug(course_slug)
+    if course_dir is None:
+        return None
+    video_dir = course_dir / "videos"
+    if not video_dir.exists():
+        return None
+    for asset in sorted(video_dir.iterdir()):
+        if not asset.is_file():
+            continue
+        match = _LECTURE_NUMBER_RE.search(asset.name)
+        if match and int(match.group(1)) == lecture_num:
+            return asset.name
+    return None
+
+
+async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -> dict | None:
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(LearningUnit, Course, CanonicalUnit)
+                .join(Course, LearningUnit.course_id == Course.id)
+                .outerjoin(CanonicalUnit, LearningUnit.canonical_unit_id == CanonicalUnit.unit_id)
+                .where(
+                    Course.slug == course_slug,
+                    LearningUnit.slug == unit_slug,
+                )
+            )
+            row = result.first()
+            if row is None:
+                return None
+
+            unit, course, canonical_unit = row
+            lecture_num = (
+                int(canonical_unit.lecture_order)
+                if canonical_unit is not None and canonical_unit.lecture_order is not None
+                else None
+            )
+            video_url = None
+            video_filename = _find_course_video_filename(course_slug, lecture_num)
+            course_dir = _course_dir_for_slug(course_slug)
+            if video_filename and course_dir is not None:
+                video_url = build_signed_asset_url(f"courses/{course_dir.name}/videos/{video_filename}")
+
+            transcript_available = bool(
+                canonical_unit is not None
+                and canonical_unit.transcript_path
+                and Path(canonical_unit.transcript_path).exists()
+            )
+            slides_available = bool(
+                lecture_num and lecture_num in _available_slide_lectures_for(course_slug)
+            )
+
+            legacy_lecture_id = None
+            tutor_enabled = False
+            if course_slug == "cs231n":
+                legacy_lecture_id = normalize_legacy_lecture_id(None, lecture_num)
+                tutor_enabled = video_url is not None and legacy_lecture_id is not None
+
+            tutor_bridge = build_tutor_bridge_payload(
+                tutor_enabled=tutor_enabled,
+                unit_id=str(unit.id),
+                legacy_lecture_id=legacy_lecture_id,
+            )
+
+            return {
+                "course": {
+                    "slug": course.slug,
+                    "title": course.title,
+                },
+                "unit": {
+                    "id": str(unit.id),
+                    "slug": unit.slug,
+                    "title": unit.title,
+                    "unit_type": unit.unit_type.value,
+                    "status": unit.status.value,
+                    "entry_mode": unit.entry_mode.value,
+                },
+                "content": {
+                    "body_markdown": unit.content_body,
+                    "video_url": video_url,
+                    "transcript_available": transcript_available,
+                    "slides_available": slides_available,
+                },
+                "tutor": tutor_bridge,
+            }
+    except Exception:
+        return None
