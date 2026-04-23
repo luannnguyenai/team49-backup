@@ -222,6 +222,16 @@ def _validate_rows(table_name: str, rows: list[dict[str, Any]], spec: ImportSpec
             raise ValueError(f"{table_name}[{index}] missing primary key columns: {missing_pk}")
 
 
+def conflict_columns_for_table(table_name: str) -> tuple[str, ...]:
+    if table_name == "courses":
+        return ("slug",)
+    if table_name == "course_overviews":
+        return ("course_id",)
+    if table_name == "learning_units":
+        return ("course_id", "slug")
+    return IMPORT_SPECS[table_name].pk_columns
+
+
 def _chunks(rows: list[dict[str, Any]], size: int) -> list[list[dict[str, Any]]]:
     return [rows[index : index + size] for index in range(0, len(rows), size)]
 
@@ -254,7 +264,7 @@ async def _import_table(
         if "updated_at" in update_columns:
             update_values["updated_at"] = func.now()
         stmt = stmt.on_conflict_do_update(
-            index_elements=list(spec.pk_columns),
+            index_elements=list(conflict_columns_for_table(table_name)),
             set_=update_values,
         )
         await session.execute(stmt)

@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 
+from sqlalchemy import Float
+
 
 class CanonicalContentModelTests(unittest.TestCase):
     def test_canonical_content_models_define_expected_tables(self):
@@ -67,6 +69,12 @@ class CanonicalContentModelTests(unittest.TestCase):
         self.assertTrue(hasattr(PrerequisiteEdge, "edge_strength"))
         self.assertTrue(hasattr(PrerequisiteEdge, "bidirectional_score"))
         self.assertTrue(hasattr(PrerequisiteEdge, "p5_trace"))
+
+    def test_canonical_content_models_store_numeric_difficulty_fields(self):
+        from src.models.canonical import CanonicalUnit, ConceptKP
+
+        self.assertIsInstance(ConceptKP.__table__.c.difficulty_level.type, Float)
+        self.assertIsInstance(CanonicalUnit.__table__.c.difficulty.type, Float)
 
     def test_canonical_content_migration_mentions_all_tables(self):
         migration = Path(

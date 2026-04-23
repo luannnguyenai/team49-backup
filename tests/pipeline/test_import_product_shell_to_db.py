@@ -111,3 +111,10 @@ def test_canonical_unit_slug_is_stable_and_path_safe():
         importer.canonical_unit_slug("local::lecture01-wordvecs::seg1")
         == "lecture01-wordvecs-seg1"
     )
+
+
+def test_product_shell_import_uses_natural_conflict_keys():
+    assert importer.conflict_columns_for_table("courses") == ("slug",)
+    assert importer.conflict_columns_for_table("course_overviews") == ("course_id",)
+    assert importer.conflict_columns_for_table("course_sections") == ("id",)
+    assert importer.conflict_columns_for_table("learning_units") == ("course_id", "slug")
