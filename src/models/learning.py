@@ -19,10 +19,11 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -336,4 +337,65 @@ class LearningPath(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         Index("ix_lp_user_id", "user_id"),
         Index("ix_lp_user_status", "user_id", "status"),
         Index("ix_lp_user_order", "user_id", "order_index"),
+    )
+
+
+class LearnerMasteryKP(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Posterior-like mastery state for a user × canonical KP pair."""
+
+    __tablename__ = "learner_mastery_kp"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    kp_id: Mapped[str] = mapped_column(String(160), nullable=False)
+    theta_mu: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    theta_sigma: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    mastery_mean_cached: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    n_items_observed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    updated_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
+
+    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "kp_id", name="uq_learner_mastery_kp_user_kp"),
+        Index("ix_learner_mastery_kp_user", "user_id"),
+        Index("ix_learner_mastery_kp_kp", "kp_id"),
+        CheckConstraint("theta_sigma >= 0", name="ck_learner_mastery_kp_sigma_nonnegative"),
+        CheckConstraint(
+            "mastery_mean_cached >= 0 AND mastery_mean_cached <= 1",
+            name="ck_learner_mastery_kp_mastery_range",
+        ),
+        CheckConstraint(
+            "n_items_observed >= 0",
+            name="ck_learner_mastery_kp_items_nonnegative",
+        ),
+    )
+
+
+class GoalPreference(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Persistent learner goal profile for planner-scoped decisions."""
+
+    __tablename__ = "goal_preferences"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    goal_weights_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    selected_course_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_embedding: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_embedding_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    derived_from_course_set_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        Index("ix_goal_preferences_user", "user_id"),
+        Index("ix_goal_preferences_hash", "derived_from_course_set_hash"),
     )

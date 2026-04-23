@@ -20,7 +20,9 @@ from src.models.course import (  # noqa: F401
     TutorContextBinding,
 )
 from src.models.learning import (  # noqa: F401
+    GoalPreference,
     Interaction,
+    LearnerMasteryKP,
     LearningPath,
     MasteryScore,
     Session,
@@ -62,4 +64,6 @@ __all__ = [
     "Interaction",
     "MasteryScore",
     "LearningPath",
+    "LearnerMasteryKP",
+    "GoalPreference",
 ]
