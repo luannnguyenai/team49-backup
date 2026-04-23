@@ -47,3 +47,46 @@ def test_settings_default_tutor_models(monkeypatch: pytest.MonkeyPatch):
     assert settings.fast_model == "gpt-5.4-nano"
     assert settings.model_provider == "openai"
     assert settings.gemini_requests_per_minute == 15
+
+
+def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    for env_name in (
+        "WRITE_GOAL_PREFERENCES_ENABLED",
+        "WRITE_LEARNER_MASTERY_KP_ENABLED",
+        "WRITE_WAIVED_UNITS_ENABLED",
+        "WRITE_PLANNER_AUDIT_ENABLED",
+        "READ_GOAL_PREFERENCES_ENABLED",
+        "READ_LEARNER_MASTERY_KP_ENABLED",
+    ):
+        monkeypatch.delenv(env_name, raising=False)
+
+    settings = Settings(_env_file=None)
+
+    assert settings.write_goal_preferences_enabled is False
+    assert settings.write_learner_mastery_kp_enabled is False
+    assert settings.write_waived_units_enabled is False
+    assert settings.write_planner_audit_enabled is False
+    assert settings.read_goal_preferences_enabled is False
+    assert settings.read_learner_mastery_kp_enabled is False
+
+
+def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    monkeypatch.setenv("WRITE_GOAL_PREFERENCES_ENABLED", "true")
+    monkeypatch.setenv("WRITE_LEARNER_MASTERY_KP_ENABLED", "1")
+    monkeypatch.setenv("WRITE_WAIVED_UNITS_ENABLED", "TRUE")
+    monkeypatch.setenv("WRITE_PLANNER_AUDIT_ENABLED", "yes")
+    monkeypatch.setenv("READ_GOAL_PREFERENCES_ENABLED", "true")
+    monkeypatch.setenv("READ_LEARNER_MASTERY_KP_ENABLED", "1")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.write_goal_preferences_enabled is True
+    assert settings.write_learner_mastery_kp_enabled is True
+    assert settings.write_waived_units_enabled is True
+    assert settings.write_planner_audit_enabled is True
+    assert settings.read_goal_preferences_enabled is True
+    assert settings.read_learner_mastery_kp_enabled is True

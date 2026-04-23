@@ -92,6 +92,30 @@ class Settings(BaseSettings):
             "freshness": 0.05,
         }
     )
+    write_goal_preferences_enabled: bool = Field(
+        default=False,
+        description="Enable writes into goal_preferences during runtime cutover.",
+    )
+    write_learner_mastery_kp_enabled: bool = Field(
+        default=False,
+        description="Enable writes into learner_mastery_kp during runtime cutover.",
+    )
+    write_waived_units_enabled: bool = Field(
+        default=False,
+        description="Enable writes into waived_units during runtime cutover.",
+    )
+    write_planner_audit_enabled: bool = Field(
+        default=False,
+        description="Enable writes into plan_history, rationale_log, and planner_session_state during runtime cutover.",
+    )
+    read_goal_preferences_enabled: bool = Field(
+        default=False,
+        description="Enable read path from goal_preferences during runtime cutover.",
+    )
+    read_learner_mastery_kp_enabled: bool = Field(
+        default=False,
+        description="Enable read path from learner_mastery_kp during runtime cutover.",
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod

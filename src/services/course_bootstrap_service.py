@@ -7,6 +7,7 @@ These files seed the canonical contracts until database-backed ingestion lands.
 
 import json
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from src.data_paths import COURSES_FILE, OVERVIEWS_FILE
