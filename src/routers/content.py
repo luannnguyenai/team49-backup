@@ -36,17 +36,6 @@ def _use_canonical_content_compat() -> bool:
     return not settings.allow_legacy_topic_content_reads
 
 
-def _legacy_content_gone() -> None:
-    raise HTTPException(
-        status_code=status.HTTP_410_GONE,
-        detail=(
-            "Legacy module/topic routes are retired. Use canonical content routes: "
-            "/api/course-sections, /api/course-sections/{section_id}, "
-            "and /api/learning-units/{learning_unit_id}/content."
-        ),
-    )
-
-
 # ---------------------------------------------------------------------------
 # GET /api/course-sections
 # ---------------------------------------------------------------------------
@@ -107,58 +96,6 @@ async def api_get_learning_unit_content(
             detail=f"Learning unit {learning_unit_id} not found.",
         )
     return result
-
-
-# ---------------------------------------------------------------------------
-# Retired legacy route: GET /api/modules
-# ---------------------------------------------------------------------------
-
-
-@content_router.get(
-    "/modules",
-    summary="Retired legacy module list endpoint",
-)
-async def api_list_modules() -> None:
-    _legacy_content_gone()
-
-
-# ---------------------------------------------------------------------------
-# Retired legacy route: GET /api/modules/{module_id}
-# ---------------------------------------------------------------------------
-
-
-@content_router.get(
-    "/modules/{module_id}",
-    summary="Retired legacy module detail endpoint",
-)
-async def api_get_module(module_id: uuid.UUID) -> None:
-    _legacy_content_gone()
-
-
-# ---------------------------------------------------------------------------
-# Retired legacy route: GET /api/topics/{topic_id}
-# ---------------------------------------------------------------------------
-
-
-@content_router.get(
-    "/topics/{topic_id}",
-    summary="Retired legacy topic detail endpoint",
-)
-async def api_get_topic(topic_id: uuid.UUID) -> None:
-    _legacy_content_gone()
-
-
-# ---------------------------------------------------------------------------
-# Retired legacy route: GET /api/topics/{topic_id}/content
-# ---------------------------------------------------------------------------
-
-
-@content_router.get(
-    "/topics/{topic_id}/content",
-    summary="Retired legacy topic content endpoint",
-)
-async def api_get_topic_content(topic_id: uuid.UUID) -> None:
-    _legacy_content_gone()
 
 
 # POST /api/seed (dev only)

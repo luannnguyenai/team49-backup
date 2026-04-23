@@ -118,12 +118,11 @@ async def test_learning_unit_content_endpoint_returns_canonical_field_names():
         f"/api/topics/{uuid.uuid4()}/content",
     ],
 )
-async def test_legacy_module_topic_routes_are_retired(path):
+async def test_legacy_module_topic_routes_are_removed(path):
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://testserver",
     ) as client:
         response = await client.get(path)
 
-    assert response.status_code == 410
-    assert "canonical" in response.json()["detail"].lower()
+    assert response.status_code == 404
