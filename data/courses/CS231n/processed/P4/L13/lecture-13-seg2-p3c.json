@@ -1,5 +1,5 @@
 {
-  "unit_id": "local::lecture_13::seg2",
+  "unit_id": "local::lecture13-generative-models-1::seg2",
   "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
   "assessment_purpose": "lecture_reinforcement",
   "grounding_mode": "transcript_only",
@@ -108,7 +108,7 @@
       "answer_index": 0,
       "explanation": "A normalized distribution sums or integrates to 1. If one region gets more probability, some other region must get less, which creates competition for probability mass.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_probability_mass_competition",
+      "primary_kp_id": "kp_discriminative_modeling_p_y_x",
       "difficulty": "medium",
       "code_question_style": null,
       "requires_monospace": false,
@@ -151,7 +151,7 @@
       "answer_index": 0,
       "explanation": "When learning p(x), the model must allocate probability across the entire input space. That lets it assign very low probability to implausible examples, whereas p(y|x) only has to distribute probability across labels for a given x.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_discriminative_vs_generative_models",
+      "primary_kp_id": "kp_generative_modeling_p_x_and_conditional_generation_p_x_y",
       "difficulty": "medium",
       "code_question_style": null,
       "requires_monospace": false,
@@ -185,27 +185,27 @@
     },
     {
       "item_id": "lecture-13-seg2-q1",
-      "global_kp_id": "kp_discriminative_vs_generative_models",
+      "global_kp_id": "kp_generative_modeling_p_x_and_conditional_generation_p_x_y",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg2-q2",
-      "global_kp_id": "kp_probability_mass_competition",
+      "global_kp_id": "kp_discriminative_modeling_p_y_x",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg2-q2",
-      "global_kp_id": "kp_discriminative_vs_generative_models",
+      "global_kp_id": "kp_generative_modeling_p_x_and_conditional_generation_p_x_y",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg2-q3",
-      "global_kp_id": "kp_discriminative_vs_generative_models",
+      "global_kp_id": "kp_generative_modeling_p_x_and_conditional_generation_p_x_y",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg2-q3",
-      "global_kp_id": "kp_probability_mass_competition",
+      "global_kp_id": "kp_discriminative_modeling_p_y_x",
       "role": "secondary"
     }
   ],

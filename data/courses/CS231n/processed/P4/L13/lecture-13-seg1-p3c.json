@@ -1,5 +1,5 @@
 {
-  "unit_id": "local::lecture_13::seg1",
+  "unit_id": "local::lecture13-generative-models-1::seg1",
   "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
   "assessment_purpose": "lecture_reinforcement",
   "grounding_mode": "transcript_only",
@@ -65,7 +65,7 @@
       "answer_index": 0,
       "explanation": "In self-supervised learning, the model learns structure from unlabeled data through a pretext task. The learned encoder can then be reused or fine-tuned for downstream tasks that have fewer labels.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_self_supervised_pretraining_transfer",
+      "primary_kp_id": "kp_self_supervised_representation_learning",
       "difficulty": "easy",
       "code_question_style": null,
       "requires_monospace": false,
@@ -108,7 +108,7 @@
       "answer_index": 0,
       "explanation": "Contrastive learning uses different augmented views of the same example as a positive pair. The objective is to pull those views together while pushing views from different images apart.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_contrastive_learning_augmentations",
+      "primary_kp_id": "kp_contrastive_learning_and_infonce",
       "difficulty": "easy",
       "code_question_style": null,
       "requires_monospace": false,
@@ -151,7 +151,7 @@
       "answer_index": 0,
       "explanation": "MoCo reuses keys from earlier steps through a queue, which increases the number of useful negatives without requiring a huge batch. It also uses a momentum encoder updated by an exponential moving average to keep key representations stable.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_moco_queue_and_momentum_encoder",
+      "primary_kp_id": "kp_simclr_and_moco_design_tradeoffs",
       "difficulty": "medium",
       "code_question_style": null,
       "requires_monospace": false,
@@ -180,32 +180,32 @@
   "item_kp_map": [
     {
       "item_id": "lecture-13-seg1-q1",
-      "global_kp_id": "kp_self_supervised_pretraining_transfer",
+      "global_kp_id": "kp_self_supervised_representation_learning",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg1-q1",
-      "global_kp_id": "kp_contrastive_learning_augmentations",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg1-q2",
-      "global_kp_id": "kp_contrastive_learning_augmentations",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg1-q2",
-      "global_kp_id": "kp_self_supervised_pretraining_transfer",
+      "global_kp_id": "kp_self_supervised_representation_learning",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg1-q3",
-      "global_kp_id": "kp_moco_queue_and_momentum_encoder",
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg1-q3",
-      "global_kp_id": "kp_contrastive_learning_augmentations",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
       "role": "secondary"
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "unit_id": "local::lecture_13::seg6",
+  "unit_id": "local::lecture13-generative-models-1::seg6",
   "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
   "assessment_purpose": "lecture_reinforcement",
   "grounding_mode": "transcript_only",
@@ -65,7 +65,7 @@
       "answer_index": 0,
       "explanation": "A VAE assumes that each observation x is generated from a hidden variable z. If the prior over z is simple, such as a standard Gaussian, then after training we can sample z from that prior to generate new data.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_vae_latent_variable_generative_story",
+      "primary_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "difficulty": "easy",
       "code_question_style": null,
       "requires_monospace": false,
@@ -108,7 +108,7 @@
       "answer_index": 0,
       "explanation": "To compute p(x), we must integrate p(x|z)p(z) over the whole latent space. When p(x|z) is represented by a nonlinear neural network in a high-dimensional space, that integral is no longer feasible to compute exactly.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_vae_intractable_marginalization",
+      "primary_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "difficulty": "hard",
       "code_question_style": null,
       "requires_monospace": false,
@@ -151,7 +151,7 @@
       "answer_index": 0,
       "explanation": "A VAE does not let its two networks output only point vectors. Instead, the encoder parameterizes an approximate posterior q(z|x), while the decoder parameterizes p(x|z), often under a simple Gaussian assumption.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_vae_encoder_decoder_parameterization",
+      "primary_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "difficulty": "medium",
       "code_question_style": null,
       "requires_monospace": false,
@@ -180,32 +180,32 @@
   "item_kp_map": [
     {
       "item_id": "lecture-13-seg6-q1",
-      "global_kp_id": "kp_vae_latent_variable_generative_story",
+      "global_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg6-q1",
-      "global_kp_id": "kp_vae_encoder_decoder_parameterization",
+      "global_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg6-q2",
-      "global_kp_id": "kp_vae_intractable_marginalization",
+      "global_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg6-q2",
-      "global_kp_id": "kp_vae_latent_variable_generative_story",
+      "global_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg6-q3",
-      "global_kp_id": "kp_vae_encoder_decoder_parameterization",
+      "global_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg6-q3",
-      "global_kp_id": "kp_vae_intractable_marginalization",
+      "global_kp_id": "kp_variational_autoencoder_latent_variable_model",
       "role": "secondary"
     }
   ],

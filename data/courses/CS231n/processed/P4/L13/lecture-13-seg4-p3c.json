@@ -1,5 +1,5 @@
 {
-  "unit_id": "local::lecture_13::seg4",
+  "unit_id": "local::lecture13-generative-models-1::seg4",
   "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
   "assessment_purpose": "lecture_reinforcement",
   "grounding_mode": "transcript_only",
@@ -65,7 +65,7 @@
       "answer_index": 0,
       "explanation": "MLE finds parameters that make the training data as likely as possible under the model distribution. That makes it a natural way to fit an explicit density model to data.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_maximum_likelihood_estimation",
+      "primary_kp_id": "kp_maximum_likelihood_estimation_for_density_models",
       "difficulty": "easy",
       "code_question_style": null,
       "requires_monospace": false,
@@ -108,7 +108,7 @@
       "answer_index": 0,
       "explanation": "Autoregressive modeling treats a sample as an ordered sequence and applies the chain rule so that each part is predicted conditioned on earlier parts. That converts one large density problem into many smaller next-step prediction problems.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_autoregressive_factorization",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
       "difficulty": "medium",
       "code_question_style": null,
       "requires_monospace": false,
@@ -151,7 +151,7 @@
       "answer_index": 0,
       "explanation": "Text already has a 1D sequential structure, so next-token prediction matches autoregressive factorization naturally. Images must be turned into very long sequences of pixels or subpixels, which makes training and generation much more expensive.",
       "answer_explanation_format": "plain_text",
-      "primary_kp_id": "kp_autoregressive_text_vs_image",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
       "difficulty": "medium",
       "code_question_style": null,
       "requires_monospace": false,
@@ -180,32 +180,32 @@
   "item_kp_map": [
     {
       "item_id": "lecture-13-seg4-q1",
-      "global_kp_id": "kp_maximum_likelihood_estimation",
+      "global_kp_id": "kp_maximum_likelihood_estimation_for_density_models",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg4-q1",
-      "global_kp_id": "kp_autoregressive_factorization",
+      "global_kp_id": "kp_autoregressive_language_modeling",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg4-q2",
-      "global_kp_id": "kp_autoregressive_factorization",
+      "global_kp_id": "kp_autoregressive_language_modeling",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg4-q2",
-      "global_kp_id": "kp_maximum_likelihood_estimation",
+      "global_kp_id": "kp_maximum_likelihood_estimation_for_density_models",
       "role": "secondary"
     },
     {
       "item_id": "lecture-13-seg4-q3",
-      "global_kp_id": "kp_autoregressive_text_vs_image",
+      "global_kp_id": "kp_autoregressive_language_modeling",
       "role": "primary"
     },
     {
       "item_id": "lecture-13-seg4-q3",
-      "global_kp_id": "kp_autoregressive_factorization",
+      "global_kp_id": "kp_autoregressive_language_modeling",
       "role": "secondary"
     }
   ],

@@ -46,7 +46,7 @@
   ],
   "units": [
     {
-      "unit_id": "local::<lecture_id>::seg1",
+      "unit_id": "local::lecture13-generative-models-1::seg1",
       "course_id": "<course_id>",
       "name": "Self-supervised learning recap and scalable contrastive variants",
       "description": "Reviews the previous lecture's self-supervised learning setup and quickly situates MoCo, DINO, and DINOv2 before starting generative models.",
@@ -91,7 +91,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg2",
+      "unit_id": "local::lecture13-generative-models-1::seg2",
       "course_id": "<course_id>",
       "name": "Supervised vs unsupervised learning and probabilistic modeling basics",
       "description": "Sets up the lecture by separating learning paradigms from probabilistic model families and introducing how normalization creates probability-mass competition.",
@@ -141,7 +141,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg3",
+      "unit_id": "local::lecture13-generative-models-1::seg3",
       "course_id": "<course_id>",
       "name": "Why generative models and how the model family tree is organized",
       "description": "Motivates conditional generation through ambiguity and then classifies major generative-model families by density access and sampling behavior.",
@@ -186,7 +186,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg4",
+      "unit_id": "local::lecture13-generative-models-1::seg4",
       "course_id": "<course_id>",
       "name": "Maximum likelihood estimation and autoregressive factorization",
       "description": "Develops exact-density training via maximum likelihood and shows how autoregressive factorization turns sequence modeling into next-token prediction.",
@@ -236,7 +236,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg5",
+      "unit_id": "local::lecture13-generative-models-1::seg5",
       "course_id": "<course_id>",
       "name": "Plain autoencoders and the motivation for VAEs",
       "description": "Builds intuition for VAEs by first showing why a bottlenecked autoencoder learns features but does not by itself solve generation.",
@@ -281,7 +281,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg6",
+      "unit_id": "local::lecture13-generative-models-1::seg6",
       "course_id": "<course_id>",
       "name": "VAE latent-variable model and Gaussian encoder/decoder parameterization",
       "description": "Introduces the latent-variable generative story behind VAEs and explains how the encoder and decoder output distributions rather than single vectors.",
@@ -331,7 +331,7 @@
       "is_template": false
     },
     {
-      "unit_id": "local::<lecture_id>::seg7",
+      "unit_id": "local::lecture13-generative-models-1::seg7",
       "course_id": "<course_id>",
       "name": "ELBO derivation, reparameterization, and VAE latent-space behavior",
       "description": "Derives the VAE training objective, shows how it is optimized in practice, and interprets the resulting latent space.",
@@ -383,7 +383,7 @@
   ],
   "concepts_kp_local": [
     {
-      "local_kp_id": "local::<lecture_id>::kp1",
+      "local_kp_id": "local::lecture13-generative-models-1::kp1",
       "name": "Scalable self-supervised representation learning",
       "description": "Momentum-based contrastive methods such as MoCo, DINO, and DINOv2 learn transferable visual features from unlabeled images and scale through queues, EMA encoders, and larger datasets.",
       "track_tags": [
@@ -410,7 +410,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp2",
+      "local_kp_id": "local::lecture13-generative-models-1::kp2",
       "name": "Supervised vs unsupervised learning",
       "description": "Supervised learning fits mappings from paired data (x, y), whereas unsupervised learning starts from x alone and seeks hidden structure, representations, or density information.",
       "track_tags": [
@@ -437,7 +437,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp3",
+      "local_kp_id": "local::lecture13-generative-models-1::kp3",
       "name": "Discriminative modeling p(y|x)",
       "description": "A discriminative model predicts labels or outputs conditioned on an input and allocates probability mass across possible y values for each fixed x.",
       "track_tags": [
@@ -464,7 +464,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp4",
+      "local_kp_id": "local::lecture13-generative-models-1::kp4",
       "name": "Generative modeling p(x) and conditional generation p(x|y)",
       "description": "Generative models allocate probability mass over possible data x, while conditional generative models do so within each conditioning signal y, enabling sampling and outlier rejection.",
       "track_tags": [
@@ -492,7 +492,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp5",
+      "local_kp_id": "local::lecture13-generative-models-1::kp5",
       "name": "Maximum likelihood estimation for density models",
       "description": "Maximum likelihood fits probabilistic models by choosing parameters that maximize the probability or log-probability of the observed dataset under an assumed density family.",
       "track_tags": [
@@ -519,7 +519,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp6",
+      "local_kp_id": "local::lecture13-generative-models-1::kp6",
       "name": "Autoregressive factorization via the chain rule",
       "description": "Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
       "track_tags": [
@@ -547,7 +547,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp7",
+      "local_kp_id": "local::lecture13-generative-models-1::kp7",
       "name": "Autoencoder bottlenecks and latent codes",
       "description": "A bottlenecked autoencoder learns compressed latent codes useful for representation learning, but plain reconstruction alone does not make the latent space sampleable for generation.",
       "track_tags": [
@@ -574,7 +574,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp8",
+      "local_kp_id": "local::lecture13-generative-models-1::kp8",
       "name": "Variational autoencoder latent-variable model",
       "description": "A VAE introduces latent variables z, a prior p(z), a decoder p_theta(x|z), and an encoder q_phi(z|x) that approximates the intractable posterior over latent codes.",
       "track_tags": [
@@ -602,7 +602,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp9",
+      "local_kp_id": "local::lecture13-generative-models-1::kp9",
       "name": "ELBO as the VAE training objective",
       "description": "The evidence lower bound keeps a reconstruction term and a KL-to-prior regularizer while discarding an intractable nonnegative KL term, yielding a tractable lower bound on log p(x).",
       "track_tags": [
@@ -630,7 +630,7 @@
       "visual_evidence": ""
     },
     {
-      "local_kp_id": "local::<lecture_id>::kp10",
+      "local_kp_id": "local::lecture13-generative-models-1::kp10",
       "name": "Reparameterization, latent sampling, and disentangling intuition",
       "description": "VAE training samples latent variables through a differentiable reparameterization trick, and the resulting latent spaces often support sampling, interpolation, and axis-wise variation.",
       "track_tags": [
@@ -660,8 +660,8 @@
   ],
   "unit_kp_map_local": [
     {
-      "unit_id": "local::<lecture_id>::seg1",
-      "local_kp_id": "local::<lecture_id>::kp1",
+      "unit_id": "local::lecture13-generative-models-1::seg1",
+      "local_kp_id": "local::lecture13-generative-models-1::kp1",
       "planner_role": "main",
       "instruction_role": "review",
       "coverage_level": "dominant",
@@ -669,8 +669,8 @@
       "coverage_rationale": "The whole segment reviews contrastive SSL, then focuses on MoCo, DINO, and DINOv2, including the momentum encoder [ts=374s], EMA update [ts=466s], and 142M-image scaling story [ts=579s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg2",
-      "local_kp_id": "local::<lecture_id>::kp2",
+      "unit_id": "local::lecture13-generative-models-1::seg2",
+      "local_kp_id": "local::lecture13-generative-models-1::kp2",
       "planner_role": "main",
       "instruction_role": "intro",
       "coverage_level": "dominant",
@@ -678,8 +678,8 @@
       "coverage_rationale": "The segment explicitly defines supervised learning from paired data [ts=745s] and unsupervised learning from x alone [ts=806s], with examples such as clustering and density estimation [ts=838s] [ts=865s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg2",
-      "local_kp_id": "local::<lecture_id>::kp3",
+      "unit_id": "local::lecture13-generative-models-1::seg2",
+      "local_kp_id": "local::lecture13-generative-models-1::kp3",
       "planner_role": "main",
       "instruction_role": "main",
       "coverage_level": "substantial",
@@ -687,8 +687,8 @@
       "coverage_rationale": "The discriminative formulation p(y|x) is introduced and unpacked through normalization and label competition [ts=952s] [ts=1060s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg2",
-      "local_kp_id": "local::<lecture_id>::kp4",
+      "unit_id": "local::lecture13-generative-models-1::seg2",
+      "local_kp_id": "local::lecture13-generative-models-1::kp4",
       "planner_role": "support",
       "instruction_role": "intro",
       "coverage_level": "substantial",
@@ -696,8 +696,8 @@
       "coverage_rationale": "The same segment begins the generative side by contrasting p(x) and p(x|y) with discriminative models and by explaining how images compete for mass [ts=1138s] [ts=1239s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg3",
-      "local_kp_id": "local::<lecture_id>::kp4",
+      "unit_id": "local::lecture13-generative-models-1::seg3",
+      "local_kp_id": "local::lecture13-generative-models-1::kp4",
       "planner_role": "main",
       "instruction_role": "application",
       "coverage_level": "dominant",
@@ -705,8 +705,8 @@
       "coverage_rationale": "Why generative models are useful is framed entirely around ambiguous conditional outputs and practical conditional generation examples [ts=1637s] [ts=1737s] [ts=1757s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg3",
-      "local_kp_id": "local::<lecture_id>::kp3",
+      "unit_id": "local::lecture13-generative-models-1::seg3",
+      "local_kp_id": "local::lecture13-generative-models-1::kp3",
       "planner_role": "prereq",
       "instruction_role": "review",
       "coverage_level": "mention",
@@ -714,8 +714,8 @@
       "coverage_rationale": "The contrast with discriminative modeling remains implicit when the instructor keeps comparing conditional generation to earlier p(y|x) thinking [ts=1637s] [ts=1782s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg4",
-      "local_kp_id": "local::<lecture_id>::kp5",
+      "unit_id": "local::lecture13-generative-models-1::seg4",
+      "local_kp_id": "local::lecture13-generative-models-1::kp5",
       "planner_role": "main",
       "instruction_role": "main",
       "coverage_level": "dominant",
@@ -723,8 +723,8 @@
       "coverage_rationale": "Maximum likelihood is introduced as the generic exact-density training principle, including the log-likelihood rewrite for IID data [ts=2114s] [ts=2267s] [ts=2296s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg4",
-      "local_kp_id": "local::<lecture_id>::kp6",
+      "unit_id": "local::lecture13-generative-models-1::seg4",
+      "local_kp_id": "local::lecture13-generative-models-1::kp6",
       "planner_role": "main",
       "instruction_role": "main",
       "coverage_level": "dominant",
@@ -732,8 +732,8 @@
       "coverage_rationale": "Autoregressive factorization is derived with the chain rule and tied to RNNs, masked transformers, and the cost of image raster sequences [ts=2386s] [ts=2444s] [ts=2650s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg4",
-      "local_kp_id": "local::<lecture_id>::kp4",
+      "unit_id": "local::lecture13-generative-models-1::seg4",
+      "local_kp_id": "local::lecture13-generative-models-1::kp4",
       "planner_role": "prereq",
       "instruction_role": "review",
       "coverage_level": "partial",
@@ -741,8 +741,8 @@
       "coverage_rationale": "The segment keeps positioning autoregressive models as one branch of explicit generative modeling [ts=2099s] [ts=2103s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg5",
-      "local_kp_id": "local::<lecture_id>::kp7",
+      "unit_id": "local::lecture13-generative-models-1::seg5",
+      "local_kp_id": "local::lecture13-generative-models-1::kp7",
       "planner_role": "main",
       "instruction_role": "main",
       "coverage_level": "dominant",
@@ -750,8 +750,8 @@
       "coverage_rationale": "This segment walks through standard autoencoders, reconstruction, and bottlenecked latent codes in detail [ts=2916s] [ts=2963s] [ts=3022s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg5",
-      "local_kp_id": "local::<lecture_id>::kp8",
+      "unit_id": "local::lecture13-generative-models-1::seg5",
+      "local_kp_id": "local::lecture13-generative-models-1::kp8",
       "planner_role": "support",
       "instruction_role": "intro",
       "coverage_level": "substantial",
@@ -759,8 +759,8 @@
       "coverage_rationale": "The VAE is motivated here as the probabilistic extension that forces latent codes toward a known Gaussian so they can be sampled later [ts=3134s] [ts=3153s] [ts=3171s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg6",
-      "local_kp_id": "local::<lecture_id>::kp8",
+      "unit_id": "local::lecture13-generative-models-1::seg6",
+      "local_kp_id": "local::lecture13-generative-models-1::kp8",
       "planner_role": "main",
       "instruction_role": "main",
       "coverage_level": "dominant",
@@ -768,8 +768,8 @@
       "coverage_rationale": "The segment formalizes latent variables z, the prior p(z), the decoder p(x|z), and the encoder q(z|x), including why direct marginalization is intractable [ts=3206s] [ts=3315s] [ts=3475s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg6",
-      "local_kp_id": "local::<lecture_id>::kp7",
+      "unit_id": "local::lecture13-generative-models-1::seg6",
+      "local_kp_id": "local::lecture13-generative-models-1::kp7",
       "planner_role": "prereq",
       "instruction_role": "review",
       "coverage_level": "partial",
@@ -777,8 +777,8 @@
       "coverage_rationale": "The VAE formulation is explicitly introduced as a probabilistic spin on the plain autoencoder bottleneck from the previous segment [ts=3188s] [ts=3192s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg6",
-      "local_kp_id": "local::<lecture_id>::kp5",
+      "unit_id": "local::lecture13-generative-models-1::seg6",
+      "local_kp_id": "local::lecture13-generative-models-1::kp5",
       "planner_role": "support",
       "instruction_role": "support",
       "coverage_level": "partial",
@@ -786,8 +786,8 @@
       "coverage_rationale": "Maximum-likelihood language reappears when the instructor asks how to train p(x|z) and explains why the needed integral over z breaks exact MLE [ts=3292s] [ts=3410s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg7",
-      "local_kp_id": "local::<lecture_id>::kp9",
+      "unit_id": "local::lecture13-generative-models-1::seg7",
+      "local_kp_id": "local::lecture13-generative-models-1::kp9",
       "planner_role": "main",
       "instruction_role": "main",
       "coverage_level": "dominant",
@@ -795,8 +795,8 @@
       "coverage_rationale": "This entire segment derives the ELBO, interprets the reconstruction and prior terms, and drops the final intractable KL using KL>=0 [ts=3794s] [ts=4003s] [ts=4086s] [ts=4149s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg7",
-      "local_kp_id": "local::<lecture_id>::kp10",
+      "unit_id": "local::lecture13-generative-models-1::seg7",
+      "local_kp_id": "local::lecture13-generative-models-1::kp10",
       "planner_role": "main",
       "instruction_role": "application",
       "coverage_level": "substantial",
@@ -804,8 +804,8 @@
       "coverage_rationale": "After the derivation, the instructor explains reparameterized sampling for training and shows how latent dimensions can be varied to morph digits smoothly [ts=4193s] [ts=4310s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg7",
-      "local_kp_id": "local::<lecture_id>::kp8",
+      "unit_id": "local::lecture13-generative-models-1::seg7",
+      "local_kp_id": "local::lecture13-generative-models-1::kp8",
       "planner_role": "prereq",
       "instruction_role": "review",
       "coverage_level": "substantial",
@@ -815,7 +815,7 @@
   ],
   "section_flags": [
     {
-      "unit_id": "local::<lecture_id>::seg1",
+      "unit_id": "local::lecture13-generative-models-1::seg1",
       "importance_flag": "medium",
       "review_worthiness": "medium",
       "item_generation_worthiness": "medium",
@@ -824,7 +824,7 @@
       "rationale": "Mostly a recap of prior material, but it highlights practically important MoCo/DINO ideas and DINOv2 scaling rather than deriving new math [ts=374s] [ts=579s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg2",
+      "unit_id": "local::lecture13-generative-models-1::seg2",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -833,7 +833,7 @@
       "rationale": "Defines the foundational axes used throughout the lecture and introduces normalized density, p(y|x), p(x), and p(x|y), so misunderstandings here would break later sections [ts=952s] [ts=969s] [ts=1239s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg3",
+      "unit_id": "local::lecture13-generative-models-1::seg3",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -842,7 +842,7 @@
       "rationale": "Important conceptual motivation plus the full taxonomy of model families; the section is less derivational than later VAE math but strongly organizes the course material [ts=1637s] [ts=1820s] [ts=1983s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg4",
+      "unit_id": "local::lecture13-generative-models-1::seg4",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -851,7 +851,7 @@
       "rationale": "Introduces maximum likelihood and the chain-rule factorization that make autoregressive models exact-density learners; these are core examinable derivations [ts=2114s] [ts=2386s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg5",
+      "unit_id": "local::lecture13-generative-models-1::seg5",
       "importance_flag": "medium",
       "review_worthiness": "medium",
       "item_generation_worthiness": "medium",
@@ -860,7 +860,7 @@
       "rationale": "Mainly an intuition-building bridge from plain autoencoders to VAEs, with less mathematical density than the following two segments [ts=2963s] [ts=3153s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg6",
+      "unit_id": "local::lecture13-generative-models-1::seg6",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
@@ -869,7 +869,7 @@
       "rationale": "Formalizes the latent-variable VAE setup, explains why exact marginalization is intractable, and introduces q(z|x) and Gaussian parameterization [ts=3315s] [ts=3475s] [ts=3599s]."
     },
     {
-      "unit_id": "local::<lecture_id>::seg7",
+      "unit_id": "local::lecture13-generative-models-1::seg7",
       "importance_flag": "high",
       "review_worthiness": "high",
       "item_generation_worthiness": "high",
