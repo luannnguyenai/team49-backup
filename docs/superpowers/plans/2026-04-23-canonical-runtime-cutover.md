@@ -1302,7 +1302,7 @@ git commit -m "feat: route planner to canonical units behind flag"
 - Test: `tests/pipeline/test_check_canonical_runtime_parity.py`
 - Modify: `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`
 
-- [ ] **Step 1: Add parity test**
+- [x] **Step 1: Add parity test**
 
 Create `tests/pipeline/test_check_canonical_runtime_parity.py`:
 
@@ -1318,7 +1318,7 @@ def test_classify_parity_status_ready_when_clean():
     assert classify_parity_status(unlinked_units=0, missing_question_phase_maps=0) == "ready"
 ```
 
-- [ ] **Step 2: Implement parity helper**
+- [x] **Step 2: Implement parity helper**
 
 Create `src/scripts/pipeline/check_canonical_runtime_parity.py`:
 
@@ -1336,7 +1336,7 @@ Then extend script with DB queries:
 - count `question_bank` items missing `item_kp_map`
 - count interactions missing `canonical_item_id` after canonical write flag is enabled
 
-- [ ] **Step 3: Document freeze policy**
+- [x] **Step 3: Document freeze policy**
 
 In `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`, add:
 
@@ -1352,7 +1352,7 @@ Freeze means:
 Delete/drop is a separate migration and requires explicit approval.
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/pipeline/test_check_canonical_runtime_parity.py -q
@@ -1362,7 +1362,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/scripts/pipeline/check_canonical_runtime_parity.py tests/pipeline/test_check_canonical_runtime_parity.py docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md

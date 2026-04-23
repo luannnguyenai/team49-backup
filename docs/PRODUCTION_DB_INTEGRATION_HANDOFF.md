@@ -367,6 +367,24 @@ These are intentional gaps, not missing UI work:
 - Do not add new production semantics to `mastery_scores`, `learning_paths`, or legacy `questions`.
 - Do not enable read flags before import/backfill verification.
 
+## Freeze/Delete Policy
+
+Old tables may only be frozen after canonical runtime parity is `ready` for two consecutive runs.
+
+Freeze means:
+
+- no new feature writes to `questions`, `mastery_scores`, or `learning_paths`
+- old rows remain for audit/backward compatibility
+- rollback is still possible by disabling canonical read flags
+
+Delete/drop is a separate migration and requires explicit approval. This cutover plan does not delete or truncate old runtime data.
+
+Run the parity report with:
+
+```bash
+PYTHONPATH=. python src/scripts/pipeline/check_canonical_runtime_parity.py
+```
+
 ## Minimal Next Backend Tasks
 
 1. Run migrations and import canonical content in the target PostgreSQL environment.
