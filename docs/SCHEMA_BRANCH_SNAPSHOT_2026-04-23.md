@@ -65,7 +65,15 @@ Nằm trong:
 
 - `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`
 
-Đây chưa phải DB tables active, nhưng là contract sạch để ingest PostgreSQL sau này.
+Đây là contract sạch để ingest PostgreSQL.
+
+Hiện đã có DB materialization tương ứng:
+
+- ORM: `src/models/canonical.py`
+- Migration: `alembic/versions/20260423_canonical_content_tables.py`
+- Importer: `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
+
+Importer chạy idempotent bằng natural keys và có `--validate-only` để kiểm tra manifest/counts trước khi ghi DB.
 
 ### 4. Learner / planner stub persistence
 

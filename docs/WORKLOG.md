@@ -41,6 +41,26 @@ cho đến khi có bridge authoritative từ runtime cũ sang canonical `kp_id` 
 
 **Hệ quả:** Runtime bắt đầu để lại audit trail hữu ích cho production migration mà không fabricate dữ liệu mới sai grain. Đổi lại, cutover chưa hoàn thành hết; hai flow mastery/waive vẫn phải chờ phase canonical-DB integration kế tiếp.
 
+### [ADR-8] Materialize canonical content artifacts thành bảng DB riêng — 23/04/2026
+
+**Bối cảnh:** Canonical JSONL đã sạch nhưng vẫn là file artifact. Nếu planner/assessor production tiếp tục đọc file, hệ sẽ khó transaction, khó query, khó enforce FK và khó nối runtime với `kp_id` / `unit_id` thật.
+
+**Quyết định:** Tạo ORM + Alembic riêng cho canonical content layer:
+
+- `concepts_kp`
+- `units`
+- `unit_kp_map`
+- `question_bank`
+- `item_calibration`
+- `item_phase_map`
+- `item_kp_map`
+- `prerequisite_edges`
+- `pruned_edges`
+
+Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, validate counts với manifest, và upsert idempotent bằng natural keys.
+
+**Hệ quả:** Production DB giờ có landing zone thật cho content graph và Q-matrix. Các flow `learner_mastery_kp` / `waived_units` vẫn chưa nên nối cho đến khi runtime có bridge đúng từ item/unit/KP canonical.
+
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".

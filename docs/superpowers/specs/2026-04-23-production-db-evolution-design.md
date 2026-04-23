@@ -88,11 +88,12 @@ Các bảng sau tiếp tục là shell runtime của sản phẩm:
 - chịu trách nhiệm catalog, learn page, progress, assets
 - không cố gánh toàn bộ semantics của KP graph, calibration, planner rationale
 
-### 2. Canonical content graph phải được materialize thành DB tables riêng
+### 2. Canonical content graph đã được materialize thành DB tables riêng
 
-Production DB cần có các bảng first-class tương ứng canonical JSONL:
+Production DB hiện có ORM + Alembic cho các bảng first-class tương ứng canonical JSONL:
 
 - `concepts_kp`
+- `units`
 - `unit_kp_map`
 - `question_bank`
 - `item_calibration`
@@ -106,6 +107,13 @@ Lý do:
 - canonical JSONL hiện đã là contract sạch nhất của pipeline
 - nếu không materialize thành bảng thật, toàn bộ planner/assessor sau này sẽ phải đọc file JSONL hoặc qua mapping tạm
 - làm production thì không nên giữ source-of-truth dạng file bootstrap quá lâu
+
+Implementation hiện tại:
+
+- ORM: `src/models/canonical.py`
+- Migration: `alembic/versions/20260423_canonical_content_tables.py`
+- Importer: `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
+- Importer có `--validate-only` để kiểm tra JSONL + manifest counts trước khi ghi DB
 
 ### 3. Learner/planner phải chuyển dần sang grain `kp/unit`
 
@@ -286,11 +294,12 @@ Rule:
 
 ## Bảng nào cần thêm/đổi ở DB
 
-## 1. Cần materialize từ canonical artifacts
+## 1. Đã materialize từ canonical artifacts
 
-Các bảng dưới đây hiện mới tồn tại dưới dạng JSONL contract và cần thành DB tables thật:
+Các bảng dưới đây đã có ORM + Alembic migration:
 
 - `concepts_kp`
+- `units`
 - `unit_kp_map`
 - `question_bank`
 - `item_calibration`
@@ -389,10 +398,13 @@ Done hoặc gần done:
 
 ### Phase 2 — Canonical content tables vào DB
 
-Việc cần làm:
+Status:
 
-- tạo ORM + Alembic cho:
+- Done
+- Commit: `c8c4213` `feat: materialize canonical content schema`
+- Tables:
   - `concepts_kp`
+  - `units`
   - `unit_kp_map`
   - `question_bank`
   - `item_calibration`
@@ -403,11 +415,26 @@ Việc cần làm:
 
 ### Phase 3 — Backfill/import
 
-Việc cần làm:
+Status:
 
-- import canonical JSONL vào DB
-- đảm bảo counts khớp manifest
-- đảm bảo FK/uniqueness đúng
+- Importer implemented
+- Commit: `e7547b2` `feat: add canonical content importer`
+- Validate-only command:
+
+```bash
+PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to_db.py --validate-only
+```
+
+- Verified counts:
+  - `concepts_kp = 470`
+  - `units = 295`
+  - `unit_kp_map = 767`
+  - `question_bank = 985`
+  - `item_calibration = 985`
+  - `item_phase_map = 6699`
+  - `item_kp_map = 1171`
+  - `prerequisite_edges = 79`
+  - `pruned_edges = 34`
 
 ### Phase 4 — Read-path cutover
 

@@ -117,6 +117,13 @@ Plan này **không** giả định rằng cùng một người sẽ:
   - future calibration timestamps
 - [ ] Commit after the migration and model tests pass.
 
+Current status:
+- Done
+- Commit: `c8c4213` `feat: materialize canonical content schema`
+- Added `src/models/canonical.py`
+- Added `alembic/versions/20260423_canonical_content_tables.py`
+- Added `tests/test_canonical_content_models.py`
+
 ### Task 3: Build DB import/backfill from canonical JSONL
 
 **Files:**
@@ -139,6 +146,28 @@ Plan này **không** giả định rằng cùng một người sẽ:
 - [ ] Verify DB row counts against canonical manifest counts.
 - [ ] Fail loudly if FK-like references do not resolve.
 - [ ] Commit importer scripts and verification utilities.
+
+Current status:
+- Done for canonical content tables
+- Commit: `e7547b2` `feat: add canonical content importer`
+- Added `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
+- Added `tests/pipeline/test_import_canonical_artifacts_to_db.py`
+- Validate-only command passed on the real canonical bundle:
+
+```bash
+PYTHONPATH=. .venv/bin/python src/scripts/pipeline/import_canonical_artifacts_to_db.py --validate-only
+```
+
+- Counts verified against manifest:
+  - `concepts_kp = 470`
+  - `units = 295`
+  - `unit_kp_map = 767`
+  - `question_bank = 985`
+  - `item_calibration = 985`
+  - `item_phase_map = 6699`
+  - `item_kp_map = 1171`
+  - `prerequisite_edges = 79`
+  - `pruned_edges = 34`
 
 ### Task 4: Define compatibility mapping for old runtime tables
 
