@@ -155,10 +155,10 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
         ForeignKey("sessions.id", ondelete="CASCADE"),
         nullable=False,
     )
-    question_id: Mapped[uuid.UUID] = mapped_column(
+    question_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("questions.id", ondelete="RESTRICT"),
-        nullable=False,
+        nullable=True,
     )
     canonical_item_id: Mapped[str | None] = mapped_column(
         String(180),

@@ -1,0 +1,58 @@
+from uuid import uuid4
+from unittest.mock import AsyncMock, Mock
+
+import pytest
+
+from src.services.canonical_mastery_service import (
+    estimate_mastery_mean,
+    next_theta_mu,
+    update_kp_mastery_from_item,
+)
+
+
+def test_estimate_mastery_mean_increases_with_theta():
+    assert estimate_mastery_mean(theta_mu=1.0, theta_sigma=0.5) > estimate_mastery_mean(
+        theta_mu=-1.0,
+        theta_sigma=0.5,
+    )
+
+
+def test_next_theta_mu_rewards_correct_answer():
+    assert next_theta_mu(current_theta=0.0, is_correct=True, item_weight=0.7) > 0.0
+    assert next_theta_mu(current_theta=0.0, is_correct=False, item_weight=0.7) < 0.0
+
+
+@pytest.mark.asyncio
+async def test_update_kp_mastery_from_item_updates_each_kp(monkeypatch):
+    session = AsyncMock()
+    mapping = Mock(kp_id="kp_attention", weight=0.7)
+    result = Mock()
+    result.scalars.return_value.all.return_value = [mapping]
+    session.execute.return_value = result
+
+    upserts = []
+
+    class FakeRepo:
+        def __init__(self, db):
+            self.db = db
+
+        async def get_by_user_kp(self, user_id, kp_id):
+            return None
+
+        async def upsert(self, user_id, kp_id, **mastery_data):
+            upserts.append((user_id, kp_id, mastery_data))
+
+    monkeypatch.setattr("src.services.canonical_mastery_service.LearnerMasteryKPRepository", FakeRepo)
+    user_id = uuid4()
+
+    updated = await update_kp_mastery_from_item(
+        session,
+        user_id=user_id,
+        canonical_item_id="item-1",
+        is_correct=True,
+    )
+
+    assert updated == ["kp_attention"]
+    assert upserts[0][0] == user_id
+    assert upserts[0][1] == "kp_attention"
+    assert upserts[0][2]["n_items_observed"] == 1

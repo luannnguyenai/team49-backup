@@ -835,11 +835,13 @@ git commit -m "feat: route assessment selection to canonical questions"
 **Files:**
 
 - Create: `src/services/canonical_mastery_service.py`
+- Create: `alembic/versions/20260423_nullable_interaction_question.py`
+- Modify: `src/models/learning.py`
 - Modify: `src/services/assessment_service.py`
 - Test: `tests/services/test_canonical_mastery_service.py`
 - Test: `tests/services/test_assessment_canonical_mastery_cutover.py`
 
-- [ ] **Step 1: Add mastery service tests**
+- [x] **Step 1: Add mastery service tests**
 
 Create `tests/services/test_canonical_mastery_service.py`:
 
@@ -858,7 +860,7 @@ def test_next_theta_mu_rewards_correct_answer():
     assert next_theta_mu(current_theta=0.0, is_correct=False, item_weight=0.7) < 0.0
 ```
 
-- [ ] **Step 2: Run tests and verify they fail**
+- [x] **Step 2: Run tests and verify they fail**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/services/test_canonical_mastery_service.py -q
@@ -868,7 +870,7 @@ Expected:
 
 - fails because service does not exist.
 
-- [ ] **Step 3: Implement simple bounded bootstrap mastery update**
+- [x] **Step 3: Implement simple bounded bootstrap mastery update**
 
 Create `src/services/canonical_mastery_service.py`:
 
@@ -927,7 +929,7 @@ async def update_kp_mastery_from_item(
     return updated
 ```
 
-- [ ] **Step 4: Wire assessment submit behind flags**
+- [x] **Step 4: Wire assessment submit behind flags**
 
 In `submit_assessment`, when grading a canonical answer:
 
@@ -946,7 +948,9 @@ if settings.write_learner_mastery_kp_enabled and answer.canonical_item_id:
 
 Keep legacy `_upsert_mastery_scores` during transition.
 
-- [ ] **Step 5: Run tests**
+Canonical-only interactions require `interactions.question_id` to be nullable while `interactions.canonical_item_id` carries the evidence key. Legacy submissions still populate `question_id`.
+
+- [x] **Step 5: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/services/test_canonical_mastery_service.py tests/services/test_assessment_canonical_mastery_cutover.py tests/repositories/test_learner_mastery_kp_repo.py -q
@@ -956,10 +960,10 @@ Expected:
 
 - pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
-git add src/services/canonical_mastery_service.py src/services/assessment_service.py tests/services/test_canonical_mastery_service.py tests/services/test_assessment_canonical_mastery_cutover.py
+git add src/services/canonical_mastery_service.py src/services/assessment_service.py src/models/learning.py alembic/versions/20260423_nullable_interaction_question.py tests/services/test_canonical_mastery_service.py tests/services/test_assessment_canonical_mastery_cutover.py
 git commit -m "feat: write canonical learner mastery from assessment evidence"
 ```
 

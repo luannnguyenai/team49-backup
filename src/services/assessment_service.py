@@ -21,9 +21,11 @@ import math
 import uuid
 from datetime import UTC, datetime
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
+from src.models.canonical import QuestionBankItem
 from src.models.content import (
     BloomLevel,
     DifficultyBucket,
@@ -49,6 +51,7 @@ from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.repositories.assessment_repo import AssessmentRepository
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.question_repo import QuestionRepository
+from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.canonical_question_selector import CanonicalQuestionSelector
 from src.services.mastery_evaluator import (
     QuestionResult,
@@ -343,6 +346,15 @@ async def submit_assessment(
     if session.completed_at is not None:
         raise ConflictError("This assessment has already been submitted.")
 
+    if _is_canonical_answer_batch(answers):
+        return await _submit_canonical_assessment(
+            db=db,
+            user_id=user_id,
+            session=session,
+            session_id=session_id,
+            answers=answers,
+        )
+
     # 2. Reject duplicate question_ids in the submission
     question_ids = [a.question_id for a in answers]
     if len(question_ids) != len(set(question_ids)):
@@ -442,6 +454,89 @@ async def submit_assessment(
     await db.flush()
 
     return await _build_result_response(db, session_id, topic_results_map, now, topic_theta)
+
+
+def _is_canonical_answer_batch(answers: list[AnswerInput]) -> bool:
+    return bool(answers) and all(answer.canonical_item_id for answer in answers)
+
+
+def _selected_answer_to_index(answer: SelectedAnswer) -> int:
+    return {"A": 0, "B": 1, "C": 2, "D": 3}[answer.value]
+
+
+async def _submit_canonical_assessment(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session: Session,
+    session_id: uuid.UUID,
+    answers: list[AnswerInput],
+) -> AssessmentResultResponse:
+    if not settings.write_canonical_interactions_enabled:
+        raise ValidationError("Canonical assessment submit is not enabled.")
+
+    canonical_item_ids = [str(answer.canonical_item_id) for answer in answers if answer.canonical_item_id]
+    if len(canonical_item_ids) != len(set(canonical_item_ids)):
+        raise ValidationError("Duplicate canonical_item_id entries in answers.")
+
+    result = await db.execute(
+        select(QuestionBankItem).where(QuestionBankItem.item_id.in_(canonical_item_ids))
+    )
+    items = {item.item_id: item for item in result.scalars().all()}
+    missing = [item_id for item_id in canonical_item_ids if item_id not in items]
+    if missing:
+        raise ValidationError(f"Unknown canonical item IDs: {missing}")
+
+    base_global = await AssessmentRepository(db).get_max_global_sequence(user_id)
+    now = datetime.now(UTC)
+    correct_count = 0
+
+    for seq, answer in enumerate(answers, start=1):
+        item_id = str(answer.canonical_item_id)
+        item = items[item_id]
+        is_correct = int(item.answer_index) == _selected_answer_to_index(answer.selected_answer)
+        if is_correct:
+            correct_count += 1
+
+        db.add(
+            Interaction(
+                user_id=user_id,
+                session_id=session_id,
+                question_id=None,
+                canonical_item_id=item_id,
+                sequence_position=seq,
+                global_sequence_position=base_global + seq,
+                selected_answer=SelectedAnswer(answer.selected_answer.value),
+                is_correct=is_correct,
+                response_time_ms=answer.response_time_ms,
+                changed_answer=False,
+                hint_used=False,
+                explanation_viewed=False,
+                timestamp=now,
+            )
+        )
+
+        if settings.write_learner_mastery_kp_enabled:
+            await update_kp_mastery_from_item(
+                db,
+                user_id=user_id,
+                canonical_item_id=item_id,
+                is_correct=is_correct,
+            )
+
+    total = len(answers)
+    session.completed_at = now
+    session.total_questions = total
+    session.correct_count = correct_count
+    session.score_percent = round(correct_count / total * 100, 1) if total else 0.0
+    db.add(session)
+    await db.flush()
+
+    return AssessmentResultResponse(
+        session_id=session_id,
+        completed_at=now,
+        overall_score_percent=session.score_percent or 0.0,
+        topic_results=[],
+    )
 
 
 # ===========================================================================
