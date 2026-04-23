@@ -9,4 +9,6 @@ def test_product_tables_have_canonical_bridge_columns():
 
 def test_runtime_learning_tables_have_canonical_bridge_columns():
     assert hasattr(Session, "canonical_phase")
+    assert hasattr(Session, "canonical_unit_id")
+    assert hasattr(Session, "canonical_section_id")
     assert hasattr(Interaction, "canonical_item_id")

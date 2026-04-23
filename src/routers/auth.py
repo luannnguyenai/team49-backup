@@ -23,8 +23,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
+from src.models.canonical import ConceptKP
 from src.models.content import Module, Topic
-from src.models.learning import MasteryScore
+from src.models.learning import LearnerMasteryKP, MasteryScore
 from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
 from src.redis_client import get_redis
@@ -143,13 +144,7 @@ async def _build_user_skill_overview(
     user_id: uuid.UUID,
 ) -> UserSkillOverview:
     if not settings.allow_legacy_mastery_reads or not settings.allow_legacy_topic_content_reads:
-        raise HTTPException(
-            status_code=status.HTTP_410_GONE,
-            detail=(
-                "Legacy skill overview is disabled. Use learner_mastery_kp with "
-                "canonical KP aggregation."
-            ),
-        )
+        return await _build_canonical_user_skill_overview(db, user_id)
 
     result = await db.execute(
         select(MasteryScore, Topic, Module)
@@ -173,6 +168,41 @@ async def _build_user_skill_overview(
         if bucket is None:
             continue
         grouped[bucket].append(round(mastery.mastery_probability * 100, 1))
+
+    skills = []
+    for label in _SKILL_LABELS:
+        if grouped[label]:
+            value = round(sum(grouped[label]) / len(grouped[label]), 1)
+            level = classify_mastery(value)
+        else:
+            value = 0.0
+            level = "not_started"
+        skills.append(UserSkillSnapshot(label=label, value=value, level=level))
+
+    return UserSkillOverview(skills=skills)
+
+
+async def _build_canonical_user_skill_overview(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+) -> UserSkillOverview:
+    result = await db.execute(
+        select(LearnerMasteryKP, ConceptKP)
+        .join(ConceptKP, LearnerMasteryKP.kp_id == ConceptKP.kp_id)
+        .where(LearnerMasteryKP.user_id == user_id)
+    )
+
+    grouped: dict[str, list[float]] = {label: [] for label in _SKILL_LABELS}
+    for mastery, kp in result.all():
+        bucket = _resolve_skill_bucket(
+            getattr(kp, "name", None),
+            getattr(kp, "description", None),
+            " ".join(str(tag) for tag in (getattr(kp, "domain_tags", None) or [])),
+            " ".join(str(tag) for tag in (getattr(kp, "track_tags", None) or [])),
+        )
+        if bucket is None:
+            continue
+        grouped[bucket].append(round((mastery.mastery_mean_cached or 0.0) * 100, 1))
 
     skills = []
     for label in _SKILL_LABELS:

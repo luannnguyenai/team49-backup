@@ -118,6 +118,16 @@ class Session(UUIDPrimaryKeyMixin, Base):
     correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     score_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
     canonical_phase: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    canonical_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    canonical_section_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("course_sections.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
@@ -130,6 +140,8 @@ class Session(UUIDPrimaryKeyMixin, Base):
     __table_args__ = (
         Index("ix_sessions_user_id", "user_id"),
         Index("ix_sessions_user_type", "user_id", "session_type"),
+        Index("ix_sessions_canonical_unit", "canonical_unit_id"),
+        Index("ix_sessions_canonical_section", "canonical_section_id"),
         Index("ix_sessions_started_at", "started_at"),
         CheckConstraint("score_percent >= 0 AND score_percent <= 100", name="ck_score_range"),
     )

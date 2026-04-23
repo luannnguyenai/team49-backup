@@ -60,6 +60,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
+from src.models.canonical import ItemKPMap, QuestionBankItem
 from src.models.content import (
     BloomLevel,
     DifficultyBucket,
@@ -69,6 +70,7 @@ from src.models.content import (
     QuestionStatus,
     Topic,
 )
+from src.models.course import CourseSection, LearningUnit
 from src.models.learning import (
     Interaction,
     LearningPath,
@@ -94,6 +96,15 @@ from src.services.mastery_evaluator import (
     classify_mastery,
     update_bloom_max,
 )
+from src.repositories.canonical_question_repo import CanonicalQuestionRepository
+from src.services.canonical_assessor_compat import (
+    answer_index_to_correct_answer,
+    canonical_item_to_module_test_question,
+    canonical_question_uuid,
+    selected_answer_to_index,
+)
+from src.services.canonical_mastery_service import update_kp_mastery_from_item
+from src.services.canonical_question_selector import CanonicalQuestionSelector
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -138,6 +149,9 @@ async def start_module_test(
     user_id: uuid.UUID,
     module_id: uuid.UUID,
 ) -> ModuleTestStartResponse:
+    if not settings.allow_legacy_question_reads:
+        return await _start_canonical_module_test(db, user_id, module_id)
+
     _ensure_legacy_module_test_question_reads_allowed()
 
     # 1. Validate module ──────────────────────────────────────────────────────
@@ -250,11 +264,13 @@ async def submit_module_test(
     session_id: uuid.UUID,
     req: ModuleTestSubmitRequest,
 ) -> ModuleTestResultResponse:
-    _ensure_legacy_module_test_question_reads_allowed()
-    _ensure_legacy_module_test_mutations_allowed()
-
     # 1. Validate session ──────────────────────────────────────────────────────
     session = await _get_module_test_session(db, user_id, session_id)
+    if session.canonical_section_id is not None:
+        return await _submit_canonical_module_test(db, user_id, session, req)
+
+    _ensure_legacy_module_test_question_reads_allowed()
+    _ensure_legacy_module_test_mutations_allowed()
     if session.completed_at is not None:
         raise ConflictError("Module test đã được nộp trước đó.")
 
@@ -362,6 +378,11 @@ async def get_module_test_results(
 
     # 1. Validate session ──────────────────────────────────────────────────────
     session = await _get_module_test_session(db, user_id, session_id)
+    if session.canonical_section_id is not None:
+        if session.completed_at is None:
+            raise ConflictError("Module test chưa được nộp.")
+        return await _build_canonical_module_test_result(db, user_id, session, mutate=False)
+
     if session.completed_at is None:
         raise ConflictError("Module test chưa được nộp.")
 
@@ -533,6 +554,308 @@ async def _build_result(
         next_module=next_module_info,
         wrong_answers=wrong_answers,
     )
+
+
+# ===========================================================================
+# Canonical compatibility helpers
+# ===========================================================================
+
+
+async def _start_canonical_module_test(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    section_id: uuid.UUID,
+) -> ModuleTestStartResponse:
+    section = await _get_canonical_section_or_404(db, section_id)
+    units = await _get_canonical_units_for_section(db, section.id)
+    if not units:
+        raise ValidationError(f"Module '{section.title}' không có canonical learning unit nào.")
+
+    incomplete = await _canonical_units_without_completed_quiz(db, user_id, units)
+    if incomplete:
+        raise ValidationError(
+            "Bạn chưa hoàn thành quiz cho các learning unit sau: "
+            + ", ".join(f"'{unit.title}'" for unit in incomplete)
+            + ". Hãy hoàn thành quiz tất cả units trước khi thi module test."
+        )
+
+    selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
+    topic_groups: list[TopicQuestionsGroup] = []
+    total_question_count = 0
+    for unit in units:
+        if not unit.canonical_unit_id:
+            continue
+        items = await selector.select_for_phase(
+            phase="final_quiz",
+            canonical_unit_ids=[unit.canonical_unit_id],
+            count=5,
+        )
+        if not items:
+            raise ValidationError(f"Không tìm thấy câu hỏi final_quiz cho learning unit '{unit.title}'.")
+        total_question_count += len(items)
+        topic_groups.append(
+            TopicQuestionsGroup(
+                topic_id=unit.id,
+                topic_name=unit.title,
+                questions=[
+                    canonical_item_to_module_test_question(item, topic_id=unit.id)
+                    for item in items
+                ],
+            )
+        )
+
+    session = Session(
+        user_id=user_id,
+        session_type=SessionType.module_test,
+        topic_id=None,
+        module_id=None,
+        canonical_section_id=section.id,
+        canonical_phase="final_quiz",
+        total_questions=total_question_count,
+        correct_count=0,
+    )
+    db.add(session)
+    await db.flush()
+    await db.refresh(session)
+
+    return ModuleTestStartResponse(
+        session_id=session.id,
+        module_id=section.id,
+        module_name=section.title,
+        total_topics=len(topic_groups),
+        total_questions=total_question_count,
+        topics=topic_groups,
+    )
+
+
+async def _submit_canonical_module_test(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session: Session,
+    req: ModuleTestSubmitRequest,
+) -> ModuleTestResultResponse:
+    if session.completed_at is not None:
+        raise ConflictError("Module test đã được nộp trước đó.")
+
+    section = await _get_canonical_section_or_404(db, session.canonical_section_id)
+    units = await _get_canonical_units_for_section(db, section.id)
+    item_by_question_id = await _canonical_item_lookup_for_units(db, units)
+
+    seen: set[str] = set()
+    for index, answer in enumerate(req.answers, start=1):
+        item = item_by_question_id.get(answer.question_id)
+        if item is None:
+            raise ValidationError("Question does not belong to this canonical module test.")
+        if item.item_id in seen:
+            raise ConflictError("Duplicate question in module-test submission.")
+        seen.add(item.item_id)
+        is_correct = item.answer_index == selected_answer_to_index(answer.selected_answer.value)
+        db.add(
+            Interaction(
+                user_id=user_id,
+                session_id=session.id,
+                question_id=None,
+                canonical_item_id=item.item_id,
+                sequence_position=index,
+                global_sequence_position=index,
+                selected_answer=SelectedAnswer(answer.selected_answer.value),
+                is_correct=is_correct,
+                response_time_ms=answer.response_time_ms,
+                changed_answer=False,
+                hint_used=False,
+                explanation_viewed=bool(item.explanation),
+                timestamp=datetime.now(UTC),
+            )
+        )
+
+    return await _build_canonical_module_test_result(db, user_id, session, mutate=True)
+
+
+async def _build_canonical_module_test_result(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session: Session,
+    *,
+    mutate: bool,
+) -> ModuleTestResultResponse:
+    section = await _get_canonical_section_or_404(db, session.canonical_section_id)
+    units = await _get_canonical_units_for_section(db, section.id)
+    unit_by_canonical_id = {unit.canonical_unit_id: unit for unit in units if unit.canonical_unit_id}
+    rows_result = await db.execute(
+        select(Interaction, QuestionBankItem)
+        .join(QuestionBankItem, Interaction.canonical_item_id == QuestionBankItem.item_id)
+        .where(Interaction.session_id == session.id)
+        .order_by(Interaction.sequence_position)
+    )
+    rows = rows_result.all()
+    if not rows:
+        raise ValidationError("Module test submission không có câu trả lời nào.")
+
+    per_unit_rows: dict[uuid.UUID, list[tuple[Interaction, QuestionBankItem]]] = {}
+    for interaction, item in rows:
+        unit = unit_by_canonical_id.get(item.unit_id)
+        if unit is not None:
+            per_unit_rows.setdefault(unit.id, []).append((interaction, item))
+
+    total = len(rows)
+    correct = sum(1 for interaction, _ in rows if interaction.is_correct)
+    total_score_pct = round(correct / total * 100, 1) if total else 0.0
+    passed = total_score_pct >= PASS_THRESHOLD
+    per_topic: list[TopicTestResult] = []
+    review_suggestions: list[ReviewTopicSuggestion] = []
+    wrong_answers: list[WrongAnswerDetail] = []
+
+    for unit in units:
+        unit_rows = per_unit_rows.get(unit.id, [])
+        if not unit_rows:
+            continue
+        unit_total = len(unit_rows)
+        unit_correct = sum(1 for interaction, _ in unit_rows if interaction.is_correct)
+        unit_pct = round(unit_correct / unit_total * 100, 1)
+        wrong_item_ids = [item.item_id for interaction, item in unit_rows if not interaction.is_correct]
+        weak_kcs = await _canonical_weak_kp_ids(db, wrong_item_ids)
+        per_topic.append(
+            TopicTestResult(
+                topic_id=unit.id,
+                topic_name=unit.title,
+                score=f"{unit_correct}/{unit_total}",
+                score_percent=unit_pct,
+                bloom_max=None,
+                verdict="pass" if unit_pct >= WEAK_THRESHOLD else "fail",
+                weak_kcs=weak_kcs,
+            )
+        )
+        if unit_pct < WEAK_THRESHOLD:
+            review_suggestions.append(
+                ReviewTopicSuggestion(
+                    topic_id=unit.id,
+                    topic_name=unit.title,
+                    weak_kcs=weak_kcs,
+                    misconceptions=[],
+                    estimated_review_hours=_unit_review_hours(unit),
+                )
+            )
+        for interaction, item in unit_rows:
+            if interaction.is_correct or interaction.selected_answer is None:
+                continue
+            question = canonical_item_to_module_test_question(item, topic_id=unit.id)
+            wrong_answers.append(
+                WrongAnswerDetail(
+                    question_id=question.id,
+                    topic_id=unit.id,
+                    topic_name=unit.title,
+                    stem_text=question.stem_text,
+                    option_a=question.option_a,
+                    option_b=question.option_b,
+                    option_c=question.option_c,
+                    option_d=question.option_d,
+                    selected_answer=interaction.selected_answer,
+                    correct_answer=answer_index_to_correct_answer(item.answer_index).value,
+                    explanation_text=item.explanation,
+                )
+            )
+
+    if mutate:
+        now = datetime.now(UTC)
+        for interaction, item in rows:
+            await update_kp_mastery_from_item(
+                db,
+                user_id=user_id,
+                canonical_item_id=item.item_id,
+                is_correct=interaction.is_correct,
+            )
+        session.completed_at = now
+        session.total_questions = total
+        session.correct_count = correct
+        session.score_percent = total_score_pct
+        db.add(session)
+        await db.flush()
+
+    return ModuleTestResultResponse(
+        session_id=session.id,
+        module_id=section.id,
+        module_name=section.title,
+        total_score_percent=total_score_pct,
+        passed=passed,
+        per_topic=per_topic,
+        recommended_review_topics=review_suggestions if not passed else [],
+        estimated_review_hours=sum(item.estimated_review_hours for item in review_suggestions)
+        if not passed
+        else 0.0,
+        next_module=None,
+        wrong_answers=wrong_answers,
+    )
+
+
+async def _get_canonical_section_or_404(db: AsyncSession, section_id: uuid.UUID) -> CourseSection:
+    result = await db.execute(select(CourseSection).where(CourseSection.id == section_id))
+    section = result.scalar_one_or_none()
+    if section is None:
+        raise NotFoundError(f"Canonical course section {section_id} not found.")
+    return section
+
+
+async def _get_canonical_units_for_section(
+    db: AsyncSession,
+    section_id: uuid.UUID,
+) -> list[LearningUnit]:
+    result = await db.execute(
+        select(LearningUnit)
+        .where(
+            LearningUnit.section_id == section_id,
+            LearningUnit.canonical_unit_id.isnot(None),
+        )
+        .order_by(LearningUnit.sort_order)
+    )
+    return list(result.scalars().all())
+
+
+async def _canonical_units_without_completed_quiz(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    units: list[LearningUnit],
+) -> list[LearningUnit]:
+    missing: list[LearningUnit] = []
+    for unit in units:
+        result = await db.execute(
+            select(Session.id)
+            .where(
+                Session.user_id == user_id,
+                Session.session_type == SessionType.quiz,
+                Session.canonical_unit_id == unit.id,
+                Session.completed_at.isnot(None),
+            )
+            .limit(1)
+        )
+        if result.scalar_one_or_none() is None:
+            missing.append(unit)
+    return missing
+
+
+async def _canonical_item_lookup_for_units(
+    db: AsyncSession,
+    units: list[LearningUnit],
+) -> dict[uuid.UUID, QuestionBankItem]:
+    canonical_unit_ids = [unit.canonical_unit_id for unit in units if unit.canonical_unit_id]
+    if not canonical_unit_ids:
+        return {}
+    result = await db.execute(
+        select(QuestionBankItem).where(QuestionBankItem.unit_id.in_(canonical_unit_ids))
+    )
+    return {canonical_question_uuid(item.item_id): item for item in result.scalars().all()}
+
+
+async def _canonical_weak_kp_ids(db: AsyncSession, item_ids: list[str]) -> list[str]:
+    if not item_ids:
+        return []
+    result = await db.execute(select(ItemKPMap.kp_id).where(ItemKPMap.item_id.in_(item_ids)))
+    return sorted({str(kp_id) for kp_id in result.scalars().all()})
+
+
+def _unit_review_hours(unit: LearningUnit) -> float:
+    if unit.estimated_minutes is None:
+        return 1.0
+    return max(0.25, round(unit.estimated_minutes / 60, 2))
 
 
 # ===========================================================================

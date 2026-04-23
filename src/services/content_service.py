@@ -10,7 +10,10 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
+from src.models.canonical import CanonicalUnit
 from src.models.content import Module, Topic
+from src.models.course import Course, CourseAsset, CourseAssetType, CourseSection, LearningUnit
 from src.schemas.content import (
     ModuleDetailResponse,
     ModuleListItem,
@@ -27,6 +30,8 @@ from src.schemas.content import (
 
 async def list_modules(db: AsyncSession) -> list[ModuleListItem]:
     """Return all modules ordered by order_index with their topic counts."""
+    if not settings.allow_legacy_topic_content_reads:
+        return await _list_modules_from_canonical_sections(db)
 
     # Fetch modules
     modules_result = await db.execute(select(Module).order_by(Module.order_index))
@@ -61,6 +66,8 @@ async def list_modules(db: AsyncSession) -> list[ModuleListItem]:
 
 async def get_module_detail(db: AsyncSession, module_id: uuid.UUID) -> ModuleDetailResponse | None:
     """Return module + its ordered topic list. None if module not found."""
+    if not settings.allow_legacy_topic_content_reads:
+        return await _get_module_detail_from_canonical_section(db, module_id)
 
     module_result = await db.execute(select(Module).where(Module.id == module_id))
     module = module_result.scalar_one_or_none()
@@ -93,6 +100,8 @@ async def get_module_detail(db: AsyncSession, module_id: uuid.UUID) -> ModuleDet
 
 async def get_topic_detail(db: AsyncSession, topic_id: uuid.UUID) -> TopicDetailResponse | None:
     """Return topic detail with resolved prerequisite graph nodes."""
+    if not settings.allow_legacy_topic_content_reads:
+        return await _get_topic_detail_from_canonical_unit(db, topic_id)
 
     topic_result = await db.execute(select(Topic).where(Topic.id == topic_id))
     topic = topic_result.scalar_one_or_none()
@@ -131,6 +140,8 @@ async def get_topic_detail(db: AsyncSession, topic_id: uuid.UUID) -> TopicDetail
 
 async def get_topic_content(db: AsyncSession, topic_id: uuid.UUID) -> TopicContentResponse | None:
     """Return the markdown content and video URL for a topic."""
+    if not settings.allow_legacy_topic_content_reads:
+        return await _get_topic_content_from_canonical_unit(db, topic_id)
 
     result = await db.execute(
         select(Topic, Module.name.label("module_name"))
@@ -166,3 +177,165 @@ def _parse_uuid_list(raw: list | None) -> list[uuid.UUID] | None:
         return [uuid.UUID(str(item)) for item in raw]
     except (ValueError, AttributeError):
         return None
+
+
+async def _list_modules_from_canonical_sections(db: AsyncSession) -> list[ModuleListItem]:
+    """Expose course sections through the legacy module-list response shape."""
+    result = await db.execute(
+        select(CourseSection, Course, func.count(LearningUnit.id).label("topics_count"))
+        .join(Course, CourseSection.course_id == Course.id)
+        .outerjoin(LearningUnit, LearningUnit.section_id == CourseSection.id)
+        .group_by(CourseSection.id, Course.id)
+        .order_by(Course.sort_order, CourseSection.sort_order)
+    )
+    rows = result.all()
+    return [
+        ModuleListItem(
+            id=section.id,
+            name=section.title,
+            description=course.short_description,
+            order_index=section.sort_order,
+            prerequisite_module_ids=None,
+            topics_count=int(topics_count or 0),
+        )
+        for section, course, topics_count in rows
+        if int(topics_count or 0) > 0
+    ]
+
+
+async def _get_module_detail_from_canonical_section(
+    db: AsyncSession,
+    section_id: uuid.UUID,
+) -> ModuleDetailResponse | None:
+    result = await db.execute(
+        select(CourseSection, Course).join(Course, CourseSection.course_id == Course.id).where(
+            CourseSection.id == section_id
+        )
+    )
+    row = result.first()
+    if row is None:
+        return None
+
+    section, course = row
+    units_result = await db.execute(
+        select(LearningUnit)
+        .where(LearningUnit.section_id == section_id)
+        .order_by(LearningUnit.sort_order)
+    )
+    units = units_result.scalars().all()
+    topics = [
+        TopicSummary(
+            id=unit.id,
+            name=unit.title,
+            description=unit.content_body,
+            order_index=unit.sort_order,
+            estimated_hours_beginner=_minutes_to_hours(unit.estimated_minutes),
+            estimated_hours_intermediate=_minutes_to_hours(unit.estimated_minutes),
+        )
+        for unit in units
+    ]
+    return ModuleDetailResponse(
+        id=section.id,
+        name=section.title,
+        description=course.short_description,
+        order_index=section.sort_order,
+        prerequisite_module_ids=None,
+        topics_count=len(topics),
+        topics=topics,
+        created_at=section.created_at,
+        updated_at=section.updated_at,
+    )
+
+
+async def _get_topic_detail_from_canonical_unit(
+    db: AsyncSession,
+    unit_id: uuid.UUID,
+) -> TopicDetailResponse | None:
+    result = await db.execute(
+        select(LearningUnit, CourseSection).join(CourseSection, LearningUnit.section_id == CourseSection.id).where(
+            LearningUnit.id == unit_id
+        )
+    )
+    row = result.first()
+    if row is None:
+        return None
+
+    unit, section = row
+    return TopicDetailResponse(
+        id=unit.id,
+        module_id=section.id,
+        name=unit.title,
+        description=unit.content_body,
+        order_index=unit.sort_order,
+        estimated_hours_beginner=_minutes_to_hours(unit.estimated_minutes),
+        estimated_hours_intermediate=_minutes_to_hours(unit.estimated_minutes),
+        estimated_hours_review=_minutes_to_hours(unit.estimated_minutes, divisor=120),
+        prerequisite_topic_ids=None,
+        prerequisites=[],
+        created_at=unit.created_at,
+        updated_at=unit.updated_at,
+    )
+
+
+async def _get_topic_content_from_canonical_unit(
+    db: AsyncSession,
+    unit_id: uuid.UUID,
+) -> TopicContentResponse | None:
+    result = await db.execute(
+        select(LearningUnit, CourseSection, Course, CanonicalUnit)
+        .join(CourseSection, LearningUnit.section_id == CourseSection.id)
+        .join(Course, LearningUnit.course_id == Course.id)
+        .outerjoin(CanonicalUnit, LearningUnit.canonical_unit_id == CanonicalUnit.unit_id)
+        .where(LearningUnit.id == unit_id)
+    )
+    row = result.first()
+    if row is None:
+        return None
+
+    unit, section, _course, canonical_unit = row
+    video_url = await _canonical_unit_video_url(db, unit, canonical_unit)
+    content_markdown = unit.content_body
+    if not content_markdown and canonical_unit is not None:
+        content_markdown = canonical_unit.summary or canonical_unit.description
+
+    return TopicContentResponse(
+        topic_id=unit.id,
+        topic_name=unit.title,
+        module_id=section.id,
+        module_name=section.title,
+        content_markdown=content_markdown,
+        video_url=video_url,
+    )
+
+
+async def _canonical_unit_video_url(
+    db: AsyncSession,
+    unit: LearningUnit,
+    canonical_unit: CanonicalUnit | None,
+) -> str | None:
+    asset_result = await db.execute(
+        select(CourseAsset)
+        .where(
+            CourseAsset.learning_unit_id == unit.id,
+            CourseAsset.asset_type == CourseAssetType.video,
+        )
+        .order_by(CourseAsset.created_at)
+        .limit(1)
+    )
+    asset = asset_result.scalar_one_or_none()
+    if asset is not None:
+        return asset.delivery_url or asset.storage_key
+
+    if canonical_unit is None or not canonical_unit.content_ref:
+        return None
+    content_ref = canonical_unit.content_ref
+    if isinstance(content_ref, dict):
+        value = content_ref.get("video_url") or content_ref.get("url")
+        return str(value) if value else None
+    return None
+
+
+def _minutes_to_hours(minutes: int | None, *, divisor: int = 60) -> float | None:
+    if minutes is None:
+        return None
+    return round(minutes / divisor, 2)

@@ -49,12 +49,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.exceptions import ConflictError, NotFoundError, ValidationError
+from src.models.canonical import ItemKPMap, QuestionBankItem
 from src.models.content import (
     DifficultyBucket,
     KnowledgeComponent,
     Question,
     Topic,
 )
+from src.models.course import LearningUnit
 from src.models.learning import (
     Interaction,
     LearningPath,
@@ -80,6 +82,15 @@ from src.services.mastery_evaluator import (
     evaluate_topic,
     update_bloom_max,
 )
+from src.services.canonical_assessor_compat import (
+    answer_index_to_correct_answer,
+    canonical_item_to_quiz_question,
+    canonical_question_uuid,
+    selected_answer_to_index,
+)
+from src.services.canonical_mastery_service import update_kp_mastery_from_item
+from src.services.canonical_question_selector import CanonicalQuestionSelector
+from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -124,6 +135,9 @@ async def start_quiz(
     user_id: uuid.UUID,
     topic_id: uuid.UUID,
 ) -> QuizStartResponse:
+    if not settings.allow_legacy_question_reads:
+        return await _start_canonical_quiz(db, user_id, topic_id)
+
     _ensure_legacy_quiz_question_reads_allowed()
 
     # 1. Validate topic
@@ -201,10 +215,12 @@ async def answer_question(
     session_id: uuid.UUID,
     req: QuizAnswerRequest,
 ) -> QuizAnswerResponse:
-    _ensure_legacy_quiz_question_reads_allowed()
-
     # 1. Load and validate session
     session = await _get_quiz_session(db, user_id, session_id)
+    if session.canonical_unit_id is not None:
+        return await _answer_canonical_quiz_question(db, user_id, session, req)
+
+    _ensure_legacy_quiz_question_reads_allowed()
     if session.completed_at is not None:
         raise ConflictError("Quiz đã hoàn thành. Không thể ghi thêm câu trả lời.")
 
@@ -288,11 +304,13 @@ async def complete_quiz(
     user_id: uuid.UUID,
     session_id: uuid.UUID,
 ) -> QuizCompleteResponse:
-    _ensure_legacy_quiz_question_reads_allowed()
-    _ensure_legacy_quiz_mutations_allowed()
-
     # 1. Validate session
     session = await _get_quiz_session(db, user_id, session_id)
+    if session.canonical_unit_id is not None:
+        return await _complete_canonical_quiz(db, user_id, session)
+
+    _ensure_legacy_quiz_question_reads_allowed()
+    _ensure_legacy_quiz_mutations_allowed()
     if session.completed_at is not None:
         raise ConflictError("Quiz đã được hoàn thành trước đó.")
 
@@ -469,6 +487,206 @@ async def _get_topic_or_404(db: AsyncSession, topic_id: uuid.UUID) -> Topic:
     if topic is None:
         raise NotFoundError(f"Topic {topic_id} not found.")
     return topic
+
+
+async def _get_learning_unit_or_404(db: AsyncSession, learning_unit_id: uuid.UUID) -> LearningUnit:
+    result = await db.execute(select(LearningUnit).where(LearningUnit.id == learning_unit_id))
+    unit = result.scalar_one_or_none()
+    if unit is None or not unit.canonical_unit_id:
+        raise NotFoundError(f"Canonical learning unit {learning_unit_id} not found.")
+    return unit
+
+
+async def _start_canonical_quiz(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    learning_unit_id: uuid.UUID,
+) -> QuizStartResponse:
+    unit = await _get_learning_unit_or_404(db, learning_unit_id)
+    selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
+    items = await selector.select_for_phase(
+        phase="mini_quiz",
+        canonical_unit_ids=[unit.canonical_unit_id],
+        count=10,
+    )
+    if not items:
+        raise ValidationError("Không tìm thấy câu hỏi quiz canonical cho learning unit này.")
+
+    session = Session(
+        user_id=user_id,
+        session_type=SessionType.quiz,
+        topic_id=None,
+        module_id=None,
+        canonical_unit_id=unit.id,
+        canonical_phase="mini_quiz",
+        total_questions=len(items),
+        correct_count=0,
+    )
+    db.add(session)
+    await db.flush()
+    await db.refresh(session)
+
+    return QuizStartResponse(
+        session_id=session.id,
+        topic_id=unit.id,
+        total_questions=len(items),
+        questions=[canonical_item_to_quiz_question(item, topic_id=unit.id) for item in items],
+    )
+
+
+async def _answer_canonical_quiz_question(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session: Session,
+    req: QuizAnswerRequest,
+) -> QuizAnswerResponse:
+    if session.completed_at is not None:
+        raise ConflictError("Quiz đã hoàn thành. Không thể ghi thêm câu trả lời.")
+
+    unit = await _get_learning_unit_or_404(db, session.canonical_unit_id)
+    item = await _get_canonical_quiz_item_by_surrogate(db, unit, req.question_id)
+    if item is None:
+        raise ValidationError("Question does not belong to this canonical quiz unit.")
+
+    existing = await db.execute(
+        select(Interaction).where(
+            Interaction.session_id == session.id,
+            Interaction.canonical_item_id == item.item_id,
+        )
+    )
+    if existing.scalar_one_or_none() is not None:
+        raise ConflictError("Câu hỏi này đã được trả lời trong phiên quiz này.")
+
+    is_correct = item.answer_index == selected_answer_to_index(req.selected_answer.value)
+    count_result = await db.execute(select(func.count()).where(Interaction.session_id == session.id))
+    seq_pos: int = (count_result.scalar() or 0) + 1
+    max_global_result = await db.execute(
+        select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
+    )
+    base_global: int = max_global_result.scalar() or 0
+
+    db.add(
+        Interaction(
+            user_id=user_id,
+            session_id=session.id,
+            question_id=None,
+            canonical_item_id=item.item_id,
+            sequence_position=seq_pos,
+            global_sequence_position=base_global + 1,
+            selected_answer=SelectedAnswer(req.selected_answer.value),
+            is_correct=is_correct,
+            response_time_ms=req.response_time_ms,
+            changed_answer=False,
+            hint_used=False,
+            explanation_viewed=bool(item.explanation),
+            timestamp=datetime.now(UTC),
+        )
+    )
+    await db.flush()
+
+    all_interactions_result = await db.execute(
+        select(Interaction.is_correct).where(Interaction.session_id == session.id)
+    )
+    all_correct_flags = all_interactions_result.scalars().all()
+    return QuizAnswerResponse(
+        is_correct=is_correct,
+        correct_answer=answer_index_to_correct_answer(item.answer_index),
+        explanation_text=item.explanation,
+        questions_answered=len(all_correct_flags),
+        questions_correct=sum(1 for correct in all_correct_flags if correct),
+    )
+
+
+async def _complete_canonical_quiz(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session: Session,
+) -> QuizCompleteResponse:
+    if session.completed_at is not None:
+        raise ConflictError("Quiz đã được hoàn thành trước đó.")
+
+    unit = await _get_learning_unit_or_404(db, session.canonical_unit_id)
+    rows_result = await db.execute(
+        select(Interaction, QuestionBankItem)
+        .join(QuestionBankItem, Interaction.canonical_item_id == QuestionBankItem.item_id)
+        .where(Interaction.session_id == session.id)
+        .order_by(Interaction.sequence_position)
+    )
+    rows = rows_result.all()
+    if not rows:
+        raise ValidationError("Không có câu trả lời nào trong phiên quiz. Hãy trả lời ít nhất 1 câu trước khi hoàn thành.")
+
+    total_answered = len(rows)
+    correct_count = sum(1 for interaction, _ in rows if interaction.is_correct)
+    quiz_score_percent = round(correct_count / total_answered * 100, 1)
+    wrong_item_ids = [item.item_id for interaction, item in rows if not interaction.is_correct]
+
+    for interaction, item in rows:
+        await update_kp_mastery_from_item(
+            db,
+            user_id=user_id,
+            canonical_item_id=item.item_id,
+            is_correct=interaction.is_correct,
+        )
+
+    now = datetime.now(UTC)
+    session.completed_at = now
+    session.total_questions = total_answered
+    session.correct_count = correct_count
+    session.score_percent = quiz_score_percent
+    db.add(session)
+    await db.flush()
+
+    weak_kcs = await _canonical_weak_kp_ids(db, wrong_item_ids)
+    time_total_ms = sum((interaction.response_time_ms or 0) for interaction, _ in rows)
+    time_total_sec = round(time_total_ms / 1000, 1)
+    avg_time_sec = round(time_total_sec / total_answered, 1) if total_answered else 0.0
+
+    return QuizCompleteResponse(
+        session_id=session.id,
+        topic_id=unit.id,
+        topic_name=unit.title,
+        score=f"{correct_count}/{total_answered}",
+        percent=quiz_score_percent,
+        mastery_before=0.0,
+        mastery_after=quiz_score_percent,
+        mastery_level=classify_mastery(quiz_score_percent),
+        bloom_breakdown=_canonical_bloom_breakdown(rows),
+        weak_kcs=weak_kcs,
+        misconceptions=[],
+        time_total_seconds=time_total_sec,
+        avg_time_per_question=avg_time_sec,
+        learning_path_updated=False,
+    )
+
+
+async def _get_canonical_quiz_item_by_surrogate(
+    db: AsyncSession,
+    unit: LearningUnit,
+    question_id: uuid.UUID,
+) -> QuestionBankItem | None:
+    if not unit.canonical_unit_id:
+        return None
+    result = await db.execute(
+        select(QuestionBankItem).where(QuestionBankItem.unit_id == unit.canonical_unit_id)
+    )
+    for item in result.scalars().all():
+        if canonical_question_uuid(item.item_id) == question_id:
+            return item
+    return None
+
+
+async def _canonical_weak_kp_ids(db: AsyncSession, item_ids: list[str]) -> list[str]:
+    if not item_ids:
+        return []
+    result = await db.execute(select(ItemKPMap.kp_id).where(ItemKPMap.item_id.in_(item_ids)))
+    return sorted({str(kp_id) for kp_id in result.scalars().all()})
+
+
+def _canonical_bloom_breakdown(rows) -> dict[str, str]:
+    total = len(rows)
+    correct = sum(1 for interaction, _ in rows if interaction.is_correct)
+    return {"canonical": f"{correct}/{total}"}
 
 
 async def _get_quiz_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID) -> Session:
