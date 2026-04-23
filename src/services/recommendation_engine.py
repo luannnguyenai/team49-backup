@@ -147,6 +147,11 @@ async def generate_learning_path(
     if settings.read_canonical_planner_enabled:
         return await _generate_canonical_learning_path(db, user, request)
 
+    if not settings.allow_legacy_planner_writes:
+        raise ValidationError(
+            "Legacy planner writes are disabled. Enable READ_CANONICAL_PLANNER_ENABLED and use canonical planner."
+        )
+
     # ── 1. Load topics for desired modules ──────────────────────────────────
     module_ids = request.desired_module_ids
     topics_result = await db.execute(

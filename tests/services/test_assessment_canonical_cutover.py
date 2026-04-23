@@ -2,6 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from src.exceptions import ValidationError
 from src.services import assessment_service
 
 
@@ -59,3 +60,17 @@ def test_canonical_question_payload_preserves_item_and_unit_ids():
     assert payload.canonical_item_id == "lecture01-q1"
     assert payload.canonical_unit_id == "local::lecture01::seg1"
     assert payload.stem_text == "What is NLP?"
+
+
+def test_legacy_question_guard_blocks_when_disabled(monkeypatch):
+    monkeypatch.setattr(assessment_service.settings, "allow_legacy_question_reads", False)
+
+    with pytest.raises(ValidationError, match="Legacy question reads are disabled"):
+        assessment_service._ensure_legacy_question_reads_allowed()
+
+
+def test_legacy_mastery_guard_blocks_when_disabled(monkeypatch):
+    monkeypatch.setattr(assessment_service.settings, "allow_legacy_mastery_writes", False)
+
+    with pytest.raises(ValidationError, match="Legacy mastery writes are disabled"):
+        assessment_service._ensure_legacy_mastery_writes_allowed()

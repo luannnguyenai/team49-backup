@@ -128,6 +128,22 @@ class Settings(BaseSettings):
         default=False,
         description="Read planner candidates from canonical learning units and prerequisite graph.",
     )
+    allow_legacy_question_reads: bool = Field(
+        default=True,
+        description="Allow legacy reads from questions/topics for assessment compatibility.",
+    )
+    allow_legacy_mastery_writes: bool = Field(
+        default=True,
+        description="Allow legacy writes into mastery_scores during compatibility.",
+    )
+    allow_legacy_planner_writes: bool = Field(
+        default=True,
+        description="Allow legacy writes into learning_paths during compatibility.",
+    )
+    allow_legacy_topic_content_reads: bool = Field(
+        default=True,
+        description="Allow legacy content APIs backed by modules/topics.",
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod

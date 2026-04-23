@@ -2,6 +2,7 @@ from uuid import uuid4
 
 import pytest
 
+from src.exceptions import ValidationError
 from src.models.learning import PathAction, PathStatus
 from src.schemas.learning_path import PathItemResponse
 from src.services import recommendation_engine
@@ -22,6 +23,15 @@ async def test_generate_learning_path_uses_canonical_branch_when_flag_enabled(mo
 
     assert result == "canonical-response"
     assert captured["called"] is True
+
+
+@pytest.mark.asyncio
+async def test_generate_learning_path_blocks_legacy_branch_when_disabled(monkeypatch):
+    monkeypatch.setattr(recommendation_engine.settings, "read_canonical_planner_enabled", False)
+    monkeypatch.setattr(recommendation_engine.settings, "allow_legacy_planner_writes", False)
+
+    with pytest.raises(ValidationError, match="Legacy planner writes are disabled"):
+        await recommendation_engine.generate_learning_path(object(), object(), object())
 
 
 def test_path_item_response_allows_canonical_unit_without_topic_id():

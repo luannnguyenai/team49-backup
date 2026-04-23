@@ -164,6 +164,20 @@ _BLOOM_SLOTS: list[tuple[list[BloomLevel], int]] = [
 ]
 
 
+def _ensure_legacy_question_reads_allowed() -> None:
+    if not settings.allow_legacy_question_reads:
+        raise ValidationError(
+            "Legacy question reads are disabled. Use canonical_unit_ids with READ_CANONICAL_QUESTIONS_ENABLED."
+        )
+
+
+def _ensure_legacy_mastery_writes_allowed() -> None:
+    if not settings.allow_legacy_mastery_writes:
+        raise ValidationError(
+            "Legacy mastery writes are disabled. Submit canonical_item_id answers with canonical mastery enabled."
+        )
+
+
 # ===========================================================================
 # POST /api/assessment/start
 # ===========================================================================
@@ -208,6 +222,8 @@ async def start_assessment(
                 for item in canonical_items
             ],
         )
+
+    _ensure_legacy_question_reads_allowed()
 
     # 1. Validate all requested topics exist
     found_ids = {t.id for t in await repo.get_topics_by_ids(topic_ids)}
@@ -354,6 +370,9 @@ async def submit_assessment(
             session_id=session_id,
             answers=answers,
         )
+
+    _ensure_legacy_question_reads_allowed()
+    _ensure_legacy_mastery_writes_allowed()
 
     # 2. Reject duplicate question_ids in the submission
     question_ids = [a.question_id for a in answers]

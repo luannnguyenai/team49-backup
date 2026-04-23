@@ -15,6 +15,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.data_paths import MODULES_FILE, TOPICS_FILE
 from src.database import get_async_db
 from src.schemas.content import (
@@ -33,6 +34,17 @@ from src.services.content_service import (
 content_router = APIRouter(prefix="/api", tags=["Content"])
 
 
+def _ensure_legacy_topic_content_reads_allowed() -> None:
+    if not settings.allow_legacy_topic_content_reads:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail=(
+                "Legacy module/topic content APIs are disabled. "
+                "Use course-first/canonical learning-unit APIs."
+            ),
+        )
+
+
 # ---------------------------------------------------------------------------
 # GET /api/modules
 # ---------------------------------------------------------------------------
@@ -46,6 +58,7 @@ content_router = APIRouter(prefix="/api", tags=["Content"])
 async def api_list_modules(
     db: AsyncSession = Depends(get_async_db),
 ) -> list[ModuleListItem]:
+    _ensure_legacy_topic_content_reads_allowed()
     return await list_modules(db)
 
 
@@ -63,6 +76,7 @@ async def api_get_module(
     module_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_db),
 ) -> ModuleDetailResponse:
+    _ensure_legacy_topic_content_reads_allowed()
     result = await get_module_detail(db, module_id)
     if result is None:
         raise HTTPException(
@@ -86,6 +100,7 @@ async def api_get_topic(
     topic_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_db),
 ) -> TopicDetailResponse:
+    _ensure_legacy_topic_content_reads_allowed()
     result = await get_topic_detail(db, topic_id)
     if result is None:
         raise HTTPException(
@@ -109,6 +124,7 @@ async def api_get_topic_content(
     topic_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_db),
 ) -> TopicContentResponse:
+    _ensure_legacy_topic_content_reads_allowed()
     result = await get_topic_content(db, topic_id)
     if result is None:
         raise HTTPException(
@@ -126,6 +142,7 @@ async def api_get_topic_content(
 )
 async def api_seed_data(db: AsyncSession = Depends(get_async_db)):
     """Load modules and topics from JSON files into database."""
+    _ensure_legacy_topic_content_reads_allowed()
     from sqlalchemy import text
 
     modules_file = MODULES_FILE
