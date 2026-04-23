@@ -19,9 +19,18 @@ from src.models.learning import MasteryLevel, SelectedAnswer
 
 class AssessmentStartRequest(BaseModel):
     topic_ids: list[uuid.UUID] = Field(
-        min_length=1,
+        default_factory=list,
         max_length=50,
-        description="Topics to include in this assessment (1-50)",
+        description="Legacy topics to include in this assessment.",
+    )
+    canonical_unit_ids: list[str] | None = Field(
+        default=None,
+        max_length=50,
+        description="Canonical unit IDs to use when canonical question selection is enabled.",
+    )
+    phase: str = Field(
+        default="placement",
+        description="Canonical assessment phase used with item_phase_map.",
     )
 
 
@@ -30,11 +39,13 @@ class QuestionForAssessment(BaseModel):
 
     model_config = {"from_attributes": True}
 
-    id: uuid.UUID
+    id: uuid.UUID | None = None
     item_id: str
-    topic_id: uuid.UUID
-    bloom_level: BloomLevel
-    difficulty_bucket: DifficultyBucket
+    canonical_item_id: str | None = None
+    canonical_unit_id: str | None = None
+    topic_id: uuid.UUID | None = None
+    bloom_level: BloomLevel | None = None
+    difficulty_bucket: DifficultyBucket | None = None
     stem_text: str
     option_a: str
     option_b: str
@@ -55,7 +66,8 @@ class AssessmentStartResponse(BaseModel):
 
 
 class AnswerInput(BaseModel):
-    question_id: uuid.UUID
+    question_id: uuid.UUID | None = None
+    canonical_item_id: str | None = None
     selected_answer: SelectedAnswer
     response_time_ms: int | None = Field(default=None, ge=0)
 

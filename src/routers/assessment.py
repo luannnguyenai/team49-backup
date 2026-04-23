@@ -54,7 +54,13 @@ async def api_start_assessment(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AssessmentStartResponse:
-    return await start_assessment(db, user.id, body.topic_ids)
+    return await start_assessment(
+        db,
+        user.id,
+        body.topic_ids,
+        canonical_unit_ids=body.canonical_unit_ids,
+        phase=body.phase,
+    )
 
 
 # ---------------------------------------------------------------------------

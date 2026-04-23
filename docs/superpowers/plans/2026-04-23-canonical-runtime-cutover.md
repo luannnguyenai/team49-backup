@@ -664,7 +664,7 @@ git commit -m "feat: add canonical question selection layer"
 - Test: `tests/services/test_assessment_canonical_cutover.py`
 - Test: `tests/test_assessment_question_selector_integration.py`
 
-- [ ] **Step 1: Add failing tests**
+- [x] **Step 1: Add failing tests**
 
 Create `tests/services/test_assessment_canonical_cutover.py`:
 
@@ -713,7 +713,7 @@ async def test_start_assessment_uses_canonical_selector_when_flag_enabled(monkey
     assert captured["phase"] == "placement"
 ```
 
-- [ ] **Step 2: Run test and verify it fails**
+- [x] **Step 2: Run test and verify it fails**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/services/test_assessment_canonical_cutover.py -q
@@ -723,7 +723,7 @@ Expected:
 
 - fails because helper/imports do not exist.
 
-- [ ] **Step 3: Extend assessment schema without breaking old fields**
+- [x] **Step 3: Extend assessment schema without breaking old fields**
 
 In `src/schemas/assessment.py`, keep old fields and add canonical optional fields:
 
@@ -758,7 +758,7 @@ class AnswerInput(BaseModel):
 
 Add validation in service, not schema, so old clients remain accepted.
 
-- [ ] **Step 4: Add canonical helper to assessment service**
+- [x] **Step 4: Add canonical helper to assessment service**
 
 In `src/services/assessment_service.py`, import:
 
@@ -785,7 +785,7 @@ async def _select_canonical_questions_for_units(
     )
 ```
 
-- [ ] **Step 5: Preserve legacy path while adding canonical branch**
+- [x] **Step 5: Preserve legacy path while adding canonical branch**
 
 In `start_assessment`, do not remove the existing topic path. Add a canonical branch only when `settings.read_canonical_questions_enabled` is true and the request has canonical unit IDs available.
 
@@ -809,7 +809,7 @@ if settings.read_canonical_questions_enabled and request.canonical_unit_ids:
     # Build QuestionForAssessment manually from canonical item fields.
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/services/test_assessment_canonical_cutover.py tests/test_assessment_question_selector_integration.py -q
@@ -819,7 +819,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/schemas/assessment.py src/services/assessment_service.py tests/services/test_assessment_canonical_cutover.py tests/test_assessment_question_selector_integration.py

@@ -23,8 +23,10 @@ from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.models.content import (
     BloomLevel,
+    DifficultyBucket,
     KnowledgeComponent,
     Question,
     Topic,
@@ -45,7 +47,9 @@ from src.schemas.assessment import (
 )
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.repositories.assessment_repo import AssessmentRepository
+from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.question_repo import QuestionRepository
+from src.services.canonical_question_selector import CanonicalQuestionSelector
 from src.services.mastery_evaluator import (
     QuestionResult,
     TopicMasteryResult,
@@ -166,8 +170,42 @@ async def start_assessment(
     db: AsyncSession,
     user_id: uuid.UUID,
     topic_ids: list[uuid.UUID],
+    canonical_unit_ids: list[str] | None = None,
+    phase: str = "placement",
 ) -> AssessmentStartResponse:
     repo = AssessmentRepository(db)
+    if settings.read_canonical_questions_enabled and canonical_unit_ids:
+        canonical_items = await _select_canonical_questions_for_units(
+            db=db,
+            canonical_unit_ids=canonical_unit_ids,
+            phase=phase,
+            count=5,
+        )
+        if not canonical_items:
+            raise ValidationError("No eligible canonical assessment questions found.")
+
+        session = Session(
+            user_id=user_id,
+            session_type=SessionType.assessment,
+            topic_id=None,
+            module_id=None,
+            canonical_phase=phase,
+            total_questions=len(canonical_items),
+            correct_count=0,
+        )
+        db.add(session)
+        await db.flush()
+        await db.refresh(session)
+
+        return AssessmentStartResponse(
+            session_id=session.id,
+            total_questions=len(canonical_items),
+            questions=[
+                _canonical_item_to_assessment_question(item)
+                for item in canonical_items
+            ],
+        )
+
     # 1. Validate all requested topics exist
     found_ids = {t.id for t in await repo.get_topics_by_ids(topic_ids)}
     missing = [tid for tid in topic_ids if tid not in found_ids]
@@ -246,6 +284,45 @@ async def _select_questions_for_topic(
         slots=_BLOOM_SLOTS,
         ability=ability,
         excluded_ids=excluded_ids,
+    )
+
+
+async def _select_canonical_questions_for_units(
+    db: AsyncSession,
+    canonical_unit_ids: list[str],
+    phase: str,
+    count: int,
+):
+    selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
+    return await selector.select_for_phase(
+        phase=phase,
+        canonical_unit_ids=canonical_unit_ids,
+        count=count,
+    )
+
+
+def _canonical_item_to_assessment_question(item) -> QuestionForAssessment:
+    choices = list(getattr(item, "choices", []) or [])
+    padded_choices = (choices + ["", "", "", ""])[:4]
+    difficulty = getattr(item, "difficulty", None)
+    difficulty_bucket = None
+    if difficulty in {bucket.value for bucket in DifficultyBucket}:
+        difficulty_bucket = DifficultyBucket(difficulty)
+
+    return QuestionForAssessment(
+        id=None,
+        item_id=item.item_id,
+        canonical_item_id=item.item_id,
+        canonical_unit_id=item.unit_id,
+        topic_id=None,
+        bloom_level=None,
+        difficulty_bucket=difficulty_bucket,
+        stem_text=item.question,
+        option_a=padded_choices[0],
+        option_b=padded_choices[1],
+        option_c=padded_choices[2],
+        option_d=padded_choices[3],
+        time_expected_seconds=None,
     )
 
 
