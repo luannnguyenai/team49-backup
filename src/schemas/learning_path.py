@@ -56,7 +56,7 @@ class PathItemResponse(BaseModel):
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
-    topic_id: uuid.UUID
+    topic_id: uuid.UUID | None = None
     topic_name: str  # resolved by the service layer
     module_name: str  # resolved by the service layer
     action: PathAction
@@ -64,6 +64,8 @@ class PathItemResponse(BaseModel):
     order_index: int
     week_number: int | None
     status: PathStatus
+    learning_unit_id: uuid.UUID | None = None
+    canonical_unit_id: str | None = None
 
 
 # ---------------------------------------------------------------------------

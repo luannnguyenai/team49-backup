@@ -4,23 +4,36 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.canonical import PrerequisiteEdge, UnitKPMap
-from src.models.course import LearningUnit
+from src.models.course import Course, LearningUnit
 
 
 class CanonicalContentRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_linked_learning_units(self, course_ids: list[UUID]) -> list[LearningUnit]:
-        if not course_ids:
+    async def get_linked_learning_units(self, selected_course_ids: list[str | UUID]) -> list[LearningUnit]:
+        if not selected_course_ids:
             return []
+        selected = [str(course_id) for course_id in selected_course_ids]
+        uuid_ids = []
+        for course_id in selected:
+            try:
+                uuid_ids.append(UUID(course_id))
+            except ValueError:
+                pass
+
+        filters = [Course.canonical_course_id.in_(selected)]
+        if uuid_ids:
+            filters.append(Course.id.in_(uuid_ids))
+
         result = await self.session.execute(
             select(LearningUnit)
+            .join(Course, LearningUnit.course_id == Course.id)
             .where(
-                LearningUnit.course_id.in_(course_ids),
+                or_(*filters),
                 LearningUnit.canonical_unit_id.isnot(None),
             )
-            .order_by(LearningUnit.sort_order)
+            .order_by(Course.sort_order, LearningUnit.sort_order)
         )
         return list(result.scalars().all())
 

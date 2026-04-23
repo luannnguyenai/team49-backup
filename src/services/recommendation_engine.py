@@ -62,12 +62,16 @@ from src.models.learning import (
     SelectedAnswer,
 )
 from src.models.user import User
+from src.repositories.canonical_content_repo import CanonicalContentRepository
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
+from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
 from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.schemas.learning_path import (
     GeneratePathRequest,
     GeneratePathResponse,
     PathItemResponse,
 )
+from src.services.canonical_planner_service import classify_unit_action
 from src.services.timeline_builder import TopicSlot, build_timeline
 from src.utils.topological_sort import CycleDetectedError, topological_sort
 
@@ -140,6 +144,8 @@ async def generate_learning_path(
     6. Persist (full replace) LearningPath rows.
     7. Return GeneratePathResponse.
     """
+    if settings.read_canonical_planner_enabled:
+        return await _generate_canonical_learning_path(db, user, request)
 
     # ── 1. Load topics for desired modules ──────────────────────────────────
     module_ids = request.desired_module_ids
@@ -303,6 +309,119 @@ async def generate_learning_path(
         total_hours=timeline.total_hours,
         required_hours_per_week=timeline.required_hours_per_week,
         warnings=timeline.warnings,
+        items=items,
+    )
+
+
+async def _generate_canonical_learning_path(
+    db: AsyncSession,
+    user: User,
+    request: GeneratePathRequest,
+) -> GeneratePathResponse:
+    content_repo = CanonicalContentRepository(db)
+    audit_repo = PlannerAuditRepository(db)
+    goal_repo = GoalPreferenceRepository(db)
+    goal = await goal_repo.get_by_user_id(user.id)
+    if goal is None or not goal.selected_course_ids:
+        raise ValidationError("Canonical planner requires goal_preferences.selected_course_ids.")
+
+    units = await content_repo.get_linked_learning_units(goal.selected_course_ids)
+    if not units:
+        raise NotFoundError("No linked canonical learning units found for selected courses.")
+
+    canonical_unit_ids = [unit.canonical_unit_id for unit in units if unit.canonical_unit_id]
+    unit_kp_rows = await content_repo.get_unit_kp_rows(canonical_unit_ids)
+    kp_ids = sorted({row.kp_id for row in unit_kp_rows})
+
+    mastery_repo = LearnerMasteryKPRepository(db)
+    mastery_by_kp = await mastery_repo.bulk_get_for_user(user.id, kp_ids)
+
+    generated_at = datetime.now(UTC)
+    items: list[PathItemResponse] = []
+    recommended_path_json = []
+
+    for order_index, unit in enumerate(units):
+        unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
+        mastery_values = [
+            mastery_by_kp[kp_id].mastery_mean_cached
+            for kp_id in unit_kps
+            if kp_id in mastery_by_kp
+        ]
+        mastery_lcb = min(mastery_values) if mastery_values else 0.0
+        action_value = classify_unit_action(mastery_lcb)
+        action = PathAction(action_value)
+        estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
+
+        item = PathItemResponse(
+            id=unit.id,
+            topic_id=None,
+            topic_name=unit.title,
+            module_name="canonical_unit",
+            action=action,
+            estimated_hours=estimated_hours if estimated_hours > 0 else None,
+            order_index=order_index,
+            week_number=None,
+            status=PathStatus.pending,
+            learning_unit_id=unit.id,
+            canonical_unit_id=unit.canonical_unit_id,
+        )
+        items.append(item)
+        recommended_path_json.append(
+            {
+                "learning_unit_id": str(unit.id),
+                "canonical_unit_id": unit.canonical_unit_id,
+                "action": action.value,
+                "estimated_hours": estimated_hours,
+                "order_index": order_index,
+                "kp_ids": unit_kps,
+                "mastery_lcb": mastery_lcb,
+            }
+        )
+
+    total_hours = sum(item.estimated_hours or 0.0 for item in items)
+    plan = await audit_repo.create_plan(
+        user_id=user.id,
+        trigger="generate_canonical_learning_path",
+        recommended_path_json=recommended_path_json,
+        goal_snapshot_json={
+            "selected_course_ids": goal.selected_course_ids,
+            "derived_from_course_set_hash": goal.derived_from_course_set_hash,
+        },
+        weights_used_json={"planner": "canonical_unit_bootstrap"},
+    )
+
+    for rank, item in enumerate(items, start=1):
+        await audit_repo.add_rationale(
+            plan_history_id=plan.id,
+            learning_unit_id=item.learning_unit_id,
+            rank=rank,
+            reason_code=f"canonical_unit_{item.action.value}",
+            term_breakdown_json={
+                "canonical_unit_id": item.canonical_unit_id,
+                "estimated_hours": item.estimated_hours,
+            },
+            rationale_text=f"Canonical planner selected unit `{item.topic_name}` as `{item.action.value}`.",
+        )
+
+    await audit_repo.upsert_session_state(
+        user_id=user.id,
+        session_id="canonical-learning-path",
+        last_plan_history_id=plan.id,
+        bridge_chain_depth=0,
+        consecutive_bridge_count=0,
+        state_json={
+            "canonical_runtime": True,
+            "generated_at": generated_at.isoformat(),
+            "unit_count": len(items),
+        },
+    )
+
+    return GeneratePathResponse(
+        generated_at=generated_at,
+        total_topics=len(items),
+        total_hours=total_hours,
+        required_hours_per_week=None,
+        warnings=[],
         items=items,
     )
 

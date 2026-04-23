@@ -1080,7 +1080,7 @@ git commit -m "feat: add canonical planner read model"
 - Modify: `src/services/recommendation_engine.py`
 - Test: `tests/services/test_recommendation_engine_canonical_cutover.py`
 
-- [ ] **Step 1: Add failing test**
+- [x] **Step 1: Add failing test**
 
 Create `tests/services/test_recommendation_engine_canonical_cutover.py`:
 
@@ -1107,7 +1107,7 @@ async def test_generate_learning_path_uses_canonical_branch_when_flag_enabled(mo
     assert captured["called"] is True
 ```
 
-- [ ] **Step 2: Add branch in `generate_learning_path`**
+- [x] **Step 2: Add branch in `generate_learning_path`**
 
 At top of `generate_learning_path`:
 
@@ -1116,7 +1116,7 @@ if settings.read_canonical_planner_enabled:
     return await _generate_canonical_learning_path(db, user, request)
 ```
 
-- [ ] **Step 3: Extend response schema backward-compatibly**
+- [x] **Step 3: Extend response schema backward-compatibly**
 
 In `src/schemas/learning_path.py`, update `PathItemResponse` so old topic paths and new unit paths can coexist:
 
@@ -1139,7 +1139,7 @@ class PathItemResponse(BaseModel):
 
 No frontend file changes are required in this task; existing topic-grain responses still populate `topic_id/topic_name/module_name`.
 
-- [ ] **Step 4: Implement unit-grain response builder**
+- [x] **Step 4: Implement unit-grain response builder**
 
 Add helper in `src/services/recommendation_engine.py`:
 
@@ -1254,7 +1254,7 @@ async def _generate_canonical_learning_path(db: AsyncSession, user: User, reques
     )
 ```
 
-- [ ] **Step 5: Write planner audit with real `learning_unit_id`**
+- [x] **Step 5: Write planner audit with real `learning_unit_id`**
 
 For each canonical planner row:
 
@@ -1273,7 +1273,7 @@ await repo.add_rationale(
 )
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 PYTHONPATH=. .venv/bin/pytest --noconftest tests/services/test_recommendation_engine_canonical_cutover.py tests/services/test_recommendation_engine_cutover.py -q
@@ -1283,7 +1283,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/schemas/learning_path.py src/services/recommendation_engine.py tests/services/test_recommendation_engine_canonical_cutover.py
