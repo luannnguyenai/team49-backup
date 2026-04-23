@@ -3,10 +3,9 @@ routers/content.py
 ------------------
 Content management API:
 
-    GET  /api/modules                        List all modules with topic counts
-    GET  /api/modules/{module_id}            Module detail + topic list
-    GET  /api/topics/{topic_id}              Topic detail + prerequisite graph
-    GET  /api/topics/{topic_id}/content      Learning material (markdown + video)
+    GET  /api/course-sections                        List course sections
+    GET  /api/course-sections/{section_id}            Section detail + learning units
+    GET  /api/learning-units/{learning_unit_id}/content  Learning-unit content
 """
 
 import uuid
@@ -19,15 +18,21 @@ from src.config import settings
 from src.data_paths import MODULES_FILE, TOPICS_FILE
 from src.database import get_async_db
 from src.schemas.content import (
+    CourseSectionDetailResponse,
+    CourseSectionListItem,
+    LearningUnitContentResponse,
     ModuleDetailResponse,
     ModuleListItem,
     TopicContentResponse,
     TopicDetailResponse,
 )
 from src.services.content_service import (
+    get_course_section_detail,
+    get_learning_unit_content,
     get_module_detail,
     get_topic_content,
     get_topic_detail,
+    list_course_sections,
     list_modules,
 )
 
@@ -37,6 +42,79 @@ content_router = APIRouter(prefix="/api", tags=["Content"])
 def _use_canonical_content_compat() -> bool:
     """Keep old frontend routes alive while sourcing rows from canonical tables."""
     return not settings.allow_legacy_topic_content_reads
+
+
+def _legacy_content_gone() -> None:
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail=(
+            "Legacy module/topic routes are retired. Use canonical content routes: "
+            "/api/course-sections, /api/course-sections/{section_id}, "
+            "and /api/learning-units/{learning_unit_id}/content."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /api/course-sections
+# ---------------------------------------------------------------------------
+
+
+@content_router.get(
+    "/course-sections",
+    response_model=list[CourseSectionListItem],
+    summary="List canonical course sections with learning-unit counts",
+)
+async def api_list_course_sections(
+    db: AsyncSession = Depends(get_async_db),
+) -> list[CourseSectionListItem]:
+    return await list_course_sections(db)
+
+
+# ---------------------------------------------------------------------------
+# GET /api/course-sections/{section_id}
+# ---------------------------------------------------------------------------
+
+
+@content_router.get(
+    "/course-sections/{section_id}",
+    response_model=CourseSectionDetailResponse,
+    summary="Get a canonical course section with its ordered learning units",
+)
+async def api_get_course_section(
+    section_id: uuid.UUID,
+    db: AsyncSession = Depends(get_async_db),
+) -> CourseSectionDetailResponse:
+    result = await get_course_section_detail(db, section_id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Course section {section_id} not found.",
+        )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# GET /api/learning-units/{learning_unit_id}/content
+# ---------------------------------------------------------------------------
+
+
+@content_router.get(
+    "/learning-units/{learning_unit_id}/content",
+    response_model=LearningUnitContentResponse,
+    summary="Get canonical learning-unit content",
+)
+async def api_get_learning_unit_content(
+    learning_unit_id: uuid.UUID,
+    db: AsyncSession = Depends(get_async_db),
+) -> LearningUnitContentResponse:
+    result = await get_learning_unit_content(db, learning_unit_id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Learning unit {learning_unit_id} not found.",
+        )
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -50,9 +128,8 @@ def _use_canonical_content_compat() -> bool:
     summary="List all curriculum modules with topic counts",
 )
 async def api_list_modules(
-    db: AsyncSession = Depends(get_async_db),
 ) -> list[ModuleListItem]:
-    return await list_modules(db)
+    _legacy_content_gone()
 
 
 # ---------------------------------------------------------------------------
@@ -67,15 +144,8 @@ async def api_list_modules(
 )
 async def api_get_module(
     module_id: uuid.UUID,
-    db: AsyncSession = Depends(get_async_db),
 ) -> ModuleDetailResponse:
-    result = await get_module_detail(db, module_id)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Module {module_id} not found.",
-        )
-    return result
+    _legacy_content_gone()
 
 
 # ---------------------------------------------------------------------------
@@ -90,15 +160,8 @@ async def api_get_module(
 )
 async def api_get_topic(
     topic_id: uuid.UUID,
-    db: AsyncSession = Depends(get_async_db),
 ) -> TopicDetailResponse:
-    result = await get_topic_detail(db, topic_id)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Topic {topic_id} not found.",
-        )
-    return result
+    _legacy_content_gone()
 
 
 # ---------------------------------------------------------------------------
@@ -113,15 +176,8 @@ async def api_get_topic(
 )
 async def api_get_topic_content(
     topic_id: uuid.UUID,
-    db: AsyncSession = Depends(get_async_db),
 ) -> TopicContentResponse:
-    result = await get_topic_content(db, topic_id)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Topic {topic_id} not found.",
-        )
-    return result
+    _legacy_content_gone()
 
 
 # POST /api/seed (dev only)

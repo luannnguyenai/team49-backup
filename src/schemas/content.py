@@ -314,3 +314,50 @@ class TopicContentResponse(BaseModel):
     module_name: str
     content_markdown: str | None
     video_url: str | None
+
+
+# ===========================================================================
+# Canonical content route response schemas
+# ===========================================================================
+
+
+class LearningUnitSelectionItem(BaseModel):
+    """Learning-unit row used by canonical section detail and selection UIs."""
+
+    id: uuid.UUID
+    canonical_unit_id: str | None = None
+    title: str
+    description: str | None
+    order_index: int
+    estimated_hours_beginner: float | None
+    estimated_hours_intermediate: float | None
+
+
+class CourseSectionListItem(BaseModel):
+    """One row in GET /api/course-sections."""
+
+    id: uuid.UUID
+    title: str
+    description: str | None
+    order_index: int
+    prerequisite_section_ids: list[uuid.UUID] | None
+    learning_units_count: int
+
+
+class CourseSectionDetailResponse(CourseSectionListItem):
+    """GET /api/course-sections/{id} — section with ordered learning units."""
+
+    learning_units: list[LearningUnitSelectionItem]
+    created_at: datetime
+    updated_at: datetime
+
+
+class LearningUnitContentResponse(BaseModel):
+    """GET /api/learning-units/{id}/content — canonical learning material."""
+
+    learning_unit_id: uuid.UUID
+    title: str
+    section_id: uuid.UUID
+    section_title: str
+    content_markdown: str | None
+    video_url: str | None
