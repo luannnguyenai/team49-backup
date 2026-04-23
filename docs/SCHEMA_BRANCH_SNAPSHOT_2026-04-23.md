@@ -30,7 +30,7 @@ Trong nhánh `rin/implement`, phần việc dữ liệu/schema gần đây tập
   - `unit_kp_map = 767`
   - `question_bank = 985`
   - `item_calibration = 985`
-  - `item_phase_map = 6699`
+  - `item_phase_map = 6838`
   - `item_kp_map = 1171`
   - `prerequisite_edges = 79`
   - `pruned_edges = 34`
@@ -1599,6 +1599,7 @@ Nguồn:
 
 - `difficulty_prior`
   - prior độ khó trước khi có IRT thật.
+  - hiện dùng numeric float, không phải bucket string.
 
 - `discrimination_prior`
   - prior độ phân biệt.
@@ -1652,6 +1653,10 @@ Nguồn:
 
 - `suitability_score`
   - độ phù hợp của item với phase đó.
+  - canonical exporter hiện normalize cả phase-map shape cũ:
+    - `eligible_phases`
+    - `recommended_phase`
+    - `phase_weight_multipliers`
 
 - `selection_priority`
   - reserve cho thứ tự ưu tiên chọn item trong cùng phase.

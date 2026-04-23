@@ -39,6 +39,33 @@ Key files:
 - `alembic/versions/20260423_learner_planner_stub_persistence.py`
 - `alembic/versions/20260423_canonical_content_tables.py`
 
+## Canonical Bootstrap Status
+
+Validated on local Postgres on 2026-04-23:
+
+- `uv run alembic upgrade head` reached `20260423_item_cal_prior (head)`
+- `PYTHONPATH=. uv run python src/scripts/pipeline/export_canonical_artifacts.py`
+- `PYTHONPATH=. uv run python src/scripts/pipeline/import_canonical_artifacts_to_db.py`
+- `PYTHONPATH=. uv run python src/scripts/pipeline/import_product_shell_to_db.py`
+- `uv run python -m src.scripts.pipeline.check_canonical_runtime_parity`
+
+Observed parity status after import:
+
+- `status = ready`
+- `linked_units = 295`
+- `unlinked_units = 0`
+- `missing_question_phase_maps = 0`
+- `missing_question_kp_maps = 0`
+
+Important contract corrections now enforced in code and DB:
+
+- `concepts_kp.difficulty_level` is numeric `Float`
+- `units.difficulty` is numeric `Float`
+- `item_calibration.difficulty_prior` is numeric `Float`
+- canonical exporter accepts both:
+  - `suitability_by_phase`
+  - legacy `eligible_phases + recommended_phase + phase_weight_multipliers`
+
 ## Migration Order
 
 Run database migrations first:
@@ -68,7 +95,7 @@ Expected canonical counts:
 - `unit_kp_map`: 767
 - `question_bank`: 985
 - `item_calibration`: 985
-- `item_phase_map`: 6699
+- `item_phase_map`: 6838
 - `item_kp_map`: 1171
 - `prerequisite_edges`: 79
 - `pruned_edges`: 34
