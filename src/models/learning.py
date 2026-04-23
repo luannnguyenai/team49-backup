@@ -117,6 +117,7 @@ class Session(UUIDPrimaryKeyMixin, Base):
     total_questions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     score_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
+    canonical_phase: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
@@ -159,6 +160,11 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
         ForeignKey("questions.id", ondelete="RESTRICT"),
         nullable=False,
     )
+    canonical_item_id: Mapped[str | None] = mapped_column(
+        String(180),
+        ForeignKey("question_bank.item_id", ondelete="RESTRICT"),
+        nullable=True,
+    )
 
     sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
     global_sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -185,6 +191,7 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
         Index("ix_interactions_user_id", "user_id"),
         Index("ix_interactions_session_id", "session_id"),
         Index("ix_interactions_question_id", "question_id"),
+        Index("ix_interactions_canonical_item_id", "canonical_item_id"),
         Index("ix_interactions_user_timestamp", "user_id", "timestamp"),
         Index("ix_interactions_global_seq", "user_id", "global_sequence_position"),
     )

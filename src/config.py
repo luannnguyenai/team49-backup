@@ -116,6 +116,18 @@ class Settings(BaseSettings):
         default=False,
         description="Enable read path from learner_mastery_kp during runtime cutover.",
     )
+    read_canonical_questions_enabled: bool = Field(
+        default=False,
+        description="Read assessment/quiz items from canonical question_bank during runtime cutover.",
+    )
+    write_canonical_interactions_enabled: bool = Field(
+        default=False,
+        description="Write canonical question item IDs into interactions during runtime cutover.",
+    )
+    read_canonical_planner_enabled: bool = Field(
+        default=False,
+        description="Read planner candidates from canonical learning units and prerequisite graph.",
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod

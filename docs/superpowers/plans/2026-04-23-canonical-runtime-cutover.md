@@ -85,7 +85,7 @@ Expected modified files:
 - Test: `tests/test_runtime_canonical_bridge_models.py`
 - Test: `tests/test_config.py`
 
-- [ ] **Step 1: Add failing model tests**
+- [x] **Step 1: Add failing model tests**
 
 Create `tests/test_runtime_canonical_bridge_models.py`:
 
@@ -115,7 +115,7 @@ def test_runtime_canonical_cutover_flags_default_to_false():
     assert settings.read_canonical_planner_enabled is False
 ```
 
-- [ ] **Step 2: Run tests and verify they fail**
+- [x] **Step 2: Run tests and verify they fail**
 
 Run:
 
@@ -127,7 +127,7 @@ Expected:
 
 - fails because bridge columns/flags do not exist yet.
 
-- [ ] **Step 3: Add bridge columns to ORM**
+- [x] **Step 3: Add bridge columns to ORM**
 
 In `src/models/course.py`, add:
 
@@ -167,7 +167,7 @@ Add index:
 Index("ix_interactions_canonical_item_id", "canonical_item_id")
 ```
 
-- [ ] **Step 4: Add cutover flags**
+- [x] **Step 4: Add cutover flags**
 
 In `src/config.py`, add:
 
@@ -186,14 +186,14 @@ read_canonical_planner_enabled: bool = Field(
 )
 ```
 
-- [ ] **Step 5: Add Alembic migration**
+- [x] **Step 5: Add Alembic migration**
 
 Create `alembic/versions/20260423_runtime_canonical_bridge_columns.py`:
 
 ```python
 """add runtime canonical bridge columns
 
-Revision ID: 20260423_runtime_canonical_bridge
+Revision ID: 20260423_runtime_bridge
 Revises: 20260423_canonical_content
 Create Date: 2026-04-23
 """
@@ -201,7 +201,7 @@ Create Date: 2026-04-23
 from alembic import op
 import sqlalchemy as sa
 
-revision = "20260423_runtime_canonical_bridge"
+revision = "20260423_runtime_bridge"
 down_revision = "20260423_canonical_content"
 branch_labels = None
 depends_on = None
@@ -242,7 +242,7 @@ def downgrade() -> None:
     op.drop_column("courses", "canonical_course_id")
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run:
 
@@ -254,7 +254,7 @@ Expected:
 
 - pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/models/course.py src/models/learning.py src/config.py alembic/versions/20260423_runtime_canonical_bridge_columns.py tests/test_runtime_canonical_bridge_models.py tests/test_config.py

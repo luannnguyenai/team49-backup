@@ -70,6 +70,9 @@ def test_settings_default_cutover_flags_disabled(monkeypatch: pytest.MonkeyPatch
     assert settings.write_planner_audit_enabled is False
     assert settings.read_goal_preferences_enabled is False
     assert settings.read_learner_mastery_kp_enabled is False
+    assert settings.read_canonical_questions_enabled is False
+    assert settings.write_canonical_interactions_enabled is False
+    assert settings.read_canonical_planner_enabled is False
 
 
 def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch):
@@ -81,6 +84,9 @@ def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setenv("WRITE_PLANNER_AUDIT_ENABLED", "yes")
     monkeypatch.setenv("READ_GOAL_PREFERENCES_ENABLED", "true")
     monkeypatch.setenv("READ_LEARNER_MASTERY_KP_ENABLED", "1")
+    monkeypatch.setenv("READ_CANONICAL_QUESTIONS_ENABLED", "true")
+    monkeypatch.setenv("WRITE_CANONICAL_INTERACTIONS_ENABLED", "1")
+    monkeypatch.setenv("READ_CANONICAL_PLANNER_ENABLED", "yes")
 
     settings = Settings(_env_file=None)
 
@@ -90,3 +96,6 @@ def test_settings_parses_cutover_flags_from_env(monkeypatch: pytest.MonkeyPatch)
     assert settings.write_planner_audit_enabled is True
     assert settings.read_goal_preferences_enabled is True
     assert settings.read_learner_mastery_kp_enabled is True
+    assert settings.read_canonical_questions_enabled is True
+    assert settings.write_canonical_interactions_enabled is True
+    assert settings.read_canonical_planner_enabled is True
