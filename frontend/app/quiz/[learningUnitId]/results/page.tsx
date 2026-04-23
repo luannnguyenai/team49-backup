@@ -1,6 +1,6 @@
 "use client";
 
-// app/quiz/[topicId]/results/page.tsx
+// app/quiz/[learningUnitId]/results/page.tsx
 // Quiz results: score, mastery before→after animated, bloom bar chart,
 // wrong answers list, KC review suggestions, 3 CTA buttons.
 
@@ -131,9 +131,9 @@ function BloomRow({ label, value, color }: { label: string; value: string; color
 // ---------------------------------------------------------------------------
 
 function QuizResultsInner() {
-  const { topicId } = useParams<{ topicId: string }>();
+  const { learningUnitId } = useParams<{ learningUnitId: string }>();
   const router = useRouter();
-  const runtimeRef = buildQuizRuntimeRef(topicId);
+  const runtimeRef = buildQuizRuntimeRef(learningUnitId);
 
   const [result, setResult] = useState<QuizCompleteResponse | null>(null);
   const [animReady, setAnimReady] = useState(false);

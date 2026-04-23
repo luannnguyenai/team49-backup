@@ -10,7 +10,13 @@ import Cookies from "js-cookie";
 import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
 import {
   buildCanonicalAssessmentStartPayload,
-  mapCourseCatalogItemToModuleListItem,
+  mapCourseCatalogItemToSectionCard,
+  mapLegacySectionDetail,
+  mapLegacySectionListItem,
+  mapLegacyTopicContent,
+  type LegacyModuleDetailResponse,
+  type LegacyModuleListItemResponse,
+  type LegacyTopicContentResponse,
 } from "@/lib/canonical-content";
 
 // ---------------------------------------------------------------------------
@@ -158,10 +164,11 @@ import type {
   AssessmentStartResponse,
   CanonicalAssessmentStartPayload,
   CourseCatalogItem,
+  CourseSectionDetail,
+  CourseSectionListItem,
   HistoryResponse,
+  LearningUnitContentById,
   LoginPayload,
-  ModuleDetail,
-  ModuleListItem,
   ModuleTestAnswerInput,
   ModuleTestResultResponse,
   ModuleTestStartResponse,
@@ -181,7 +188,6 @@ import type {
   SessionType,
   StartLearningDecisionResponse,
   TokenPair,
-  TopicContent,
   User,
   UserSkillOverview,
 } from "@/types";
@@ -202,19 +208,6 @@ export const assessmentApi = {
       .get<AssessmentResultResponse>(`/api/assessment/${sessionId}/results`)
       .then((r) => r.data),
 };
-
-export const legacyContentApi = {
-  modules: () =>
-    api.get<ModuleListItem[]>("/api/modules").then((r) => r.data),
-
-  moduleDetail: (id: string) =>
-    api.get<ModuleDetail>(`/api/modules/${id}`).then((r) => r.data),
-
-  topicContent: (id: string) =>
-    api.get<TopicContent>(`/api/topics/${id}/content`).then((r) => r.data),
-};
-
-export const contentApi = legacyContentApi;
 
 export const courseApi = {
   catalog: (params?: {
@@ -253,16 +246,33 @@ export const courseApi = {
       .then((r) => r.data.units),
 };
 
-export const canonicalContentApi = {
-  catalogModules: (params?: {
+export const canonicalSectionApi = {
+  list: () =>
+    api
+      .get<LegacyModuleListItemResponse[]>("/api/modules")
+      .then((r) => r.data.map(mapLegacySectionListItem)),
+
+  detail: (id: string) =>
+    api
+      .get<LegacyModuleDetailResponse>(`/api/modules/${id}`)
+      .then((r) => mapLegacySectionDetail(r.data)),
+
+  catalogCards: (params?: {
     view?: CourseCatalogView;
     includeUnavailable?: boolean;
   }) =>
     courseApi.catalog(params).then((response) =>
       response.items.map((course: CourseCatalogItem) =>
-        mapCourseCatalogItemToModuleListItem(course),
+        mapCourseCatalogItemToSectionCard(course),
       ),
     ),
+};
+
+export const learningUnitCompatApi = {
+  contentById: (id: string) =>
+    api
+      .get<LegacyTopicContentResponse>(`/api/topics/${id}/content`)
+      .then((r) => mapLegacyTopicContent(r.data)),
 };
 
 export const canonicalAssessmentApi = {
@@ -292,9 +302,6 @@ export const canonicalModuleTestApi = {
 };
 
 export const quizApi = {
-  start: (topicId: string) =>
-    api.post<QuizStartResponse>("/api/quiz/start", { topic_id: topicId }).then((r) => r.data),
-
   answer: (
     sessionId: string,
     data: { question_id: string; selected_answer: SelectedAnswer; response_time_ms: number | null }
@@ -331,11 +338,6 @@ export const historyApi = {
 };
 
 export const moduleTestApi = {
-  start: (moduleId: string) =>
-    api
-      .post<ModuleTestStartResponse>("/api/module-test/start", { module_id: moduleId })
-      .then((r) => r.data),
-
   submit: (sessionId: string, answers: ModuleTestAnswerInput[]) =>
     api
       .post<ModuleTestResultResponse>(`/api/module-test/${sessionId}/submit`, { answers })

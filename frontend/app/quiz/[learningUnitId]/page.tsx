@@ -1,6 +1,6 @@
 "use client";
 
-// app/quiz/[topicId]/page.tsx
+// app/quiz/[learningUnitId]/page.tsx
 // Full-screen quiz: 10 MCQ one-at-a-time, real-time feedback after each answer,
 // live correct/incorrect progress bar, running timer.
 
@@ -72,9 +72,9 @@ type Phase = "loading" | "quiz" | "feedback" | "completing" | "error";
 // ---------------------------------------------------------------------------
 
 export default function QuizPage() {
-  const { topicId } = useParams<{ topicId: string }>();
+  const { learningUnitId } = useParams<{ learningUnitId: string }>();
   const router = useRouter();
-  const runtimeRef = buildQuizRuntimeRef(topicId);
+  const runtimeRef = buildQuizRuntimeRef(learningUnitId);
 
   // Session
   const [phase, setPhase] = useState<Phase>("loading");

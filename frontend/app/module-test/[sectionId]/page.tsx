@@ -1,6 +1,6 @@
 "use client";
 
-// app/module-test/[moduleId]/page.tsx
+// app/module-test/[sectionId]/page.tsx
 // Full-screen module test exam:
 //   - All questions visible via left navigation panel (click to jump)
 //   - One question shown at a time
@@ -212,9 +212,9 @@ function ConfirmDialog({
 type Phase = "loading" | "active" | "submitting" | "error";
 
 export default function ModuleTestPage() {
-  const { moduleId } = useParams<{ moduleId: string }>();
+  const { sectionId } = useParams<{ sectionId: string }>();
   const router = useRouter();
-  const runtimeRef = buildModuleTestRuntimeRef(moduleId);
+  const runtimeRef = buildModuleTestRuntimeRef(sectionId);
 
   // ── Core state ───────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<Phase>("loading");

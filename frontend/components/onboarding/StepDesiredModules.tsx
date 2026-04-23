@@ -6,7 +6,7 @@
 import { BookOpen, Check, Clock, Code2, Database, Layers } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ModuleDetail } from "@/types";
+import type { CourseSectionDetail } from "@/types";
 
 const MODULE_CONFIGS: Array<{
   gradient: string;
@@ -20,14 +20,14 @@ const MODULE_CONFIGS: Array<{
 ];
 
 interface Props {
-  modules: ModuleDetail[];
+  sections: CourseSectionDetail[];
   selectedIds: string[];
   onToggle: (id: string) => void;
   error?: string;
 }
 
 export default function StepDesiredModules({
-  modules,
+  sections,
   selectedIds,
   onToggle,
   error,
@@ -45,26 +45,25 @@ export default function StepDesiredModules({
         )}
       </p>
 
-      {modules.length === 0 && (
+      {sections.length === 0 && (
         <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Không có modules nào để hiển thị.
+          Không có sections nào để hiển thị.
         </div>
       )}
 
-      {modules.map((module, idx) => {
-        const isSelected = selectedSet.has(module.id);
+      {sections.map((section, idx) => {
+        const isSelected = selectedSet.has(section.id);
         const { gradient, Icon } = MODULE_CONFIGS[idx % MODULE_CONFIGS.length];
 
-        // Compute estimated hours from topics
-        const totalHours = module.topics
-          .reduce((sum, t) => sum + (t.estimated_hours_beginner ?? 0), 0)
+        const totalHours = section.learning_units
+          .reduce((sum, unit) => sum + (unit.estimated_hours_beginner ?? 0), 0)
           .toFixed(1);
 
         return (
           <button
-            key={module.id}
+            key={section.id}
             type="button"
-            onClick={() => onToggle(module.id)}
+            onClick={() => onToggle(section.id)}
             className={cn(
               "w-full rounded-xl border-2 p-4 text-left",
               "transition-all duration-150 hover:shadow-md active:scale-[0.99]",
@@ -96,7 +95,7 @@ export default function StepDesiredModules({
                     className="font-semibold"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {module.name}
+                    {section.title}
                   </h3>
                   {isSelected && (
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600">
@@ -105,12 +104,12 @@ export default function StepDesiredModules({
                   )}
                 </div>
 
-                {module.description && (
+                {section.description && (
                   <p
                     className="mt-0.5 line-clamp-2 text-sm"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {module.description}
+                    {section.description}
                   </p>
                 )}
 
@@ -121,7 +120,7 @@ export default function StepDesiredModules({
                     style={{ color: "var(--text-muted)" }}
                   >
                     <Layers className="h-3.5 w-3.5" />
-                    {module.topics_count} topics
+                    {section.learning_units_count} units
                   </span>
                   <span
                     className="flex items-center gap-1 text-xs"

@@ -4,21 +4,21 @@ import {
   buildCanonicalAssessmentContext,
   getAssessmentQuestionKey,
 } from "@/lib/canonical-assessment-session";
-import type { ModuleDetail, QuestionForAssessment } from "@/types";
+import type { CourseSectionDetail, QuestionForAssessment } from "@/types";
 
-const MODULES: ModuleDetail[] = [
+const SECTIONS: CourseSectionDetail[] = [
   {
     id: "section_foundations",
-    name: "Foundations",
+    title: "Foundations",
     description: "Core foundations",
     order_index: 1,
-    prerequisite_module_ids: null,
-    topics_count: 2,
-    topics: [
+    prerequisite_section_ids: null,
+    learning_units_count: 2,
+    learning_units: [
       {
         id: "learning_unit_1",
         canonical_unit_id: "local::lecture01::seg1",
-        name: "Vectors",
+        title: "Vectors",
         description: null,
         order_index: 1,
         estimated_hours_beginner: 1,
@@ -27,7 +27,7 @@ const MODULES: ModuleDetail[] = [
       {
         id: "learning_unit_2",
         canonical_unit_id: "local::lecture01::seg2",
-        name: "Linear algebra",
+        title: "Linear algebra",
         description: null,
         order_index: 2,
         estimated_hours_beginner: 1.5,
@@ -37,16 +37,16 @@ const MODULES: ModuleDetail[] = [
   },
   {
     id: "section_models",
-    name: "Models",
+    title: "Models",
     description: "Model building",
     order_index: 2,
-    prerequisite_module_ids: null,
-    topics_count: 1,
-    topics: [
+    prerequisite_section_ids: null,
+    learning_units_count: 1,
+    learning_units: [
       {
         id: "learning_unit_3",
         canonical_unit_id: "local::lecture02::seg1",
-        name: "Optimization",
+        title: "Optimization",
         description: null,
         order_index: 1,
         estimated_hours_beginner: 2,
@@ -60,9 +60,9 @@ describe("canonical assessment session helpers", () => {
   it("builds canonical assessment context from selected known topics", () => {
     expect(
       buildCanonicalAssessmentContext({
-        modules: MODULES,
-        knownTopicIds: ["learning_unit_2", "learning_unit_3"],
-        desiredModuleIds: ["section_foundations"],
+        sections: SECTIONS,
+        knownUnitIds: ["learning_unit_2", "learning_unit_3"],
+        desiredSectionIds: ["section_foundations"],
       }),
     ).toEqual({
       canonicalUnitIds: ["local::lecture01::seg2", "local::lecture02::seg1"],
@@ -76,9 +76,9 @@ describe("canonical assessment session helpers", () => {
   it("falls back to selected modules when no known topics were chosen", () => {
     expect(
       buildCanonicalAssessmentContext({
-        modules: MODULES,
-        knownTopicIds: [],
-        desiredModuleIds: ["section_foundations"],
+        sections: SECTIONS,
+        knownUnitIds: [],
+        desiredSectionIds: ["section_foundations"],
       }),
     ).toEqual({
       canonicalUnitIds: ["local::lecture01::seg1", "local::lecture01::seg2"],

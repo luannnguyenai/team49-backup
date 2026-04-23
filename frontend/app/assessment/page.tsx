@@ -17,9 +17,8 @@ import {
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
-import { assessmentApi, canonicalAssessmentApi, legacyContentApi } from "@/lib/api";
+import { assessmentApi, canonicalAssessmentApi } from "@/lib/api";
 import {
-  ASSESSMENT_STORAGE_KEYS,
   buildAssessmentAnswerInput,
   clearPendingAssessmentContext,
   getAssessmentQuestionKey,
@@ -28,7 +27,6 @@ import {
 import { cn } from "@/lib/utils";
 import type {
   AnswerInput,
-  ModuleDetail,
   QuestionForAssessment,
   SelectedAnswer,
 } from "@/types";
@@ -102,49 +100,20 @@ export default function AssessmentPage() {
     async function bootstrap() {
       try {
         const { canonicalUnitIds, unitNameMap } = readPendingCanonicalAssessment();
-        const topicIdsRaw = sessionStorage.getItem(ASSESSMENT_STORAGE_KEYS.topicIds);
-        const topicNamesRaw = sessionStorage.getItem(ASSESSMENT_STORAGE_KEYS.topicNames);
-
-        let topicIds: string[] = topicIdsRaw ? JSON.parse(topicIdsRaw) as string[] : [];
-        let nameMap: Record<string, string> = topicNamesRaw
-          ? JSON.parse(topicNamesRaw) as Record<string, string>
-          : {};
-
-        if (canonicalUnitIds.length === 0 && topicIds.length === 0) {
-          const moduleIdsRaw = sessionStorage.getItem(ASSESSMENT_STORAGE_KEYS.moduleIds);
-          if (moduleIdsRaw) {
-            const moduleIds = JSON.parse(moduleIdsRaw) as string[];
-            const mods: ModuleDetail[] = await Promise.all(
-              moduleIds.map((id) => legacyContentApi.moduleDetail(id))
-            );
-            mods.forEach((m) =>
-              m.topics.forEach((t) => {
-                topicIds.push(t.id);
-                nameMap[t.id] = t.name;
-              })
-            );
+        if (canonicalUnitIds.length === 0) {
+          if (!cancelled) {
+            setErrorMsg("Không tìm thấy learning units cho assessment. Hãy quay lại onboarding.");
+            setPhase("error");
           }
+          return;
         }
 
-        if (canonicalUnitIds.length === 0 && topicIds.length === 0) {
-          const allModules = await legacyContentApi.modules();
-          const details: ModuleDetail[] = await Promise.all(
-            allModules.map((m) => legacyContentApi.moduleDetail(m.id))
-          );
-          details.forEach((m) =>
-            m.topics.forEach((t) => {
-              topicIds.push(t.id);
-              nameMap[t.id] = t.name;
-            })
-          );
-        }
-
-        const resp = canonicalUnitIds.length > 0
-          ? await canonicalAssessmentApi.start({ canonical_unit_ids: canonicalUnitIds })
-          : await assessmentApi.start(topicIds);
+        const resp = await canonicalAssessmentApi.start({
+          canonical_unit_ids: canonicalUnitIds,
+        });
         if (cancelled) return;
 
-        setTopicNames(canonicalUnitIds.length > 0 ? unitNameMap : nameMap);
+        setTopicNames(unitNameMap);
         setSessionId(resp.session_id);
         setQuestions(resp.questions);
         questionStart.current = Date.now();

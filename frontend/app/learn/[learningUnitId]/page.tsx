@@ -1,6 +1,6 @@
 "use client";
 
-// app/learn/[topicId]/page.tsx
+// app/learn/[learningUnitId]/page.tsx
 // Learning content page: markdown render, auto-TOC, reading time tracker,
 // "Bắt đầu Quiz" CTA.
 
@@ -14,8 +14,8 @@ import {
   Play,
   Video,
 } from "lucide-react";
-import { legacyContentApi } from "@/lib/api";
-import type { TopicContent } from "@/types";
+import { learningUnitCompatApi } from "@/lib/api";
+import type { LearningUnitContentById } from "@/types";
 import LearnMarkdown, { extractHeadings, type Heading } from "@/components/learn/LearnMarkdown";
 
 function countWords(text: string): number {
@@ -33,10 +33,10 @@ function fmtTime(seconds: number): string {
 }
 
 export default function LearnTopicPage() {
-  const { topicId } = useParams<{ topicId: string }>();
+  const { learningUnitId } = useParams<{ learningUnitId: string }>();
   const router = useRouter();
 
-  const [content, setContent] = useState<TopicContent | null>(null);
+  const [content, setContent] = useState<LearningUnitContentById | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,10 +49,10 @@ export default function LearnTopicPage() {
   const articleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!topicId) return;
+    if (!learningUnitId) return;
     setLoading(true);
-    legacyContentApi
-      .topicContent(topicId)
+    learningUnitCompatApi
+      .contentById(learningUnitId)
       .then((data) => {
         setContent(data);
         if (data.content_markdown) {
@@ -61,7 +61,7 @@ export default function LearnTopicPage() {
       })
       .catch(() => setError("Không thể tải nội dung. Vui lòng thử lại."))
       .finally(() => setLoading(false));
-  }, [topicId]);
+  }, [learningUnitId]);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -170,14 +170,14 @@ export default function LearnTopicPage() {
           className="mb-4 flex items-center gap-1 text-xs"
           style={{ color: "var(--text-muted)" }}
         >
-          <span>{content.module_name}</span>
+          <span>{content.section_title}</span>
           <ChevronRight size={12} />
-          <span style={{ color: "var(--text-secondary)" }}>{content.topic_name}</span>
+          <span style={{ color: "var(--text-secondary)" }}>{content.title}</span>
         </nav>
 
         <div className="card mb-6 p-5">
           <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-            {content.topic_name}
+            {content.title}
           </h1>
 
           <div
@@ -298,7 +298,7 @@ export default function LearnTopicPage() {
             </p>
           </div>
           <button
-            onClick={() => router.push(`/quiz/${topicId}`)}
+            onClick={() => router.push(`/quiz/${learningUnitId}`)}
             className="btn-primary flex shrink-0 items-center gap-2 ml-4"
           >
             <Play size={16} />

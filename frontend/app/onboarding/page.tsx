@@ -22,16 +22,15 @@ import StepDesiredModules from "@/components/onboarding/StepDesiredModules";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
-import { legacyContentApi } from "@/lib/api";
+import { canonicalSectionApi } from "@/lib/api";
 import {
   buildCanonicalAssessmentContext,
   writePendingCanonicalAssessment,
-  ASSESSMENT_STORAGE_KEYS,
 } from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import type { ModuleDetail } from "@/types";
+import type { CourseSectionDetail } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Step metadata
@@ -79,7 +78,7 @@ export default function OnboardingPage() {
   const [animKey, setAnimKey] = useState(0);
 
   // Content data loaded from the API
-  const [modules, setModules] = useState<ModuleDetail[]>([]);
+  const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   // ── React Hook Form ──────────────────────────────────────────────────────
@@ -101,18 +100,17 @@ export default function OnboardingPage() {
     },
   });
 
-  // ── Load all modules + topics on mount ──────────────────────────────────
+  // ── Load all sections + learning units on mount ─────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
-        const list = await legacyContentApi.modules();
-        // Fetch each module's full detail (with topics) in parallel
+        const list = await canonicalSectionApi.list();
         const details = await Promise.all(
-          list.map((m) => legacyContentApi.moduleDetail(m.id))
+          list.map((section) => canonicalSectionApi.detail(section.id))
         );
-        setModules(details);
+        setSections(details);
       } catch {
-        // On API failure: keep modules empty; user can still complete the form
+        // On API failure: keep sections empty; user can still complete the form
       } finally {
         setLoadingData(false);
       }
@@ -122,8 +120,8 @@ export default function OnboardingPage() {
 
   // Derive the selected modules objects (needed for schedule estimate)
   const selectedModuleIds = watch("desired_module_ids");
-  const selectedModules = modules.filter((m) =>
-    selectedModuleIds.includes(m.id)
+  const selectedSections = sections.filter((section) =>
+    selectedModuleIds.includes(section.id)
   );
 
   // ── Navigation ───────────────────────────────────────────────────────────
@@ -153,41 +151,13 @@ export default function OnboardingPage() {
       await onboard(data);
       const next = searchParams.get("next");
       const canonicalContext = buildCanonicalAssessmentContext({
-        modules,
-        knownTopicIds: data.known_topic_ids,
-        desiredModuleIds: data.desired_module_ids,
+        sections,
+        knownUnitIds: data.known_topic_ids,
+        desiredSectionIds: data.desired_module_ids,
       });
-
-      // Persist selected module IDs (used by learning-path generation)
-      sessionStorage.setItem(
-        ASSESSMENT_STORAGE_KEYS.moduleIds,
-        JSON.stringify(data.desired_module_ids),
-      );
-
-      // Persist the selected legacy topic IDs as compatibility fallback while the
-      // assessment flow migrates to canonical unit IDs.
-      sessionStorage.setItem(
-        ASSESSMENT_STORAGE_KEYS.topicIds,
-        JSON.stringify(data.known_topic_ids),
-      );
-
-      // Build a topic-name lookup so the assessment page can display names
-      // without extra API calls.
-      const topicNameMap: Record<string, string> = {};
-      for (const mod of modules) {
-        for (const t of mod.topics) {
-          if (data.known_topic_ids.includes(t.id)) {
-            topicNameMap[t.id] = t.name;
-          }
-        }
-      }
-      sessionStorage.setItem(
-        ASSESSMENT_STORAGE_KEYS.topicNames,
-        JSON.stringify(topicNameMap),
-      );
       writePendingCanonicalAssessment(canonicalContext);
 
-      if (data.known_topic_ids.length > 0) {
+      if (canonicalContext.canonicalUnitIds.length > 0) {
         const assessmentTarget = next
           ? `/assessment?next=${encodeURIComponent(next)}`
           : "/assessment";
@@ -345,7 +315,7 @@ export default function OnboardingPage() {
                     name="known_topic_ids"
                     render={({ field }) => (
                       <StepKnownTopics
-                        modules={modules}
+                        sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
                           field.onChange(
@@ -366,7 +336,7 @@ export default function OnboardingPage() {
                     name="desired_module_ids"
                     render={({ field }) => (
                       <StepDesiredModules
-                        modules={modules}
+                        sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
                           field.onChange(
@@ -387,7 +357,7 @@ export default function OnboardingPage() {
                     register={register}
                     errors={errors}
                     watch={watch}
-                    selectedModules={selectedModules}
+                    selectedSections={selectedSections}
                   />
                 )}
 

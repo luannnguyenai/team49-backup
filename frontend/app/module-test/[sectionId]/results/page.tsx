@@ -1,6 +1,6 @@
 "use client";
 
-// app/module-test/[moduleId]/results/page.tsx
+// app/module-test/[sectionId]/results/page.tsx
 // Module test results:
 //   PASS ✅ / FAIL ❌ hero section
 //   Total score %
@@ -271,9 +271,9 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
 // ---------------------------------------------------------------------------
 
 function ModuleTestResultsInner() {
-  const { moduleId } = useParams<{ moduleId: string }>();
+  const { sectionId } = useParams<{ sectionId: string }>();
   const router = useRouter();
-  const runtimeRef = buildModuleTestRuntimeRef(moduleId);
+  const runtimeRef = buildModuleTestRuntimeRef(sectionId);
 
   const [result, setResult] = useState<ModuleTestResultResponse | null>(null);
   const [animReady, setAnimReady] = useState(false);

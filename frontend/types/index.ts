@@ -63,30 +63,27 @@ export interface OnboardingPayload {
 
 // ---- Content API shapes ----
 
-/** @deprecated Use canonical course/section/unit types instead. */
-export interface TopicInModule {
+export interface LearningUnitSelectionItem {
   id: string;
   canonical_unit_id?: string | null;
-  name: string;
+  title: string;
   description: string | null;
   order_index: number;
   estimated_hours_beginner: number | null;
   estimated_hours_intermediate: number | null;
 }
 
-/** @deprecated Use CourseCatalogItem or CourseSectionSummary instead. */
-export interface ModuleListItem {
+export interface CourseSectionListItem {
   id: string;
-  name: string;
+  title: string;
   description: string | null;
   order_index: number;
-  prerequisite_module_ids: string[] | null;
-  topics_count: number;
+  prerequisite_section_ids: string[] | null;
+  learning_units_count: number;
 }
 
-/** @deprecated Use CourseSectionSummary + canonical unit lookups instead. */
-export interface ModuleDetail extends ModuleListItem {
-  topics: TopicInModule[];
+export interface CourseSectionDetail extends CourseSectionListItem {
+  learning_units: LearningUnitSelectionItem[];
 }
 
 // ---- Assessment API shapes ----
@@ -148,12 +145,11 @@ export interface AssessmentResultResponse {
 
 // ---- Topic content ----
 
-/** @deprecated Use LearningUnitResponse and LearningUnitQuizRef instead. */
-export interface TopicContent {
-  topic_id: string;
-  topic_name: string;
-  module_id: string;
-  module_name: string;
+export interface LearningUnitContentById {
+  learning_unit_id: string;
+  title: string;
+  section_id: string;
+  section_title: string;
   content_markdown: string | null;
   video_url: string | null;
 }
@@ -264,7 +260,7 @@ export interface LearningUnitResponse {
 
 export interface LearningUnitQuizRef {
   learning_unit_id: string;
-  canonical_unit_id: string;
+  canonical_artifact_unit_id: string | null;
   course_slug: string;
   unit_slug: string;
   title: string;

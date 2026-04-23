@@ -1,6 +1,6 @@
 import type {
   AnswerInput,
-  ModuleDetail,
+  CourseSectionDetail,
   QuestionForAssessment,
   SelectedAnswer,
 } from "@/types";
@@ -8,15 +8,12 @@ import type {
 export const ASSESSMENT_STORAGE_KEYS = {
   canonicalUnitIds: "al_pending_canonical_unit_ids",
   unitNames: "al_pending_canonical_unit_names",
-  moduleIds: "al_pending_module_ids",
-  topicIds: "al_pending_topic_ids",
-  topicNames: "al_pending_topic_names",
 } as const;
 
 interface BuildCanonicalAssessmentContextInput {
-  modules: ModuleDetail[];
-  knownTopicIds: string[];
-  desiredModuleIds: string[];
+  sections: CourseSectionDetail[];
+  knownUnitIds: string[];
+  desiredSectionIds: string[];
 }
 
 export interface CanonicalAssessmentContext {
@@ -29,30 +26,30 @@ function unique<T>(values: T[]): T[] {
 }
 
 export function buildCanonicalAssessmentContext({
-  modules,
-  knownTopicIds,
-  desiredModuleIds,
+  sections,
+  knownUnitIds,
+  desiredSectionIds,
 }: BuildCanonicalAssessmentContextInput): CanonicalAssessmentContext {
-  const selectedTopicSet = new Set(knownTopicIds);
-  const selectedModuleSet = new Set(desiredModuleIds);
-  const topicRows =
-    selectedTopicSet.size > 0
-      ? modules.flatMap((module) =>
-          module.topics.filter((topic) => selectedTopicSet.has(topic.id)),
+  const selectedUnitSet = new Set(knownUnitIds);
+  const selectedSectionSet = new Set(desiredSectionIds);
+  const unitRows =
+    selectedUnitSet.size > 0
+      ? sections.flatMap((section) =>
+          section.learning_units.filter((unit) => selectedUnitSet.has(unit.id)),
         )
-      : modules.flatMap((module) =>
-          selectedModuleSet.has(module.id) ? module.topics : [],
+      : sections.flatMap((section) =>
+          selectedSectionSet.has(section.id) ? section.learning_units : [],
         );
 
   const canonicalUnitIds = unique(
-    topicRows
-      .map((topic) => topic.canonical_unit_id ?? null)
+    unitRows
+      .map((unit) => unit.canonical_unit_id ?? null)
       .filter((value): value is string => Boolean(value)),
   );
 
-  const unitNameMap = topicRows.reduce<Record<string, string>>((acc, topic) => {
-    if (topic.canonical_unit_id) {
-      acc[topic.canonical_unit_id] = topic.name;
+  const unitNameMap = unitRows.reduce<Record<string, string>>((acc, unit) => {
+    if (unit.canonical_unit_id) {
+      acc[unit.canonical_unit_id] = unit.title;
     }
     return acc;
   }, {});
