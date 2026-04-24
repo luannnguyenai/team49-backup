@@ -1,0 +1,204 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture17-convnets",
+    "lecture_title": "Lecture 17 - ConvNets and TreeRNNs for NLP",
+    "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture17-convnets::seg5",
+    "course_id": "cs224n-2024",
+    "name": "Recursive neural tensor networks and phrase-level supervision",
+    "description": "Introduces the recursive neural tensor network and the Stanford Sentiment Treebank used to train it.",
+    "summary": "To address the rigidity of a single shared composition matrix, the lecture introduces the recursive neural tensor network (RNTN), which models richer interactions between phrase components via multiplicative tensor-based composition [ts=3302s][ts=3344s]. The motivation is semantic asymmetry: adjective-noun combinations such as 'red ball' and verb-object combinations such as 'kick the ball' require different kinds of composition [ts=3316s][ts=3336s]. The tensor layer is described as learning multiple intermediate matrices that together form a tensor, enabling vector-tensor-vector interactions instead of only a linear transform over concatenated children [ts=3351s][ts=3388s]. The model is then tied to sentiment analysis through the Stanford Sentiment Treebank, where nearly 12,000 parsed sentences receive sentiment labels not just at the sentence level but on every phrase node in the tree [ts=3419s][ts=3595s]. Phrase-level supervision itself improves simpler baselines from 79% to 83%, and the RNTN further improves over bigram Naive Bayes by roughly 2.5%, showing that richer composition plus denser supervision can help [ts=3718s][ts=3785s].",
+    "key_points": [
+      {
+        "text": "RNTNs were introduced to model different kinds of composition more flexibly than a single shared matrix allows.",
+        "timestamp_s": 3302,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Adjective-noun and verb-object combinations require different semantic interactions.",
+        "timestamp_s": 3316,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The neural tensor layer replaces a purely linear child-composition step with vector-tensor-vector interactions.",
+        "timestamp_s": 3351,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The Stanford Sentiment Treebank labels every phrase node, not just whole sentences, with sentiment.",
+        "timestamp_s": 3595,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Phrase-level supervision boosts even simple baselines, and the RNTN improves further over bigram Naive Bayes.",
+        "timestamp_s": 3718,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=17",
+      "start_s": 3302,
+      "end_s": 3810
+    },
+    "difficulty": 0.76,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "To address the rigidity of a single shared composition matrix, the lecture introduces the recursive neural tensor network (RNTN), which models richer interactions between phrase components via multiplicative tensor-based composition [ts=3302s][ts=3344s]. The motivation is semantic asymmetry: adjective-noun combinations such as 'red ball' and verb-object combinations such as 'kick the ball' require different kinds of composition [ts=3316s][ts=3336s]. The tensor layer is described as learning multiple intermediate matrices that together form a tensor, enabling vector-tensor-vector interactions instead of only a linear transform over concatenated children [ts=3351s][ts=3388s]. The model is then tied to sentiment analysis through the Stanford Sentiment Treebank, where nearly 12,000 parsed sentences receive sentiment labels not just at the sentence level but on every phrase node in the tree [ts=3419s][ts=3595s]. Phrase-level supervision itself improves simpler baselines from 79% to 83%, and the RNTN further improves over bigram Naive Bayes by roughly 2.5%, showing that richer composition plus denser supervision can help [ts=3718s][ts=3785s].",
+  "target_kp_ids": [
+    "kp_recursive_neural_tensor_networks",
+    "kp_phrase_level_sentiment_supervision"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "transcript_slice": "00:55:06\ncombine together in linguistic semantics terms,\n\n00:55:14\neach other in different ways.\n\n00:55:21\nis giving attributes of the noun.\n\n00:55:28\n\"kick the ball,\" you've got a very different role\n\n00:55:35\nIt's the opposite way around,\n\n00:55:39\nin the way we can calculate meanings of phrases\n\n00:55:44\nAnd the way we came up with doing that\n\n00:55:51\nAnd so the idea in the neural tensor layer\n\n00:56:04\nwords or phrases.\n\n00:56:09\nrather than directly concatenating them\n\n00:56:18\nlike a regular neural network layer, instead what we could do\n\n00:56:28\nAnd if we put several of those together,\n\n00:56:33\nAnd we can multiply a vector by a tensor times a vector.\n\n00:56:47\nWe'll have multiple such vectors.\n\n00:56:59\nis for this task of sentiment analysis.\n\n00:57:05\nAnd this is sort of in fact, going\n\n00:57:10\nTreebank there was already used in the Yoon Kim work.\n\n00:57:15\nis to say whether a piece of text\n\n00:57:20\nSo a lot of the time, doing sentiment analysis\n\n00:57:25\nIn the 2010s and probably even today,\n\n00:57:34\njust keyword matching.\n\n00:57:42\nIf you see something of poor, bad--\n\n00:57:47\nAnd so lots of the time, you can effectively\n\n00:57:55\nespecially on longer documents.\n\n00:58:01\nin lots of interesting ways, and it's not always that easy.\n\n00:58:08\nsuch as the snippets you get on Rotten Tomatoes,\n\n00:58:15\n\"with this cast and this subject matter,\n\n00:58:21\nAnd if you just think of it as, OK, we're\n\n00:58:26\nthe word entertaining, that's definitely positive.\n\n00:58:32\nSo there are two positive words, so this\n\n00:58:37\nBut of course, it's not a positive review.\n\n00:58:44\nwell, I'm just reading it out again--\n\n00:58:47\nthe movie should have been funnier and more entertaining.\"\n\n00:58:56\nto mean that because it's buried under \"should have been,\"\n\n00:59:07\nAnd so it's a negative review.\n\n00:59:11\nthat we were interested in and saying,\n\n00:59:17\nmore and do a better job at sentiment analysis?\n\n00:59:26\nhad pieces of text and a classification judgment\n\n00:59:32\nSo we decided we were going to do more than that and come up\n\n00:59:37\nwhere what we did was parsed up a whole lot of sentences,\n\n00:59:45\nAnd then what we were going to do\n\n00:59:53\nof the sentence.\n\n00:59:58\nis a phrase, no sentiment.\n\n01:00:03\n\"Entertaining\" is a phrase, a one-word phrase.\n\n01:00:12\n\"Funnier and more entertaining,\" that's a phrase.\n\n01:00:19\nBut then by the time we get embedded under \"should have been\n\n01:00:26\nIt's sentiment is now negative.\n\n01:00:31\nthat's an even bigger phrase.\n\n01:00:34\nAnd so we were parsing up trees like that.\n\n01:00:41\nI'll show you a big examples later,\n\n01:00:47\nthere are blue nodes and orange nodes\n\n01:00:52\nreflecting units at the different sizes.\n\n01:00:57\nthis gave us a richer annotated data set,\n\n01:01:04\nor whole articles that were annotated for sentiment.\n\n01:01:11\nAnd simply the fact that you are annotating phrases\n\n01:01:19\nSo that even if you were using something very simple\n\n01:01:24\nare annotations on words and smaller phrases,\n\n01:01:31\nand which were negative.\n\n01:01:38\na baseline method of bigram Naive Bayes classifier,\n\n01:01:45\nthat if you just trained with sentiment classifiers,\n\n01:01:54\nIf you trained using every node of the Treebank, you got 83%.\n\n01:02:02\nAnd so that was kind of good.\n\n01:02:10\nAnd the negative part of the result\n\n01:02:16\nclassifier.\n\n01:02:20\nBut a lot of the extra information\n\n01:02:27\nyou can get from bigrams, because that can already\n\n01:02:35\nlike that.\n\n01:02:43\nAnd so that then led into use of this recursive neural tensor\n\n01:02:51\ninteractions between word or phrase vectors.\n\n01:03:00\nAnd so then here are the results of that model\n\n01:03:05\nSo by having our recursive neural tensor network,\n\n01:03:16\nperformed at least reasonably better than a bigram Naive Bayes\n\n01:03:24\nSo about 2.5% better than a bigram Naive Bayes model.\n\n01:03:30\nBut I think perhaps the more interesting thing",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "name": "Recursive neural tensor network",
+      "description": "An RNTN uses tensor-mediated interactions to model richer phrase composition than a standard recursive neural network.",
+      "track_tags": [
+        "nlp",
+        "semantics",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "rntn",
+        "tensor_layer",
+        "recursive_models"
+      ],
+      "career_path_tags": [
+        "research",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Recursive neural tensor network synthesizes earlier ideas into a higher-level mechanism or takeaway.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "name": "Phrase-level sentiment supervision",
+      "description": "Labeling every phrase node in a parse tree creates richer supervision than sentence-level labels alone.",
+      "track_tags": [
+        "nlp",
+        "datasets",
+        "supervision"
+      ],
+      "domain_tags": [
+        "stanford_sentiment_treebank",
+        "phrase_labels",
+        "sentiment_analysis"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Phrase-level sentiment supervision captures the core idea that Labeling every phrase node in a parse tree creates richer supervision than sentence-level labels alone.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "name": "Negation and compositional sentiment",
+      "description": "Modeling how modifiers and negation change sentiment requires structure-sensitive composition, not just keyword counts.",
+      "track_tags": [
+        "nlp",
+        "semantics",
+        "sentiment_analysis"
+      ],
+      "domain_tags": [
+        "negation",
+        "composition",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because Negation and compositional sentiment synthesizes earlier ideas into a higher-level mechanism or takeaway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp13"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.61,
+    0.91
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture17-convnets_transcript.txt"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_16::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript clearly supports two introductory foundation-model questions, so no separate clip is necessary.",
+  "question_bank": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which option best captures the main difference between a traditional task-specific model and a foundation model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A task-specific model is trained for one task, while a foundation model is broadly pretrained and then adapted to many tasks",
+        "A task-specific model always uses self-supervision, while a foundation model always uses labels",
+        "A task-specific model cannot use neural networks, while a foundation model must use transformers",
+        "A task-specific model predicts only text, while a foundation model predicts only images"
+      ],
+      "answer_index": 0,
+      "explanation": "The central shift is from building one model per task to broadly pretraining a single model that can later be adapted across many downstream tasks.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pre-trained on broad skills",
+          "adapted to task-specific needs"
+        ],
+        "timestamps": [
+          "00:01:38",
+          "00:01:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which trait is most characteristic of foundation models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are usually trained at large scale and aim to be robust across many tasks",
+        "They always require a separate labeled dataset for every new use case",
+        "They can only be used for language and not for vision",
+        "They avoid self-supervised objectives in favor of hand-coded rules"
+      ],
+      "answer_index": 0,
+      "explanation": "Foundation models are typically designed to generalize broadly, and that usually goes together with large models, large datasets, and self-supervised or weakly supervised pretraining.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_traits_of_foundation_models",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "robust across many tasks",
+          "large training datasets"
+        ],
+        "timestamps": [
+          "00:03:46",
+          "00:03:46"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "global_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "global_kp_id": "kp_traits_of_foundation_models",
+      "role": "primary"
+    }
+  ]
+}

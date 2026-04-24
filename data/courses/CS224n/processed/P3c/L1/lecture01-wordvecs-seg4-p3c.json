@@ -1,0 +1,100 @@
+{
+  "unit_id": "local::lecture01-wordvecs::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=DzpHeXVSC5I",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
+  "review_summary": "This unit supports diagnostic questions about limitations of static embeddings and careful interpretation of embedding visualizations.",
+  "question_bank": [
+    {
+      "item_id": "lecture01-wordvecs-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a key limitation of assigning one static embedding to each word string?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It cannot directly represent different meanings of the same word in different contexts.",
+        "It prevents the word from appearing more than once in a corpus.",
+        "It guarantees that every word has a different vector for every sentence.",
+        "It makes the vector impossible to use with dot products."
+      ],
+      "answer_index": 0,
+      "explanation": "A static embedding gives one vector to a word type. That single vector may blend multiple senses, so it cannot directly distinguish meanings that depend on context.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_contextual_embeddings",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "one word vector",
+          "word in context"
+        ],
+        "timestamps": [
+          "00:42:11",
+          "00:42:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should 2D embedding plots be interpreted cautiously?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are usually dimensionality-reduced views, not the original high-dimensional embedding space.",
+        "They show exact distances for every pair of high-dimensional vectors without distortion.",
+        "They prove that embeddings use only two dimensions during training.",
+        "They remove the need to evaluate embeddings on downstream tasks."
+      ],
+      "answer_index": 0,
+      "explanation": "A low-dimensional plot is a visualization aid. Methods such as t-SNE compress high-dimensional vectors, so the plot can reveal patterns but is not the full representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "nonlinear dimensionality reduction",
+          "t-SNE"
+        ],
+        "timestamps": [
+          "00:43:37",
+          "00:43:43"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture01-wordvecs-seg4-q1",
+      "global_kp_id": "kp_contextual_embeddings",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg4-q1",
+      "global_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture01-wordvecs-seg4-q2",
+      "global_kp_id": "kp_word_vectors_and_embedding_spaces",
+      "role": "primary"
+    }
+  ]
+}

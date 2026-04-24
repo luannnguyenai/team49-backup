@@ -1,10 +1,10 @@
 "use client";
 // app/onboarding/page.tsx
 // Multi-step onboarding flow (4 steps) for new users.
-// Collects: known topics · desired modules · schedule · learning method
+// Collects: known units · desired sections · schedule · learning method
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,16 +17,20 @@ import {
 
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import StepKnownTopics from "@/components/onboarding/StepKnownTopics";
-import StepDesiredModules from "@/components/onboarding/StepDesiredModules";
+import StepKnownUnits from "@/components/onboarding/StepKnownUnits";
+import StepDesiredSections from "@/components/onboarding/StepDesiredSections";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
-import { contentApi } from "@/lib/api";
+import { canonicalSectionApi } from "@/lib/api";
+import {
+  buildCanonicalAssessmentContext,
+  writePendingCanonicalAssessment,
+} from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import type { ModuleDetail } from "@/types";
+import type { CourseSectionDetail } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Step metadata
@@ -35,11 +39,11 @@ import type { ModuleDetail } from "@/types";
 const STEPS = [
   {
     title: "Bạn đã biết gì?",
-    subtitle: "Tick những topics bạn đã nắm",
+    subtitle: "Tick những units bạn đã nắm",
   },
   {
     title: "Bạn muốn học gì?",
-    subtitle: "Chọn module bạn quan tâm",
+    subtitle: "Chọn section bạn quan tâm",
   },
   {
     title: "Thời gian của bạn",
@@ -54,7 +58,7 @@ const STEPS = [
 // Fields that must pass validation before advancing from each step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                                // Step 0: optional
-  ["desired_module_ids"],                            // Step 1: required
+  ["desired_section_ids"],                           // Step 1: required
   ["available_hours_per_week", "target_deadline"],   // Step 2: required
   ["preferred_method"],                              // Step 3: required
 ];
@@ -63,7 +67,7 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
 // Page component
 // ---------------------------------------------------------------------------
 
-export default function OnboardingPage() {
+function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
@@ -74,7 +78,7 @@ export default function OnboardingPage() {
   const [animKey, setAnimKey] = useState(0);
 
   // Content data loaded from the API
-  const [modules, setModules] = useState<ModuleDetail[]>([]);
+  const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   // ── React Hook Form ──────────────────────────────────────────────────────
@@ -88,26 +92,26 @@ export default function OnboardingPage() {
   } = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      known_topic_ids: [],
-      desired_module_ids: [],
+      known_unit_ids: [],
+      desired_section_ids: [],
+      selected_course_ids: [],
       available_hours_per_week: 5,
       target_deadline: "",
       preferred_method: undefined,
     },
   });
 
-  // ── Load all modules + topics on mount ──────────────────────────────────
+  // ── Load all sections + learning units on mount ─────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
-        const list = await contentApi.modules();
-        // Fetch each module's full detail (with topics) in parallel
+        const list = await canonicalSectionApi.list();
         const details = await Promise.all(
-          list.map((m) => contentApi.moduleDetail(m.id))
+          list.map((section) => canonicalSectionApi.detail(section.id))
         );
-        setModules(details);
+        setSections(details);
       } catch {
-        // On API failure: keep modules empty; user can still complete the form
+        // On API failure: keep sections empty; user can still complete the form
       } finally {
         setLoadingData(false);
       }
@@ -115,10 +119,10 @@ export default function OnboardingPage() {
     loadData();
   }, []);
 
-  // Derive the selected modules objects (needed for schedule estimate)
-  const selectedModuleIds = watch("desired_module_ids");
-  const selectedModules = modules.filter((m) =>
-    selectedModuleIds.includes(m.id)
+  // Derive the selected sections objects (needed for schedule estimate)
+  const selectedSectionIds = watch("desired_section_ids");
+  const selectedSections = sections.filter((section) =>
+    selectedSectionIds.includes(section.id)
   );
 
   // ── Navigation ───────────────────────────────────────────────────────────
@@ -145,35 +149,27 @@ export default function OnboardingPage() {
   const onSubmit = async (data: OnboardingFormData) => {
     clearError();
     try {
-      await onboard(data);
       const next = searchParams.get("next");
+      const canonicalContext = buildCanonicalAssessmentContext({
+        sections,
+        knownUnitIds: data.known_unit_ids,
+        desiredSectionIds: data.desired_section_ids,
+      });
+      const selectedCourseIds = Array.from(
+        new Set(
+          selectedSections.map((section) => section.canonical_course_id ?? section.course_id)
+        )
+      );
+      await onboard({ ...data, selected_course_ids: selectedCourseIds });
+      writePendingCanonicalAssessment(canonicalContext);
 
-      // Persist selected module IDs (used by learning-path generation)
-      sessionStorage.setItem("al_pending_module_ids", JSON.stringify(data.desired_module_ids));
-
-      // Persist the specific topic IDs the user chose for mastery assessment.
-      // The assessment page will test ONLY these topics (5 questions each).
-      sessionStorage.setItem("al_pending_topic_ids", JSON.stringify(data.known_topic_ids));
-
-      // Build a topic-name lookup so the assessment page can display names
-      // without extra API calls.
-      const topicNameMap: Record<string, string> = {};
-      for (const mod of modules) {
-        for (const t of mod.topics) {
-          if (data.known_topic_ids.includes(t.id)) {
-            topicNameMap[t.id] = t.name;
-          }
-        }
-      }
-      sessionStorage.setItem("al_pending_topic_names", JSON.stringify(topicNameMap));
-
-      if (data.known_topic_ids.length > 0) {
+      if (canonicalContext.canonicalUnitIds.length > 0) {
         const assessmentTarget = next
           ? `/assessment?next=${encodeURIComponent(next)}`
           : "/assessment";
         router.push(assessmentTarget);
       } else {
-        // No topics selected → nothing to assess → go straight to dashboard
+        // No units selected → nothing to assess → go straight to dashboard
         router.push(next ?? "/dashboard");
       }
     } catch {
@@ -318,14 +314,14 @@ export default function OnboardingPage() {
                     : "animate-slide-in"
                 }
               >
-                {/* Step 0 — Known topics */}
+                {/* Step 0 — Known units */}
                 {step === 0 && (
                   <Controller
                     control={control}
-                    name="known_topic_ids"
+                    name="known_unit_ids"
                     render={({ field }) => (
-                      <StepKnownTopics
-                        modules={modules}
+                      <StepKnownUnits
+                        sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
                           field.onChange(
@@ -339,14 +335,14 @@ export default function OnboardingPage() {
                   />
                 )}
 
-                {/* Step 1 — Desired modules */}
+                {/* Step 1 — Desired sections */}
                 {step === 1 && (
                   <Controller
                     control={control}
-                    name="desired_module_ids"
+                    name="desired_section_ids"
                     render={({ field }) => (
-                      <StepDesiredModules
-                        modules={modules}
+                      <StepDesiredSections
+                        sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
                           field.onChange(
@@ -355,7 +351,7 @@ export default function OnboardingPage() {
                               : [...field.value, id]
                           )
                         }
-                        error={errors.desired_module_ids?.message}
+                        error={errors.desired_section_ids?.message}
                       />
                     )}
                   />
@@ -367,7 +363,7 @@ export default function OnboardingPage() {
                     register={register}
                     errors={errors}
                     watch={watch}
-                    selectedModules={selectedModules}
+                    selectedSections={selectedSections}
                   />
                 )}
 
@@ -432,5 +428,19 @@ export default function OnboardingPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
+      <OnboardingPageInner />
+    </Suspense>
   );
 }

@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_13::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về latent-variable story của VAE, lý do tích phân p(x) là bất khả trị trực tiếp, và cách encoder/decoder được tham số hóa thành phân phối Gaussian.",
+  "question_bank": [
+    {
+      "item_id": "lecture-13-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong câu chuyện sinh dữ liệu của VAE, vai trò của latent vector z là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "z là biến ẩn chứa thông tin sinh ra x, thường được lấy từ một prior đơn giản như unit Gaussian.",
+        "z là nhãn gán tay của con người cho từng mẫu.",
+        "z là gradient của decoder theo trọng số.",
+        "z là ảnh đầu ra sau khi đã giải mã xong."
+      ],
+      "answer_index": 0,
+      "explanation": "VAE giả định mỗi quan sát x được tạo ra từ một biến ẩn z. Nếu prior của z là đơn giản, chẳng hạn Gaussian chuẩn, thì sau khi học xong ta có thể lấy mẫu z từ prior đó để sinh dữ liệu mới.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vae_latent_variable_generative_story",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "unobserved latent vector z",
+          "unit Gaussian over z"
+        ],
+        "timestamps": [
+          "00:53:26",
+          "00:53:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-13-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao việc tính trực tiếp p(x) bằng cách marginalize qua z trở nên không khả thi trong VAE?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì tích phân qua z đi qua decoder là neural network nên không thể tính chính xác một cách khả thi.",
+        "Vì z luôn là biến rời rạc nên tích phân không tồn tại.",
+        "Vì p(x) không phụ thuộc vào z nên không cần marginalize.",
+        "Vì chỉ supervised learning mới cho phép tích phân qua latent."
+      ],
+      "answer_index": 0,
+      "explanation": "Để tính p(x), ta phải tích phân p(x|z)p(z) trên toàn bộ không gian z. Khi p(x|z) được biểu diễn bằng neural network phi tuyến trong không gian nhiều chiều, tích phân này không còn tính được chính xác một cách thực tế.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vae_intractable_marginalization",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "marginalizing z to compute p(x)",
+          "impossible to compute exactly"
+        ],
+        "timestamps": [
+          "00:55:15",
+          "00:55:15"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-13-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Cặp mô tả nào đúng về đầu ra của encoder và decoder trong thiết lập Gaussian của VAE?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Encoder dự đoán mean và diagonal covariance cho z; decoder dự đoán tham số Gaussian cho x.",
+        "Encoder chỉ trả ra một nhãn lớp; decoder chỉ trả ra một scalar loss.",
+        "Encoder luôn trả ra z cố định không có phân phối; decoder không phụ thuộc z.",
+        "Cả encoder và decoder đều chỉ trả ra ma trận attention."
+      ],
+      "answer_index": 0,
+      "explanation": "VAE không để hai mạng trả ra một vector điểm duy nhất, mà ép chúng tham số hóa các phân phối. Encoder tạo phân phối gần đúng q(z|x), còn decoder tạo phân phối p(x|z), thường dưới giả định Gaussian đơn giản.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vae_encoder_decoder_parameterization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "encoder outputs a Gaussian mean",
+          "decoder outputs Gaussian parameters"
+        ],
+        "timestamps": [
+          "00:59:59",
+          "00:59:59"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-13-seg6-q1",
+      "global_kp_id": "kp_vae_latent_variable_generative_story",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg6-q1",
+      "global_kp_id": "kp_vae_encoder_decoder_parameterization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg6-q2",
+      "global_kp_id": "kp_vae_intractable_marginalization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg6-q2",
+      "global_kp_id": "kp_vae_latent_variable_generative_story",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg6-q3",
+      "global_kp_id": "kp_vae_encoder_decoder_parameterization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg6-q3",
+      "global_kp_id": "kp_vae_intractable_marginalization",
+      "role": "secondary"
+    }
+  ]
+}

@@ -1,0 +1,410 @@
+{
+  "unit_id": "local::lecture15-benchmarking::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "Transcript is sufficient for reinforcement questions on this unit's evaluation concepts. The key distinctions, caveats, and examples are stated directly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture15-benchmarking-seg6-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture15-benchmarking-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which trio best summarizes three common families of LLM evaluation used today?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Perplexity, aggregate benchmark suites, and arena-like pairwise comparisons",
+        "BLEU, ROUGE, and human-only evaluation",
+        "Only MMLU, coding, and agents",
+        "Only perplexity on one validation set"
+      ],
+      "answer_index": 0,
+      "explanation": "The unit groups current practice into three broad families: loss-like metrics such as perplexity, benchmark averages over many tasks, and arena-style pairwise comparisons.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "three main ways",
+          "perplexity ... average ... arena-like"
+        ],
+        "timestamps": [
+          "00:55:08",
+          "00:55:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are coding benchmarks especially attractive in modern LLM evaluation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They remove the need for prompts",
+        "They correlate with reasoning and can be scored automatically with tests",
+        "They avoid all contamination issues",
+        "They are directly comparable across tokenizers"
+      ],
+      "answer_index": 1,
+      "explanation": "Coding tasks are useful because they often probe reasoning ability and can be checked automatically by running test cases, which makes evaluation scalable.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "correlates with reasoning",
+          "checked automatically with tests"
+        ],
+        "timestamps": [
+          "00:58:32",
+          "00:58:32"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do agent benchmarks usually need sandboxed environments?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because agent tasks can involve tool use and real actions that must be evaluated safely",
+        "Because sandboxes increase perplexity",
+        "Because MMLU requires them",
+        "Because sandboxing removes the need for prompts"
+      ],
+      "answer_index": 0,
+      "explanation": "Agents may call tools or take actions that should be executed in a controlled setting. A sandbox makes that evaluation safer and more reproducible.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sandboxed environments",
+          "evaluating real actions safely is difficult"
+        ],
+        "timestamps": [
+          "01:00:00",
+          "01:00:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the correct caution about perplexity?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is never useful for downstream evaluation",
+        "It is often a strong proxy, but it is not directly comparable across datasets or tokenizers",
+        "It can replace all arena-style evaluation",
+        "It is meaningful only for instruction-tuned chat models"
+      ],
+      "answer_index": 1,
+      "explanation": "Perplexity can track downstream performance surprisingly well for pretrained models, but comparisons depend on dataset and tokenizer choices, so the number is not universally comparable.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "strong proxy",
+          "not comparable across datasets or tokenizers"
+        ],
+        "timestamps": [
+          "01:01:31",
+          "01:02:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg6-q1",
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q2",
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q3",
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q4",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture15-benchmarking-seg6-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which trio best summarizes three common families of LLM evaluation used today\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why are coding benchmarks especially attractive in modern LLM evaluation\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why do agent benchmarks usually need sandboxed environments\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the correct caution about perplexity\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg6-q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which trio best summarizes three common families of LLM evaluation used today\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why are coding benchmarks especially attractive in modern LLM evaluation\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why do agent benchmarks usually need sandboxed environments\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg6-q4",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the correct caution about perplexity\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

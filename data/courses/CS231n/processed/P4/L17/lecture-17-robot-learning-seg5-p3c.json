@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for questions about RL success stories, sim-to-real transfer, and the limitations of model-free RL. The contrasts between locomotion and manipulation are verbally explicit.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the Breakout tunnel example illustrate about reinforcement learning agents?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They can discover strong strategies that are not obvious at first",
+        "They can only copy human demonstrations exactly",
+        "They always maximize reward safely in the real world",
+        "They require perfectly differentiable environments"
+      ],
+      "answer_index": 0,
+      "explanation": "Extended trial and error can uncover strategies that were not manually specified, including ones that look clever or surprising to humans.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "tunnel strategy",
+          "after extended exploration"
+        ],
+        "timestamps": [
+          "00:26:39",
+          "00:26:55"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is sim-to-real transfer especially encouraging in locomotion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because locomotion policies never need contact dynamics",
+        "Because even imperfect but randomized simulations can still transfer useful behaviors to the real world",
+        "Because real robots are easier to optimize than simulators",
+        "Because locomotion rewards are always dense and differentiable"
+      ],
+      "answer_index": 1,
+      "explanation": "The segment argues that for locomotion, enough variation in simulation can make learned behaviors robust enough to survive mismatch at deployment time.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sim-to-real gap",
+          "works very reliably"
+        ],
+        "timestamps": [
+          "00:32:23",
+          "00:33:07"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main limitation of model-free RL in this discussion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can never achieve superhuman game performance",
+        "It only works when demonstrations are available",
+        "It requires huge interaction, raises safety concerns, and is hard to interpret",
+        "It is incompatible with neural networks"
+      ],
+      "answer_index": 2,
+      "explanation": "Model-free RL can be powerful, but it often pays for that power with large data requirements, unsafe real-world exploration, and limited interpretability when things go wrong.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "massive interaction cost",
+          "hard to interpret"
+        ],
+        "timestamps": [
+          "00:35:10",
+          "00:36:39"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q1",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q2",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q3",
+      "global_kp_id": "kp_model_free_rl_successes_and_sim_to_real_limitations",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does the Breakout tunnel example illustrate about reinforcement learning agents\" is a direct reinforcement check and should land on the easier side."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is sim-to-real transfer especially encouraging in locomotion\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the main limitation of model-free RL emphasized at the end of this segment\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does the Breakout tunnel example illustrate about reinforcement learning agents\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is sim-to-real transfer especially encouraging in locomotion\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg5-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the main limitation of model-free RL emphasized at the end of this segment\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

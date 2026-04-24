@@ -1,0 +1,160 @@
+{
+  "unit_id": "local::lecture_1_introduction::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript provides strong grounding for receptive fields, hierarchical processing, and the difficulty of 3D recovery from 2D images. These concepts can be assessed without a separate clip.",
+  "question_bank": [
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the key idea behind a receptive field in early visual processing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A neuron responds to information from a limited patch of visual space rather than the entire scene.",
+        "A neuron receives the entire image and directly recognizes complete objects.",
+        "A receptive field is a camera lens that projects light onto a sensor.",
+        "A receptive field is only used for language, not vision."
+      ],
+      "answer_index": 0,
+      "explanation": "A receptive field localizes a neuron's input. Early visual neurons therefore begin with small regions of the visual world, often responding to simple patterns in those regions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hierarchical_receptive_fields_in_biological_vision",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Receptive fields means",
+          "very confined patch",
+          "oriented edges"
+        ],
+        "timestamps": [
+          "00:08:44",
+          "00:08:55",
+          "00:09:23"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does hierarchical visual processing mean?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Simple visual features can feed into later processing stages that represent more complex patterns or objects.",
+        "Every visual neuron independently solves the entire recognition problem.",
+        "Only the final layer of the system receives any visual information.",
+        "Visual processing ignores edges and begins directly with complete 3D models."
+      ],
+      "answer_index": 0,
+      "explanation": "A hierarchy builds complexity gradually. Early responses such as oriented edges can be composed by later stages into richer features and eventually object-level representations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hierarchical_receptive_fields_in_biological_vision",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "is hierarchical",
+          "neurons feed into other neurons",
+          "feed into an object receptor"
+        ],
+        "timestamps": [
+          "00:09:42",
+          "00:09:47",
+          "00:10:06"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is recovering 3D structure from 2D images described as ill-posed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A 2D projection can be compatible with multiple possible 3D worlds, so extra constraints or views are needed.",
+        "A 2D image always contains exact geometric depth for every object.",
+        "The problem is easy because one eye gives perfect triangulation.",
+        "The problem only exists for language data, not visual data."
+      ],
+      "answer_index": 0,
+      "explanation": "A flat image loses information about the full three-dimensional world. Multiple views and correspondence can help, but they add reasoning rather than making the problem automatically solved.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_3d_vision_is_fundamentally_ill_posed_from_2d_images",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "actual world is 3D",
+          "from 2D images",
+          "ill-posed problem",
+          "you triangulate information"
+        ],
+        "timestamps": [
+          "00:14:45",
+          "00:14:55",
+          "00:15:02",
+          "00:15:25"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q1",
+      "global_kp_id": "kp_hierarchical_receptive_fields_in_biological_vision",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q2",
+      "global_kp_id": "kp_hierarchical_receptive_fields_in_biological_vision",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q3",
+      "global_kp_id": "kp_3d_vision_is_fundamentally_ill_posed_from_2d_images",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg3::q3",
+      "global_kp_id": "kp_hierarchical_receptive_fields_in_biological_vision",
+      "role": "secondary"
+    }
+  ]
+}

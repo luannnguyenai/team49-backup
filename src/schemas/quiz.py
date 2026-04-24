@@ -16,7 +16,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 from src.models.content import BloomLevel, CorrectAnswer, DifficultyBucket
 from src.models.learning import MasteryLevel, SelectedAnswer
@@ -27,7 +27,9 @@ from src.models.learning import MasteryLevel, SelectedAnswer
 
 
 class QuizStartRequest(BaseModel):
-    topic_id: uuid.UUID
+    learning_unit_id: uuid.UUID = Field(
+        validation_alias=AliasChoices("learning_unit_id", "topic_id")
+    )
 
 
 class QuestionForQuiz(BaseModel):
@@ -37,7 +39,7 @@ class QuestionForQuiz(BaseModel):
 
     id: uuid.UUID
     item_id: str
-    topic_id: uuid.UUID
+    learning_unit_id: uuid.UUID
     bloom_level: BloomLevel
     difficulty_bucket: DifficultyBucket
     stem_text: str
@@ -50,7 +52,7 @@ class QuestionForQuiz(BaseModel):
 
 class QuizStartResponse(BaseModel):
     session_id: uuid.UUID
-    topic_id: uuid.UUID
+    learning_unit_id: uuid.UUID
     total_questions: int
     questions: list[QuestionForQuiz]
 
@@ -84,8 +86,8 @@ class QuizAnswerResponse(BaseModel):
 
 class QuizCompleteResponse(BaseModel):
     session_id: uuid.UUID
-    topic_id: uuid.UUID
-    topic_name: str
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
 
     # Raw score
     score: str  # e.g. "7/10"
@@ -116,8 +118,8 @@ class QuizCompleteResponse(BaseModel):
 
 class QuizHistorySummary(BaseModel):
     session_id: uuid.UUID
-    topic_id: uuid.UUID
-    topic_name: str
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
     score_percent: float | None
     correct_count: int
     total_questions: int

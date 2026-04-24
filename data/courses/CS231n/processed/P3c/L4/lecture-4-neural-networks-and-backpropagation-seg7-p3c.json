@@ -1,0 +1,157 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ để hỏi về Jacobian, gradient shape và lý do tránh explicit Jacobian ở matrix backprop; clip riêng không cần thiết.",
+  "question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Một nguyên tắc hình dạng quan trọng của backprop là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Gradient của loss theo một biến có cùng shape với chính biến đó.",
+        "Gradient luôn là một scalar dù biến gốc là gì.",
+        "Gradient luôn có shape giống Jacobian của lớp trước.",
+        "Gradient chỉ tồn tại cho vector, không tồn tại cho ma trận."
+      ],
+      "answer_index": 0,
+      "explanation": "Backprop trả về mức độ nhạy của loss đối với từng phần tử của biến gốc. Vì thế tensor gradient phải khớp kích thước với tensor mà nó đang đạo hàm theo.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same dimensionality",
+          "the original variable"
+        ],
+        "timestamps": [
+          "01:08:48",
+          "01:08:57"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong backward của ReLU áp dụng theo từng phần tử, cách thực hiện thực tế thường là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Dùng một mask theo quy tắc 0/1 thay vì materialize toàn bộ Jacobian.",
+        "Luôn xây đầy đủ Jacobian đặc trước rồi nhân ma trận.",
+        "Dùng softmax để xấp xỉ đạo hàm của ReLU.",
+        "Bỏ qua gradient ở mọi phần tử âm và dương như nhau."
+      ],
+      "answer_index": 0,
+      "explanation": "ReLU theo từng phần tử tạo Jacobian chéo thưa với các giá trị 0 hoặc 1. Trong thực tế chỉ cần áp dụng quy tắc mask lên upstream gradient là đủ và tiết kiệm hơn nhiều.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sparse matrix",
+          "rule-based calculation"
+        ],
+        "timestamps": [
+          "01:09:48",
+          "01:10:44"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Tại sao backprop cho phép nhân ma trận trong thực tế tránh xây explicit Jacobian?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì Jacobian có thể khổng lồ về bộ nhớ nên ta suy ra các công thức backward hiệu quả bằng phép toán ma trận trực tiếp.",
+        "Vì explicit Jacobian không khả vi.",
+        "Vì explicit Jacobian chỉ dùng được cho mạng tuyến tính.",
+        "Vì learning rate sẽ tự sửa mọi lỗi do bỏ Jacobian."
+      ],
+      "answer_index": 0,
+      "explanation": "Với tensor lớn, Jacobian của phép nhân ma trận có thể phình ra cực mạnh và không thực tế để lưu. Thay vào đó, ta suy ra các công thức gradient trực tiếp cho từng toán hạng bằng đại số ma trận.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_efficient_matrix_backprop_without_explicit_jacobians",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "huge Jacobian",
+          "256 gigabytes"
+        ],
+        "timestamps": [
+          "01:11:49",
+          "01:12:52"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q1",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q2",
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "global_kp_id": "kp_efficient_matrix_backprop_without_explicit_jacobians",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg7-q3",
+      "global_kp_id": "kp_vector_valued_gradients_and_jacobians",
+      "role": "secondary"
+    }
+  ]
+}

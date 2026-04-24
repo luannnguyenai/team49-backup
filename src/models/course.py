@@ -88,6 +88,7 @@ class LearningProgressStatus(enum.StrEnum):
     in_progress = "in_progress"
     completed = "completed"
     blocked = "blocked"
+    skipped = "skipped"
 
 
 class LegacyLectureMigrationState(enum.StrEnum):
@@ -118,6 +119,7 @@ class Course(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     hero_badge: Mapped[str | None] = mapped_column(String(255), nullable=True)
     primary_subject: Mapped[str | None] = mapped_column(String(120), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    canonical_course_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
 
     overview: Mapped["CourseOverview | None"] = relationship(
         "CourseOverview",
@@ -271,6 +273,7 @@ class LearningUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     content_source_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
     content_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     estimated_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    canonical_unit_id: Mapped[str | None] = mapped_column(String(220), nullable=True, index=True)
     entry_mode: Mapped[LearningUnitEntryMode] = mapped_column(
         Enum(LearningUnitEntryMode, name="learning_unit_entry_mode_enum"),
         nullable=False,

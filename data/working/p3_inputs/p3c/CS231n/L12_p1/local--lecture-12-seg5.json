@@ -1,0 +1,211 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_12",
+    "lecture_title": "Lecture 12: Self-Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_12::seg5",
+    "course_id": "cs231n_spring_2025",
+    "name": "Masked Autoencoders as scalable reconstruction pretraining",
+    "description": "Explains MAE as an asymmetric masked-reconstruction framework built on ViT-style patch encoders, and highlights why it became a dominant pretraining approach.",
+    "summary": "MAE is introduced as a modern reconstruction-based method that masks a very large portion of image patches and trains a model to reconstruct the full image from the visible subset [ts=2781s] [ts=2825s]. The lecturer explains that images are split into patches like a ViT, around 75% of patches are masked, and only the visible 25% are fed to a large transformer encoder, making the pretext task challenging and allowing many distinct masked views per image during training [ts=2898s] [ts=2960s]. Missing patches are represented with a shared learned mask token before a separate decoder reconstructs the image, so the architecture is explicitly asymmetric and the decoder is used only for reconstruction during pretraining [ts=3009s] [ts=3050s]. Training uses pixel-space mean squared error computed only on masked patches, and the learned encoder can be evaluated via linear probing or full fine-tuning; the lecture also notes that ablations found random masking and roughly 75% masking to work especially well, with MAE outperforming strong contrastive baselines such as DINO and MoCo v3 in the presented comparisons [ts=3062s] [ts=3235s].",
+    "key_points": [
+      {
+        "text": "MAE masks a large fraction of image patches and reconstructs them from the visible remainder.",
+        "timestamp_s": 2781,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The encoder only processes visible patches, typically about 25% of the image after 75% masking.",
+        "timestamp_s": 2898,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Masked patches are represented with a shared learned mask token before decoding, yielding an asymmetric encoder-decoder design.",
+        "timestamp_s": 3009,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "MAE training uses pixel-space mean squared error computed only on masked patches.",
+        "timestamp_s": 3062,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Linear probing measures representation quality, while full fine-tuning better reflects the model's downstream potential.",
+        "timestamp_s": 3125,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Ablations in the discussion highlight 75% masking and random masking as strong design choices.",
+        "timestamp_s": 3170,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+      "start_s": 2771,
+      "end_s": 3508
+    },
+    "difficulty": 0.62,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "transcript_slice": "00:46:14\non a data set on raw data sets, we often use this MAE framework.\n\n00:46:24\nIt is also reconstruction based framework\n\n00:46:30\nbut this is far more detailed.\n\n00:46:39\nis not just selecting one mask.\n\n00:46:44\nthat they do masking with even more aggressive sampling\n\n00:46:54\nAnd through training in larger scale,\n\n00:47:00\nare able to reconstruct all of those masked areas,\n\n00:47:11\nthe images into good features.\n\n00:47:20\na encoder and a decoder.\n\n00:47:23\nsaid these are not symmetric.\n\n00:47:30\nof the input masks.\n\n00:47:37\nthey are given to the encoder to encode in two features that\n\n00:47:49\nBut let's go a little bit into details of what this means.\n\n00:47:56\nthese models are trained here.\n\n00:48:04\nhow these models often work.\n\n00:48:13\nAll of them are based on transformers, the ViTs\n\n00:48:18\nSimilar to the ViTs, the images are split into patches.\n\n00:48:29\nis what they've done and they've shown 75%\n\n00:48:40\nAnd they use a high masking ratio,\n\n00:48:50\nand challenging in the set of pretext\n\n00:48:56\nmeans the task is meaningful.\n\n00:49:00\nhas to learn good features to be able to reconstruct it.\n\n00:49:09\nof sampling, what it can do is they can actually\n\n00:49:17\nmask 75% of the data, so you can reuse the same image\n\n00:49:23\nSo you will have so much of data to train this encoder with.\n\n00:49:36\nin as their encoder.\n\n00:49:43\nThe patches embeds those two with first linear projection\n\n00:49:51\nThen positional embeddings are added exactly same\n\n00:49:59\nAnd all of these are transformer blocks.\n\n00:50:09\nAnd then when it comes to the decoding part,\n\n00:50:17\nthat were present for the patches that were masked\n\n00:50:23\nFor those, there is a trainable parameter,\n\n00:50:29\nA shared masked masked token that is basically\n\n00:50:36\nWe can consider that as an average patch,\n\n00:50:43\nare missing are masked, and then the decoder has to transfer them\n\n00:50:54\nand then the entire image is the output target is the output.\n\n00:51:06\nbased mean squared error loss function for between the image\n\n00:51:18\nis only computed for the masked patches\n\n00:51:25\nAnd then what it has is--\n\n00:51:33\nthat you can do either linear probing or full fine tuning\n\n00:51:44\nfor any of the applications that you have in mind.\n\n00:51:50\nis you often have your encoder frozen and then use\n\n00:51:58\nfor the final task.\n\n00:52:04\nbut in full fine tuning, in fine tuning,\n\n00:52:08\nfine tuned, either all of them or just few transformer blocks.\n\n00:52:19\nThe linear probing provides a measure\n\n00:52:25\nfeatures are, and fine tuning always exploits models\n\n00:52:37\nOK, so if you're interested in this topic\n\n00:52:45\nI highly advise looking at the paper in its follow-ups.\n\n00:52:53\nmodel choices, hyperparameters, masking ratio\n\n00:53:00\nis actually giving them a very high accuracy.\n\n00:53:07\nDecoder depth, decoder width, mask tokens, reconstruction\n\n00:53:18\nand mask sampling method I'm showing the results here again.\n\n00:53:25\nshould they use some random masking blocks or grid\n\n00:53:31\nYou see the examples here, and they've came to the conclusion\n\n00:53:39\nAnd finally they've been able to show\n\n00:53:49\nto many of the other methods that were used.\n\n00:53:56\nwere actually Dino and Moco V3.\n\n00:54:00\nBut this framework was actually outperforming\n\n00:54:13\nof contrastive learning.\n\n00:54:22\nLet me just summarize what we've talked about.\n\n00:54:30\nAnd as I said their focus is on understanding\n\n00:54:36\nAnd one of the things that also related\n\n00:54:44\nis coming up with an individual pretext task is often\n\n00:54:52\nbe general enough because of the type of tasks that you define.\n\n00:55:05\nor jigsaw puzzle or colorization,\n\n00:55:11\nthose specific tasks, and they may not\n\n00:55:19\nSo the question is in split brain autoencoder,\n\n00:55:28\nfor example L channel, the illumination channel,\n\n00:55:34\nSo let me answer your question with a question.\n\n00:55:43\nin the image, how does the encoder\n\n00:55:51\nLabeled data, because what you're doing is you're\n\n00:55:59\ncalculated around those labels.\n\n00:56:03\nWe define the network that takes one of the channels\n\n00:56:09\nHow this was trained was by back propagating\n\n00:56:15\nThe output was the other channel.\n\n00:56:20\nSo instead of defining the task being a classification\n\n00:56:26\nhere we define the task to be predicting\n\n00:56:32\nAnd the color of the pixels, we already\n\n00:56:36\ncan be calculated and back propagated.\n\n00:56:42\nused as input to the decoder.\n\n00:56:51\nencoder that turns every input to a token as the output that\n\n00:57:02\nSo we've talked about this.\n\n00:57:10\nthere are some of the patches that are masked.\n\n00:57:15\ntrain this encoder outputs a shared mask\n\n00:57:25\nIt's a learnable parameter.\n\n00:57:29\nbut we can say it's probably something\n\n00:57:35\nSo that's shared mask token is put in the place of those\n\n00:57:42\nAnd then this long vector, long sequence is created.\n\n00:57:49\ntakes this long set of tokens and outputs those\n\n00:58:01\nPerfect, so we only have 15 minutes and a lot of things\n\n00:58:14\nBut I think what I wanted to get out of this session,\n\n00:58:24\nand how we define them.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "global_kp_id": "kp_masked_autoencoders_mae",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "global_kp_id": "kp_self_supervised_representation_learning",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_masked_autoencoders_mae",
+      "name": "Masked Autoencoders (MAE)",
+      "description": "A scalable masked-reconstruction approach using a large encoder over visible patches and a lightweight decoder over visible plus mask tokens.",
+      "track_tags": [
+        "masked_modeling",
+        "reconstruction",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning",
+        "vision_transformers"
+      ],
+      "career_path_tags": [
+        "foundation_models",
+        "research"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because masked Autoencoders (MAE) synthesizes a scalable masked-reconstruction approach using a large encoder over visible patches and a lightweight decoder over visible plus mask tokens into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "name": "Downstream transfer and extrinsic evaluation",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
+      "track_tags": [
+        "computer_vision",
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "downstream_adaptation",
+        "linear_probe",
+        "machine_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp14",
+        "local::lecture_12::kp3",
+        "local::lecture_16::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_self_supervised_representation_learning",
+      "name": "Self-supervised representation learning",
+      "description": "Momentum-based contrastive methods such as MoCo, DINO, and DINOv2 learn transferable visual features from unlabeled images and scale through queues, EMA encoders, and larger datasets. The encoder is first trained on a pretext task with targets generated from unlabeled data, then transferred to a labeled downstream task.",
+      "track_tags": [
+        "data",
+        "representation_learning",
+        "self_supervised_learning",
+        "self_supervision",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineer",
+        "ml_engineering",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because self-supervised representation learning clarifies momentum-based contrastive methods such as MoCo, DINO, and DINOv2 learn transferable visual features from unlabeled images and scale through queues, EMA encoders, and larger datasets, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical, high, and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp1",
+        "local::lecture_12::kp2",
+        "local::lecture13-generative-models-1::kp1"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.47,
+    0.77
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L12_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture12-self-supervised-learning_transcript.txt"
+  }
+}

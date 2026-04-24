@@ -1,0 +1,191 @@
+{
+  "unit_id": "local::lecture22-nlp-linguistics::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "Transcript slice and summary provide sufficient grounding for application questions about labor, concentration of power, immediate harms, and misinformation; no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main lesson drawn from older waves of automation anxiety?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Technological change matters, but policy and distribution strongly shape whether its gains or harms are shared fairly.",
+        "Automation anxiety began only after large language models appeared.",
+        "Technology alone determines employment outcomes with no social mediation.",
+        "Every labor-saving technology inevitably causes permanent mass unemployment."
+      ],
+      "answer_index": 0,
+      "explanation": "Automation can disrupt work, but historical outcomes depend on institutions, policy, and bargaining power. The social response shapes who benefits.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "greatly changed",
+          "distributed wealth"
+        ],
+        "timestamps": [
+          "01:04:01",
+          "01:05:16"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is concentration of AI wealth and power described as a serious concern?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "If only a few technology giants control the systems and gains, social and political power can become dangerously centralized.",
+        "It means AI systems will automatically become more open-source.",
+        "It eliminates the need for regulation or public debate.",
+        "It is mainly a problem of model perplexity."
+      ],
+      "answer_index": 0,
+      "explanation": "When capability, infrastructure, and profits concentrate in a few firms, the issue is not only technical performance; it affects democratic control, fairness, and access.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "technology giants",
+          "political problem"
+        ],
+        "timestamps": [
+          "01:06:19",
+          "01:07:37"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is one risk of focusing public discussion mainly on distant existential-risk scenarios?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can distract attention from immediate harms such as bias, exploitation, copyright issues, disinformation, and regulatory capture.",
+        "It makes present-day harms easier to measure and fix.",
+        "It proves that current systems have no social impact.",
+        "It guarantees that misinformation will disappear."
+      ],
+      "answer_index": 0,
+      "explanation": "Long-term risks can be debated, but present harms are already observable. Ignoring them can delay practical mitigation and accountability.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "distract away",
+          "immediate harms"
+        ],
+        "timestamps": [
+          "01:10:15",
+          "01:10:41"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which response best fits the closing warning about AI-enabled misinformation and concentrated technological power?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Invest in critical reasoning, education, and open dissemination of knowledge while addressing present-day harms.",
+        "Assume fluent model outputs are automatically truthful.",
+        "Ban all discussion of AI policy because the issue is purely technical.",
+        "Focus only on text fakes and ignore visual deepfakes or persuasion."
+      ],
+      "answer_index": 0,
+      "explanation": "Persuasive synthetic media and concentrated control are social risks. A realistic defense includes public understanding, critical evaluation, transparency, and attention to current harms.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "persuasive misinformation",
+          "open dissemination"
+        ],
+        "timestamps": [
+          "01:11:40",
+          "01:16:09"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q1",
+      "global_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q2",
+      "global_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q3",
+      "global_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg8-q4",
+      "global_kp_id": "kp_present_day_ai_harms_power_concentration_and_disinformation",
+      "role": "primary"
+    }
+  ]
+}

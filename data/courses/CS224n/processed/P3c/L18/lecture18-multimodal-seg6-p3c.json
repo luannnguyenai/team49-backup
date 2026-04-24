@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi chẩn đoán về benchmark multimodal: vì sao COCO quan trọng, vì sao VQA có thể học shortcut, và cách Hateful Memes hay Winoground được thiết kế để buộc mô hình phải lý giải quan hệ giữa các modality.",
+  "question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Mục tiêu quan trọng nhất của evaluation trong multimodal learning là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chỉ để chứng minh mô hình mới lớn hơn mô hình cũ.",
+        "Kiểm tra xem hệ thống có thật sự suy luận qua nhiều modality hay chỉ khai thác shortcut dữ liệu.",
+        "Giảm hoàn toàn chi phí huấn luyện của mô hình.",
+        "Biến mọi tác vụ thành retrieval để dễ so sánh."
+      ],
+      "answer_index": 1,
+      "explanation": "Đánh giá không chỉ để báo con số cao hơn mà để biết mô hình có thật sự dùng cả ảnh và văn bản theo cách đúng hay không. Một benchmark tệ có thể cho mô hình điểm cao dù nó gần như bỏ qua một modality.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_and_benchmark_design",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "truly reasons across modalities",
+          "dataset shortcuts"
+        ],
+        "timestamps": [
+          "54:56",
+          "55:30"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "COCO được nhấn mạnh như benchmark quan trọng vì lý do nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Nó chỉ chứa nhãn sentiment cho ảnh meme.",
+        "Nó có chú thích rất giàu, hỗ trợ nhiều tác vụ như captioning, retrieval và segmentation.",
+        "Nó chỉ dùng cho speech recognition đa ngôn ngữ.",
+        "Nó được thiết kế riêng để kiểm tra reward hacking."
+      ],
+      "answer_index": 1,
+      "explanation": "COCO quan trọng vì nó có chú thích phong phú ở nhiều mức: đối tượng, vùng, segmentation và caption. Nhờ vậy nó mở khóa hàng loạt bài toán vision-language chứ không chỉ một tác vụ hẹp.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_and_benchmark_design",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "richly annotated",
+          "captioning, retrieval, segmentation"
+        ],
+        "timestamps": [
+          "56:36",
+          "57:08"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Ví dụ 'luôn đoán 2 cho câu hỏi how many' trong VQA cho thấy vấn đề gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mô hình đã học được suy luận thị giác rất tốt từ ảnh.",
+        "Benchmark có bias hoặc shortcut, khiến mô hình có thể đạt điểm cao mà gần như không nhìn ảnh.",
+        "Mọi câu hỏi đếm trong VQA đều không thể trả lời đúng bằng ảnh.",
+        "Mô hình phải luôn dùng chain-of-thought cho mọi câu hỏi VQA."
+      ],
+      "answer_index": 1,
+      "explanation": "Nếu một mô hình đạt điểm tốt chỉ bằng cách đoán một đáp án phổ biến như 2 cho câu hỏi 'how many', thì benchmark đang thưởng cho shortcut thống kê thay vì suy luận đa phương thức thật sự. Đây là dấu hiệu benchmark design có vấn đề.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_and_benchmark_design",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "always predicting 2",
+          "without looking at the image"
+        ],
+        "timestamps": [
+          "58:05",
+          "58:18"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Điểm thiết kế then chốt của Hateful Memes là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chỉ cần nhìn ảnh hoặc chỉ đọc chữ là đủ phân loại đúng trong đa số trường hợp.",
+        "Thay đổi một modality có thể làm đổi nhãn, nên mô hình buộc phải dùng cả ảnh lẫn văn bản.",
+        "Benchmark này loại bỏ hoàn toàn văn bản để tập trung vào vision.",
+        "Nó chỉ đo năng lực sinh ảnh từ meme đầu vào."
+      ],
+      "answer_index": 1,
+      "explanation": "Hateful Memes được dựng sao cho quan hệ giữa ảnh và văn bản mới quyết định nhãn. Nếu chỉ nhìn một modality thì thường không đủ, nên benchmark này buộc mô hình phải làm reasoning qua cả hai nguồn thông tin.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_and_benchmark_design",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "changing one modality can flip the label",
+          "forcing genuine multimodal reasoning"
+        ],
+        "timestamps": [
+          "60:00",
+          "60:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Winoground được dùng để kiểm tra điều gì nổi bật nhất?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Khả năng huấn luyện object detector bằng dữ liệu web-scale.",
+        "Khả năng phân biệt các caption có cùng từ vựng nhưng khác quan hệ hoặc thứ tự thành phần với đúng ảnh tương ứng.",
+        "Khả năng nén ảnh trước khi đưa vào transformer.",
+        "Khả năng sinh meme có tính xúc phạm."
+      ],
+      "answer_index": 1,
+      "explanation": "Winoground tập trung vào compositionality. Mô hình phải hiểu rằng đổi thứ tự quan hệ giữa các thực thể sẽ làm nghĩa thay đổi, dù bộ từ dùng gần như y hệt. Đây là bài test rất khó với nhiều hệ hiện đại.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_and_benchmark_design",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same words in different orders",
+          "correct visual match"
+        ],
+        "timestamps": [
+          "64:37",
+          "64:52"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg6-q1",
+      "global_kp_id": "kp_evaluation_and_benchmark_design",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q2",
+      "global_kp_id": "kp_evaluation_and_benchmark_design",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q3",
+      "global_kp_id": "kp_evaluation_and_benchmark_design",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q4",
+      "global_kp_id": "kp_evaluation_and_benchmark_design",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg6-q5",
+      "global_kp_id": "kp_evaluation_and_benchmark_design",
+      "role": "primary"
+    }
+  ]
+}

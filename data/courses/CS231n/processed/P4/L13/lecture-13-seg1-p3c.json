@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture13-generative-models-1::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript is sufficient for reinforcement questions on self-supervised learning, contrastive learning, and extensions such as MoCo, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core goal of self-supervised learning in this recap?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Learn representations from unlabeled data and then transfer the encoder to labeled downstream tasks.",
+        "Train the final classifier directly on fully labeled data from the start.",
+        "Discard the encoder and keep only the decoder for all later tasks.",
+        "Turn every problem into exact pixel-level regression."
+      ],
+      "answer_index": 0,
+      "explanation": "In self-supervised learning, the model learns structure from unlabeled data through a pretext task. The learned encoder can then be reused or fine-tuned for downstream tasks that have fewer labels.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_self_supervised_representation_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pretext tasks on unlabeled data",
+          "transfers the encoder"
+        ],
+        "timestamps": [
+          "00:00:43",
+          "00:00:43"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In contrastive learning, which pair should be pulled closer together in feature space?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Two augmentations of the same image.",
+        "Any two images in the same minibatch.",
+        "Two augmentations of two different images.",
+        "Any pair of images with the same input size."
+      ],
+      "answer_index": 0,
+      "explanation": "Contrastive learning uses different augmented views of the same example as a positive pair. The objective is to pull those views together while pushing views from different images apart.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_contrastive_learning_and_infonce",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pull together augmentations",
+          "push apart augmentations"
+        ],
+        "timestamps": [
+          "00:03:10",
+          "00:03:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does MoCo mainly reduce the need for extremely large batch sizes?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "By keeping a queue of previous keys and updating a momentum encoder with an EMA-style rule.",
+        "By removing negative pairs entirely.",
+        "By replacing every convolution with a recurrent network.",
+        "By training directly on human-provided labels."
+      ],
+      "answer_index": 0,
+      "explanation": "MoCo reuses keys from earlier steps through a queue, which increases the number of useful negatives without requiring a huge batch. It also uses a momentum encoder updated by an exponential moving average to keep key representations stable.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "queue of previous keys",
+          "exponential moving average"
+        ],
+        "timestamps": [
+          "00:07:46",
+          "00:07:46"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "global_kp_id": "kp_self_supervised_representation_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "global_kp_id": "kp_self_supervised_representation_learning",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the core goal of self-supervised learning in this recap\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"In contrastive learning, which pair should be pulled closer together in feature space\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does MoCo mainly reduce the need for extremely large batch sizes\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the core goal of self-supervised learning in this recap\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In contrastive learning, which pair should be pulled closer together in feature space\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does MoCo mainly reduce the need for extremely large batch sizes\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

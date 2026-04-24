@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_3::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "The segment clearly describes gradient descent updates and minibatch SGD mechanics, so transcript-only grounding is sufficient.",
+  "question_bank": [
+    {
+      "item_id": "lecture-3-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core update idea in gradient descent?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Compute the gradient at the current weights and subtract a learning-rate-scaled version of it.",
+        "Add the gradient to the weights so the loss increases steadily.",
+        "Replace the weights with the labels from the current minibatch.",
+        "Update weights only after testing on the held-out test set."
+      ],
+      "answer_index": 0,
+      "explanation": "Gradient descent minimizes loss by moving opposite the gradient. The learning rate controls how large each step is.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "calculate the gradients",
+          "go down the slope"
+        ],
+        "timestamps": [
+          "00:34:14",
+          "00:34:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is stochastic gradient descent used instead of computing the full gradient on every step for large datasets?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It estimates the gradient from a randomly sampled minibatch, reducing the cost of each update.",
+        "It avoids using gradients and chooses random model parameters instead.",
+        "It guarantees every individual update has the exact same direction as the full gradient.",
+        "It eliminates the need for a learning rate."
+      ],
+      "answer_index": 0,
+      "explanation": "Full gradients require evaluating all training examples, which is expensive at scale. A minibatch gives a cheaper estimate that can be used for frequent updates.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a mini batch",
+          "sampling 256 data points"
+        ],
+        "timestamps": [
+          "00:37:03",
+          "00:37:08"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes minibatch gradient descent stochastic?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each update uses a randomly sampled subset of the training data.",
+        "The loss function is never evaluated.",
+        "The model always chooses a random class label.",
+        "The learning rate changes according to a cosine schedule."
+      ],
+      "answer_index": 0,
+      "explanation": "The randomness comes from which training examples are included in the minibatch for a given update. Different minibatches can produce slightly different gradient estimates.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "subset of our data",
+          "called stochastic gradient descent"
+        ],
+        "timestamps": [
+          "00:37:22",
+          "00:37:31"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-3-seg4-q1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg4-q2",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg4-q3",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    }
+  ]
+}

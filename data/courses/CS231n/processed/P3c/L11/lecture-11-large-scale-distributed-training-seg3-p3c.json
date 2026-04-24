@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_11_large_scale_distributed_training::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions on cluster bandwidth hierarchy, topology-aware thinking, and the systems framing of distributed training. No separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "As communication moves farther out in the cluster hierarchy, what trend matters most for distributed training design?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Bandwidth increases with distance, so distant GPUs are easiest to coordinate",
+        "Bandwidth stays roughly constant, so topology barely matters",
+        "Bandwidth drops with distance, so heavy communication should stay local when possible",
+        "Only latency matters; bandwidth is irrelevant"
+      ],
+      "answer_index": 2,
+      "explanation": "Communication becomes more constrained as devices are farther apart, so algorithms should place the heaviest traffic on the fastest local links.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cluster_topology_and_bandwidth_hierarchy",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "and imagine these in the context of a full data center.",
+          "of memory bandwidth."
+        ],
+        "timestamps": [
+          "00:15:47",
+          "00:15:54"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is it useful to think of the whole GPU cluster as one giant computer?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because each GPU already stores the entire training dataset",
+        "Because cluster-scale training is really about placing computation and communication across a hierarchy of connected resources",
+        "Because it eliminates the need for batching",
+        "Because it guarantees every link has the same bandwidth"
+      ],
+      "answer_index": 1,
+      "explanation": "That viewpoint helps you reason about the full system: compute placement, communication paths, and bandwidth limits across many levels of hardware.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_large_scale_distributed_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "about the individual servers.",
+          "center as one big computer."
+        ],
+        "timestamps": [
+          "00:22:16",
+          "00:22:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core systems problem of distributed training, as framed here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Choosing the best tokenizer before training starts",
+        "Splitting computation and overlapping it with communication across the hierarchy",
+        "Eliminating all communication by duplicating every activation",
+        "Ensuring every GPU sees the same minibatch"
+      ],
+      "answer_index": 1,
+      "explanation": "Distributed training succeeds when work is partitioned well and communication is hidden or reduced so compute devices stay busy.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_large_scale_distributed_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "our neural networks.",
+          "to be split up your computation."
+        ],
+        "timestamps": [
+          "00:26:33",
+          "00:26:36"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg3-q1",
+      "global_kp_id": "kp_cluster_topology_and_bandwidth_hierarchy",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg3-q2",
+      "global_kp_id": "kp_large_scale_distributed_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg3-q3",
+      "global_kp_id": "kp_large_scale_distributed_training",
+      "role": "primary"
+    }
+  ]
+}

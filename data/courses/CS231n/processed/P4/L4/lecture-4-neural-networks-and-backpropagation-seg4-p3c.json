@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript is clear enough about the forward pass, model capacity, and regularization, so no code or video clip is needed for these questions.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a simple two-layer network training loop, what is the main job of the forward pass?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To compute hidden values, output predictions, and the loss from the current weights.",
+        "To directly update W1 and W2 using gradient descent.",
+        "To generate new target labels for the data at random.",
+        "To automatically choose the optimal number of hidden neurons."
+      ],
+      "answer_index": 0,
+      "explanation": "The forward pass moves from the input through the layers to produce hidden activations, predictions, and finally the loss. Weight updates happen later, after gradients are computed in the backward pass.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_forward_pass_and_hand_built_2_layer_training_loop",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "the forward pass",
+          "outputting that loss value"
+        ],
+        "timestamps": [
+          "00:27:05",
+          "00:27:29"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a common consequence of increasing the number of hidden-layer neurons?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It increases capacity so the model can learn more complex boundaries, but it also raises the risk of overfitting.",
+        "It always makes the model generalize better on new data.",
+        "It removes the need for regularization entirely.",
+        "It reduces the number of parameters, making memorization harder."
+      ],
+      "answer_index": 0,
+      "explanation": "More neurons usually make the model more flexible and able to fit more complex patterns. The tradeoff is that the model can also memorize the training data more easily.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_regularization_and_generalization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "more capacity",
+          "generalize to unseen data"
+        ],
+        "timestamps": [
+          "00:28:42",
+          "00:29:36"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "According to the practical rule emphasized here, what should usually be preferred for controlling overfitting?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use regularization strength such as lambda, rather than expecting network size to act as the main regularizer.",
+        "Always force the network to be very small so no hyperparameter tuning is needed.",
+        "Increase the number of parameters as much as possible and remove the regularizer.",
+        "Only change the optimizer and ignore regularization."
+      ],
+      "answer_index": 0,
+      "explanation": "Network size affects capacity, but regularization is the more direct tool for balancing fit and generalization. In practice, it is often better to tune lambda than to rely on network size alone as the main regularizer.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_regularization_and_generalization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not use the size",
+          "value of lambda"
+        ],
+        "timestamps": [
+          "00:29:51",
+          "00:31:13"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q1",
+      "global_kp_id": "kp_forward_pass_and_hand_built_2_layer_training_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q2",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q3",
+      "global_kp_id": "kp_regularization_and_generalization",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.55,
+      "discrimination_prior": 0.84,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Forward-pass purpose is a direct loop-mechanics question and should be easy."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "More hidden units versus capacity is straightforward but still requires some generalization intuition."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Controlling overfitting by regularization rather than purely shrinking models is a medium practice-oriented item."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is an early-screening item on the basic training-loop structure."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item reinforces the link between capacity and overfitting risk."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg4-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a transferable modeling judgment about regularization strategy."
+    }
+  ]
+}

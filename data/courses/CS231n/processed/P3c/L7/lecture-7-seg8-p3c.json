@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_7::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for stacked RNN structure and compact notation. The relationships across layer depth and time are stated verbally.",
+  "question_bank": [
+    {
+      "item_id": "lecture-7-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a stacked RNN, what does an upper recurrent layer at time t typically receive as input?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only its own previous hidden state",
+        "The lower layer's output at the same time step",
+        "The final output token of the whole sequence",
+        "A fresh copy of the raw input sequence"
+      ],
+      "answer_index": 1,
+      "explanation": "Stacking means higher layers process representations produced by lower layers, while still keeping their own recurrent connections through time.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multilayer_rnns",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "take as input",
+          "output y from the previous layer"
+        ],
+        "timestamps": [
+          "00:57:40",
+          "00:57:45"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-7-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How are weights shared in a multilayer RNN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "All layers and all time steps share one identical weight set",
+        "Weights are shared through time within a layer, but different layers have different weights",
+        "Weights are shared across layers but not across time",
+        "No weights are shared at all"
+      ],
+      "answer_index": 1,
+      "explanation": "A recurrent layer reuses its own parameters across time, but a different stacked layer learns its own separate transformation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multilayer_rnns",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "each of these layers",
+          "previous time steps"
+        ],
+        "timestamps": [
+          "00:57:16",
+          "00:57:33"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-7-seg8-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do authors sometimes combine W_hh and W_xh into one larger matrix in the notation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the hidden state and input are mathematically identical",
+        "Because the model stops distinguishing recurrent and input terms",
+        "As a shorthand after stacking vectors, even though the conceptual blocks are still distinct",
+        "To avoid using an activation function"
+      ],
+      "answer_index": 2,
+      "explanation": "The compact form is mainly notational convenience. It bundles the linear terms together, but the recurrent contribution and input contribution still play different conceptual roles.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multilayer_rnns",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "for shorthand",
+          "these are two blocks"
+        ],
+        "timestamps": [
+          "00:59:31",
+          "00:59:37"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-7-seg8-q1",
+      "global_kp_id": "kp_multilayer_rnns",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg8-q2",
+      "global_kp_id": "kp_multilayer_rnns",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg8-q3",
+      "global_kp_id": "kp_multilayer_rnns",
+      "role": "primary"
+    }
+  ]
+}

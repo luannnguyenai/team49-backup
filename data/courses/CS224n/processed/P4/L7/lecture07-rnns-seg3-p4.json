@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture07-rnns::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for procedural questions about vectorization, symmetry-breaking initialization, and adaptive optimizers such as Adam. The steps are described directly, so no clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture07-rnns-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture07-rnns-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the recommended implementation habit when writing deep-learning code for speed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Prefer Python for-loops because they are easier to debug",
+        "Use vectorized tensor operations instead of explicit loops whenever possible",
+        "Write each neuron as a separate function call",
+        "Move all computation back to the CPU after preprocessing"
+      ],
+      "answer_index": 1,
+      "explanation": "Vectorized tensor operations are much faster than explicit Python loops and map well to GPU-style hardware.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vectorization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "no for loops",
+          "always use vectors matrices and tensors"
+        ],
+        "timestamps": [
+          "00:17:48",
+          "00:17:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is initializing all weights to the same constant, such as zero, a bad idea?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It makes the model too nonlinear",
+        "It creates symmetry so different features learn the same thing",
+        "It forces gradients to become larger for every layer",
+        "It prevents the use of matrix multiplication"
+      ],
+      "answer_index": 1,
+      "explanation": "If all weights start identical, symmetric units receive identical updates and fail to diversify into useful different features.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_parameter_initialization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "we have symmetries",
+          "only have one feature"
+        ],
+        "timestamps": [
+          "00:19:47",
+          "00:20:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If you want a strong default optimizer to try first, which one does the segment recommend remembering?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Plain SGD",
+        "AdaGrad",
+        "Adam",
+        "L-BFGS"
+      ],
+      "answer_index": 2,
+      "explanation": "Adam is presented as the optimizer name to remember because it adapts update sizes per parameter and is less fragile than plain SGD.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_adaptive_optimizers",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Adam is recommended",
+          "less dependent on you setting"
+        ],
+        "timestamps": [
+          "00:23:10",
+          "00:22:58"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture07-rnns-seg3-q1",
+      "global_kp_id": "kp_vectorization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q2",
+      "global_kp_id": "kp_parameter_initialization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q3",
+      "global_kp_id": "kp_adaptive_optimizers",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture07-rnns-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the recommended implementation habit when writing deep-learning code for speed\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is initializing all weights to the same constant, such as zero, a bad idea\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"If you want a strong default optimizer to try first, which one does the segment recommend remembering\" is a direct reinforcement check and should be on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture07-rnns-seg3-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the recommended implementation habit when writing deep-learning code for speed\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is initializing all weights to the same constant, such as zero, a bad idea\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture07-rnns-seg3-q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"If you want a strong default optimizer to try first, which one does the segment recommend remembering\" fits guided practice better than final evaluation."
+    }
+  ]
+}

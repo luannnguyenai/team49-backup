@@ -1,0 +1,537 @@
+{
+  "unit_id": "local::lecture17-convnets::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "The segment provides direct conceptual support for RNTNs, tensor composition, and phrase-level sentiment supervision. The examples are sufficiently described in the transcript, so no clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture17-convnets-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture17-convnets-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What limitation of a standard recursive neural network motivates a recursive neural tensor network?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A single linear composition rule is too rigid to capture different semantic interactions between phrase parts.",
+        "A standard recursive network cannot represent any word vectors at the leaves.",
+        "A standard recursive network can only be used for image classification.",
+        "A standard recursive network cannot be trained with labeled examples."
+      ],
+      "answer_index": 0,
+      "explanation": "Phrase combinations such as modifier-noun and verb-object pairs involve different roles. Tensor-based composition adds richer interactions than one shared linear transform over concatenated children.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_recursive_neural_tensor_networks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "different ways",
+          "neural tensor layer",
+          "vector by a tensor"
+        ],
+        "timestamps": [
+          "00:55:14",
+          "00:55:51",
+          "00:56:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the tensor component add to phrase composition in an RNTN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It allows multiplicative vector-tensor-vector interactions between the two child representations.",
+        "It prevents the model from using nonlinearities in the parent representation.",
+        "It replaces all phrase labels with random sentiment labels.",
+        "It turns every parse tree into a flat bag of words."
+      ],
+      "answer_index": 0,
+      "explanation": "A tensor layer can model interactions between dimensions of both child vectors, not just a linear transformation of their concatenation. This gives the composition function more expressive power.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_recursive_neural_tensor_networks",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "multiply a vector",
+          "tensor times a vector",
+          "multiple such vectors"
+        ],
+        "timestamps": [
+          "00:56:33",
+          "00:56:33",
+          "00:56:47"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is phrase-level sentiment supervision richer than only labeling whole sentences?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It gives training signals for intermediate phrases, including places where local sentiment changes before the full sentence is complete.",
+        "It removes the need to know the sentence-level label.",
+        "It guarantees that every individual word has the same sentiment as the full sentence.",
+        "It trains only on punctuation marks rather than words or phrases."
+      ],
+      "answer_index": 0,
+      "explanation": "Labeling internal tree nodes teaches the model how sentiment is built and modified across phrases, not just what the final sentence label should be.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_phrase_level_sentiment_supervision",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "annotating phrases",
+          "every node",
+          "richer annotated data set"
+        ],
+        "timestamps": [
+          "01:01:11",
+          "01:01:54",
+          "01:00:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why would a phrase like 'should have been funnier and more entertaining' be difficult for simple keyword sentiment methods?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Positive words appear inside a construction that makes the overall phrase negative.",
+        "The phrase contains no sentiment-bearing words at all.",
+        "The phrase is too short for any classifier to process.",
+        "The sentiment depends only on the final punctuation mark."
+      ],
+      "answer_index": 0,
+      "explanation": "Keyword counting can overvalue isolated positive words. Structure-sensitive composition can recognize that the larger phrase expresses disappointment, reversing the local positivity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_negation_and_compositional_sentiment",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "entertaining",
+          "not a positive review",
+          "buried under"
+        ],
+        "timestamps": [
+          "00:58:26",
+          "00:58:37",
+          "00:58:56"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What lesson follows from the fact that phrase-level labels improved even a simple bigram Naive Bayes baseline?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "More fine-grained supervision can be valuable independently of the model architecture.",
+        "Recursive neural tensor networks are unnecessary for all sentiment tasks.",
+        "Sentence-level labels are always harmful during training.",
+        "Bigrams are guaranteed to solve all negation and composition cases."
+      ],
+      "answer_index": 0,
+      "explanation": "Denser labels expose the learner to sentiment-bearing subphrases and their local behavior. That extra signal can improve simple models, even before adding richer neural composition.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_phrase_level_sentiment_supervision",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "using every node",
+          "you got 83%",
+          "bigram Naive Bayes"
+        ],
+        "timestamps": [
+          "01:01:54",
+          "01:01:54",
+          "01:01:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture17-convnets-seg5-q1",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q1",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q2",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q3",
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q3",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q4",
+      "global_kp_id": "kp_negation_and_compositional_sentiment",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q4",
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q5",
+      "global_kp_id": "kp_phrase_level_sentiment_supervision",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q5",
+      "global_kp_id": "kp_recursive_neural_tensor_networks",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture17-convnets-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What limitation of a standard recursive neural network motivates a recursive neural tensor network\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.85,
+      "discrimination_prior": 1.06,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does the tensor component add to phrase composition in an RNTN\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is phrase-level sentiment supervision richer than only labeling whole sentences\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why would a phrase like 'should have been funnier and more entertaining' be difficult for simple keyword sentiment methods\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.85,
+      "discrimination_prior": 1.06,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What lesson follows from the fact that phrase-level labels improved even a simple bigram Naive Bayes baseline\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture17-convnets-seg5-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What limitation of a standard recursive neural network motivates a recursive neural tensor network\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q2",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does the tensor component add to phrase composition in an RNTN\" is a stronger synthesis item suited to later assessment."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is phrase-level sentiment supervision richer than only labeling whole sentences\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why would a phrase like 'should have been funnier and more entertaining' be difficult for simple keyword sentiment methods\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture17-convnets-seg5-q5",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What lesson follows from the fact that phrase-level labels improved even a simple bigram Naive Bayes baseline\" is a stronger synthesis item suited to later assessment."
+    }
+  ]
+}

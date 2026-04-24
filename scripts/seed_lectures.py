@@ -1,8 +1,8 @@
 """
 scripts/seed_lectures.py
 ------------------------
-Seeds lecture data (Lecture, Chapter, TranscriptLine) from data/CS231n/ into
-the PostgreSQL database using the async engine.
+Seeds lecture data (Lecture, Chapter, TranscriptLine) from data/courses/CS231n/
+into the PostgreSQL database using the async engine.
 
 Usage:
     docker compose exec backend uv run python -m scripts.seed_lectures
@@ -17,9 +17,10 @@ import re
 from sqlalchemy import func, select
 
 from src.database import async_session_factory
+from src.data_paths import CS231N_DIR
 from src.models.store import Chapter, Lecture, TranscriptLine
 
-DATA_DIR = "data/CS231n"
+DATA_DIR = str(CS231N_DIR)
 TOC_DIR = os.path.join(DATA_DIR, "ToC_Summary")
 TRANSCRIPT_DIR = os.path.join(DATA_DIR, "transcripts")
 VIDEO_DIR = os.path.join(DATA_DIR, "videos")

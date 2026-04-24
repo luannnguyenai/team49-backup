@@ -1,0 +1,334 @@
+{
+  "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript supports the need for a loss objective, softmax probability conversion, and negative-log correct-class loss. The material is assessable from text without a separate clip.",
+  "qa_outputs": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item clearly asks why an objective is needed, and the distractors make sense as novice confusions about training.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item targets softmax conversion directly and is supported by transcript evidence that explains score normalization into probabilities.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item directly assesses the basis of cross-entropy loss for one example, and the distractors preserve clear conceptual contrasts.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is a loss function needed when training a linear classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It quantifies how bad the current scores are so the weights can be optimized.",
+        "It converts every image into a nearest-neighbor lookup table.",
+        "It removes the need for labels in supervised learning.",
+        "It guarantees that every dataset is linearly separable."
+      ],
+      "answer_index": 0,
+      "explanation": "A loss function turns model performance into a scalar objective. Training then adjusts the weights to reduce that objective.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_linear_separability_and_the_need_for_an_objective",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "how bad the model",
+          "minimize that unhappiness",
+          "optimization process"
+        ],
+        "timestamps": [
+          "00:55:38",
+          "00:55:54",
+          "00:56:05"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does softmax do to a vector of raw class scores?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It exponentiates the scores and normalizes them into positive values that sum to one.",
+        "It subtracts the nearest training image from each test image.",
+        "It chooses the number of nearest neighbors for k-NN.",
+        "It makes all class scores negative so the loss can be minimized."
+      ],
+      "answer_index": 0,
+      "explanation": "Softmax converts unbounded raw scores into a probability distribution by making scores positive and normalizing by their total.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_entropy_loss",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "exponentiate the values",
+          "outputs will always be positive",
+          "normalize them"
+        ],
+        "timestamps": [
+          "00:58:58",
+          "00:59:10",
+          "00:59:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For one training example, what is the softmax cross-entropy loss based on?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The negative log of the probability assigned to the correct class.",
+        "The raw score of the highest-scoring incorrect class only.",
+        "The L1 distance between the image and its nearest neighbor.",
+        "The number of pixels that changed after augmentation."
+      ],
+      "answer_index": 0,
+      "explanation": "Cross-entropy rewards assigning high probability to the correct class. Taking the negative log makes confident correct predictions low-loss and low correct-class probability high-loss.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_entropy_loss",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "maximize the probability",
+          "We negate it",
+          "negative log"
+        ],
+        "timestamps": [
+          "01:01:06",
+          "01:01:49",
+          "01:02:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q1",
+      "global_kp_id": "kp_limits_of_linear_separability_and_the_need_for_an_objective",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q1",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q2",
+      "global_kp_id": "kp_cross_entropy_loss",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q2",
+      "global_kp_id": "kp_limits_of_linear_separability_and_the_need_for_an_objective",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q3",
+      "global_kp_id": "kp_cross_entropy_loss",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q3",
+      "global_kp_id": "kp_limits_of_linear_separability_and_the_need_for_an_objective",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "This is an accessible introductory loss-function item, so it should be easier than most concept checks."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.05,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "This is a medium item because it asks for the functional role of softmax rather than mere vocabulary recall."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The learner must connect softmax output to the correct-class negative log-probability, giving this medium-but-technical difficulty."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "A learner who cannot explain why a loss is needed is not ready to skip optimization fundamentals."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item works well as a bridge from raw scores to probabilistic interpretation in classification."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6::q3",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item is most useful once learners are expected to connect the loss expression to probabilistic training objectives."
+    }
+  ]
+}

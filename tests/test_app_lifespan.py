@@ -21,3 +21,11 @@ async def test_lifespan_continues_when_redis_connect_fails():
 
     disconnect_mock.assert_awaited_once()
     dispose_mock.assert_awaited_once()
+
+
+def test_app_does_not_mount_legacy_kg_routes():
+    from src.api.app import app
+
+    kg_routes = [route.path for route in app.routes if route.path.startswith("/kg")]
+
+    assert kg_routes == []

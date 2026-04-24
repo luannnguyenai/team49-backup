@@ -1,0 +1,161 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture23-interpretability",
+    "lecture_title": "Lecture 23 - Model Interpretability and Editing",
+    "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs"
+  },
+  "unit": {
+    "unit_id": "local::lecture23-interpretability::seg6",
+    "course_id": "cs224n-2024",
+    "name": "Toward Move 37: AlphaZero and teaching superhuman chess concepts",
+    "description": "Presents an ongoing research direction that tries to discover machine chess strategies humans do not know and test whether a world champion can learn them.",
+    "summary": "Kim returns to the motivating question of Move 37 and describes a chess program of research designed to carve out a solvable subproblem: understanding what AlphaZero knows that humans do not [ts=3313s] [ts=3346s]. She reviews prior work that tracks when human chess concepts arise in AlphaZero and shows that AlphaZero’s opening repertoire differs substantially from human play, suggesting there may be superhuman strategic concepts to discover [ts=3374s] [ts=3391s] [ts=3409s]. The new proposal is to discover novel strategies by explicitly forgetting existing strategies, learning a concept graph over known relationships, generating board positions corresponding to the new concept, and then testing whether Magnus Carlsen can apply the taught concept on new puzzles [ts=3464s] [ts=3481s] [ts=3598s]. The evaluation target is not whether another engine can solve the puzzle, but whether at least some machine-discovered concepts are digestible by a human expert [ts=3621s] [ts=3645s].",
+    "key_points": [
+      {
+        "text": "AlphaZero is introduced as a self-trained chess system that exceeds human skill and differs from humans in opening preferences.",
+        "timestamp_s": 3359,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Earlier work probed when and where known human chess concepts appear in AlphaZero’s network.",
+        "timestamp_s": 3374,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The new project aims to teach a world champion a genuinely new superhuman chess strategy.",
+        "timestamp_s": 3441,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Board positions for puzzles are generated from AlphaZero’s embedding space and predicted moves via MCTS.",
+        "timestamp_s": 3562,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Success is defined as a human expert being able to learn and apply at least some machine-discovered concepts.",
+        "timestamp_s": 3641,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+      "start_s": 3313,
+      "end_s": 3709
+    },
+    "difficulty": 0.71,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "low",
+    "duration_min": 7,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Kim returns to the motivating question of Move 37 and describes a chess program of research designed to carve out a solvable subproblem: understanding what AlphaZero knows that humans do not [ts=3313s] [ts=3346s]. She reviews prior work that tracks when human chess concepts arise in AlphaZero and shows that AlphaZero’s opening repertoire differs substantially from human play, suggesting there may be superhuman strategic concepts to discover [ts=3374s] [ts=3391s] [ts=3409s]. The new proposal is to discover novel strategies by explicitly forgetting existing strategies, learning a concept graph over known relationships, generating board positions corresponding to the new concept, and then testing whether Magnus Carlsen can apply the taught concept on new puzzles [ts=3464s] [ts=3481s] [ts=3598s]. The evaluation target is not whether another engine can solve the puzzle, but whether at least some machine-discovered concepts are digestible by a human expert [ts=3621s] [ts=3645s].",
+  "target_kp_ids": [
+    "kp_teaching_humans_superhuman_machine_concepts",
+    "kp_move_37_as_a_superhuman_concept_exemplar"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "video_clip_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "transcript_slice": "00:55:17\nto Move 37.\n\n00:55:19\nI still don't.\n\n00:55:23\nthat I'm currently doing I'm really\n\n00:55:29\nWill this understanding Move 37 happen before\n\n00:55:34\nAnd I was like, oh, maybe not.\n\n00:55:37\nSo we start-- this is all about research, right?\n\n00:55:43\nsolvable, and you try to attack that problem.\n\n00:55:48\nto get a little closer to our ultimate goal\n\n00:55:55\nSo before that, how many people here know\n\n00:55:59\nYes.\n\n00:56:05\nmachine that has higher Elo rating than any other humans\n\n00:56:12\nno existing human can beat Stockfish.\n\n00:56:19\nconcepts in this network.\n\n00:56:26\nappear in its network, which layer, and when in the training\n\n00:56:31\nAnd which we call what, when, and where plots.\n\n00:56:37\nof opening moves between humans and AlphaZero.\n\n00:56:42\nmake when you play chess.\n\n00:56:46\nLeft is human.\n\n00:56:49\nIt turns out that AlphaZero can master or supposedly master\n\n00:56:57\nOpenings can be very aggressive.\n\n00:57:03\ntargeting for long-range strategy or short-range, very\n\n00:57:07\nSo that begs the question, what does AlphaZero\n\n00:57:12\nDon't you want to learn what that might be?\n\n00:57:17\nWe're actually almost-- we're about to evaluate.\n\n00:57:27\na new superhuman chess strategy.\n\n00:57:34\nis the world chess champion.\n\n00:57:38\nBut he's still champion in my mind.\n\n00:57:44\nSo the way that we're doing this is\n\n00:57:51\nforgetting existing chess strategy, which\n\n00:57:56\nAnd then we're going to learn a graph--\n\n00:58:01\nby using the existing relationships\n\n00:58:07\ncan get a little bit of more idea of what\n\n00:58:11\nAnd Magnus Carlsen-- so my favorite part about this work--\n\n00:58:16\nMy favorite part about this work is that the evaluation\n\n00:58:21\nSo it's not just like Magnus coming in\n\n00:58:25\nand say nice things about our work.\n\n00:58:29\nAnd we will be able to evaluate him whether he did it or not.\n\n00:58:35\nBut I'm extremely excited.\n\n00:58:39\nof Lisa, who is a champion herself but also a PhD\n\n00:58:45\nAnd she played against Magnus in the past and many other chess\n\n00:58:49\nAnd she's going to be the ultimate pre-superhuman\n\n00:58:57\nget to Magnus.\n\n00:59:00\nI have no results.\n\n00:59:02\nI'm excited.\n\n00:59:05\n[INAUDIBLE] how are the puzzles generated?\n\n00:59:10\nSo I'm assuming that there's probably something new\n\n00:59:15\nwhat are the puzzles about?\n\n00:59:17\nPuzzles are actually pretty simple.\n\n00:59:22\nare within the embedding space of AlphaZero.\n\n00:59:27\nhas really weird architecture, so every single latent layer\n\n00:59:33\nThat's just the way that they decide to do it.\n\n00:59:39\nthe board positions that corresponds to that concept.\n\n00:59:46\nwhat move it's going to make, given that board position.\n\n00:59:52\nthe whole AlphaZero thing.\n\n00:59:56\nAnd that's all you need for puzzles.\n\n01:00:01\nWe explain the concept and then give Magnus\n\n01:00:08\nthat he just learned.\n\n01:00:13\nStockfish on [INAUDIBLE] right?\n\n01:00:17\nhuman behavior [INAUDIBLE].\n\n01:00:25\nto solve those puzzles, that would be a different question\n\n01:00:32\nStockfish.\n\n01:00:34\nThat's actually interesting thing\n\n01:00:37\nBut our goal is to just teach one superhuman.\n\n01:00:45\nand only three of them are digestible by Magnus,\n\n01:00:50\nThat will be a big win for this type of research.\n\n01:00:59\nAll right Yeah, so--\n\n01:01:02\nSo wrap up-- small steps towards our hopes and dreams.\n\n01:01:09\nversus what we think machines know.\n\n01:01:14\nThere's three different maybe angles\n\n01:01:19\nand bridge that gap.\n\n01:01:24\nin observation study or control study.\n\n01:01:30\nAnd I'm not an expert, but anthropology\n\n01:01:34\nabout this.\n\n01:01:41\nat some point, hopefully, within my lifetime through this chess\n\n01:01:48\nThank you.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture23-interpretability::seg6",
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg6",
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_teaching_humans_superhuman_machine_concepts",
+      "name": "Teaching humans superhuman machine concepts",
+      "description": "A long-term goal is to discover strategies or concepts from models like AlphaZero that humans do not know and test whether people can learn them.",
+      "track_tags": [
+        "alignment",
+        "human_ai_interaction",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "games",
+        "ml",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "ai_safety",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because teaching humans superhuman machine concepts synthesizes a long-term goal is to discover strategies or concepts from models like AlphaZero that humans do not know and test whether people can learn them into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_move_37_as_a_superhuman_concept_exemplar",
+      "name": "Move 37 as a superhuman concept exemplar",
+      "description": "AlphaGo’s Move 37 is used as a concrete case of a machine-discovered strategy that humans could recognize as important without yet being able to explain it.",
+      "track_tags": [
+        "alignment",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "games",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "ai_safety",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because move 37 as a superhuman concept exemplar clarifies alphaGo’s Move 37 is used as a concrete case of a machine-discovered strategy that humans could recognize as important without yet being able to explain it, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp2"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.56,
+    0.86
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L23_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture23-interpretability_transcript.txt"
+  }
+}

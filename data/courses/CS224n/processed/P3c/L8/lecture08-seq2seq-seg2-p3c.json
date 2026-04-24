@@ -1,0 +1,233 @@
+{
+  "unit_id": "local::lecture08-seq2seq::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=Ba6Fn1-Jsfw",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 5 diagnostic reinforcement questions about why simple rnns fail: vanishing and exploding gradients without needing a separate video clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture08_seq2seq_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the simplified linear analysis of backpropagation through time, what repeatedly determines the gradient as we move farther back in the sequence?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Repeated multiplication by powers of the recurrent matrix",
+        "Only the current input embedding at each position",
+        "A fresh optimizer state that resets every step",
+        "The output softmax temperature"
+      ],
+      "answer_index": 0,
+      "explanation": "Without the nonlinearity, backpropagation through time keeps multiplying by the recurrent matrix. That is why powers of the recurrent matrix control whether gradients stay stable, vanish, or explode.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vanishing_and_exploding_gradients",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "powers of the matrix",
+          "going through a W"
+        ],
+        "timestamps": [
+          "00:12:58",
+          "00:11:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What happens to gradients in a simple RNN if the relevant recurrent-matrix eigenvalues are all below 1 in magnitude?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They vanish as you backpropagate farther",
+        "They explode immediately to infinity",
+        "They stay exactly constant over time",
+        "They become independent of the recurrent matrix"
+      ],
+      "answer_index": 0,
+      "explanation": "When eigenvalues are below 1, repeated multiplication shrinks signals. That makes the gradient get smaller and smaller as it travels backward through many time steps.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vanishing_and_exploding_gradients",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "getting smaller and smaller",
+          "gradient"
+        ],
+        "timestamps": [
+          "00:13:24",
+          "00:11:14"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the printer-toner-tickets example matter for sequence modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It shows that correct prediction can depend on context many words earlier",
+        "It proves that nearby words are always enough for prediction",
+        "It demonstrates that gradient clipping solves all context problems",
+        "It shows that RNNs are unnecessary for language tasks"
+      ],
+      "answer_index": 0,
+      "explanation": "The example highlights a long-distance dependency: the right next word is recoverable only if the model preserves information from much earlier context. This is exactly what vanishing gradients make hard to learn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_long_distance_dependencies_in_sequence_modeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "depends on getting back",
+          "long-distance dependencies"
+        ],
+        "timestamps": [
+          "00:15:39",
+          "00:15:07"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What rough practical limitation of simple RNNs did the lecture mention for language modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They effectively conditioned only about seven tokens back",
+        "They could not process sequences longer than seven words at all",
+        "They always needed exactly seven hidden layers",
+        "They required a seven-way beam search to decode"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture's rough estimate was that the simple RNN only learned useful conditioning from about seven tokens back, which is not enough for many real language dependencies.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_long_distance_dependencies_in_sequence_modeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "about seven tokens back"
+        ],
+        "timestamps": [
+          "00:17:00"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does gradient clipping do when the gradient norm becomes too large?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It rescales the gradient to reduce its norm while keeping its direction",
+        "It sets all gradients to zero forever",
+        "It removes the recurrent matrix from the network",
+        "It increases the learning rate so training escapes bad regions"
+      ],
+      "answer_index": 0,
+      "explanation": "Gradient clipping is a practical safeguard for exploding gradients. It shrinks an overly large gradient vector so updates are not wildly unstable, while largely preserving the update direction.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vanishing_and_exploding_gradients",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "norm of the gradient",
+          "scale it down"
+        ],
+        "timestamps": [
+          "00:19:30",
+          "00:19:48"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture08_seq2seq_seg2_q1",
+      "global_kp_id": "kp_vanishing_and_exploding_gradients",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q2",
+      "global_kp_id": "kp_vanishing_and_exploding_gradients",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q3",
+      "global_kp_id": "kp_long_distance_dependencies_in_sequence_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q4",
+      "global_kp_id": "kp_long_distance_dependencies_in_sequence_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture08_seq2seq_seg2_q5",
+      "global_kp_id": "kp_vanishing_and_exploding_gradients",
+      "role": "primary"
+    }
+  ]
+}

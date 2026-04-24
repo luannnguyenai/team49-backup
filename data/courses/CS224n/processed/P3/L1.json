@@ -1,0 +1,124 @@
+{
+  "output_filename": "p3a__cs224n__lecture01_wordvecs.json",
+  "run_id": "unknown",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture01-wordvecs",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture01-wordvecs::seg1",
+      "is_worth_learning": false,
+      "salience_score": "skip",
+      "rationale": "Administrative logistics and grading dominate the unit, and section_flags mark item_generation_worthiness as low.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "administrative",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg2",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of the main KP on language as thought scaffolding plus substantial modern-NLP examples gives this motivation segment clear instructional value despite being non-formulaic.",
+      "target_kp_ids": [
+        "kp_language_scaffolding_and_thought",
+        "kp_modern_neural_nlp_and_foundation_models"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "motivation",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "The main KP on distributional semantics has dominant coverage and is a critical gateway, with substantial support from one-hot limitations and embedding-space geometry, and section_flags rate item_generation_worthiness high.",
+      "target_kp_ids": [
+        "kp_distributional_semantics",
+        "kp_limitations_of_one_hot_localist_word_representations",
+        "kp_word_vectors_and_embedding_spaces"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg4",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Although framed as Q&A, it gives dominant coverage of the main KP on contextual embeddings and clarifies error-prone misconceptions about polysemy, t-SNE, and dimensionality.",
+      "target_kp_ids": [
+        "kp_contextual_embeddings",
+        "kp_word_vectors_and_embedding_spaces"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "The main KP on the skip-gram objective is covered dominantly, and the unit is formula_heavy with high item_generation_worthiness as it formalizes context prediction into negative log likelihood.",
+      "target_kp_ids": [
+        "kp_word2vec_skipgram_objective"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of the main KP on the softmax probability model, plus substantial optimization support and formula_heavy treatment, makes this a core modeling unit.",
+      "target_kp_ids": [
+        "kp_softmax_probability_model_for_context_prediction",
+        "kp_gradient_based_learning_and_observed_minus_expected_updates"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture01-wordvecs::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "This worked derivation gives dominant coverage of the capstone main KP on observed-minus-expected gradients and is the lecture’s densest formula_heavy segment.",
+      "target_kp_ids": [
+        "kp_gradient_based_learning_and_observed_minus_expected_updates"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

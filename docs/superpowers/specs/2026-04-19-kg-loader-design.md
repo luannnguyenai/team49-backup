@@ -1,6 +1,8 @@
 # KG Phase 0 — Loader + Bridges YAML Design
 
-**Date:** 2026-04-19  
+> **Historical spec:** This document is preserved for implementation history only. Legacy KG runtime code has been removed; use canonical `prerequisite_edges` and the current handoff docs for production graph work.
+
+**Date:** 2026-04-19
 **Scope:** Task 2 of Knowledge Graph module — bridges YAML seed, DB-backed loader, test fixtures  
 **Depends on:** `2026-04-19-kg-migration-schemas-design.md` (schemas already implemented)
 

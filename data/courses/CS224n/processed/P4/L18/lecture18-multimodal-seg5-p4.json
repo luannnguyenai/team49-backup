@@ -1,0 +1,509 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "review_summary": "The transcript is clear enough to generate questions about the wave of generative multimodal models, the frozen-language-model recipe, Flamingo and BLIP-2, and the practical trade-offs involved in adding vision to strong LLMs.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture18-multimodal-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are generative multimodal models such as SimVLM or CoCa considered more appealing than pure matching models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because they do not need any paired image-text data at all.",
+        "Because caption-generation or sequence-generation objectives can force the model to learn richer representations than objectives that only rank matched versus mismatched pairs.",
+        "Because they are always cheaper than contrastive learning at every scale.",
+        "Because they completely remove the role of the language model."
+      ],
+      "answer_index": 1,
+      "explanation": "The idea is that if a model must generate a caption or sequence, it often has to capture more semantic structure than if it only decides whether two representations match. This can lead to richer downstream representations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_generative_multimodal_language_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "caption-generation objectives",
+          "richer representations"
+        ],
+        "timestamps": [
+          "40:41",
+          "40:55"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the 'frozen language model recipe'?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Retrain the entire language model together with the vision encoder from scratch on a small dataset.",
+        "Freeze a strong existing language model and learn only how to project image features into its token space.",
+        "Freeze only the vision encoder while always fully fine-tuning the language model.",
+        "Remove language tokenization and replace it with bag of visual words."
+      ],
+      "answer_index": 1,
+      "explanation": "Instead of updating a whole large language model, you keep it fixed and learn a projection from image features into a space the language model can understand. This lets you reuse existing language knowledge while adding visual capability.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_generative_multimodal_language_models",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "keep a strong LM fixed",
+          "projection into its token space"
+        ],
+        "timestamps": [
+          "41:26",
+          "41:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which option best describes Flamingo?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A pure ViT image model with no language model attached.",
+        "A system with a vision encoder, perceiver resampler, gated cross-attention, and a frozen Chinchilla language model.",
+        "A reward model for visual-language answers.",
+        "An object detector trained with RLHF."
+      ],
+      "answer_index": 1,
+      "explanation": "Flamingo combines an image encoder with a strong frozen language model. Components such as the perceiver resampler and gated cross-attention help compress and inject visual information before the LM generates text.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_generative_multimodal_language_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "perceiver resampler",
+          "gated cross-attention",
+          "frozen Chinchilla"
+        ],
+        "timestamps": [
+          "42:43",
+          "43:20",
+          "44:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is BLIP-2 used to illustrate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "That it is possible to learn a bridge between an image encoder and LLMs such as OPT or FlanT5 without fully fine-tuning the whole system.",
+        "That every multimodal task should discard language and keep only images.",
+        "That classical encoder-decoder models are always better than modern foundation models.",
+        "That multimodal reasoning cannot use in-context learning."
+      ],
+      "answer_index": 0,
+      "explanation": "BLIP-2 is a prominent example of learning only the connector between images and a large language model. It shows that strong existing LLMs can be reused without retraining the full system from scratch.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_generative_multimodal_language_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "BLIP-2",
+          "OPT or FlanT5"
+        ],
+        "timestamps": [
+          "45:56",
+          "46:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If the goal is to preserve the pretrained abilities of a language model while adding image signals, which choice is most appropriate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Freeze the already learned layers so gradients do not update their weights.",
+        "Reinitialize all weights every epoch to avoid overfitting.",
+        "Use only late fusion because it is always richer than early fusion.",
+        "Delete the text modality from the training data."
+      ],
+      "answer_index": 0,
+      "explanation": "When a module is frozen, gradients can still pass through it so surrounding parts can learn, but that module's own weights are not updated. This helps preserve pretrained abilities while learning the multimodal connector around it.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_generative_multimodal_language_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "weights are not updated",
+          "preserve pretrained abilities"
+        ],
+        "timestamps": [
+          "49:04",
+          "49:16"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg5-q1",
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q2",
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q3",
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q4",
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q5",
+      "global_kp_id": "kp_generative_multimodal_language_models",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture18-multimodal-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why are generative multimodal models such as SimVLM or CoCa considered more appealing than pure matching models\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the 'frozen language model recipe'\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which option best describes Flamingo\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is BLIP-2 used to illustrate\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"If the goal is to preserve the pretrained abilities of a language model while adding image signals, which choice is most appropriate\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture18-multimodal-seg5-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why are generative multimodal models such as SimVLM or CoCa considered more appealing than pure matching models\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the 'frozen language model recipe'\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which option best describes Flamingo\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is BLIP-2 used to illustrate\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture18-multimodal-seg5-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"If the goal is to preserve the pretrained abilities of a language model while adding image signals, which choice is most appropriate\" checks whether the learner can execute the procedure reliably."
+    }
+  ]
+}

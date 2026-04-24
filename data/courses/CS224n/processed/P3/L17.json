@@ -1,0 +1,109 @@
+{
+  "output_filename": "p3a__cs224n__lecture17_convnets.json",
+  "run_id": "run_cs224n_lecture17_convnets",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture17-convnets",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture17-convnets::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway KP kp_1d_convolution_over_n_grams plus substantial coverage of pooling/tensor-shape KPs; formula_heavy derivation segment on convolution, padding, pooling, stride, and dilation.",
+      "target_kp_ids": [
+        "kp_text_cnn_framing",
+        "kp_1d_convolution_over_n_grams"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of kp_kim_2014_sentence_classification_cnn with a concrete generalization pitfall for embedding fine-tuning; the segment supports diagnostic questions about why frozen+trainable channels help.",
+      "target_kp_ids": [
+        "kp_kim_2014_sentence_classification_cnn"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "dominant coverage of kp_vd_cnn_character_level_text_classification, but the unit is broader architectural context with optional/supporting KP coverage (batch norm, 1x1 conv, VD-CNN) rather than a gateway derivation.",
+      "target_kp_ids": [
+        "kp_vd_cnn_character_level_text_classification"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway KP kp_compositional_tree_semantics and dominant coverage of kp_greedy_recursive_constituency_parsing; formula_heavy segment introducing shared composition, scoring, and greedy merges.",
+      "target_kp_ids": [
+        "kp_compositional_tree_semantics",
+        "kp_greedy_recursive_constituency_parsing"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of capstone KP kp_recursive_neural_tensor_networks and dominant coverage of kp_phrase_level_sentiment_supervision; formula_heavy tensor-composition segment tied to phrase-level supervision gains.",
+      "target_kp_ids": [
+        "kp_recursive_neural_tensor_networks",
+        "kp_phrase_level_sentiment_supervision"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of capstone KP kp_negation_and_compositional_sentiment plus substantial coverage of kp_tree_models_versus_transformers; example-driven sentiment composition and negation cases support application questions.",
+      "target_kp_ids": [
+        "kp_negation_and_compositional_sentiment",
+        "kp_tree_models_versus_transformers"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

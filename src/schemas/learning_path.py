@@ -16,7 +16,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 from src.models.learning import PathAction, PathStatus
 
@@ -29,19 +29,20 @@ class GeneratePathRequest(BaseModel):
     """
     Body for the generate endpoint.
 
-    desired_module_ids: UUIDs of the modules the user wants to learn.
-    mastery_overrides:  Optional per-topic score overrides (used in tests /
+    desired_section_ids: UUIDs of the course sections the user wants to learn.
+    mastery_overrides:  Optional per-learning-unit score overrides (used in tests /
                         re-generation after additional practice). When absent
-                        the engine reads live MasteryScore rows from the DB.
+                        the engine reads live canonical mastery rows from the DB.
     """
 
-    desired_module_ids: list[uuid.UUID] = Field(
+    desired_section_ids: list[uuid.UUID] = Field(
         min_length=1,
-        description="Modules chosen during onboarding",
+        validation_alias=AliasChoices("desired_section_ids", "desired_module_ids"),
+        description="Course sections chosen during onboarding",
     )
     mastery_overrides: dict[str, float] | None = Field(
         default=None,
-        description="Optional {topic_id_str: score_percent} overrides",
+        description="Optional {learning_unit_id_str: score_percent} overrides",
     )
 
 
@@ -56,14 +57,15 @@ class PathItemResponse(BaseModel):
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
-    topic_id: uuid.UUID
-    topic_name: str  # resolved by the service layer
-    module_name: str  # resolved by the service layer
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
+    section_title: str | None = None
     action: PathAction
     estimated_hours: float | None
     order_index: int
     week_number: int | None
     status: PathStatus
+    canonical_unit_id: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -75,7 +77,7 @@ class GeneratePathResponse(BaseModel):
     """Full generated path with metadata and optional warnings."""
 
     generated_at: datetime
-    total_topics: int
+    total_units: int
     total_hours: float
     required_hours_per_week: float | None = Field(
         description="Hours/week needed to meet the deadline"
@@ -95,9 +97,9 @@ class GeneratePathResponse(BaseModel):
 class LearningPathResponse(BaseModel):
     """Current user's full learning path."""
 
-    total_topics: int
-    completed_topics: int
-    in_progress_topics: int
+    total_units: int
+    completed_units: int
+    in_progress_units: int
     items: list[PathItemResponse]
 
 
@@ -107,10 +109,10 @@ class LearningPathResponse(BaseModel):
 
 
 class WeekEntry(BaseModel):
-    """Topics allocated to a single calendar week."""
+    """Learning units allocated to a single calendar week."""
 
     week: int
-    topics: list[PathItemResponse]
+    learning_units: list[PathItemResponse]
     total_hours: float
 
 
@@ -134,6 +136,6 @@ class UpdateStatusResponse(BaseModel):
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
-    topic_id: uuid.UUID
+    learning_unit_id: uuid.UUID
     status: PathStatus
     updated_at: datetime

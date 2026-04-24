@@ -1,0 +1,522 @@
+{
+  "unit_id": "local::lecture13-posttraining::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "The transcript is clear enough to create questions about multitask instruction fine-tuning, difficulties in evaluation with benchmarks such as MMLU, and lessons about data scale and synthetic instruction data.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture13-posttraining-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture13-posttraining-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What kind of data does instruction fine-tuning learn from?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Instruction-output pairs across many different tasks.",
+        "Only raw unprocessed web data like pretraining data.",
+        "Only win-loss ranking pairs between two answers.",
+        "Only multiple-choice questions such as MMLU."
+      ],
+      "answer_index": 0,
+      "explanation": "Instruction tuning collects instructions and desired responses for many task types, then teaches the model to respond to user intent rather than merely continue free-form text.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_instruction_fine_tuning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Instruction fine-tuning trains on instruction-output pairs across many tasks."
+        ],
+        "timestamps": [
+          "00:24:25"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How has modern instruction tuning scaled?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "From a few tasks to thousands of tasks and millions of examples.",
+        "From many tasks down to a single task in order to avoid noise.",
+        "It now depends only on self-generated dialogue data and no longer needs human-written examples.",
+        "It has reduced the number of examples to almost zero because scale no longer matters."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture emphasizes the data-plus-scale pattern: more high-quality tasks and examples can help instruction tuning generalize to tasks not seen during training.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_instruction_fine_tuning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Instruction tuning has scaled from one task to thousands of tasks and"
+        ],
+        "timestamps": [
+          "00:25:06"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the role of MMLU?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is a broad benchmark used to test knowledge across many domains.",
+        "It is the main pretraining dataset for GPT-3.",
+        "It is an algorithm for automatically generating instruction data.",
+        "It is a regularizer used in RLHF."
+      ],
+      "answer_index": 0,
+      "explanation": "MMLU is used as a broad measure of knowledge. The lecture also cautions that a broad benchmark is not a perfect evaluation and may not reflect every real use case.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "MMLU is used as a broad benchmark over diverse knowledge questions."
+        ],
+        "timestamps": [
+          "00:26:03"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should benchmark results such as MMLU be interpreted carefully?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because of possible leakage, ambiguous questions, benchmark saturation, and limits on practical usefulness.",
+        "Because benchmarks only measure inference speed and not correctness.",
+        "Because benchmarks always require RLHF before they can be run.",
+        "Because benchmarks cannot compare models with different parameter counts."
+      ],
+      "answer_index": 0,
+      "explanation": "A high score may be affected by test-data leakage, unclear questions, or over-optimization for the benchmark. It is important to separate benchmark scores from the model's practical value.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Evaluation is tricky because of leakage, ambiguity, and benchmark saturation."
+        ],
+        "timestamps": [
+          "00:27:32"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the FLAN-T5 result suggest?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Larger models often benefit more from instruction tuning than smaller models.",
+        "Instruction tuning is only useful for models below 1B parameters.",
+        "Instruction tuning makes larger models less stable than smaller models in every case.",
+        "Once models become large, instruction tuning no longer has any effect."
+      ],
+      "answer_index": 0,
+      "explanation": "FLAN-T5 is used to illustrate that, as model scale increases, the model may make better use of instruction data. This fits the intuition that scale helps models respond more effectively to structured task data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_instruction_fine_tuning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Larger FLAN-T5 models benefit more from instruction tuning than smaller models."
+        ],
+        "timestamps": [
+          "00:29:14"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture13-posttraining-seg4-q1",
+      "global_kp_id": "kp_instruction_fine_tuning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q1",
+      "global_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q2",
+      "global_kp_id": "kp_instruction_fine_tuning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q2",
+      "global_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q3",
+      "global_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q3",
+      "global_kp_id": "kp_instruction_fine_tuning",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q4",
+      "global_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q4",
+      "global_kp_id": "kp_instruction_fine_tuning",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q5",
+      "global_kp_id": "kp_instruction_fine_tuning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q5",
+      "global_kp_id": "kp_llm_evaluation_and_instruction_data_scaling",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture13-posttraining-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What kind of data does instruction fine-tuning learn from\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How has modern instruction tuning scaled\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the role of MMLU\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why should benchmark results such as MMLU be interpreted carefully\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does the FLAN-T5 result suggest\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture13-posttraining-seg4-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What kind of data does instruction fine-tuning learn from\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How has modern instruction tuning scaled\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q3",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the role of MMLU\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why should benchmark results such as MMLU be interpreted carefully\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture13-posttraining-seg4-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does the FLAN-T5 result suggest\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

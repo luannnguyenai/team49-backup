@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::cs224n-2024-lecture19-bci::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "The transcript is sufficient to generate 5 reinforcement questions about phoneme-based speech decoding and the T12 speech neuroprosthesis findings without cutting a separate clip.",
+  "qa_outputs": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does speech restoration start from oral-facial motor cortex rather than trying to decode all language processes directly?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Speech production depends on motor planning and articulation, making motor cortex a practical first decoding target",
+        "Motor cortex stores every word in a sentence explicitly",
+        "Motor cortex is the only brain region involved in language",
+        "Motor cortex eliminates the need for machine learning"
+      ],
+      "answer_index": 0,
+      "explanation": "Language is distributed across many regions, but actual speech output still requires coordinated articulatory movement, so motor cortex offers a concrete entry point for decoding speech production.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "motor planning of language",
+          "controls speech"
+        ],
+        "timestamps": [
+          "00:36:43",
+          "00:37:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What intermediate target is proposed instead of decoding every continuous articulator trajectory?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Discrete phonemes",
+        "Whole paragraphs",
+        "Part-of-speech tags",
+        "Eye-movement patterns"
+      ],
+      "answer_index": 0,
+      "explanation": "Phonemes give a smaller, discrete target space tied to articulation, which is more manageable than trying to reconstruct every continuous mouth movement directly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "discrete phonemes",
+          "basic phonetic units"
+        ],
+        "timestamps": [
+          "00:38:46",
+          "00:38:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What prior result is cited to show that speech can be decoded from cortical signals even before the T12 system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A 2021 UCSF ECOG system decoding a 50-word vocabulary at about 75% accuracy",
+        "A scalp EEG system decoding full open-vocabulary speech at 99% accuracy",
+        "A robotic-arm BCI controlling handwriting at 150 words per minute",
+        "A text-only language model predicting phonemes without neural recordings"
+      ],
+      "answer_index": 0,
+      "explanation": "The cited UCSF result is important as a proof of concept: even with lower-resolution ECOG, researchers could decode a limited speech vocabulary above chance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "50-word vocabulary",
+          "roughly 75% accuracy"
+        ],
+        "timestamps": [
+          "00:39:33",
+          "00:40:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How were T12's arrays positioned in the lab's speech-neuroprosthesis study?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Two arrays in motor cortex and two in Broca's area",
+        "Four arrays all in visual cortex",
+        "One array in motor cortex and three on the scalp",
+        "Two arrays in auditory cortex and two in the spinal cord"
+      ],
+      "answer_index": 0,
+      "explanation": "The implant strategy probed both speech execution and higher-level planning by placing arrays in motor cortex and Broca's area.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_t12_speech_neuroprosthesis_findings",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two arrays into her motor cortex",
+          "two arrays in Broca's area"
+        ],
+        "timestamps": [
+          "00:41:16",
+          "00:41:58"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What did the behavioral analyses show about signal quality across T12's implanted regions?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Motor-cortex arrays carried much stronger decoding information for movements, phonemes, and words than Broca's-area arrays",
+        "Broca's-area arrays always outperformed motor cortex on every task",
+        "Both regions were equally uninformative",
+        "Only silent speech could be decoded, not attempted audible speech"
+      ],
+      "answer_index": 0,
+      "explanation": "The data suggested that speech execution signals in motor cortex were much more informative for this decoding setup than the more planning-related Broca's-area signals.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_t12_speech_neuroprosthesis_findings",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "much higher than chance",
+          "Broca's area"
+        ],
+        "timestamps": [
+          "00:42:53",
+          "00:44:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q1",
+      "global_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q2",
+      "global_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q3",
+      "global_kp_id": "kp_speech_motor_decoding_through_phonemes",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q4",
+      "global_kp_id": "kp_t12_speech_neuroprosthesis_findings",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q5",
+      "global_kp_id": "kp_t12_speech_neuroprosthesis_findings",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why does speech restoration start from oral-facial motor cortex rather than trying to decode all language processes directly\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What intermediate target is proposed instead of decoding every continuous articulator trajectory\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What prior result is cited to show that speech can be decoded from cortical signals even before the T12 system\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How were T12's arrays positioned in the lab's speech-neuroprosthesis study\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What did the behavioral analyses show about signal quality across T12's implanted regions\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q1",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why does speech restoration start from oral-facial motor cortex rather than trying to decode all language processes directly\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q2",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What intermediate target is proposed instead of decoding every continuous articulator trajectory\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What prior result is cited to show that speech can be decoded from cortical signals even before the T12 system\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q4",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How were T12's arrays positioned in the lab's speech-neuroprosthesis study\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg5_q5",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What did the behavioral analyses show about signal quality across T12's implanted regions\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

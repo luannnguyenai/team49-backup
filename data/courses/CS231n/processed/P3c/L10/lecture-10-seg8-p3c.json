@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_10::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for concept questions on I3D weight inflation and the distinction between temporal action localization and full spatio-temporal detection.",
+  "question_bank": [
+    {
+      "item_id": "lecture_10_seg8_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does I3D initialize an inflated 3D kernel by copying a pretrained 2D kernel Kt times and dividing by Kt?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To reuse image-pretrained weights while keeping the response sensible for constant-frame videos",
+        "To force the model to ignore temporal information completely",
+        "To reduce the number of output channels to one",
+        "To replace fine-tuning with a closed-form solution"
+      ],
+      "answer_index": 0,
+      "explanation": "This initialization transfers useful image features into a video model. Dividing by Kt keeps the overall response scale reasonable, and a constant video behaves consistently with the original 2D filter.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_i3d_inflation_and_weight_transfer",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "copy the weights",
+          "dividing by Kt"
+        ],
+        "timestamps": [
+          "00:56:03",
+          "00:56:12"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_10_seg8_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the difference between temporal action localization and spatio-temporal detection?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Temporal localization finds when an action happens, while spatio-temporal detection finds both when and where it happens",
+        "Temporal localization classifies clips, while spatio-temporal detection estimates optical flow",
+        "Temporal localization uses audio only, while spatio-temporal detection uses RGB only",
+        "There is no difference; the terms mean the same thing"
+      ],
+      "answer_index": 0,
+      "explanation": "Temporal localization focuses on the time interval of an action. Spatio-temporal detection adds spatial localization, so the system must also identify where the action occurs in the frames.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_temporal_localization_and_spatio_temporal_detection",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "localized in time",
+          "space and time"
+        ],
+        "timestamps": [
+          "01:01:16",
+          "01:02:03"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg8_q1",
+      "global_kp_id": "kp_i3d_inflation_and_weight_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg8_q2",
+      "global_kp_id": "kp_temporal_localization_and_spatio_temporal_detection",
+      "role": "primary"
+    }
+  ]
+}

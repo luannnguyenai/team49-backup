@@ -1,0 +1,301 @@
+{
+  "unit_id": "local::lecture_8::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit supports mastery questions on scaled dot-product attention, matrix-vectorized attention, and the separation of keys and values. No visual-only details are needed to assess the core ideas.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does scaled dot-product attention divide dot products by the square root of the vector dimension?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To keep softmax inputs from becoming too large as dimension grows, preserving useful gradients.",
+        "To force every query to attend uniformly to all keys.",
+        "To remove the need for learned key and value projections.",
+        "To make the output sequence shorter than the input sequence."
+      ],
+      "answer_index": 0,
+      "explanation": "Dot products tend to grow in magnitude with dimension. Scaling keeps the values entering softmax in a healthier range, which helps avoid saturated probabilities and weak gradients.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_scaled_dot_product_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "scaled dot product",
+          "preventing vanishing gradients"
+        ],
+        "timestamps": [
+          "00:33:30",
+          "00:34:04"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the key-value view of attention, what is the difference between keys and values?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Keys are used to match queries; values are the vectors combined to form the output.",
+        "Keys are the final outputs; values are discarded after softmax.",
+        "Keys store token positions; values store only punctuation marks.",
+        "Keys are fixed constants; values are the only learned parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "Attention separates lookup from retrieval. Queries compare against keys to decide attention weights, and those weights are then applied to values to construct the output representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_keys_and_values",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "key vectors",
+          "compute linear combinations"
+        ],
+        "timestamps": [
+          "00:39:21",
+          "00:39:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes cross-attention different from self-attention?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The queries and the data being attended to can come from different sources.",
+        "It never uses softmax to compute attention weights.",
+        "It requires all input vectors to be identical before projection.",
+        "It only works when the input sequence has length one."
+      ],
+      "answer_index": 0,
+      "explanation": "Cross-attention is useful when one representation needs to look up information from another representation, such as output tokens attending to source tokens or text attending to image features.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two different sets of things",
+          "image and tokens"
+        ],
+        "timestamps": [
+          "00:49:48",
+          "00:50:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "global_kp_id": "kp_scaled_dot_product_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "global_kp_id": "kp_keys_and_values",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "global_kp_id": "kp_cross_attention",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Scaling by sqrt(d) is a moderately technical stabilization detail in dot-product attention."
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Distinguishing keys from values is a medium representational-role question."
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Cross-attention versus self-attention is central and medium because it asks about where information comes from."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-8-seg4-q1",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is best used when learners should understand why score magnitudes need control."
+    },
+    {
+      "item_id": "lecture-8-seg4-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item reinforces the separation between addressing and content in attention."
+    },
+    {
+      "item_id": "lecture-8-seg4-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a core distinction that transfers across many modern architectures."
+    }
+  ]
+}

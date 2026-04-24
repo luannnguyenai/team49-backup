@@ -1,0 +1,160 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_11_large_scale_distributed_training",
+    "lecture_title": "Stanford CS231N Lecture 11: Large-Scale Distributed Training",
+    "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Inside the H100: memory hierarchy, SMs, tensor cores, and speed scaling",
+    "description": "Explains the internal organization of an H100 GPU, why tensor cores dominate throughput, why mixed precision matters, and how GPU throughput increased over the last decade.",
+    "summary": "This segment dissects the H100 from package level to streaming multiprocessors. The H100 is presented as compute cores surrounded by 80 GB of HBM, with about 3 TB/s of bandwidth between memory and cores, then further broken into 50 MB of L2 cache and 132 enabled streaming multiprocessors after binning [ts=321s] [ts=366s]. Inside an SM, the lecture emphasizes the memory hierarchy from L1/registers to L2 to HBM, 128 FP32 cores that provide 256 FLOP/cycle per SM, and 4 tensor cores that execute fixed matrix-multiply tiles for 4096 FLOP/cycle per SM, making tensor cores the throughput-critical hardware path [ts=463s] [ts=627s]. The instructor then explains mixed precision: tensor cores typically consume 16-bit inputs and accumulate in 32-bit, so forgetting to cast a model to 16-bit can cause it to run on FP32 cores and be about 20x slower [ts=659s] [ts=694s]. The segment closes by connecting tensor-core growth to the roughly 1000x per-device throughput increase from K40-era GPUs to B200-era devices, arguing that this jump is a major driver of deep-learning progress [ts=760s] [ts=808s].",
+    "key_points": [
+      {
+        "text": "An H100 packages compute cores with 80 GB of HBM and roughly 3 TB/s memory bandwidth to the cores.",
+        "timestamp_s": 321,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The H100 exposes a three-level memory hierarchy: L1/registers, 50 MB of L2 cache, and 80 GB of HBM.",
+        "timestamp_s": 463,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Each SM has 128 FP32 cores for 256 FLOP/cycle and 4 tensor cores for 4096 FLOP/cycle, so tensor cores dominate throughput.",
+        "timestamp_s": 527,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Tensor cores use mixed precision with 16-bit inputs and 32-bit accumulation.",
+        "timestamp_s": 659,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "If a PyTorch model is not cast to 16-bit, it can run on FP32 cores and be about 20x slower than expected.",
+        "timestamp_s": 694,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "GPU throughput has increased by roughly 1000x since 2013, largely because newer devices devote much more hardware to tensor cores.",
+        "timestamp_s": 808,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=9MvD-XsowsE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=11",
+      "start_s": 303,
+      "end_s": 912
+    },
+    "difficulty": 0.55,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "transcript_slice": "00:05:06\nand seeing what's in them.\n\n00:05:09\nwhich is the mainstay of deep learning training\n\n00:05:14\nThere's a next generation that just came out,\n\n00:05:17\nI haven't trained anything on it yet.\n\n00:05:21\nInside this NVIDIA GPU, inside this H100 GPU in the middle\n\n00:05:26\nAnd surrounding that are 80 gigabytes of HBM\n\n00:05:30\nSo you can see the memory is separated\n\n00:05:33\nThey need to move.\n\n00:05:36\nto move data back and forth from the GPU memory into the cores.\n\n00:05:43\nwhich is a lot of bits moving around.\n\n00:05:48\nwe see that in the middle in that compute core part,\n\n00:05:52\nabout 50 megabytes of L2 cache that\n\n00:05:58\nBut it's very, very close to the actual computing elements.\n\n00:06:03\nfrom the compute cores.\n\n00:06:06\nare these 132 Streaming Multiprocessors or SMs.\n\n00:06:13\nThey're a little bit more powerful\n\n00:06:17\nbecause they can do a lot more parallelism.\n\n00:06:21\ncore also in a lot of ways, because they tend\n\n00:06:24\nThey can't do as much instruction prediction,\n\n00:06:27\nSo it's really hard to make exact apples\n\n00:06:32\ncores.\n\n00:06:35\nas roughly akin to a CPU core.\n\n00:06:41\ncount all the little boxes on this screen,\n\n00:06:45\nand when I've said there's only 132.\n\n00:06:48\nIt's because all GPU hardware uses a process called binning,\n\n00:06:53\nmany little computing elements.\n\n00:06:57\nthey just don't come out perfectly.\n\n00:07:00\nSo they plan for that in the development of their products.\n\n00:07:05\nThe full chip in theory has 144, but none of the chips\n\n00:07:08\nBut we know we'll get a reasonable number of those\n\n00:07:13\nSo they tend to use this process of binning.\n\n00:07:17\na much more larger proportion of the chips\n\n00:07:24\nwill be turned on.\n\n00:07:30\nmultiprocessors.\n\n00:07:33\ngoing on inside of these GPUs.\n\n00:07:38\nmultiprocessors inside an H100.\n\n00:07:43\nFirst, we see we have 256 kilobytes of L1 cache\n\n00:07:47\nSo this continues the trend of the memory hierarchy in the GPU.\n\n00:07:53\nwere learning deep learning?\n\n00:07:56\nSorry, it's a surprise.\n\n00:07:59\nis really important for deep learning\n\n00:08:03\nAnd the general trend is that you\n\n00:08:06\naway from the compute cores.\n\n00:08:10\nyou have smaller bits of memory but are much, much faster.\n\n00:08:14\nwell, if you're writing the low-level algorithms that\n\n00:08:18\nto be aware of this memory hierarchy\n\n00:08:21\ndata between different phases of this memory hierarchy.\n\n00:08:26\nyou spend a lot of time trying to optimize that.\n\n00:08:31\nwe see the three levels of memory hierarchy in the H100.\n\n00:08:40\nand then 80 gigabytes of HBM memory.\n\n00:08:44\nof memory hierarchy in the H100.\n\n00:08:51\nThese are little arithmetic units\n\n00:08:56\nAnd in particular, each one of these 128 FP32 cores\n\n00:09:03\nIt can perform that bit of computation in one clock cycle.\n\n00:09:10\nis basically 1 multiply 1 addition,\n\n00:09:15\nThis whole SM can do 256 floating point operations per SM\n\n00:09:22\nThen we'll also see that in red, we've\n\n00:09:27\nto these FP32 cores, there are also these four tensor cores.\n\n00:09:34\nThese are actually matrix cores.\n\n00:09:39\nis they're special circuits that are designed.\n\n00:09:43\nThey do matrix multiply.\n\n00:09:46\ncan do a single chunk of matrix multiply.\n\n00:09:52\ninput matrix A is 16 by 4, input matrix B is 4 by 8,\n\n00:10:01\nSo it basically does ax plus b, where\n\n00:10:06\nAnd it can do that one little chunk of matrix\n\n00:10:12\nSo then if you multiply all these numbers out,\n\n00:10:19\nparticular size is 1,024 floating point operations,\n\n00:10:25\neach add as a single floating point operation.\n\n00:10:30\nAnd we see that the entire SM, if it's going through the tensor\n\n00:10:39\nclock cycle.\n\n00:10:42\nthat we can get from the FP32 cores.\n\n00:10:46\ncores are where all the magic happens.\n\n00:10:50\ncomes from.\n\n00:10:53\nand they can make maximum usage of them,\n\n00:10:59\nAnother interesting thing about these tensor cores\n\n00:11:03\nRather than traditional floating point numbers,\n\n00:11:08\nprecision procedure, where the inputs are usually 16-bit.\n\n00:11:14\nformats that they can use that we can't get into today.\n\n00:11:20\nprecision 16-bit and then do the additions,\n\n00:11:24\nSo these tensor cores take a low precision, 16-bit input,\n\n00:11:31\nand produce the outputs in a higher precision 32-bit.\n\n00:11:37\nif you forget to cast your model into 16-bit,\n\n00:11:42\nInstead it will be 20 times slower than you expect.\n\n00:11:47\nbut it becomes very tangible when you mess up those data\n\n00:11:53\nAnd then note, so GPUs are really fast,\n\n00:11:58\ngotten over the past decade or 15 years or so.\n\n00:12:05\nlearning, the state-of-the-art GPU that we were all using was\n\n00:12:12\nAnd this thing could do just a 5 teraflops of FP32 compute\n\n00:12:17\nAll right, so I should explain the graph.\n\n00:12:23\nup to present day.\n\n00:12:26\nof each of these devices measured in terms of teraflops\n\n00:12:33\nAnd you can see the graph goes up a lot.\n\n00:12:37\nis that from the K40 to the P100,\n\n00:12:42\nwhich came out towards the end of my PhD and around 2016, 2017,\n\n00:12:49\nintroduced these tensor cores.\n\n00:12:54\nhave gotten more tensor cores, bigger tensor cores,\n\n00:13:00\nand this has resulted in a gigantic increase\n\n00:13:04\nor 15 years.\n\n00:13:09\nthat was formally announced.\n\n00:13:12\nThis one in theory has about 83.3 teraflops per second\n\n00:13:25\nof mixed precision compute on the tensor cores.\n\n00:13:31\nthrough a 1,000 fold increase in computation over the past 12\n\n00:13:36\nAnd that's just that the per device level.\n\n00:13:42\nyears, what has happened?\n\n00:13:44\nThere's now a source of computation that we're taking\n\n00:13:50\nAnytime anything in the world changes by 1,000x,\n\n00:13:55\nto cause major changes in our technological capabilities.\n\n00:14:01\nis the major driver of improvement in deep learning\n\n00:14:05\nSo it does not have 5,000 tensor cores.\n\n00:14:12\nYeah.\n\n00:14:15\non the tensor cores versus the compute on the FP32 cores.\n\n00:14:20\nIt's already crazy that there's been a 1,000 increase\n\n00:14:25\nI've held a K40 in my hands, and I've not had the opportunity\n\n00:14:30\nBut they feel like the same physical object.\n\n00:14:35\nlooks the same, but the one from today is 1,000 times faster than\n\n00:14:39\nThat's insane.\n\n00:14:44\nI said that when the K40 first came out in 2013,\n\n00:14:51\nBut today, we're training not just on one GPU.\n\n00:14:55\nsometimes hundreds of thousands of GPUs,\n\n00:15:00\nSo stack that on top of this 1,000 fold increase in per\n\n00:15:04\nAnd something truly insane has happened in the past decade.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+      "global_kp_id": "kp_gpu_memory_hierarchy",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+      "global_kp_id": "kp_mixed_precision_training",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_gpu_memory_hierarchy",
+      "name": "GPU Memory Hierarchy",
+      "description": "The layered organization of HBM, L2, L1/registers, and SM-local compute that determines how efficiently data can reach GPU execution units.",
+      "track_tags": [
+        "gpu_hardware",
+        "systems"
+      ],
+      "domain_tags": [
+        "computer_architecture",
+        "deep_learning_systems"
+      ],
+      "career_path_tags": [
+        "kernel_engineer",
+        "ml_infrastructure_engineer",
+        "systems_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gPU Memory Hierarchy clarifies the layered organization of HBM, L2, L1/registers, and SM-local compute that determines how efficiently data can reach GPU execution units, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_11_large_scale_distributed_training::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_mixed_precision_training",
+      "name": "Mixed precision training",
+      "description": "Specialized matrix-multiply units that dominate GPU throughput and typically consume low-precision inputs while accumulating in higher precision. Training scheme that uses low-precision compute for speed and memory savings while retaining higher-precision state for stable updates.",
+      "track_tags": [
+        "gpu_hardware",
+        "ml_systems",
+        "numerics",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "deep_learning_systems",
+        "numerical_computing",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "kernel_engineer",
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because mixed precision training formalizes how specialized matrix-multiply units that dominate GPU throughput and typically consume low-precision inputs while accumulating in higher precision, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16-efficient-training::kp2",
+        "local::lecture_11_large_scale_distributed_training::kp3"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.4,
+    0.7
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L11_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture11-large-scale-distributed-training_transcript.txt"
+  }
+}

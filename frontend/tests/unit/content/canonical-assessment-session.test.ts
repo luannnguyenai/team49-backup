@@ -1,0 +1,124 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  buildCanonicalAssessmentContext,
+  getAssessmentQuestionKey,
+} from "@/lib/canonical-assessment-session";
+import type { CourseSectionDetail, QuestionForAssessment } from "@/types";
+
+const SECTIONS: CourseSectionDetail[] = [
+  {
+    id: "section_foundations",
+    course_id: "course_cs231n_uuid",
+    canonical_course_id: "course_cs231n",
+    title: "Foundations",
+    description: "Core foundations",
+    order_index: 1,
+    prerequisite_section_ids: null,
+    learning_units_count: 2,
+    learning_units: [
+      {
+        id: "learning_unit_1",
+        canonical_unit_id: "local::lecture01::seg1",
+        title: "Vectors",
+        description: null,
+        order_index: 1,
+        estimated_hours_beginner: 1,
+        estimated_hours_intermediate: 0.5,
+      },
+      {
+        id: "learning_unit_2",
+        canonical_unit_id: "local::lecture01::seg2",
+        title: "Linear algebra",
+        description: null,
+        order_index: 2,
+        estimated_hours_beginner: 1.5,
+        estimated_hours_intermediate: 1,
+      },
+    ],
+  },
+  {
+    id: "section_models",
+    course_id: "course_cs231n_uuid",
+    canonical_course_id: "course_cs231n",
+    title: "Models",
+    description: "Model building",
+    order_index: 2,
+    prerequisite_section_ids: null,
+    learning_units_count: 1,
+    learning_units: [
+      {
+        id: "learning_unit_3",
+        canonical_unit_id: "local::lecture02::seg1",
+        title: "Optimization",
+        description: null,
+        order_index: 1,
+        estimated_hours_beginner: 2,
+        estimated_hours_intermediate: 1.5,
+      },
+    ],
+  },
+];
+
+describe("canonical assessment session helpers", () => {
+  it("builds canonical assessment context from selected known units", () => {
+    expect(
+      buildCanonicalAssessmentContext({
+        sections: SECTIONS,
+        knownUnitIds: ["learning_unit_2", "learning_unit_3"],
+        desiredSectionIds: ["section_foundations"],
+      }),
+    ).toEqual({
+      canonicalUnitIds: ["local::lecture01::seg2", "local::lecture02::seg1"],
+      unitNameMap: {
+        "local::lecture01::seg2": "Linear algebra",
+        "local::lecture02::seg1": "Optimization",
+      },
+    });
+  });
+
+  it("falls back to selected sections when no known units were chosen", () => {
+    expect(
+      buildCanonicalAssessmentContext({
+        sections: SECTIONS,
+        knownUnitIds: [],
+        desiredSectionIds: ["section_foundations"],
+      }),
+    ).toEqual({
+      canonicalUnitIds: ["local::lecture01::seg1", "local::lecture01::seg2"],
+      unitNameMap: {
+        "local::lecture01::seg1": "Vectors",
+        "local::lecture01::seg2": "Linear algebra",
+      },
+    });
+  });
+
+  it("prefers canonical item ids for assessment question keys", () => {
+    const canonicalQuestion: QuestionForAssessment = {
+      id: null,
+      item_id: "legacy-surrogate",
+      canonical_item_id: "item::canonical",
+      canonical_unit_id: "local::lecture01::seg2",
+      topic_id: null,
+      bloom_level: null,
+      difficulty_bucket: null,
+      stem_text: "Question",
+      option_a: "A",
+      option_b: "B",
+      option_c: "C",
+      option_d: "D",
+      time_expected_seconds: null,
+    };
+
+    const legacyQuestion: QuestionForAssessment = {
+      ...canonicalQuestion,
+      id: "question_uuid",
+      canonical_item_id: null,
+      canonical_unit_id: null,
+      topic_id: "topic_uuid",
+    };
+
+    expect(getAssessmentQuestionKey(canonicalQuestion)).toBe("item::canonical");
+    expect(getAssessmentQuestionKey(legacyQuestion)).toBe("question_uuid");
+  });
+});

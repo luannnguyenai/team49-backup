@@ -1,0 +1,4691 @@
+Title: Stanford CS224N: NLP with Deep Learning | Spring 2024 | Lecture 16 - ConvNets and TreeRNNs
+URL: https://www.youtube.com/watch?v=S8d-7v3f5MQ
+Video ID: S8d-7v3f5MQ
+============================================================
+
+00:00:05
+Hi.
+
+00:00:05
+OK, let me get
+started for today.
+
+00:00:08
+I guess I'm now down
+to the more select week
+
+00:00:12
+eight audience of people
+who actually want to learn.
+
+00:00:15
+So my welcome and my
+pleasure for the people
+
+00:00:20
+who show up today.
+
+00:00:21
+Thank you.
+
+00:00:22
+Thank you.
+
+00:00:24
+OK.
+
+00:00:24
+So what I want to do today is
+principally talk about a couple
+
+00:00:33
+of other neural network
+techniques which
+
+00:00:37
+can be used for language.
+
+00:00:40
+I mean, in some sense,
+these two techniques
+
+00:00:44
+are the ones that people aren't
+using very much these days.
+
+00:00:49
+And that's partly why they get
+sort of stuck towards the end
+
+00:00:52
+of the course, because
+we try to teach people
+
+00:00:55
+early on in the course the
+most essential things that you
+
+00:00:59
+should definitely know about.
+
+00:01:01
+But the fact of the matter
+is in any scientific field,
+
+00:01:07
+there are different ideas and
+techniques that bounce around,
+
+00:01:11
+and it's good to know a few
+of the different ideas that
+
+00:01:14
+are out there,
+because often what
+
+00:01:15
+happens is people find new
+ways to reinvent things
+
+00:01:20
+and put things together and see
+different insights from them.
+
+00:01:24
+So today, I'm going to
+tell you a little bit
+
+00:01:27
+about using convolutional
+neural networks for language,
+
+00:01:30
+and then a bit about tree
+recursive neural networks.
+
+00:01:34
+But before that, just
+course organization.
+
+00:01:38
+This is a bit after it
+happened, but I guess
+
+00:01:41
+I've never been back to say it.
+
+00:01:42
+So thanks to everyone who filled
+in the mid-quarter surveys.
+
+00:01:46
+Some people said
+very nice things
+
+00:01:48
+about the lecture, fantastic
+lectures, and really interesting
+
+00:01:52
+content.
+
+00:01:53
+Some people wished that
+we were teaching more
+
+00:01:56
+about state space models.
+
+00:01:58
+I guess we haven't added
+those that lecture in yet.
+
+00:02:03
+A couple of people
+thought it would
+
+00:02:04
+be good to have an
+exam in this class.
+
+00:02:07
+Clearly, they weren't people
+who have friends in CS231N
+
+00:02:12
+from what I've heard.
+
+00:02:13
+But yeah.
+
+00:02:16
+And then in general,
+people are pretty happy how
+
+00:02:19
+it has been going, a
+bit less happy on how
+
+00:02:23
+office hours have been going.
+
+00:02:25
+I mean, honestly,
+it's a hard problem
+
+00:02:29
+I fail to do office hours.
+
+00:02:31
+Some people are saying, oh, you
+should just use queue status.
+
+00:02:34
+I sort of remember
+badly to a year where
+
+00:02:36
+we did everything
+but queue status
+
+00:02:38
+and near the
+assignments' due date.
+
+00:02:41
+The queue had stretched
+six hours long,
+
+00:02:43
+and that didn't seem such
+a good solution either,
+
+00:02:46
+but we'll work along with it.
+
+00:02:49
+Finally, on cloud
+compute, I know
+
+00:02:53
+this is something that people
+variously do have issues with.
+
+00:02:57
+So there are quite a few
+people that are still
+
+00:03:00
+trying to do things with
+Google Colab, which I realize
+
+00:03:04
+is a sort of a very
+convenient, nice interface,
+
+00:03:07
+but you do suffer from access
+to GPUs on Google Colab.
+
+00:03:12
+The best way to get
+better access to GPUs
+
+00:03:15
+is to pay $10 for a month
+of Colab Pro, which perhaps
+
+00:03:22
+means that you end up paying for
+two months if it's May and June.
+
+00:03:27
+We can't reimburse you for that.
+
+00:03:29
+But it's not so many
+coffees worth of money,
+
+00:03:32
+and it does just give you
+better access to GPUs.
+
+00:03:36
+I encourage you to
+use the GCP credits,
+
+00:03:39
+and together API access
+that we've given to you.
+
+00:03:44
+You're also welcome
+to try other things.
+
+00:03:46
+Kaggle Notebooks can
+actually give you
+
+00:03:48
+better GPU access, but not all
+the nice features of Colabs.
+
+00:03:55
+And some groups
+have started using
+
+00:03:57
+Modal, which can also be a
+good way to get GPU access.
+
+00:04:03
+OK, that was the intro to that.
+
+00:04:05
+And so now I wanted to talk
+about convolutional neural
+
+00:04:09
+networks for language.
+
+00:04:13
+I mean, these slides are
+sort of positioned a bit
+
+00:04:17
+as convolutional neural networks
+versus RNNs as opposed to versus
+
+00:04:22
+transformers.
+
+00:04:23
+I mean, that's
+partly, you could say,
+
+00:04:26
+because I haven't
+updated my slides enough.
+
+00:04:29
+But in another sense,
+that's partly because that's
+
+00:04:33
+how the ideas of
+convolutional neural networks
+
+00:04:36
+really were explored.
+
+00:04:38
+It was in the days
+when most people
+
+00:04:40
+were using recursive
+neural networks for NLP.
+
+00:04:43
+A few people said
+about saying, hey,
+
+00:04:45
+maybe we should use
+convolutional neural networks
+
+00:04:47
+for language as well.
+
+00:04:49
+Whereas in truth, in the last
+five years when transformers
+
+00:04:53
+have dominated,
+there hasn't been
+
+00:04:54
+much use of convolutional
+neural networks for NLP.
+
+00:04:57
+So if we think back to our
+recurrent neural networks,
+
+00:05:02
+if you remember those,
+they kind of gave
+
+00:05:05
+a way of giving a
+representation for a sentence
+
+00:05:09
+or part of a sentence, but
+they sort of computed forward
+
+00:05:13
+through the string.
+
+00:05:15
+And so you kind of had to
+get a representation that
+
+00:05:20
+included in everything that
+came before you and then you.
+
+00:05:24
+So you didn't really have a
+representation of the ceremony.
+
+00:05:28
+You had a representation of
+Monet walked into the ceremony
+
+00:05:31
+that you could use.
+
+00:05:35
+So in contrast to that,
+convolutional neural networks
+
+00:05:39
+basically say, well, kind of
+like an n-gram model that we
+
+00:05:44
+should be able to take
+n-grams of words like 2-grams
+
+00:05:47
+or 3-grams.
+
+00:05:49
+So for example, tentative deal
+reached to keep the government
+
+00:05:52
+open that we can take each
+3-gram tentative deal reached,
+
+00:05:57
+deal reached to, reached to
+keep, to keep government.
+
+00:06:00
+And we can make some
+neural representation
+
+00:06:04
+for each of those.
+
+00:06:05
+So notice just being done for
+every n-gram for a certain n.
+
+00:06:10
+So there's nothing
+linguistically or cognitively
+
+00:06:13
+especially plausible
+here, but we're just
+
+00:06:15
+going to form representations
+of multi-word units, which
+
+00:06:20
+will then group in some
+form further away later on.
+
+00:06:24
+And the standard
+way of doing that
+
+00:06:26
+is with convolutional
+neural networks.
+
+00:06:30
+So the classic case of
+convolutional neural networks
+
+00:06:33
+is in vision.
+
+00:06:34
+That convolutional
+neural networks
+
+00:06:36
+were invented for vision, where
+they gave you a translation
+
+00:06:40
+invariant model
+so that you could
+
+00:06:43
+recognize your kangaroo no
+matter where in the frame
+
+00:06:46
+it was.
+
+00:06:47
+And so this little picture here,
+which I'll just do the lower
+
+00:06:53
+half of the slide is what a
+convolutional neural network is
+
+00:06:58
+doing in 2D vision.
+
+00:07:00
+So the convolution
+is like a mask
+
+00:07:03
+that you're sliding
+over the image.
+
+00:07:06
+And the mask is defined
+by weights, which are
+
+00:07:09
+the little things shown in red.
+
+00:07:11
+And so for each place
+you slide your masks to,
+
+00:07:16
+you're then calculating a score
+by taking what's effectively
+
+00:07:21
+a dot product of the mask terms
+by the elements in that patch.
+
+00:07:26
+And that's then filling in
+the matrix on the right that's
+
+00:07:30
+shown in pink.
+
+00:07:31
+And so that's then calculating
+our convolved feature
+
+00:07:36
+from the image.
+
+00:07:38
+That makes sense?
+
+00:07:40
+Yeah.
+
+00:07:41
+So well, what happens if we then
+want to do that for language?
+
+00:07:46
+Well, for language, we
+don't have a 2D picture.
+
+00:07:49
+We've got a 1D picture.
+
+00:07:51
+We've got a sequence of words.
+
+00:07:53
+So we can have tentative deal
+reached to keep government open.
+
+00:07:57
+So each of our words
+will have a word vector.
+
+00:08:00
+I'm using four
+dimensional in my examples
+
+00:08:03
+to keep it compact on my slide.
+
+00:08:05
+And so then we
+can apply a filter
+
+00:08:09
+that applies to an n-gram.
+
+00:08:12
+So this is going to be
+a filter for a trigram.
+
+00:08:16
+And so then we're going to
+slide that downwards in exactly
+
+00:08:21
+the same way as for
+the vision case,
+
+00:08:23
+apart from we just sliding
+it in one dimension.
+
+00:08:26
+So I calculate the dot product
+of the filter and this 3-gram.
+
+00:08:33
+And that gives me a value minus
+1, if I did my arithmetic right.
+
+00:08:37
+Then I slide it down to the
+next position and work it out.
+
+00:08:41
+And I get minus 0.5.
+
+00:08:44
+Slide it down and
+get the other values.
+
+00:08:46
+And then typically, I
+can add on a bias term.
+
+00:08:50
+So my bias is plus
+1 in this example.
+
+00:08:53
+And then I'll stick it through
+a non-linearity like a sigmoid
+
+00:08:56
+or something like that.
+
+00:08:57
+And so I'll be calculating
+a vector for a term for each
+
+00:09:03
+of these 3 grams.
+
+00:09:05
+And so that is a convolution
+for a single filter.
+
+00:09:09
+And then commonly,
+what I'm doing
+
+00:09:12
+after that is deciding
+that I'm going
+
+00:09:14
+to have more than one filter.
+
+00:09:16
+And I'll show you
+that in a minute.
+
+00:09:19
+In this example and in my
+vision example earlier,
+
+00:09:24
+we sort of had shrinkage because
+we started off with seven words.
+
+00:09:28
+But because we sort of
+slid these trigram over it,
+
+00:09:35
+we only sort of had
+space for 5 trigrams.
+
+00:09:39
+And so we ended up with
+something smaller than our input
+
+00:09:42
+sentence.
+
+00:09:43
+Often people want to
+keep it the same size,
+
+00:09:46
+and the way you can keep it the
+same size is by having padding.
+
+00:09:49
+So if I put a 0 padding
+at each end, well,
+
+00:09:53
+now I'm going to get 7 trigrams
+coming out as corresponding
+
+00:09:58
+to my original 7 words.
+
+00:10:00
+And normally, I'll just pad
+it with zeros like that.
+
+00:10:05
+You can actually increase
+the size of things,
+
+00:10:08
+because if you add
+padding of 2 at each end,
+
+00:10:12
+you can then have
+a wide convolution.
+
+00:10:14
+And so 7 will then go
+to 9 different things.
+
+00:10:18
+So if we only had one filter,
+things are pretty limiting.
+
+00:10:24
+And so commonly, as
+in the vision case,
+
+00:10:27
+what we're going to do is
+define multiple filters.
+
+00:10:31
+And then we're going
+to be calculating
+
+00:10:33
+a value for each of
+these filters over each
+
+00:10:36
+of these trigrams.
+
+00:10:38
+And so then we're getting out a
+new representation as a vector.
+
+00:10:42
+And depending on
+how many filters
+
+00:10:45
+we have relative to what
+the word dimensionality is,
+
+00:10:48
+we might end up with
+something that's
+
+00:10:50
+shorter, as in this example,
+the same length or actually
+
+00:10:54
+longer than what our input
+was in terms of word vectors.
+
+00:11:01
+But commonly when we do
+that, we then, in some way,
+
+00:11:07
+want to summarize
+all of these filters.
+
+00:11:11
+And the most common way of
+doing that is to do something
+
+00:11:16
+that's called max pooling.
+
+00:11:18
+And max pooling is something
+you see quite a bit
+
+00:11:20
+in neural networks in general.
+
+00:11:23
+And the way to
+think of max pooling
+
+00:11:25
+that I think makes
+sense, is that you
+
+00:11:28
+can think of max
+pooling as doing
+
+00:11:31
+what you want if you
+want to run something
+
+00:11:35
+that's like a feature detector.
+
+00:11:37
+So if you imagine that you
+learn these functions that
+
+00:11:44
+will look at word vectors and
+that they will look for evidence
+
+00:11:48
+of something particular.
+
+00:11:50
+So maybe this filter looks
+for the person is using I
+
+00:11:55
+language that matches
+the words I, my, we, our,
+
+00:12:00
+something like
+this, and maybe this
+
+00:12:03
+is a filter that matches
+speech verbs or thinking
+
+00:12:08
+verbs like think, say, said,
+told, et cetera, like that.
+
+00:12:13
+And so each of these is some
+kind of feature of the text
+
+00:12:18
+that you might want to detect.
+
+00:12:20
+Well, if that's
+your model of it,
+
+00:12:22
+when you slide your feature
+detector down the piece of text,
+
+00:12:26
+you want to know, does
+this match anywhere
+
+00:12:30
+in this piece of text is
+somewhere it using an I word,
+
+00:12:34
+regardless of whether it's
+in the first, second, third,
+
+00:12:37
+or fourth position.
+
+00:12:38
+And so that's effectively what
+you're getting out with max
+
+00:12:41
+x that a feature is counting
+as firing to the extent
+
+00:12:45
+that it fires strongly in
+any position in the text
+
+00:12:49
+that you could match.
+
+00:12:51
+That's not the only way
+you can think of doing it.
+
+00:12:54
+An alternative way
+you could do it is you
+
+00:12:57
+could think of your
+feature detector
+
+00:12:59
+as sort of measuring
+some quality
+
+00:13:01
+of the text, like
+casualness, or learnedness,
+
+00:13:06
+or something like that.
+
+00:13:07
+And then you might
+think, oh, well,
+
+00:13:09
+for overall wanting to know
+how casual the text is, maybe
+
+00:13:14
+I want to know the average
+of how casual it is
+
+00:13:17
+in different parts of the text.
+
+00:13:19
+And so then you can do the
+alternative of average pooling.
+
+00:13:22
+And sometimes people
+do that as well.
+
+00:13:25
+You can do both.
+
+00:13:26
+You can both work out an
+average pool and a max pool
+
+00:13:29
+and put both of them into
+the feature detector.
+
+00:13:31
+In general, for the
+kind of features people
+
+00:13:34
+learn in neural
+networks, if you're just
+
+00:13:36
+doing one or the
+other, the result
+
+00:13:38
+does seem to be that max
+pooling is the most effective,
+
+00:13:42
+that kind of does the
+feature fire metaphor tends
+
+00:13:45
+in general to be the best
+way of thinking about things.
+
+00:13:52
+OK, so if you want to do all
+of this in PyTorch conv1d,
+
+00:13:57
+right that I guess the
+one-dimensional convolutions
+
+00:14:01
+aren't the most common case.
+
+00:14:03
+And so you're using conv1d
+and all these kind of things
+
+00:14:07
+that you can then be specifying.
+
+00:14:10
+So the output channels is the
+number of filters you have.
+
+00:14:13
+The kernel size is saying
+the size is how big it is,
+
+00:14:17
+which, from my example, is 3.
+
+00:14:19
+And then you can just collapse
+things with the max pooling.
+
+00:14:24
+There's a space of other
+things that you can also
+
+00:14:29
+do with convolutional
+neural networks, which
+
+00:14:32
+I think are less useful and
+less used in language cases,
+
+00:14:38
+but I can say them quickly.
+
+00:14:41
+So one thing you can
+do is have a stride,
+
+00:14:46
+because when we did every
+trigram of 0 tentative deal,
+
+00:14:53
+then tentative deal reached,
+then deal reached to,
+
+00:14:56
+you could feel like,
+well, they're overlapping
+
+00:14:58
+each other a lot,
+so they've actually
+
+00:14:59
+got very similar stuff in them.
+
+00:15:02
+And that would be even more so
+if we weren't using 3-grams.
+
+00:15:05
+We were using
+something like 5-grams.
+
+00:15:07
+So something that you can
+do as the stride of sort
+
+00:15:11
+of how much you move along.
+
+00:15:12
+So if you move along
+2, you'd have 1 trigram
+
+00:15:15
+that's padding tentative deal.
+
+00:15:18
+And then the next one would then
+be "deal reach to," and then
+
+00:15:22
+the next one would be
+"to keep government"
+
+00:15:24
+so that they're overlapping
+by less as you go through it.
+
+00:15:30
+Another thing that you can
+then do that sort of stride
+
+00:15:36
+like it's rather than doing max
+pooling over the entire thing,
+
+00:15:44
+you could do more
+of a local max pool.
+
+00:15:47
+So you could think that well,
+I want to have this feature
+
+00:15:51
+detector for something
+use of "I" language.
+
+00:15:55
+But if it's a big long
+sentence and there's "I"
+
+00:15:57
+language at four
+different points,
+
+00:15:59
+maybe you should get 4 points
+for that rather than just the 1
+
+00:16:02
+point that you're going
+to get from max pooling.
+
+00:16:05
+So you could do local max
+pooling sensitive to the stride.
+
+00:16:10
+So here I could look at
+the first two of these
+
+00:16:13
+and max pool those two.
+
+00:16:15
+Then the next two
+and max pool those.
+
+00:16:17
+The next 2 and max pool those.
+
+00:16:19
+And the next pool 2
+and max pool those.
+
+00:16:21
+And you could sort of then end
+up with this sort of local max
+
+00:16:25
+pooling as you go along.
+
+00:16:30
+OK.
+
+00:16:32
+And then one other idea that's
+sort of related that you can do
+
+00:16:38
+is well, another
+way of capturing
+
+00:16:42
+does something match
+in multiple places
+
+00:16:45
+is rather than only keeping
+the one max in each column,
+
+00:16:49
+maybe you could just do a k
+max so you could keep the two
+
+00:16:53
+maximum things in a column.
+
+00:16:55
+And that might be also be a way
+of seeing whether something is
+
+00:16:59
+detected in two places or not.
+
+00:17:04
+OK.
+
+00:17:06
+Then I've got lots
+of notions here.
+
+00:17:09
+So dilation is then the notion
+that what we'd like to do
+
+00:17:18
+is form our trigrams not
+only as adjacent things,
+
+00:17:24
+but things that are spaced out.
+
+00:17:27
+So after having done our first
+layer of convolutional filters
+
+00:17:32
+that took trigrams that got
+us to top right part here,
+
+00:17:37
+we could then do a dilated
+trigram convolution,
+
+00:17:41
+which means that we're going
+to take the first, third,
+
+00:17:44
+and fifth things and combine
+them in a convolutional filter.
+
+00:17:52
+And then we'll take the second,
+fourth, and sixth things
+
+00:17:55
+and combine them in a
+convolutional filter.
+
+00:17:59
+And so we've then
+got a trigram filter,
+
+00:18:01
+but it sort of has a bigger
+range of size that it can see.
+
+00:18:07
+And that's sometimes
+used more commonly
+
+00:18:09
+used in places like speech
+than a natural language.
+
+00:18:13
+So those are the
+kind of tools we
+
+00:18:16
+have for calculating things with
+these convolutions over text.
+
+00:18:21
+And so next what I
+want to do is tell you
+
+00:18:24
+about a couple of
+pieces of work that
+
+00:18:27
+made use of convolutions for
+natural language processing.
+
+00:18:31
+I guess this is a decade old
+now because this is from 2014.
+
+00:18:36
+This is the single most
+famous piece of work
+
+00:18:40
+that made use of
+convolutional neural networks
+
+00:18:43
+for natural language processing.
+
+00:18:45
+And Yoon Kim is now an
+assistant professor at MIT.
+
+00:18:50
+I mean, in retrospect, it's
+sort of actually pretty simple.
+
+00:18:55
+But I guess, he got in
+early with the idea of, hey,
+
+00:18:59
+maybe we could use
+convolutions for NLP
+
+00:19:03
+and did a kind of a
+clear example of that
+
+00:19:06
+that worked pretty well.
+
+00:19:08
+And so this piece of
+work is very well known.
+
+00:19:13
+So this was writing a
+sentiment classifier.
+
+00:19:18
+So looking at a sentence
+and deciding whether it's
+
+00:19:22
+positive or negative.
+
+00:19:24
+And actually, for both
+the kind of models
+
+00:19:26
+that I'm going to
+talk about today,
+
+00:19:27
+we're going to use
+examples that are
+
+00:19:30
+doing sentiment classification.
+
+00:19:33
+He also considered other
+tasks subjective or objective
+
+00:19:36
+language, question
+classification
+
+00:19:39
+as to what they were about.
+
+00:19:40
+But the main application was
+doing sentiment analysis.
+
+00:19:43
+So what you're
+going to be doing--
+
+00:19:46
+and this paper shows things
+more in his notation,
+
+00:19:52
+but it's exactly the same as
+we've just been talking about,
+
+00:19:55
+that you're taking
+n-grams of word vectors.
+
+00:19:58
+You're going to be multiplying
+them by a convolution
+
+00:20:03
+and calculating new vectors.
+
+00:20:06
+And it's going to
+be done in his model
+
+00:20:09
+for different sizes of n-grams.
+
+00:20:11
+So he's going to have some
+convolutional filters that look
+
+00:20:14
+at bigrams, some of it trigrams,
+and some of them that look
+
+00:20:19
+at 4-grams.
+
+00:20:24
+And then there's the slid across
+the positions in the sentence.
+
+00:20:29
+Then having done
+that, it then does
+
+00:20:32
+maxpooling, as we've
+been talking about,
+
+00:20:35
+which gives a single number
+coming out of each filter.
+
+00:20:41
+And those max pooled
+numbers from each filter
+
+00:20:44
+are then going to be
+used as a classifier
+
+00:20:47
+in a final, simple softmax
+layer to give the full answers.
+
+00:20:53
+There's one other
+thing that came up
+
+00:20:55
+in this paper, which is just
+an interesting general idea
+
+00:21:00
+to be aware of.
+
+00:21:02
+And there was something
+he sort of pioneered,
+
+00:21:05
+which is the following, that
+it's a very common case that
+
+00:21:13
+for when you're--
+
+00:21:15
+I guess this, again,
+occurs less with
+
+00:21:18
+huge pre-trained transformers.
+
+00:21:20
+But for the classic
+case of models
+
+00:21:23
+where you had word
+vectors, and then you
+
+00:21:25
+were training some
+neural network
+
+00:21:27
+model on some
+supervised data, there
+
+00:21:32
+was this following pitfall
+of what happened when
+
+00:21:36
+you fine tuned word vectors.
+
+00:21:38
+And so the setting
+is we've started off
+
+00:21:42
+with our pre-trained word
+vectors from GloVe, or word2vec,
+
+00:21:47
+or whatever it is.
+
+00:21:48
+And then we've got a smaller
+sentiment analysis data set
+
+00:21:54
+and that we're going to
+train a sentiment classifier.
+
+00:21:59
+And that will involve not
+only learning the parameters
+
+00:22:03
+of our sentiment
+classifier, but also, we
+
+00:22:06
+can back prop into the word
+vector representations.
+
+00:22:11
+And if you do that,
+I mean, it seems
+
+00:22:14
+like that should be a good
+idea because normal word
+
+00:22:19
+vectors aren't specially
+attuned to predicting sentiment
+
+00:22:24
+correctly.
+
+00:22:25
+They're more tuned
+to meaning of words
+
+00:22:28
+as to just what words are about.
+
+00:22:33
+And so it seems like
+it should help you
+
+00:22:36
+if you could back prop
+into the word vectors
+
+00:22:40
+and change them as you go along.
+
+00:22:42
+But if you do that, there
+tends to be a problem.
+
+00:22:46
+And the problem is
+what you'll find
+
+00:22:50
+is that some words will be
+in your sentiment training
+
+00:22:54
+data set.
+
+00:22:55
+And when you learn
+with back prop,
+
+00:23:00
+these word vectors will move.
+
+00:23:02
+But some words just won't
+be in your training data,
+
+00:23:06
+and they're going to
+stay exactly where they
+
+00:23:08
+were in the word2vec
+vectors, because there's
+
+00:23:11
+nothing to move them around.
+
+00:23:13
+So what tends to happen is
+you start it off like this,
+
+00:23:18
+where all of "tedious,"
+"dull," and "plodding"
+
+00:23:20
+were close by each other as
+having similar meanings and are
+
+00:23:24
+indicators of
+something negative.
+
+00:23:27
+But after you've done your
+training, "tedious" and "dull"
+
+00:23:32
+as part of backprop
+we've moved over here,
+
+00:23:34
+where they're part
+of the negative land,
+
+00:23:37
+and the classification
+boundary has moved over here.
+
+00:23:40
+But "plodding" wasn't
+in the training set,
+
+00:23:43
+so it's just sitting exactly
+where it was at the start
+
+00:23:46
+of the process.
+
+00:23:47
+And now it's being treated
+as a positive word, which
+
+00:23:51
+is completely wrong.
+
+00:23:52
+And so that's tended
+to have the result
+
+00:23:56
+that when people sort
+of train language neural
+
+00:24:01
+network on a small
+supervised data set,
+
+00:24:04
+you've got ambivalent results
+that sometimes doing backprop
+
+00:24:11
+into the word vectors would help
+because you could specialize
+
+00:24:14
+your word vectors to your task.
+
+00:24:16
+But sometimes it would hurt you
+because of this kind of effect,
+
+00:24:19
+that you're sort of messed up
+the semantic relations that
+
+00:24:23
+applied over that were
+captured reasonably well
+
+00:24:26
+in the initial word vectors.
+
+00:24:29
+So the way that Yoon
+Kim dealt with that
+
+00:24:33
+was a fairly simple way.
+
+00:24:36
+He just doubled his
+number of channels.
+
+00:24:38
+And so he made two copies
+of each channel, each filter
+
+00:24:45
+in his convolutional
+neural network.
+
+00:24:48
+And for one of them, it used
+the fine tuned word vectors.
+
+00:24:53
+And for one of them, it kept
+the original word vectors.
+
+00:24:56
+And then he could have
+the best of both worlds.
+
+00:25:00
+OK.
+
+00:25:01
+So this picture captures
+the whole of his network,
+
+00:25:08
+and this picture actually comes
+from a follow-on paper which
+
+00:25:12
+produced this nice picture.
+
+00:25:14
+So we start off with a sentence
+"I like this movie very much,"
+
+00:25:19
+which should be
+classified positive.
+
+00:25:21
+So we have words and
+their word vectors.
+
+00:25:24
+And so then you're going to have
+convolutional filters that are
+
+00:25:29
+both bigram filters, trigram
+filters, and 4-gram filters.
+
+00:25:34
+And at each of
+those sizes, you're
+
+00:25:37
+going to have ones that work
+on the unfine-tuned word
+
+00:25:40
+vectors and the
+fine-tuned word vectors.
+
+00:25:44
+And so you're going
+to put these filters
+
+00:25:49
+and slide them over the text
+and get representations.
+
+00:25:54
+And the way he's doing this, the
+filters are done without padding
+
+00:25:59
+so that the 4-gram filters,
+you're getting smaller vectors
+
+00:26:02
+coming out.
+
+00:26:03
+And the bigram filters, you've
+got bigger vectors coming out.
+
+00:26:07
+And so then for each
+of these, you're
+
+00:26:10
+then going to max pool so
+you're just getting the highest
+
+00:26:14
+value from it.
+
+00:26:15
+And then you're getting
+the highest value
+
+00:26:17
+from the ones with the
+fine tuning of the word
+
+00:26:20
+vectors and the ones not.
+
+00:26:22
+And so you're getting one
+feature out of each filter.
+
+00:26:27
+You're then concatenating all
+of those max pooled outputs
+
+00:26:33
+together, so you
+can then one vector
+
+00:26:35
+for the entire sentence, which
+is of fixed size reflecting
+
+00:26:39
+the number of filters.
+
+00:26:41
+And then you're
+just sticking this
+
+00:26:43
+as a straightforward
+linear classifier
+
+00:26:46
+into a softmax that's
+then giving you
+
+00:26:49
+a probability of a
+positive or negative.
+
+00:26:52
+And that was the entire model.
+
+00:26:56
+And the interesting thing was
+this actually worked pretty well
+
+00:27:00
+for natural language
+classification tasks.
+
+00:27:05
+So this is a big table of
+results from his paper.
+
+00:27:09
+So there are sentiment data
+sets like the Stanford Sentiment
+
+00:27:15
+Treebank, two versions of that.
+
+00:27:17
+Movie reviews is another
+sentiment data set.
+
+00:27:20
+There's a subjectivity
+classifier.
+
+00:27:23
+The trec was the kind of
+question type classifier.
+
+00:27:27
+So various data sets.
+
+00:27:31
+And various people,
+including us at Stanford,
+
+00:27:39
+I guess all of these Socher
+et al. results were ones
+
+00:27:41
+that we were doing at Stanford
+had built lots of models
+
+00:27:47
+on various of these data sets.
+
+00:27:49
+And his argument
+was that by using
+
+00:27:53
+this simple convolutional
+neural network,
+
+00:27:56
+you could do as well,
+sometimes better,
+
+00:28:00
+than any of these
+other models that
+
+00:28:02
+were being considered at the
+time for sentiment analysis.
+
+00:28:06
+Now, there was at least one way
+in which maybe that comparison
+
+00:28:13
+was too generous to the CNN.
+
+00:28:15
+So because if you remember back
+when we were doing drop out
+
+00:28:21
+and we said, Dropout
+is such a good idea.
+
+00:28:24
+I mean, Dropout, I
+think, came out in 2012,
+
+00:28:27
+if I'm remembering correctly.
+
+00:28:29
+So the reality is a lot of these
+other methods were being written
+
+00:28:33
+before Dropout
+appeared on the scene,
+
+00:28:36
+whereas he was using Dropout,
+and that gave him an advantage
+
+00:28:41
+and better experimental
+technique might have been
+
+00:28:44
+to compare to redo the
+other models with Dropout,
+
+00:28:48
+which he didn't.
+
+00:28:50
+But nevertheless,
+it shows that you
+
+00:28:52
+could get strong results using
+convolutional neural networks
+
+00:28:57
+with just a very
+simple architecture.
+
+00:29:01
+Yeah.
+
+00:29:02
+So that's one more
+thing that you can do.
+
+00:29:04
+And so the thing
+to think about here
+
+00:29:07
+is we have this sort of toolkit
+of ways that you can do things.
+
+00:29:11
+We started off with
+word vectors and bags
+
+00:29:15
+of vectors, which you could
+use for simple classification.
+
+00:29:18
+We talked early on
+about window models,
+
+00:29:22
+and your window
+models are sort of
+
+00:29:25
+like what you get for
+convolutional neural networks,
+
+00:29:28
+but more ad hoc.
+
+00:29:31
+Then we have convolutional
+neural networks,
+
+00:29:34
+which are definitely
+good for classification
+
+00:29:37
+and very easy to
+parallelize, which is good.
+
+00:29:40
+Then we talked about
+recurrent neural networks,
+
+00:29:43
+which seem to be
+cognitively plausible,
+
+00:29:45
+reading through sentences
+from left to right
+
+00:29:48
+but aren't easy to parallelize.
+
+00:29:51
+And then we've talked
+about transformers,
+
+00:29:54
+which to some extent is
+our best model for NLP
+
+00:29:58
+and is being used everywhere.
+
+00:30:00
+And indeed, what's
+happening now is
+
+00:30:02
+that things are going in reverse
+and people are increasingly
+
+00:30:06
+using transformers for vision
+as well, though they still, I
+
+00:30:10
+think, more debate in the
+vision world as between CNNs
+
+00:30:13
+and transformers, with some
+people arguing that both of them
+
+00:30:17
+have complementary advantages.
+
+00:30:21
+OK.
+
+00:30:22
+A couple of other just facts
+on the side, and then I'll
+
+00:30:25
+show you one other bigger,
+fancier convolutional neural
+
+00:30:31
+network model for language.
+
+00:30:33
+So we talked about
+for transformer models
+
+00:30:38
+the use of layer normalization,
+which sort of keeps
+
+00:30:43
+the size of the numbers
+in the middle layers
+
+00:30:46
+of the neural network
+about the same
+
+00:30:48
+by giving 0 mean
+and unit variance.
+
+00:30:54
+There are slightly different
+ways that you can do that.
+
+00:30:57
+For convolutional
+neural networks,
+
+00:30:59
+a standard thing to be using
+is batch normalization.
+
+00:31:03
+And indeed, batch
+normalization was the thing
+
+00:31:06
+that was invented first.
+
+00:31:09
+And layer normalization
+and batch normalization
+
+00:31:13
+are sort of doing the same
+thing of scaling numbers
+
+00:31:17
+to give them 0 mean
+and unit variance.
+
+00:31:21
+But the way that they differ is
+sort of under what dimensions
+
+00:31:25
+they're doing
+their calculations.
+
+00:31:28
+So that layer norm is
+calculating statistics
+
+00:31:31
+across the feature
+dimension, whereas batch norm
+
+00:31:34
+is normalizing all the elements
+in the batch for each feature
+
+00:31:39
+independently.
+
+00:31:42
+OK.
+
+00:31:43
+One other little
+concept that turns up,
+
+00:31:47
+which actually sort of connects
+a bit to transformers as well,
+
+00:31:52
+there's this sort of
+funny thing that you can--
+
+00:31:54
+all of what I've presented so
+far was sort of convolutions
+
+00:31:58
+that are some n-gram,
+bigram, trigram, 4-gram.
+
+00:32:03
+And so there are also
+size 1 convolutions.
+
+00:32:08
+And at first sight, that
+seems to make no sense at all,
+
+00:32:12
+because what's the point of
+doing a size 1 convolution?
+
+00:32:16
+Because you've just
+got one thing and it's
+
+00:32:18
+staying just one thing.
+
+00:32:20
+But it actually does make
+sense because it corresponds
+
+00:32:25
+to having a little
+fully connected layer
+
+00:32:28
+that's only looking at the
+representation in one position.
+
+00:32:32
+So in a language term,
+it's taking a word vector
+
+00:32:35
+and putting it through a
+fully connected neural network
+
+00:32:39
+to produce a new representation
+just of that word.
+
+00:32:43
+And that's actually
+what we also have
+
+00:32:46
+with the fully connected layers
+and transformers, that you've
+
+00:32:49
+got a fully connected
+layer that's
+
+00:32:51
+just at 1 subword token
+position and calculates
+
+00:32:55
+a new representation for it.
+
+00:32:58
+And so that allows you to
+create new representations
+
+00:33:04
+with actually many fewer
+parameters than if you're
+
+00:33:07
+allowing a fully connected layer
+across the entire sentence.
+
+00:33:13
+And so this is then
+a more recent version
+
+00:33:19
+of a convolutional
+neural network,
+
+00:33:22
+still, again, used for text
+classification, but a much more
+
+00:33:27
+complex one from Conneau et al.
+
+00:33:31
+in 2017.
+
+00:33:33
+And again, this was still at
+the stage in which LSTM sequence
+
+00:33:38
+models were dominant in NLP.
+
+00:33:40
+I guess in 2017,
+this is the same year
+
+00:33:44
+that the first transformer
+paper came out.
+
+00:33:47
+And the motivations were sort of
+comparing vision and language.
+
+00:33:56
+And so at that point in time,
+convolutional neural network
+
+00:34:02
+models and vision
+were already very deep
+
+00:34:05
+models, so people were using
+things like ResNet models
+
+00:34:08
+that had 30, 50, or
+100 layers in them.
+
+00:34:12
+And that stood in
+stark contrast to what
+
+00:34:16
+was happening in the LSTM
+world for sequence models,
+
+00:34:19
+where commonly, people were just
+using two layer sequence models.
+
+00:34:24
+And if you're wanting
+to go further,
+
+00:34:27
+you might be using a
+three-layer sequence model
+
+00:34:29
+or a four-layer sequence model.
+
+00:34:31
+Or occasionally, if you
+got really, really deep,
+
+00:34:34
+people had used
+eight-layer sequence models
+
+00:34:37
+if they had a lot of data.
+
+00:34:38
+But essentially, it was
+always in a single digit,
+
+00:34:42
+the number of layers.
+
+00:34:44
+And then the second
+thing was, in some sense,
+
+00:34:48
+the vision models were more raw
+signal models because they were
+
+00:34:54
+operating on the
+individual pixel level,
+
+00:34:57
+whereas in NLP, the
+standard was that we
+
+00:35:01
+were using word level models
+still in the transformer models.
+
+00:35:05
+So it sort of seemed like
+things were much more
+
+00:35:07
+grouped before they began.
+
+00:35:10
+And so the idea of this
+paper is, well, maybe we
+
+00:35:13
+could do NLP kind of
+like it was vision.
+
+00:35:17
+So we'll start with the raw
+characters as our signal.
+
+00:35:22
+We're going to put them into
+a deeper convolutional neural
+
+00:35:27
+network and use the same kind of
+architecture we use for vision
+
+00:35:32
+and use that for language
+classification tasks.
+
+00:35:36
+And so that led to this
+VD-CNN architecture,
+
+00:35:41
+which is something that looks
+very like a vision system
+
+00:35:46
+in design.
+
+00:35:49
+And so what do we have here?
+
+00:35:50
+So at the bottom, we have
+individual characters.
+
+00:35:57
+And the individual characters
+get a 16D representation.
+
+00:36:03
+And then you've got some sort
+of size of piece of text that
+
+00:36:07
+you're classifying,
+which for them was 1,024.
+
+00:36:13
+And then at each
+stage, we're then
+
+00:36:16
+going to have
+convolutional blocks.
+
+00:36:21
+And so these
+convolutional blocks
+
+00:36:24
+have a whole bunch of filters,
+but they're also then going
+
+00:36:29
+to group stuff
+together so that we're
+
+00:36:32
+starting to collapse into
+multi-character units.
+
+00:36:37
+So we're starting
+off, first of all,
+
+00:36:41
+having 64 size 3
+convolutional filters.
+
+00:36:49
+And so that gives us a
+representation of 64 times
+
+00:36:54
+the window size.
+
+00:36:56
+And then we're going to
+do that again and put it
+
+00:37:03
+through another set of
+convolutional filters of size 3
+
+00:37:07
+and 64 of them, which gets
+us sort of up to here.
+
+00:37:12
+And then at each point, we
+also have residual connections,
+
+00:37:16
+which we also saw
+in transformers
+
+00:37:18
+that were pioneered
+in the vision space,
+
+00:37:20
+so that we have a path
+that things can just
+
+00:37:22
+go straight through.
+
+00:37:24
+But then when we
+get to here, we're
+
+00:37:27
+then going to do local pooling.
+
+00:37:29
+So each pair of representations
+here will be pooled together.
+
+00:37:36
+And so at that point, we've
+no longer got a length
+
+00:37:40
+of the initial length of 1,024.
+
+00:37:44
+We've now got a length of 512.
+
+00:37:49
+So now we're going to be
+putting it through, again,
+
+00:37:54
+sort of trigram convolutions.
+
+00:37:56
+But now we're going to
+have 128 of those channels.
+
+00:38:02
+We're going to
+repeat that again.
+
+00:38:04
+And then we're going to
+again group with pooling.
+
+00:38:07
+So now we're going to have 256
+long sequence because we've done
+
+00:38:16
+local pooling of each pair.
+
+00:38:18
+And we're going to then have
+256 filters at each stage.
+
+00:38:23
+And we go up.
+
+00:38:24
+And then we do local pooling
+again so each of them
+
+00:38:28
+is now representing an
+eight gram of characters.
+
+00:38:32
+And we're putting trigram
+filters over those 8 grams.
+
+00:38:36
+So really, the
+amount of a sentence
+
+00:38:41
+that the convolutional filters
+are seeing at this point
+
+00:38:45
+is 24 characters,
+so seeing something
+
+00:38:48
+like six-word sequences
+or something like that.
+
+00:38:51
+More convolutional blocks there.
+
+00:38:56
+They then do this k-max pooling.
+
+00:38:58
+So some of the ideas from
+the beginning of the lecture
+
+00:39:01
+do show up.
+
+00:39:02
+So you're then
+doing k-max pooling
+
+00:39:04
+and finding the eight highest
+activations in the sequence.
+
+00:39:09
+And that sort of makes sense for
+something like a text classifier
+
+00:39:12
+because you want to count up
+the amount of evidence, right.
+
+00:39:16
+If you got some category like,
+is this about, I don't know,
+
+00:39:21
+copper mining, you want to
+be seeing whether there's
+
+00:39:25
+a bunch of places
+in the text that's
+
+00:39:27
+talking about copper mining.
+
+00:39:30
+And then right up the top, they
+have several fully connected
+
+00:39:33
+layers, which, again, is
+very typical of what you're
+
+00:39:37
+finding in vision networks
+such as something like VGGNet
+
+00:39:43
+that after you've done a whole
+bunch of convolutional layers,
+
+00:39:47
+you just stick it through
+multiple fully connected layers
+
+00:39:50
+at the top.
+
+00:39:51
+And so that's what
+they're doing as well.
+
+00:39:53
+And this is your architecture
+for doing text understanding.
+
+00:40:00
+OK.
+
+00:40:01
+I think I talked through
+that in a lot of detail.
+
+00:40:04
+So I'll skip this slide.
+
+00:40:06
+Yeah.
+
+00:40:07
+So their experiments were done
+on text classification data
+
+00:40:12
+sets.
+
+00:40:13
+So various news
+classification data sets.
+
+00:40:18
+DBPedia ontology, then
+doing sentiment analysis
+
+00:40:22
+on Yelp reviews
+and Amazon reviews.
+
+00:40:26
+And here, our results
+from their one.
+
+00:40:32
+So they're taking
+the previous known
+
+00:40:35
+best published results, which
+are shown here in table four.
+
+00:40:40
+And then they're considering
+whether they can do better
+
+00:40:45
+by using their architecture and
+that they used architectures
+
+00:40:51
+of different lengths in
+terms of the number of layers
+
+00:40:55
+of 9 layers, 17, and 29 layers.
+
+00:40:59
+And the result of the
+paper is, in all cases,
+
+00:41:02
+they got the best results
+by their deepest network,
+
+00:41:06
+which was a 29-layer model,
+which is sort of then sort
+
+00:41:09
+of similar to what people
+were doing in vision.
+
+00:41:13
+And then there's some
+variation as to which
+
+00:41:17
+was best by using the max
+pooling or the k-max pooling.
+
+00:41:20
+But in general, it was
+always the deep model.
+
+00:41:23
+And it varied a bit
+according to the data set,
+
+00:41:27
+but at least
+sometimes, they were
+
+00:41:29
+able to produce the best
+results that were known.
+
+00:41:32
+So I mean, I guess for
+these text classification,
+
+00:41:35
+previous results were slightly
+better than their results.
+
+00:41:39
+But for some of be other ones,
+like the DBP and the Yelp,
+
+00:41:43
+their results are also--
+
+00:41:46
+well, for both the
+Yelp data sets,
+
+00:41:48
+their results were better than
+the best known previous results.
+
+00:41:53
+The Amazon ones, one was
+better, one was worse.
+
+00:41:57
+But to a first approximation,
+this meant that they could
+
+00:42:00
+basically reach the
+state-of-the-art of a text
+
+00:42:03
+classification system with
+something that was just a deep
+
+00:42:08
+convolutional neural network,
+starting from the character
+
+00:42:12
+level, with none of those having
+learnt word vectors in advance
+
+00:42:16
+or anything like that.
+
+00:42:17
+And so that was a
+pretty cool achievement,
+
+00:42:20
+which showed that you could
+go a fair way in doing things
+
+00:42:24
+with just this sort of raw
+character level convolutional
+
+00:42:28
+neural networks, more
+like a vision system.
+
+00:42:33
+OK.
+
+00:42:34
+So that's that.
+
+00:42:35
+And then for the final
+piece of the class,
+
+00:42:39
+I then want to tell
+you about something
+
+00:42:42
+in the other extreme, which
+is about tree recursive neural
+
+00:42:47
+networks.
+
+00:42:47
+So tree recursive
+neural networks
+
+00:42:50
+is a framework that me and
+students developed at Stanford.
+
+00:42:55
+So I mean, when I first
+got into neural networks
+
+00:43:01
+starting in 2010, that's sort of
+for about the first five years
+
+00:43:07
+that what me and
+students worked on
+
+00:43:09
+was doing these tree
+recursive neural networks.
+
+00:43:12
+And so they were
+the Stanford brand.
+
+00:43:16
+Ultimately, they didn't
+prove as successful
+
+00:43:22
+as other things that came along.
+
+00:43:24
+But I think they're
+linguistically interesting.
+
+00:43:27
+And I think there's
+a clear idea here,
+
+00:43:30
+which is still an
+idea that exists.
+
+00:43:32
+And I think there may
+be still some things
+
+00:43:35
+to do with which
+I'll come back to.
+
+00:43:37
+But the starting
+point is essentially
+
+00:43:39
+being motivated by
+structure of human language.
+
+00:43:43
+And so most of this slide
+is sort of filled by a paper
+
+00:43:48
+from Noam Chomsky and
+colleagues sort of discussing
+
+00:43:52
+their views of the human
+faculty of language, what it is,
+
+00:43:56
+who has it, and
+how did it evolve.
+
+00:43:59
+And I don't want to dwell
+on this in too much detail,
+
+00:44:04
+but essentially in
+this paper, what
+
+00:44:06
+they argue is that the defining
+property of human language
+
+00:44:12
+that's not observed in
+other things that humans do
+
+00:44:16
+is that language has
+this recursive structure,
+
+00:44:20
+that you have this hierarchical
+nesting where the same structure
+
+00:44:25
+repeats inside itself.
+
+00:44:27
+So if you have an example,
+like "the person standing next
+
+00:44:31
+to the man from the company that
+purchased the firm that's used
+
+00:44:34
+to work at," what you have is--
+
+00:44:40
+the whole of this is a
+noun phrase, "the person."
+
+00:44:43
+Headed by "the person."
+
+00:44:45
+And then it's
+"standing next to."
+
+00:44:47
+Then the first square brackets,
+here is another noun phrase--
+
+00:44:51
+"the man from."
+
+00:44:53
+Then inside that
+prepositional phrase,
+
+00:44:55
+there's another noun phrase--
+
+00:44:56
+"the company that
+purchased the firm."
+
+00:45:00
+And then "the firm" is
+another noun phrase that has
+
+00:45:04
+the relative clause modifier of
+"the firm that you used to work
+
+00:45:08
+at."
+
+00:45:08
+So we have these embedded
+layers of noun phrases
+
+00:45:12
+with the same syntactic
+structure underneath them.
+
+00:45:16
+And so for the
+kind of formalisms
+
+00:45:18
+that we use in linguistics
+or context-free grammar,
+
+00:45:22
+it permits the kind of infinite
+embedding of nesting, which
+
+00:45:26
+is the same kind of nesting
+that you get in programming
+
+00:45:29
+languages, where you
+can use if statements
+
+00:45:34
+and nest them as deeply as
+you want to because you just
+
+00:45:37
+have this same repeating
+recursive structure.
+
+00:45:40
+Now, of course, human
+beings can't actually
+
+00:45:42
+understand recursive
+infinite recursion,
+
+00:45:46
+and people don't actually
+produce infinite recursion
+
+00:45:49
+that you could say and practice.
+
+00:45:52
+No one's going to
+go more than eight
+
+00:45:54
+deep when they're
+saying a sentence.
+
+00:45:56
+But in terms of the structure
+of what the language looks like,
+
+00:46:00
+it seems like you should be
+able to do it infinitely deep.
+
+00:46:03
+And when you actually
+start looking
+
+00:46:05
+at the structures of sentences,
+they do sort of repeat
+
+00:46:09
+over the same
+structure quite deeply.
+
+00:46:12
+So this is an example
+of a Penn Treebank
+
+00:46:15
+tree, which is the best
+known constituency treebank.
+
+00:46:21
+And so here's my
+random sentence.
+
+00:46:23
+"Analysts said Mr. Stronach
+wants to resume a more
+
+00:46:27
+influential role in
+running the company."
+
+00:46:31
+And, well, what
+we end up with, we
+
+00:46:33
+have these nested
+things of verb phrases.
+
+00:46:37
+So "running the company"
+is a verb phrase.
+
+00:46:39
+"Resume a more influential
+role in running the company"
+
+00:46:44
+is a bigger verb phrase.
+
+00:46:46
+"Wants to resume a bigger
+role in running the company"
+
+00:46:51
+is an even bigger verb phrase.
+
+00:46:53
+And then "said Mr. Stronach
+wants to resume a more
+
+00:46:59
+influential role in
+running the company"
+
+00:47:01
+is an even bigger verb phrase.
+
+00:47:03
+And so we have 1, 2, 3,
+4 verb phrases all nested
+
+00:47:10
+inside each other.
+
+00:47:12
+And so the idea
+was, well, maybe we
+
+00:47:15
+should be thinking of sentences
+as having this kind of tree
+
+00:47:19
+structure and computing
+representations
+
+00:47:22
+of meanings of sentences in
+terms of this tree structure.
+
+00:47:27
+So we have words that have
+representations in a word vector
+
+00:47:34
+space like we saw right at
+the beginning of the class.
+
+00:47:37
+But then we're going
+to have a phrase
+
+00:47:39
+like the country of my birth.
+
+00:47:41
+And the classic
+linguistic answer
+
+00:47:44
+that you find both in linguistic
+semantics classes or philosophy
+
+00:47:48
+of language is that we should
+construct representations
+
+00:47:52
+of phrases using the principle
+of compositionality, which
+
+00:47:57
+says that the meaning
+of a phrase or sentence
+
+00:47:59
+is determined by the
+meanings of its words,
+
+00:48:02
+which are our word vectors, and
+the rules that combine them.
+
+00:48:06
+So maybe we could take
+the phrase structure
+
+00:48:09
+tree of a sentence and combine
+the word vectors together
+
+00:48:15
+by some means, and then we
+can construct a representation
+
+00:48:19
+of the meaning of phrases in a
+more linguistic way, giving us
+
+00:48:23
+a vector representation of
+the meaning of the phrase,
+
+00:48:26
+which we could also put
+into our vector space.
+
+00:48:29
+And we'd hoped that a phrase
+like the country of my birth
+
+00:48:32
+would appear in the vector
+space in a similar place
+
+00:48:36
+to where words representing
+locations appeared.
+
+00:48:41
+OK.
+
+00:48:41
+So what we want is to be able
+to start with word vectors
+
+00:48:45
+and parse up a sentence.
+
+00:48:48
+And as we parse
+the sentence, we're
+
+00:48:51
+then going to be
+computing representations
+
+00:48:54
+for the different
+phrases of the sentence.
+
+00:48:59
+And so the difference
+here is now--
+
+00:49:02
+the difference between
+recursive and recurrent
+
+00:49:08
+is sort of a fake
+difference, right?
+
+00:49:11
+They both come from
+the same recur word.
+
+00:49:14
+But rather than having the
+recursion just happening along
+
+00:49:18
+a sequence as in a
+recurrent neural network,
+
+00:49:21
+we're going to have the
+recursion happening up a tree
+
+00:49:25
+structure so we're
+computing representations
+
+00:49:28
+for linguistically
+meaningful phrases.
+
+00:49:31
+And so what we're going
+to do with that is,
+
+00:49:38
+the easy cases, if we know
+the phrase structure tree,
+
+00:49:44
+we can take the representations
+of the child nodes,
+
+00:49:49
+put them into a
+neural network, which
+
+00:49:51
+could give us the representation
+of the parent node.
+
+00:49:55
+But we'd also like to
+find the tree structure.
+
+00:49:59
+And so a way we could do that
+is then get a second thing out
+
+00:50:02
+of the neural network.
+
+00:50:03
+We could get a score for
+how plausible something is
+
+00:50:08
+as a constituent.
+
+00:50:09
+Does it make sense to combine
+these two nodes together
+
+00:50:13
+to form a larger constituent?
+
+00:50:16
+And then we can use
+that in a parser.
+
+00:50:18
+So formally, the
+very simplest kind
+
+00:50:23
+of tree neural network and
+the first one we explored
+
+00:50:26
+was when we had
+two child vectors.
+
+00:50:30
+We're going to be
+representing the parent vector
+
+00:50:34
+by concatenating
+the two children,
+
+00:50:38
+multiplying them by a
+matrix, adding a bias,
+
+00:50:41
+putting it through a
+non-linearity to get a parent
+
+00:50:44
+representation p.
+
+00:50:46
+And then we'd score whether it's
+a good constituent by taking
+
+00:50:51
+another vector of
+learned parameters, which
+
+00:50:57
+we'd do a dot product with p.
+
+00:51:00
+And that would give us a
+score as to whether this
+
+00:51:03
+was a good constituent to
+include in your parse tree.
+
+00:51:06
+And the same w
+parameters were used
+
+00:51:10
+at all nodes of the
+tree in the same way
+
+00:51:13
+as in a recurrent neural network
+kept using the same parameters.
+
+00:51:19
+OK.
+
+00:51:20
+So if we had that, we could
+build a greedy parser,
+
+00:51:25
+because what we could do is we
+could start with all the word
+
+00:51:28
+vectors, and we could just
+take every pair of words
+
+00:51:32
+and put it through this
+system and calculate
+
+00:51:36
+what the representation of that
+pair would be as a constituent,
+
+00:51:41
+and then get a score
+as to whether it seemed
+
+00:51:44
+a good constituent or not.
+
+00:51:46
+And then we could
+just greedily decide,
+
+00:51:49
+this is the best
+constituent, "the cat."
+
+00:51:52
+And so if we do a greedy
+parser, we can commit to that.
+
+00:51:56
+And then, well, we
+already still know
+
+00:51:59
+the possibilities of combining
+other pairs of words.
+
+00:52:03
+And we could just additionally
+score how good "the cat"
+
+00:52:09
+combined with "sat" is so that
+we're producing binary parse
+
+00:52:14
+structures.
+
+00:52:15
+So now the best pair to
+combine greedily is "the mat."
+
+00:52:19
+So we could combine them
+together and commit to those.
+
+00:52:23
+We can score combining
+"on" with the "mat."
+
+00:52:27
+And now that seems
+the best thing.
+
+00:52:29
+So we'll commit to that.
+
+00:52:30
+And we just keep on
+up, and we produce
+
+00:52:33
+a binary parse of the sentence.
+
+00:52:35
+And this gives us our
+sentence representation.
+
+00:52:40
+OK.
+
+00:52:41
+Which is like that.
+
+00:52:43
+And so that gives
+us our simple RNN.
+
+00:52:48
+And so back in 2011, we got
+some pretty decent results
+
+00:52:53
+of showing that you could use
+this as a sentence parser.
+
+00:52:57
+That worked pretty well.
+
+00:52:59
+But beyond that,
+the representations
+
+00:53:03
+we calculated for
+sentences and phrases
+
+00:53:06
+were good enough representations
+that you could use it
+
+00:53:10
+for tasks like sentence
+classification, sentiment
+
+00:53:14
+analysis, and it
+works reasonably well.
+
+00:53:19
+It only works reasonably
+well because if you start
+
+00:53:26
+thinking about it further.
+
+00:53:28
+There sort of were
+strong limitations
+
+00:53:31
+of having this single w matrix
+that's used at all points
+
+00:53:35
+to combine things so that if
+you have that architecture,
+
+00:53:40
+you sort of can't have
+different forms of interaction
+
+00:53:44
+between the different words.
+
+00:53:46
+You're sort of just
+uniformly computing things.
+
+00:53:49
+And that stands in
+distinction to the fact
+
+00:53:52
+that different kinds of
+things in natural language
+
+00:53:55
+seem kind of different.
+
+00:53:56
+You have different properties
+with verbs and their objects
+
+00:54:00
+versus an adjective
+modifying a noun just
+
+00:54:04
+in terms of what the roles
+of the different words were.
+
+00:54:06
+So we started to see limitations
+of this architecture.
+
+00:54:11
+And so in following years, we
+started exploring other ways
+
+00:54:15
+to build tree recursive
+neural networks,
+
+00:54:18
+which had more
+flexibility as to how
+
+00:54:21
+things were combined together.
+
+00:54:23
+And I'm not going to show you
+all the details of all of that,
+
+00:54:26
+but I will show
+you one more model
+
+00:54:32
+that we use for building tree
+recursive neural networks
+
+00:54:35
+and that was used in some of our
+sentiment analysis work called
+
+00:54:40
+the Recursive Neural
+Tensor Network.
+
+00:54:44
+It wasn't actually the final
+net version that we did.
+
+00:54:47
+After that, we sort of
+started taking LSTM ideas
+
+00:54:50
+and extending those to
+the tree structured case.
+
+00:54:54
+And we worked on tree LSTMs.
+
+00:54:56
+But I'm not going to
+show you that this year.
+
+00:54:58
+But the idea of recursive
+neural tensor networks
+
+00:55:02
+is when pairs of
+words or phrases
+
+00:55:06
+combine together in
+linguistic semantics terms,
+
+00:55:11
+depending on the pairs
+of words, they modify
+
+00:55:14
+each other in different ways.
+
+00:55:16
+So if you have an adjective and
+noun like a "red ball," "red"
+
+00:55:21
+is giving attributes
+of the noun.
+
+00:55:23
+Whereas if you have something
+like a verb and its object like
+
+00:55:28
+"kick the ball," you've
+got a very different role
+
+00:55:30
+for the object as the right
+hand side versus the "red ball."
+
+00:55:35
+It's the opposite way around,
+
+00:55:36
+So we want to have
+more flexibility
+
+00:55:39
+in the way we can calculate
+meanings of phrases
+
+00:55:42
+depending on what's in it.
+
+00:55:44
+And the way we came
+up with doing that
+
+00:55:47
+is to come up with what we
+call this neural tensor layer.
+
+00:55:51
+And so the idea in the
+neural tensor layer
+
+00:55:54
+is that we had the
+representations of the child
+
+00:56:04
+words or phrases.
+
+00:56:06
+And so rather than
+directly putting--
+
+00:56:09
+rather than directly
+concatenating them
+
+00:56:12
+and then putting it through a
+sort of a linear transformation
+
+00:56:18
+like a regular neural network
+layer, instead what we could do
+
+00:56:22
+is that we could learn
+in between matrices.
+
+00:56:28
+And if we put several
+of those together,
+
+00:56:30
+we're then getting a
+three-dimensional tensor.
+
+00:56:33
+And we can multiply a vector
+by a tensor times a vector.
+
+00:56:41
+And then we'll end up getting
+out vectors for each one.
+
+00:56:47
+We'll have multiple
+such vectors.
+
+00:56:55
+And the place that
+we applied this model
+
+00:56:59
+is for this task of
+sentiment analysis.
+
+00:57:01
+So let me just tell you a little
+bit more of what we did here.
+
+00:57:05
+And this is sort
+of in fact, going
+
+00:57:07
+backwards to the
+Stanford Sentiment
+
+00:57:10
+Treebank there was already
+used in the Yoon Kim work.
+
+00:57:13
+So the goal of
+sentiment analysis
+
+00:57:15
+is to say whether
+a piece of text
+
+00:57:17
+is positive,
+negative, or neutral.
+
+00:57:20
+So a lot of the time,
+doing sentiment analysis
+
+00:57:23
+is pretty easy.
+
+00:57:25
+In the 2010s and
+probably even today,
+
+00:57:30
+quite a few people's sentiment
+analysis systems are essentially
+
+00:57:34
+just keyword matching.
+
+00:57:38
+If you see great, marvelous,
+wonderful-- positive sentiment.
+
+00:57:42
+If you see something
+of poor, bad--
+
+00:57:45
+negative sentiment.
+
+00:57:47
+And so lots of the time,
+you can effectively
+
+00:57:51
+do a kind of dictionary matching
+and get pretty good sentiment,
+
+00:57:55
+especially on longer documents.
+
+00:57:58
+But on the other hand,
+people use language
+
+00:58:01
+in lots of interesting ways,
+and it's not always that easy.
+
+00:58:05
+So if you look at something
+like movie reviews,
+
+00:58:08
+such as the snippets you
+get on Rotten Tomatoes,
+
+00:58:11
+you get snippets like
+this in Rotten Tomatoes--
+
+00:58:15
+"with this cast and
+this subject matter,
+
+00:58:17
+the movie should have been
+funnier and more entertaining."
+
+00:58:21
+And if you just think
+of it as, OK, we're
+
+00:58:24
+doing dictionary
+matching, there's
+
+00:58:26
+the word entertaining,
+that's definitely positive.
+
+00:58:30
+And funnier, that's positive.
+
+00:58:32
+So there are two
+positive words, so this
+
+00:58:35
+should be a positive review.
+
+00:58:37
+But of course, it's
+not a positive review.
+
+00:58:39
+This is a negative review
+because it's saying--
+
+00:58:44
+well, I'm just
+reading it out again--
+
+00:58:45
+"with this cast
+and subject matter,
+
+00:58:47
+the movie should have been
+funnier and more entertaining."
+
+00:58:51
+So the compositional structure
+of human language goes together
+
+00:58:56
+to mean that because it's
+buried under "should have been,"
+
+00:59:02
+the funnier and entertaining
+are actually lacking.
+
+00:59:07
+And so it's a negative review.
+
+00:59:09
+And so these were
+the kind of examples
+
+00:59:11
+that we were interested
+in and saying,
+
+00:59:14
+could we actually understand
+the structure of sentences
+
+00:59:17
+more and do a better job
+at sentiment analysis?
+
+00:59:21
+And so up until this
+time, people just sort of
+
+00:59:26
+had pieces of text and a
+classification judgment
+
+00:59:30
+of positive and negative.
+
+00:59:32
+So we decided we were going to
+do more than that and come up
+
+00:59:35
+with the Stanford
+Sentiment Treebank,
+
+00:59:37
+where what we did was parsed
+up a whole lot of sentences,
+
+00:59:43
+almost 12,000 of them.
+
+00:59:45
+And then what we
+were going to do
+
+00:59:47
+is put sentiment judgments
+on every linguistic phrase
+
+00:59:53
+of the sentence.
+
+00:59:55
+So for something like this
+example, "with this cast"
+
+00:59:58
+is a phrase, no sentiment.
+
+01:00:01
+So they'd just be neutral.
+
+01:00:03
+"Entertaining" is a
+phrase, a one-word phrase.
+
+01:00:07
+It's sentiment is positive.
+
+01:00:12
+"Funnier and more
+entertaining," that's a phrase.
+
+01:00:17
+Very positive.
+
+01:00:19
+But then by the time we get
+embedded under "should have been
+
+01:00:23
+funnier and more entertaining,"
+that's a bigger phrase.
+
+01:00:26
+It's sentiment is now negative.
+
+01:00:28
+And "the movie should have been
+funnier and more entertaining,"
+
+01:00:31
+that's an even bigger phrase.
+
+01:00:33
+It's negative.
+
+01:00:34
+And so we were parsing
+up trees like that.
+
+01:00:38
+And these examples
+are very small.
+
+01:00:41
+I'll show you a
+big examples later,
+
+01:00:43
+but you can just see
+that in the trees,
+
+01:00:47
+there are blue nodes
+and orange nodes
+
+01:00:49
+corresponding to positive
+and negative sentiment
+
+01:00:52
+reflecting units at
+the different sizes.
+
+01:00:54
+And so the interesting
+thing is then
+
+01:00:57
+this gave us a richer
+annotated data set,
+
+01:01:01
+because it's not only
+sort of whole sentences
+
+01:01:04
+or whole articles that were
+annotated for sentiment.
+
+01:01:07
+We had annotations
+for different phrases.
+
+01:01:11
+And simply the fact that
+you are annotating phrases
+
+01:01:15
+meant that you could learn
+more from the examples.
+
+01:01:19
+So that even if you were
+using something very simple
+
+01:01:21
+like a Naive Bayes
+classifier, because there
+
+01:01:24
+are annotations on words
+and smaller phrases,
+
+01:01:28
+you could learn a bit more
+about which were positive
+
+01:01:31
+and which were negative.
+
+01:01:33
+And so that was the first
+result that we could--
+
+01:01:38
+a baseline method of bigram
+Naive Bayes classifier,
+
+01:01:43
+which is a very common
+sentiment classifier
+
+01:01:45
+that if you just trained
+with sentiment classifiers,
+
+01:01:48
+you got 79% on this data set.
+
+01:01:54
+If you trained using every node
+of the Treebank, you got 83%.
+
+01:02:00
+So you got a 4% lift.
+
+01:02:02
+And so that was kind of good.
+
+01:02:04
+These other two lines show
+two of our early tree RNNs.
+
+01:02:10
+And the negative
+part of the result
+
+01:02:11
+is they weren't really better
+than a bigram naive Bayes
+
+01:02:16
+classifier.
+
+01:02:17
+They were better than a
+unigram Naive Bayes classifier.
+
+01:02:20
+But a lot of the
+extra information
+
+01:02:24
+that you want to capture
+for sentiment analysis,
+
+01:02:27
+you can get from bigrams,
+because that can already
+
+01:02:30
+tell you not good, somewhat
+interesting, and things
+
+01:02:35
+like that.
+
+01:02:39
+So the other hope was to
+have a more powerful model.
+
+01:02:43
+And so that then led into use
+of this recursive neural tensor
+
+01:02:47
+network, which allowed the
+mediated multiplicative
+
+01:02:51
+interactions between
+word or phrase vectors.
+
+01:02:57
+And so we built that.
+
+01:03:00
+And so then here are the
+results of that model
+
+01:03:03
+that's shown in red.
+
+01:03:05
+So by having our recursive
+neural tensor network,
+
+01:03:09
+we were able to build a somewhat
+better neural network that
+
+01:03:16
+performed at least reasonably
+better than a bigram Naive Bayes
+
+01:03:22
+model that we were getting.
+
+01:03:24
+So about 2.5% better than
+a bigram Naive Bayes model.
+
+01:03:29
+So that was progress.
+
+01:03:30
+But I think perhaps the
+more interesting thing
+
+01:03:33
+isn't the aggregate
+results, but the fact
+
+01:03:36
+that because we were
+building up this model,
+
+01:03:41
+the computed representations
+over a constituency tree,
+
+01:03:47
+that it actually made judgments
+of different parts of sentences
+
+01:03:51
+and how they combined.
+
+01:03:53
+So here's a movie
+review sentence.
+
+01:03:56
+There are slow and
+repetitive parts,
+
+01:03:59
+but it has just enough spice
+to keep it interesting.
+
+01:04:03
+So I hope you'll agree
+with the judgment
+
+01:04:05
+that overall, that's a positive
+statement about the movie.
+
+01:04:08
+And so the recursive
+neural tensor network
+
+01:04:13
+builds the tree structure
+of this sentence.
+
+01:04:16
+And it says, "slow
+and repetitive."
+
+01:04:19
+That's negative.
+
+01:04:20
+"There are slow and
+repetitive parts."
+
+01:04:23
+It's all negative to here.
+
+01:04:25
+But for the hard over to
+the right, "interesting."
+
+01:04:29
+"Spice," they're both positive.
+
+01:04:31
+And "spice to keep it
+interesting," that's positive.
+
+01:04:34
+"It has just enough spice to
+keep it interesting," positive.
+
+01:04:38
+And it correctly
+predicts that when
+
+01:04:39
+you put these two halves of
+these sentences together,
+
+01:04:42
+the overall judgment is that
+this remains a positive review,
+
+01:04:48
+and it gives a positive
+judgment overall.
+
+01:04:51
+So that was kind of cool.
+
+01:04:54
+And in particular, the fact that
+we are building these phrase
+
+01:04:58
+judgments meant that it
+seemed like we could actually
+
+01:05:02
+do a better job of sentence
+understanding in the way
+
+01:05:07
+that any linguist doing
+linguistic semantics
+
+01:05:10
+would like to see
+sentence understanding.
+
+01:05:13
+So one of the things that
+neural networks, when
+
+01:05:16
+looking at language, have
+often been faulted for
+
+01:05:20
+and are still faulted for to
+this day using transformer
+
+01:05:24
+models, is you often find the
+result that neural network
+
+01:05:30
+models just don't pay
+attention to negation,
+
+01:05:33
+that you can be
+having some sentence,
+
+01:05:37
+and you can compare the
+sentence of a lot of students
+
+01:05:42
+are studying for their final
+exams versus a lot of students
+
+01:05:46
+aren't studying for
+their final exams.
+
+01:05:48
+And the negation just
+gets lost, that it
+
+01:05:50
+doesn't produce the differences
+in representation and meaning
+
+01:05:55
+that you'd like it to.
+
+01:05:57
+So somewhat interestingly,
+with this model,
+
+01:06:03
+it seemed like because
+we were modeling
+
+01:06:05
+the curse of building up
+of sentence structure,
+
+01:06:09
+that we actually could do
+interesting things with modeling
+
+01:06:15
+negation.
+
+01:06:16
+So in particular, the results
+that you'd like to get is if you
+
+01:06:25
+have something like "it's just
+incredibly dull," so "dull"
+
+01:06:28
+is a very negative word.
+
+01:06:31
+"Incredible" is a
+positive word by itself.
+
+01:06:35
+But when you're sort of
+saying "incredibly dull,"
+
+01:06:37
+it's definitely still negative.
+
+01:06:40
+And our recursive neural tensor
+network is correctly modeling
+
+01:06:49
+"it's just incredibly dull"
+is very negative despite
+
+01:06:52
+"incredible" being a
+sort of positive word.
+
+01:06:55
+So actually, in
+this model, there
+
+01:07:01
+was five-way classification.
+
+01:07:03
+So there was very negative,
+somewhat negative, neutral,
+
+01:07:06
+somewhat positive,
+very positive.
+
+01:07:08
+So there's some bouncing
+around as to whether it's
+
+01:07:11
+given classification, very
+negative versus somewhat
+
+01:07:14
+negative.
+
+01:07:15
+I can't really explain
+why in the middle,
+
+01:07:18
+it goes to somewhat negative and
+then goes back to very negative.
+
+01:07:21
+But that's the results that
+came out of the network.
+
+01:07:24
+And at any rate, it
+all stays negative.
+
+01:07:27
+The fact that "incredible" by
+itself incredibly is a positive
+
+01:07:31
+word, it's seen in the
+modified modification of "dull"
+
+01:07:35
+as that keeps it negative.
+
+01:07:37
+But on the other hand, if
+you put a negation in here,
+
+01:07:42
+"it's definitely not dull,"
+well then, what happens?
+
+01:07:46
+Now, interestingly,
+the word "not"
+
+01:07:49
+by itself is a negative word
+that if you just do the raw
+
+01:07:54
+statistics of it, "not" occurs
+much more often in negative
+
+01:08:00
+sentiment sentences than it
+does in positive sentiments
+
+01:08:03
+and sentences.
+
+01:08:05
+So if you want to be a
+more positive person,
+
+01:08:08
+use negation less.
+
+01:08:11
+"Not" by itself is negative, but
+if you then combine it together,
+
+01:08:15
+"not dull," or in this case,
+"definitely not dull," well,
+
+01:08:21
+"not dull" is you have two
+negations so that they cancel
+
+01:08:25
+each other out, and you get
+something that's positive.
+
+01:08:29
+And so "it's
+definitely not dull"
+
+01:08:31
+comes out as a
+positive sentence.
+
+01:08:34
+And so the interesting
+result here
+
+01:08:37
+is that if you compare
+what happens between--
+
+01:08:45
+if you have negated positive
+sentences so it's definitely not
+
+01:08:51
+good, various models can model
+that correctly because "not"
+
+01:08:57
+is a negative word.
+
+01:08:58
+And so therefore, it weakens the
+positivity of the positive word.
+
+01:09:04
+And so putting a "not" in front
+of a positive into a positive
+
+01:09:09
+sentence makes it less positive.
+
+01:09:11
+And even a "not very well," but
+even a Naive Bayes model can do
+
+01:09:17
+that, because "not" by itself
+is seen as a negative word.
+
+01:09:21
+But the hard case is
+what happens if you
+
+01:09:23
+negate a negative sentence?
+
+01:09:25
+Well, the result that you should
+get is it becomes more positive.
+
+01:09:30
+And neither are
+bigram Naive Bayes
+
+01:09:33
+model or our earlier
+attempts at recursive models
+
+01:09:37
+can capture that, whereas
+this RNTN structure was
+
+01:09:42
+able to correctly capture this
+sort of semantic modification
+
+01:09:46
+structure and say, hey, that's
+made the sentence much more
+
+01:09:50
+positive.
+
+01:09:51
+So that was a cool result. And
+to some extent, this result
+
+01:09:55
+I think, still isn't
+captured as well by any
+
+01:09:58
+of the current
+transformer models,
+
+01:10:01
+even though they have
+many other advantages
+
+01:10:04
+and are much better than a
+tree recursive neural network.
+
+01:10:09
+So yeah, so just
+to say a couple--
+
+01:10:13
+this is basically
+the end to just say
+
+01:10:16
+a couple of final remarks
+about these tree recursive
+
+01:10:19
+neural networks.
+
+01:10:20
+The reason that they
+became uncompetitive
+
+01:10:26
+is because they
+just didn't allow
+
+01:10:30
+the kind of associations
+and information flow
+
+01:10:36
+that you have in a transformer.
+
+01:10:39
+These models had a strictly
+context-free backbone,
+
+01:10:44
+and the only information flow
+was tree structured following
+
+01:10:48
+the context free backbone.
+
+01:10:51
+Whereas in the
+transformer, you've
+
+01:10:54
+got this attention function,
+where in every position
+
+01:10:57
+you're looking at
+every other position,
+
+01:10:59
+and so you can have much more
+general information flow.
+
+01:11:03
+And in general,
+that is just good.
+
+01:11:05
+And transformers are
+much more powerful.
+
+01:11:08
+But on the other hand, to
+the extent that you actually
+
+01:11:12
+want to model the sort of
+semantics of human language
+
+01:11:17
+carefully as to
+what modifies what
+
+01:11:21
+and how does negation or
+quantifiers in a sentence
+
+01:11:25
+behave, in some sense, these
+models were more right.
+
+01:11:29
+And so one of the things I'm
+still kind of interested in is,
+
+01:11:32
+are there any opportunities
+to combine together
+
+01:11:36
+some of the benefits of both
+of these ways of thinking
+
+01:11:39
+and have something
+that's a bit more tree
+
+01:11:41
+structured, while still more
+flexible, like a transformer?
+
+01:11:46
+OK, that's it for today.
+
+01:11:48
+Thanks a lot.

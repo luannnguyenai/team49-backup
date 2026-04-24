@@ -1,0 +1,642 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "The transcript is clear enough to generate diagnostic questions about saliency maps, the limits of IG/SHAP, why visually appealing explanations are not enough for behavioral inference, and why local sampling is proposed as a more practical alternative.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a saliency map try to estimate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How often each feature appears in the training set.",
+        "The local change in the model output when each feature is varied around the input point of interest.",
+        "The probability that a feature is semantically correct according to human judgment.",
+        "The number of parameters in the nearest layer related to that feature."
+      ],
+      "answer_index": 1,
+      "explanation": "A saliency map is described as an estimate of the local shape of the prediction function around the data point being examined: if a feature changes, how much does the output change?",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same image with a number",
+          "local shape of the prediction function"
+        ],
+        "timestamps": [
+          "00:10:06",
+          "00:10:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main warning behind the finding that trained and untrained networks can produce very similar saliency maps?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Saliency maps always capture deep causal knowledge in the model.",
+        "Explanations that look plausible may still fail to distinguish a genuinely learned model from an almost random one.",
+        "Untrained networks are usually more accurate than trained networks on ImageNet.",
+        "The interpretability problem disappears if we only increase image resolution."
+      ],
+      "answer_index": 1,
+      "explanation": "If a meaningful model and a nearly random model still produce similar explanations, then visually appealing explanation maps are not enough to conclude that the model is using the right knowledge humans expect.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same very similar saliency map",
+          "meaningful prediction"
+        ],
+        "timestamps": [
+          "00:12:20",
+          "00:12:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which kind of problem is NOT reliably detected by common attribution methods?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Label errors, spurious correlations, and out-of-distribution shift.",
+        "Only label errors, while the other two are always detected well.",
+        "Only out-of-distribution shift, while label errors always stand out clearly.",
+        "None of these were ever mentioned as a challenge."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture emphasizes that many important model failures, such as label noise, spurious correlation, and OOD shift, are not stably revealed by attribution-style explanations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "labeling error",
+          "out-of-distribution at test time",
+          "spurious correlation"
+        ],
+        "timestamps": [
+          "00:13:02",
+          "00:13:06",
+          "00:17:19"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When Integrated Gradients or SHAP are viewed as tools for “hypothesis testing” about model behavior, what is the main conclusion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They always confirm the correct hypothesis if the user is experienced enough.",
+        "They can test hypotheses better than random guessing on most practical tasks.",
+        "They cannot reliably confirm such hypotheses better than random guessing.",
+        "They fail only on images but are always correct for text."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture argues that, from a hypothesis-testing perspective, common attribution methods such as IG and SHAP do not provide sufficiently reliable evidence to verify the behavioral conclusions users want to draw.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cannot do better than random guessing",
+          "SHAP and IG"
+        ],
+        "timestamps": [
+          "00:16:09",
+          "00:16:47"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If the goal is to understand the local shape of the prediction function around a data point, what practical alternative is proposed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only add more attention layers and draw a more detailed heatmap.",
+        "Directly sample around the point of interest to estimate the local function, then validate carefully before using it in high-stakes settings.",
+        "Abandon all quantitative evaluation and rely only on human intuition.",
+        "Force every model to become a CNN so that saliency maps are more stable."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture proposes a simpler approach: directly sample around the point being examined. Its usefulness depends on sample count, output resolution, and the number of features, and it still requires careful validation before real deployment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "direct sampling strategy",
+          "careful validation"
+        ],
+        "timestamps": [
+          "00:18:35",
+          "00:20:40"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "global_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "global_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a saliency map try to estimate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How often each feature appears in the training set.",
+        "The local change in the model output when each feature is varied around the input point of interest.",
+        "The probability that a feature is semantically correct according to human judgment.",
+        "The number of parameters in the nearest layer related to that feature."
+      ],
+      "answer_index": 1,
+      "explanation": "A saliency map is described as an estimate of the local shape of the prediction function around the data point being examined: if a feature changes, how much does the output change?",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same image with a number",
+          "local shape of the prediction function"
+        ],
+        "timestamps": [
+          "00:10:06",
+          "00:10:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main warning behind the finding that trained and untrained networks can produce very similar saliency maps?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Saliency maps always capture deep causal knowledge in the model.",
+        "Explanations that look plausible may still fail to distinguish a genuinely learned model from an almost random one.",
+        "Untrained networks are usually more accurate than trained networks on ImageNet.",
+        "The interpretability problem disappears if we only increase image resolution."
+      ],
+      "answer_index": 1,
+      "explanation": "If a meaningful model and a nearly random model still produce similar explanations, then visually appealing explanation maps are not enough to conclude that the model is using the right knowledge humans expect.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same very similar saliency map",
+          "meaningful prediction"
+        ],
+        "timestamps": [
+          "00:12:20",
+          "00:12:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which kind of problem is NOT reliably detected by common attribution methods?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Label errors, spurious correlations, and out-of-distribution shift.",
+        "Only label errors, while the other two are always detected well.",
+        "Only out-of-distribution shift, while label errors always stand out clearly.",
+        "None of these were ever mentioned as a challenge."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture emphasizes that many important model failures, such as label noise, spurious correlation, and OOD shift, are not stably revealed by attribution-style explanations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "labeling error",
+          "out-of-distribution at test time",
+          "spurious correlation"
+        ],
+        "timestamps": [
+          "00:13:02",
+          "00:13:06",
+          "00:17:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When Integrated Gradients or SHAP are viewed as tools for “hypothesis testing” about model behavior, what is the main conclusion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They always confirm the correct hypothesis if the user is experienced enough.",
+        "They can test hypotheses better than random guessing on most practical tasks.",
+        "They cannot reliably confirm such hypotheses better than random guessing.",
+        "They fail only on images but are always correct for text."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture argues that, from a hypothesis-testing perspective, common attribution methods such as IG and SHAP do not provide sufficiently reliable evidence to verify the behavioral conclusions users want to draw.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cannot do better than random guessing",
+          "SHAP and IG"
+        ],
+        "timestamps": [
+          "00:16:09",
+          "00:16:47"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If the goal is to understand the local shape of the prediction function around a data point, what practical alternative is proposed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only add more attention layers and draw a more detailed heatmap.",
+        "Directly sample around the point of interest to estimate the local function, then validate carefully before using it in high-stakes settings.",
+        "Abandon all quantitative evaluation and rely only on human intuition.",
+        "Force every model to become a CNN so that saliency maps are more stable."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture proposes a simpler approach: directly sample around the point being examined. Its usefulness depends on sample count, output resolution, and the number of features, and it still requires careful validation before real deployment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "direct sampling strategy",
+          "careful validation"
+        ],
+        "timestamps": [
+          "00:18:35",
+          "00:20:40"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from easy diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from hard diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from hard diagnostic MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg2-q1",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q2",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q3",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q4",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg2-q5",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    }
+  ]
+}

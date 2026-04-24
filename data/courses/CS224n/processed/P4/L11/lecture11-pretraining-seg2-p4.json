@@ -1,0 +1,420 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture11-pretraining-seg2-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can a static word embedding fail on a word like “record”?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It assigns one vector to the surface form, so different senses are blended together.",
+        "It cannot represent the word unless it appears at the start of a sentence.",
+        "It always treats nouns and verbs as separate vocabulary items.",
+        "It only stores the spelling of the word and no numerical values."
+      ],
+      "answer_index": 0,
+      "explanation": "A static embedding maps the same string to the same vector in every context. That makes it hard to distinguish meanings such as the noun “record” from the verb “record.”",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_contextual_embeddings",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "one vector",
+          "meaning record the string"
+        ],
+        "timestamps": [
+          "00:16:10",
+          "00:16:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What distinguishes whole-model pretraining from the older approach of using pretrained word embeddings?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Whole-model pretraining trains the contextual network parameters, not only the input embedding table.",
+        "Whole-model pretraining removes the need for downstream tasks.",
+        "Whole-model pretraining uses only labeled examples from the final task.",
+        "Whole-model pretraining freezes all weights before any language data is seen."
+      ],
+      "answer_index": 0,
+      "explanation": "Pretrained word embeddings initialize only the lookup vectors. Whole-model pretraining also trains the layers that compose contextual representations, giving the downstream model a much stronger starting point.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "train all of the parameters",
+          "pretraining"
+        ],
+        "timestamps": [
+          "00:17:39",
+          "00:17:45"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can reconstructing masked text teach useful language representations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Predicting missing words forces the model to use syntax, semantics, co-reference, and world cues from context.",
+        "It teaches the model only to copy tokens from the input without learning context.",
+        "It prevents the model from learning anything about word order.",
+        "It works only when the missing token is the final word of a sentence."
+      ],
+      "answer_index": 0,
+      "explanation": "A missing-token objective creates many prediction problems from raw text. To solve them well, the model must use grammatical constraints, nearby meaning, entity references, and common facts encoded in context.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reconstructing the input",
+          "it might learn"
+        ],
+        "timestamps": [
+          "00:19:55",
+          "00:20:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which example best matches the self-supervised pretraining recipe?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mask part of a naturally occurring sentence and train the model to predict the missing part.",
+        "Ask human annotators to label each sentence as positive or negative.",
+        "Train a classifier only on a small task-specific dataset.",
+        "Manually write grammar rules and use them as the model weights."
+      ],
+      "answer_index": 0,
+      "explanation": "Self-supervised pretraining obtains targets from the input itself. Masking text creates a prediction target without requiring a separate human annotation for each example.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "masked sentence",
+          "the input is this broken"
+        ],
+        "timestamps": [
+          "00:20:22",
+          "00:20:29"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg2-q1",
+      "global_kp_id": "kp_contextual_embeddings",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q2",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q2",
+      "global_kp_id": "kp_contextual_embeddings",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q3",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q3",
+      "global_kp_id": "kp_contextual_embeddings",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q4",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture11-pretraining-seg2-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why can a static word embedding fail on a word like “record”\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What distinguishes whole-model pretraining from the older approach of using pretrained word embeddings\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can reconstructing masked text teach useful language representations\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which example best matches the self-supervised pretraining recipe\" is a direct reinforcement check and should be on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture11-pretraining-seg2-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can a static word embedding fail on a word like “record”\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What distinguishes whole-model pretraining from the older approach of using pretrained word embeddings\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can reconstructing masked text teach useful language representations\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture11-pretraining-seg2-q4",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which example best matches the self-supervised pretraining recipe\" works best as an early concept check."
+    }
+  ]
+}

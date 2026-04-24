@@ -1,0 +1,946 @@
+{
+  "lecture_title": "Lecture 16 - Efficient Training and Parameter-Efficient Fine-Tuning",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Roadmap and mixed precision foundations",
+      "start_s": 8,
+      "end_s": 833
+    },
+    {
+      "section_index": 2,
+      "title": "DDP and ZeRO stage 1",
+      "start_s": 840,
+      "end_s": 1473
+    },
+    {
+      "section_index": 3,
+      "title": "ZeRO stage 2, FSDP, and activation memory",
+      "start_s": 1476,
+      "end_s": 2157
+    },
+    {
+      "section_index": 4,
+      "title": "Practical training recipe and motivation for efficient adaptation",
+      "start_s": 2164,
+      "end_s": 2576
+    },
+    {
+      "section_index": 5,
+      "title": "LoRA and parameter-efficient fine-tuning",
+      "start_s": 2594,
+      "end_s": 3275
+    },
+    {
+      "section_index": 6,
+      "title": "FSDP implementation details and Q&A",
+      "start_s": 3285,
+      "end_s": 3744
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "course_id": "cs224n_spring_2024",
+      "name": "Mixed precision training: FP32, FP16, loss scaling, and BF16",
+      "description": "Explains floating-point representation, why naive FP16 training fails, and how mixed precision with BF16 improves training efficiency.",
+      "summary": "After brief lecture setup and announcements, the instructor frames efficient training as a systems topic covering mixed precision, multi-GPU training, and parameter-efficient fine-tuning [ts=53s][ts=63s]. He explains floating-point representation through sign, range, and precision bits, noting that FP32 uses 4 bytes per parameter and offers broad dynamic range and precision [ts=149s][ts=181s]. Naively casting everything to FP16 halves memory but causes underflow of small values to 0, overflow of large values to NaNs, and more rounding error; epsilon and the smallest normal value explain why many gradients vanish in half precision [ts=208s][ts=343s]. Mixed precision addresses this by keeping FP32 master weights, running forward/backward compute in FP16, upcasting gradients to FP32, and updating the master copy before copying weights back [ts=387s][ts=422s]. Because FP16 gradients can still underflow, the loss is scaled before backprop and gradients are unscaled before the FP32 update [ts=525s][ts=560s]. The segment then introduces BF16 as keeping FP32-like range with less precision, which removes the need for grad scaling on supported newer GPUs, and cites a DistilBERT example showing faster training, similar accuracy, and lower memory use [ts=691s][ts=767s].",
+      "key_points": [
+        {
+          "text": "FP32 uses 4 bytes per parameter and allocates bits to sign, range, and precision.",
+          "timestamp_s": 149,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "FP16 halves memory but has less dynamic range and precision, so small numbers can underflow to 0 and large ones can overflow to NaNs.",
+          "timestamp_s": 270,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Epsilon and the smallest normal value determine when additions are rounded away and when values collapse to 0 in FP16.",
+          "timestamp_s": 309,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Mixed precision keeps FP32 master weights while forward and backward computation run in FP16.",
+          "timestamp_s": 387,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Loss scaling multiplies the loss before backprop so more FP16 gradients survive, then unscales them before the FP32 update.",
+          "timestamp_s": 525,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "BFloat16 keeps the same exponent range as FP32 but sacrifices precision, so gradient scaling is usually unnecessary on supported GPUs.",
+          "timestamp_s": 691,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "On an A100, BF16 mixed precision fine-tuning of DistilBERT is presented as faster and lower-memory while keeping about the same accuracy.",
+          "timestamp_s": 767,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+        "start_s": 8,
+        "end_s": 833
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 14,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg2",
+      "course_id": "cs224n_spring_2024",
+      "name": "Multi-GPU basics: DDP and ZeRO stage 1",
+      "description": "Introduces memory accounting on multi-GPU training, DDP synchronization, and optimizer-state sharding in ZeRO stage 1.",
+      "summary": "The lecture switches to the multi-GPU setting by accounting for what lives in GPU VRAM: model parameters, gradients, and optimizer state, with Adam requiring momentum and variance buffers in FP32 in addition to mixed-precision model weights [ts=852s][ts=913s]. In distributed data parallel training, the dataset is split across GPUs, each replica computes different activations and gradients on its shard, and synchronization communicates those gradients so every optimizer can apply the same update [ts=923s][ts=1034s]. The all-reduce primitive is introduced as the operation that merges gradients and redistributes the combined result to every worker, with communication cost tied to FP16 gradient size [ts=985s][ts=1018s]. The instructor then highlights DDP's weak memory scaling because each GPU still stores the full model, the full gradient, FP32 master weights, and Adam state, summarized as 2 bytes for parameters, 2 for gradients, and 12 extra bytes per parameter for optimizer-related state [ts=1065s][ts=1092s]. ZeRO stage 1 improves this by sharding optimizer state so each worker updates only the parameters corresponding to its shard after a reduce-scatter, then synchronizes updated parameters with an all-gather [ts=1165s][ts=1298s].",
+      "key_points": [
+        {
+          "text": "In mixed-precision multi-GPU training, Adam still needs FP32 optimizer buffers for momentum and variance.",
+          "timestamp_s": 896,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "DDP splits data across workers, so each model replica gets different activations and gradients before synchronization.",
+          "timestamp_s": 950,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "All-reduce merges gradients across GPUs and redistributes the result to all workers.",
+          "timestamp_s": 985,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "DDP memory scales poorly because every GPU keeps the full model, full gradients, FP32 master weights, and optimizer state.",
+          "timestamp_s": 1053,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "ZeRO stage 1 shards optimizer state so each worker updates only the parameters associated with its shard.",
+          "timestamp_s": 1169,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Reduce-scatter followed by all-gather lets ZeRO stage 1 preserve synchronization while cutting optimizer-state memory.",
+          "timestamp_s": 1218,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+        "start_s": 840,
+        "end_s": 1473
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "course_id": "cs224n_spring_2024",
+      "name": "ZeRO stage 2, ZeRO stage 3, FSDP, and activation memory",
+      "description": "Extends sharding to gradients and parameters, then explains FSDP communication and the separate role of activation memory.",
+      "summary": "Building on ZeRO stage 1, the lecture explains ZeRO stage 2 as also sharding gradients so the full gradient vector is never instantiated at once; during backprop, each layer's gradient is computed, immediately sent to the responsible worker, and then the temporary memory is freed [ts=1483s][ts=1594s]. The instructor argues this is still close to 'free' in communication terms because it resembles the same collective pattern as DDP, while saving more memory than stage 1 [ts=1657s][ts=1680s]. ZeRO stage 3—also called fully sharded data parallel (FSDP)—goes further by sharding model parameters themselves, which is necessary when even the model cannot fit on one GPU [ts=1699s][ts=1735s]. In FSDP, layers are grouped into FSDP units, parameters are flattened and sharded, and the forward pass must all-gather parameters for each layer before computing and then discard them after use [ts=1744s][ts=1868s]. During the backward pass, the system all-gathers layer parameters again, computes gradients on each worker's data, then reduce-scatters the merged gradients to the owning shards before local updates [ts=1871s][ts=1943s]. The segment closes by distinguishing activation memory from parameter and optimizer memory: activations are needed for backprop, scale linearly with batch size, and are not solved by the sharding methods described so far [ts=2100s][ts=2154s].",
+      "key_points": [
+        {
+          "text": "ZeRO stage 2 shards gradients and avoids materializing the full gradient vector at once.",
+          "timestamp_s": 1483,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "During stage-2 backprop, each layer's gradient is computed, sent to the responsible worker, and then deallocated.",
+          "timestamp_s": 1560,
+          "evidence_type": "example"
+        },
+        {
+          "text": "ZeRO stage 3/FSDP shards model parameters in addition to gradients and optimizer state.",
+          "timestamp_s": 1711,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "FSDP forward passes require all-gathering a layer's parameters before computation and freeing them afterward.",
+          "timestamp_s": 1830,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "FSDP backward passes all-gather parameters again and then reduce-scatter gradients to parameter owners.",
+          "timestamp_s": 1911,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Activation memory scales with batch size and remains a separate bottleneck not fixed by ZeRO or FSDP sharding.",
+          "timestamp_s": 2134,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+        "start_s": 1476,
+        "end_s": 2157
+      },
+      "difficulty": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg4",
+      "course_id": "cs224n_spring_2024",
+      "name": "Practical decision flowchart and why efficiency matters",
+      "description": "Turns the systems content into a project recipe and motivates parameter-efficient fine-tuning with compute, access, and environmental arguments.",
+      "summary": "The instructor compresses the systems material into a practical project flowchart: always use mixed precision, prefer BF16 on newer NVIDIA architectures, check whether batch size 1 fits, use ZeRO stage 2 when it does, escalate to ZeRO stage 3 when it does not, and fall back to parameter-efficient fine-tuning if full fine-tuning still fails even with checkpointing [ts=2180s][ts=2288s]. He then defines parameter-efficient fine-tuning as updating only a small subset of model parameters instead of all of them [ts=2300s][ts=2312s]. Beyond simple memory limits, the lecture motivates efficiency by noting that overparameterized models on small datasets may benefit from constrained adaptation, while the growth of training compute appears to outpace global compute capacity and risks concentrating AI development in a few organizations [ts=2339s][ts=2432s]. The segment also criticizes a field-wide emphasis on accuracy over efficiency and highlights environmental costs, including a cited GPT-3 carbon estimate and a class example where a more efficient RL algorithm could have saved roughly 880 kWh [ts=2450s][ts=2563s].",
+      "key_points": [
+        {
+          "text": "The recommended project recipe is mixed precision first, then ZeRO stage 2 if batch size 1 fits, ZeRO stage 3 if it does not, and PEFT if full fine-tuning still fails.",
+          "timestamp_s": 2211,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Parameter-efficient fine-tuning updates only a small subset of parameters instead of the whole model.",
+          "timestamp_s": 2300,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "PEFT is motivated both by memory limits and by the idea that smaller updates may generalize well on small datasets.",
+          "timestamp_s": 2322,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture argues that training-compute growth may exceed global capacity and concentrate model development in a few organizations.",
+          "timestamp_s": 2369,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Efficiency is also presented as an environmental concern, illustrated with GPT-3 emissions and an 880 kWh RL-course example.",
+          "timestamp_s": 2498,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+        "start_s": 2164,
+        "end_s": 2576
+      },
+      "difficulty": 0.39,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg5",
+      "course_id": "cs224n_spring_2024",
+      "name": "LoRA mechanics, tradeoffs, and parameter choices",
+      "description": "Recaps full fine-tuning, introduces LoRA as low-rank adaptation, and gives concrete advice on where and how to apply it.",
+      "summary": "The lecture returns to task adaptation by recapping full fine-tuning as collecting task pairs and updating every parameter of a pretrained autoregressive language model, which becomes expensive to optimize and store at GPT-3 scale or across many tasks [ts=2594s][ts=2648s]. It then introduces the central PEFT method of the lecture, LoRA, motivated by the observation that fine-tuning updates often have low intrinsic rank [ts=2716s][ts=2751s]. Instead of learning a full update to a weight matrix, LoRA constrains the update to the product of two low-rank matrices B and A with rank r much smaller than the input or output dimensions, while alpha controls how strongly task-specific knowledge modifies the pretrained model [ts=2773s][ts=2840s]. Only A and B are trainable, increasing r moves the method toward full fine-tuning, and storing these small matrices per task is far cheaper than storing a full delta for every task [ts=2837s][ts=2909s]. In implementation terms, the base weight matrix is frozen, the usual hidden-state computation is performed, and a learned low-rank offset is added during the forward pass [ts=2928s][ts=2965s]. The segment closes by comparing LoRA favorably to other PEFT methods such as adapters and BitFit, and recommending LoRA on self-attention query and value matrices with small ranks as a strong starting point [ts=3012s][ts=3155s].",
+      "key_points": [
+        {
+          "text": "Full fine-tuning updates every model parameter on task data and becomes hard to optimize and store for very large models.",
+          "timestamp_s": 2623,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "LoRA is motivated by the claim that fine-tuning gradients or updates often have low intrinsic rank.",
+          "timestamp_s": 2731,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "LoRA represents the update to a pretrained weight matrix as a low-rank product BA with rank r much smaller than the matrix dimensions.",
+          "timestamp_s": 2773,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Alpha sets the trade-off between preserving pretrained knowledge and injecting task-specific change.",
+          "timestamp_s": 2817,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Only the low-rank matrices A and B are trainable, and increasing rank r moves LoRA toward full fine-tuning.",
+          "timestamp_s": 2837,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In code, LoRA freezes the base weight matrix and adds a trainable low-rank offset during the forward pass.",
+          "timestamp_s": 2931,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A practical rule of thumb is to apply LoRA to self-attention query and value matrices.",
+          "timestamp_s": 3111,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Already-small ranks can perform well, making LoRA a strong accuracy-versus-parameter tradeoff relative to other PEFT methods.",
+          "timestamp_s": 3138,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+        "start_s": 2594,
+        "end_s": 3275
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg6",
+      "course_id": "cs224n_spring_2024",
+      "name": "Final heuristics and deeper FSDP implementation details",
+      "description": "Ends with concrete LoRA defaults, then uses audience questions to unpack how FSDP overlaps communication with compute and why sharding policy matters.",
+      "summary": "The final minutes first restate the practical defaults for projects: on multi-GPU setups, use mixed precision, prefer BF16 when available, move from batch-size checks to ZeRO stage 2 or ZeRO stage 3 as needed, and if that still fails use LoRA with query/value targets, rank 8, and alpha 1 as an initial setting [ts=3191s][ts=3270s]. Audience questions then drive a deeper walk-through of an FSDP timeline diagram. The instructor explains that communication overhead can be tolerable when parameter all-gathers are prefetched during current-layer forward computation and unused layer memory is freed promptly [ts=3310s][ts=3465s]. He then explains the backward side of the same timeline: parameters for the current layer are all-gathered again, gradients are computed on each worker's data, and reduce-scatter is overlapped with backward computation where possible [ts=3483s][ts=3529s]. The final implementation caveat is that FSDP performance depends heavily on how the model is partitioned into FSDP units; grouping consecutive layers can reduce communication, while poor sharding policies can make new architectures less efficient even if the abstraction looks general [ts=3559s][ts=3666s]. In response to a final question, he clarifies that from the user's perspective weights are effectively thrown away after use and streamed back in for backward passes, even if some internal caching may exist [ts=3663s][ts=3726s].",
+      "key_points": [
+        {
+          "text": "Recommended initial LoRA defaults are query/value matrices, rank 8, and alpha 1 when full fine-tuning is too expensive.",
+          "timestamp_s": 3254,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "FSDP can hide some communication cost by prefetching the next unit's parameters during the current forward pass.",
+          "timestamp_s": 3310,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Unused layer memory is freed during FSDP execution so VRAM is recycled as computation advances.",
+          "timestamp_s": 3447,
+          "evidence_type": "example"
+        },
+        {
+          "text": "During backward computation, FSDP again all-gathers parameters and overlaps reduce-scatter with backpropagation where possible.",
+          "timestamp_s": 3483,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "FSDP performance depends strongly on the sharding policy and how layers are grouped into FSDP units.",
+          "timestamp_s": 3559,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "From the user's perspective, FSDP effectively throws away weights after use and streams them back in later, though internal caching may still exist.",
+          "timestamp_s": 3682,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=13",
+        "start_s": 3285,
+        "end_s": 3744
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 6,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp1",
+      "name": "Floating-point range vs precision",
+      "description": "How FP32, FP16, and related formats allocate bits to sign, exponent/range, and mantissa/precision, and why that affects underflow, overflow, and memory cost.",
+      "track_tags": [
+        "ml_systems",
+        "numerical_stability"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "numerical_computing"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.43,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture builds mixed precision on top of this concept, repeatedly returning to range and precision to explain gradient underflow and BF16 design.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around 00:02:17, the instructor references a cartoon FP32 bit layout separating sign, range, and precision."
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp2",
+      "name": "Mixed precision training",
+      "description": "Training scheme that uses low-precision compute for speed and memory savings while retaining higher-precision state for stable updates.",
+      "track_tags": [
+        "ml_systems",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "applied_scientist"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the first recommendation in both practical flowcharts and the foundation for later memory accounting across DDP, ZeRO, and FSDP.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp3",
+      "name": "Loss scaling for FP16 training",
+      "description": "Technique that multiplies the loss before backpropagation so FP16 gradients are less likely to underflow, then unscales before the optimizer step.",
+      "track_tags": [
+        "ml_systems",
+        "numerical_stability"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture uses it as the key fix for FP16 underflow before showing why BF16 can avoid it.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around 00:05:43 to 00:09:07, the instructor references a gradient-distribution plot and a cutoff line to explain why scaling shifts gradients away from zero."
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp4",
+      "name": "BFloat16",
+      "description": "Half-precision format with FP32-like exponent range and lower mantissa precision, often preferred for mixed-precision training on supported hardware.",
+      "track_tags": [
+        "ml_systems",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "hardware_aware_training"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "infra_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly says it is the better choice on newer GPUs because it avoids grad scaling while retaining mixed-precision benefits.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp5",
+      "name": "Distributed Data Parallel (DDP)",
+      "description": "Multi-GPU training setup where each worker holds a full replica, processes a data shard, and synchronizes gradients across workers.",
+      "track_tags": [
+        "distributed_training",
+        "ml_systems"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "parallel_computing"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "infra_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "DDP is the baseline system against which ZeRO and FSDP are explained, so understanding it unlocks the rest of the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp6",
+      "name": "Collective communication primitives",
+      "description": "All-reduce, reduce-scatter, all-gather, and reduce as the core synchronization operations behind DDP, ZeRO, and FSDP.",
+      "track_tags": [
+        "distributed_training",
+        "systems_fundamentals"
+      ],
+      "domain_tags": [
+        "parallel_computing",
+        "deep_learning_systems"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture repeatedly decomposes higher-level training schemes into these collectives and even uses equivalences between them to argue about communication cost.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp7",
+      "name": "ZeRO optimizer and gradient sharding",
+      "description": "ZeRO stages 1 and 2 reduce memory by sharding optimizer state and then gradients across workers while preserving synchronized updates.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "infra_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor calls stage 2 a default recommendation because it saves memory with little or no extra communication relative to DDP.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp8",
+      "name": "Fully Sharded Data Parallel (FSDP / ZeRO stage 3)",
+      "description": "Stage-3 sharding scheme that partitions parameters, gradients, and optimizer state, then gathers per-layer weights on demand during forward and backward passes.",
+      "track_tags": [
+        "distributed_training",
+        "memory_optimization"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "parallel_computing"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the lecture's main answer for models that do not fit on one GPU and a major topic in the second half of the systems discussion.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around 00:29:04 and again at 00:55:10, the lecture walks through FSDP unit diagrams and a timeline showing all-gather, forward, free, and reduce-scatter overlap."
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp9",
+      "name": "Activation memory as a separate bottleneck",
+      "description": "Model activations must be stored for backpropagation, scale with batch size, and are not automatically reduced by parameter or optimizer sharding.",
+      "track_tags": [
+        "memory_optimization",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This concept corrects an earlier simplification and explains why OOM errors can persist even after using ZeRO or FSDP.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp10",
+      "name": "Parameter-efficient fine-tuning (PEFT)",
+      "description": "Fine-tuning approach that updates only a small subset of model parameters to reduce memory, storage, and sometimes overfitting risk.",
+      "track_tags": [
+        "adaptation",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transfer_learning"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.41,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is the recommended fallback when full fine-tuning remains infeasible and serves as the bridge into the lecture's LoRA discussion.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp11",
+      "name": "LoRA low-rank adaptation",
+      "description": "PEFT method that freezes base weights and learns a low-rank update for selected matrices, usually controlled by rank and scaling hyperparameters.",
+      "track_tags": [
+        "adaptation",
+        "parameter_efficient_methods"
+      ],
+      "domain_tags": [
+        "nlp",
+        "transfer_learning"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "LoRA is the featured PEFT method, the lecture's main practical recommendation when full fine-tuning is too expensive, and the basis of its closing defaults.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp12",
+      "name": "Practical fine-tuning decision flowchart",
+      "description": "Operational decision rule for choosing mixed precision, ZeRO stage 2 or 3, checkpointing, and LoRA based on hardware and memory constraints.",
+      "track_tags": [
+        "applied_workflows",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "project_practice"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "student_researcher"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly says this flowchart is what students should remember and use for final projects if they forgot the rest of the lecture.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around 00:36:13 and 00:52:57, the instructor explicitly calls out a simple flowchart summarizing what to do in projects."
+    },
+    {
+      "local_kp_id": "local::lecture16-efficient-training::kp13",
+      "name": "FSDP sharding policy and communication overlap",
+      "description": "Implementation-level idea that FSDP efficiency depends on how layers are grouped into units and how communication is overlapped with computation.",
+      "track_tags": [
+        "distributed_training",
+        "systems_implementation"
+      ],
+      "domain_tags": [
+        "parallel_computing",
+        "deep_learning_systems"
+      ],
+      "career_path_tags": [
+        "infra_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The final Q&A shows that FSDP is not only a conceptual algorithm; real efficiency depends on careful unit construction and prefetch/free behavior.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around 00:55:10, the instructor revisits a timeline slide to explain prefetched all-gathers, forward overlap, frees, and backward reduce-scatter."
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "local_kp_id": "local::lecture16-efficient-training::kp1",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment opens by unpacking FP32/FP16 range and precision bits and links them to memory cost and representable values [ts=149s][ts=208s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "local_kp_id": "local::lecture16-efficient-training::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment's core arc is the mixed-precision recipe with FP32 master weights and low-precision compute [ts=387s][ts=560s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "local_kp_id": "local::lecture16-efficient-training::kp3",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Loss scaling is introduced as the fix for FP16 gradient underflow and is explained step by step [ts=505s][ts=560s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "local_kp_id": "local::lecture16-efficient-training::kp4",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "BF16 is contrasted with FP16 and recommended on newer GPUs because it keeps range without needing grad scaling [ts=691s][ts=748s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg2",
+      "local_kp_id": "local::lecture16-efficient-training::kp5",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment introduces multi-GPU replicas, per-worker data shards, gradient synchronization, and names the setup DDP [ts=923s][ts=1046s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg2",
+      "local_kp_id": "local::lecture16-efficient-training::kp6",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "All-reduce and reduce-scatter/all-gather are defined as the operations behind synchronization and sharding [ts=985s][ts=1280s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg2",
+      "local_kp_id": "local::lecture16-efficient-training::kp7",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "ZeRO stage 1 is introduced as optimizer-state sharding and contrasted directly with DDP's full-state replication [ts=1105s][ts=1401s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "local_kp_id": "local::lecture16-efficient-training::kp6",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The explanation of ZeRO stage 2 and FSDP repeatedly depends on all-gather, reduce-scatter, and reduce [ts=1657s][ts=1943s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "local_kp_id": "local::lecture16-efficient-training::kp7",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The first half of the segment centers on ZeRO stage 2 gradient sharding and layerwise reduction [ts=1483s][ts=1653s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "local_kp_id": "local::lecture16-efficient-training::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment devotes most of its second half to stage-3/FSDP parameter sharding and its forward/backward communication pattern [ts=1699s][ts=2085s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "local_kp_id": "local::lecture16-efficient-training::kp9",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment ends by correcting the earlier VRAM picture with activation memory and batch-size scaling [ts=2100s][ts=2154s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg4",
+      "local_kp_id": "local::lecture16-efficient-training::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment begins with the explicit practical flowchart the instructor recommends for projects [ts=2164s][ts=2288s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg4",
+      "local_kp_id": "local::lecture16-efficient-training::kp10",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "PEFT is defined and motivated as the fallback when full fine-tuning remains infeasible [ts=2300s][ts=2338s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg4",
+      "local_kp_id": "local::lecture16-efficient-training::kp9",
+      "planner_role": "prereq",
+      "instruction_role": "support",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Checkpointing appears in the flowchart as another response to activation-driven memory pressure [ts=2276s][ts=2280s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg5",
+      "local_kp_id": "local::lecture16-efficient-training::kp10",
+      "planner_role": "prereq",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment starts from the PEFT framing of updating a small parameter subset rather than the whole model [ts=2659s][ts=2711s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg5",
+      "local_kp_id": "local::lecture16-efficient-training::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "LoRA is defined, parameterized, implemented, compared with alternatives, and given concrete targeting advice [ts=2716s][ts=3155s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg5",
+      "local_kp_id": "local::lecture16-efficient-training::kp12",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The end of the segment returns to actionable defaults by tying LoRA choices back to the project recipe [ts=3177s][ts=3270s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg6",
+      "local_kp_id": "local::lecture16-efficient-training::kp8",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The Q&A revisits the FSDP execution pattern in more implementation detail rather than introducing a new system [ts=3310s][ts=3529s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg6",
+      "local_kp_id": "local::lecture16-efficient-training::kp11",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment briefly restates the recommended LoRA defaults before shifting to FSDP questions [ts=3254s][ts=3270s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg6",
+      "local_kp_id": "local::lecture16-efficient-training::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Most of the segment is devoted to overlap, freeing, and policy details that determine real FSDP efficiency [ts=3310s][ts=3726s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture16-efficient-training::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Core numerical-stability setup for the lecture; includes datatype structure, loss scaling mechanics, and BF16 tradeoffs [ts=149s][ts=691s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Introduces the baseline distributed-training scheme and first sharding method, which later sections assume [ts=923s][ts=1165s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Most technically dense systems segment, covering stage-2/3 sharding, FSDP execution, and activation-memory caveats [ts=1483s][ts=2154s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg4",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Less mechanistic and more strategic; valuable for decision-making and motivation but lighter on derivations or stepwise procedures [ts=2164s][ts=2563s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Central adaptation segment with the LoRA update form, trainable-parameter story, and concrete hyperparameter guidance [ts=2773s][ts=3155s]."
+    },
+    {
+      "unit_id": "local::lecture16-efficient-training::seg6",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Q&A-driven implementation detail on FSDP overlap and sharding policy; useful for advanced understanding more than first-pass conceptual acquisition [ts=3310s][ts=3726s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture16-efficient-training"
+}

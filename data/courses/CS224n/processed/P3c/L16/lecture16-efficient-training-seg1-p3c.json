@@ -1,0 +1,201 @@
+{
+  "unit_id": "local::lecture16-efficient-training::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture16-efficient-training-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can naively training an entire neural network in FP16 cause numerical failures?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "FP16 has less dynamic range and precision, so small values may underflow, large values may overflow, and updates may be rounded too coarsely.",
+        "FP16 always changes the mathematical objective, so the model optimizes a different loss function.",
+        "FP16 stores gradients exactly but stores activations incorrectly, so only inference is affected.",
+        "FP16 fails because it cannot represent negative numbers."
+      ],
+      "answer_index": 0,
+      "explanation": "Reducing precision saves memory, but it also reduces the range and granularity of representable values. That can turn small gradients into zero, large values into invalid numbers, and small updates into no-ops.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_floating_point_range_vs_precision",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "less dynamic range",
+          "less precision"
+        ],
+        "timestamps": [
+          "00:03:41",
+          "00:03:46"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the key idea of mixed precision training with FP16 and FP32 master weights?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use FP16 for much of the forward/backward computation, but keep FP32 master weights for stable parameter updates.",
+        "Store all weights permanently in FP16 and convert only the loss to FP32.",
+        "Run the forward pass in FP32 and the backward pass in FP16, with no master copy.",
+        "Use FP16 only for model outputs, while all parameters and activations remain FP32."
+      ],
+      "answer_index": 0,
+      "explanation": "Mixed precision gets memory and speed benefits from FP16 computation while preserving more accurate parameter updates through FP32 master weights.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mixed_precision_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "master weights",
+          "update your master weights"
+        ],
+        "timestamps": [
+          "00:06:33",
+          "00:07:02"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is loss scaling used in FP16 mixed precision training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It makes small gradients larger during backprop so they are less likely to underflow, then the gradients are unscaled before the update.",
+        "It makes the model intentionally learn a larger loss to avoid overfitting.",
+        "It converts all FP16 tensors back into FP32 before any computation occurs.",
+        "It removes the need to compute gradients during backpropagation."
+      ],
+      "answer_index": 0,
+      "explanation": "Many FP16 gradients are too small to represent. Scaling the loss shifts those gradients into a representable range, and unscaling restores the correct update size before applying the optimizer step.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_loss_scaling_for_fp16_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "scale the loss",
+          "scale down your gradient"
+        ],
+        "timestamps": [
+          "00:08:49",
+          "00:09:50"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does BF16 usually avoid the need for gradient scaling compared with FP16?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "BF16 keeps a wide FP32-like exponent range, so very small and very large values are less likely to underflow or overflow.",
+        "BF16 has more mantissa precision than FP32, so every gradient is represented exactly.",
+        "BF16 stores two copies of every parameter, one for forward and one for backward.",
+        "BF16 disables gradient computation for small values."
+      ],
+      "answer_index": 0,
+      "explanation": "Gradient scaling is mainly needed because FP16 has a narrow exponent range. BF16 sacrifices precision but keeps the broad range, so values are less likely to collapse to zero or invalid values.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_floating_point_range_vs_precision",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same exponent range",
+          "gradient scaling"
+        ],
+        "timestamps": [
+          "00:11:31",
+          "00:11:51"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture16-efficient-training-seg1-q1",
+      "global_kp_id": "kp_floating_point_range_vs_precision",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q2",
+      "global_kp_id": "kp_mixed_precision_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q2",
+      "global_kp_id": "kp_floating_point_range_vs_precision",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q3",
+      "global_kp_id": "kp_loss_scaling_for_fp16_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q4",
+      "global_kp_id": "kp_floating_point_range_vs_precision",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg1-q4",
+      "global_kp_id": "kp_loss_scaling_for_fp16_training",
+      "role": "secondary"
+    }
+  ]
+}

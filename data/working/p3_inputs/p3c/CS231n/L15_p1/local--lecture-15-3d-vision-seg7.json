@@ -1,0 +1,196 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_15_3d_vision",
+    "lecture_title": "Lecture 15: 3D Vision",
+    "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_15_3d_vision::seg7",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "From deep implicits to NeRF and 3D Gaussian splatting",
+    "description": "Builds from deep implicit geometry to neural radiance fields, differentiable volume rendering, image-only supervision, and the efficiency gains of Gaussian splatting.",
+    "summary": "Starting from deep occupancy and deep SDF ideas, Wu generalizes neural implicit functions so a network can answer richer queries than inside/outside, including signed distance, density, color, and radiance [ts=3469s][ts=3504s]. NeRF is introduced as the step that pairs these queryable fields with viewing direction and differentiable volume rendering: the network maps spatial position and camera direction to density and color, and the rendering equation is differentiable enough to learn directly from 2D images rather than requiring 3D supervision [ts=3548s][ts=3561s][ts=3571s][ts=3608s][ts=3627s]. Wu then notes that radiance-field ideas can also be embedded in generative pipelines to obtain more realistic controllable 3D outputs from image supervision [ts=3761s][ts=3800s]. The main weakness of NeRF is efficiency, since rays still sample many empty locations; 3D Gaussian splatting addresses this by representing the scene with sparse Gaussian blobs so computation focuses on occupied regions, giving similar rendering quality but dramatically higher frame rates [ts=3842s][ts=3913s][ts=3958s][ts=3994s][ts=4000s].",
+    "key_points": [
+      {
+        "text": "Deep implicit methods can predict occupancy, signed distance, density, and appearance for queried 3D points.",
+        "timestamp_s": 3469,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "NeRF queries a neural field with x, y, z and viewing direction to output density and radiance.",
+        "timestamp_s": 3561,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Differentiable volume rendering lets NeRF learn from 2D images by accumulating color and transmittance along rays.",
+        "timestamp_s": 3608,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Radiance-field generators can provide controllable 3D generation while training directly from images.",
+        "timestamp_s": 3761,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "3D Gaussian splatting uses sparse Gaussian blobs so rays sample mainly where matter exists.",
+        "timestamp_s": 3913,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Gaussian splatting achieves NeRF-like quality with much higher rendering speed.",
+        "timestamp_s": 3994,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=7lxrKDKtykM&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=15",
+      "start_s": 3460,
+      "end_s": 4030
+    },
+    "difficulty": 0.79,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "transcript_slice": "00:57:41\nAnd that's the kind of idea that was proposed in 2019.\n\n00:57:47\nhave been still using this same idea.\n\n00:57:51\nto tell me whether a point is inside or outside an object.\n\n00:57:56\nlike a binary classification of inside and outside,\n\n00:58:01\nI say, what would be the signed distance function?\n\n00:58:06\nOr what would be the density values of the point?\n\n00:58:11\nWhat will be the radiance values of the point?\n\n00:58:16\nstart to apply deep network in a way that is, in some sense,\n\n00:58:20\nThat is, I take points in 3D space and use it as an implicit\n\n00:58:27\nspace.\n\n00:58:33\nof implicit functions, not just how PCs are deforming\n\n00:58:38\nin 3D, but really representing implicit parts of the objects\n\n00:58:43\nAnd they can form a complex shapes.\n\n00:58:52\nyou can do that not only for geometry.\n\n00:58:56\nor whether a point is inside or outside objects,\n\n00:59:01\nYou can also query, what will be the radiance?\n\n00:59:04\nAnd then I go directly one year later.\n\n00:59:08\nNow, people come up with this thing called NeRF So\n\n00:59:13\nor I should use deepen our knowledge\n\n00:59:17\nor density of the objects, but also querying the radiance?\n\n00:59:26\nz-coordinate in the 3D space.\n\n00:59:29\nto model the appearance as well, you also\n\n00:59:35\nAnd the output of the neural network is not just like 1 or 0,\n\n00:59:40\nIt is the density values in addition to the color values\n\n00:59:45\nAnd if you directly train implicit functions on 3D shapes,\n\n00:59:52\nSo if you have a collection of 3D objects,\n\n00:59:56\nThat gives you-- OK, you have the ground truth about whether\n\n01:00:01\nBut here you want to train on 2D images.\n\n01:00:05\nSo they also put that together with the neural rendering--\n\n01:00:09\nAnd they made this volume rendering function\n\n01:00:15\nyou can query all these different points in 3D space.\n\n01:00:20\ntheir densities in appearance.\n\n01:00:25\nlight is blocked along the way.\n\n01:00:29\nas in computer graphics.\n\n01:00:35\neven directly from the volume-rendering equations,\n\n01:00:39\nthis is an approximation.\n\n01:00:42\nis differentiable.\n\n01:00:46\nif the neural network gives you the density, which is--\n\n01:00:51\nspace, and it also gives you the color,\n\n01:00:55\nby the points that are sampled ahead of that point.\n\n01:01:02\nhow much light is there contributing\n\n01:01:09\nSo now you have a few things.\n\n01:01:13\nfor the colors or radiance and the densities.\n\n01:01:18\nwhich is made differentiable so that you can learn directly from\n\n01:01:23\nSo these are the two things that have changed.\n\n01:01:27\nI can train on 2D images with this volume rendering equations.\n\n01:01:33\nor density of objects in 3D, I also look into their radiance\n\n01:01:40\nSo these two changes lead to the kind of big jump\n\n01:01:46\nor deep [? SDF ?] and all these other methods to NeRF.\n\n01:01:52\nIt seems like out of nowhere.\n\n01:01:55\nvery much inspired-- if you look at the articles they later\n\n01:02:01\ninspired by all these advances in deep intrinsic functions.\n\n01:02:06\nBut now I do both geometry and appearance.\n\n01:02:13\nSo yeah, here are some results of NeRF.\n\n01:02:24\nOK, so if you remember, we said, in the past,\n\n01:02:29\nshapes, and then also generating their 2D appearances.\n\n01:02:36\nthat is voxels.\n\n01:02:41\nAnd if we have implicit representations,\n\n01:02:45\nWhat if we just replace that with the radiance fields?\n\n01:02:50\nSo we have a neural network that capture\n\n01:02:54\nBut it is generative neural network.\n\n01:02:59\nframework so that you can render objects in 3D,\n\n01:03:04\nAnd you can also do the same thing as controllability.\n\n01:03:10\nYou can change object identity, but you can keep the viewpoint.\n\n01:03:15\nBut now with NeRF, you can learn directly from images.\n\n01:03:20\nof cars or chairs, where you have a lot of 3D data,\n\n01:03:26\nYeah, so you can see that now, the output becomes much more\n\n01:03:30\nSo this is the thing we did called [? pigeon ?]\n\n01:03:35\nand also with mostly people from Gordon's group.\n\n01:03:48\nthat is, you have to sample a lot of points in 3D.\n\n01:03:53\na volumetric convolution.\n\n01:03:56\nyou have to sample all the points\n\n01:03:59\nAnd now you can do it learning from 2D.\n\n01:04:04\nBut because you still have to do all the sampling,\n\n01:04:07\nSo people thought a little bit more.\n\n01:04:10\nwere like, OK, I have this good idea about points and meshes.\n\n01:04:15\nThey're very efficient.\n\n01:04:19\nCan I have an implicit representations?\n\n01:04:23\nI don't have to sample all the times,\n\n01:04:26\nSo maybe I really should put them together.\n\n01:04:34\nsorry, parameterize the scenes very, very densely,\n\n01:04:39\nA lot of points are wasted, just like in voxels.\n\n01:04:44\nYou don't want that.\n\n01:04:48\nare also querying empty space.\n\n01:04:52\nor something like that, but it's taking a lot of time.\n\n01:04:57\nWhat If I just try to sample things more sparsely?\n\n01:05:02\nBut instead of sampling empty spaces all the time,\n\n01:05:09\nBut how can I know that?\n\n01:05:13\nSo this is the idea behind this thing called Gaussian splats,\n\n01:05:18\nSo it still has the same implicit functions.\n\n01:05:23\nand stuff like that.\n\n01:05:28\nI have a point representation of the 3D Gaussian blobs in the 3D\n\n01:05:33\nas point clouds.\n\n01:05:36\nThey're like a blob.\n\n01:05:39\nAnd because you know where these blobs are,\n\n01:05:46\nand sample points, you don't have to sample all the time.\n\n01:05:50\nand then you can know-- based on the radius\n\n01:05:55\nwill only sample at regions where\n\n01:05:58\nSo this makes rendering much more efficient.\n\n01:06:05\nGaussian splats.\n\n01:06:17\nthey're actually not that--\n\n01:06:20\nI would say they're comparable to NeRFs.\n\n01:06:25\nThey're like rendering qualities.\n\n01:06:29\nSo this is a little misleading.\n\n01:06:33\nSo in terms of quality, rendering quality,\n\n01:06:36\nwhen they're first proposed.\n\n01:06:40\nSo this is FPS, Frame Per Second.\n\n01:06:45\nWell, for NeRF, it takes you maybe 20 seconds\n\n01:06:51\nSo now this thing is now made 1,000 times faster.\n\n01:06:56\nSo because you no longer waste all your computing power\n\n01:07:02\nall the time about these points that are in the empty space.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg7",
+      "global_kp_id": "kp_implicit_functions_for_geometry",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg7",
+      "global_kp_id": "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_15_3d_vision::seg7",
+      "global_kp_id": "kp_3d_gaussian_splatting",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_implicit_functions_for_geometry",
+      "name": "Implicit functions for geometry",
+      "description": "A representation in which surface points satisfy a condition like f(x,y,z)=0, enabling inside/outside reasoning and later neural field methods.",
+      "track_tags": [
+        "3d_vision",
+        "neural_fields"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "computer_vision",
+        "geometry"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "generative_ai",
+        "graphics_research"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because implicit functions for geometry formalizes how a representation in which surface points satisfy a condition like f(x,y,z)=0, enabling inside/outside reasoning and later neural field methods, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+      "name": "Neural radiance fields and differentiable volume rendering",
+      "description": "A neural field that predicts density and color from spatial position and view direction, trained through differentiable rendering from 2D images.",
+      "track_tags": [
+        "3d_vision",
+        "neural_fields",
+        "neural_rendering"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "cv_research",
+        "generative_ai",
+        "graphics_research"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because neural radiance fields and differentiable volume rendering synthesizes a neural field that predicts density and color from spatial position and view direction, trained through differentiable rendering from 2D images into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_3d_gaussian_splatting",
+      "name": "3D Gaussian splatting",
+      "description": "A sparse radiance-field-style representation that stores extended Gaussian blobs in space to avoid repeatedly sampling empty regions.",
+      "track_tags": [
+        "3d_vision",
+        "efficient_representation",
+        "neural_rendering"
+      ],
+      "domain_tags": [
+        "computer_graphics",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "applied_ml",
+        "graphics_research",
+        "real_time_rendering"
+      ],
+      "difficulty_level": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because 3D Gaussian splatting clarifies a sparse radiance-field-style representation that stores extended Gaussian blobs in space to avoid repeatedly sampling empty regions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_15_3d_vision::kp12"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.64,
+    0.94
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture15-3d-vision_transcript.txt"
+  }
+}

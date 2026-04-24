@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture04-wordvecs-lm::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about intrinsic versus extrinsic evaluation, analogy and similarity benchmarks, and NER as a downstream test. The distinctions are stated directly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What best distinguishes intrinsic evaluation from extrinsic evaluation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intrinsic uses unlabeled data, while extrinsic uses labeled data only",
+        "Intrinsic scores an internal subtask directly, while extrinsic tests impact on a downstream task",
+        "Intrinsic always measures accuracy, while extrinsic always measures F1",
+        "Intrinsic applies only to language models, while extrinsic applies only to classifiers"
+      ],
+      "answer_index": 1,
+      "explanation": "Intrinsic evaluation measures a component on a focused internal test, while extrinsic evaluation asks whether that component helps a real end task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_downstream_transfer_evaluation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "intrinsic valuation",
+          "real task you want"
+        ],
+        "timestamps": [
+          "00:46:38",
+          "00:47:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a word-vector analogy benchmark typically measure?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How fast vectors can be loaded into memory",
+        "The percentage of analogy questions solved correctly by vector arithmetic",
+        "The number of words in the vocabulary",
+        "Whether every word has an antonym"
+      ],
+      "answer_index": 1,
+      "explanation": "Analogy evaluation checks how often vector arithmetic retrieves the intended answer on a held-out set of relational word problems.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_word_vector_analogy_and_similarity_benchmarks",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "set of word vectors",
+          "which ones work"
+        ],
+        "timestamps": [
+          "00:48:25",
+          "00:48:47"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is named entity recognition an example of extrinsic evaluation for word vectors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it directly asks humans to score similarity",
+        "Because it tests whether embeddings improve performance on a real downstream labeling task",
+        "Because it uses only count-based vectors",
+        "Because it does not require any labels"
+      ],
+      "answer_index": 1,
+      "explanation": "NER is a full downstream task. If adding word vectors improves the system, that is evidence the embeddings are useful beyond isolated probes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "named entity recognition",
+          "substantially improves performance"
+        ],
+        "timestamps": [
+          "00:51:15",
+          "00:51:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q1",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q2",
+      "global_kp_id": "kp_word_vector_analogy_and_similarity_benchmarks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q3",
+      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What best distinguishes intrinsic evaluation from extrinsic evaluation\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does a word-vector analogy benchmark typically measure\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is named entity recognition an example of extrinsic evaluation for word vectors\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What best distinguishes intrinsic evaluation from extrinsic evaluation\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q2",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does a word-vector analogy benchmark typically measure\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg5-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is named entity recognition an example of extrinsic evaluation for word vectors\" naturally belongs in transfer-style evaluation."
+    }
+  ]
+}

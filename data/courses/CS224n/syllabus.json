@@ -1,0 +1,371 @@
+{
+  "course": "CS224N: Natural Language Processing with Deep Learning",
+  "source": "YouTube Playlist PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D",
+  "note": "Custom curated course order. Lecture numbering is pedagogical and may differ from original YouTube release numbering and year.",
+  "lectures": [
+    {
+      "lecture_id": "lecture-01",
+      "youtube_title": "Lecture 1 - Intro and Word Vectors",
+      "lecture_number": 1,
+      "topic": "Intro and Word Vectors",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Foundations",
+      "assets": {
+        "slides": "cs224n-2024-lecture01-wordvecs.pdf",
+        "video": "cs224n-2024-lecture01-wordvecs.mp4",
+        "transcript": "cs224n-2024-lecture01-wordvecs_transcript.txt"
+      },
+      "custom_order": 1
+    },
+    {
+      "lecture_id": "lecture-02",
+      "youtube_title": "Python Tutorial, Manasi Sharma",
+      "lecture_number": 2,
+      "topic": "Python Review Session",
+      "speaker": "Manasi Sharma",
+      "year": 2023,
+      "type": "tutorial",
+      "course_phase": "Foundations",
+      "assets": {
+        "slides": "cs224n-python-review-2023.pdf",
+        "video": "cs224n-2024-lecture02-python-review.mp4",
+        "transcript": "cs224n-2024-lecture02-python-review_transcript.txt"
+      },
+      "custom_order": 2
+    },
+    {
+      "lecture_id": "lecture-03",
+      "youtube_title": "PyTorch Tutorial, Drew Kaul",
+      "lecture_number": 3,
+      "topic": "PyTorch Tutorial",
+      "speaker": "Drew Kaul",
+      "year": 2023,
+      "type": "tutorial",
+      "course_phase": "Foundations",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture03-pytorch.mp4",
+        "transcript": "cs224n-2024-lecture03-pytorch_transcript.txt"
+      },
+      "custom_order": 3
+    },
+    {
+      "lecture_id": "lecture-04",
+      "youtube_title": "Lecture 2 - Word Vectors and Language Models",
+      "lecture_number": 4,
+      "topic": "Word Vectors and Language Models",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Foundations",
+      "assets": {
+        "slides": "cs224n-2024-lecture02-wordvecs-lm.pdf",
+        "video": "cs224n-2024-lecture04-wordvecs-lm.mp4",
+        "transcript": "cs224n-2024-lecture04-wordvecs-lm_transcript.txt"
+      },
+      "custom_order": 4
+    },
+    {
+      "lecture_id": "lecture-05",
+      "youtube_title": "Lecture 3 - Backpropagation, Neural Network",
+      "lecture_number": 5,
+      "topic": "Backpropagation and Neural Networks",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Foundations",
+      "assets": {
+        "slides": "cs224n-2024-lecture03-backprop.pdf",
+        "video": "cs224n-2024-lecture05-backprop.mp4",
+        "transcript": "cs224n-2024-lecture05-backprop_transcript.txt"
+      },
+      "custom_order": 5
+    },
+    {
+      "lecture_id": "lecture-06",
+      "youtube_title": "Lecture 4 - Dependency Parsing",
+      "lecture_number": 6,
+      "topic": "Dependency Parsing",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Foundations",
+      "assets": {
+        "slides": "cs224n-2024-lecture04-dep-parsing.pdf",
+        "video": "cs224n-2024-lecture06-dependency-parsing.mp4",
+        "transcript": "cs224n-2024-lecture06-dependency-parsing_transcript.txt"
+      },
+      "custom_order": 6
+    },
+    {
+      "lecture_id": "lecture-07",
+      "youtube_title": "Lecture 5 - Recurrent Neural Networks",
+      "lecture_number": 7,
+      "topic": "Recurrent Neural Networks",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Sequence Models",
+      "assets": {
+        "slides": "cs224n-2024-lecture05-rnns.pdf",
+        "video": "cs224n-2024-lecture07-rnns.mp4",
+        "transcript": "cs224n-2024-lecture07-rnns_transcript.txt"
+      },
+      "custom_order": 7
+    },
+    {
+      "lecture_id": "lecture-08",
+      "youtube_title": "Lecture 6 - Sequence to Sequence Models",
+      "lecture_number": 8,
+      "topic": "Sequence to Sequence Models",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Sequence Models",
+      "assets": {
+        "slides": "cs224n-2024-lecture06-seq2seq.pdf",
+        "video": "cs224n-2024-lecture08-seq2seq.mp4",
+        "transcript": "cs224n-2024-lecture08-seq2seq_transcript.txt"
+      },
+      "custom_order": 8
+    },
+    {
+      "lecture_id": "lecture-09",
+      "youtube_title": "Lecture 7 - Attention, Final Projects and LLM Intro",
+      "lecture_number": 9,
+      "topic": "Attention, Final Projects and LLM Intro",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Sequence Models",
+      "assets": {
+        "slides": "cs224n-2024-lecture07-attention.pdf",
+        "video": "cs224n-2024-lecture09-attention.mp4",
+        "transcript": "cs224n-2024-lecture09-attention_transcript.txt"
+      },
+      "custom_order": 9
+    },
+    {
+      "lecture_id": "lecture-10",
+      "youtube_title": "Lecture 8 - Self-Attention and Transformers",
+      "lecture_number": 10,
+      "topic": "Self-Attention and Transformers",
+      "speaker": "Chris Manning",
+      "year": 2023,
+      "course_phase": "Transformers & LLMs",
+      "assets": {
+        "slides": "cs224n-2024-lecture08-transformers.pdf",
+        "video": "cs224n-2024-lecture10-transformers.mp4",
+        "transcript": "cs224n-2024-lecture10-transformers_transcript.txt"
+      },
+      "custom_order": 10
+    },
+    {
+      "lecture_id": "lecture-11",
+      "youtube_title": "Lecture 9 - Pretraining",
+      "lecture_number": 11,
+      "topic": "Pretraining",
+      "speaker": "Chris Manning",
+      "year": 2023,
+      "course_phase": "Transformers & LLMs",
+      "assets": {
+        "slides": "cs224n-2024-lecture09-pretraining.pdf",
+        "video": "cs224n-2024-lecture11-pretraining.mp4",
+        "transcript": "cs224n-2024-lecture11-pretraining_transcript.txt"
+      },
+      "custom_order": 11
+    },
+    {
+      "lecture_id": "lecture-12",
+      "youtube_title": "Hugging Face Tutorial, Eric Frankel",
+      "lecture_number": 12,
+      "topic": "Hugging Face Transformers Tutorial",
+      "speaker": "Eric Frankel",
+      "year": 2023,
+      "type": "tutorial",
+      "course_phase": "Transformers & LLMs",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture12-huggingface.mp4",
+        "transcript": "cs224n-2024-lecture12-huggingface_transcript.txt"
+      },
+      "custom_order": 12
+    },
+    {
+      "lecture_id": "lecture-13",
+      "youtube_title": "Lecture 10 - Post-training by Archit Sharma",
+      "lecture_number": 13,
+      "topic": "Post-training",
+      "speaker": "Archit Sharma",
+      "year": 2024,
+      "course_phase": "Transformers & LLMs",
+      "assets": {
+        "slides": "cs224n-2024-lecture10-posttraining.pdf",
+        "video": "cs224n-2024-lecture13-posttraining.mp4",
+        "transcript": "cs224n-2024-lecture13-posttraining_transcript.txt"
+      },
+      "custom_order": 13
+    },
+    {
+      "lecture_id": "lecture-14",
+      "youtube_title": "Lecture 11 - Natural Language Generation",
+      "lecture_number": 14,
+      "topic": "Natural Language Generation",
+      "speaker": "Chris Manning",
+      "year": 2023,
+      "course_phase": "Applications",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture14-nlg.mp4",
+        "transcript": "cs224n-2024-lecture14-nlg_transcript.txt"
+      },
+      "custom_order": 14,
+      "type": "supplemental"
+    },
+    {
+      "lecture_id": "lecture-15",
+      "youtube_title": "Lecture 11 - Benchmarking by Yann Dubois",
+      "lecture_number": 15,
+      "topic": "Benchmarking and Evaluation",
+      "speaker": "Yann Dubois",
+      "year": 2024,
+      "course_phase": "Applications",
+      "assets": {
+        "slides": "cs224n-2024-lecture11-benchmarking.pdf",
+        "video": "cs224n-2024-lecture15-benchmarking.mp4",
+        "transcript": "cs224n-2024-lecture15-benchmarking_transcript.txt"
+      },
+      "custom_order": 15
+    },
+    {
+      "lecture_id": "lecture-16",
+      "youtube_title": "Lecture 12 - Efficient Training, Shikhar Murty",
+      "lecture_number": 16,
+      "topic": "Efficient Training and Parameter-Efficient Fine-Tuning",
+      "speaker": "Shikhar Murty",
+      "year": 2024,
+      "course_phase": "Applications",
+      "assets": {
+        "slides": "cs224n-2024-lecture12-efficient-training.pdf",
+        "video": "cs224n-2024-lecture16-efficient-training.mp4",
+        "transcript": "cs224n-2024-lecture16-efficient-training_transcript.txt"
+      },
+      "custom_order": 16
+    },
+    {
+      "lecture_id": "lecture-17",
+      "youtube_title": "Lecture 16 - ConvNets and TreeRNNs",
+      "lecture_number": 17,
+      "topic": "ConvNets and TreeRNNs for NLP",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Guest Lectures",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture17-convnets.mp4",
+        "transcript": "cs224n-2024-lecture17-convnets_transcript.txt"
+      },
+      "custom_order": 17
+    },
+    {
+      "lecture_id": "lecture-18",
+      "youtube_title": "Lecture 16 - Multimodal Deep Learning, Douwe Kiela",
+      "lecture_number": 18,
+      "topic": "Multimodal Deep Learning",
+      "speaker": "Douwe Kiela",
+      "year": 2023,
+      "course_phase": "Guest Lectures",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture18-multimodal.mp4",
+        "transcript": "cs224n-2024-lecture18-multimodal_transcript.txt"
+      },
+      "custom_order": 18,
+      "type": "supplemental"
+    },
+    {
+      "lecture_id": "lecture-19",
+      "youtube_title": "Lecture 13 - Brain-Computer Interfaces, Chaofei Fan",
+      "lecture_number": 19,
+      "topic": "Brain-Computer Interfaces",
+      "speaker": "Chaofei Fan",
+      "year": 2024,
+      "course_phase": "Guest Lectures",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture19-bci.mp4",
+        "transcript": "cs224n-2024-lecture19-bci_transcript.txt"
+      },
+      "custom_order": 19
+    },
+    {
+      "lecture_id": "lecture-20",
+      "youtube_title": "Lecture 14 - Reasoning and Agents by Shikhar Murty",
+      "lecture_number": 20,
+      "topic": "Reasoning and Agents",
+      "speaker": "Shikhar Murty",
+      "year": 2024,
+      "course_phase": "Guest Lectures",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture20-reasoning-agents.mp4",
+        "transcript": "cs224n-2024-lecture20-reasoning-agents_transcript.txt"
+      },
+      "custom_order": 20
+    },
+    {
+      "lecture_id": "lecture-21",
+      "youtube_title": "Lecture 15 - After DPO by Nathan Lambert",
+      "lecture_number": 21,
+      "topic": "After DPO",
+      "speaker": "Nathan Lambert",
+      "year": 2024,
+      "course_phase": "Guest Lectures",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture21-after-dpo.mp4",
+        "transcript": "cs224n-2024-lecture21-after-dpo_transcript.txt"
+      },
+      "custom_order": 21
+    },
+    {
+      "lecture_id": "lecture-22",
+      "youtube_title": "Lecture 18 - NLP, Linguistics, Philosophy",
+      "lecture_number": 22,
+      "topic": "NLP, Linguistics, and Philosophy",
+      "speaker": "Chris Manning",
+      "year": 2024,
+      "course_phase": "Wrap-up",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture22-nlp-linguistics.mp4",
+        "transcript": "cs224n-2024-lecture22-nlp-linguistics_transcript.txt"
+      },
+      "custom_order": 22
+    },
+    {
+      "lecture_id": "lecture-23",
+      "youtube_title": "Lec. 19 - Model Interpretability & Editing, Been Kim",
+      "lecture_number": 23,
+      "topic": "Model Interpretability and Editing",
+      "speaker": "Been Kim",
+      "year": 2023,
+      "course_phase": "Wrap-up",
+      "assets": {
+        "slides": null,
+        "video": "cs224n-2024-lecture23-interpretability.mp4",
+        "transcript": "cs224n-2024-lecture23-interpretability_transcript.txt"
+      },
+      "custom_order": 23
+    }
+  ],
+  "reference_slides_no_video": [
+    {
+      "id": "ref-slide-qa",
+      "topic": "Question Answering",
+      "note": "Official 2024 syllabus slide, no matching YouTube video",
+      "slides": "cs224n-2024-lecture12-QA.pdf"
+    },
+    {
+      "id": "ref-slide-security",
+      "topic": "Security and Privacy (Nicholas Carlini)",
+      "note": "Official 2024 syllabus slide, no matching YouTube video",
+      "slides": "cs224n-2024-lecture13-security-and-privacy.pdf"
+    }
+  ]
+}

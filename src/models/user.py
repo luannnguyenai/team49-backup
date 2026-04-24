@@ -14,7 +14,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
-    from src.models.learning import Interaction, LearningPath, MasteryScore, Session
+    from src.models.learning import (
+        GoalPreference,
+        Interaction,
+        LearnerMasteryKP,
+        PlanHistory,
+        PlannerSessionState,
+        Session,
+        WaivedUnit,
+    )
 
 
 class PreferredMethod(enum.StrEnum):
@@ -60,9 +68,18 @@ class User(UUIDPrimaryKeyMixin, Base):
     interactions: Mapped[list["Interaction"]] = relationship(  # type: ignore[name-defined]
         "Interaction", back_populates="user", lazy="select"
     )
-    mastery_scores: Mapped[list["MasteryScore"]] = relationship(  # type: ignore[name-defined]
-        "MasteryScore", back_populates="user", lazy="select"
+    learner_mastery_kp: Mapped[list["LearnerMasteryKP"]] = relationship(  # type: ignore[name-defined]
+        "LearnerMasteryKP", lazy="select"
     )
-    learning_paths: Mapped[list["LearningPath"]] = relationship(  # type: ignore[name-defined]
-        "LearningPath", back_populates="user", lazy="select"
+    goal_preferences: Mapped[list["GoalPreference"]] = relationship(  # type: ignore[name-defined]
+        "GoalPreference", lazy="select"
+    )
+    waived_units: Mapped[list["WaivedUnit"]] = relationship(  # type: ignore[name-defined]
+        "WaivedUnit", lazy="select"
+    )
+    plan_histories: Mapped[list["PlanHistory"]] = relationship(  # type: ignore[name-defined]
+        "PlanHistory", lazy="select"
+    )
+    planner_session_states: Mapped[list["PlannerSessionState"]] = relationship(  # type: ignore[name-defined]
+        "PlannerSessionState", lazy="select"
     )

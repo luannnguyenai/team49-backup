@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_11_large_scale_distributed_training::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions on the H100 memory hierarchy, tensor-core throughput, and mixed-precision pitfalls. The key evidence is verbal and does not require a clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which memory order goes from closest and fastest to farthest and largest in an H100-style hierarchy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "HBM -> L2 -> L1/registers",
+        "L1/registers -> L2 -> HBM",
+        "L2 -> HBM -> L1/registers",
+        "Registers -> HBM -> L2"
+      ],
+      "answer_index": 1,
+      "explanation": "The hierarchy places the smallest and fastest storage nearest the compute units, then larger but slower levels farther away.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gpu_memory_hierarchy",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "First, we see we have 256 kilobytes of L1 cache",
+          "So this continues the trend of the memory hierarchy in the GPU."
+        ],
+        "timestamps": [
+          "00:07:43",
+          "00:07:47"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do tensor cores dominate throughput in modern training GPUs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They mainly accelerate disk I/O",
+        "They execute fixed matrix-multiply tiles at much higher FLOPs per cycle than ordinary FP32 cores",
+        "They replace the need for caches",
+        "They only help during inference, not training"
+      ],
+      "answer_index": 1,
+      "explanation": "Deep learning workloads are dominated by matrix multiplications, and tensor cores are specialized to execute those operations far more efficiently than standard FP32 cores.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gpu_memory_hierarchy",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "of memory hierarchy in the H100.",
+          "These are little arithmetic units"
+        ],
+        "timestamps": [
+          "00:08:44",
+          "00:08:51"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can forgetting to cast a PyTorch model to 16-bit make training dramatically slower on an H100?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It disables optimizer states entirely",
+        "It forces the workload onto slower FP32 execution paths instead of tensor-core mixed-precision paths",
+        "It prevents any memory from reaching HBM",
+        "It makes all-reduce mathematically incorrect"
+      ],
+      "answer_index": 1,
+      "explanation": "Mixed-precision tensor-core paths are the high-throughput route for modern training. Leaving the model in FP32 can route work to slower hardware paths and severely reduce speed.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mixed_precision_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "if you forget to cast your model into 16-bit,",
+          "and produce the outputs in a higher precision 32-bit."
+        ],
+        "timestamps": [
+          "00:11:37",
+          "00:11:31"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg2-q1",
+      "global_kp_id": "kp_gpu_memory_hierarchy",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg2-q2",
+      "global_kp_id": "kp_gpu_memory_hierarchy",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg2-q3",
+      "global_kp_id": "kp_mixed_precision_training",
+      "role": "primary"
+    }
+  ]
+}

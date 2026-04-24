@@ -1,0 +1,410 @@
+{
+  "unit_id": "local::lecture10-transformers::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 4 reinforcement questions about causal masking and the minimal self-attention architecture without requiring a separate video clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is masking necessary in autoregressive language modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because a token must not use information from future words when predicting the next token",
+        "Because keys and values must be different lengths",
+        "Because softmax only works on triangular matrices",
+        "Because decoders cannot use positional embeddings"
+      ],
+      "answer_index": 0,
+      "explanation": "If future tokens were visible during training, the model could cheat by directly reading information it is supposed to predict.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "can't cheat",
+          "look at the future"
+        ],
+        "timestamps": [
+          "00:33:12",
+          "00:33:16"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the unit implement causal masking mathematically?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Set future attention scores to negative infinity before softmax",
+        "Replace future value vectors with zeros after the output is computed",
+        "Delete all query vectors for earlier tokens",
+        "Normalize each row by its maximum instead of a softmax"
+      ],
+      "answer_index": 0,
+      "explanation": "By setting forbidden future scores to a very large negative value before the softmax, their resulting attention weights become zero.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "negative infinity",
+          "gets mapped to zero"
+        ],
+        "timestamps": [
+          "00:34:32",
+          "00:34:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After applying the softmax to a masked score matrix, what happens to future positions?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They receive zero attention weight",
+        "They receive equal weight with past positions",
+        "They become new queries for the next layer",
+        "They are copied into the residual connection"
+      ],
+      "answer_index": 0,
+      "explanation": "The softmax turns the masked negative-infinity scores into zero probability mass, so those future positions do not contribute to the weighted sum.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "weighted average is zero",
+          "future"
+        ],
+        "timestamps": [
+          "00:34:08",
+          "00:34:18"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the unit's example, what visibility pattern should the token \"chef\" have in a masked decoder?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It may attend to start, the, and chef, but not to who",
+        "It may attend only to who because who is more informative",
+        "It must attend equally to all tokens in the sentence",
+        "It may attend only to itself and never to earlier tokens"
+      ],
+      "answer_index": 0,
+      "explanation": "A causal mask allows attention to current and earlier positions only. That means \"chef\" can use prior context but not any token that comes later.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_self_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "start the chef",
+          "can't look at who"
+        ],
+        "timestamps": [
+          "00:34:37",
+          "00:34:52"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "global_kp_id": "kp_causal_self_attention",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why is masking necessary in autoregressive language modeling\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does the unit implement causal masking mathematically\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"After applying the softmax to a masked score matrix, what happens to future positions\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"In the unit's example, what visibility pattern should the token \"chef\" have in a masked decoder\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture10_transformers_seg4_q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is masking necessary in autoregressive language modeling\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does the unit implement causal masking mathematically\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"After applying the softmax to a masked score matrix, what happens to future positions\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture10_transformers_seg4_q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"In the unit's example, what visibility pattern should the token \"chef\" have in a masked decoder\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

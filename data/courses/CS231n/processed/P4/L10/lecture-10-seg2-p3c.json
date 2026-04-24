@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_10::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for application-oriented questions about single-frame CNN baselines and the tradeoffs of late fusion without requiring a separate clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_10_seg2_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_10_seg2_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_10_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is a single-frame CNN often a strong baseline for video classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Many actions are already recognizable from appearance in sampled frames, and averaging frame predictions can work surprisingly well",
+        "It explicitly models long-range temporal dependencies better than recurrent models",
+        "It has more temporal shift invariance than 3D convolution",
+        "It always uses fewer training examples than clip-based models"
+      ],
+      "answer_index": 0,
+      "explanation": "Some actions can be recognized from the posture, scene, or object configuration visible in individual frames. Averaging predictions across sampled frames can therefore perform well even without explicit motion modeling.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_single_frame_cnn_baseline",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "treat them as images",
+          "very strong baseline"
+        ],
+        "timestamps": [
+          "00:08:29",
+          "00:09:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_10_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main drawback of late fusion by concatenating frame features before an MLP?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The feature vector grows with the number of frames, which can create many parameters",
+        "It makes spatial features impossible to learn",
+        "It removes all temporal information before classification",
+        "It requires optical flow as an extra input"
+      ],
+      "answer_index": 0,
+      "explanation": "Concatenation keeps separate information from each frame, but the resulting clip representation gets larger as more frames are used. A large input to the classifier can make the model parameter-heavy and inefficient.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_late_fusion",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "concatenate the feature maps",
+          "introduce a lot of parameters"
+        ],
+        "timestamps": [
+          "00:12:06",
+          "00:12:45"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg2_q1",
+      "global_kp_id": "kp_single_frame_cnn_baseline",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg2_q2",
+      "global_kp_id": "kp_late_fusion",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_10_seg2_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "A single-frame CNN as a strong baseline is a fairly accessible video-modeling idea."
+    },
+    {
+      "item_id": "lecture_10_seg2_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The drawback of late fusion requires understanding what temporal structure is lost, making it medium difficulty."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_10_seg2_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a useful first check on why temporal modeling is not always necessary."
+    },
+    {
+      "item_id": "lecture_10_seg2_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item checks whether the learner can articulate a central late-fusion limitation."
+    }
+  ]
+}

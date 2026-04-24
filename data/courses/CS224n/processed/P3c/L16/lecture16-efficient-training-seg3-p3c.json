@@ -1,0 +1,196 @@
+{
+  "unit_id": "local::lecture16-efficient-training::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture16-efficient-training-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What additional memory does ZeRO stage 2 save compared with ZeRO stage 1?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It shards gradients so the full gradient vector does not need to live on every GPU at once.",
+        "It removes all activations from memory during the forward pass.",
+        "It stores model parameters only on the CPU and never communicates them.",
+        "It freezes all parameters, so no optimizer is needed."
+      ],
+      "answer_index": 0,
+      "explanation": "Stage 1 shards optimizer state. Stage 2 goes further by sharding gradient storage, often sending layer gradients to their owning workers as they are produced.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_zero_optimizer_and_gradient_sharding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "ZeRO stage 2",
+          "send it to the right worker"
+        ],
+        "timestamps": [
+          "00:24:39",
+          "00:25:30"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What distinguishes ZeRO stage 3, also called FSDP, from earlier ZeRO stages?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It shards the model parameters themselves in addition to optimizer state and gradients.",
+        "It stops using multiple GPUs and moves back to single-GPU training.",
+        "It keeps all parameters replicated but compresses only the input data.",
+        "It removes the need for backpropagation by using forward-only updates."
+      ],
+      "answer_index": 0,
+      "explanation": "FSDP targets cases where the model itself may not fit on one GPU. By sharding parameters, no worker has to permanently store the full model.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fsdp",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "split up your model",
+          "fully sharded data"
+        ],
+        "timestamps": [
+          "00:28:23",
+          "00:28:52"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "During an FSDP forward pass, why is an all-gather needed before computing a layer?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because each GPU has only a shard of that layer's parameters, so the full layer parameters must be temporarily reconstructed for computation.",
+        "Because each GPU has a different vocabulary and must merge tokenizers before every layer.",
+        "Because all activations must be averaged before any layer can run.",
+        "Because FSDP requires every layer to use the same random seed."
+      ],
+      "answer_index": 0,
+      "explanation": "Parameter sharding saves memory, but a layer computation still needs the layer's full weights. FSDP temporarily gathers those weights, computes the layer, and can then free them.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_fsdp",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "all gather",
+          "full set of parameters"
+        ],
+        "timestamps": [
+          "00:30:44",
+          "00:31:02"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does activation memory remain a separate bottleneck even when parameters and optimizer state are sharded?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Activations are saved for backpropagation and scale with batch size, so sharding model state does not eliminate them.",
+        "Activations are stored permanently in the optimizer state, so ZeRO cannot access them.",
+        "Activations are always FP64, regardless of mixed precision.",
+        "Activations are only used during inference, not training."
+      ],
+      "answer_index": 0,
+      "explanation": "Sharding reduces memory for parameters, gradients, and optimizer state. The intermediate values needed to compute gradients still occupy memory and grow with the batch and sequence workload.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_memory_as_a_separate_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "activation memory",
+          "linearly with batch size"
+        ],
+        "timestamps": [
+          "00:35:00",
+          "00:35:48"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture16-efficient-training-seg3-q1",
+      "global_kp_id": "kp_zero_optimizer_and_gradient_sharding",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q2",
+      "global_kp_id": "kp_fsdp",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q2",
+      "global_kp_id": "kp_zero_optimizer_and_gradient_sharding",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q3",
+      "global_kp_id": "kp_fsdp",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg3-q4",
+      "global_kp_id": "kp_activation_memory_as_a_separate_bottleneck",
+      "role": "primary"
+    }
+  ]
+}

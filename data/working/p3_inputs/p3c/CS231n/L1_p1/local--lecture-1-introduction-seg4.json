@@ -1,0 +1,206 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_1_introduction",
+    "lecture_title": "CS231n Lecture 1: Introduction",
+    "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A"
+  },
+  "unit": {
+    "unit_id": "local::lecture_1_introduction::seg4",
+    "course_id": "CS231N",
+    "name": "Classical recognition, AI winter, and the cognitive science north star",
+    "description": "Reviews the classical computer vision era, the limitations that led to AI winter, and the cognitive/neuroscience findings that clarified what strong visual recognition should look like.",
+    "summary": "Li surveys 1970s to 1990s classical approaches such as generalized cylinders, compositional models, and edge detection, noting that these methods made progress but often produced limited representations like sketches and edges [ts=1041s] [ts=1135s]. She explains that this gap between ambition and results contributed to AI winter, when enthusiasm and funding declined because systems did not deliver on their promises [ts=1143s] [ts=1179s]. The lecture then pivots to cognitive science and neuroscience as a North Star for the field, highlighting studies showing that recognition depends on scene context, not only local object pixels [ts=1197s] [ts=1238s]. Additional experiments demonstrate how remarkably fast human visual recognition is, including RSVP-style detection at 100 ms per frame and EEG evidence that categorization signals emerge around 150 ms after image onset [ts=1260s] [ts=1378s]. Finally, discoveries of specialized brain areas for faces, places, and body parts reinforce the idea that recognition is central and highly structured in biological vision [ts=1382s] [ts=1434s].",
+    "key_points": [
+      {
+        "text": "Classical vision methods included recognition via parts and edge detection, but their outputs often remained shallow.",
+        "timestamp_s": 1045,
+        "evidence_type": "example"
+      },
+      {
+        "text": "AI winter is attributed to dwindling enthusiasm and funding after systems like expert systems and classical vision failed to deliver.",
+        "timestamp_s": 1150,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Scene context affects object recognition; seeing the whole world changes how targets are perceived.",
+        "timestamp_s": 1230,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Human vision can detect targets in rapidly shown frames at roughly 100 ms exposure per frame.",
+        "timestamp_s": 1300,
+        "evidence_type": "example"
+      },
+      {
+        "text": "EEG evidence suggests category-specific signals emerge around 150 ms after viewing a natural scene.",
+        "timestamp_s": 1355,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Humans have specialized neural areas for recognizing faces, places, and body parts.",
+        "timestamp_s": 1410,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=2fq9wYslV0A&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=1",
+      "start_s": 1020,
+      "end_s": 1450
+    },
+    "difficulty": 0.52,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "transcript_slice": "00:17:05\nthat.\n\n00:17:09\nSo I just want you to appreciate the difference between language\n\n00:17:17\nhow it solved this problem.\n\n00:17:21\n1970s, the early pioneers of computer vision, without data,\n\n00:17:32\nwithout the mathematical advances we have seen today,\n\n00:17:40\nof computer vision-- for example, recognition of objects.\n\n00:17:48\nis called generalized cylinders by Rodney Brooks and Tom\n\n00:17:52\nAnd ironically, Rodney Brooks today is on campus, actually,\n\n00:18:03\nAnd he went on to become one of the greatest\n\n00:18:10\nand many other robots.\n\n00:18:16\nresearchers have worked on these also compositional models\n\n00:18:27\nAnd then in the 1980s, digital photos start to appear.\n\n00:18:37\nAnd people can digitize that a little bit.\n\n00:18:43\nYou look at all this and probably feel\n\n00:18:50\nI mean, it's kind of trivial to get some sketches and edges.\n\n00:18:58\nThat's how computer vision, works at that time.\n\n00:19:03\nThat was around the time before many of you\n\n00:19:10\nThe field entered AI winter because the enthusiasm\n\n00:19:18\nA lot of things didn't deliver.\n\n00:19:22\nExpert systems didn't deliver.\n\n00:19:26\nBut under the hood of this winter, a lot of research\n\n00:19:34\nlike computer vision, NLP, robotics.\n\n00:19:40\nthat had a profound implication in computer vision,\n\n00:19:45\ncontinue to blossom.\n\n00:19:49\nfor the field of computer vision, is cognitive\n\n00:19:55\nproblems we should work on.\n\n00:20:00\nthere's something special about seeing nature,\n\n00:20:06\nThis is a study by Irv Biederman, who\n\n00:20:13\ndiffer depending on if the images are scrambled or not.\n\n00:20:19\nFrom a phton point of view, these two bicycles\n\n00:20:26\nBut somehow the rest of the image\n\n00:20:39\nSo there is something telling us that seeing\n\n00:20:44\nimpacts the way we see objects.\n\n00:20:49\nHere's another direct measure of how fast we detect objects.\n\n00:21:00\na video.\n\n00:21:07\nin one of the frames.\n\n00:21:11\nof the frames.\n\n00:21:15\nor your brain is because you've never seen this video.\n\n00:21:22\nappear.\n\n00:21:24\nobject will look like, where it is, its gestures, and all that.\n\n00:21:34\nAnd on top of that, these frames are\n\n00:21:39\nseeing every frame for only 100 milliseconds.\n\n00:21:47\nIn fact, Simon Thorpe, another cognitive neuroscientist,\n\n00:21:55\nIf you hook people up in EEG caps\n\n00:22:01\nand ask human subjects to categorize things\n\n00:22:07\nversus things without animals--\n\n00:22:11\nAnd then you measure the brain wave.\n\n00:22:18\nyour brain already has a differential signal\n\n00:22:24\nYou might not be so impressed.\n\n00:22:29\n150 milliseconds is really orders of magnitude slower.\n\n00:22:37\nOur wetware, our brain, our neurons\n\n00:22:43\n150 milliseconds is actually really fast.\n\n00:22:49\nin terms of neural processing.\n\n00:22:53\nhumans are really good at seeing objects and categorizing them.\n\n00:23:02\nand categorizing them, we even develop specialized brain\n\n00:23:10\nfaces or places or body parts.\n\n00:23:19\nand early 21st century.\n\n00:23:26\nbe studying these kind of character shapes\n\n00:23:33\nWe really should go after important fundamental problems\n\n00:23:40\nAnd one of those problems that everything\n\n00:23:46\nis object recognition in natural setting.\n\n00:23:52\nAnd studying this is going to be part\n\n00:24:00\nAnd that's what we did.\n\n00:24:04\nat how we can separate foreground objects\n\n00:24:09\nThis is called recognition by grouping in the 1990s.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_1_introduction::seg4",
+      "global_kp_id": "kp_classical_cv_features",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_1_introduction::seg4",
+      "global_kp_id": "kp_human_recognition_is_fast_contextual_and_specialized",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_1_introduction::seg4",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_classical_cv_features",
+      "name": "Classical computer vision and hand-crafted features",
+      "description": "Pre-neural-network image pipelines that replaced raw pixels with human-designed descriptors such as color histograms or HOG before classification. The pre-deep-learning era emphasized parts, edges, grouping, matching, and handcrafted representations, with limited success on full recognition.",
+      "track_tags": [
+        "classical_methods",
+        "computer_vision",
+        "historical_context",
+        "history"
+      ],
+      "domain_tags": [
+        "classic_cv",
+        "computer_vision",
+        "feature_engineering"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because classical computer vision and hand-crafted features clarifies pre-neural-network image pipelines that replaced raw pixels with human-designed descriptors such as color histograms or HOG before classification, sharpening later modeling, analysis, or evaluation choices while roles split between optional and supporting and importance labels split between high and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_1_introduction::kp5",
+        "local::lecture_5_image_classification_with_cnns::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_human_recognition_is_fast_contextual_and_specialized",
+      "name": "Human recognition is fast, contextual, and specialized",
+      "description": "Cognitive and neuroscience studies show that recognition depends on scene context, happens rapidly, and recruits specialized processing areas.",
+      "track_tags": [
+        "cognition",
+        "recognition"
+      ],
+      "domain_tags": [
+        "cognitive_science",
+        "computer_vision",
+        "neuroscience"
+      ],
+      "career_path_tags": [
+        "research"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because human recognition is fast, contextual, and specialized clarifies cognitive and neuroscience studies show that recognition depends on scene context, happens rapidly, and recruits specialized processing areas, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_1_introduction::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.37,
+    0.67
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L1_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture01-introduction_transcript.txt"
+  }
+}

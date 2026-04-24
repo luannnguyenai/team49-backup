@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_16::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript clearly supports two introductory foundation-model questions, so no separate clip is necessary.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which option best captures the main difference between a traditional task-specific model and a foundation model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A task-specific model is trained for one task, while a foundation model is broadly pretrained and then adapted to many tasks",
+        "A task-specific model always uses self-supervision, while a foundation model always uses labels",
+        "A task-specific model cannot use neural networks, while a foundation model must use transformers",
+        "A task-specific model predicts only text, while a foundation model predicts only images"
+      ],
+      "answer_index": 0,
+      "explanation": "The central shift is from building one model per task to broadly pretraining a single model that can later be adapted across many downstream tasks.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pre-trained on broad skills",
+          "adapted to task-specific needs"
+        ],
+        "timestamps": [
+          "00:01:38",
+          "00:01:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which trait is most characteristic of foundation models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are usually trained at large scale and aim to be robust across many tasks",
+        "They always require a separate labeled dataset for every new use case",
+        "They can only be used for language and not for vision",
+        "They avoid self-supervised objectives in favor of hand-coded rules"
+      ],
+      "answer_index": 0,
+      "explanation": "Foundation models are typically designed to generalize broadly, and that usually goes together with large models, large datasets, and self-supervised or weakly supervised pretraining.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_traits_of_foundation_models",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "robust across many tasks",
+          "large training datasets"
+        ],
+        "timestamps": [
+          "00:03:46",
+          "00:03:46"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "global_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "global_kp_id": "kp_traits_of_foundation_models",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which option best captures the main difference between a traditional task-specific model and a foundation model\" is a direct reinforcement check and should land on the easier side."
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which trait is most characteristic of foundation models\" is a direct reinforcement check and should land on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_16_seg1_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which option best captures the main difference between a traditional task-specific model and a foundation model\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture_16_seg1_q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which trait is most characteristic of foundation models\" works best as an early concept check."
+    }
+  ]
+}

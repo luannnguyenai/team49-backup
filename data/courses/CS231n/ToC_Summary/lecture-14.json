@@ -1,0 +1,125 @@
+{
+    "lecture_title": "Generative Models (Part 2): GANs and Diffusion Models",
+    "table_of_contents": [
+        {
+            "section_number": 1,
+            "timestamp": "00:00:05",
+            "topic_title": "Review of Generative Modeling Categories",
+            "detailed_summary": "The lecture begins by briefly recapping the differences between discriminative models (predicting a label given data) and generative models (learning the underlying probability distribution of the data). Conditional generative models aim to generate data based on a specific input, like a text prompt. The instructor reviews explicit density models covered previously, including autoregressive models (which predict data sequentially, like pixels in an image) and Variational Autoencoders (VAEs, which approximate density by optimizing a variational lower bound using an encoder-decoder architecture).",
+            "key_takeaways": [
+                "Generative models learn a probability distribution over data, allowing for the creation of new samples.",
+                "Explicit density models like VAEs and Autoregressive models compute an exact or approximate probability density function."
+            ]
+        },
+        {
+            "section_number": 2,
+            "timestamp": "00:03:04",
+            "topic_title": "Implicit Density: Generative Adversarial Networks (GANs)",
+            "detailed_summary": "The discussion shifts to implicit density models, which do not compute explicit probability densities but allow for sampling. Generative Adversarial Networks (GANs) are introduced as a prime example. GANs consist of two neural networks: a Generator that maps random noise from a simple prior (like a unit Gaussian) into data space, and a Discriminator that tries to distinguish between real data and the fake data produced by the generator. The training objective is formulated as a minimax game where the generator tries to minimize the discriminator's accuracy, while the discriminator tries to maximize its ability to correctly classify real versus fake samples.",
+            "key_takeaways": [
+                "Implicit density models give up on calculating exact probabilities in favor of direct sampling capabilities.",
+                "GANs operate on a minimax game framework between a Generator and a Discriminator."
+            ]
+        },
+        {
+            "section_number": 3,
+            "timestamp": "00:16:09",
+            "topic_title": "GAN Training Dynamics and Latent Space Interpolation",
+            "detailed_summary": "GANs are notoriously difficult to train because the objective does not provide a meaningful loss curve; the value of the minimax game depends on the relative strength of both networks. Early in training, the generator produces pure noise, making the discriminator's job too easy and leading to vanishing gradients for the generator. A common practical trick is to change the generator's objective to maximize the log-probability of the discriminator making a mistake rather than minimizing the probability of it being correct. Despite training instabilities like mode collapse (where the generator memorizes a few samples), GANs produce highly realistic, crisp images and exhibit a smooth latent space, allowing for seamless, semantic interpolation between generated features.",
+            "key_takeaways": [
+                "GANs lack an interpretable loss curve, making them highly unstable and difficult to tune.",
+                "A well-trained GAN creates a smooth latent space where interpolating between noise vectors yields smooth semantic transitions in the generated images."
+            ]
+        },
+        {
+            "section_number": 4,
+            "timestamp": "00:30:26",
+            "topic_title": "Introduction to Diffusion Models and Rectified Flow",
+            "detailed_summary": "Diffusion models are introduced as the current state-of-the-art framework that largely displaced GANs. The core intuition is to iteratively corrupt data by adding noise until it becomes pure noise, and then train a neural network to reverse this process by removing the noise step-by-step. The instructor explains a specific, simplified implementation called Rectified Flow. Geometrically, this involves drawing a straight line from a clean data sample to a pure noise sample. The network is given a point on this line corresponding to a specific noise level and is trained to predict the velocity vector pointing along this line toward the noise.",
+            "key_takeaways": [
+                "Diffusion models learn to reverse a gradual noising process to generate data from pure noise.",
+                "Rectified Flow provides a clear geometric intuition for diffusion by linearly interpolating between data and noise."
+            ]
+        },
+        {
+            "section_number": 5,
+            "timestamp": "00:46:00",
+            "topic_title": "Training and Sampling in Rectified Flow Models",
+            "detailed_summary": "The training loop for rectified flow is remarkably simple, typically requiring only a few lines of code to sample data, sample noise, sample a random timestep, compute the interpolated noisy data, and then apply an MSE loss against the target velocity vector. Unlike GANs, diffusion models offer smooth, interpretable loss curves during training. However, inference (sampling) is iterative and computationally expensive. Starting from pure noise, the model predicts the velocity vector, takes a small step to partially denoise the sample, and repeats this process over many discrete steps (e.g., 50) until a clean image is generated.",
+            "key_takeaways": [
+                "Diffusion models are much more stable to train than GANs and provide a meaningful loss curve.",
+                "Inference in diffusion models is iterative and slow, requiring the model to be evaluated multiple times to generate a single sample."
+            ]
+        },
+        {
+            "section_number": 6,
+            "timestamp": "00:52:00",
+            "topic_title": "Conditional Diffusion and Classifier-Free Guidance (CFG)",
+            "detailed_summary": "To make diffusion models controllable (e.g., generating an image from text), conditional information is passed into the network alongside the noisy image and timestep. To strongly enforce this conditioning, a technique called Classifier-Free Guidance (CFG) is used. During training, the conditioning signal is randomly dropped (set to a null value) about 50% of the time, forcing the model to learn both conditional and unconditional velocity vectors. During inference, the model evaluates both vectors and extrapolates away from the unconditional prediction towards the conditional one. While CFG significantly improves output quality and alignment with prompts, it effectively doubles the computational cost of inference.",
+            "key_takeaways": [
+                "Classifier-Free Guidance (CFG) drastically improves prompt adherence in conditional generation.",
+                "CFG requires the model to be evaluated twice per sampling step (once with conditions, once without), doubling the inference cost."
+            ]
+        },
+        {
+            "section_number": 7,
+            "timestamp": "01:02:26",
+            "topic_title": "Optimizing Diffusion: Noise Schedules",
+            "detailed_summary": "Sampling the noise level uniformly during training is suboptimal because predicting the extremes (pure noise or pure clean data) is relatively easy for the network. The most difficult and ambiguous predictions occur at intermediate noise levels, where multiple data-noise pairs overlap and the network must average over them. To address this, practitioners use non-uniform noise schedules, such as logit-normal sampling, which concentrates training efforts on the middle noise levels. Additionally, generating high-resolution images requires shifting the noise schedule to higher noise levels to properly destroy strong local pixel correlations.",
+            "key_takeaways": [
+                "Uniform noise sampling is inefficient; models benefit from focusing on intermediate, ambiguous noise levels.",
+                "High-resolution image generation requires customized, shifted noise schedules to account for pixel correlation."
+            ]
+        },
+        {
+            "section_number": 8,
+            "timestamp": "01:06:58",
+            "topic_title": "Scaling Up: Latent Diffusion Models (LDMs)",
+            "detailed_summary": "Running diffusion processes directly on high-resolution pixel space is computationally prohibitive. Latent Diffusion Models (LDMs) solve this by utilizing a pre-trained, frozen autoencoder to compress images into a lower-dimensional latent space. The diffusion model is then trained entirely within this latent space. Because standard VAEs produce blurry outputs, a GAN discriminator is typically added to the autoencoder's training to ensure crisp, high-fidelity reconstructions. Thus, modern LDMs are actually a hybrid of VAEs, GANs, and diffusion models working together.",
+            "key_takeaways": [
+                "LDMs perform the diffusion process in a compressed latent space, drastically reducing computational requirements.",
+                "State-of-the-art architectures combine VAEs for compression, GANs for sharpness, and Diffusion for generation."
+            ]
+        },
+        {
+            "section_number": 9,
+            "timestamp": "01:13:58",
+            "topic_title": "Diffusion Transformers (DiTs) and Video Generation",
+            "detailed_summary": "Historically, diffusion models utilized Convolutional Neural Networks (like U-Nets), but modern architectures have shifted to Diffusion Transformers (DiTs). DiTs process data as a sequence of tokens. The diffusion timestep is typically injected via adaptive normalization (scale and shift operations), while conditioning data (like text embeddings from a frozen language model) is injected via cross-attention or concatenated directly into the sequence. This architecture scales exceptionally well, powering state-of-the-art text-to-image models (like FLUX.1) and text-to-video models (like Sora and Veo 3). Video generation remains highly expensive due to the massive sequence lengths required (e.g., 76,000+ tokens).",
+            "key_takeaways": [
+                "Transformers have replaced CNNs as the backbone for state-of-the-art diffusion models.",
+                "Video diffusion models are computationally massive due to the extreme sequence lengths required for temporal and spatial resolution."
+            ]
+        },
+        {
+            "section_number": 10,
+            "timestamp": "01:18:36",
+            "topic_title": "Speeding Up Inference: Diffusion Distillation",
+            "detailed_summary": "Because the iterative sampling process of diffusion models is inherently slow (requiring dozens of sequential network passes), researchers actively explore diffusion distillation. These mathematical and algorithmic techniques aim to compress the multi-step sampling process into significantly fewer steps—sometimes down to a single step—without drastically sacrificing image quality. It is currently one of the most active and critical areas of research in generative AI to make models viable for real-time applications.",
+            "key_takeaways": [
+                "Diffusion Distillation aims to reduce the number of sampling steps required to generate high-quality images.",
+                "Faster inference is crucial for deploying generative models in real-world, user-facing applications."
+            ]
+        },
+        {
+            "section_number": 11,
+            "timestamp": "01:21:40",
+            "topic_title": "Generalized Diffusion and Mathematical Perspectives",
+            "detailed_summary": "The lecture briefly touches on the vast mathematical literature surrounding diffusion. Different formulations alter the interpolation functions between data and noise, leading to Variance Preserving (VP) or Variance Exploding (VE) models. Depending on the setup, the model can be parameterized to predict the clean data, the noise, or the velocity. Theoretically, diffusion can be viewed through three distinct lenses: as a Latent Variable Model optimizing a variational lower bound, as a method learning the Score Function of the data distribution, or as a system solving Stochastic Differential Equations (SDEs), which opens up various numerical integration techniques for sampling.",
+            "key_takeaways": [
+                "Diffusion models can be mathematically formulated in several different, yet interconnected ways (SDEs, Score Matching, Latent Variables).",
+                "Different formulations require different network prediction targets and noise scheduling functions."
+            ]
+        },
+        {
+            "section_number": 12,
+            "timestamp": "01:28:44",
+            "topic_title": "Autoregressive Models on Discrete Latents and Lecture Summary",
+            "detailed_summary": "Finally, the instructor notes that autoregressive models (like the architecture powering GPT) are still highly relevant for image generation when applied to discrete latents produced by a discrete VAE (like a VQ-VAE), bypassing the slowness of pixel-by-pixel generation. The lecture concludes by summarizing that modern generative modeling relies heavily on combining different historical frameworks—VAEs for latent compression, GANs for perceptual sharpness, and Diffusion or Autoregressive models for the core generation step—to achieve the current state-of-the-art results.",
+            "key_takeaways": [
+                "Autoregressive models are viable for images when operating on compressed, discrete latent spaces.",
+                "Modern AI pipelines are an amalgamation of VAEs, GANs, and Diffusion/Autoregressive models working in tandem."
+            ]
+        }
+    ]
+}

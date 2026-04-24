@@ -1,0 +1,282 @@
+{
+  "unit_id": "local::lecture12-huggingface::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 6,
+  "review_summary": "The transcript provides enough grounded detail to generate 6 reinforcement questions about preparing an IMDb DatasetDict, tokenizing with datasets.map, connecting the result to a standard PyTorch fine-tuning loop, and one code-style preprocessing check.",
+  "question_bank": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which dataset is used in the fine-tuning walkthrough?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "IMDb sentiment reviews",
+        "SQuAD question answering",
+        "MNLI entailment pairs",
+        "WikiText language modeling"
+      ],
+      "answer_index": 0,
+      "explanation": "The walkthrough fine-tunes on the IMDb sentiment dataset provided through the datasets library.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "IMDb",
+          "sentiment analysis"
+        ],
+        "timestamps": [
+          "00:32:13",
+          "00:32:21"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is a small demonstration DatasetDict constructed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "By shuffling the training data and selecting 128 train examples and 32 validation examples",
+        "By downloading only the test split and duplicating it",
+        "By merging IMDb with SST-2 and then filtering neutral labels",
+        "By keeping the full dataset but removing all labels"
+      ],
+      "answer_index": 0,
+      "explanation": "The speaker makes a smaller CPU-friendly demonstration dataset by shuffling and selecting 128 training examples and 32 validation examples.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "128 examples",
+          "validation"
+        ],
+        "timestamps": [
+          "00:33:12",
+          "00:32:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After tokenizing the dataset with map, what cleanup steps are performed before using it with PyTorch?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Remove the raw text column, rename label to labels, and set the format to Torch",
+        "Convert every label to a string and decode the input IDs",
+        "Delete the attention mask and keep only text",
+        "Replace the tokenizer output with logits from the model"
+      ],
+      "answer_index": 0,
+      "explanation": "Once the text has been tokenized, the raw text field is no longer needed. Renaming label to labels and setting Torch format makes the dataset fit the model interface naturally.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "remove the text column",
+          "format to Torch"
+        ],
+        "timestamps": [
+          "00:36:00",
+          "00:36:09"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What do the labels mean in this sentiment dataset?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "1 means positive and 0 means negative",
+        "1 means negative and 0 means positive",
+        "1 means neutral and 0 means mixed",
+        "Labels are string categories rather than integers"
+      ],
+      "answer_index": 0,
+      "explanation": "The dataset uses integer labels, where 1 denotes positive sentiment and 0 denotes negative sentiment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "positive or negative",
+          "label here corresponds"
+        ],
+        "timestamps": [
+          "00:34:29",
+          "00:36:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Once the tokenized dataset is wrapped in a DataLoader, how different is the fine-tuning loop from ordinary PyTorch training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is basically the standard PyTorch loop: compute loss, backpropagate, and step the optimizer",
+        "It no longer needs an optimizer or loss function",
+        "It can only run through Trainer and not manual PyTorch code",
+        "It must decode model outputs back to text before each gradient step"
+      ],
+      "answer_index": 0,
+      "explanation": "After data preparation, the speaker emphasizes that Hugging Face models are trained in essentially the same way as ordinary PyTorch modules inside a standard training loop.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pytorch_training_loop",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same as what",
+          "backpropagate"
+        ],
+        "timestamps": [
+          "00:39:09",
+          "00:40:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main purpose of calling map with a tokenization function on a DatasetDict?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "To apply the tokenizer across dataset examples and add model-ready token fields",
+        "To shuffle the dataset and drop all labels",
+        "To run backpropagation on every training example",
+        "To convert the dataset directly into model predictions"
+      ],
+      "answer_index": 0,
+      "explanation": "datasets.map is used here as a preprocessing pass that transforms raw text examples into tokenized features suitable for training.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "medium",
+      "code_question_style": "concept_from_code",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "def tokenize_fn(batch):\n    return tokenizer(batch[\"text\"], truncation=True)\n\ntokenized = dataset.map(tokenize_fn, batched=True)",
+        "highlight_lines": [
+          1,
+          2,
+          4
+        ]
+      },
+      "evidence": {
+        "source": "code",
+        "transcript_quotes": [
+          "datasets.map",
+          "tokenizer"
+        ],
+        "timestamps": [
+          "00:00:00"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "global_kp_id": "kp_pytorch_training_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    }
+  ]
+}

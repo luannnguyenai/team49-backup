@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_6::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
+  "review_summary": "The transcript evidence is direct enough for a compact initialization question set, without requiring a cut clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture_6_seg6_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a common consequence of initializing weights too small in a deep ReLU network?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Activation means and standard deviations shrink toward zero with depth",
+        "Every layer immediately becomes an identity function",
+        "The output classes become linearly separable by construction",
+        "Gradients are guaranteed to explode instead of shrink"
+      ],
+      "answer_index": 0,
+      "explanation": "If weights start too small, the signals passed forward through many layers also stay very small. As depth increases, the activation statistics collapse toward zero, making optimization harder.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_kaiming_msra_initialization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "too small, it goes to 0",
+          "smaller mean and standard deviation"
+        ],
+        "timestamps": [
+          "00:43:12",
+          "00:43:38"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_6_seg6_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which initialization scale was presented as the practical default for ReLU-style networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "std = sqrt(2 / D_in)",
+        "std = 1 / D_in^2",
+        "std = sqrt(D_in / 2)",
+        "std = D_in / 2"
+      ],
+      "answer_index": 0,
+      "explanation": "Kaiming or MSRA initialization uses a standard deviation of sqrt(2 / D_in). The purpose is to keep activation statistics relatively stable as signals move through the network.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_kaiming_msra_initialization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "square root of 2",
+          "over your input dimension size"
+        ],
+        "timestamps": [
+          "00:45:05",
+          "00:45:15"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg6_q1",
+      "global_kp_id": "kp_kaiming_msra_initialization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg6_q2",
+      "global_kp_id": "kp_kaiming_msra_initialization",
+      "role": "primary"
+    }
+  ]
+}

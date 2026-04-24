@@ -1,0 +1,300 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture04-wordvecs-lm",
+    "lecture_title": "Lecture 4 - Word Vectors and Language Models",
+    "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture04-wordvecs-lm::seg7",
+    "course_id": "CS224N",
+    "name": "Neural window classifiers and cross-entropy loss",
+    "description": "Introduces supervised neural classification with word-vector windows, nonlinear hidden representations, and cross-entropy loss.",
+    "summary": "The final technical arc starts by framing word2vec as already a simple classifier because it predicts which words are likely in a context [ts=3806s]. The main example is named entity recognition: words are assigned classes such as person, location, or not-a-named-entity, and the same surface words can have different classes depending on context, as in Paris Hilton versus a location use of Paris [ts=3824s]. The proposed model is a window classifier: take a target word plus context words on both sides, represent each with word vectors, concatenate the window, and feed it to a classifier that predicts location versus not-location [ts=3927s]. This is supervised learning: training data consists of inputs x_i and labels y_i, such as negative Paris Hilton and positive I visit Paris every spring [ts=3992s]. Traditional classifiers such as logistic regression, softmax classifiers, SVMs, and Naive Bayes are described as mostly linear classifiers over fixed inputs, whereas neural classifiers also learn distributed representations and can be nonlinear relative to the original input space [ts=4085s]. The concrete neural architecture concatenates five word embeddings into a high-dimensional vector, applies a matrix plus bias and a nonlinearity to form a hidden representation, then maps that hidden representation to a score and sigmoid probability for the location class [ts=4196s]. Cross-entropy loss is introduced as the PyTorch loss students will use; for one-hot target labels, all incorrect terms vanish and cross entropy becomes the log probability assigned to the correct class, used as negative log likelihood [ts=4354s].",
+    "key_points": [
+      {
+        "text": "Word2vec can be viewed as a simple classifier because it predicts likely context words.",
+        "timestamp_s": 3806,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Named entity recognition labels words with classes such as person, location, or not a named entity, using context to resolve ambiguity.",
+        "timestamp_s": 3824,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A window classifier uses a target word plus surrounding context words represented by their word vectors.",
+        "timestamp_s": 3927,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Supervised classification uses labeled input examples x_i with class labels y_i.",
+        "timestamp_s": 3992,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Neural classifiers learn both weights and distributed word representations, making nonlinear classification possible in the original space.",
+        "timestamp_s": 4139,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A five-word window with 100-dimensional embeddings becomes a 500-dimensional concatenated input.",
+        "timestamp_s": 4224,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "A hidden layer computes matrix times input plus bias, then applies a nonlinearity before output scoring.",
+        "timestamp_s": 4231,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For one-hot targets, cross entropy reduces to the log probability assigned to the correct class and is used as negative log likelihood.",
+        "timestamp_s": 4354,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=nBor4jfWetQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=2",
+      "start_s": 3789,
+      "end_s": 4449
+    },
+    "difficulty": 3.7,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The final technical arc starts by framing word2vec as already a simple classifier because it predicts which words are likely in a context [ts=3806s]. The main example is named entity recognition: words are assigned classes such as person, location, or not-a-named-entity, and the same surface words can have different classes depending on context, as in Paris Hilton versus a location use of Paris [ts=3824s]. The proposed model is a window classifier: take a target word plus context words on both sides, represent each with word vectors, concatenate the window, and feed it to a classifier that predicts location versus not-location [ts=3927s]. This is supervised learning: training data consists of inputs x_i and labels y_i, such as negative Paris Hilton and positive I visit Paris every spring [ts=3992s]. Traditional classifiers such as logistic regression, softmax classifiers, SVMs, and Naive Bayes are described as mostly linear classifiers over fixed inputs, whereas neural classifiers also learn distributed representations and can be nonlinear relative to the original input space [ts=4085s]. The concrete neural architecture concatenates five word embeddings into a high-dimensional vector, applies a matrix plus bias and a nonlinearity to form a hidden representation, then maps that hidden representation to a score and sigmoid probability for the location class [ts=4196s]. Cross-entropy loss is introduced as the PyTorch loss students will use; for one-hot target labels, all incorrect terms vanish and cross entropy becomes the log probability assigned to the correct class, used as negative log likelihood [ts=4354s].",
+  "target_kp_ids": [
+    "kp_supervised_window_classification",
+    "kp_neural_classifiers_as_learned_nonlinear_representations",
+    "kp_feedforward_neural_networks",
+    "kp_cross_entropy_loss",
+    "kp_named_entity_recognition_as_an_extrinsic_embedding_task"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "transcript_slice": "01:03:09\nSo I just wanted to start to introduce, in the last 15\n\n01:03:21\nand how we start to build, in general, neural networks.\n\n01:03:28\nbuilt a very simple neural classifier\n\n01:03:35\nwhat words are likely to occur in the context of another word,\n\n01:03:42\nBut let's look at a simple classifier\n\n01:03:47\nSo for the named entity recognizer,\n\n01:03:52\nSo we want to say, these two words are a person,\n\n01:03:59\nare then locations in this second sentence.\n\n01:04:08\nAnd the other state is that they're not\n\n01:04:13\nThey're just a word that is some other word.\n\n01:04:20\nas a bit of understanding.\n\n01:04:25\nwhere they've tagged company names with the stock ticker\n\n01:04:35\nor something like that, you've got named entities\n\n01:04:42\nyou're doing this second stage of entity linking,\n\n01:04:46\nentity to some canonical form of it, like a Wikipedia page.\n\n01:04:54\nfor the rest of the day.\n\n01:05:03\nwe've got this simple task where what we're going to do\n\n01:05:09\nbecause sometimes Paris is a name of a person,\n\n01:05:14\nAnd so we're going to want to look at this word in its context\n\n01:05:23\nAnd so the way that we're going to do it is we're\n\n01:05:31\nSo we're going to take a word with a couple of words\n\n01:05:36\nAnd for the words in our context window,\n\n01:05:41\nbecause we want to show they're useful for something.\n\n01:05:46\nthat is a classifier.\n\n01:05:51\ngoing to be a really simple classifier.\n\n01:05:58\nSo this one here, we're wanting to say for this window here,\n\n01:06:07\nWhereas if it had been I love Paris Hilton greatly,\n\n01:06:16\nthe word in the middle of the context, then isn't a location.\n\n01:06:25\nWe're assigning some set of classes to things.\n\n01:06:35\ndo supervised learning, which means\n\n01:06:41\nSo we have input items x I. And for each one,\n\n01:06:51\ntraining examples ones like I love Paris Hilton greatly.\n\n01:07:00\nAnd I visit Paris every spring.\n\n01:07:03\nThat is a location where I'm actually\n\n01:07:08\nSo inputs labels.\n\n01:07:14\nSo my set here is simply location not a location.\n\n01:07:20\nI've got five classes.\n\n01:07:27\nwhatever other ones there are--\n\n01:07:31\nI could be assigning a bunch of or other not a name and a bunch\n\n01:07:37\nBut I'm going to be doing it with only two\n\n01:07:43\nas well.\n\n01:07:47\nSo that's what we're going to do.\n\n01:07:54\nis neural classifiers.\n\n01:08:03\nfor thought as we go into it.\n\n01:08:11\nyou can build classifiers like logistic regression or softmax\n\n01:08:20\nBayes or whatever else you might have seen.\n\n01:08:27\nare linear classifiers, meaning that they have a linear decision\n\n01:08:31\nAnd when we're learning these classifiers,\n\n01:08:37\nBut our inputs are fixed, that our inputs are represented\n\n01:08:45\nSo we have fixed inputs.\n\n01:08:50\nused to multiply the inputs.\n\n01:08:56\nSo when we have our neural classifier,\n\n01:09:02\nSo first of all, we're not only learning\n\n01:09:07\nalso learning distributed representations for our words.\n\n01:09:15\nour word vectors represent the actual words as symbols\n\n01:09:22\nso that in terms of the original space,\n\n01:09:30\ncomplex functions, but we will then\n\n01:09:39\na final classification.\n\n01:09:44\nwe're about to build, we will have a linear classifier\n\n01:09:51\nbut not in terms of our original space.\n\n01:09:56\nSo here's what I'm going to use.\n\n01:10:05\nAnd so I start with some words, Museums and Paris are amazing.\n\n01:10:15\nof those using my word vectors.\n\n01:10:21\nis just a concatenation of five word vectors.\n\n01:10:26\nthis is 500 dimensional.\n\n01:10:31\nlayer, which is simply multiplying\n\n01:10:39\nAnd then I'm going to put it through some non-linearity,\n\n01:10:46\nthat we've already seen.\n\n01:10:50\nAnd in particular, if the W is, say, 8 by 500,\n\n01:11:01\nyeah, 8 by 500, I'll be reducing it to a much smaller vector.\n\n01:11:10\nmy hidden representation in the middle of my neural network\n\n01:11:15\nAnd that will give me a score.\n\n01:11:20\nthat we saw earlier to say, what's the probability this\n\n01:11:25\nSo at this point, my classifier is\n\n01:11:32\nof this internal representation that's used right at the end.\n\n01:11:40\nvectors.\n\n01:11:51\nHere's one other thing.\n\n01:11:58\nsince you want to know this when we start\n\n01:12:02\nI mean, up until now, I've presented everything\n\n01:12:10\nfor building our models.\n\n01:12:15\ngoing to be starting to do things with PyTorch.\n\n01:12:26\nwhat you're going to be wanting to use is cross entropy loss.\n\n01:12:34\nSo cross entropy is from information theory.\n\n01:12:42\nand you're computing a probability distribution q,\n\n01:12:49\nSo it's the log of your model probability,\n\n01:13:00\ndistribution.\n\n01:13:03\nwhereas if you have ground truth or gold or target data where\n\n01:13:13\nso like for examples of I love Paris when warm,\n\n01:13:24\nProbability 1, it's a location, probability 0,\n\n01:13:29\nSo if you're just labeling the right class as probability 1,\n\n01:13:39\nAnd the only thing you're left with\n\n01:13:44\nwhat log probability is my model giving to the right class.\n\n01:13:53\nwhich we can use for the negative log likelihood.\n\n01:14:02\nJust remember that you'll want to use cross entropy\n\n01:14:09\nBefore we end today, here is my obligatory one picture",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_supervised_window_classification",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_neural_classifiers_as_learned_nonlinear_representations",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-wordvecs-lm::seg7",
+      "global_kp_id": "kp_cross_entropy_loss",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_named_entity_recognition_as_an_extrinsic_embedding_task",
+      "name": "Named entity recognition as an extrinsic embedding task",
+      "description": "NER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system.",
+      "track_tags": [
+        "nlp"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because named entity recognition as an extrinsic embedding task clarifies nER labels spans as people, places, and other entities, and can test whether word vectors improve a downstream NLP system, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_supervised_window_classification",
+      "name": "Supervised window classification",
+      "description": "A window classifier predicts a label for a target word using its surrounding context and word-vector features.",
+      "track_tags": [
+        "classification"
+      ],
+      "domain_tags": [
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because supervised window classification formalizes how a window classifier predicts a label for a target word using its surrounding context and word-vector features, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp19"
+      ]
+    },
+    {
+      "global_kp_id": "kp_neural_classifiers_as_learned_nonlinear_representations",
+      "name": "Neural classifiers as learned nonlinear representations",
+      "description": "Neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space.",
+      "track_tags": [
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because neural classifiers as learned nonlinear representations formalizes how neural classifiers learn both weights and distributed representations, enabling nonlinear classification in the original input space, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp20"
+      ]
+    },
+    {
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "name": "Feed-forward neural networks / MLPs",
+      "description": "Stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons. A neural layer concatenates embeddings, applies an affine transformation plus nonlinearity, and maps hidden features to output scores.",
+      "track_tags": [
+        "architectures",
+        "deep_learning",
+        "neural_networks"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because feed-forward neural networks / MLPs formalizes how stacks of linear layers that map inputs to outputs through hidden representations, more precisely called fully connected networks or multi-layer perceptrons, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp21",
+        "local::lecture_4_neural_networks_and_backpropagation::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cross_entropy_loss",
+      "name": "Cross-entropy loss and negative log likelihood",
+      "description": "Transform raw class scores into probabilities with softmax and learn by minimizing the negative log probability of the correct class, equivalent here to maximum likelihood and cross-entropy under one-hot labels. For one-hot targets, cross entropy reduces to the model's log probability of the correct class and is optimized as negative log likelihood.",
+      "track_tags": [
+        "deep_learning_basics",
+        "loss_functions",
+        "neural_networks"
+      ],
+      "domain_tags": [
+        "cross_entropy",
+        "machine_learning",
+        "multiclass_logistic_regression",
+        "softmax"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because cross-entropy loss and negative log likelihood formalizes how transform raw class scores into probabilities with softmax and learn by minimizing the negative log probability of the correct class, equivalent here to maximum likelihood and cross-entropy under one-hot labels, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp22",
+        "local::lecture_2_image_classification_with_linear_classifiers::kp11"
+      ]
+    }
+  ],
+  "question_intent": "procedural",
+  "target_item_count": 6,
+  "target_difficulty_range": [
+    3.55,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture04-wordvecs-lm_transcript.txt"
+  }
+}

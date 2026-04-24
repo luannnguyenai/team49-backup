@@ -1,0 +1,142 @@
+{
+    "output_filename": "p3a__cs231n__lecture_18_human_centered_ai.json",
+    "run_id": "<run_id>",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_18_human_centered_ai",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg1",
+            "is_worth_learning": true,
+            "salience_score": "low",
+            "rationale": "Dominant coverage of main gateway KP kp_human_centered_ai and a clear three-part lecture framing make this motivation segment assessable despite its historical setup.",
+            "target_kp_ids": [
+                "kp_human_centered_ai"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "motivation",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 1,
+            "salience_confidence": "low",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg2",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main coverage of kp_visual_intelligence_and_recognition plus substantial main coverage of gateway KP kp_deep_learning_resurgence and high item-generation worthiness make this a core theory segment.",
+            "target_kp_ids": [
+                "kp_visual_intelligence_and_recognition",
+                "kp_deep_learning_resurgence"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg3",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant main coverage of scene graphs, substantial main coverage of capstone KP kp_dynamic_multi_actor_activity_understanding, and high item-generation worthiness give this strong conceptual value.",
+            "target_kp_ids": [
+                "kp_scene_graphs_and_relational_perception",
+                "kp_dynamic_multi_actor_activity_understanding"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg4",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant main coverage of human attention limits, substantial fine-grained recognition coverage, and demo-heavy examples like Stroop, change blindness, and surgical counting support diagnostic assessment items.",
+            "target_kp_ids": [
+                "kp_human_attention_limits_and_error_prone_perception",
+                "kp_fine_grained_recognition_for_superhuman_perception"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg5",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main coverage of critical gateway KP kp_bias_and_fairness_in_visual_ai plus substantial privacy coverage and high item-generation worthiness make this a central deployment-focused segment.",
+            "target_kp_ids": [
+                "kp_bias_and_fairness_in_visual_ai",
+                "kp_privacy_preserving_visual_ai"
+            ],
+            "question_intent": "application",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg6",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main coverage of critical capstone KP kp_augmentation_over_replacement and multiple demo-heavy healthcare sensing cases make this a strong application segment.",
+            "target_kp_ids": [
+                "kp_augmentation_over_replacement"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg7",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant main coverage of kp_perception_action_integration and a demo-heavy LLM/VLM robot-planning pipeline make this well suited for procedural assessment.",
+            "target_kp_ids": [
+                "kp_perception_action_integration"
+            ],
+            "question_intent": "procedural",
+            "content_type": "worked_example",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_18_human_centered_ai::seg8",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main coverage of human-preference-driven benchmarking, substantial main coverage of capstone KP kp_augmentation_over_replacement, and benchmark results with essentially zero current performance make this a key synthesis segment.",
+            "target_kp_ids": [
+                "kp_human_preference_driven_robot_benchmarking",
+                "kp_augmentation_over_replacement"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

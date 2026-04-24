@@ -20,8 +20,9 @@ from typing import Any
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from src.config import FAST_MODEL
+from src.config import FAST_MODEL, settings
 from src.services.chat_model_factory import build_chat_model_kwargs
+from src.services.llm_rate_limiter import enforce_llm_rate_limit
 
 
 def _fmt_ts(seconds: float) -> str:
@@ -144,6 +145,8 @@ def route_question(
         {"route": "COMPLEX", "reason": "..."}
     """
     try:
+        enforce_llm_rate_limit(model=FAST_MODEL, model_provider=settings.model_provider)
+
         # Build context for router
         user_text = f'Lecture: "{lecture_title}"\n'
         user_text += f"Student is currently at: {_fmt_ts(current_timestamp)}"

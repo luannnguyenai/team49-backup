@@ -1,0 +1,191 @@
+{
+  "unit_id": "local::lecture14-nlg::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture14-nlg-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In autoregressive generation, what happens after the model selects a token?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The selected token is fed back as part of the context for later predictions.",
+        "The whole sequence is regenerated from scratch.",
+        "The model discards the previous context and samples independently.",
+        "The encoder must be retrained on the selected token."
+      ],
+      "answer_index": 0,
+      "explanation": "Autoregressive generation builds a sequence step by step. Each generated token becomes part of the prefix that conditions the next-token distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pass it back",
+          "recursively"
+        ],
+        "timestamps": [
+          "00:09:21",
+          "00:09:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are decoder-only models commonly used for highly open-ended generation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are a practical fit for left-to-right continuation over many possible outputs.",
+        "They guarantee the globally highest-probability sequence.",
+        "They avoid the need for a vocabulary.",
+        "They can only be used when an input sentence has a fixed translation."
+      ],
+      "answer_index": 0,
+      "explanation": "Open-ended generation often looks like continuing a prefix into many possible futures. Decoder-only autoregressive models naturally model this left-to-right continuation process.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "more open-ended tasks",
+          "decoder-only"
+        ],
+        "timestamps": [
+          "00:10:12",
+          "00:10:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the key difference between teacher forcing and student forcing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Teacher forcing conditions on gold previous tokens during training, while student forcing conditions on the model's own generated tokens.",
+        "Teacher forcing samples randomly, while student forcing always chooses the gold token.",
+        "Teacher forcing is used only for evaluation, while student forcing is used only for data collection.",
+        "Teacher forcing removes the softmax layer, while student forcing adds it back."
+      ],
+      "answer_index": 0,
+      "explanation": "Teacher forcing supplies the correct previous tokens, making next-token learning easier. At generation time, the model no longer has those gold tokens and must condition on its own earlier outputs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_teacher_forcing_and_student_forcing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "gold previous tokens",
+          "model's own generated"
+        ],
+        "timestamps": [
+          "00:11:40",
+          "00:14:18"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg2-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does “autoregressive” mean in left-to-right language generation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each prediction is conditioned on previously generated tokens using the chain rule.",
+        "All tokens are generated simultaneously without any order.",
+        "The model predicts only the final token of a sentence.",
+        "The model conditions only on future tokens."
+      ],
+      "answer_index": 0,
+      "explanation": "Autoregressive generation decomposes a sequence probability into a product of next-token probabilities, each conditioned on the prefix produced so far.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "chain rule",
+          "left to right"
+        ],
+        "timestamps": [
+          "00:12:40",
+          "00:12:50"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture14-nlg-seg2-q1",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg2-q2",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg2-q3",
+      "global_kp_id": "kp_teacher_forcing_and_student_forcing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg2-q4",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "role": "primary"
+    }
+  ]
+}

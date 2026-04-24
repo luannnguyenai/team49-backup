@@ -1,0 +1,108 @@
+{
+  "output_filename": "p3a__cs224n__lecture12_huggingface.json",
+  "run_id": "<run_id>",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture12-huggingface",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture12-huggingface::seg1",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of the main workflow KP plus demo-heavy setup gives clear instructional value for the reusable Hub→tokenizer→model→prediction pattern, but the segment is less assessment-rich than later implementation units.",
+      "target_kp_ids": [
+        "kp_hugging_face_end_to_end_workflow"
+      ],
+      "question_intent": "procedural",
+      "content_type": "motivation",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture12-huggingface::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of the critical gateway KP on tokenization outputs plus substantial coverage of padding/truncation/decoding and high item_generation_worthiness make this a core demo-heavy implementation unit.",
+      "target_kp_ids": [
+        "kp_transformer_tokenization_outputs",
+        "kp_padding_truncation_and_decoding_utilities"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture12-huggingface::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Two main KPs receive dominant coverage here, including a critical gateway concept on architecture-task matching, and the demo-heavy unit directly teaches inference calls, logits, loss, and prediction generation.",
+      "target_kp_ids": [
+        "kp_task_specific_model_classes_and_architecture_task_matching",
+        "kp_sequence_classification_outputs_loss_and_predictions"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture12-huggingface::seg4",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "The main introspection KP has dominant coverage and the unit is demo-heavy, but section_flags mark only medium item_generation_worthiness and it is less central than the main fine-tuning workflow.",
+      "target_kp_ids": [
+        "kp_model_introspection_with_hidden_states_and_attention"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture12-huggingface::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main coverage of dataset preparation plus substantial coverage of the critical capstone PyTorch training loop, together with high item_generation_worthiness and demo-heavy execution, make this a strong worked-example unit.",
+      "target_kp_ids": [
+        "kp_dataset_preparation_with_datasets_and_datasetdict",
+        "kp_pytorch_training_loop"
+      ],
+      "question_intent": "procedural",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture12-huggingface::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "The capstone Trainer API KP is covered dominantly in a demo-heavy unit with high item_generation_worthiness, and the segment teaches the full configuration-evaluation-checkpoint workflow for practical fine-tuning.",
+      "target_kp_ids": [
+        "kp_trainer_api_metrics_callbacks_and_checkpoints"
+      ],
+      "question_intent": "procedural",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

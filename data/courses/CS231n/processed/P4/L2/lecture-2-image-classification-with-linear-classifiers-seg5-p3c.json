@@ -1,0 +1,334 @@
+{
+  "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript and unit summary provide enough support for linear score functions, weight shapes, bias terms, and the template/geometric interpretations. A separate video clip is not required.",
+  "qa_outputs": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item checks matrix-shape reasoning for linear classifiers and has a single unambiguous correct answer.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item isolates the role of the bias term clearly, and the distractors remain plausible without overlapping the correct answer.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item asks for the visual interpretation of weight rows, which aligns directly with the target KP and evidence.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a linear image classifier with 10 classes and a flattened 3072-dimensional input, what shape should the weight matrix have to produce one score per class?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "10 by 3072",
+        "3072 by 10 by 3",
+        "10 by 10",
+        "3072 by 1"
+      ],
+      "answer_index": 0,
+      "explanation": "Each row of the weight matrix produces the score for one class by combining all input features. With 10 classes and 3072 input features, the matrix has one row per class and one column per feature.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "3,072 numbers",
+          "10 output classes",
+          "weight matrix"
+        ],
+        "timestamps": [
+          "00:48:10",
+          "00:48:23",
+          "00:48:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the bias term do in a linear classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It adds an input-independent shift that can move decision boundaries away from the origin.",
+        "It replaces the weight matrix so no features are needed.",
+        "It forces all classes to share exactly the same score.",
+        "It measures the pixel distance between the query image and training images."
+      ],
+      "answer_index": 0,
+      "explanation": "The bias is independent of the input features, so it shifts class scores and allows separating boundaries to be positioned more flexibly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "input-independent value",
+          "helps with much better separation",
+          "all of these lines"
+        ],
+        "timestamps": [
+          "00:48:56",
+          "00:49:13",
+          "00:53:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How can the rows of a linear classifier's weight matrix be interpreted visually?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each row acts like a learned class template that is scored against the image.",
+        "Each row is a separate training image that must be copied exactly.",
+        "Each row stores the validation accuracy for one hyperparameter.",
+        "Each row is a probability distribution produced by softmax before scoring."
+      ],
+      "answer_index": 0,
+      "explanation": "A class score is formed by comparing the input vector with that class's row of weights. This makes each row interpretable as a template for evidence toward a class.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "row in the matrix w",
+          "specific class",
+          "these templates"
+        ],
+        "timestamps": [
+          "00:51:46",
+          "00:51:51",
+          "00:52:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "global_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "global_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "global_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 1.0,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Dimension reasoning is slightly more demanding than plain terminology but still squarely medium difficulty."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.0,
+      "discrimination_prior": 0.92,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bias-term interpretation is conceptually important but still accessible, so the item sits near baseline medium."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Learners must connect linear algebra to visual template intuition, which makes this a slightly harder conceptual question."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is useful when checking whether a learner can move from the classifier idea to its algebraic shape constraints."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item is concise and works well in reinforcement quizzes or bridge checks around linear models."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "final_quiz",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The template view of weights transfers well to later discussions of learned representations and classifier geometry."
+    }
+  ]
+}

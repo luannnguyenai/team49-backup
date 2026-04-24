@@ -1,0 +1,109 @@
+{
+  "output_filename": "p3a__cs224n__lecture06_dependency_parsing.json",
+  "run_id": "<run_id>",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture06-dependency-parsing",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_dependency_grammar, which is critical and gateway, plus high item_generation_worthiness makes this foundational core theory.",
+      "target_kp_ids": [
+        "kp_dependency_grammar",
+        "kp_phrase_structure_grammar"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_syntactic_ambiguity_and_attachment with high item_generation_worthiness and a concrete application to information extraction makes this strong motivation/application content.",
+      "target_kp_ids": [
+        "kp_syntactic_ambiguity_and_attachment"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg3",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of main KP kp_annotated_treebanks gives clear instructional value, but much of the unit is notation and historical context rather than algorithmically central material.",
+      "target_kp_ids": [
+        "kp_annotated_treebanks"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg4",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of main KP kp_dependency_trees_and_projectivity and high item_generation_worthiness make the projectivity constraint and parsing cues worth assessing, though the segment is shorter and less central than the parser algorithm.",
+      "target_kp_ids": [
+        "kp_dependency_trees_and_projectivity"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_transition_based_dependency_parsing with high item_generation_worthiness and a worked shift/left-arc/right-arc walkthrough makes this the core procedural unit.",
+      "target_kp_ids": [
+        "kp_transition_based_dependency_parsing",
+        "kp_local_parser_state_and_features"
+      ],
+      "question_intent": "procedural",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_neural_transition_based_parser, which is critical and capstone, plus high item_generation_worthiness and standard evaluation metrics make this a high-value synthesis unit.",
+      "target_kp_ids": [
+        "kp_neural_transition_based_parser",
+        "kp_uas_and_las_evaluation",
+        "kp_graph_based_dependency_parsing"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

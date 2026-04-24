@@ -54,8 +54,9 @@ export interface ForgotPasswordPayload {
 }
 
 export interface OnboardingPayload {
-  known_topic_ids: string[];
-  desired_module_ids: string[];
+  known_unit_ids: string[];
+  desired_section_ids: string[];
+  selected_course_ids: string[];
   available_hours_per_week: number;
   target_deadline: string;
   preferred_method: "reading" | "video";
@@ -63,26 +64,29 @@ export interface OnboardingPayload {
 
 // ---- Content API shapes ----
 
-export interface TopicInModule {
+export interface LearningUnitSelectionItem {
   id: string;
-  name: string;
+  canonical_unit_id?: string | null;
+  title: string;
   description: string | null;
   order_index: number;
   estimated_hours_beginner: number | null;
   estimated_hours_intermediate: number | null;
 }
 
-export interface ModuleListItem {
+export interface CourseSectionListItem {
   id: string;
-  name: string;
+  course_id: string;
+  canonical_course_id?: string | null;
+  title: string;
   description: string | null;
   order_index: number;
-  prerequisite_module_ids: string[] | null;
-  topics_count: number;
+  prerequisite_section_ids: string[] | null;
+  learning_units_count: number;
 }
 
-export interface ModuleDetail extends ModuleListItem {
-  topics: TopicInModule[];
+export interface CourseSectionDetail extends CourseSectionListItem {
+  learning_units: LearningUnitSelectionItem[];
 }
 
 // ---- Assessment API shapes ----
@@ -93,11 +97,13 @@ export type SelectedAnswer = "A" | "B" | "C" | "D";
 export type MasteryLevel = "not_started" | "novice" | "developing" | "proficient" | "mastered";
 
 export interface QuestionForAssessment {
-  id: string;
+  id: string | null;
   item_id: string;
-  topic_id: string;
-  bloom_level: BloomLevel;
-  difficulty_bucket: DifficultyBucket;
+  canonical_item_id?: string | null;
+  canonical_unit_id?: string | null;
+  topic_id: string | null;
+  bloom_level: BloomLevel | null;
+  difficulty_bucket: DifficultyBucket | null;
   stem_text: string;
   option_a: string;
   option_b: string;
@@ -112,15 +118,20 @@ export interface AssessmentStartResponse {
   questions: QuestionForAssessment[];
 }
 
+export interface CanonicalAssessmentStartPayload {
+  canonical_unit_ids: string[];
+}
+
 export interface AnswerInput {
-  question_id: string;
+  question_id?: string | null;
+  canonical_item_id?: string | null;
   selected_answer: SelectedAnswer;
   response_time_ms: number | null;
 }
 
-export interface TopicResult {
-  topic_id: string;
-  topic_name: string;
+export interface LearningUnitResult {
+  learning_unit_id: string;
+  learning_unit_title: string;
   score_percent: number;
   mastery_level: MasteryLevel;
   bloom_breakdown: Record<string, string>; // e.g. {"remember": "1/1"}
@@ -132,16 +143,16 @@ export interface AssessmentResultResponse {
   session_id: string;
   completed_at: string;
   overall_score_percent: number;
-  topic_results: TopicResult[];
+  learning_unit_results: LearningUnitResult[];
 }
 
 // ---- Topic content ----
 
-export interface TopicContent {
-  topic_id: string;
-  topic_name: string;
-  module_id: string;
-  module_name: string;
+export interface LearningUnitContentById {
+  learning_unit_id: string;
+  title: string;
+  section_id: string;
+  section_title: string;
   content_markdown: string | null;
   video_url: string | null;
 }
@@ -163,6 +174,7 @@ export interface CourseCatalogItem {
   short_description: string;
   status: CourseStatus;
   cover_image_url: string | null;
+  hero_kicker?: string | null;
   hero_badge: string | null;
   is_recommended: boolean;
 }
@@ -200,6 +212,25 @@ export interface LearningUnitCourseSummary {
   title: string;
 }
 
+export interface CourseSectionSummary {
+  id: string;
+  course_id: string;
+  course_slug: string;
+  course_title: string;
+  title: string;
+  description: string | null;
+  order_index: number;
+  learning_units_count: number;
+}
+
+export interface CourseUnitListItem {
+  slug: string;
+  title: string;
+  status: CourseStatus;
+  unit_type: string;
+  order_index: number;
+}
+
 export interface LearningUnitSummary {
   id: string;
   slug: string;
@@ -230,12 +261,20 @@ export interface LearningUnitResponse {
   tutor: TutorContextPayload;
 }
 
+export interface LearningUnitQuizRef {
+  learning_unit_id: string;
+  canonical_artifact_unit_id: string | null;
+  course_slug: string;
+  unit_slug: string;
+  title: string;
+}
+
 // ---- Quiz API shapes ----
 
 export interface QuestionForQuiz {
   id: string;
   item_id: string;
-  topic_id: string;
+  learning_unit_id: string;
   bloom_level: BloomLevel;
   difficulty_bucket: DifficultyBucket;
   stem_text: string;
@@ -248,7 +287,7 @@ export interface QuestionForQuiz {
 
 export interface QuizStartResponse {
   session_id: string;
-  topic_id: string;
+  learning_unit_id: string;
   total_questions: number;
   questions: QuestionForQuiz[];
 }
@@ -263,8 +302,8 @@ export interface QuizAnswerResponse {
 
 export interface QuizCompleteResponse {
   session_id: string;
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   score: string; // e.g. "7/10"
   percent: number;
   mastery_before: number;
@@ -283,7 +322,7 @@ export interface QuizCompleteResponse {
 export interface QuestionForModuleTest {
   id: string;
   item_id: string;
-  topic_id: string;
+  learning_unit_id: string;
   bloom_level: BloomLevel;
   difficulty_bucket: DifficultyBucket;
   stem_text: string;
@@ -294,19 +333,19 @@ export interface QuestionForModuleTest {
   time_expected_seconds: number | null;
 }
 
-export interface TopicQuestionsGroup {
-  topic_id: string;
-  topic_name: string;
+export interface LearningUnitQuestionsGroup {
+  learning_unit_id: string;
+  learning_unit_title: string;
   questions: QuestionForModuleTest[];
 }
 
 export interface ModuleTestStartResponse {
   session_id: string;
-  module_id: string;
-  module_name: string;
-  total_topics: number;
+  section_id: string;
+  section_title: string;
+  total_learning_units: number;
   total_questions: number;
-  topics: TopicQuestionsGroup[];
+  learning_units: LearningUnitQuestionsGroup[];
 }
 
 export interface ModuleTestAnswerInput {
@@ -315,9 +354,9 @@ export interface ModuleTestAnswerInput {
   response_time_ms: number | null;
 }
 
-export interface TopicTestResult {
-  topic_id: string;
-  topic_name: string;
+export interface LearningUnitTestResult {
+  learning_unit_id: string;
+  learning_unit_title: string;
   score: string;
   score_percent: number;
   bloom_max: string | null;
@@ -325,23 +364,23 @@ export interface TopicTestResult {
   weak_kcs: string[];
 }
 
-export interface ReviewTopicSuggestion {
-  topic_id: string;
-  topic_name: string;
+export interface ReviewLearningUnitSuggestion {
+  learning_unit_id: string;
+  learning_unit_title: string;
   weak_kcs: string[];
   misconceptions: string[];
   estimated_review_hours: number;
 }
 
-export interface NextModuleInfo {
-  module_id: string;
-  module_name: string;
+export interface NextSectionInfo {
+  section_id: string;
+  section_title: string;
 }
 
 export interface WrongAnswerDetail {
   question_id: string;
-  topic_id: string;
-  topic_name: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
   stem_text: string;
   option_a: string;
   option_b: string;
@@ -354,14 +393,14 @@ export interface WrongAnswerDetail {
 
 export interface ModuleTestResultResponse {
   session_id: string;
-  module_id: string;
-  module_name: string;
+  section_id: string;
+  section_title: string;
   total_score_percent: number;
   passed: boolean;
-  per_topic: TopicTestResult[];
-  recommended_review_topics: ReviewTopicSuggestion[];
+  per_learning_unit: LearningUnitTestResult[];
+  recommended_review_units: ReviewLearningUnitSuggestion[];
   estimated_review_hours: number;
-  next_module: NextModuleInfo | null;
+  next_section: NextSectionInfo | null;
   wrong_answers: WrongAnswerDetail[];
 }
 
@@ -376,8 +415,8 @@ export interface HistoryItem {
   completed_at: string | null;
   duration_seconds: number | null;
   subject: string;
-  topic_id: string | null;
-  module_id: string | null;
+  learning_unit_id: string | null;
+  section_id: string | null;
   score_percent: number | null;
   correct_count: number;
   total_questions: number;
@@ -407,7 +446,7 @@ export interface HistoryResponse {
 export interface QuestionInteractionDetail {
   question_id: string;
   sequence_position: number;
-  topic_name: string;
+  learning_unit_title: string;
   stem_text: string;
   bloom_level: BloomLevel;
   difficulty_bucket: DifficultyBucket;

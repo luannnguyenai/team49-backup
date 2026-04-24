@@ -1,0 +1,279 @@
+{
+  "unit_id": "local::lecture18-multimodal::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=5vfIT5LOkR0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 6,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về CLIP, zero-shot prompting, mở rộng bằng dữ liệu lớn như ALIGN/LAION, các kiến trúc multimodal transformer kiểu BERT và mô hình nền tảng hợp nhất như FLAVA.",
+  "question_bank": [
+    {
+      "item_id": "lecture18-multimodal-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Điểm cốt lõi của objective CLIP là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Sinh caption token-by-token cho mọi ảnh trong batch.",
+        "Xếp hạng cặp ảnh-văn bản đúng cao hơn các cặp lệch bằng contrastive learning với in-batch negatives.",
+        "Huấn luyện reward model từ so sánh cặp caption của con người.",
+        "Dự đoán object detector box trước rồi mới học embedding ngôn ngữ."
+      ],
+      "answer_index": 1,
+      "explanation": "CLIP mã hóa ảnh và văn bản riêng, sau đó dùng các cặp đúng và sai trong cùng batch để đẩy cặp khớp lại gần và đẩy cặp lệch ra xa. Đây là một objective contrastive rất đơn giản nhưng cực kỳ hiệu quả khi kết hợp với dữ liệu và mô hình đủ lớn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "in-batch contrastive ranking",
+          "aligned image-text pairs"
+        ],
+        "timestamps": [
+          "23:55",
+          "24:01"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao CLIP có thể làm zero-shot image classification bằng prompt như 'a photo of a...'?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì CLIP luôn được fine-tune riêng cho từng nhãn mục tiêu trước suy luận.",
+        "Vì nhãn lớp có thể được diễn đạt thành văn bản và so khớp trực tiếp với embedding ảnh.",
+        "Vì CLIP chỉ cần bounding box chứ không cần văn bản mô tả nhãn.",
+        "Vì prompt đó buộc mô hình chuyển sang chế độ RLHF."
+      ],
+      "answer_index": 1,
+      "explanation": "Trong CLIP, nhãn lớp có thể được biến thành các câu mô tả ngôn ngữ. Mô hình so khớp embedding ảnh với embedding của các prompt ứng viên và chọn prompt phù hợp nhất, nên có thể phân loại mà không cần fine-tune riêng cho bài toán mới.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a photo of a",
+          "zero-shot label predictions"
+        ],
+        "timestamps": [
+          "25:03",
+          "25:16"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Thông điệp chính từ ALIGN và LAION là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Kiến trúc phải thay đổi hoàn toàn sau mỗi 6 tháng mới tạo ra bước tiến lớn.",
+        "Cùng một ý tưởng contrastive cơ bản có thể mạnh lên rất nhiều khi mở rộng dữ liệu và compute.",
+        "Dữ liệu web-scale không hữu ích cho vision-language modeling.",
+        "Mô hình mở nguồn luôn vượt mô hình đóng chỉ nhờ license."
+      ],
+      "answer_index": 1,
+      "explanation": "Bài giảng nhấn mạnh rằng nhiều bước tiến lớn đến từ mở rộng dữ liệu và compute hơn là đổi loss hoàn toàn mới. ALIGN và LAION tiếp tục câu chuyện này: cùng tinh thần CLIP, nhưng dữ liệu lớn hơn giúp mô hình tổng quát hóa tốt hơn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "more data and more compute",
+          "1.8 billion image text pairs"
+        ],
+        "timestamps": [
+          "26:37",
+          "27:01"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Phát biểu nào mô tả đúng sự khác nhau giữa VisualBERT và ViLBERT?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "VisualBERT dùng hai stream tách biệt còn ViLBERT gộp tất cả vào một stream duy nhất.",
+        "VisualBERT là single-stream còn ViLBERT là dual-stream với tương tác chéo giữa hai nhánh.",
+        "Cả hai đều chỉ xử lý văn bản và không dùng đặc trưng ảnh.",
+        "ViLBERT bỏ hẳn attention còn VisualBERT chỉ dùng CNN."
+      ],
+      "answer_index": 1,
+      "explanation": "VisualBERT là kiểu single-stream: trộn đầu vào thị giác và ngôn ngữ vào một transformer. ViLBERT giữ hai stream riêng cho mỗi modality rồi cho chúng tương tác bằng cơ chế attention chéo.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multimodal_transformer_pretraining",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "single-stream",
+          "two streams with cross-attention"
+        ],
+        "timestamps": [
+          "30:28",
+          "31:09"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Ý chính của ViLT là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Thay toàn bộ transformer bằng object detector lớn hơn.",
+        "Bỏ detector-style preprocessing và đưa patch ảnh trực tiếp vào transformer.",
+        "Chỉ dùng text encoder rồi học retrieval thuần văn bản.",
+        "Sinh thêm ảnh giả bằng GAN để tăng dữ liệu huấn luyện."
+      ],
+      "answer_index": 1,
+      "explanation": "ViLT đơn giản hóa pipeline bằng cách bỏ các bước detector nặng nề và xử lý ảnh gần như trực tiếp bằng patch-based transformer. Điều này làm hệ gọn hơn và cho thấy không phải lúc nào detector features cũng là bắt buộc.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_multimodal_transformer_pretraining",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "feeds image patches directly",
+          "removes detector-style preprocessing"
+        ],
+        "timestamps": [
+          "34:21",
+          "34:28"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q6",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "FLAVA được trình bày như thế nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một mô hình chỉ huấn luyện contrastive loss giữa ảnh và văn bản.",
+        "Một mô hình hợp nhất chỉ dành cho retrieval, không làm được tác vụ thuần ảnh hay thuần văn bản.",
+        "Một foundation model chung học đồng thời objective unimodal và multimodal trong cùng hệ thống.",
+        "Một phiên bản BERT chỉ dành cho ảnh mà không có nhánh văn bản."
+      ],
+      "answer_index": 2,
+      "explanation": "FLAVA được mô tả như mô hình nền tảng hợp nhất: nó học cả objective thuần ảnh, thuần văn bản và đa phương thức. Ý tưởng là một mô hình dùng chung có thể linh hoạt hơn trước dữ liệu thiếu modality và nhiều kiểu tác vụ khác nhau.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_unified_multimodal_foundation_models",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "one model to rule them all",
+          "image-only, text-only, and multimodal"
+        ],
+        "timestamps": [
+          "36:47",
+          "38:51"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture18-multimodal-seg4-q1",
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q2",
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q3",
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q4",
+      "global_kp_id": "kp_multimodal_transformer_pretraining",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q5",
+      "global_kp_id": "kp_multimodal_transformer_pretraining",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture18-multimodal-seg4-q6",
+      "global_kp_id": "kp_unified_multimodal_foundation_models",
+      "role": "primary"
+    }
+  ]
+}

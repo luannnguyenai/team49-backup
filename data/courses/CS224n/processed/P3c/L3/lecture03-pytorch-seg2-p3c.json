@@ -1,0 +1,150 @@
+{
+  "unit_id": "local::lecture03-pytorch::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "The transcript supports a small bank on shape debugging and tensor indexing, including one code-style check, so a separate clip is unnecessary.",
+  "question_bank": [
+    {
+      "item_id": "lecture03_pytorch_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When a PyTorch program starts failing after several tensor operations, what is the most useful first debugging step?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Print tensor shapes at each stage",
+        "Immediately switch every tensor to float64",
+        "Replace reshape calls with Python loops",
+        "Turn every tensor into a Python scalar"
+      ],
+      "answer_index": 0,
+      "explanation": "Shape mismatches often cause downstream errors. Printing shapes lets you see where dimensions changed unexpectedly and is often more informative than relying only on the error message.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shape_based_debugging",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "print out the shapes",
+          "best resource when debugging"
+        ],
+        "timestamps": [
+          "00:11:34",
+          "00:11:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture03_pytorch_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Suppose x has shape 3x2x2. What is the shape of x[0]?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "2x2",
+        "3x2",
+        "3x2x2",
+        "2"
+      ],
+      "answer_index": 0,
+      "explanation": "Indexing with x[0] selects one slice along the first dimension, so that dimension is removed and the remaining tensor has shape 2x2.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reshape_and_indexing",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "x bracket 0",
+          "2X2 tensor"
+        ],
+        "timestamps": [
+          "00:21:25",
+          "00:21:37"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture03_pytorch_seg2_q3",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "What is printed by this PyTorch code?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "torch.Size([2, 2])",
+        "torch.Size([3, 2])",
+        "torch.Size([3, 2, 2])",
+        "torch.Size([2])"
+      ],
+      "answer_index": 0,
+      "explanation": "Indexing with x[0] takes one slice along the first axis and removes that axis, leaving the remaining two dimensions intact.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reshape_and_indexing",
+      "difficulty": "medium",
+      "code_question_style": "output_prediction",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "import torch\nx = torch.randn(3, 2, 2)\nprint(x[0].shape)",
+        "highlight_lines": [
+          2,
+          3
+        ]
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "x bracket 0",
+          "2X2 tensor"
+        ],
+        "timestamps": [
+          "00:21:25",
+          "00:21:37"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture03_pytorch_seg2_q1",
+      "global_kp_id": "kp_shape_based_debugging",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture03_pytorch_seg2_q2",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture03_pytorch_seg2_q3",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "primary"
+    }
+  ]
+}

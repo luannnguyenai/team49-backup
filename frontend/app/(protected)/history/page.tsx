@@ -25,12 +25,12 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
-import { contentApi, historyApi } from "@/lib/api";
+import { canonicalSectionApi, historyApi } from "@/lib/api";
 import type {
   BloomLevel,
+  CourseSectionListItem,
   HistoryItem,
   HistoryResponse,
-  ModuleListItem,
   QuestionInteractionDetail,
   SelectedAnswer,
   SessionDetailResponse,
@@ -507,7 +507,7 @@ export default function HistoryPage() {
   const [typeFilter, setTypeFilter] = useState<SessionType | "">("");
   const [moduleFilter, setModuleFilter] = useState<string>("");
   const [daysFilter, setDaysFilter] = useState<number | "">("");
-  const [modules, setModules] = useState<ModuleListItem[]>([]);
+  const [sections, setSections] = useState<CourseSectionListItem[]>([]);
 
   // ── Sort state ────────────────────────────────────────────────────────────
   const [sortKey, setSortKey] = useState<SortKey>("started_at");
@@ -524,7 +524,7 @@ export default function HistoryPage() {
 
   // ── Load modules for dropdown ─────────────────────────────────────────────
   useEffect(() => {
-    contentApi.modules().then(setModules).catch(() => {});
+    canonicalSectionApi.list().then(setSections).catch(() => {});
   }, []);
 
   // ── Fetch history whenever filters / page change ──────────────────────────
@@ -534,7 +534,7 @@ export default function HistoryPage() {
     try {
       const result = await historyApi.list({
         session_type: typeFilter || undefined,
-        module_id: moduleFilter || undefined,
+        section_id: moduleFilter || undefined,
         days: daysFilter || undefined,
         page,
         page_size: PAGE_SIZE,
@@ -679,7 +679,7 @@ export default function HistoryPage() {
           <option value="module_test">Module Test</option>
         </select>
 
-        {/* Module */}
+        {/* Section */}
         <select
           value={moduleFilter}
           onChange={(e) => setModuleFilter(e.target.value)}
@@ -687,9 +687,9 @@ export default function HistoryPage() {
           style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
         >
           <option value="">Tất cả module</option>
-          {modules.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
+          {sections.map((section) => (
+            <option key={section.id} value={section.id}>
+              {section.title}
             </option>
           ))}
         </select>

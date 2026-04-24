@@ -1,0 +1,1100 @@
+{
+  "lecture_title": "Lecture 22 - NLP, Linguistics, and Philosophy",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Course recap and the main ideas behind modern NLP",
+      "start_s": 5,
+      "end_s": 499
+    },
+    {
+      "section_index": 2,
+      "title": "Open problems: generalization, interpretability, multilinguality, evaluation, and deployment",
+      "start_s": 500,
+      "end_s": 979
+    },
+    {
+      "section_index": 3,
+      "title": "Where we are with GPT-4-class models",
+      "start_s": 980,
+      "end_s": 1534
+    },
+    {
+      "section_index": 4,
+      "title": "Symbolic AI, cybernetics, and language as a symbolic system",
+      "start_s": 1535,
+      "end_s": 2199
+    },
+    {
+      "section_index": 5,
+      "title": "Why linguistics and language still matter for intelligence",
+      "start_s": 2200,
+      "end_s": 2889
+    },
+    {
+      "section_index": 6,
+      "title": "Model-theoretic semantics and classical semantic parsing",
+      "start_s": 2890,
+      "end_s": 3420
+    },
+    {
+      "section_index": 7,
+      "title": "Use theory of meaning and gradient grounding",
+      "start_s": 3421,
+      "end_s": 3820
+    },
+    {
+      "section_index": 8,
+      "title": "AI future: jobs, power, disinformation, and public reason",
+      "start_s": 3821,
+      "end_s": 4574
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Course recap: what made modern NLP work",
+      "description": "A compressed review of the ideas that structured CS224N, from word vectors to transformers and foundation models.",
+      "summary": "The lecture opens by reviewing the arc of CS224N: word vectors and dense hidden representations, sequence models, transformers, and the modern recipe of pretraining plus post-training for high-performance foundation models [ts=69s] [ts=99s]. Manning emphasizes that distributional semantics—representing words by their contexts—has driven both statistical and neural NLP, starting with word vectors and continuing through transformers [ts=121s] [ts=165s]. He also stresses two engineering enablers: residual connections made deep models much easier to train reliably, and language modeling emerged as a universal pretraining task because both linguistic knowledge and world knowledge help next-word prediction [ts=179s] [ts=227s]. The segment ends by noting the striking empirical regularity that performance has improved roughly linearly as data, compute, and model size scale up, even though that does not mean NLP is solved [ts=250s] [ts=275s].",
+      "key_points": [
+        {
+          "text": "Modern NLP in the course progresses from word vectors and feedforward networks to sequence models, transformers, and foundation models.",
+          "timestamp_s": 69,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Distributional semantics represents words by their contexts: 'you shall know a word by the company it keeps.'",
+          "timestamp_s": 132,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Residual connections made deep transformer training far more stable and reliable.",
+          "timestamp_s": 179,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Language modeling became a universal pretraining task because linguistic and world knowledge both improve next-word prediction.",
+          "timestamp_s": 219,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scaling data, compute, and model size has produced near-linear empirical performance gains.",
+          "timestamp_s": 250,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 5,
+        "end_s": 499
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 8,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Open problems after the success of scaling",
+      "description": "A survey of the hardest unresolved issues in current NLP systems and their deployment.",
+      "summary": "After the recap, Manning turns to what large language models still do poorly. He questions whether they truly generalize or mostly benefit from having seen enormous amounts of data, comparing them to 'a talking encyclopedia' rather than a human-like problem solver [ts=289s] [ts=323s]. He cites an example where LSTMs generalize from limited formal-language data better than transformers, using this to contrast human one-shot learning with the much heavier data needs of current models [ts=358s] [ts=405s]. He then highlights interpretability work, including early neuron-level analyses and more recent mechanistic interpretability, before moving to multilingual inequity: GPT-4 improves many large languages, but low-resource and mostly oral languages still remain outside the reach of current data-hungry methods [ts=485s] [ts=653s]. The segment closes on evaluation contamination, domain-specific risk in legal and medical NLP, legal-answer hallucinations at about one in six, and persistent cultural bias and underrepresentation problems [ts=741s] [ts=914s].",
+      "key_points": [
+        {
+          "text": "A central question is whether large pretrained models generalize or mainly memorize patterns from massive exposure.",
+          "timestamp_s": 289,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Manning compares large language models to a 'talking encyclopedia' rather than a system that solves truly new problems like humans do.",
+          "timestamp_s": 323,
+          "evidence_type": "example"
+        },
+        {
+          "text": "On limited finite-automata data, an LSTM reaches near-ceiling generalization while a transformer needs much more data.",
+          "timestamp_s": 358,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Mechanistic interpretability and causal abstraction aim to understand what neural networks learn internally.",
+          "timestamp_s": 530,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "For low-resource languages, there often is not enough written data to build the kinds of models discussed in the course.",
+          "timestamp_s": 694,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Benchmark contamination can make strong results untrustworthy because models may have already seen benchmark problems during pretraining.",
+          "timestamp_s": 757,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "In a recent RegLab study, legal NLP systems hallucinated in about one question out of six.",
+          "timestamp_s": 914,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 500,
+        "end_s": 979
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg3",
+      "course_id": "cs224n-2024",
+      "name": "The mixed picture of GPT-4-class models",
+      "description": "A perspective segment on why current LLMs feel both astonishingly capable and still obviously limited.",
+      "summary": "Manning describes the current moment as one where GPT-4-class models are both amazing and puzzling. He uses a same-day ChatGPT 4o example—writing a sonnet about transformers with every line beginning with T—to show how next-token prediction can still feel almost magical, even to an expert who understands the training objective [ts=1040s] [ts=1084s]. He notes that the output approximately satisfies rhyme, meter, and transformer-related content constraints, which for him illustrates how capable these systems have become as language and world-understanding devices [ts=1090s] [ts=1206s]. He then cites productivity evidence from Boston Consulting Group consultants: users of GPT-4 completed more tasks, worked faster, and produced higher-rated work, with the biggest gains for weaker workers [ts=1239s] [ts=1341s]. But he balances that with evidence that GPT-4 is still far below expert human fiction writers, concluding that the current state of LLMs is genuinely useful yet still clearly limited [ts=1372s] [ts=1409s].",
+      "key_points": [
+        {
+          "text": "A next-token predictor can satisfy rich stylistic constraints, as shown by the sonnet example where every line begins with T.",
+          "timestamp_s": 1040,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The generated sonnet approximately gets rhyme, meter, and transformer terminology right.",
+          "timestamp_s": 1090,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Manning treats GPT-4-class systems as having crossed the threshold of being very usable in many contexts.",
+          "timestamp_s": 1206,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In the BCG study, GPT-4 users completed 12% more tasks, 25% faster, with outputs judged 40% higher quality.",
+          "timestamp_s": 1300,
+          "evidence_type": "example"
+        },
+        {
+          "text": "These tools act as a leveler, helping weaker workers more than stronger ones.",
+          "timestamp_s": 1339,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "GPT-4 remains much worse than New Yorker fiction writers at creative writing.",
+          "timestamp_s": 1372,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 980,
+        "end_s": 1534
+      },
+      "difficulty": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 9,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Symbolic AI versus cybernetics",
+      "description": "A historical and conceptual comparison between symbolic AI and the neural/cybernetic tradition.",
+      "summary": "This section reframes AI history as a split between symbolic AI and cybernetics. Manning explains that classical AI, associated with McCarthy, Minsky, Newell, and Simon, aimed to build intelligence in the style of mathematics and logic, culminating in the physical symbol system hypothesis that symbol systems are necessary and sufficient for general intelligent action [ts=1778s] [ts=1830s]. He contrasts that with cybernetics, rooted in control and communication and closer to electrical engineering, where neural networks originally developed [ts=1868s] [ts=1884s]. The Stanford Symbolic Systems program is presented as an institutional trace of the symbolic tradition, especially via Jon Barwise's insistence on meaning and world connection [ts=1584s] [ts=1678s]. Manning then argues that language itself is unquestionably a symbolic system, but that this does not imply the brain—or NLP systems—must be symbolic processors; neural models may better match how brains process language [ts=2046s] [ts=2147s].",
+      "key_points": [
+        {
+          "text": "The physical symbol system hypothesis claims that symbol systems have the necessary and sufficient means for general intelligent action.",
+          "timestamp_s": 1820,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Cybernetics grew out of control and communication and is the historical lineage in which neural networks were first explored.",
+          "timestamp_s": 1868,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Rosenblatt's perceptron was surrounded by intense AI hype long before the 2020s.",
+          "timestamp_s": 1948,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Language is a symbolic system, including spoken language where phonemes function as discrete symbols.",
+          "timestamp_s": 2046,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The fact that communication uses symbols does not mean the processor of those symbols must itself be a physical symbol system.",
+          "timestamp_s": 2122,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Neural models may scale better and capture language processing better than symbolic processors.",
+          "timestamp_s": 2142,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 1535,
+        "end_s": 2199
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Linguistics and language as scaffolding for intelligence",
+      "description": "Why linguistic concepts still matter for AI, and why language may be central to higher-level human thought.",
+      "summary": "Manning argues that even if we do not build symbolic processors, linguistics remains valuable because it supplies concepts and distinctions for studying language acquisition, processing, compositionality, systematic generalization, reference, and discourse phenomena [ts=2212s] [ts=2333s]. He suggests that low-level sensory processing may get AI to something like insect-level intelligence, but richer questions about language become increasingly important for higher intelligence [ts=2265s] [ts=2290s]. The segment then turns philosophical: drawing on Humboldt, Kahneman and Tversky, and Dennett, Manning suggests that language is not only for communication but also scaffolds system-2 style thought [ts=2504s] [ts=2596s]. Dennett's hierarchy culminates in Gregorian intelligence, where thinking tools amplify cognition; Manning highlights human language as the preeminent such tool, making it central to the distinctive kind of intelligence humans display [ts=2710s] [ts=2873s].",
+      "key_points": [
+        {
+          "text": "Linguistics is useful because it provides questions, concepts, and distinctions for studying language understanding.",
+          "timestamp_s": 2212,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Concepts such as compositionality, systematic generalization, and reference remain relevant in neural AI.",
+          "timestamp_s": 2236,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Sensory neural processing may get you only to 'insect-level intelligence'; higher intelligence requires grappling with linguistic structure.",
+          "timestamp_s": 2265,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Humboldt's famous view is that human language makes infinite use of finite means.",
+          "timestamp_s": 2480,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Manning presents language as scaffolding for system-2 style abstract thought.",
+          "timestamp_s": 2590,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Dennett's Gregorian intelligence uses thinking tools, and human language is presented as the preeminent one.",
+          "timestamp_s": 2837,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 2200,
+        "end_s": 2889
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Model-theoretic semantics and semantic parsing",
+      "description": "The classical denotational picture of meaning and how it powered earlier natural language understanding systems.",
+      "summary": "The lecture next reviews the dominant semantic tradition in philosophy, linguistics, and older NLP: model-theoretic or denotational semantics, where a word's meaning is its denotation in the world or in a model of the world [ts=2907s] [ts=2934s]. Manning contrasts this with distributional semantics, then reconstructs the classical pipeline for natural language understanding: parse a sentence, retrieve lexical meanings, compose phrase meanings bottom-up, build a sentence-level meaning representation, and execute it against a database or formal system [ts=2950s] [ts=3196s]. He ties this intellectual lineage to Tarski and Montague, noting that Montague's rebellion against the idea that natural language is too incoherent for formal semantics became foundational in linguistics [ts=3027s] [ts=3099s]. The worked example 'How many red cars in Palo Alto does Kathy like?' illustrates how semantic parsing could transform a sentence into SQL, while Manning notes that such systems worked in limited domains but were brittle [ts=3228s] [ts=3331s].",
+      "key_points": [
+        {
+          "text": "In model-theoretic semantics, the meaning of a word is its denotation in the world or in a model of the world.",
+          "timestamp_s": 2907,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Traditional NLU pipelines parse a sentence, compose meanings from lexical entries, and build a sentence-level meaning representation.",
+          "timestamp_s": 3136,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Montague argued that there is no important theoretical difference between formal and natural languages.",
+          "timestamp_s": 3074,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A semantic parsing pipeline can convert a question like 'How many red cars in Palo Alto does Kathy like?' into SQL and query a database.",
+          "timestamp_s": 3228,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Classical semantic parsing systems could work in limited domains but were extremely brittle.",
+          "timestamp_s": 3325,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Current transformers do not obviously implement the same bottom-up compositional meaning-construction process.",
+          "timestamp_s": 3367,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 2890,
+        "end_s": 3420
+      },
+      "difficulty": 0.77,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg7",
+      "course_id": "cs224n-2024",
+      "name": "Use theory of meaning and partial grounding",
+      "description": "A defense of the idea that meaning can come from use and from multiple forms of grounding, not only direct denotation.",
+      "summary": "Manning then contrasts denotational semantics with the use theory of meaning associated with Firth and later Wittgenstein, arguing that meaning can arise from how expressions are used rather than only from direct symbol-to-world denotation [ts=3421s] [ts=3532s]. He pushes back on the view that only explicit form-to-meaning mappings count as semantics, arguing instead that meanings are built through many kinds of connections—to things in the real world, to virtual worlds, and to other words in language [ts=3558s] [ts=3603s]. A key claim is that meaning is gradient rather than binary: we can understand a word more or less well [ts=3606s] [ts=3624s]. The shehnai example shows how pictures, sound, verbal explanation, and textual usage each provide different partial kinds of grounding, with corpus context revealing culturally important facets such as sound and association with weddings [ts=3631s] [ts=3815s].",
+      "key_points": [
+        {
+          "text": "The use theory of meaning treats meaning as arising from use rather than only from denotation.",
+          "timestamp_s": 3532,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Wittgenstein challenges the idea that natural language must be replaced by a different symbolic system to express meaning.",
+          "timestamp_s": 3472,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Meaning can be grounded through multiple connections: real-world reference, virtual worlds, and relations to other language.",
+          "timestamp_s": 3576,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Meaning is gradient rather than a 0/1 property.",
+          "timestamp_s": 3606,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The word 'shehnai' is used to show that pictures, sound, definitions, and contextual examples each contribute partial meaning.",
+          "timestamp_s": 3631,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Textual usage can reveal aspects of meaning, such as a shehnai's wailing sound and its connection to weddings, that a picture alone would miss.",
+          "timestamp_s": 3746,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 3421,
+        "end_s": 3820
+      },
+      "difficulty": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg8",
+      "course_id": "cs224n-2024",
+      "name": "AI future: labor, concentration of power, and present-day harms",
+      "description": "A closing reflection on what kinds of AI risk deserve the most attention.",
+      "summary": "The final section argues that AI futures should be discussed in social and political, not only technical, terms. Manning notes that fears of automation-driven mass unemployment are old and repeatedly resurfaced in 1928 and 1961, while history shows that social policy shapes how technological gains are distributed [ts=3841s] [ts=3959s]. He is more worried about wealth and power concentrating in a few technology giants, calling that a political problem that societies have solved before under stronger leadership [ts=3975s] [ts=4052s]. On existential risk and singularity discourse, he is skeptical, citing arguments that no current technique plausibly supports extinction-risk claims and that existential-risk framing can distract from immediate harms such as bias, worker exploitation, copyright violations, disinformation, and regulatory capture [ts=4140s] [ts=4245s]. He closes by stressing present-day NLP harms—offensive or untruthful content, persuasive misinformation, and likely visual deepfakes in politics—and ends with Carl Sagan's warning that technological concentration plus declining public critical faculties is a more realistic danger, making education and open dissemination of knowledge especially important [ts=4288s] [ts=4569s].",
+      "key_points": [
+        {
+          "text": "Automation anxiety is longstanding, and whether people lose jobs depends heavily on policy and distribution, not just technology.",
+          "timestamp_s": 3841,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A more serious worry is that most AI wealth and power could flow to a small number of technology giants.",
+          "timestamp_s": 3975,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Manning is skeptical of imminent-singularity and extinction-risk arguments.",
+          "timestamp_s": 4127,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A focus on existential risk can distract from immediate harms such as bias, worker exploitation, copyright violations, disinformation, and regulatory capture.",
+          "timestamp_s": 4209,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "AI systems may enable highly personalized and persuasive misinformation, and visual fakes may be even more politically potent than text.",
+          "timestamp_s": 4300,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture ends by treating education, critical reasoning, and open dissemination of knowledge as key defenses against darker AI futures.",
+          "timestamp_s": 4502,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18](https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18)",
+        "start_s": 3821,
+        "end_s": 4574
+      },
+      "difficulty": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 13,
+      "ordering_index": 8,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp1",
+      "name": "Distributional semantics",
+      "description": "The idea that linguistic representations gain meaning from the contexts in which words occur; presented as a central engine of modern NLP.",
+      "track_tags": [
+        "nlp",
+        "semantics",
+        "representation-learning"
+      ],
+      "domain_tags": [
+        "natural-language-processing",
+        "linguistics"
+      ],
+      "career_path_tags": [
+        "ml-engineer",
+        "research-scientist"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "It is presented as the unifying idea connecting word vectors, neural representations, and later meaning discussions in the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp2",
+      "name": "Scaling, pretraining, and foundation models",
+      "description": "The modern recipe of language-model pretraining, post-training, and scaling compute/data/model size to obtain strong general-purpose NLP systems.",
+      "track_tags": [
+        "nlp",
+        "llms",
+        "foundation-models"
+      ],
+      "domain_tags": [
+        "natural-language-processing",
+        "deep-learning"
+      ],
+      "career_path_tags": [
+        "ml-engineer",
+        "research-scientist"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the course-level synthesis of how contemporary high-performing systems are built.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp3",
+      "name": "Generalization versus memorization",
+      "description": "The concern that LLM success may rely heavily on memorized exposure rather than flexible generalization from limited data.",
+      "track_tags": [
+        "nlp",
+        "generalization",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "machine-learning",
+        "natural-language-processing"
+      ],
+      "career_path_tags": [
+        "research-scientist",
+        "ml-engineer"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It frames one of the lecture's most important critiques of current transformers and links to human-like intelligence.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp4",
+      "name": "Mechanistic interpretability",
+      "description": "Research that tries to explain what internal neural-network computations and components are doing.",
+      "track_tags": [
+        "interpretability",
+        "nlp",
+        "deep-learning"
+      ],
+      "domain_tags": [
+        "machine-learning"
+      ],
+      "career_path_tags": [
+        "research-scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is presented as a promising but unresolved approach for understanding why models succeed and fail.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp5",
+      "name": "Multilingual and low-resource NLP gaps",
+      "description": "The mismatch between strong English-centric performance and much weaker support for many other languages, especially low-resource ones.",
+      "track_tags": [
+        "multilingual-nlp",
+        "evaluation",
+        "fairness"
+      ],
+      "domain_tags": [
+        "natural-language-processing",
+        "linguistics"
+      ],
+      "career_path_tags": [
+        "research-scientist",
+        "language-technologist"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture treats this as a major unsolved problem and a major equity issue for language technology.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp6",
+      "name": "Benchmark contamination and evaluation integrity",
+      "description": "The problem that benchmark examples may leak into pretraining data, undermining claims of true generalization.",
+      "track_tags": [
+        "evaluation",
+        "benchmarks",
+        "llms"
+      ],
+      "domain_tags": [
+        "machine-learning",
+        "natural-language-processing"
+      ],
+      "career_path_tags": [
+        "research-scientist",
+        "evaluation-engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It directly affects whether published results can be trusted.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp7",
+      "name": "Domain-specific and socially situated NLP",
+      "description": "The idea that NLP behavior changes across legal, medical, and social contexts, where failures can cause real harm.",
+      "track_tags": [
+        "applied-nlp",
+        "ethics",
+        "domain-adaptation"
+      ],
+      "domain_tags": [
+        "natural-language-processing",
+        "ai-ethics"
+      ],
+      "career_path_tags": [
+        "applied-scientist",
+        "policy-researcher"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It ties model quality to deployment risk, bias, and safety in real institutions.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp8",
+      "name": "The capability–limitation duality of LLMs",
+      "description": "The view that GPT-4-class systems are simultaneously astonishingly useful and still qualitatively limited.",
+      "track_tags": [
+        "llms",
+        "capabilities",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "natural-language-processing",
+        "artificial-intelligence"
+      ],
+      "career_path_tags": [
+        "product-builder",
+        "research-scientist"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the central takeaway of the lecture's 'where are we with GPT-4' section.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp9",
+      "name": "Symbolic AI versus cybernetics",
+      "description": "The historical divide between logic-based symbolic AI and the neural/cybernetic tradition.",
+      "track_tags": [
+        "ai-history",
+        "symbolic-ai",
+        "neural-networks"
+      ],
+      "domain_tags": [
+        "artificial-intelligence",
+        "history-of-ai"
+      ],
+      "career_path_tags": [
+        "research-scientist"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It provides the conceptual frame for the lecture's philosophy section and for later semantic arguments.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp10",
+      "name": "Language as a symbolic communication system processed by neural brains",
+      "description": "The claim that language is symbolic, but this does not require symbolic internal processors in brains or machines.",
+      "track_tags": [
+        "linguistics",
+        "symbolic-systems",
+        "neural-networks"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "cognitive-science",
+        "natural-language-processing"
+      ],
+      "career_path_tags": [
+        "research-scientist",
+        "cognitive-scientist"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This reconciles symbolic properties of language with the neural methods that dominate modern NLP.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp11",
+      "name": "Linguistics and language as scaffolding for thought",
+      "description": "The view that linguistic theory supplies useful distinctions for AI and that language supports higher-order human cognition.",
+      "track_tags": [
+        "linguistics",
+        "cognition",
+        "semantics"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "cognitive-science",
+        "natural-language-processing"
+      ],
+      "career_path_tags": [
+        "research-scientist",
+        "cognitive-scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It explains why linguistic notions like compositionality remain relevant even in neural AI.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp12",
+      "name": "Model-theoretic semantics and semantic parsing",
+      "description": "The classical denotational pipeline that maps sentences to formal meanings and executable representations.",
+      "track_tags": [
+        "semantics",
+        "semantic-parsing",
+        "logic"
+      ],
+      "domain_tags": [
+        "natural-language-processing",
+        "linguistics",
+        "formal-semantics"
+      ],
+      "career_path_tags": [
+        "research-scientist",
+        "nlp-engineer"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "It summarizes the pre-neural approach to meaning and serves as the foil for the lecture's later defense of use-based meaning.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp13",
+      "name": "Use theory and gradient grounding of meaning",
+      "description": "The idea that meaning can be partial, graded, and grounded through use, context, and multiple kinds of connection rather than only denotation.",
+      "track_tags": [
+        "semantics",
+        "distributional-semantics",
+        "grounding"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "philosophy-of-language",
+        "natural-language-processing"
+      ],
+      "career_path_tags": [
+        "research-scientist"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the lecture's strongest philosophical synthesis linking early word-vector ideas to a broader theory of meaning.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp14",
+      "name": "Present-day AI harms, power concentration, and disinformation",
+      "description": "A risk framework that prioritizes immediate social harms and power asymmetries over speculative extinction scenarios.",
+      "track_tags": [
+        "ai-ethics",
+        "policy",
+        "misinformation"
+      ],
+      "domain_tags": [
+        "artificial-intelligence",
+        "ai-governance",
+        "natural-language-processing"
+      ],
+      "career_path_tags": [
+        "policy-researcher",
+        "responsible-ai",
+        "product-lead"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The closing argument explicitly broadens the lecture from NLP to governance, public reasoning, and societal consequences.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp1",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Distributional semantics is introduced as the course's central idea and explicitly tied to word vectors and later transformers [ts=121s] [ts=165s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp2",
+      "planner_role": "main",
+      "instruction_role": "review",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The recap traces the pipeline from pretraining and post-training to foundation models and scaling laws [ts=96s] [ts=106s] [ts=250s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp3",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The section closes by pivoting from scaling success to the question of whether models truly generalize [ts=275s] [ts=289s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Generalization versus memorization drives the opening of this segment, including the LSTM-versus-transformer comparison [ts=289s] [ts=358s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp4",
+      "planner_role": "support",
+      "instruction_role": "support",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Interpretability appears through discussion of black-box models, Karpathy's neuron analysis, and mechanistic interpretability [ts=446s] [ts=530s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp5",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The multilingual gap and the low-resource language problem occupy a large middle portion of the segment [ts=538s] [ts=694s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp6",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Benchmark contamination and the need for hidden or dynamic evaluation are discussed explicitly [ts=741s] [ts=829s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp7",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Legal/medical NLP, hallucination risk, and cultural bias are treated as deployment-critical issues [ts=832s] [ts=976s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg3",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The whole segment is structured around the idea that GPT-4-class models are both astonishingly capable and still clearly limited [ts=982s] [ts=1409s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg4",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Most of the segment contrasts symbolic AI with cybernetics through McCarthy, Newell and Simon, and Rosenblatt [ts=1538s] [ts=2000s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg4",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp10",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The final portion argues that language is symbolic while processors of language need not be symbolic [ts=2046s] [ts=2147s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg5",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Linguistics as a source of useful distinctions and language as a tool for higher cognition dominate the section [ts=2212s] [ts=2873s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg5",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp10",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The section builds directly on the earlier claim that symbolic communication can coexist with neural processing [ts=2200s] [ts=2236s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg6",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The section centers on denotational semantics, Montague semantics, and semantic parsing into executable forms [ts=2907s] [ts=3254s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg6",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp11",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Compositionality and bottom-up meaning construction are linked back to broader linguistic questions [ts=3168s] [ts=3189s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg7",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This segment explicitly introduces the use theory of meaning and defends graded, multi-source grounding via the shehnai example [ts=3532s] [ts=3815s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg7",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp1",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The use-theory discussion returns to the course's earlier distributional slogan about meaning from context [ts=3421s] [ts=3430s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg8",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp14",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The entire closing section weighs jobs, concentration of power, existential-risk debate, misinformation, and education as AI-society issues [ts=3821s] [ts=4569s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg8",
+      "local_kp_id": "local::lecture22-nlp-linguistics::kp7",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Earlier concerns about domain harms and bias reappear as concrete present-day harms from deployed AI systems [ts=4209s] [ts=4288s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This is the lecture's course-level synthesis of the main ideas of modern NLP and introduces the core framing for the rest of the talk [ts=35s] [ts=121s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The segment bundles several open problems—generalization, interpretability, multilinguality, evaluation, and deployment harms—that are central review targets [ts=289s] [ts=741s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg3",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "It is a perspective section anchored by examples and studies rather than technical derivations, but it captures the lecture's balanced view of current LLMs [ts=1040s] [ts=1372s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This section provides the historical and conceptual framework for the lecture's philosophy of AI and language [ts=1538s] [ts=1820s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The segment connects linguistics to cognition and intelligence, making it conceptually dense and useful for discussion questions [ts=2212s] [ts=2837s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This is the lecture's most formal treatment of semantics and older NLU pipelines, with many crisp concepts suitable for recall and comparison [ts=2907s] [ts=3254s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "It states the lecture's strongest thesis about meaning and grounding, including a memorable worked example with shehnai [ts=3532s] [ts=3746s]."
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The closing section synthesizes technical capability with governance, disinformation, and public reasoning, making it highly worth reviewing [ts=3975s] [ts=4502s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture22-nlp-linguistics"
+}

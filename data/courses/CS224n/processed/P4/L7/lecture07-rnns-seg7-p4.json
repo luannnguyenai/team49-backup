@@ -1,0 +1,604 @@
+{
+  "unit_id": "local::lecture07-rnns::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 6,
+  "review_summary": "Transcript is sufficient for questions about the recurrent update, weight sharing, the output softmax, and the main strengths and weaknesses of simple RNNs. No separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture07-rnns-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q6",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture07-rnns-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the defining parameter-sharing idea of an RNN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each time step has its own independent weight matrices",
+        "The same weights are reused across successive time steps",
+        "The output layer is removed during training",
+        "The vocabulary is resampled at each step"
+      ],
+      "answer_index": 1,
+      "explanation": "RNNs share one set of recurrent parameters across time so the same update rule is applied at every position in the sequence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reuse the same weights",
+          "one set of weights"
+        ],
+        "timestamps": [
+          "00:51:43",
+          "00:51:51"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is the hidden state updated at each time step in the basic RNN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only the current word embedding is used",
+        "Only the previous hidden state is used",
+        "The previous hidden state and current word embedding are combined",
+        "The full future sequence is averaged first"
+      ],
+      "answer_index": 2,
+      "explanation": "The recurrent update combines information from the previous hidden state with the current input embedding, allowing the model to carry forward a summary of prior context.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "previous hidden state",
+          "current word embedding"
+        ],
+        "timestamps": [
+          "00:53:14",
+          "00:53:21"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which additional ingredients are part of the recurrent update besides the two matrix multiplies?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A bias term and a nonlinearity such as tanh",
+        "A beam search and a sampling temperature",
+        "A context window and negative samples",
+        "A convolution kernel and max pooling"
+      ],
+      "answer_index": 0,
+      "explanation": "The segment explicitly adds a bias and a nonlinearity, commonly tanh, to the recurrent state update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "adding on a bias term",
+          "putting things through a non-linearity"
+        ],
+        "timestamps": [
+          "00:54:08",
+          "00:54:17"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the model turn the final hidden state into a prediction for the next word?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It clusters the hidden state with k-means",
+        "It applies another affine map and then a softmax",
+        "It copies the most recent input token",
+        "It computes cosine similarity to all previous hidden states"
+      ],
+      "answer_index": 1,
+      "explanation": "After reading the context, the final hidden state is mapped to output scores and normalized with softmax to obtain a next-word distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "add another bias and stick that through a softmax",
+          "predict the next word"
+        ],
+        "timestamps": [
+          "00:55:11",
+          "00:55:17"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can an RNN, in principle, use arbitrarily long context without growing the number of model parameters?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it stores every past token separately",
+        "Because all prior context is summarized into a fixed-size hidden vector updated by shared weights",
+        "Because it rebuilds the vocabulary at each time step",
+        "Because it always truncates context to four words"
+      ],
+      "answer_index": 1,
+      "explanation": "The model size stays fixed because it keeps reusing the same recurrent parameters while compressing prior context into a hidden-state summary.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "variable-length context with fixed model size",
+          "summarized in a fixed-size hidden vector"
+        ],
+        "timestamps": [
+          "00:55:49",
+          "00:55:56"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q6",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a practical weakness of simple RNNs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They cannot model any sequence longer than five tokens",
+        "They are fully parallel across time",
+        "They are sequentially slow and tend to forget far-back information",
+        "They require no training data"
+      ],
+      "answer_index": 2,
+      "explanation": "Simple RNNs must process time steps one after another, and their hidden states often fail to preserve distant information well enough.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "inherently sequential",
+          "information fade too quickly"
+        ],
+        "timestamps": [
+          "00:56:18",
+          "00:56:32"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture07-rnns-seg7-q1",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q2",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q3",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q4",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q5",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q6",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture07-rnns-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the defining parameter-sharing idea of an RNN\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How is the hidden state updated at each time step in the basic RNN\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which additional ingredients are part of the recurrent update besides the two matrix multiplies\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How does the model turn the final hidden state into a prediction for the next word\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can an RNN, in principle, use arbitrarily long context without growing the number of model parameters\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q6",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is a practical weakness of simple RNNs\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture07-rnns-seg7-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the defining parameter-sharing idea of an RNN\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How is the hidden state updated at each time step in the basic RNN\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which additional ingredients are part of the recurrent update besides the two matrix multiplies\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q4",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does the model turn the final hidden state into a prediction for the next word\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can an RNN, in principle, use arbitrarily long context without growing the number of model parameters\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture07-rnns-seg7-q6",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is a practical weakness of simple RNNs\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

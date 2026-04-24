@@ -1,0 +1,1081 @@
+{
+  "lecture_title": "Lecture 7 - Recurrent Neural Networks",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Roadmap, scale, and the deep learning resurgence",
+      "start_s": 5,
+      "end_s": 476
+    },
+    {
+      "section_index": 2,
+      "title": "Modern regularization and dropout",
+      "start_s": 477,
+      "end_s": 1063
+    },
+    {
+      "section_index": 3,
+      "title": "Vectorization, initialization, and optimizers",
+      "start_s": 1064,
+      "end_s": 1494
+    },
+    {
+      "section_index": 4,
+      "title": "Language models and n-gram fundamentals",
+      "start_s": 1495,
+      "end_s": 2315
+    },
+    {
+      "section_index": 5,
+      "title": "N-gram smoothing, backoff, and sampling",
+      "start_s": 2316,
+      "end_s": 2663
+    },
+    {
+      "section_index": 6,
+      "title": "Fixed-window neural language models and why they fall short",
+      "start_s": 2664,
+      "end_s": 3049
+    },
+    {
+      "section_index": 7,
+      "title": "RNN architecture, strengths, and weaknesses",
+      "start_s": 3050,
+      "end_s": 3507
+    },
+    {
+      "section_index": 8,
+      "title": "Training RNN language models with teacher forcing and BPTT",
+      "start_s": 3508,
+      "end_s": 4115
+    },
+    {
+      "section_index": 9,
+      "title": "RNN rollout generation and character/contextual variants",
+      "start_s": 4116,
+      "end_s": 4723
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture07-rnns::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Roadmap, scale, and the deep learning resurgence",
+      "description": "Sets up the lecture and motivates why sequence models matter by connecting modern language model scale to the historical difficulty of training deep neural networks.",
+      "summary": "The instructor frames the lecture as a short review of extra neural-net concepts before moving into language models and then recurrent neural networks, with transformers deferred to later lectures [ts=9s] [ts=56s]. He motivates the topic by noting that modern language models are enormous deep systems, then reviews how backprop enabled hidden-layer neural nets in the 1980s and 1990s but deeper networks were long believed too hard to train until late-2000s and 2010s ideas reversed that stagnation [ts=177s] [ts=354s] [ts=422s].",
+      "key_points": [
+        {
+          "text": "The lecture roadmap is: extra neural-net concepts, then language models, then recurrent neural networks, with transformers later.",
+          "timestamp_s": 9,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Modern language models are described as huge deep models with over 100 billion parameters.",
+          "timestamp_s": 177,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Historically, deep multilayer networks were widely seen as too difficult to train and often worse than one- or two-hidden-layer nets.",
+          "timestamp_s": 317,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A small set of seemingly modest ideas and tweaks helped restart progress in deep learning after years of stagnation.",
+          "timestamp_s": 458,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 5,
+        "end_s": 476
+      },
+      "difficulty": 0.34,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Modern regularization and dropout",
+      "description": "Explains how regularization is viewed in modern deep learning and then develops dropout as a practical regularization method.",
+      "summary": "This segment starts from L2 regularization, where the loss is augmented to prefer smaller parameter values, and contrasts the classical overfitting picture with a modern view in which huge networks can nearly memorize the training set yet still generalize if regularized well [ts=517s] [ts=719s] [ts=807s]. It then introduces dropout: at training time a random binary mask zeroes parts of an internal representation, while at test time the network keeps all units and rescales activations, encouraging robustness instead of reliance on a few co-adapted features [ts=928s] [ts=1020s] [ts=1054s].",
+      "key_points": [
+        {
+          "text": "L2 regularization adds a squared-parameter term to the loss to prefer smaller weights.",
+          "timestamp_s": 565,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The lecture argues that in modern large neural networks the simple classical picture of overfitting no longer matches practice.",
+          "timestamp_s": 719,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Large models can drive training loss essentially to zero and still generalize if regularization is done well.",
+          "timestamp_s": 807,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Dropout samples a random mask of zeros and ones and applies it to hidden representations during training.",
+          "timestamp_s": 928,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "At test time dropout keeps all units active and rescales instead of deleting activations.",
+          "timestamp_s": 1024,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Dropout can be interpreted as preventing feature co-adaptation or as approximating a large model ensemble.",
+          "timestamp_s": 1054,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 477,
+        "end_s": 1063
+      },
+      "difficulty": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Vectorization, initialization, and optimizers",
+      "description": "Covers three implementation habits that make neural networks train effectively: tensorized computation, symmetry-breaking initialization, and adaptive optimization.",
+      "summary": "The instructor emphasizes vectorization as a core deep-learning habit: avoid Python for-loops, use vectors, matrices, and tensors, and exploit GPUs or NPUs for large speedups [ts=1064s] [ts=1207s] [ts=1238s]. He then explains why parameters should start as small random values rather than all zeros, since constant initialization creates symmetry and stalls learning, and mentions Xavier initialization as an older scale-aware scheme [ts=1294s] [ts=1375s] [ts=1428s]. The segment closes with adaptive optimizers, especially Adam, which track gradient history per parameter and are less fragile than plain SGD with respect to step-size tuning [ts=1478s] [ts=1558s] [ts=1615s].",
+      "key_points": [
+        {
+          "text": "Deep learning should be implemented with vectorized tensor operations rather than explicit for-loops.",
+          "timestamp_s": 1064,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Running vectorized computation on GPUs or NPUs yields orders-of-magnitude speedups.",
+          "timestamp_s": 1238,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Weights should be initialized to small random numbers to break symmetry and allow features to differentiate.",
+          "timestamp_s": 1294,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Xavier initialization chooses variance based on a layer's input and output sizes.",
+          "timestamp_s": 1428,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Adaptive optimizers estimate gradient scale for each parameter and use it to choose update sizes.",
+          "timestamp_s": 1558,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Adam is recommended as the safe optimizer name to remember and try first.",
+          "timestamp_s": 1615,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 1064,
+        "end_s": 1615
+      },
+      "difficulty": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Language models and n-gram fundamentals",
+      "description": "Defines language models formally and begins the classical n-gram solution based on counting local contexts.",
+      "summary": "A language model is defined as a system that assigns a probability distribution to the next token given the previous context, and equivalently as a model that assigns probability to an entire sequence via a chain-rule decomposition into next-token conditionals [ts=1714s] [ts=1777s] [ts=1821s]. The lecture stresses that language models long predate ChatGPT and underlie autocomplete and query suggestion systems [ts=1862s] [ts=1882s] [ts=1928s]. It then introduces n-gram language models, where a Markov assumption keeps only the most recent n-1 words and predicts the next word from relative frequencies of observed short contexts [ts=1975s] [ts=2106s] [ts=2157s].",
+      "key_points": [
+        {
+          "text": "A language model predicts a probability distribution over the next word given the preceding context.",
+          "timestamp_s": 1714,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A language model also assigns probability to a whole text by chain-rule factorization into conditional next-word probabilities.",
+          "timestamp_s": 1821,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Autocomplete and query suggestion are presented as longstanding applications of language models.",
+          "timestamp_s": 1897,
+          "evidence_type": "example"
+        },
+        {
+          "text": "An n-gram language model predicts from short word subsequences such as unigrams, bigrams, and trigrams.",
+          "timestamp_s": 1975,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The Markov assumption keeps only the most recent n-1 words and discards older context.",
+          "timestamp_s": 2106,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Relative-frequency counts of n-grams provide the probability estimate for the next word.",
+          "timestamp_s": 2157,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "In the running example, a four-gram model would estimate next-word probabilities from counts after 'students open their'.",
+          "timestamp_s": 2183,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 1495,
+        "end_s": 2315
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 14,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg5",
+      "course_id": "cs224n-2024",
+      "name": "N-gram smoothing, backoff, and sampling",
+      "description": "Develops the main weaknesses of count-based language models and shows how they generate text by repeated sampling.",
+      "summary": "This segment focuses on the weaknesses of raw n-gram counts: unseen continuations get probability zero, unseen conditioning contexts make denominators undefined, and larger contexts worsen both sparsity and storage exponentially [ts=2345s] [ts=2433s] [ts=2520s]. The fixes are smoothing by adding a small delta to counts and backoff to shorter contexts when a longer one is missing [ts=2445s] [ts=2487s]. The instructor then shows how an n-gram model samples words one by one to generate text, producing output that is often grammatical but still globally incoherent, and argues that better models, not just more scale, are needed [ts=2752s] [ts=2838s] [ts=3017s].",
+      "key_points": [
+        {
+          "text": "Unseen n-grams create zero probabilities, which are especially damaging because downstream probability computations collapse to zero.",
+          "timestamp_s": 2394,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Add-delta smoothing assigns a small nonzero count to unseen events so every continuation remains possible.",
+          "timestamp_s": 2445,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Backoff replaces an unseen longer context with a shorter one until an estimate is available.",
+          "timestamp_s": 2487,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Using more conditioning words improves context but worsens sparsity and storage exponentially, so practice usually stopped around 5-grams.",
+          "timestamp_s": 2520,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "N-gram text generation samples from the next-word distribution repeatedly to roll out a sequence.",
+          "timestamp_s": 2752,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Sampled n-gram text can look locally grammatical while remaining semantically incoherent.",
+          "timestamp_s": 2857,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 2316,
+        "end_s": 2857
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Fixed-window neural language models and why they fall short",
+      "description": "Introduces the first neural alternative to n-grams, then explains why a fixed-window architecture still misses the full language-modeling problem.",
+      "summary": "The lecture next replaces count tables with a neural classifier: concatenate embeddings from a fixed context window, pass them through a hidden layer, and apply a softmax over the vocabulary to get a next-word distribution [ts=3032s] [ts=3123s] [ts=3178s]. This early neural language model, associated with Bengio and colleagues, removes explicit sparsity and storage problems because the model stores learned parameters instead of all observed n-grams [ts=3205s] [ts=3212s] [ts=3303s]. But it still uses a Markov-style fixed window, and its position-specific weight matrix treats the same word differently depending on where it appears, motivating a shared-parameter sequence model instead [ts=3328s] [ts=3351s] [ts=3410s].",
+      "key_points": [
+        {
+          "text": "A fixed-window neural language model concatenates word embeddings from a local context and predicts the next word with a softmax classifier.",
+          "timestamp_s": 3123,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "This architecture is essentially the first neural language model associated with early 2000s work by Bengio and colleagues.",
+          "timestamp_s": 3205,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Neural language models remove the need to store all observed n-grams explicitly.",
+          "timestamp_s": 3303,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The fixed-window model still makes a Markov assumption because it throws away far-back context.",
+          "timestamp_s": 3328,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The same word occurring in different input positions is handled by different subparts of the weight matrix, which is inefficient.",
+          "timestamp_s": 3351,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "These limitations motivate a variable-length, shared-parameter architecture: the recurrent neural network.",
+          "timestamp_s": 3410,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 2664,
+        "end_s": 3410
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "course_id": "cs224n-2024",
+      "name": "RNN architecture, strengths, and weaknesses",
+      "description": "Presents the recurrent neural network as a shared-parameter sequence model and explains both its advantages over fixed windows and its practical limitations.",
+      "summary": "An RNN is introduced as a family of networks that reuse one set of weights across time steps, updating a hidden state as each token is read [ts=3471s] [ts=3516s] [ts=3600s]. The hidden state starts from an initial value, combines the previous state with the current word embedding, adds a bias, applies a nonlinearity such as tanh, and the final hidden state is fed through a softmax to predict the next word [ts=3616s] [ts=3646s] [ts=3691s] [ts=3779s]. This gives variable-length context with fixed model size and shared processing, but it remains sequentially slow and simple RNNs tend to let distant information fade too quickly [ts=3816s] [ts=3850s] [ts=3898s] [ts=3977s].",
+      "key_points": [
+        {
+          "text": "RNNs reuse the same weights across successive time steps in a sequence.",
+          "timestamp_s": 3516,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The hidden state is updated from the previous hidden state and the current word embedding at each step.",
+          "timestamp_s": 3627,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Bias terms and a nonlinearity, commonly tanh, are part of the recurrent update.",
+          "timestamp_s": 3687,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The final hidden state is passed through a softmax to produce a next-word distribution.",
+          "timestamp_s": 3779,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "RNNs handle arbitrary context length without increasing model size, because context is summarized in a fixed-size hidden vector.",
+          "timestamp_s": 3816,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Recurrent computation is slow because it is inherently sequential.",
+          "timestamp_s": 3865,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Simple RNNs forget information from far back in the sequence too quickly.",
+          "timestamp_s": 3977,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 3050,
+        "end_s": 3977
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg8",
+      "course_id": "cs224n-2024",
+      "name": "Training RNN language models with teacher forcing and BPTT",
+      "description": "Shows how to define the RNN language-model objective, how training is staged over segments, and how gradients are propagated through repeated weights.",
+      "summary": "Training starts by computing a next-word distribution at each time step and using cross-entropy, equivalently the negative log-likelihood of the actual next word, then averaging that loss per token across a segment [ts=3992s] [ts=4016s] [ts=4058s]. The lecture then explains teacher forcing: during training the model is not allowed to free-run, but is repeatedly fed the ground-truth next token so that each prediction is conditioned on real text prefixes [ts=4142s] [ts=4191s] [ts=4252s]. For optimization, long corpora are cut into manageable segments or fixed-length chunks for batched GPU training, and gradients through repeated recurrent weights are summed across time; in practice truncated backpropagation through time can stop the backward pass after a smaller number of steps [ts=4355s] [ts=4419s] [ts=4501s] [ts=4614s].",
+      "key_points": [
+        {
+          "text": "The RNN language-model objective is average per-token cross-entropy, i.e. negative log-likelihood of the actual next word.",
+          "timestamp_s": 4016,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Teacher forcing feeds the correct next token back into the model during training instead of using the model's own sampled output.",
+          "timestamp_s": 4191,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Training corpora are cut into manageable segments, and in practice fixed-length chunks are convenient for vectorized batching on GPUs.",
+          "timestamp_s": 4355,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "For a repeated recurrent weight matrix, the total gradient is the sum of the gradients from each time step where it appears.",
+          "timestamp_s": 4501,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Truncated backpropagation through time keeps the full forward context but shortens the backward pass to speed training.",
+          "timestamp_s": 4614,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 3508,
+        "end_s": 4614
+      },
+      "difficulty": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg9",
+      "course_id": "cs224n-2024",
+      "name": "RNN rollout generation and character/contextual variants",
+      "description": "Uses trained RNN language models to generate text and broadens the idea to character-level and contextual sequence generation.",
+      "summary": "To generate text, the model starts from an initial hidden state and a special start-of-sequence symbol, samples a next token from the softmax distribution, feeds that generated token back in, and continues until an end-of-sequence symbol is produced [ts=4644s] [ts=4694s] [ts=4728s] [ts=4772s]. The instructor notes that later systems such as ChatGPT use the same autoregressive rollout pattern, though with more complex architectures [ts=4790s] [ts=4806s]. Example outputs from Barack Obama speeches, Harry Potter, and recipe corpora show that simple RNNs can mimic local style and syntax but still struggle with global coherence [ts=4870s] [ts=5037s] [ts=5087s]. The final examples extend RNNs to character-level generation and contextual initialization, including generating paint-color names from RGB values [ts=5176s] [ts=5216s] [ts=5266s].",
+      "key_points": [
+        {
+          "text": "Generation begins with a start-of-sequence token and an initial hidden state.",
+          "timestamp_s": 4671,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Autoregressive rollout samples a word, feeds it back as the next input, and repeats until an end-of-sequence symbol is produced.",
+          "timestamp_s": 4728,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The lecture explicitly connects this rollout process to how later systems like ChatGPT generate responses.",
+          "timestamp_s": 4790,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "RNNs trained on Obama speeches, Harry Potter, or recipes generate stylistically plausible but imperfect text.",
+          "timestamp_s": 4870,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Character-level RNNs generate one letter at a time instead of one word at a time.",
+          "timestamp_s": 5176,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A contextual RNN can initialize the hidden state with side information such as RGB values to generate paint-color names.",
+          "timestamp_s": 5266,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=5",
+        "start_s": 4116,
+        "end_s": 5266
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 9,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture07-rnns::kp1",
+      "name": "Deep learning resurgence and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty.",
+      "track_tags": [
+        "deep_learning_fundamentals"
+      ],
+      "domain_tags": [
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This concept frames why the lecture studies regularization and sequence models rather than treating them as arbitrary tricks.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp2",
+      "name": "Modern regularization",
+      "description": "The view that very large networks can fit training data closely yet still generalize when regularization is chosen appropriately.",
+      "track_tags": [
+        "deep_learning_fundamentals"
+      ],
+      "domain_tags": [
+        "regularization",
+        "generalization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It explains the modern training regime assumed by later neural language-model discussions.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp3",
+      "name": "Dropout",
+      "description": "A regularization method that randomly masks hidden activations during training and rescales at test time.",
+      "track_tags": [
+        "deep_learning_fundamentals"
+      ],
+      "domain_tags": [
+        "regularization",
+        "neural_network_training"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Dropout is one of the lecture's concrete examples of the small but high-impact changes that made deep networks practical.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp4",
+      "name": "Vectorization",
+      "description": "Implementing neural computation with vectors, matrices, and tensors instead of explicit loops.",
+      "track_tags": [
+        "deep_learning_fundamentals"
+      ],
+      "domain_tags": [
+        "numerical_computing",
+        "systems_for_ml"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "software_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is practical infrastructure knowledge rather than the main conceptual centerpiece of the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp5",
+      "name": "Parameter initialization",
+      "description": "Choosing non-constant initial weights so learning can break symmetry and remain numerically stable.",
+      "track_tags": [
+        "deep_learning_fundamentals"
+      ],
+      "domain_tags": [
+        "optimization",
+        "neural_network_training"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important for practice, but it supports later models more than it defines the lecture's main intellectual arc.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp6",
+      "name": "Adaptive optimizers",
+      "description": "Optimization methods such as Adam that adapt updates using accumulated gradient statistics.",
+      "track_tags": [
+        "deep_learning_fundamentals"
+      ],
+      "domain_tags": [
+        "optimization",
+        "neural_network_training"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It matters for making models train reliably, but it is secondary to the lecture's main language-modeling content.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp7",
+      "name": "Language modeling objective",
+      "description": "Modeling text as a probability distribution over the next token and, by chain rule, over entire sequences.",
+      "track_tags": [
+        "nlp_foundations"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "probability"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.47,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Next-token prediction is the gateway objective that connects classical NLP systems to later large language models across the course.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp8",
+      "name": "N-gram language models",
+      "description": "Count-based next-word models that use a short Markov context, smoothing, and backoff.",
+      "track_tags": [
+        "nlp_foundations"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "classical_nlp"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The n-gram baseline supplies the contrast that makes the move to neural sequence models intelligible.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp9",
+      "name": "Fixed-window neural language models",
+      "description": "Neural next-word predictors that embed a limited context window and classify the next token with a softmax.",
+      "track_tags": [
+        "nlp_foundations"
+      ],
+      "domain_tags": [
+        "language_modeling",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This concept is transitional: it is important chiefly because it exposes why fixed windows are not enough.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp10",
+      "name": "Recurrent neural networks",
+      "description": "Shared-parameter sequence models that update a hidden state over time to summarize prior context.",
+      "track_tags": [
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "recurrent_neural_networks",
+        "language_modeling"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "RNNs are the lecture's central new architecture and a prerequisite for understanding later improvements and comparisons with transformers.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp11",
+      "name": "Teacher forcing and backpropagation through time",
+      "description": "The standard training setup for autoregressive RNNs, including per-token loss, repeated-weight gradients, and truncated BPTT.",
+      "track_tags": [
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "training_dynamics",
+        "recurrent_neural_networks"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "This is the main operational knowledge needed to actually train the sequence model introduced in the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    },
+    {
+      "local_kp_id": "local::lecture07-rnns::kp12",
+      "name": "Autoregressive rollout and RNN variants",
+      "description": "Generating sequences token by token and extending RNNs to character-level or conditioned-generation settings.",
+      "track_tags": [
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "generation",
+        "recurrent_neural_networks"
+      ],
+      "career_path_tags": [
+        "nlp_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "Useful for applications and intuition, but less foundational than the language-model objective and the core RNN update/training ideas.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": ""
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture07-rnns::seg1",
+      "local_kp_id": "local::lecture07-rnns::kp1",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The opening roadmap and historical framing occupy the segment and motivate why deep learning needed new training ideas [ts=9s] [ts=354s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "local_kp_id": "local::lecture07-rnns::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Most of the segment contrasts classical overfitting intuition with modern regularization practice [ts=617s] [ts=719s] [ts=807s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "local_kp_id": "local::lecture07-rnns::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Dropout is introduced explicitly and explained through train-time masking, test-time rescaling, and interpretation [ts=928s] [ts=1024s] [ts=1054s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg3",
+      "local_kp_id": "local::lecture07-rnns::kp4",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The instructor gives a direct implementation rule: no for-loops, use vectors, matrices, and tensors [ts=1064s] [ts=1207s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg3",
+      "local_kp_id": "local::lecture07-rnns::kp5",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The middle of the segment explains why all-zero initialization fails and why small random initialization works [ts=1294s] [ts=1375s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg3",
+      "local_kp_id": "local::lecture07-rnns::kp6",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The closing subsection introduces adaptive optimizers and specifically recommends Adam [ts=1478s] [ts=1615s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "local_kp_id": "local::lecture07-rnns::kp7",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment formally defines language modeling as next-token prediction and sequence probability by chain rule [ts=1714s] [ts=1821s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "local_kp_id": "local::lecture07-rnns::kp8",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The latter part begins the n-gram story with the Markov assumption and relative-frequency estimation [ts=1975s] [ts=2106s] [ts=2157s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg5",
+      "local_kp_id": "local::lecture07-rnns::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "This segment is devoted to smoothing, backoff, sparsity, storage growth, and n-gram sampling [ts=2445s] [ts=2487s] [ts=2752s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg5",
+      "local_kp_id": "local::lecture07-rnns::kp7",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The generation discussion still relies on the next-word probability view introduced earlier [ts=2752s] [ts=2819s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg6",
+      "local_kp_id": "local::lecture07-rnns::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment introduces the fixed-window neural language model architecture and its benefits over count tables [ts=3123s] [ts=3303s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg6",
+      "local_kp_id": "local::lecture07-rnns::kp8",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The neural model is presented explicitly as a replacement for n-gram language models [ts=3216s] [ts=3277s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg6",
+      "local_kp_id": "local::lecture07-rnns::kp10",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "mention",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment ends by motivating a shared-parameter variable-length architecture, setting up RNNs [ts=3410s] [ts=3445s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "local_kp_id": "local::lecture07-rnns::kp10",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The full recurrent update, hidden-state intuition, benefits, and limitations are all central here [ts=3516s] [ts=3691s] [ts=3977s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "local_kp_id": "local::lecture07-rnns::kp7",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The RNN is applied specifically as a next-word language model with a softmax output [ts=3768s] [ts=3791s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg8",
+      "local_kp_id": "local::lecture07-rnns::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Cross-entropy loss, teacher forcing, repeated-weight gradients, and truncated BPTT define this segment [ts=4016s] [ts=4252s] [ts=4501s] [ts=4614s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg8",
+      "local_kp_id": "local::lecture07-rnns::kp10",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The training discussion assumes the recurrent architecture and explains how its shared weights are updated [ts=4452s] [ts=4485s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg9",
+      "local_kp_id": "local::lecture07-rnns::kp12",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment is devoted to rollout generation, sampling, character-level RNNs, and contextual initialization examples [ts=4671s] [ts=4728s] [ts=5176s] [ts=5266s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg9",
+      "local_kp_id": "local::lecture07-rnns::kp10",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "All examples still use the recurrent hidden-state machinery introduced earlier [ts=4648s] [ts=4702s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture07-rnns::seg1",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Useful framing and motivation, but lighter on operational details than later sections [ts=9s] [ts=422s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Introduces modern regularization intuition and dropout, both of which are reusable across later neural models [ts=719s] [ts=928s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Dense with practical training advice on speed, initialization, and optimization choices [ts=1064s] [ts=1294s] [ts=1615s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Defines the core language-modeling objective and the chain-rule formulation that downstream sections rely on [ts=1714s] [ts=1821s] [ts=2106s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Covers the classical fixes and limitations—smoothing, backoff, sparsity, storage, and sampling—that motivate neural sequence models [ts=2445s] [ts=2487s] [ts=2520s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Bridge section showing why a fixed-window neural model helps but still fails to solve long-context language modeling [ts=3123s] [ts=3328s] [ts=3410s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "This is the core architecture segment: recurrent update, hidden-state intuition, benefits, and forgetting limitations [ts=3516s] [ts=3691s] [ts=3977s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Defines the training objective and the key algorithmic mechanics for learning RNN language models [ts=4016s] [ts=4252s] [ts=4501s] [ts=4614s]."
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg9",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "More application- and example-oriented, with rollout generation and interesting character/contextual variants [ts=4728s] [ts=4870s] [ts=5266s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture07-rnns"
+}

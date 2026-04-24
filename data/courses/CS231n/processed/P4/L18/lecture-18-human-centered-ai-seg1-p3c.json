@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_18_human_centered_ai::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript is sufficient for questions about human-centered AI, the role of vision in the evolution of intelligence, and why visual intelligence is treated as a central axis of the lecture, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a human-centered AI perspective emphasize?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Placing AI in a human context instead of introducing yet another algorithm in isolation.",
+        "Proving that one new architecture beats every earlier vision model.",
+        "Presenting the full optimization formula for object recognition.",
+        "Comparing segmentation benchmarks across modern datasets."
+      ],
+      "answer_index": 0,
+      "explanation": "The opening frames the lecture as a broader reflection on AI in relation to people, history, impact, and values, rather than as a presentation of one additional technical trick.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "human perspective",
+          "not going to teach"
+        ],
+        "timestamps": [
+          "00:00:18",
+          "00:00:42"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the Cambrian explosion example illustrate about the role of vision in the evolution of intelligence?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The emergence of vision created an evolutionary arms race that helped drive a rapid expansion in species diversity.",
+        "Vision became important only after humans invented cameras.",
+        "Hearing, not vision, was the main cause of large-scale diversification.",
+        "The evolution of vision was mostly unrelated to survival behavior."
+      ],
+      "answer_index": 0,
+      "explanation": "The example highlights that once animals could see, hunting and avoiding danger became much more effective. That created a strong selective pressure and helped drive rapid diversification.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "driver of the Cambrian",
+          "evolutionary arms race"
+        ],
+        "timestamps": [
+          "00:01:23",
+          "00:01:56"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is visual intelligence treated as a central axis of human-centered AI?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because AI can help us see what humans see, what humans cannot see, and what humans want to see.",
+        "Because the field is divided only into vision, language, and numerical optimization.",
+        "Because the main three learning paradigms are supervised, unsupervised, and reinforcement learning.",
+        "Because the only important vision tasks are classification, detection, and image generation."
+      ],
+      "answer_index": 0,
+      "explanation": "These three ideas form the lecture’s human-centered frame: start from human visual ability, expand beyond human limits, and then return to questions about human values and needs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "three chunks",
+          "want to see"
+        ],
+        "timestamps": [
+          "00:04:18",
+          "00:04:44"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does a human-centered AI perspective emphasize\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does the Cambrian explosion example illustrate about the role of vision in the evolution of intelligence\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why is visual intelligence treated as a central axis of human-centered AI\" is a direct reinforcement check and should be on the easier side."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does a human-centered AI perspective emphasize\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does the Cambrian explosion example illustrate about the role of vision in the evolution of intelligence\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is visual intelligence treated as a central axis of human-centered AI\" works best as an early concept check."
+    }
+  ]
+}

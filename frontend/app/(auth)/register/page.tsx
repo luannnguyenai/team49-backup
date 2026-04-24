@@ -1,5 +1,6 @@
 // app/(auth)/register/page.tsx
 
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import RegisterForm from "@/components/auth/RegisterForm";
 
@@ -16,7 +17,9 @@ export default function RegisterPage() {
           Miễn phí. Không cần thẻ tín dụng.
         </p>
       </div>
-      <RegisterForm />
+      <Suspense>
+        <RegisterForm />
+      </Suspense>
     </>
   );
 }

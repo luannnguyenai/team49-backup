@@ -1,0 +1,938 @@
+{
+  "lecture_title": "Lecture 10 - Self-Attention and Transformers",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Why RNNs fall short and why attention helps",
+      "start_s": 152,
+      "end_s": 711
+    },
+    {
+      "section_index": 2,
+      "title": "Self-attention as a fuzzy key-value lookup",
+      "start_s": 715,
+      "end_s": 1257
+    },
+    {
+      "section_index": 3,
+      "title": "Adding order and nonlinearity to self-attention",
+      "start_s": 1261,
+      "end_s": 1970
+    },
+    {
+      "section_index": 4,
+      "title": "Causal masking and the minimal self-attention block",
+      "start_s": 1979,
+      "end_s": 2475
+    },
+    {
+      "section_index": 5,
+      "title": "Transformer decoder: multi-head attention and scaling",
+      "start_s": 2476,
+      "end_s": 3484
+    },
+    {
+      "section_index": 6,
+      "title": "Residuals, layer norm, and encoder/decoder transformer variants",
+      "start_s": 3485,
+      "end_s": 4361
+    },
+    {
+      "section_index": 7,
+      "title": "Why transformers won and their remaining limitations",
+      "start_s": 4364,
+      "end_s": 4609
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "course_id": "cs224n",
+      "name": "Why recurrence is replaced by attention",
+      "description": "Motivates the shift from LSTMs/RNNs to attention by isolating two core failures of recurrence: long interaction paths and poor parallelism.",
+      "summary": "The lecture first recaps the pre-transformer recipe—bidirectional LSTMs for encoding, unidirectional LSTMs for decoding, plus attention for flexible memory access in tasks like translation [ts=172s] [ts=206s]. It then explains why recurrence is limiting: long-distance dependencies such as relating \"chef\" to \"was\" require many recurrent steps and difficult gradient propagation, even with LSTMs [ts=278s] [ts=360s]. A second problem is that RNN states must be computed sequentially, so the model incurs O(sequence length) many unparallelizable operations, whereas attention can represent each token by looking across the whole sequence in one parallel step [ts=452s] [ts=599s] [ts=698s].",
+      "key_points": [
+        {
+          "text": "A standard NLP baseline before transformers used a bidirectional LSTM encoder and a unidirectional LSTM decoder, often with attention.",
+          "timestamp_s": 175,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "RNNs suffer from linear interaction distance: words that are far apart need many recurrent steps to influence each other.",
+          "timestamp_s": 278,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The long-distance dependency in \"the chef ... was\" is hard to learn because gradients must propagate across many intervening words.",
+          "timestamp_s": 406,
+          "evidence_type": "example"
+        },
+        {
+          "text": "RNN forward/backward passes require O(sequence length) many unparallelizable operations because later states depend on earlier ones.",
+          "timestamp_s": 454,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Attention can connect distant words directly and compute token representations in parallel across the whole sequence.",
+          "timestamp_s": 638,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 152,
+        "end_s": 711
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 9,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "course_id": "cs224n",
+      "name": "Self-attention as fuzzy key-value lookup",
+      "description": "Introduces self-attention conceptually and mathematically as a soft lookup over keys and values generated from each token.",
+      "summary": "Attention is framed as a fuzzy lookup in a key-value store: instead of exactly matching one key, a query softly matches all keys, producing a weighted combination of values [ts=722s] [ts=768s]. The lecture then instantiates this for self-attention over a sentence, where every token embedding is transformed into a query, key, and value using learned matrices Q, K, and V [ts=912s] [ts=947s]. The attention score e_ij is the dot product between token i's query and token j's key, the weights are normalized with a softmax, and each output vector is the weighted sum of value vectors over the sequence [ts=986s] [ts=1010s] [ts=1033s].",
+      "key_points": [
+        {
+          "text": "Attention can be viewed as a fuzzy lookup in a key-value store rather than an exact dictionary lookup.",
+          "timestamp_s": 722,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Each token embedding x_i is transformed into a query q_i, key k_i, and value v_i by learned matrices Q, K, and V.",
+          "timestamp_s": 912,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The compatibility score e_ij is computed as the dot product q_i^T k_j.",
+          "timestamp_s": 986,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The attention weight alpha_ij is the softmax-normalized version of e_ij over all positions j.",
+          "timestamp_s": 1012,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The output o_i for token i is a weighted sum of all value vectors v_j using weights alpha_ij.",
+          "timestamp_s": 1033,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Whether a token attends strongly to itself is learned through Q and K rather than hard-coded.",
+          "timestamp_s": 1192,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 715,
+        "end_s": 1257
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 9,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "course_id": "cs224n",
+      "name": "Adding positional information and nonlinearity",
+      "description": "Shows why raw self-attention is insufficient and adds positional encodings plus a position-wise feed-forward network.",
+      "summary": "A central defect of plain self-attention is that it is permutation-invariant over the input set: the lecture uses \"Zuko made his uncle\" versus \"his uncle made Zuko\" to show that the same token multiset would otherwise get the same representations [ts=1306s] [ts=1352s]. To restore order, positional vectors p_i are added to token embeddings, with two options discussed: sinusoidal position encodings and learned position embeddings; learned embeddings are simpler and common in practice, but hard-limit the maximum sequence length and can fail on longer inputs [ts=1378s] [ts=1531s] [ts=1601s]. A second issue is that stacked self-attention layers without extra processing mostly keep re-averaging value vectors, so transformers add a position-wise feed-forward MLP after attention to inject nonlinearity and more expressive computation per token [ts=1830s] [ts=1867s] [ts=1945s].",
+      "key_points": [
+        {
+          "text": "Plain self-attention has no notion of sequence order and acts on a set of token vectors.",
+          "timestamp_s": 1291,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "\"Zuko made his uncle\" and \"his uncle made Zuko\" illustrate that token order must be encoded explicitly.",
+          "timestamp_s": 1310,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A positional vector p_i can be added to the word embedding x_i so the model knows both token identity and index.",
+          "timestamp_s": 1439,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Sinusoidal position encodings vary by dimension and period, but the instructor notes they do not reliably solve extrapolation in practice.",
+          "timestamp_s": 1504,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Learned position embeddings are common but impose a maximum supported sequence length n.",
+          "timestamp_s": 1554,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A position-wise feed-forward MLP after self-attention adds the nonlinear processing missing from repeated weighted averaging.",
+          "timestamp_s": 1867,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 1261,
+        "end_s": 1970
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "course_id": "cs224n",
+      "name": "Causal masking and the minimal self-attention architecture",
+      "description": "Explains how to prevent information leakage from future tokens and assembles the minimal usable self-attention block.",
+      "summary": "For language modeling and decoder-side sequence generation, self-attention cannot look ahead to future tokens, so the lecture introduces causal masking by setting scores for future positions to negative infinity before softmax, which forces their attention weights to zero [ts=1999s] [ts=2023s]. The instructor illustrates this with a lower-triangular attention pattern where the representation of \"chef\" can see only start/the/chef and not future words like \"who,\" preventing training-time cheating when predicting the next token [ts=2078s] [ts=2100s]. With masking added to positional embeddings, self-attention, and a feed-forward network, the lecture defines a minimal self-attention architecture that can replace recurrence and be stacked into larger models [ts=2359s] [ts=2408s] [ts=2435s].",
+      "key_points": [
+        {
+          "text": "In autoregressive settings, future tokens must be masked so a token cannot use information from words that come later.",
+          "timestamp_s": 1999,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Causal masking is implemented by replacing future attention scores with negative infinity before the softmax.",
+          "timestamp_s": 2023,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "After softmax, masked future positions receive weight zero in the weighted sum.",
+          "timestamp_s": 2048,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lower-triangular visibility pattern lets \"chef\" attend only to earlier or current tokens, not to \"who.\"",
+          "timestamp_s": 2098,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A minimal usable block consists of position embeddings, self-attention, masking when needed, and a feed-forward network.",
+          "timestamp_s": 2380,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 1979,
+        "end_s": 2475
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 8,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg5",
+      "course_id": "cs224n",
+      "name": "Multi-head attention and scaled dot-product attention",
+      "description": "Presents the main transformer innovation over the minimal block: multiple attention heads, efficient matrix implementation, and scaling of attention scores.",
+      "summary": "The transformer decoder upgrades single-head attention to masked multi-head self-attention so the model can look at different parts of the sequence for different reasons rather than forcing one average pattern of relevance [ts=2544s] [ts=2584s] [ts=2630s]. The lecture rewrites attention in sequence-stacked matrix form—computing XQ, XK, and XV for the whole sequence, forming all pairwise scores with one matrix multiplication, softmax-normalizing them, and multiplying by XV to get all outputs efficiently on GPUs [ts=2716s] [ts=2799s] [ts=2851s]. Multi-head attention then projects into h lower-dimensional subspaces, runs attention independently per head, concatenates the head outputs, and mixes them with a final linear map; this is described as empirically much better than one head [ts=2906s] [ts=2964s] [ts=3255s]. The section closes by motivating scaled dot-product attention: when dimensionality grows, raw dot products get too large and make softmax gradients small, so scores are divided by a dimension-based constant [ts=3399s] [ts=3427s] [ts=3472s].",
+      "key_points": [
+        {
+          "text": "Multi-head attention lets the model attend to different tokens for different reasons instead of collapsing everything into one pattern.",
+          "timestamp_s": 2544,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In matrix form, self-attention computes all pairwise scores with XQ times (XK)^T, then applies softmax and multiplies by XV.",
+          "timestamp_s": 2795,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Each head uses its own Q, K, and V matrices and projects from model dimension d to a lower dimension d/h.",
+          "timestamp_s": 2906,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Head outputs are concatenated and then mixed by a final linear transformation.",
+          "timestamp_s": 2959,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Heads are expected to specialize, but this is not guaranteed and some redundancy remains.",
+          "timestamp_s": 2684,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scaled dot-product attention divides scores by a dimension-based constant so large dot products do not saturate the softmax early in training.",
+          "timestamp_s": 3446,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 2476,
+        "end_s": 3484
+      },
+      "difficulty": 0.77,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 17,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "course_id": "cs224n",
+      "name": "Residuals, layer norm, and transformer architectures",
+      "description": "Adds the optimization machinery that makes transformers train well, then distinguishes decoder-only, encoder-only, and encoder-decoder variants.",
+      "summary": "Two optimization components are added after attention and after the feed-forward layer: residual connections and layer normalization [ts=3498s] [ts=3505s]. Residual connections add a layer's input back to its output so gradients have a direct identity path and the network starts closer to an identity mapping [ts=3541s] [ts=3581s] [ts=3600s]. Layer normalization then normalizes each token vector independently across its hidden dimensions to reduce uninformative variation between layers, rather than sharing statistics across tokens or across the batch [ts=3662s] [ts=3720s] [ts=3924s]. The lecture then assembles the full decoder block (masked multi-head attention, add-and-norm, feed-forward, add-and-norm), explains padding/masking for variable lengths, shows that the encoder is the same architecture without causal masking, and finally introduces encoder-decoder transformers with cross-attention where decoder states provide queries and encoder outputs provide keys and values [ts=4004s] [ts=4176s] [ts=4233s] [ts=4313s].",
+      "key_points": [
+        {
+          "text": "Residual connections add a layer's input to its output so the layer learns a residual and gradients have a direct path.",
+          "timestamp_s": 3541,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Layer normalization standardizes each token vector using its own mean and standard deviation across hidden dimensions.",
+          "timestamp_s": 3720,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Layer norm in transformers does not share normalization statistics across sequence positions or across the batch.",
+          "timestamp_s": 3924,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A transformer decoder block contains masked multi-head attention, add-and-norm, feed-forward, and add-and-norm.",
+          "timestamp_s": 4010,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Variable-length inputs are commonly padded, and pad tokens are masked out just like future tokens.",
+          "timestamp_s": 4097,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In cross-attention, decoder states define queries while encoder outputs define keys and values.",
+          "timestamp_s": 4233,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 3485,
+        "end_s": 4361
+      },
+      "difficulty": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg7",
+      "course_id": "cs224n",
+      "name": "Transformer results, strengths, and open limitations",
+      "description": "Summarizes why transformers displaced LSTMs and highlights their major remaining bottlenecks and research directions.",
+      "summary": "The lecture closes by arguing that transformers first succeeded because parallelization let them train more efficiently and scale to much more data, giving strong machine translation results and then taking over document generation and pretraining-based NLP more broadly [ts=4372s] [ts=4404s] [ts=4424s]. The main drawback emphasized is quadratic cost in sequence length, since each block computes all-pairs token interactions through an n by n score matrix, making very long contexts expensive in memory and compute [ts=4465s] [ts=4510s] [ts=4540s]. The instructor also notes continuing work on better position representations and efficient variants, while remarking that the original transformer plus a few modifications has shown striking staying power [ts=4495s] [ts=4574s] [ts=4581s].",
+      "key_points": [
+        {
+          "text": "Transformers improved machine translation and later broader NLP largely because they train efficiently through parallelization.",
+          "timestamp_s": 4376,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pretraining at scale became practical because transformers can use lots of data and compute effectively.",
+          "timestamp_s": 4424,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The major downside is quadratic compute and memory growth with sequence length due to all-pairs interactions.",
+          "timestamp_s": 4465,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The n by n attention-score matrix is the core source of long-context cost.",
+          "timestamp_s": 4510,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Despite many variants, the original transformer architecture remains very competitive with only modest modifications.",
+          "timestamp_s": 4581,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "[https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8](https://www.youtube.com/watch?v=LWMzyfvuehA&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=8)",
+        "start_s": 4364,
+        "end_s": 4609
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 4,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture10-transformers::kp1",
+      "name": "RNN linear interaction distance",
+      "description": "The recurrent path between two related tokens grows with the number of intervening positions, making long-distance dependencies harder to learn and slowing training.",
+      "track_tags": [
+        "nlp",
+        "sequence_models",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "recurrent_neural_networks",
+        "sequence_modeling"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It motivates why the lecture abandons recurrence and frames the problem transformers are designed to solve.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=318s], the instructor uses the whiteboard sentence \"the chef ... was\" to visualize a long-distance dependency separated by many recurrent steps."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp2",
+      "name": "Self-attention as all-pairs contextual lookup",
+      "description": "Each token can gather information from every token in the sequence in a single parallel operation, rather than relying on stepwise recurrence.",
+      "track_tags": [
+        "nlp",
+        "attention",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "self_attention",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the core replacement for recurrence and the conceptual foundation of the rest of the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=830s], a slide shows teal attention bars over the sentence \"I went to Stanford CS224N and learned\" to depict contextual lookup."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp3",
+      "name": "Key-query-value self-attention equations",
+      "description": "Token embeddings are projected into queries, keys, and values; dot-product scores are softmax-normalized and used to compute weighted sums of value vectors.",
+      "track_tags": [
+        "nlp",
+        "attention",
+        "math_for_ml"
+      ],
+      "domain_tags": [
+        "self_attention",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "These equations define the basic computation used repeatedly in every later transformer variant.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=986s], the lecture transitions from the toy example to the explicit dot-product and softmax equations for self-attention."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp4",
+      "name": "Positional encoding",
+      "description": "Because self-attention alone ignores order, position information must be injected, commonly by adding sinusoidal or learned positional vectors to token embeddings.",
+      "track_tags": [
+        "nlp",
+        "transformers",
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "positional_encoding",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.59,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Without position information, self-attention cannot distinguish reordered sentences with different meanings.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=1326s], the whiteboard contrasts \"Zuko made his uncle\" with \"his uncle made Zuko\" to show why order must be encoded."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp5",
+      "name": "Position-wise feed-forward network",
+      "description": "A per-token MLP applied after attention adds nonlinearity and extra compute so stacked layers do more than repeated weighted averaging.",
+      "track_tags": [
+        "deep_learning",
+        "transformers",
+        "nlp"
+      ],
+      "domain_tags": [
+        "feed_forward_networks",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "It is a necessary supporting component of the architecture but not the central new idea of the lecture.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=1898s], the slide shows each attention output vector flowing independently through an MLP."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp6",
+      "name": "Causal masking",
+      "description": "Future positions are masked in decoder self-attention so next-token prediction cannot cheat by reading words that come later in the sequence.",
+      "track_tags": [
+        "nlp",
+        "language_modeling",
+        "transformers"
+      ],
+      "domain_tags": [
+        "causal_masking",
+        "autoregressive_models"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Masking is essential for turning self-attention into a valid decoder for language modeling and translation generation.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=2060s], the lecture describes a lower-triangular visibility pattern where later words are grayed out and effectively zeroed."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp7",
+      "name": "Multi-head self-attention",
+      "description": "Instead of one attention operation, transformers run several attention heads in parallel on lower-dimensional projections and then combine their outputs.",
+      "track_tags": [
+        "nlp",
+        "transformers",
+        "deep_learning"
+      ],
+      "domain_tags": [
+        "multi_head_attention",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture presents multi-head attention as the most important distinction between the minimal block and the practical transformer.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=3005s], the slide reshapes the sequence representation into separate head-specific tensors and score matrices."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp8",
+      "name": "Scaled dot-product attention",
+      "description": "Attention scores are divided by a dimension-based constant so large dot products do not saturate the softmax and kill useful gradients.",
+      "track_tags": [
+        "attention",
+        "optimization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "scaled_dot_product_attention",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "It is an important stabilization detail for practical training, but conceptually secondary to attention and multi-head design.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=3446s], the lecture returns to the score equations and adds the division that defines scaled dot-product attention."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp9",
+      "name": "Residual connections",
+      "description": "Skip connections add a layer's input to its output, easing optimization by creating direct gradient paths and biasing the network toward identity mappings early in training.",
+      "track_tags": [
+        "deep_learning",
+        "optimization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "residual_connections",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Residuals are presented as one of the two big optimization methods that make deep transformers train reliably.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=3620s], the slide shows a loss-landscape cartoon to illustrate why residual connections make optimization easier."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp10",
+      "name": "Layer normalization",
+      "description": "Each token vector is normalized across its hidden dimensions so later layers see more stable activations without depending on batch statistics.",
+      "track_tags": [
+        "deep_learning",
+        "optimization",
+        "transformers"
+      ],
+      "domain_tags": [
+        "layer_normalization",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Layer norm is paired with residuals as a standard add-and-norm component of transformer blocks.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=3720s], the lecture writes the mean and standard deviation formulas used to normalize each token vector."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp11",
+      "name": "Transformer architectural variants",
+      "description": "The same core block yields a decoder-only model with masking, an encoder-only model without masking, and an encoder-decoder model with cross-attention.",
+      "track_tags": [
+        "nlp",
+        "transformers",
+        "architectures"
+      ],
+      "domain_tags": [
+        "encoder_decoder_models",
+        "cross_attention",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "This synthesizes how the building blocks instantiate practical model families used for language modeling and machine translation.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=4233s], the diagram shows two arrows from the encoder into cross-attention for keys/values and one arrow from the decoder for queries."
+    },
+    {
+      "local_kp_id": "local::lecture10-transformers::kp12",
+      "name": "Transformer scaling advantage and quadratic bottleneck",
+      "description": "Transformers win through parallelizable large-scale training, but all-pairs attention introduces quadratic sequence-length cost that makes long contexts expensive.",
+      "track_tags": [
+        "nlp",
+        "scaling",
+        "transformers"
+      ],
+      "domain_tags": [
+        "computational_complexity",
+        "long_context_modeling",
+        "transformers"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "systems_ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "It explains both the historical success of transformers and the main research pressure to improve them.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=4510s], the instructor revisits the n by n attention matrix to make the quadratic memory cost concrete."
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "local_kp_id": "local::lecture10-transformers::kp1",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment is centered on linear interaction distance and sequential dependence in RNNs [ts=278s] [ts=452s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "local_kp_id": "local::lecture10-transformers::kp2",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Attention is introduced as the alternative that solves long-range interaction and parallelization issues [ts=599s] [ts=698s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "local_kp_id": "local::lecture10-transformers::kp2",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit develops the conceptual view of attention as fuzzy lookup over a sentence [ts=722s] [ts=830s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "local_kp_id": "local::lecture10-transformers::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Most of the segment derives Q, K, V, attention scores, softmax weights, and weighted-sum outputs [ts=912s] [ts=1033s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "local_kp_id": "local::lecture10-transformers::kp4",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit shows that self-attention is permutation-invariant without positional encoding and then presents sinusoidal and learned position embeddings [ts=1306s] [ts=1554s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "local_kp_id": "local::lecture10-transformers::kp5",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The second half of the segment explains why feed-forward layers add nonlinearity after attention [ts=1830s] [ts=1945s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "local_kp_id": "local::lecture10-transformers::kp6",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Future masking is introduced mathematically and illustrated with a lower-triangular accessibility pattern [ts=1999s] [ts=2100s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "local_kp_id": "local::lecture10-transformers::kp2",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Masking is presented as a modification of self-attention rather than a new mechanism [ts=1999s] [ts=2380s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg5",
+      "local_kp_id": "local::lecture10-transformers::kp7",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The instructor explicitly names masked multi-head self-attention as the most important difference between the minimal block and the transformer [ts=2524s] [ts=2544s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg5",
+      "local_kp_id": "local::lecture10-transformers::kp3",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Attention is rewritten in matrix form with XQ, XK, XV, score matrices, softmax, and weighted sums [ts=2716s] [ts=2851s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg5",
+      "local_kp_id": "local::lecture10-transformers::kp8",
+      "planner_role": "support",
+      "instruction_role": "support",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Scaled dot-product attention is added near the end of the segment as a stabilization detail [ts=3399s] [ts=3472s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "local_kp_id": "local::lecture10-transformers::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Residual connections are introduced as one of two major optimization methods and explained with gradient-flow intuition [ts=3505s] [ts=3600s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "local_kp_id": "local::lecture10-transformers::kp10",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Layer normalization is derived with mean and standard deviation formulas and clarified as per-token, not across sequence or batch [ts=3662s] [ts=3924s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "local_kp_id": "local::lecture10-transformers::kp11",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment assembles the decoder block, explains the encoder without masking, and introduces encoder-decoder cross-attention [ts=4004s] [ts=4313s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg7",
+      "local_kp_id": "local::lecture10-transformers::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The conclusion explicitly connects transformer success to parallelizable scaling and its main weakness to quadratic sequence-length cost [ts=4372s] [ts=4510s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg7",
+      "local_kp_id": "local::lecture10-transformers::kp11",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "This segment briefly refers back to the original transformer and later variants as architectural families [ts=4581s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture10-transformers::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This unit sets up the lecture's main motivation by contrasting RNN limitations with attention's parallel all-pairs interaction [ts=278s] [ts=638s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The section defines the core Q/K/V self-attention computation and includes the main score, softmax, and weighted-sum equations [ts=912s] [ts=1033s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "It introduces positional encoding and feed-forward layers, both essential fixes to raw self-attention, with explicit vector notation and architectural reasoning [ts=1439s] [ts=1867s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Masking is a core decoder mechanism and is explained both mathematically and with a concrete triangular visibility example [ts=2023s] [ts=2098s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "This section contains the lecture's densest derivations: matrix-form attention, multi-head splitting/concatenation, and scaled dot-product attention [ts=2716s] [ts=3472s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Residuals, layer norm, and encoder/decoder variants are all central transformer components and are explained with formulas plus block diagrams [ts=3541s] [ts=4313s]."
+    },
+    {
+      "unit_id": "local::lecture10-transformers::seg7",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The closing section is conceptual rather than derivational, summarizing why transformers scale well and why quadratic long-context cost remains a concern [ts=4372s] [ts=4510s]."
+    }
+  ],
+  "self_critique_trace": null,
+  "lecture_id": "lecture10-transformers"
+}

@@ -1,0 +1,6133 @@
+Title: Stanford CS231N | Spring 2025 | Lecture 7: Recurrent Neural Networks
+URL: https://www.youtube.com/watch?v=kG2lAPBF7zA
+Video ID: kG2lAPBF7zA
+============================================================
+
+00:00:05
+So hello everyone.
+
+00:00:07
+Welcome to lecture 7.
+
+00:00:09
+I also wanted to go over some
+clarifications from last time.
+
+00:00:12
+So when I gave
+lecture last time,
+
+00:00:13
+there were two ed posts that
+I think were good that you all
+
+00:00:17
+might want to check out.
+
+00:00:18
+But in case you
+haven't seen it, I'll
+
+00:00:19
+just go through
+it really quickly.
+
+00:00:21
+I think when
+describing dropout, how
+
+00:00:23
+to scale probabilities at
+test time during lecture,
+
+00:00:26
+there was a bit of confusion.
+
+00:00:28
+Basically, what I said in
+the slide had a mismatch.
+
+00:00:32
+So in each forward
+pass for dropout
+
+00:00:36
+we have this hyperparameter
+p, which is either
+
+00:00:38
+the amount of neurons
+you're dropping out
+
+00:00:41
+or it's the amount of
+neurons that you're
+
+00:00:43
+keeping depending on
+which implementation
+
+00:00:45
+dropout you're using.
+
+00:00:46
+Generally they do.
+
+00:00:47
+It's the number of
+the ones you drop out.
+
+00:00:50
+So in most libraries
+that's what p means.
+
+00:00:52
+But the basic idea
+is that at test time,
+
+00:00:54
+you want the expected output to
+be the same as at training time.
+
+00:00:58
+So this means that if you
+dropped 25% of your activations
+
+00:01:03
+during training time, at test
+time, you would scale by 0.75,
+
+00:01:07
+so that the expected
+output is the same.
+
+00:01:09
+And so I think there
+was a bit of confusion
+
+00:01:10
+because in this slide
+the implementation uses p
+
+00:01:14
+as the probability of
+keeping a unit active.
+
+00:01:17
+So a bit of a mismatch there.
+
+00:01:20
+Just to clarify.
+
+00:01:21
+There was also a question in
+class from last time about how
+
+00:01:25
+normalization can be useful.
+
+00:01:26
+And maybe resolve
+the issues that
+
+00:01:28
+arise when you have weights that
+are initialized incorrectly.
+
+00:01:31
+But we have this choice
+setting where we have 2D inputs
+
+00:01:34
+to our model, and a two layer
+neural network with ReLU.
+
+00:01:37
+It's outputting basically
+this quadrant function.
+
+00:01:40
+So if the point lies in the
+top right, it'll output 1 or 2
+
+00:01:43
+or 3 or 4, depending on which
+quadrant the point lies in.
+
+00:01:47
+And we plot the different
+training losses and test losses
+
+00:01:51
+for good initialization using
+the Kaiming initialization
+
+00:01:54
+we discussed last time
+and bad initialization
+
+00:01:57
+where the standard
+deviation is too high.
+
+00:01:59
+And the blue plot
+here represents bad,
+
+00:02:02
+and the green represents bad
+initialization with LayerNorm.
+
+00:02:05
+So you can see it actually does
+resolve a lot of the issues.
+
+00:02:07
+But to get the best
+performance you still
+
+00:02:09
+need good weight
+initialization, which
+
+00:02:10
+are the two lines afterwards.
+
+00:02:12
+So you can go dive in.
+
+00:02:13
+And also, whether or
+not LayerNorm help
+
+00:02:15
+depends on the problem.
+
+00:02:18
+So in this quadrant I, you can
+imagine that you don't need
+
+00:02:20
+to know the exact 2D
+position of each point.
+
+00:02:23
+So LayerNorm was
+actually helping.
+
+00:02:25
+But for some of the other
+functions that are in the code,
+
+00:02:28
+you can check out,
+where you need
+
+00:02:30
+to know the exact coordinate in
+order to get the right output,
+
+00:02:32
+LayerNorm actually
+hurts performance
+
+00:02:34
+because you lose
+some information
+
+00:02:35
+about the exact spatial
+location of your input
+
+00:02:38
+when you're doing the
+subtraction of the mean
+
+00:02:39
+and dividing by the
+standard deviation.
+
+00:02:42
+So just some notes here.
+
+00:02:44
+Basically at a high level,
+it does help with the issue,
+
+00:02:47
+but a gap remains.
+
+00:02:48
+So you can't get by this
+weight initialization issue
+
+00:02:51
+with just normalization.
+
+00:02:55
+And as I mentioned,
+it may not always
+
+00:02:57
+make sense depending on
+what you're trying to model.
+
+00:03:00
+So I think just to recap
+also from last time,
+
+00:03:02
+we've been mainly talking about
+these sort of vanilla, standard,
+
+00:03:05
+non-recurrent neural
+networks so far.
+
+00:03:07
+So this is a fixed size input
+and a fixed size output.
+
+00:03:12
+You have this one time setup
+where you set your activation
+
+00:03:15
+functions.
+
+00:03:15
+You do data
+pre-processing according
+
+00:03:17
+to some fixed mean and standard
+deviation for the images,
+
+00:03:21
+the image channels.
+
+00:03:22
+You have your weight
+initialization
+
+00:03:25
+and normalization
+functions that you use,
+
+00:03:27
+as well as transfer learning.
+
+00:03:30
+So if you pre-train on one
+data set, like ImageNet
+
+00:03:33
+or some other large
+scale internet data set,
+
+00:03:35
+you can get better results if
+you initialize your weights
+
+00:03:37
+to those values.
+
+00:03:38
+We also talked about
+training dynamics,
+
+00:03:40
+how you can babysit the
+learning process in choosing
+
+00:03:42
+a good learning
+rate, how you want
+
+00:03:44
+to update your different
+hyperparameters,
+
+00:03:46
+and also how to optimize
+those based on the validation
+
+00:03:48
+performance as well as
+test time augmentation
+
+00:03:51
+to improve performance further.
+
+00:03:53
+So a really good tool
+for points 2 and 3
+
+00:03:56
+here is something I use in
+basically all my projects called
+
+00:03:59
+weights and biases.
+
+00:04:00
+So you might find this useful.
+
+00:04:01
+It's a really neat way
+that you can essentially
+
+00:04:05
+look at different--
+you set different runs
+
+00:04:07
+with different hyperparameters.
+
+00:04:09
+In this case, they show
+a dropout column here.
+
+00:04:12
+So these are all the
+different values of dropout.
+
+00:04:14
+The color coding is really nice.
+
+00:04:15
+So you can see that generally
+the lower values of dropout
+
+00:04:18
+will achieve higher accuracy.
+
+00:04:20
+And so you can visualize
+these different validation--
+
+00:04:24
+sorry, these different
+hyperparameters
+
+00:04:26
+based on validation
+set performance.
+
+00:04:28
+And you can see
+based on many runs
+
+00:04:33
+get an idea of which
+hyperparameters work best.
+
+00:04:35
+So I always use this.
+
+00:04:36
+I think it's great.
+
+00:04:37
+Especially if you have the
+compute where you can just
+
+00:04:38
+run something over
+and over again
+
+00:04:39
+to improve
+performance more, this
+
+00:04:41
+is a really neat way
+of visualizing it.
+
+00:04:42
+I think they do it well.
+
+00:04:43
+There are other tools
+like TensorBoard.
+
+00:04:45
+But this is personally
+the one that I like.
+
+00:04:49
+OK, so for the rest
+of lecture today,
+
+00:04:52
+we'll be discussing
+sequence modeling.
+
+00:04:55
+So this is, in contrast
+to a fixed sized input
+
+00:04:59
+as input to our
+model, what if we have
+
+00:05:00
+a sequence of variable length.
+
+00:05:03
+And also, we'll
+be discussing what
+
+00:05:05
+are the simple neural
+networks that people
+
+00:05:07
+use before the era
+of transformers,
+
+00:05:09
+which mainly consists of RNNs
+and some variants of RNNs.
+
+00:05:13
+And then I'll also
+relate in one slide
+
+00:05:15
+how RNNs actually are similar to
+a lot of, and inspire a lot of,
+
+00:05:20
+the modern type
+of language models
+
+00:05:23
+that you see called
+state space models.
+
+00:05:24
+So you might have
+heard of Mamba.
+
+00:05:26
+There's some other ones too that
+we'll talk about in the slide,
+
+00:05:28
+but the basic idea is the
+key concepts from RNNs
+
+00:05:31
+are still being used today.
+
+00:05:32
+They're not just
+used in the past,
+
+00:05:34
+and they have a lot
+of nice advantages
+
+00:05:36
+over transformers
+that will go into.
+
+00:05:39
+Cool, so to specifically
+formulate this sequence modeling
+
+00:05:43
+task, you can imagine, we
+have a vanilla neural network
+
+00:05:45
+where we have one fixed
+size input to one fixed size
+
+00:05:48
+output, which is what we've
+discussed in the course so far.
+
+00:05:51
+In contrast, you could have a
+one to many sequence modeling
+
+00:05:55
+task.
+
+00:05:56
+So here we still have a fixed
+size input like say an image,
+
+00:05:59
+but we want to output a
+sequence of variable length.
+
+00:06:01
+So one common example
+is image captioning.
+
+00:06:04
+So we input an image
+and we want to output
+
+00:06:06
+a sequence of
+words or characters
+
+00:06:08
+or however you're modeling
+the language or encoding it,
+
+00:06:11
+but the goal is to have
+a variable length caption
+
+00:06:14
+output for what's
+happening in the image.
+
+00:06:17
+You could also have a many to
+one sequence modeling task.
+
+00:06:21
+So here we could imagine
+our inputs are, say, a video
+
+00:06:25
+and we're trying to classify
+what is this a video of.
+
+00:06:27
+So we give it a sequence
+of video frames.
+
+00:06:30
+And the output is one single
+class label similar to the image
+
+00:06:33
+classification case.
+
+00:06:34
+But now we have
+multiple frames as input
+
+00:06:36
+rather than just a single image.
+
+00:06:38
+So this is an example
+of many to one.
+
+00:06:41
+And then you also
+have many to many.
+
+00:06:42
+So the number of inputs and
+outputs in the sequences
+
+00:06:48
+don't need to match, so
+you could have your input
+
+00:06:51
+as a variable number of frames,
+and your output in this case
+
+00:06:54
+could be a caption
+of variable length,
+
+00:06:56
+and they don't need
+to necessarily match,
+
+00:06:58
+but they could match.
+
+00:06:59
+So for every single input
+you have one output.
+
+00:07:02
+And for discussing
+RNNs we'll mainly
+
+00:07:04
+be focusing on this
+setting on the far right.
+
+00:07:06
+But there are basically
+a lot of small changes
+
+00:07:08
+you can make to change and
+reformulate the problem to apply
+
+00:07:12
+to the other settings, but this
+is the most straightforward one.
+
+00:07:14
+Every time there's an
+input, there's an output,
+
+00:07:16
+and we'll be using it for
+the beginning of class
+
+00:07:18
+to talk about how RNNs work.
+
+00:07:22
+And a canonical
+example problem here
+
+00:07:24
+would be video
+classification, where you're
+
+00:07:26
+classifying every single frame.
+
+00:07:28
+OK, so what is an RNN?
+
+00:07:31
+The basic idea is you have an
+input sequence x, and an output
+
+00:07:36
+sequence y.
+
+00:07:37
+And what makes an RNN an RNN
+is this recurrent nature.
+
+00:07:41
+So often people will diagram
+it by this arrow that's
+
+00:07:44
+feeding back into the block.
+
+00:07:46
+This is how you know it's a
+recurrent layer when you're
+
+00:07:48
+reading different diagrams.
+
+00:07:50
+But what it actually
+means is that RNNs
+
+00:07:52
+have this internal
+state or a hidden state,
+
+00:07:55
+as it's often called,
+that is updated
+
+00:07:57
+as a sequence is processed.
+
+00:07:59
+So every time there's a
+new input to the model,
+
+00:08:01
+we process that and we
+calculate a new hidden state
+
+00:08:04
+or internal state.
+
+00:08:05
+So there's a hidden
+state, it updates,
+
+00:08:07
+and it depends on the new inputs
+as well as the previous internal
+
+00:08:11
+or hidden state.
+
+00:08:14
+I think this diagram is
+sometimes a bit confusing
+
+00:08:16
+when you're trying to think
+about how the gradients are
+
+00:08:18
+actually calculated and what
+are the order of operations.
+
+00:08:21
+So people will often do this
+diagram of an unrolled RNN.
+
+00:08:25
+And so here it's basically
+the same as before,
+
+00:08:28
+but we're explicitly showing
+that the current hidden state
+
+00:08:32
+calculation is dependent on
+our input at that time step
+
+00:08:35
+as well as the
+previous RNN state.
+
+00:08:38
+So we're more explicitly
+modeling what is exactly
+
+00:08:41
+needed to calculate
+each output, and each
+
+00:08:43
+RNN you move backwards in
+the computational graph.
+
+00:08:48
+So I've been speaking
+with words so far.
+
+00:08:51
+So let's formulate this with
+mathematical equations now.
+
+00:08:53
+So the basic idea is
+we're trying to process
+
+00:08:57
+a sequence of vectors, x.
+
+00:08:59
+And we're applying
+this recurrence formula
+
+00:09:01
+at every single time step.
+
+00:09:03
+So we have our new hidden
+state as a function
+
+00:09:06
+of the old hidden state and the
+input vector at some time step
+
+00:09:10
+as well as we have a function
+with normally with an activation
+
+00:09:14
+function along with
+some parameters,
+
+00:09:15
+W. So you can think
+of this as this
+
+00:09:17
+very similar to the
+initial neural network
+
+00:09:21
+layers we were learning
+where it's a weight matrix,
+
+00:09:23
+multiply by and then you follow
+it up by an activation function.
+
+00:09:27
+This is the same thing here.
+
+00:09:29
+The only change is that it's
+now a recurrence formula.
+
+00:09:31
+So we're using the same set
+of W's and the same activation
+
+00:09:39
+function each time we're
+computing the hidden state.
+
+00:09:43
+So basically, as I mentioned,
+this is a recurrence formula.
+
+00:09:48
+And to get the actual
+output, so how do we
+
+00:09:50
+calculate this blue block?
+
+00:09:51
+We have a separate
+function that depends
+
+00:09:55
+on a separate set
+of parameters that
+
+00:09:57
+convert our hidden dimension
+state into the dimension
+
+00:10:02
+of our output.
+
+00:10:03
+And also is a set of weights
+to convert the hidden state
+
+00:10:06
+to the output.
+
+00:10:07
+So this does two and one.
+
+00:10:08
+It changes the
+dimension of our vectors
+
+00:10:10
+from the dimension size
+of our hidden state, which
+
+00:10:12
+can be whatever we want to the
+dimension size of our output.
+
+00:10:15
+And then also it provides
+a transformation there.
+
+00:10:18
+So W hy is a weight matrix that
+you will multiply by your hidden
+
+00:10:23
+state to get the--
+
+00:10:24
+so it does two things.
+
+00:10:25
+It converts your hidden state
+to the dimension of your output.
+
+00:10:28
+So your hidden state and output
+could be different dimensions.
+
+00:10:31
+And then also, it's a weight
+matrix that you learn.
+
+00:10:35
+So not only does it do
+this dimension change,
+
+00:10:36
+but also it applies
+a transformation
+
+00:10:38
+to your hidden state.
+
+00:10:40
+So it's how you convert
+your hidden states
+
+00:10:41
+to your outputs, what W hy is.
+
+00:10:45
+So the previous slide was how we
+calculate the new hidden state.
+
+00:10:48
+So it's essentially
+the same idea
+
+00:10:51
+where you're doing this
+recursively with the same set
+
+00:10:53
+of parameters, but
+we have one set
+
+00:10:54
+of parameters and one
+function for calculating
+
+00:10:56
+the hidden state.
+
+00:10:57
+We have another set of
+parameters and another function
+
+00:10:59
+for calculating the output
+depending on what type of task
+
+00:11:02
+it is, and how we
+want to model the RNN.
+
+00:11:06
+Yeah, so they still share the
+same weights for each time step,
+
+00:11:09
+but there's two
+different things here.
+
+00:11:11
+One is to calculate
+basically how do you-- maybe
+
+00:11:13
+it'll be more clear as we go
+through more concrete examples.
+
+00:11:16
+But how do you actually
+calculate the new hidden state,
+
+00:11:19
+which is this internal
+state of the RNN.
+
+00:11:20
+And then how do you
+convert that hidden state
+
+00:11:22
+to the output,
+which is this slide.
+
+00:11:26
+So looking through this
+unrolled diagram here,
+
+00:11:31
+we can see that you need to
+initialize your hidden state
+
+00:11:35
+to some value.
+
+00:11:36
+So we usually call this h,0
+and you can initialize it
+
+00:11:40
+to whatever you want.
+
+00:11:42
+In principle, usually this
+is a learned input vector,
+
+00:11:47
+but now we'll specifically
+go into each step
+
+00:11:50
+of this unrolled
+recurrent RNN and actually
+
+00:11:53
+go through a concrete example
+for what it looks like when
+
+00:11:55
+you're doing the forward pass.
+
+00:11:58
+So one thing to note
+that already came up
+
+00:12:00
+with some of the
+questions is that we're
+
+00:12:02
+processing the
+sequence of vectors x,
+
+00:12:05
+and we're applying this
+recurrence formula at each time
+
+00:12:07
+step.
+
+00:12:08
+So you really do notice how the
+same function and the same set
+
+00:12:12
+of parameters are used
+at every time step
+
+00:12:13
+when computing the hidden state.
+
+00:12:15
+And a separate function and
+a separate set of parameters
+
+00:12:17
+are always used
+at each time step
+
+00:12:19
+when predicting the output
+from the hidden state.
+
+00:12:22
+Yeah, so can old values of y
+affect the new hidden state?
+
+00:12:25
+Under some formulations, yes.
+
+00:12:27
+And we'll actually go through
+one example of why that's used.
+
+00:12:29
+It's most commonly used if
+you want to predict the next--
+
+00:12:33
+if you're doing a language
+modeling or autoregressive
+
+00:12:36
+modeling task
+where you're trying
+
+00:12:37
+to predict one value
+given the previous values,
+
+00:12:40
+people will just use the
+previous values as the input.
+
+00:12:43
+So that's generally
+how people do
+
+00:12:44
+that explicit
+formulation of how can y
+
+00:12:47
+affect the next hidden state.
+
+00:12:49
+What is the difference between
+h and x at the first time step?
+
+00:12:53
+So they use basically
+different weights.
+
+00:12:57
+So the h,0 is using all of--
+it's using the weights that are
+
+00:13:02
+used to update every hidden
+state to the next one.
+
+00:13:06
+We'll go through exactly
+what the weights look like,
+
+00:13:08
+but basically they're
+using different weights,
+
+00:13:10
+is the short answer.
+
+00:13:12
+So when people say
+Vanilla RNN, they usually
+
+00:13:15
+are almost exactly referring
+to this type of model
+
+00:13:18
+where we have our
+hidden state t, which
+
+00:13:21
+uses tanh or hyperbolic tangent
+as an activation function.
+
+00:13:26
+This is nice because
+it's bounded between 1
+
+00:13:28
+and negative 1.
+
+00:13:30
+So as you do the operation
+over and over again,
+
+00:13:32
+your values will stay
+within this range.
+
+00:13:35
+So this is a nice
+property to have.
+
+00:13:36
+It's also zero
+centered and you can
+
+00:13:38
+represent both positive
+and negative values.
+
+00:13:40
+This is why people use tanh.
+
+00:13:43
+Also we sometimes have an
+output function fy here,
+
+00:13:48
+but in the simplest
+case your output yt
+
+00:13:50
+could just be a matrix
+multiplied by your hidden state.
+
+00:13:53
+So this is really the most
+simple formulation of an RNN.
+
+00:13:57
+And what we'll specifically
+go in our concrete example
+
+00:14:00
+today in lecture is this idea
+of just manually creating
+
+00:14:05
+a recurrent neural network.
+
+00:14:06
+So we're not going to learn this
+through gradient descent or all
+
+00:14:09
+these different methods.
+
+00:14:10
+I'm just going to show you how
+you could construct one by hand.
+
+00:14:15
+And we'll go through
+it and you'll
+
+00:14:16
+understand the
+forward pass, what
+
+00:14:18
+each of the different
+weight matrices are doing,
+
+00:14:20
+as well as how the
+output is calculated.
+
+00:14:23
+So in this really toy
+example because it
+
+00:14:25
+needs to be pretty
+simple, if we're just
+
+00:14:26
+going to be going through
+all the different weights.
+
+00:14:28
+You're given sequences of
+0's and 1's, and your goal
+
+00:14:32
+is to output a 1 when there's
+two repeated 1's in a row.
+
+00:14:36
+So you're basically detecting
+repeated 1's and you'll
+
+00:14:39
+output a 0 otherwise.
+
+00:14:41
+So you can see this input
+sequence coming in 0, 1, 0, 1.
+
+00:14:45
+So far, there's been
+no repeated ones.
+
+00:14:47
+But now we have a
+repeated one, and we
+
+00:14:48
+have another repeated one
+because there's two in a row
+
+00:14:50
+here and so on.
+
+00:14:52
+So this is the type of
+model we're building.
+
+00:14:54
+It's trying to do this task.
+
+00:14:55
+This is specifically the many
+to many sequence modeling tasks
+
+00:14:58
+where we have one
+output for every input.
+
+00:15:01
+And so we've been talking
+high level so far,
+
+00:15:04
+but if you're trying to
+create an RNN to do this,
+
+00:15:07
+what information should be
+captured in the hidden state?
+
+00:15:11
+So you have this internal
+state of your model, what
+
+00:15:13
+information needs to be captured
+there in order to do this task?
+
+00:15:17
+Yeah, so the input to
+the previous time step.
+
+00:15:20
+And if our output is only
+dependent on the hidden state,
+
+00:15:22
+what else do we need to know?
+
+00:15:23
+And the current--
+
+00:15:24
+Yeah, exactly.
+
+00:15:26
+So this is the
+information that we need
+
+00:15:28
+to capture in our hidden state.
+
+00:15:29
+So previous input and the
+current value for x, so 0 or 1.
+
+00:15:34
+And the way I'll do
+this is I'll just
+
+00:15:36
+set the hidden state t to be
+a three dimensional vector.
+
+00:15:38
+The reason why it's 3, is this
+one will come in handy when
+
+00:15:41
+we're trying to do the
+output stage calculation,
+
+00:15:44
+but you could probably
+construct one without a 1 here.
+
+00:15:47
+This is just to make
+the math easy and simple
+
+00:15:49
+for the purposes of
+the lecture today.
+
+00:15:51
+And the other information
+is the current value.
+
+00:15:53
+So this will either be 0 or 1
+along with the previous values
+
+00:15:57
+0 or 1.
+
+00:15:58
+And we'll initialize
+it to be 001,
+
+00:16:00
+so that we're basically assuming
+it's basically seeing two zeros
+
+00:16:03
+in a row before at this point.
+
+00:16:06
+Yeah, so this is how we will do.
+
+00:16:09
+This will be the
+type of variables
+
+00:16:11
+we're trying to track
+in our hidden state.
+
+00:16:13
+And this is how
+we'll initialize h,0.
+
+00:16:15
+So I talked about how
+you can initialize it
+
+00:16:16
+to very different strategies,
+or you could learn it.
+
+00:16:19
+This is what we'll
+initialize it to
+
+00:16:21
+OK, now let's walk
+through the code
+
+00:16:24
+and I'll do it step by step.
+
+00:16:25
+So I'm just putting it
+on screen here right now.
+
+00:16:28
+But we'll also do ReLU, I
+guess, sorry, one other thing
+
+00:16:32
+I missed on this
+slide is that we're
+
+00:16:33
+setting our activation
+functions to be ReLU,
+
+00:16:35
+just to make the math easy.
+
+00:16:36
+So it'll just be max of 0
+or whatever the value is.
+
+00:16:39
+We're only dealing essentially
+with zeros and ones
+
+00:16:41
+in this case.
+
+00:16:42
+So it makes it pretty
+simple to think about.
+
+00:16:44
+Yeah,
+
+00:16:44
+You probably could construct
+it so that it works with tanh.
+
+00:16:48
+But this is just
+something that I
+
+00:16:49
+created as an example
+for how to run it.
+
+00:16:52
+And so just to make the math
+really easy, we'll just do ReLU.
+
+00:16:55
+But yeah, you could
+conceivably make a model
+
+00:16:57
+that could do this with tanh.
+
+00:16:59
+Yeah, cool.
+
+00:17:02
+So we have ReLU.
+
+00:17:04
+We have two specific
+weights here.
+
+00:17:06
+We have the first
+weight, which converts
+
+00:17:10
+our previous hidden state.
+
+00:17:13
+It applies a transformation
+to the previous hidden state
+
+00:17:16
+onto to calculate the next one.
+
+00:17:20
+And then we have
+this weight here,
+
+00:17:21
+which converts our input x to
+the dimension of our hidden
+
+00:17:25
+state, as well as
+applies a transformation.
+
+00:17:28
+So we are setting
+this second one.
+
+00:17:31
+So our current hidden
+state is a function
+
+00:17:32
+of the previous hidden state,
+along with the current time
+
+00:17:36
+step.
+
+00:17:37
+And so when we're trying to
+calculate this hidden state
+
+00:17:41
+at time step t, we're looking
+to calculate this current value
+
+00:17:46
+first.
+
+00:17:46
+So we'll use the x value here.
+
+00:17:49
+We'll set the weight to be a 3
+by 1 column vector with values
+
+00:17:55
+1, 0, 0, such that when x is 0
+and we do the matrix multiply,
+
+00:18:00
+we get a 0 vector, and when
+x is 1, we'll get 1, 0, 0.
+
+00:18:06
+And we'll add this
+to another term,
+
+00:18:07
+but basically, this is
+going to be calculating
+
+00:18:09
+what is the current value here.
+
+00:18:11
+So it'll be either a zero
+on top or a one on top.
+
+00:18:15
+And it's calculated based on
+this first operation here.
+
+00:18:21
+So that's how we're
+calculating the current value
+
+00:18:23
+based on the input.
+
+00:18:26
+Now we'll talk about, how are
+we doing this hidden state
+
+00:18:31
+transformation.
+
+00:18:32
+So we want to just use the
+current value for this top value
+
+00:18:35
+here.
+
+00:18:36
+So in our weight matrix, we'll
+just have zeros in the top row.
+
+00:18:38
+This means that
+when we multiply it
+
+00:18:40
+with the previous
+hidden state we'll
+
+00:18:41
+get a 0 value here for the top.
+
+00:18:43
+So it'll be 0 plus whatever
+value the right hand
+
+00:18:46
+side contains.
+
+00:18:47
+So that's how we're going to
+maintain this not changing based
+
+00:18:50
+on the previous hidden state.
+
+00:18:51
+And we'll set it to be
+1, 0, 0 for the next row.
+
+00:18:55
+Why we do this?
+
+00:18:56
+Is you can imagine
+we have the hidden
+
+00:18:58
+state from the previous
+time step here.
+
+00:19:00
+And we want to set
+the now previous
+
+00:19:05
+to be the former
+current time step.
+
+00:19:06
+So we have a 1, 0, 0.
+
+00:19:08
+What this will do is it'll
+multiply by h,t minus 1.
+
+00:19:10
+We'll set the current value
+over to now the previous value
+
+00:19:14
+for this time step.
+
+00:19:16
+So basically this term
+will be a zero on top,
+
+00:19:19
+and it will be whatever the
+previous time step input
+
+00:19:22
+value was as the second term.
+
+00:19:24
+And then this final bit
+here just maintains the one
+
+00:19:27
+so that we're keeping this
+one across all calculations.
+
+00:19:31
+So just to recap,
+we have zeros here
+
+00:19:33
+because we want the right
+hand side term to be
+
+00:19:36
+tracking this current value.
+
+00:19:39
+We have a one here to copy over
+the current from the former time
+
+00:19:42
+step to be the previous--
+
+00:19:43
+sorry to copy the current
+of the former time step
+
+00:19:46
+to be the previous of
+the current time step.
+
+00:19:50
+So we're just doing h--
+
+00:19:52
+maybe it's easy in the code but
+h,t previous is equal to h,t,
+
+00:19:57
+and we want to also move the
+corresponding value down one
+
+00:20:00
+here.
+
+00:20:01
+And then this is just
+a copy of the one.
+
+00:20:03
+So how do we actually
+get our output now?
+
+00:20:05
+So we basically talked about how
+we can track these values given
+
+00:20:10
+the weight matrices I
+talked about, so Whh and Wxh
+
+00:20:15
+So if we have a weight
+matrix to convert
+
+00:20:17
+our hidden state into
+the output dimension,
+
+00:20:20
+we want it to be 1 by 3.
+
+00:20:23
+So it's a single value that's
+being output when we have
+
+00:20:26
+this hidden dimension as input.
+
+00:20:28
+And this is a dot product
+between the values here
+
+00:20:31
+and the values here.
+
+00:20:32
+So what this will
+correspond to is the current
+
+00:20:35
+plus the previous minus 1
+because we multiply the minus 1
+
+00:20:39
+here.
+
+00:20:40
+This is where the
+one became useful,
+
+00:20:42
+and the current associated
+here with a one.
+
+00:20:46
+And then also the previous
+associated here with the one
+
+00:20:49
+as well.
+
+00:20:51
+So that's how we actually do it.
+
+00:20:52
+And if you think about it,
+this general formula will work.
+
+00:20:57
+So if say we're looking here,
+we have the current plus
+
+00:21:02
+the previous is 2 minus
+1 is 1 for this left hand
+
+00:21:06
+term inside the ReLU.
+
+00:21:07
+So the max of 1 and 0 is 1.
+
+00:21:09
+And if these are both 0, you'll
+have a minus 1, so we'll get 0.
+
+00:21:13
+These are a 1 and a 0.
+
+00:21:14
+Then you'll still get 0.
+
+00:21:16
+So these are how you can
+construct these weight matrices.
+
+00:21:19
+But I actually wanted to
+pause briefly and talk about
+
+00:21:23
+if there were any
+questions about any step
+
+00:21:26
+among this calculation, because
+this is the only example we'll
+
+00:21:29
+go through in class, where we're
+literally doing all the matrix
+
+00:21:32
+and vector multiplications,
+and the rest
+
+00:21:34
+will be more high level
+explanations for how people tend
+
+00:21:37
+to put these layers together.
+
+00:21:39
+So I just want to pause and see
+if there's a question about how
+
+00:21:43
+the matrices and vectors
+are tracked and multiplied
+
+00:21:46
+and updated.
+
+00:21:47
+Yeah, so the question
+is, how do you
+
+00:21:49
+go about constructing
+the weight matrices?
+
+00:21:51
+Which is a really
+great question,
+
+00:21:53
+and I thought to put
+it in the slide here.
+
+00:21:55
+So how would you
+actually do this?
+
+00:21:56
+It's the same way we're
+always finding the weight
+
+00:21:58
+matrices in this class.
+
+00:21:59
+We're going to be
+using gradient descent.
+
+00:22:01
+And we'll talk about how
+you do gradient descent when
+
+00:22:03
+you have multiple time
+steps, and maybe you
+
+00:22:05
+have losses computed at
+each time step as well.
+
+00:22:07
+So that'll be a lot of
+what we go into right next.
+
+00:22:10
+So it's a great question and
+very relevant to the lecture.
+
+00:22:13
+So this is just
+an example, so you
+
+00:22:16
+can see how all of the weight
+matrices are multiplied.
+
+00:22:20
+Basically, if you were
+trying to change--
+
+00:22:22
+if you were trying to
+initialize with this,
+
+00:22:24
+and then train it
+to do another task,
+
+00:22:26
+that would be transfer learning
+where you're initializing
+
+00:22:29
+the weights with this.
+
+00:22:31
+But in practice, I don't think
+it would work very well at all,
+
+00:22:35
+because your hidden
+state is really small
+
+00:22:37
+and people normally do
+much larger hidden states.
+
+00:22:40
+I just wanted to do something
+that I could fit in the slide
+
+00:22:42
+here.
+
+00:22:43
+Yeah, OK, I'll go over
+the second row again.
+
+00:22:46
+So if you imagine we have h,t
+minus 1 as a column vector here,
+
+00:22:51
+when you do the matrix multiply,
+to get the value of the left
+
+00:22:55
+hand side here, what this second
+row is doing is you're taking
+
+00:22:59
+the value, and then you're
+rotating it and doing the dot
+
+00:23:02
+product with the values here.
+
+00:23:04
+So for the second row
+that gets calculated,
+
+00:23:08
+the entry here will be equal
+to the top of the vector here.
+
+00:23:12
+So this is how we move the
+current down to the previous
+
+00:23:16
+is in this step here.
+
+00:23:17
+So the end result of
+this matrix multiply
+
+00:23:20
+will be such that the second
+value is the current value
+
+00:23:27
+from t minus 1.
+
+00:23:30
+So we do the matrix multiply
+with t minus 1 here,
+
+00:23:33
+and so the second row of this
+operation and this operation
+
+00:23:36
+are both giving us vectors of
+the size of our hidden state.
+
+00:23:40
+And so we're adding
+them together.
+
+00:23:42
+Yeah, the left is doing
+the previous carryover
+
+00:23:45
+and the right is
+doing the current.
+
+00:23:47
+And that's also of how it works
+for RNNs when you are doing it
+
+00:23:51
+beyond this toy example, where
+this weight matrix is being
+
+00:23:55
+multiplied by the current input,
+and this other weight matrix
+
+00:23:57
+is being multiplied by
+the previous hidden state.
+
+00:24:00
+So that's what these weight
+matrices track more generally
+
+00:24:03
+than the specific
+problem as well.
+
+00:24:06
+So how do you actually
+compute the gradients?
+
+00:24:11
+Let's look at the
+computational graph.
+
+00:24:13
+So just to draw a little bit
+more explicitly than before,
+
+00:24:16
+we have these x1
+coming in and x2,
+
+00:24:19
+and we have a sequence of x's.
+
+00:24:20
+We're calculating a hidden
+state at each time step,
+
+00:24:23
+and we're specifically using
+the same W's, same weight
+
+00:24:27
+matrices for each of these
+calculations as well.
+
+00:24:30
+So we need to be
+thinking about this
+
+00:24:31
+when we're thinking about how
+we're computing the gradients,
+
+00:24:35
+and let's start with the
+many to many scenario.
+
+00:24:37
+So we have an output
+for each input.
+
+00:24:40
+And in this scenario, you
+can often also calculate
+
+00:24:43
+a loss for each output,
+which is how correct
+
+00:24:45
+is the output at that stage.
+
+00:24:47
+So if we're doing this setting
+you have a loss at each step,
+
+00:24:53
+and you can sum them all
+together to get your total loss.
+
+00:24:55
+And this would be your loss
+across the entire input
+
+00:24:58
+sequence.
+
+00:24:59
+And when we do
+backprop basically,
+
+00:25:07
+when we compute
+our final loss, we
+
+00:25:08
+can then calculate
+the loss per time step
+
+00:25:11
+as well or depending
+on the formulation.
+
+00:25:14
+So if we're calculating
+a loss per time step,
+
+00:25:16
+you can treat them
+independently.
+
+00:25:18
+Sometimes you have
+an overall loss based
+
+00:25:20
+on the loss per time step too.
+
+00:25:23
+We can also get basically
+the final gradients for each
+
+00:25:28
+of these W's.
+
+00:25:29
+You can calculate the gradient
+for each time step separately,
+
+00:25:32
+and then you're going to
+sum them all together.
+
+00:25:34
+So this is how it
+works in practice.
+
+00:25:36
+You could imagine if it were
+different W's at each time step.
+
+00:25:39
+You could pretty probably easily
+see how the computational graph
+
+00:25:43
+could be structured such that
+you're calculating a different
+
+00:25:46
+gradient for each of
+these different W's.
+
+00:25:48
+And so we're essentially
+treating our single W
+
+00:25:51
+for computational purposes as a
+set of different W's, but then
+
+00:25:57
+at the end, we merge all
+the gradients together
+
+00:25:59
+because it's just
+the same weight
+
+00:26:00
+matrix that's being multiplied.
+
+00:26:02
+So conceptually, you can think
+of it as you're just calculating
+
+00:26:06
+it for each time step, almost
+treating it in your head
+
+00:26:08
+like it's a different
+W being used,
+
+00:26:10
+but because it's the same
+value of the weights,
+
+00:26:12
+you just need to sum all the
+gradients that you calculate
+
+00:26:15
+at each time step together.
+
+00:26:18
+In the many to one
+scenario, you'll
+
+00:26:20
+just have a single
+loss calculated here.
+
+00:26:24
+And sometimes you'll only
+use the final hidden state
+
+00:26:28
+to calculate the value depending
+on the problem setting.
+
+00:26:30
+Say you're trying to do
+video classification,
+
+00:26:32
+it may make sense to use the
+hidden state from every step,
+
+00:26:35
+because you might have
+information about the video
+
+00:26:37
+throughout the entire course of
+the video during classification.
+
+00:26:40
+You're going to do some pooling,
+like average pooling or max
+
+00:26:42
+pooling or something like
+that to compute your y value.
+
+00:26:46
+And then if you have this one
+to many mapping like in image
+
+00:26:51
+classification or sorry,
+in image captioning,
+
+00:26:56
+there was a question about
+how you could incorporate
+
+00:26:58
+the previous y's.
+
+00:26:59
+So you still need to
+have an input to your f,w
+
+00:27:04
+because it's two different
+of these weight matrices,
+
+00:27:07
+one that's expecting
+input vector x,
+
+00:27:09
+and the other that's expecting
+the previous time steps hidden
+
+00:27:14
+state.
+
+00:27:14
+So you can imagine that you can
+put a lot of values in here.
+
+00:27:19
+You could just put zeros or you
+could put the previous output
+
+00:27:24
+here.
+
+00:27:26
+So I explained at a high level
+how you do the back propagation.
+
+00:27:30
+But there's actually
+some specific issues
+
+00:27:32
+that you'll run into when
+you're trying this conceptual--
+
+00:27:35
+when you're looking through
+this conceptual framework that
+
+00:27:37
+are very practical in terms of
+running out of GPU memory, which
+
+00:27:40
+is always the cause of basically
+all the issues when you're
+
+00:27:43
+trying to train a
+neural network that and,
+
+00:27:46
+I guess, NaN loss
+string training.
+
+00:27:47
+So when you're computing,
+say, a loss at each time step,
+
+00:27:53
+and you have an extremely
+long input sequence,
+
+00:27:56
+it's really easy to understand.
+
+00:27:57
+You need to be keeping the
+activations and the gradients
+
+00:28:00
+at each time step in memory and
+then summing them all together.
+
+00:28:03
+This is going to get extremely
+large as your input sequence
+
+00:28:07
+increases.
+
+00:28:07
+So what can you do practically
+to resolve this issue?
+
+00:28:11
+This is called
+backpropagation through time,
+
+00:28:13
+by the way, when you have
+the same weight matrix that's
+
+00:28:16
+being applied in multiple
+different time steps,
+
+00:28:18
+and then you're summing the
+gradient at each time step
+
+00:28:21
+together.
+
+00:28:22
+So what you can
+do is, it's called
+
+00:28:24
+truncated back
+propagation through time.
+
+00:28:26
+So you basically
+fix a time window,
+
+00:28:28
+and you can look at
+basically pretending
+
+00:28:31
+that this is all the model
+was trained on so far.
+
+00:28:35
+We start with our h,0.
+
+00:28:37
+We calculate based on
+the input at time step 1,
+
+00:28:41
+and our previous h value.
+
+00:28:43
+We can calculate what is the
+current hidden state at h,1,
+
+00:28:47
+and then we can use that
+to calculate our output.
+
+00:28:49
+We'll have our loss.
+
+00:28:50
+And we can run this for
+each of our examples.
+
+00:28:52
+And you can imagine
+how in this setting,
+
+00:28:54
+it's relatively easy to see how
+you just treat the beginning
+
+00:28:57
+sequence as if this is all
+we're seeing during training.
+
+00:29:00
+And moving to the next
+block, now essentially,
+
+00:29:03
+you're starting your h,0
+with now it's the output
+
+00:29:06
+of your previous step here.
+
+00:29:08
+So we're initializing the hidden
+state with whatever the output
+
+00:29:11
+was in our final step,
+but the gradients
+
+00:29:12
+are no longer carrying over.
+
+00:29:14
+So we're basically batching
+the computational graph such
+
+00:29:16
+that we're only looking at
+the loss in the neighborhood
+
+00:29:19
+of these time steps at a time.
+
+00:29:21
+This is a fixed window
+size that you set.
+
+00:29:23
+So this is how you get around
+this relatively, I would say,
+
+00:29:29
+common issue, especially as
+you have really long input
+
+00:29:32
+sequences.
+
+00:29:34
+And so yeah, you basically
+are batching it out,
+
+00:29:37
+and you can just keep doing this
+for the entire input sequence.
+
+00:29:42
+So one other thing is
+that you might ask,
+
+00:29:46
+how does this work, if we
+have just a single output
+
+00:29:48
+at the very end?
+
+00:29:50
+So you can still calculate the
+gradients at each time step,
+
+00:29:54
+but you will no longer
+have this loss that's
+
+00:29:59
+dependent on the
+time step itself,
+
+00:30:02
+the output of the
+time step itself,
+
+00:30:04
+rather you'll be relying
+on upstream gradients.
+
+00:30:06
+So you can imagine we're looking
+at the far right of the diagram
+
+00:30:09
+here, and we have
+our loss that we
+
+00:30:11
+calculate based on the output
+of the final time step.
+
+00:30:13
+We can calculate what is
+the gradient with respect
+
+00:30:16
+to our current hidden
+state at the end.
+
+00:30:19
+And then we have our Whh
+matrix to help us understand
+
+00:30:23
+how did the previous
+hidden state contribute
+
+00:30:27
+to the final hidden state.
+
+00:30:30
+And we can use that to
+calculate the gradient
+
+00:30:34
+and understanding based on
+the previous hidden state
+
+00:30:36
+and the weight matrix.
+
+00:30:37
+How can we change this
+transformation matrix Whh such
+
+00:30:42
+that we would be
+changing our loss?
+
+00:30:44
+And then basically just applying
+the gradient rule to Whh
+
+00:30:49
+over and over again here.
+
+00:30:50
+And you're only looking at
+how the hidden state changed
+
+00:30:53
+the next hidden state, and how
+that contributed to the loss.
+
+00:30:56
+So you look at the
+final example here.
+
+00:30:59
+This tells you how
+changing the hidden state
+
+00:31:01
+depends on the loss, and then
+how the previous hidden states,
+
+00:31:04
+how they change,
+how that affected
+
+00:31:06
+the current hidden state which
+is given by this Whh matrix.
+
+00:31:10
+So using different
+W's at each time step
+
+00:31:14
+would essentially mean that
+you're no longer modeling it
+
+00:31:17
+as a recurrence relation.
+
+00:31:18
+So basically you can
+think of it as one layer
+
+00:31:22
+for each different
+possible time step.
+
+00:31:24
+So you would probably
+see worse performance
+
+00:31:28
+because if you are no longer
+modeling it as a sequence
+
+00:31:33
+recursively, you're just--
+
+00:31:35
+imagine you train
+a neural network
+
+00:31:37
+where you have a
+series of inputs,
+
+00:31:38
+each one has a separate
+weight that it goes to--
+
+00:31:40
+Independently.
+
+00:31:41
+Yeah, independently.
+
+00:31:42
+That would make
+sense for a problem
+
+00:31:43
+where it's not a sequence
+modeling problem,
+
+00:31:45
+you just have a set of things
+that you want to classify.
+
+00:31:49
+You will need to know the amount
+of the sequence ahead of time.
+
+00:31:52
+So I think it could work
+if it's not a sequence,
+
+00:31:54
+but for sequences
+of variable length,
+
+00:31:59
+I think it would not work
+very well because you're--
+
+00:32:03
+I mean I'm trying to think of
+a simple way to explain it,
+
+00:32:06
+but it's like
+you're just training
+
+00:32:08
+one neural network
+for each time step,
+
+00:32:10
+so it's not the way
+to formulate it.
+
+00:32:13
+So how does this
+work with chunking?
+
+00:32:15
+So we have our--
+
+00:32:18
+do you understand how to
+this point, at the point
+
+00:32:21
+right here where the red
+dot, we can calculate
+
+00:32:24
+the gradient of the
+loss with respect
+
+00:32:27
+to our final hidden state?
+
+00:32:29
+So if we can do that, then
+we can calculate the gradient
+
+00:32:32
+of our loss with respect to our
+second to final hidden state.
+
+00:32:35
+Because we know our
+final hidden state
+
+00:32:37
+is dependent on our previous
+hidden state times this weight
+
+00:32:40
+matrix W.
+
+00:32:42
+So we can do this and we can
+go back and forth until here.
+
+00:32:45
+And at this point, all we need
+to save is this final step here.
+
+00:32:50
+So what is the gradient of
+this very final or finals--
+
+00:32:56
+maybe over using the word final.
+
+00:32:57
+But what is the gradient of
+this initial hidden state
+
+00:33:01
+within our truncated batch,
+with respect to the loss?
+
+00:33:05
+And then when we're
+calculating backwards,
+
+00:33:07
+we just use that value to
+calculate all the previous time
+
+00:33:10
+steps.
+
+00:33:11
+So that's the overall process.
+
+00:33:13
+You're only looking at how
+the hidden state transforms
+
+00:33:17
+to form the new hidden state,
+and that's the only value
+
+00:33:19
+that's getting updated here.
+
+00:33:23
+Yeah, and also how the input
+changes the hidden state.
+
+00:33:28
+So you're looking at two values,
+both how the input affects it,
+
+00:33:30
+and how the input affects
+the next hidden state
+
+00:33:33
+and the previous hidden state.
+
+00:33:36
+Sorry, there's two values, yeah.
+
+00:33:38
+So the learning still
+occurs for all the batches.
+
+00:33:41
+So you have your
+loss with respect
+
+00:33:44
+to each of your
+parameters in W here.
+
+00:33:49
+And then when you're calculating
+it for the previous time step,
+
+00:33:53
+you basically keep
+this one value.
+
+00:33:57
+If you change the initial
+hidden state here,
+
+00:33:59
+how does that change the loss?
+
+00:34:00
+You can calculate
+that, and then you
+
+00:34:01
+can see how all the variables
+feeding into this, namely
+
+00:34:04
+this original hidden
+state and the current time
+
+00:34:06
+step, how will that
+affect the variable?
+
+00:34:08
+But then when you're actually
+moving to the next chunk over,
+
+00:34:11
+you only need to look at how
+does this hidden state here
+
+00:34:14
+affect the hidden state
+on in the next chunk.
+
+00:34:17
+So you're looking at
+this division boundary.
+
+00:34:19
+The one variable you
+need to track over
+
+00:34:21
+is what is the gradient
+of the hidden state that
+
+00:34:24
+occurs after the chunk.
+
+00:34:27
+And then you can use
+that to calculate
+
+00:34:29
+the gradient of the
+current hidden state, which
+
+00:34:31
+is dependent on the
+input x and the previous.
+
+00:34:33
+So there's different ways
+you can formulate it,
+
+00:34:35
+but you can imagine
+we just apply
+
+00:34:38
+the update to all the weights
+here and we zero out the memory.
+
+00:34:41
+The only thing we're tracking
+is this gradient right here.
+
+00:34:46
+So you can apply, you can
+do gradient apply step
+
+00:34:49
+where you apply all the
+gradients to the weights
+
+00:34:51
+depend on the learning rate
+and your optimizer and all
+
+00:34:53
+this stuff.
+
+00:34:54
+And then you move on to
+calculating the next batch.
+
+00:34:56
+So the reason why this
+isn't a perfect calculation
+
+00:34:59
+is because you're calculating
+these independently rather than
+
+00:35:03
+all at once.
+
+00:35:04
+So you have three different
+updates rather than
+
+00:35:07
+just one update at a
+time, but it should be--
+
+00:35:10
+you still calculating the
+gradient for each step here.
+
+00:35:14
+You keep one thing
+in memory, which
+
+00:35:16
+is how does this hidden state--
+the first one in the batch.
+
+00:35:22
+How can you update
+the hidden state here
+
+00:35:24
+to determine the loss?
+
+00:35:26
+And we throw out
+all the other ones.
+
+00:35:29
+So you have the
+weights in memory.
+
+00:35:31
+You can apply the gradient, you
+do your learning rate multiply
+
+00:35:34
+and you apply it to the weights.
+
+00:35:36
+You'll also see a similar thing
+if you do distributed learning.
+
+00:35:41
+So if you have a gradient
+calculated on each GPU
+
+00:35:43
+separately, they will apply them
+all to the same set of weights
+
+00:35:47
+even though they're
+calculated independently.
+
+00:35:49
+So I think we have a lecture on
+distributed learning coming up.
+
+00:35:52
+So it's a similar thing
+where you're not tracking it
+
+00:35:55
+all in the same memory
+at the same time,
+
+00:35:57
+and you're applying it to
+the weights one at a time.
+
+00:36:01
+Yeah, it would be better if
+you could fit it all in memory.
+
+00:36:03
+Yeah, it would be better if
+you could fit it all in memory.
+
+00:36:06
+I mean, this is mainly--
+
+00:36:07
+for this one, it's
+essentially the same.
+
+00:36:09
+But in this setting
+maybe it's more clear
+
+00:36:11
+how you're explicitly
+losing information.
+
+00:36:14
+So here, you're only looking at
+some of the outputs at a time.
+
+00:36:19
+So it's really
+clear how we're not
+
+00:36:22
+looking at the entire
+set of the losses
+
+00:36:26
+when we're calculating,
+because there's
+
+00:36:28
+losses at each time step.
+
+00:36:30
+So you lose information
+here, but in this case,
+
+00:36:32
+you wouldn't lose information.
+
+00:36:34
+I think one more
+practical example where
+
+00:36:37
+we can't fit the
+whole RNN on the slide
+
+00:36:39
+is this idea of a character
+level language model.
+
+00:36:42
+And it's really
+funny because these
+
+00:36:43
+were shown to be quite
+effective 10 years ago.
+
+00:36:48
+And it's really
+funny because you
+
+00:36:50
+can see how the current
+wave of language models
+
+00:36:53
+are a build up of this really
+simple approach of just
+
+00:36:56
+predicting characters with RNNs.
+
+00:36:58
+So usually when you
+do a model like this,
+
+00:37:01
+you will input your
+characters, and then people
+
+00:37:05
+call this a one hot encoding
+where you basically have one--
+
+00:37:10
+you have a one in
+your vector and zeros
+
+00:37:12
+in every other location.
+
+00:37:14
+So it's the index here.
+
+00:37:16
+You can encode
+this as the index,
+
+00:37:18
+and then we can use
+these as inputs.
+
+00:37:22
+And we can calculate
+our hidden layers
+
+00:37:23
+based on the previous
+hidden layer as well
+
+00:37:25
+as the current input.
+
+00:37:28
+And then we have our
+output layer the same
+
+00:37:30
+where now we can
+look at, what is
+
+00:37:33
+the output for the
+corresponding correct value
+
+00:37:37
+here, which is taken
+as the next time step.
+
+00:37:39
+So we want the output
+for example to be e,
+
+00:37:42
+we map it over here we look at--
+
+00:37:45
+you can imagine this is
+something like softmax,
+
+00:37:46
+and we have the logits,
+so these are the scores.
+
+00:37:50
+2.2, it's lower than 4.1.
+
+00:37:52
+So yeah, we have--
+this is maybe not
+
+00:37:57
+so great of an output
+at this time step,
+
+00:37:59
+and so on and so forth.
+
+00:38:00
+So you can really view this as
+a time step wise classification
+
+00:38:03
+problem.
+
+00:38:04
+And that's exactly what in
+general, these language models
+
+00:38:09
+are doing, is time step wise
+classification based on softmax.
+
+00:38:14
+So at test time,
+the basic idea is
+
+00:38:17
+we need to also sample
+characters one at a time
+
+00:38:19
+and just feed it
+back into the model,
+
+00:38:21
+so it sees what it generated
+at the previous time step,
+
+00:38:25
+so on and so forth, repeating
+until we generate the words.
+
+00:38:29
+So you can actually create
+RNNs to do this basic language
+
+00:38:36
+modeling task by operating
+at a character level,
+
+00:38:39
+and it works quite well.
+
+00:38:40
+One thing to note is that in
+terms of this input layer,
+
+00:38:44
+usually we don't actually
+input one hot embeddings
+
+00:38:47
+into the model,
+and instead we'll
+
+00:38:49
+have something called
+an embedding layer where
+
+00:38:52
+this is essentially just a giant
+matrix, which is the dimensions.
+
+00:38:57
+It's D by D, where D is the
+number of different inputs
+
+00:39:00
+you have to your model.
+
+00:39:01
+And what you do
+is you can imagine
+
+00:39:04
+this as a matrix multiply
+where we grab the first row,
+
+00:39:08
+or in this case, we
+grab the second row
+
+00:39:09
+of our embedding matrix based on
+what our input sample is here.
+
+00:39:14
+And we just use this
+as a matrix multiply.
+
+00:39:17
+This is incorrect,
+actually, this one
+
+00:39:19
+should be higher
+probability, yeah.
+
+00:39:23
+It's Funny, We've had these
+slides for quite a few years
+
+00:39:26
+and I guess no one noticed it.
+
+00:39:29
+Anyway, so we have E here
+as our target character.
+
+00:39:34
+And so in this case, you're
+correct that the model is
+
+00:39:37
+actually getting it
+wrong, so we will
+
+00:39:38
+want to penalize it
+heavy for this time step.
+
+00:39:40
+Yeah, that's a good question.
+
+00:39:43
+Yeah, so one of the nice things
+about this implementation
+
+00:39:45
+is also it's really simple.
+
+00:39:47
+So it's 112 lines
+of Python code,
+
+00:39:49
+and you can train these models
+on a variety of different tasks.
+
+00:39:52
+So this is the pre-LLM
+era of what you could do.
+
+00:39:56
+You can train it on sonnets
+by William Shakespeare.
+
+00:39:58
+And as I mentioned,
+there's a blog post
+
+00:40:00
+by former instructor of this
+course, Andrej Karpathy, back
+
+00:40:03
+in 2015, which talked about
+how these RNNs are unreasonably
+
+00:40:07
+effective at what they
+do in generating text.
+
+00:40:09
+Yeah?
+
+00:40:10
+Could you explain again, why
+you use an embedding layer?
+
+00:40:14
+Yeah, so the basic idea
+for an embedding layer
+
+00:40:16
+is that generally it's better
+to have vectors as input
+
+00:40:19
+to our models.
+
+00:40:20
+And you can learn what these
+embedding layers are too.
+
+00:40:22
+So we tend to favor spread
+out weights in general
+
+00:40:26
+when we're trying
+to learn these.
+
+00:40:28
+So you can initialize
+your embedding layer
+
+00:40:30
+to this very small zero values
+with something like the Kaiming
+
+00:40:34
+initialization, we talked about.
+
+00:40:35
+And then you're just
+looking at one row of it
+
+00:40:37
+at a time as your
+input vector, rather
+
+00:40:38
+than it being a
+number as input, how
+
+00:40:41
+you would have to
+represent that is basically
+
+00:40:43
+a one with a bunch of zeros and
+optimization only the embedding
+
+00:40:47
+works better.
+
+00:40:53
+So yeah, you can do it in 112
+lines of python code, which
+
+00:40:55
+is pretty neat.
+
+00:40:56
+You can train it on Sonnets
+by William Shakespeare
+
+00:40:59
+and it'll actually
+output reasonable text.
+
+00:41:00
+We'll go through some examples.
+
+00:41:02
+So one of the cool
+things is you can
+
+00:41:03
+see as you train
+the model more, it
+
+00:41:05
+becomes more and more coherent.
+
+00:41:06
+So at the beginning, it's
+basically just gibberish
+
+00:41:09
+because it hasn't learned
+proper values for W.
+
+00:41:11
+And then as you train it more
+and more, it becomes more
+
+00:41:15
+like the stage III, looks
+like English, at least some
+
+00:41:17
+of the words are there.
+
+00:41:19
+And then as you train
+more, it actually
+
+00:41:20
+starts working
+really well, which
+
+00:41:22
+this is I guess was a
+bit of foreshadowing
+
+00:41:25
+for what was to come in the era
+of AI, which is pretty cool.
+
+00:41:30
+You can see full
+on, it learns things
+
+00:41:32
+about the style, how you
+should have someone's name,
+
+00:41:36
+and how something that seems
+fairly plausible as you
+
+00:41:40
+have it generating
+more and more,
+
+00:41:41
+it starts making
+less and less sense,
+
+00:41:43
+but it's pretty cool to see.
+
+00:41:45
+You can train it on code,
+like I think in this example,
+
+00:41:50
+they trained it on Linux.
+
+00:41:51
+So there's just the
+source code for Linux.
+
+00:41:53
+They trained one of these
+character level RNNs,
+
+00:41:55
+and you can see it generating C
+code, which looks pretty good.
+
+00:41:59
+I don't know if
+this would compile,
+
+00:42:00
+but it looks reasonable
+just looking at it.
+
+00:42:03
+And this idea has really taken
+off over the past few years.
+
+00:42:07
+So I mean, I'm sure you all know
+it especially since a lot of you
+
+00:42:12
+work in computer science
+or coding or your students
+
+00:42:14
+in this area, but there's all
+of these different programming
+
+00:42:18
+tools now for these
+language models
+
+00:42:20
+that were essentially
+trained on a similar task
+
+00:42:22
+where they consumed a
+bunch of this training data
+
+00:42:26
+that's just existing code, and
+instead of trying to predict
+
+00:42:29
+the next character,
+they're trying
+
+00:42:30
+to predict the next token,
+which is a group of characters.
+
+00:42:33
+And how they define tokens
+depends on the model,
+
+00:42:35
+and there's a lot of details
+we could get into there.
+
+00:42:37
+But at a high level, it's
+a really similar thing,
+
+00:42:39
+they're just predicting
+groups of characters
+
+00:42:41
+autoregressively
+one after the next.
+
+00:42:43
+And it's really seen a
+blow up in recent years
+
+00:42:45
+with all these existing tools.
+
+00:42:46
+Yeah?
+
+00:42:51
+What is the input to the model?
+
+00:42:52
+Is It like a trigger.
+
+00:42:54
+Oh, what like for this?
+
+00:42:55
+Yeah.
+
+00:42:56
+You could have the input be--
+
+00:42:58
+you just-- maybe you start
+with a random character.
+
+00:43:01
+Could be one way
+to do it, but you
+
+00:43:03
+would need some initial input.
+
+00:43:05
+There could be-- usually
+with language models
+
+00:43:08
+they have a start token
+as a predetermined.
+
+00:43:11
+This is always what you see
+at the start of your sequence.
+
+00:43:13
+So you could do a
+similar things with RNNs.
+
+00:43:15
+I don't know in this exact
+scenario what they did.
+
+00:43:17
+Maybe they just did a character,
+but it's hard to know.
+
+00:43:20
+So the question is,
+how does labeling
+
+00:43:21
+work with language models?
+
+00:43:22
+And the neat thing about
+these pure language
+
+00:43:25
+models, all they're doing is
+just predicting the next token.
+
+00:43:28
+You don't need to
+label it, you just
+
+00:43:29
+need to give it a lot of text.
+
+00:43:30
+That's why these
+models are so good,
+
+00:43:32
+is because they scrape the
+internet for essentially all
+
+00:43:35
+available text, and then they
+train the model on all of it.
+
+00:43:38
+So that's why they're so good.
+
+00:43:40
+It's because it's just
+generating the next token,
+
+00:43:42
+and you don't need to label it.
+
+00:43:44
+So that's why language
+models are so good.
+
+00:43:46
+So the question
+is, if we're always
+
+00:43:49
+taking the maximum probability
+output at each time step,
+
+00:43:53
+we always just be generating the
+same thing over and over again.
+
+00:43:56
+And the answer is yes, actually.
+
+00:43:57
+So if you just took the
+maximum probability,
+
+00:44:01
+I guess this example
+is not so good.
+
+00:44:03
+But imagine the probabilities
+are correct here
+
+00:44:05
+and you just took the maximum
+probability at each time step.
+
+00:44:08
+You would always be
+getting the same output
+
+00:44:10
+given the same input.
+
+00:44:11
+In practice what
+people do, is they
+
+00:44:12
+don't do this is
+called greedy decoding,
+
+00:44:14
+you're always picking
+the maximum probability.
+
+00:44:16
+In practice, they sample
+based on a distribution,
+
+00:44:18
+the distribution given by
+the probabilities output
+
+00:44:21
+by your softmax.
+
+00:44:22
+So you won't pick
+the max probability,
+
+00:44:23
+you would pick say in this case
+probability 0.84 for this one,
+
+00:44:28
+or probability 0.13 for
+this other output variable.
+
+00:44:32
+And then you would run
+that for each sequence.
+
+00:44:34
+And there's a bunch of different
+ways you can do it too.
+
+00:44:37
+You can search ahead.
+
+00:44:38
+It's called beam
+searching, where you're
+
+00:44:39
+trying different
+ones and seeing which
+
+00:44:41
+one has the highest overall
+probability for the sequence.
+
+00:44:43
+So there's a lot of-- this is a
+whole active area of research,
+
+00:44:46
+how do you sample
+from these models?
+
+00:44:48
+But the simple answer
+is you don't always
+
+00:44:50
+pick the highest probability.
+
+00:44:52
+Yeah, so the question is in the
+case where we have many to one
+
+00:44:55
+outputs, are we outputting
+something each time
+
+00:44:57
+or do we have something
+to look at here?
+
+00:44:59
+So I think in practice
+to save compute
+
+00:45:01
+you wouldn't want to output
+something that's never used.
+
+00:45:03
+But you could feasibly
+output at each time step.
+
+00:45:05
+And it might be interesting
+depending on your problem,
+
+00:45:08
+to look at that and understand,
+is the output converging
+
+00:45:10
+over the course of
+training or not?
+
+00:45:12
+Something like that.
+
+00:45:13
+So it might be
+useful to look at,
+
+00:45:15
+but generally people wouldn't
+do it just to save compute.
+
+00:45:17
+But it could be
+useful, actually yeah.
+
+00:45:19
+It could help you understand
+the way your model works.
+
+00:45:21
+If there's certain triggers
+or things that help
+
+00:45:23
+it predict the correct answer.
+
+00:45:27
+Cool, good questions.
+
+00:45:30
+So we'll keep on chugging along.
+
+00:45:34
+We talked about these
+RNNs, how good they
+
+00:45:36
+are at generating characters.
+
+00:45:37
+We related them to some
+of these modern coding
+
+00:45:39
+tools, which are really neat.
+
+00:45:41
+One of the cool
+things also about RNNs
+
+00:45:42
+is you can look at
+the activation values,
+
+00:45:46
+and they'll actually
+sometimes tell you
+
+00:45:48
+interesting things about
+what the model is tracking.
+
+00:45:50
+So in our little toy example, we
+looked at the output activations
+
+00:45:55
+, and you would see it's the
+current value and the previous
+
+00:45:57
+value.
+
+00:45:58
+That was what the RNN states
+or cells were tracking.
+
+00:46:02
+What you can also do is give
+it basically a sequence here.
+
+00:46:05
+And the models I'll
+show in these slides,
+
+00:46:07
+it's using a tanh activation,
+so this is from 1 to minus 1,
+
+00:46:11
+and minus 1 means it's
+visualized as red here, and very
+
+00:46:16
+close to one would be blue.
+
+00:46:18
+We get the whole spectrum here.
+
+00:46:20
+And you can look at--
+
+00:46:21
+for each character
+coming in, what
+
+00:46:23
+is the activation of that
+cell at that time step?
+
+00:46:26
+And so that's how their color
+coding these plots here.
+
+00:46:28
+This one's not really showing
+anything, it's random.
+
+00:46:30
+A lot of them won't
+be interpretable.
+
+00:46:32
+But some of them have pretty
+cool things that you can track.
+
+00:46:34
+For example, this
+one's a quote detector,
+
+00:46:37
+so it turns on basically
+as soon as the quote starts
+
+00:46:40
+and it ends when the quote ends.
+
+00:46:42
+So this is basically
+something in the RNN tracking,
+
+00:46:44
+we need to have an end
+quote at some point.
+
+00:46:46
+And when to put it is
+something the model
+
+00:46:50
+is trying to figure out,
+but it's tracking it.
+
+00:46:53
+Another cool thing is the
+line length tracking cell.
+
+00:46:57
+So it starts very high value.
+
+00:47:02
+And then it becomes a
+very low value as you
+
+00:47:05
+near where the model
+thinks there'll
+
+00:47:06
+be a new line character.
+
+00:47:08
+So this is also cool as a way
+to look at this other value.
+
+00:47:13
+And these are, again,
+just single activations
+
+00:47:15
+in a layer of this model that
+we're looking at, and mapping it
+
+00:47:18
+to each character.
+
+00:47:20
+So it's highly interpretable.
+
+00:47:23
+They have this if
+statement cell.
+
+00:47:25
+So anything within
+an if statement
+
+00:47:27
+is being tracked here,
+which is also pretty cool.
+
+00:47:29
+And even things like
+detecting quotes or comments
+
+00:47:33
+because it needs to know to
+output the end of comment
+
+00:47:36
+character here.
+
+00:47:37
+So it's something
+it needs to track.
+
+00:47:39
+And so you have this nice
+interpretable cell as well.
+
+00:47:42
+And then finally
+this code depth cell.
+
+00:47:44
+So as you have
+nesting in your code,
+
+00:47:47
+it activates more and
+more at each time step,
+
+00:47:51
+at each not time
+step, at each step
+
+00:47:53
+into the indentation
+into your code hierarchy.
+
+00:47:58
+So yeah, this is pretty neat.
+
+00:47:59
+You can actually look
+at the activations
+
+00:48:01
+and directly map
+them onto the inputs
+
+00:48:03
+without needing to do any fancy
+tricks, which is actually pretty
+
+00:48:06
+incredible, if you
+think about how
+
+00:48:08
+interpretable some of these
+hidden states are in the RNN.
+
+00:48:10
+It's actually somewhat similar
+to what we were doing where
+
+00:48:13
+we were manually assigning it.
+
+00:48:14
+But the RNN is internally
+doing a very similar process.
+
+00:48:19
+Cool, so I'll talk about
+now some of the trade
+
+00:48:22
+offs why you might want to use
+an RNN, when is it helpful.
+
+00:48:25
+So the nice thing is they can
+process any length of input.
+
+00:48:29
+So a lot of these
+modern language models
+
+00:48:31
+that rely on transformers
+have something
+
+00:48:33
+called a context length or
+context window, maximum context
+
+00:48:36
+window.
+
+00:48:37
+RNNs don't have this.
+
+00:48:38
+They can just take a
+sequence of infinite length,
+
+00:48:40
+essentially, as long as you can
+keep running the model on it.
+
+00:48:43
+So there's no
+context length limit.
+
+00:48:46
+The computation for
+the time step, t
+
+00:48:50
+can, in theory, use
+information from many steps
+
+00:48:52
+back if it's captured
+in the hidden state.
+
+00:48:54
+So if your model is
+effectively capturing
+
+00:48:56
+all of the dynamics
+of your input
+
+00:48:58
+sequence in the hidden
+state, in theory
+
+00:48:59
+it can use values from an
+extremely long time ago.
+
+00:49:02
+But in practice, there
+might be some issues
+
+00:49:04
+with this, which we'll go
+into some details there.
+
+00:49:08
+Also, the model size does not
+increase for a longer input.
+
+00:49:13
+So we had an example
+where, what if you just
+
+00:49:16
+had a different layer
+for each input time step?
+
+00:49:20
+You don't have this
+issue, which is nice.
+
+00:49:22
+And then we're applying the
+same weights at each time step.
+
+00:49:25
+So basically, we
+know the update rule
+
+00:49:27
+for how we calculate the outputs
+is the same every single time.
+
+00:49:29
+So there's some
+nice symmetry here.
+
+00:49:32
+And also, just when you think
+conceptually about the problem,
+
+00:49:35
+you're always doing
+the same thing
+
+00:49:36
+at every single time step,
+which is nice conceptually
+
+00:49:38
+and also helps with some
+implementation as well.
+
+00:49:42
+So what are the
+main disadvantages?
+
+00:49:44
+So you need to compute the
+previous hidden state to compute
+
+00:49:48
+the next one every single time.
+
+00:49:50
+So this can be slow
+if you need to.
+
+00:49:55
+Each hidden state is
+determined and is conditioned
+
+00:49:58
+on all the previous ones, then
+this recurrence computation
+
+00:50:02
+can actually end up
+taking a lot of time.
+
+00:50:05
+So although this is not an
+issue during inference time
+
+00:50:08
+when you're always--
+like for a transformer,
+
+00:50:10
+also you have this
+issue where you
+
+00:50:12
+need to output the next token
+or character every single time,
+
+00:50:16
+but at training
+time, it's actually
+
+00:50:17
+difficult to batch all of these
+together and during training
+
+00:50:21
+because in order to
+calculate the loss,
+
+00:50:24
+you need to calculate the
+previous hidden states.
+
+00:50:27
+So this can pose challenges for
+scaling up to a lot of data.
+
+00:50:32
+And then in practice,
+it's actually
+
+00:50:34
+difficult to access information
+many time steps back
+
+00:50:37
+because we have a fixed
+size hidden state,
+
+00:50:40
+and we're trying to cram
+all the information into it.
+
+00:50:42
+So you'll eventually
+lose some information
+
+00:50:44
+as your sequence goes
+longer and longer.
+
+00:50:49
+Cool, I'll talk about some
+applications more specific
+
+00:50:52
+to computer vision, where
+RNNs have seen success now.
+
+00:50:56
+So one of them is
+image captioning,
+
+00:50:58
+which we talked about.
+
+00:50:59
+So the basic thing
+here is we mentioned
+
+00:51:02
+there's this start token
+or start character which
+
+00:51:05
+begins the sequence.
+
+00:51:06
+And then you will terminate
+when you have this end character
+
+00:51:08
+or end token.
+
+00:51:09
+In this case, it seems like
+it's word level tokens.
+
+00:51:13
+So you could have
+a model like this.
+
+00:51:16
+The most basic way
+to do it is you
+
+00:51:19
+essentially have a CNN or
+something that encodes,
+
+00:51:22
+a visual encoder, that
+encodes the image,
+
+00:51:24
+and we use that as input to
+our recurrent neural network
+
+00:51:28
+as well as the previous
+text that was generated.
+
+00:51:32
+So we have two stages here.
+
+00:51:33
+And very more
+concretely, how would you
+
+00:51:36
+combine the CNN and RNN?
+
+00:51:37
+You can imagine you
+have this test image.
+
+00:51:39
+It comes in, so your model's
+going downwards here,
+
+00:51:43
+starting at the first
+layers at the top
+
+00:51:45
+and then moving downwards.
+
+00:51:47
+You can imagine this is
+something that was trained
+
+00:51:49
+on ImageNet or something.
+
+00:51:51
+And so we're not going
+to use the class labels,
+
+00:51:53
+but we're going to use
+this second to last layer.
+
+00:51:56
+This is the common
+strategy we saw
+
+00:51:58
+for transfer learning
+as well, or this
+
+00:52:00
+getting good visual
+representations of images.
+
+00:52:04
+So we use the second
+to last layer.
+
+00:52:06
+And then we can start using this
+as input to our hidden state.
+
+00:52:11
+And now our hidden
+state is also a function
+
+00:52:13
+of this Wih value here.
+
+00:52:18
+So we don't necessarily
+have just a hidden state,
+
+00:52:23
+we're also tracking the
+visual components here.
+
+00:52:27
+But I won't spend
+too much time on this
+
+00:52:28
+because this won't be in
+any of the assignments,
+
+00:52:31
+but just to give you
+a flavor of here's
+
+00:52:33
+how RNNs were used
+historically with CNNs,
+
+00:52:35
+where we're taking a CNN
+pre-trained on ImageNet,
+
+00:52:37
+and now we're including
+this information
+
+00:52:39
+into the hidden state as well.
+
+00:52:41
+So we use the sampling process,
+either greedy sampling,
+
+00:52:44
+some other version of
+sampling to calculate
+
+00:52:46
+the tokens at each time step.
+
+00:52:48
+We end it when we
+have this end token.
+
+00:52:50
+Whenever we sample
+the end token,
+
+00:52:52
+that's how we know
+when to finish.
+
+00:52:53
+And these models actually
+worked very well for the time.
+
+00:52:56
+I think they had a lot
+of great successes.
+
+00:52:58
+So you can see here a lot
+of nice examples of where
+
+00:53:02
+the model's outputting very
+reasonable captions based
+
+00:53:05
+on the input image, but also
+they the models would struggle
+
+00:53:10
+in a lot of scenarios too.
+
+00:53:11
+So a lot of these have to do
+with the distribution of where
+
+00:53:16
+these images are commonly
+seen in the training data.
+
+00:53:19
+For example, someone holding
+something with their hands
+
+00:53:22
+cupped like this very much looks
+how they might hold a mouse.
+
+00:53:27
+But obviously, we can tell
+this is a phone because it's
+
+00:53:31
+a flat object they're holding,
+and their hand is facing up,
+
+00:53:34
+not downwards.
+
+00:53:36
+So this thing is
+interesting to see.
+
+00:53:39
+Also, I guess they think
+the woman's holding
+
+00:53:41
+a cat where she's just
+wearing some fur clothing.
+
+00:53:46
+They see a beach, so they
+assume there's a surfboard.
+
+00:53:49
+This type of
+hallucination, I would say,
+
+00:53:51
+is still extremely common
+with vision language models
+
+00:53:54
+today, where it'll think
+there's objects present that
+
+00:53:58
+are commonly present
+in a given scene,
+
+00:54:00
+but aren't in this particular
+scene that you're looking at.
+
+00:54:03
+Also, things like bird
+being perched in a tree
+
+00:54:05
+or throwing a ball, but
+he's catching a ball.
+
+00:54:07
+These are all based on the bias
+in the data set, essentially,
+
+00:54:11
+and the model learning
+that during training, it
+
+00:54:14
+is most probably true
+that a certain object
+
+00:54:16
+or a certain action
+is being performed
+
+00:54:17
+when in the actual
+image it's not the case.
+
+00:54:20
+So in the data set,
+there's high co-occurrence
+
+00:54:25
+of these actions or objects
+with the particular scene.
+
+00:54:27
+So the model learns
+to associate them,
+
+00:54:29
+but it doesn't learn
+to disentangle.
+
+00:54:30
+It's happening in this scene
+because of the-- in this scene,
+
+00:54:33
+we know they're not throwing
+because the glove is here,
+
+00:54:36
+and the ball is going into the
+glove, not on the other hand,
+
+00:54:38
+but you need to
+explain it like that.
+
+00:54:40
+And the way we
+train these models,
+
+00:54:42
+we're training them just
+to output the caption.
+
+00:54:44
+So we're not doing
+any explanation there,
+
+00:54:46
+and that's why it's
+part of the reason you
+
+00:54:47
+see this co-occurrence issue.
+
+00:54:51
+So for visual
+question answering,
+
+00:54:55
+this is another really common
+task where RNNs were used,
+
+00:54:57
+and there are two formulations
+for visual question answering
+
+00:55:01
+that were commonly used.
+
+00:55:03
+One is to basically,
+you say you have
+
+00:55:05
+a model that is a
+captioning model,
+
+00:55:08
+and you want to see how well
+it could answer questions.
+
+00:55:12
+One thing you could do is
+to give it this question,
+
+00:55:14
+and then have it
+output text and look
+
+00:55:16
+at the probabilities of each
+of the answer sequences.
+
+00:55:19
+So you have a probability
+for each character or token,
+
+00:55:21
+and you could
+multiply them together
+
+00:55:23
+to get the probability
+of the overall answer.
+
+00:55:25
+This is one way you could use
+one of these RNN style models
+
+00:55:29
+to do question answering.
+
+00:55:31
+A more common way people did
+it is they would have basically
+
+00:55:36
+a question as
+input to the model,
+
+00:55:40
+multiple different
+answers also as
+
+00:55:42
+separate inputs to your model.
+
+00:55:43
+And then it's outputting
+essentially a probability
+
+00:55:45
+per question.
+
+00:55:46
+So in this case, it would be
+a four way classifier where
+
+00:55:50
+you have four different classes:
+answer 1, answer 2, answer 3,
+
+00:55:52
+answer 4, and you're just
+outputting the probabilities.
+
+00:55:54
+And a lot of different
+ways you can formulate it,
+
+00:55:56
+but this is a very common
+task in computer vision
+
+00:56:00
+where you need to use
+language and where
+
+00:56:02
+sequence modeling helps.
+
+00:56:04
+Also visual dialogue.
+
+00:56:06
+At the time, these were all
+considered very separate tasks.
+
+00:56:10
+These days, the tasks you have
+one model that can do almost all
+
+00:56:13
+of these, but how can you
+have a chat about an image?
+
+00:56:17
+We've really seen an
+explosion in the capabilities
+
+00:56:19
+of these kinds of models
+in the last two years.
+
+00:56:22
+Maybe one other type of model
+that RNNs were commonly used for
+
+00:56:27
+is for this visual
+navigation task.
+
+00:56:30
+So you have these images coming
+in, and you want to output
+
+00:56:33
+a sequence of directions to
+move in some 2D floor plan.
+
+00:56:37
+How do you get to the
+target destination?
+
+00:56:40
+There's another
+application for you
+
+00:56:42
+all to be aware of where these
+sequence models were used.
+
+00:56:48
+One thing I want to note that I
+didn't really explicitly mention
+
+00:56:53
+before, but just in
+the same way where
+
+00:56:56
+we can have multi-layer CNNs
+or multi-layer of these dense
+
+00:57:02
+or fully connected layers, you
+can also have multi-layer RNNs.
+
+00:57:06
+And in practice,
+most of the RNNs,
+
+00:57:07
+I showed were multi-layer RNNs.
+
+00:57:10
+Now, the main difference is that
+you treat each layer separately.
+
+00:57:16
+So the hidden state
+of say layer 1,
+
+00:57:19
+depends on the hidden
+state of the previous time
+
+00:57:21
+step of layer 1.
+
+00:57:23
+So in this of depth
+wise dimension--
+
+00:57:26
+I'm sorry in the depth
+dimension, each of these layers,
+
+00:57:31
+you're only looking
+at the hidden states
+
+00:57:33
+from that layer in the
+previous time steps.
+
+00:57:35
+And then in terms of looking at
+Windows in the time dimension,
+
+00:57:40
+instead of-- so the first layer
+will have the actual input
+
+00:57:43
+x as the input, but
+then the second layer
+
+00:57:45
+will take as input the output
+y from the previous layer.
+
+00:57:49
+So you can stack
+these up, and it
+
+00:57:51
+forms this grid, where each
+layer is operating with regards
+
+00:57:57
+to the previous hidden states
+only within that layer,
+
+00:58:00
+but then in terms of
+passing input output that
+
+00:58:02
+is between layers.
+
+00:58:03
+And so you can see to
+calculate this top right value
+
+00:58:06
+we need to calculate all of
+the different values, all
+
+00:58:10
+of the different hidden states
+in this entire computational
+
+00:58:13
+graph beforehand.
+
+00:58:14
+So you can get a feel for
+how as you start training,
+
+00:58:17
+this gets to be a very involved
+process and not very efficient.
+
+00:58:22
+OK, I'll talk about one of the
+key variants for RNNs that was
+
+00:58:27
+proposed actually a
+while ago in the 1990s,
+
+00:58:30
+but saw a lot of success
+for quite some time until
+
+00:58:34
+the transformer
+revolution called LSTMs.
+
+00:58:37
+You won't need to know about the
+details of how LSTMs operate,
+
+00:58:41
+but what I hope you
+learned is that RNNs have
+
+00:58:44
+some key disadvantages that
+LSTMs seek to alleviate,
+
+00:58:49
+and a lot of the more
+modern state space
+
+00:58:51
+models also try to
+seek to alleviate
+
+00:58:53
+some of these same
+issues that RNNs face.
+
+00:58:57
+So we talked about
+how by default, tanh
+
+00:59:01
+is a really commonly
+used activation function.
+
+00:59:04
+And we also talked about
+how you have this Whh
+
+00:59:06
+matrix that converts your
+previous hidden state
+
+00:59:09
+to the new one.
+
+00:59:11
+And it's summed with this Wxh
+matrix that converts your input
+
+00:59:17
+vector xt at the
+current time step
+
+00:59:19
+into your hidden state dimension
+and then you sum these together.
+
+00:59:22
+You can also formulate this
+as we have our weights here,
+
+00:59:28
+and you're stacking
+the vectors like this.
+
+00:59:31
+And so sometimes for
+shorthand people,
+
+00:59:33
+we'll just combine both of these
+W's together to form one big W.
+
+00:59:37
+But you should note that
+these are two blocks that
+
+00:59:42
+are diagonally
+positioned together
+
+00:59:45
+where there would be like-- if
+you're formulating like this,
+
+00:59:48
+there's a lot of
+zeros in this W,
+
+00:59:50
+because Whh is not
+interacting with xt at all,
+
+00:59:53
+but this is a shorthand
+way to notate it
+
+00:59:55
+where it makes thinking
+about it and writing down
+
+00:59:57
+the math easier.
+
+00:59:58
+So you will see all
+three variants here.
+
+01:00:00
+This one's maybe
+the most explicit
+
+01:00:02
+about where the actual
+values, the non-zero values,
+
+01:00:05
+and the weight matrices lie.
+
+01:00:07
+And so one way to think of
+it is you stack these vectors
+
+01:00:09
+together, which is shown here.
+
+01:00:11
+We're multiplying by this W and
+then we pass it through tanh h.
+
+01:00:13
+This gives us our output h,t
+which we pass to the next RNN.
+
+01:00:18
+You can imagine
+these are stacked.
+
+01:00:19
+And then you may also have
+either the output directly yt,
+
+01:00:23
+or we have this layer where
+it's a weight matrix times
+
+01:00:27
+ht with the activation
+function around it too.
+
+01:00:31
+Yeah, question.
+
+01:00:32
+Oh sure.
+
+01:00:35
+So here we have multilayer RNNs,
+how is the [INAUDIBLE] matrix
+
+01:00:40
+pretty much [INAUDIBLE]?
+
+01:00:41
+Yeah so the weights are
+shared within the layers
+
+01:00:43
+for multi-layer RNN.
+
+01:00:44
+So all of these
+hidden state updates
+
+01:00:49
+will use the same weights.
+
+01:00:51
+And then each layer, which
+you stack it vertically
+
+01:00:54
+in this diagram, each layer will
+have a separate set of weights.
+
+01:00:58
+OK, yeah, so this is
+the way that it works.
+
+01:01:04
+And then when you
+have backpropagation,
+
+01:01:06
+we talked about.
+
+01:01:07
+If you don't have a
+loss for each time step,
+
+01:01:11
+why you need to only calculate
+your loss based on what
+
+01:01:14
+the losses of your output
+h,t, and so when you do this
+
+01:01:18
+backpropagation, you're
+multiplying by W,
+
+01:01:20
+and then you're also taking
+the derivative of tanh.
+
+01:01:23
+And both of these can
+actually have some issues.
+
+01:01:25
+So when specifically
+mathematically
+
+01:01:28
+looking at what is
+the gradient of how--
+
+01:01:32
+if we change each component
+of our hidden state t,
+
+01:01:36
+with respect to h,t minus 1.
+
+01:01:38
+Sorry, if we change each
+component of h,t minus 1,
+
+01:01:40
+how will that affect h,t?
+
+01:01:43
+This is what this
+gradient is calculating.
+
+01:01:44
+We need the derivative of tanh
+because this is our activation
+
+01:01:47
+function.
+
+01:01:48
+And then we have Whh which is
+the multiply here for converting
+
+01:01:52
+the previous hidden
+state to the next one.
+
+01:01:55
+So this is actually how
+we calculate the gradient.
+
+01:01:57
+And here we can run into issues.
+
+01:01:58
+So if we're calculating
+the loss at each time step,
+
+01:02:04
+and we have lost
+here the total loss
+
+01:02:06
+we just summit for
+each of the weights.
+
+01:02:09
+So the total loss
+is just the sum
+
+01:02:11
+of the loss at each
+time step with respect
+
+01:02:13
+to this reused W matrix.
+
+01:02:18
+And so you end up getting
+this product of these dl--
+
+01:02:26
+to calculate the loss of L-- at
+the final step L,t with respect
+
+01:02:32
+to h,t, you need to calculate
+each of the intermediate hidden
+
+01:02:35
+states and how that affects W
+in order to calculate this final
+
+01:02:39
+loss here by using
+the chain rule.
+
+01:02:42
+We mentioned example
+here, and just
+
+01:02:44
+to point out why
+this is an issue.
+
+01:02:46
+If we look at these
+individual terms,
+
+01:02:48
+so if we hone in on
+this aspect of how
+
+01:02:50
+does changing the current hidden
+state change the next one, which
+
+01:02:55
+is the majority of these
+calculations contained
+
+01:02:58
+in this product
+term here, we get
+
+01:03:00
+that it's the same thing
+we mentioned earlier
+
+01:03:04
+where you have this derivative
+of tanh multiplied by your Whh.
+
+01:03:09
+And so why is this an issue?
+
+01:03:10
+Well, first of all, this is the
+derivative of tanh plotted here.
+
+01:03:15
+The maximum value is 1,
+and so almost always you're
+
+01:03:19
+getting less than 1.
+
+01:03:20
+So you can have vanishing
+gradients from this term here.
+
+01:03:25
+But even if we assume there's
+no non-linearity or we
+
+01:03:30
+pick some other
+activation function
+
+01:03:33
+that doesn't have this issue.
+
+01:03:34
+If we look at this
+weight matrix here,
+
+01:03:38
+that we're multiplying
+at each time step,
+
+01:03:41
+either we're going to have
+a large singular value,
+
+01:03:45
+so this will be as the
+vectors are coming in,
+
+01:03:49
+what is the maximum
+they'll be stretched?
+
+01:03:52
+If it's say a unit vector
+singular value is telling you
+
+01:03:55
+what's the maximum that
+a unit vector could
+
+01:03:58
+be stretched by the matrix?
+
+01:03:59
+So if it's very large you can
+have these gradients explode
+
+01:04:02
+or if it's very small, you can
+have this vanishing gradients
+
+01:04:04
+issue.
+
+01:04:06
+And if you have
+exploding gradients,
+
+01:04:08
+we have a fix which is
+this scaling the gradient.
+
+01:04:11
+So you can just divide or clip
+it and somehow so that you
+
+01:04:14
+don't--
+
+01:04:15
+so too big of a gradient,
+it's not too much of an issue.
+
+01:04:17
+But this really small
+vanishing gradient issue
+
+01:04:21
+is actually the main issue
+with why people don't just
+
+01:04:23
+use really long RNNs in
+practice because of tanh,
+
+01:04:26
+and because under
+many scenarios,
+
+01:04:29
+your weight matrix has
+this property where
+
+01:04:31
+it's either expanding your
+activations or reducing them.
+
+01:04:37
+So yeah, I think these are the
+main reasons why it motivated
+
+01:04:42
+a change in RNN architectures,
+and why a lot of the reasons why
+
+01:04:45
+people don't use RNNs.
+
+01:04:46
+This is one of the main issues.
+
+01:04:48
+So how do you resolve this.
+
+01:04:50
+So the way that people did it
+was this creation of the LSTM.
+
+01:04:54
+And the high level idea, which
+I won't go into too many details
+
+01:04:57
+because it's actually
+quite complicated
+
+01:04:59
+is that you have four of
+these different gates that
+
+01:05:03
+are tracking different
+values, that instead
+
+01:05:05
+of just having one
+hidden state, you
+
+01:05:07
+have multiple of these values.
+
+01:05:09
+You precompute to determine how
+to change your hidden state,
+
+01:05:11
+and then also what
+information to pass
+
+01:05:14
+through a different pathway.
+
+01:05:15
+So you have the regular
+hidden state pathway.
+
+01:05:17
+You have a different
+pathway where it's easier
+
+01:05:19
+to pass information.
+
+01:05:20
+And this is the basic idea, at
+a high level they call it a gate
+
+01:05:26
+or what are you actually writing
+to the hidden state of the cell.
+
+01:05:30
+The input gate, which is
+deciding whether or not you
+
+01:05:32
+write information to the cell.
+
+01:05:34
+The forget gate, how much
+to forget from previous time
+
+01:05:37
+steps, as well as the output
+gate, which is how much
+
+01:05:40
+are you actually outputting
+for your hidden state.
+
+01:05:42
+So you can see, this
+is really involved,
+
+01:05:44
+a lot of design choices here.
+
+01:05:46
+and they put it all together
+into this, I would say,
+
+01:05:49
+fairly complicated
+diagram, but the basic idea
+
+01:05:51
+is this part is the
+same where we're
+
+01:05:54
+doing this weight multiply.
+
+01:05:55
+But now we have four different
+values we're computing instead
+
+01:05:58
+of just the h,t.
+
+01:06:00
+We have the input
+gate, and the gate
+
+01:06:03
+to determine how
+much to write here,
+
+01:06:05
+and we have our output that's
+passed to the next hidden state.
+
+01:06:10
+You can think of
+this top section
+
+01:06:12
+here as a highway where
+the goal is to not
+
+01:06:14
+have any activation functions.
+
+01:06:16
+So no tanh.
+
+01:06:17
+So we avoid the
+issues we had where
+
+01:06:20
+tanh made the gradients
+vanish, and all we're applying
+
+01:06:24
+is this forget gate.
+
+01:06:25
+So as long as
+we're not basically
+
+01:06:28
+forgetting all the
+information at each time step,
+
+01:06:32
+we're able to pass
+information more easily.
+
+01:06:34
+This is the high
+level explanation.
+
+01:06:36
+And then more
+importantly, in practice,
+
+01:06:38
+people seem to see that
+this worked very well.
+
+01:06:41
+Again, you won't be implementing
+this for the course at all,
+
+01:06:45
+but I think this is a really
+commonly used baseline still
+
+01:06:47
+and some deep learning papers.
+
+01:06:50
+So it's good to know about.
+
+01:06:51
+But I think you can think of
+this through the lens of people
+
+01:06:54
+are trying to construct
+these things to make up
+
+01:06:56
+for all the issues
+that RNNs had,
+
+01:06:58
+which is vanishing gradients
+and also the lack of information
+
+01:07:01
+being captured.
+
+01:07:02
+You need to cram everything
+into this hidden state.
+
+01:07:04
+So you have really
+long term dependencies.
+
+01:07:06
+Those are lost.
+
+01:07:07
+So they created a
+separate pathway
+
+01:07:08
+to pass over this more long
+term information through the top
+
+01:07:12
+here.
+
+01:07:15
+So do LSTMs solve the vanishing
+gradient problem completely?
+
+01:07:19
+It definitely helps.
+
+01:07:20
+So it makes the RNN
+easier to preserve
+
+01:07:22
+this information
+over many time steps
+
+01:07:24
+by using this top
+pathway diagram.
+
+01:07:26
+So it's in contrast--
+
+01:07:29
+it's much harder
+for Vanilla RNNs
+
+01:07:32
+to learn our current weight
+matrix that preserves info
+
+01:07:35
+in the hidden state across
+every single time step,
+
+01:07:38
+if we're always doing
+the same operation,
+
+01:07:40
+and we're not able to just
+pass information directly
+
+01:07:42
+without an activation function.
+
+01:07:45
+So it doesn't guarantee it, but
+it makes it significantly easier
+
+01:07:49
+and it helps improve learning
+long term dependencies and works
+
+01:07:54
+very well empirically.
+
+01:07:55
+So people generally don't train
+RNNs so much, and more often
+
+01:07:59
+train LSTMs, if you
+were going to go
+
+01:08:01
+with this recurrent modeling
+route, but I think in general,
+
+01:08:07
+these are also--
+
+01:08:07
+I was saying, I would say
+significantly fallen out
+
+01:08:10
+of fashion, but it
+gives you a sense
+
+01:08:12
+of the way that people have
+tried to design RNNs to account
+
+01:08:15
+for the issues they face.
+
+01:08:18
+So one other thing that would
+be cool to tie-in to something
+
+01:08:22
+you learned earlier
+in this course,
+
+01:08:24
+is this idea of directly
+adding outputs and skipping
+
+01:08:27
+some activation
+functions or other layers
+
+01:08:29
+is actually highly
+related to the idea
+
+01:08:31
+that we discussed
+in ResNets, where
+
+01:08:33
+you have these skip connections,
+where the value is just
+
+01:08:36
+copied over and added
+later in the layer block.
+
+01:08:41
+So you have multiple in ResNets.
+
+01:08:43
+You have multiple of these
+convolution layers stacked
+
+01:08:45
+together, and then you add skip
+connections where the value just
+
+01:08:48
+gets added here.
+
+01:08:49
+And you can think of
+this in a similar light
+
+01:08:52
+for LSTMs, how it's skipping
+over some of these layers
+
+01:08:56
+and it helps improve as
+you get in this case,
+
+01:08:59
+instead of very large
+depth of the model.
+
+01:09:02
+It's very long
+sequences of time steps.
+
+01:09:04
+So this is parallel, but
+it's a little different
+
+01:09:07
+because one is the
+number of layers
+
+01:09:08
+and the other is the
+number of time steps.
+
+01:09:12
+OK, I think the final
+slide for today's lecture
+
+01:09:16
+is just a little tie-in for
+how these RNNs have made
+
+01:09:21
+a bit of a resurgence
+in the last year or two,
+
+01:09:24
+which is funny, because I think
+if we taught the course maybe
+
+01:09:28
+a year or two ago, I would have
+been much more willing to want
+
+01:09:30
+to cut RNNs entirely.
+
+01:09:31
+But there are actually a lot
+of nice advantages they have.
+
+01:09:34
+So the main one is this
+unlimited context length.
+
+01:09:37
+So one of the main
+issues with transformers
+
+01:09:39
+is they have a limited context
+length, as people are really
+
+01:09:42
+pushing the boundaries for what
+these models are capable of.
+
+01:09:44
+This context length is becoming
+more and more of an issue.
+
+01:09:47
+So there have been various
+workarounds in the transformer
+
+01:09:49
+space.
+
+01:09:49
+People do things like rope
+and some other techniques
+
+01:09:52
+to try to extend
+the context length,
+
+01:09:54
+but it's a pretty significant
+limitation of the model.
+
+01:09:57
+The other thing is that
+during inference for RNNs,
+
+01:10:02
+the compute scales linearly
+with the sequence length
+
+01:10:05
+or during training
+to, but basically,
+
+01:10:07
+as you add more and more
+steps to your sequence,
+
+01:10:11
+you just need to recompute the
+same operation over and over
+
+01:10:14
+again.
+
+01:10:14
+So there's no operation that
+looks across the entire input
+
+01:10:17
+sequence like you
+have for transformers.
+
+01:10:20
+So these are really
+big advantages,
+
+01:10:22
+and there have been
+a couple of papers.
+
+01:10:24
+So to shout out a few,
+there's this RWKV model.
+
+01:10:28
+You can check out
+arXiv link here,
+
+01:10:30
+and also Mamba are both
+mainly highlighting
+
+01:10:33
+this idea of we're able to
+achieve linear time sequence
+
+01:10:35
+modeling.
+
+01:10:36
+So as you scale up
+your input sequence,
+
+01:10:38
+the compute also scales linearly
+as opposed to quadratically
+
+01:10:41
+with transformers.
+
+01:10:42
+And so it's better for long
+context problems sometimes.
+
+01:10:46
+In terms of compute
+it works better,
+
+01:10:48
+and it has these
+main advantages.
+
+01:10:50
+So people try to get
+the best of both worlds,
+
+01:10:51
+and there's been a lot
+of research in this area.
+
+01:10:53
+How can you get the
+performance of transformers
+
+01:10:55
+with the scaling of RNNs?
+
+01:10:58
+OK, so that's all
+for today in class.
+
+01:11:01
+We basically talked about how,
+there's a lot of different ways
+
+01:11:04
+you can design
+architectures with RNNs.
+
+01:11:06
+Vanilla RNNs are simple, but
+they don't work that well.
+
+01:11:09
+And there's been
+more complex variants
+
+01:11:10
+that people have proposed that
+introduce ways to selectively
+
+01:11:13
+pass information.
+
+01:11:16
+This backward flow
+of gradients in RNNs
+
+01:11:18
+can either explode or vanish,
+depending on the activation
+
+01:11:20
+function you use, or what is
+the properties of your weight
+
+01:11:22
+matrix.
+
+01:11:23
+So you often need this back
+propagation through time
+
+01:11:26
+to actually compute
+the gradient as well.
+
+01:11:29
+And then finally, basically
+these better architectures
+
+01:11:32
+are a hot topic of
+research right now, as well
+
+01:11:34
+as just generally new paradigms
+for reasoning over sequences.
+
+01:11:37
+So yeah, I think
+that's it for today.
+
+01:11:39
+Next time we'll talk about
+attention and transformers.

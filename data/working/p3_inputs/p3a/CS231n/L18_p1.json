@@ -1,0 +1,1148 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_18_human_centered_ai",
+    "lecture_title": "What We See and What We Value: AI with the Human Perspective",
+    "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Historical framing and the three-part agenda",
+      "start_s": 5,
+      "end_s": 286
+    },
+    {
+      "section_index": 2,
+      "title": "Building AI to see what humans see",
+      "start_s": 288,
+      "end_s": 1406
+    },
+    {
+      "section_index": 3,
+      "title": "Building AI to see what humans don't see",
+      "start_s": 1417,
+      "end_s": 2303
+    },
+    {
+      "section_index": 4,
+      "title": "Building AI to see what humans want to see",
+      "start_s": 2304,
+      "end_s": 3905
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg1",
+      "course_id": "cs231n_spring_2025",
+      "name": "Evolution, computer vision history, and the human-centered framing",
+      "description": "Introduces the lecture as a reflective, non-algorithmic capstone and frames vision as both an evolutionary driver and a model for modern AI.",
+      "summary": "The lecture opens by explicitly shifting from new algorithms to a broader perspective on AI, emphasizing the 'human perspective' and the question of where computer vision came from and where it is going [ts=15s] [ts=249s]. Fei-Fei Li connects biological vision to the Cambrian explosion, arguing that the onset of vision triggered an evolutionary arms race and made visual intelligence central for many animals and for humans' survival, work, and social life [ts=109s] [ts=161s]. She then links that history to the 1960s 'summer vision project' and to modern AI progress, setting up the lecture's three-part structure: AI that sees what humans see, what humans do not see, and what humans want to see [ts=181s] [ts=258s].",
+      "key_points": [
+        {
+          "text": "The lecture is a perspective talk about AI's human dimension rather than a new algorithm lecture.",
+          "timestamp_s": 15,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The onset of vision in early animals is presented as a driver of the Cambrian explosion.",
+          "timestamp_s": 109,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Vision is described as a primary sensory intelligence system for many animals and for humans.",
+          "timestamp_s": 155,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture is organized into three chunks: seeing what humans see, do not see, and want to see.",
+          "timestamp_s": 258,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 5,
+        "end_s": 286
+      },
+      "difficulty": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 5,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "course_id": "cs231n_spring_2025",
+      "name": "Object recognition: from human vision to ImageNet and deep learning",
+      "description": "Reviews why object recognition became the canonical visual intelligence problem and traces the pre-deep-learning and deep-learning eras that made it practical.",
+      "summary": "Fei-Fei Li begins from human perception experiments, noting that people can detect targets in rapidly flashed scenes and categorize complex stimuli within roughly 150 ms, with specialized brain areas supporting object understanding [ts=297s] [ts=373s]. She uses this to motivate object recognition as a foundational computer vision task, then recounts the pre-deep-learning history: part-based compositional models were elegant but ineffective, while statistical machine learning introduced learnable parameters, data dependence, and models such as Bayes nets, random fields, and SVMs [ts=423s] [ts=564s]. The decisive unlock came from taking Biederman's estimate of tens of thousands of human-recognizable categories seriously, leading to ImageNet's scale and, later, the 2012 convergence of data, CNNs, and GPUs that made object recognition industrially mature [ts=692s] [ts=856s].",
+      "key_points": [
+        {
+          "text": "Humans can detect targets in unfamiliar scenes shown at 10 Hz, highlighting strong object-focused visual understanding.",
+          "timestamp_s": 297,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Object recognition became a fundamental building block for visual intelligence in computer vision.",
+          "timestamp_s": 423,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Part-based object recognition models from the 1970s-1990s were mathematically appealing but did not work well in practice.",
+          "timestamp_s": 543,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Statistical machine learning reframed recognition as learning parameters from data rather than hand-tuning rules.",
+          "timestamp_s": 576,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Biederman's conjecture that children know roughly 30,000 to 100,000 visual categories motivated scaling up datasets.",
+          "timestamp_s": 694,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The 2012 convergence of ImageNet, CNNs, and GPUs is presented as the birth of deep learning for vision.",
+          "timestamp_s": 856,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 288,
+        "end_s": 904
+      },
+      "difficulty": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 10,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg3",
+      "course_id": "cs231n_spring_2025",
+      "name": "From objects to relationships, language, and dynamic scenes",
+      "description": "Expands visual intelligence beyond labels to scene graphs, captioning, and dynamic multi-actor understanding, while stressing remaining open problems.",
+      "summary": "After object recognition, the lecture argues that the same objects can imply very different situations depending on their relationships, motivating structured representations such as scene graphs with objects as nodes and relations as edges [ts=914s] [ts=991s]. Fei-Fei Li highlights work on Visual Genome and zero-shot relational reasoning, showing how common relations like 'person riding horse' can support unusual combinations like 'horse wearing hat' through compositional structure [ts=1030s] [ts=1074s]. She then traces the move to image captioning and dense captioning with CNN+LSTM models, notes that multimodal LLMs have advanced this further, and closes by emphasizing that dynamic multi-actor activity understanding remains unsolved and crucial for everyday robotics [ts=1140s] [ts=1271s].",
+      "key_points": [
+        {
+          "text": "Visual intelligence must encode relationships between objects, not just object labels.",
+          "timestamp_s": 956,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A scene graph represents objects as entity nodes and relationships as connectivity or attributes.",
+          "timestamp_s": 991,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Compositional scene graphs enable zero-shot recognition of unusual relationships such as 'horse wearing hat'.",
+          "timestamp_s": 1053,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Image captioning and dense captioning emerged from combining CNNs with LSTMs.",
+          "timestamp_s": 1156,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Dynamic multi-object, multi-actor activity understanding is still unsolved and important for robotics.",
+          "timestamp_s": 1261,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 905,
+        "end_s": 1406
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg4",
+      "course_id": "cs231n_spring_2025",
+      "name": "Superhuman perception and the limits of human attention",
+      "description": "Shows how AI can exceed human recognition granularity and compensate for human attention failures in high-stakes settings.",
+      "summary": "The second major section starts with fine-grained categorization, arguing that humans are poor at discriminating thousands of similar bird species or car makes/models/years and that this remains a challenging but important vision problem even in the multimodal-LLM era [ts=1454s] [ts=1471s]. Fei-Fei Li describes using fine-grained car recognition over Google Street View data to infer education, income, voting, and environmental patterns, making computer vision a social sensing tool beyond what any human could manually do [ts=1573s] [ts=1623s]. She then pivots to human limitations via the Stroop test and change blindness before linking limited attention to medical errors and to a demo where AI counts surgical items such as gauze to assist clinicians [ts=1656s] [ts=1818s].",
+      "key_points": [
+        {
+          "text": "Fine-grained categorization asks AI to distinguish very similar categories such as bird species or car make/model/year.",
+          "timestamp_s": 1454,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Fine-grained bird recognition still has high error at the most specific taxonomic levels.",
+          "timestamp_s": 1524,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Street-view car recognition can be used to study education, income, voting, and environmental patterns.",
+          "timestamp_s": 1592,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The Stroop test illustrates conflict between reading words and naming colors as a limit of human attention.",
+          "timestamp_s": 1656,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Change blindness shows that humans can miss large scene changes, motivating AI assistance in safety-critical work.",
+          "timestamp_s": 1717,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "AI item counting in surgery is proposed as a way to reduce dangerous pauses caused by missing tools or gauze.",
+          "timestamp_s": 1818,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 1417,
+        "end_s": 1850
+      },
+      "difficulty": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg5",
+      "course_id": "cs231n_spring_2025",
+      "name": "Bias, fairness, and privacy in visual AI",
+      "description": "Uses visual illusions, face recognition, and privacy-preserving sensing to argue that AI must account for human bias and respect human values.",
+      "summary": "Using the checkerboard luminance illusion, Fei-Fei Li argues that bias is built into human vision through evolutionary priors, social experience, and data exposure, which makes fairness a central issue for AI systems trained from human-generated data [ts=1863s] [ts=1919s]. She gives face recognition as a concrete example where systems historically performed differently across skin color and gender, with potential downstream harms in self-driving and medical use cases, while noting that by 2025 the field is paying much more attention to the problem [ts=1952s] [ts=1990s]. The unit then turns to privacy-preserving visual AI, contrasting blunt approaches like blurring and masking with a hardware-software lens that removes identity cues while preserving enough motion information for action recognition [ts=2034s] [ts=2148s].",
+      "key_points": [
+        {
+          "text": "Human visual perception contains biases shaped by evolution, social experience, and data exposure.",
+          "timestamp_s": 1919,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Bias becomes harmful when it creates unfairness for groups or communities.",
+          "timestamp_s": 1939,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Face recognition systems historically performed unevenly across skin color and gender.",
+          "timestamp_s": 1952,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Privacy in visual AI can be pursued with blurring, masking, dimensionality reduction, federated learning, or encryption.",
+          "timestamp_s": 2067,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A custom lens-plus-software approach can hide identity while retaining activity information for recognition.",
+          "timestamp_s": 2148,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 1851,
+        "end_s": 2303
+      },
+      "difficulty": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "course_id": "cs231n_spring_2025",
+      "name": "AI augmentation for healthcare and labor shortages",
+      "description": "Reframes AI from replacement to augmentation and presents ambient-intelligence systems for clinical and home health settings.",
+      "summary": "The final section begins by acknowledging real labor disruption from AI while arguing that healthcare and eldercare also suffer from acute labor shortages, so the more useful framing is augmentation rather than replacement [ts=2315s] [ts=2455s]. Fei-Fei Li calls hospitals, patient rooms, pharmacies, and homes the 'dark spaces of health' and presents ambient intelligence as smart sensors plus machine learning that extract clinically relevant signals for patients, families, and providers [ts=2467s] [ts=2497s]. She then gives three concrete examples: privacy-preserving hand-hygiene monitoring that outperforms sparse human auditing, ICU mobility monitoring for bed/chair transitions, and home sensing for infection, mobility, sleep, and diet in aging populations [ts=2622s] [ts=2790s].",
+      "key_points": [
+        {
+          "text": "The lecture reframes AI's labor role from replacement toward augmentation in domains with worker shortages.",
+          "timestamp_s": 2455,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The 'dark spaces of health' are settings where there are not enough human eyes to monitor critical events.",
+          "timestamp_s": 2475,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Ambient intelligence combines smart sensors with machine learning to extract health-critical insights.",
+          "timestamp_s": 2497,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Depth-based hand-hygiene monitoring is more consistent than human auditing and preserves privacy.",
+          "timestamp_s": 2625,
+          "evidence_type": "example"
+        },
+        {
+          "text": "ICU mobilization monitoring tracks actions such as getting in or out of bed and chair because movement supports recovery.",
+          "timestamp_s": 2717,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Home sensing can support aging in place by monitoring infection risk, mobility, sleep, and diet.",
+          "timestamp_s": 2826,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 2304,
+        "end_s": 2870
+      },
+      "difficulty": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 9,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg7",
+      "course_id": "cs231n_spring_2025",
+      "name": "Embodied AI and open-world robot planning",
+      "description": "Introduces robotics as the closure of the perception-action loop and describes a method that uses LLMs and VLMs for open-ended robot control.",
+      "summary": "Fei-Fei Li frames embodied AI as the point where vision connects to action, likening robotics to the evolutionary jump from eyes to movement while cautioning that current robots remain slow, clumsy, and poor at generalization [ts=2871s] [ts=2911s]. She then presents an open-world manipulation system that accepts natural-language instructions like opening a drawer while avoiding a vase, using an LLM to generate structured instructions and a VLM to detect referenced objects and update motion-planning heat maps [ts=2990s] [ts=3150s]. The segment stresses that this approach reduces reliance on closed-world robot training and demonstrates diverse tasks such as articulated-object manipulation, table setting, and sweeping [ts=3084s] [ts=3213s].",
+      "key_points": [
+        {
+          "text": "Embodied AI closes the loop between perception and action.",
+          "timestamp_s": 2887,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Current robots are still slow, clumsy, and weak at generalizable real-world adaptation.",
+          "timestamp_s": 2911,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The goal is open-world robot generalization from open-ended instructions rather than a predesignated closed task set.",
+          "timestamp_s": 2985,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "An LLM converts task instructions into code-like steps and a VLM grounds referenced objects in the scene.",
+          "timestamp_s": 3105,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Motion-planning heat maps encode where the robot should go and what it should avoid, such as a vase.",
+          "timestamp_s": 3136,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 2871,
+        "end_s": 3230
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 6,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "course_id": "cs231n_spring_2025",
+      "name": "Human-preference-driven robotics, BEHAVIOR, and assistive futures",
+      "description": "Argues that robot task design should follow human preferences, introduces the BEHAVIOR benchmark, and ends with assistive brain-controlled robotics and an augmentation-first conclusion.",
+      "summary": "The lecture asks a normative question—who decides which tasks robots should do?—and answers it with a human-centered survey of about 1,400 people, showing that respondents want help with chores like floor cleaning but not with socially or emotionally salient activities like opening Christmas gifts or buying wedding rings [ts=3308s] [ts=3425s]. This preference signal is used to define a thousand target tasks and to motivate BEHAVIOR, a benchmark built from scanned real-world environments, thousands of object assets, and a high-fidelity simulator developed with NVIDIA Omniverse [ts=3462s] [ts=3534s]. Fei-Fei Li emphasizes that current algorithms still score essentially zero on hard BEHAVIOR tasks without privileged information, then closes with EEG-based robot control as an assistive direction and the final message that AI should help people rather than replace them [ts=3628s] [ts=3900s].",
+      "key_points": [
+        {
+          "text": "Robot task selection should be guided by human preference rather than only by researcher convenience.",
+          "timestamp_s": 3334,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A survey of about 1,400 people was used to rank which everyday tasks people want robots to help with.",
+          "timestamp_s": 3425,
+          "evidence_type": "example"
+        },
+        {
+          "text": "BEHAVIOR stands for a benchmark for everyday household activities in virtual, interactive, ecological environments.",
+          "timestamp_s": 3297,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The BEHAVIOR setup includes scanned scenes, more than 10,000 object assets, and a simulator built with NVIDIA Omniverse.",
+          "timestamp_s": 3487,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Without privileged information, current robotic algorithms achieve essentially zero performance on benchmarked BEHAVIOR tasks.",
+          "timestamp_s": 3650,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "EEG-based control of a robot arm is presented as an assistive path for severely paralyzed patients.",
+          "timestamp_s": 3800,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The final takeaway is that AI should augment and help people rather than replace them.",
+          "timestamp_s": 3892,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+        "start_s": 3230,
+        "end_s": 3905
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 8,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg1",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Conceptual framing and historical setup with the three-part agenda; no formulas or demos [ts=15s] [ts=258s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Core historical review of object recognition, statistical learning, ImageNet, and the 2012 deep-learning turning point [ts=423s] [ts=856s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Introduces scene graphs, captioning, and the still-open problem of dynamic activity understanding, all central retrieval targets [ts=991s] [ts=1261s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Dense with memorable examples: fine-grained recognition, social sensing, Stroop, change blindness, and surgical item-counting demo [ts=1573s] [ts=1837s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Responsible-AI themes dominate here, including fairness and a privacy-preserving activity-recognition demonstration [ts=1952s] [ts=2148s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Application-heavy health section with multiple concrete sensing systems and strong human-impact framing [ts=2497s] [ts=2826s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Embodied AI is taught through an end-to-end LLM/VLM robot-planning demo and open-world manipulation examples [ts=3034s] [ts=3213s]."
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Human-centered robot benchmarking, current zero-performance results, and EEG control make this a key synthesis and future-looking segment [ts=3425s] [ts=3900s]."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg1",
+      "global_kp_id": "kp_human_centered_ai",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg1",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg2",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg3",
+      "global_kp_id": "kp_scene_graphs_and_relational_perception",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg3",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg3",
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg3",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg4",
+      "global_kp_id": "kp_fine_grained_recognition_for_superhuman_perception",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg4",
+      "global_kp_id": "kp_human_attention_limits_and_error_prone_perception",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg4",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg5",
+      "global_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg5",
+      "global_kp_id": "kp_privacy_preserving_visual_ai",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg5",
+      "global_kp_id": "kp_human_centered_ai",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "global_kp_id": "kp_privacy_preserving_visual_ai",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg7",
+      "global_kp_id": "kp_perception_action_integration",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg7",
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg7",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "global_kp_id": "kp_human_preference_driven_robot_benchmarking",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "global_kp_id": "kp_perception_action_integration",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg8",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_human_centered_ai",
+      "name": "Human-centered AI",
+      "description": "The lecture frames AI progress through the lens of human perception, human impact, and human values rather than only algorithmic performance. Vision systems can save lives and create value, but also propagate bias and cause harm in high-stakes settings.",
+      "track_tags": [
+        "ai_overview",
+        "ethics",
+        "human_centered_ai",
+        "societal_impact"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "industry",
+        "policy",
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because human-centered AI formalizes how the lecture frames AI progress through the lens of human perception, human impact, and human values rather than only algorithmic performance, which later units use as core machinery rather than background context though roles split between capstone and gateway.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp1",
+        "local::lecture_1_introduction::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "name": "Visual intelligence and object recognition",
+      "description": "Object recognition is treated as a core capability of both human and machine vision and as the starting point of modern computer vision progress. The lecture frames vision as central to animal and human intelligence, not merely one application area inside AI.",
+      "track_tags": [
+        "foundations",
+        "motivation",
+        "recognition",
+        "vision_basics"
+      ],
+      "domain_tags": [
+        "artificial_intelligence",
+        "cognitive_science",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "ml_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.33,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because visual intelligence and object recognition formalizes how object recognition is treated as a core capability of both human and machine vision and as the starting point of modern computer vision progress, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp2",
+        "local::lecture_1_introduction::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "name": "Data-driven supervised learning pipeline",
+      "description": "Pre-deep-learning progress came from shifting from hand-coded rules to learnable statistical models trained from data. The collect-train-predict paradigm: gather labeled data, fit a model, and evaluate predictions on unseen examples.",
+      "track_tags": [
+        "deep_learning_basics",
+        "machine_learning",
+        "machine_learning_foundations",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning",
+        "model_training",
+        "supervised_learning"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because data-driven supervised learning pipeline formalizes how pre-deep-learning progress came from shifting from hand-coded rules to learnable statistical models trained from data, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp3",
+        "local::lecture_2_image_classification_with_linear_classifiers::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_scene_graphs_and_relational_perception",
+      "name": "Scene graphs and relational perception",
+      "description": "Scene understanding requires explicit representations of objects, attributes, and relations rather than isolated labels.",
+      "track_tags": [
+        "scene_understanding",
+        "structured_prediction"
+      ],
+      "domain_tags": [
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "research"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because scene graphs and relational perception clarifies scene understanding requires explicit representations of objects, attributes, and relations rather than isolated labels, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "name": "Image captioning and multimodal scene description",
+      "description": "Vision systems can map images to natural language descriptions, first with CNN+LSTM pipelines and later with multimodal LLMs.",
+      "track_tags": [
+        "language_vision",
+        "multimodal_ai"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because image captioning and multimodal scene description clarifies vision systems can map images to natural language descriptions, first with CNN+LSTM pipelines and later with multimodal LLMs, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "name": "Dynamic multi-actor activity understanding",
+      "description": "Understanding who is doing what and what happens next in videos remains an open problem beyond static scene recognition.",
+      "track_tags": [
+        "activity_recognition",
+        "video_understanding"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "research",
+        "robotics"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dynamic multi-actor activity understanding synthesizes understanding who is doing what and what happens next in videos remains an open problem beyond static scene recognition into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_fine_grained_recognition_for_superhuman_perception",
+      "name": "Fine-grained recognition for superhuman perception",
+      "description": "AI can exceed typical human perception by distinguishing extremely similar categories and extracting patterns at scale.",
+      "track_tags": [
+        "fine_grained_recognition",
+        "superhuman_ai"
+      ],
+      "domain_tags": [
+        "computational_social_science",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "applied_ai",
+        "data_science",
+        "research"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because fine-grained recognition for superhuman perception clarifies aI can exceed typical human perception by distinguishing extremely similar categories and extracting patterns at scale, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_human_attention_limits_and_error_prone_perception",
+      "name": "Human attention limits and error-prone perception",
+      "description": "Human visual processing has systematic limits such as Stroop interference and change blindness that can create safety risks.",
+      "track_tags": [
+        "attention",
+        "human_perception"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "psychology"
+      ],
+      "career_path_tags": [
+        "healthcare_ai",
+        "research",
+        "safety"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because human attention limits and error-prone perception clarifies human visual processing has systematic limits such as Stroop interference and change blindness that can create safety risks, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "name": "AI augmentation over replacement",
+      "description": "Smart sensing and machine learning can compensate for labor shortages by supporting monitoring and decision-making in clinical and home settings. The lecture's closing principle is that AI should enhance human capability and care rather than simply replace people.",
+      "track_tags": [
+        "ambient_intelligence",
+        "healthcare_ai",
+        "human_centered_ai",
+        "societal_impact"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "computer_vision",
+        "digital_health",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "healthcare_ai",
+        "policy",
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because aI augmentation over replacement synthesizes smart sensing and machine learning can compensate for labor shortages by supporting monitoring and decision-making in clinical and home settings into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp12",
+        "local::lecture_18_human_centered_ai::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "name": "Bias and fairness in visual AI",
+      "description": "AI systems can inherit and amplify human or data bias, making fairness analysis essential for deployment.",
+      "track_tags": [
+        "fairness",
+        "responsible_ai"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "policy",
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because bias and fairness in visual AI formalizes how aI systems can inherit and amplify human or data bias, making fairness analysis essential for deployment, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_privacy_preserving_visual_ai",
+      "name": "Privacy-preserving visual AI",
+      "description": "Vision systems should preserve useful activity signals while withholding identity or other sensitive information.",
+      "track_tags": [
+        "privacy",
+        "responsible_ai"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "healthcare_ai",
+        "research",
+        "security"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because privacy-preserving visual AI clarifies vision systems should preserve useful activity signals while withholding identity or other sensitive information, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_perception_action_integration",
+      "name": "Perception-action integration",
+      "description": "Robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times. Robotics is framed as the closure of the loop between seeing and doing, requiring both perception and action planning.",
+      "track_tags": [
+        "embodied_ai",
+        "perception",
+        "planning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "perception_action_loop",
+        "robotics",
+        "task_conditioned_perception"
+      ],
+      "career_path_tags": [
+        "autonomy_engineer",
+        "ml_engineering",
+        "research",
+        "robotics",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because perception-action integration clarifies robots should sense only what is necessary for the current task and continuously couple perception to action rather than fully reconstructing the world at all times, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp6",
+        "local::lecture_18_human_centered_ai::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_human_preference_driven_robot_benchmarking",
+      "name": "Human-preference-driven robot benchmarking",
+      "description": "Robot benchmarks should prioritize tasks people actually want help with and should be evaluated in realistic, diverse environments.",
+      "track_tags": [
+        "benchmarking",
+        "human_centered_robotics"
+      ],
+      "domain_tags": [
+        "human_computer_interaction",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "product",
+        "research",
+        "robotics"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because human-preference-driven robot benchmarking clarifies robot benchmarks should prioritize tasks people actually want help with and should be evaluated in realistic, diverse environments, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp14"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L18_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture18-human-centered-ai_transcript.txt"
+  }
+}

@@ -32,10 +32,10 @@ class HistoryItem(BaseModel):
     completed_at: datetime | None
     duration_seconds: int | None  # None if session never completed
 
-    # Subject: topic name for quiz/assessment rows, module name for module_test
+    # Subject: learning unit title for quiz/assessment rows, section title for module_test
     subject: str
-    topic_id: uuid.UUID | None
-    module_id: uuid.UUID | None
+    learning_unit_id: uuid.UUID | None
+    section_id: uuid.UUID | None
 
     score_percent: float | None
     correct_count: int
@@ -75,9 +75,10 @@ class HistoryResponse(BaseModel):
 class QuestionInteractionDetail(BaseModel):
     """One question + user's answer within a session."""
 
-    question_id: uuid.UUID
+    question_id: uuid.UUID | None = None
+    canonical_item_id: str | None = None
     sequence_position: int
-    topic_name: str
+    learning_unit_title: str
     stem_text: str
     bloom_level: str
     difficulty_bucket: str

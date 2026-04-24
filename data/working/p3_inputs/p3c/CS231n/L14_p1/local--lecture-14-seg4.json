@@ -1,0 +1,157 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_14",
+    "lecture_title": "CS231N Lecture 14: Generative Models (Part 2)",
+    "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_14::seg4",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Diffusion intuition and the move to rectified flow",
+    "description": "Introduces diffusion as iterative denoising and sets up rectified flow as the lecture's clean diffusion formalism.",
+    "summary": "The lecture transitions to diffusion models, warning that the literature has many competing mathematical formalisms and notation choices, while this lecture will use the cleaner rectified-flow view [ts=1855s], [ts=1900s]. The core intuition is that diffusion, like GANs, tries to convert samples from a simple noise distribution into samples from pdata, but instead of learning a one-shot deterministic map G(z), it learns an iterative denoising procedure [ts=1919s], [ts=1935s]. The noise variable must have the same shape as the data, and noisy samples are described by a noise level t where t=0 is clean data and t=1 is full noise [ts=1946s], [ts=1978s]. A neural network is trained to take a noisy sample xt and t and remove a small amount of noise [ts=2013s]. At inference time, sampling starts from pure noise and applies the network repeatedly until a clean-looking generated sample emerges [ts=2046s], [ts=2101s]. The segment ends by narrowing from the general diffusion picture to rectified flow, treated here as a diffusion-style model [ts=2155s].",
+    "key_points": [
+      {
+        "text": "Diffusion literature has many mathematical formalisms, so the lecture uses rectified flow as a clean implementation.",
+        "timestamp_s": 1860,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Diffusion converts noise samples into data samples using iterative denoising rather than a one-shot generator.",
+        "timestamp_s": 1919,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The noise distribution must have the same shape as the data.",
+        "timestamp_s": 1946,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Noise level t ranges from 0 for clean data to 1 for full noise.",
+        "timestamp_s": 1978,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A denoising network receives xt and t and learns to remove a small amount of noise.",
+        "timestamp_s": 2013,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Inference starts from pure noise and repeatedly applies the denoiser to reach a clean sample.",
+        "timestamp_s": 2046,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+      "start_s": 1855,
+      "end_s": 2174
+    },
+    "difficulty": 3.3,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 5,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "transcript_slice": "00:30:55\nof models called diffusion models.\n\n00:31:00\nDiffusion model literature is crazy.\n\n00:31:05\nbefore they tell you at all what's going on.\n\n00:31:11\nthat lead to diffusion models that are all\n\n00:31:14\nAnd there's very different notation, very different\n\n00:31:18\nbetween papers.\n\n00:31:23\nSo I need to put a big caveat here\n\n00:31:28\nof diffusion models with all of their proper mathematical\n\n00:31:31\nInstead, what I'm going to try to do\n\n00:31:35\nas well as an intuitive geometric understanding\n\n00:31:40\nwhich are called rectified flow models.\n\n00:31:45\nand get into all the interesting mathematical nuance of all these\n\n00:31:51\nlecture, unfortunately.\n\n00:31:56\nbehind diffusion models is actually easy.\n\n00:32:03\nAnd like GANs, we want to convert samples from a noise\n\n00:32:11\nbut the way that we're going to do that in diffusion models\n\n00:32:15\nGANs learn this deterministic mapping\n\n00:32:20\nWith a diffusion model, we're going\n\n00:32:24\nSo what we're going to do, first off the first constraint\n\n00:32:30\nthe noise always has to have the same shape as our data.\n\n00:32:36\nthen your noise distribution always\n\n00:32:39\nThey have to be exactly the same shape.\n\n00:32:45\nof our data that are corrupted by increasing levels of noise.\n\n00:32:51\nis this picture of a cat, then t is\n\n00:32:58\nSo at t equals 0 that means no noise.\n\n00:33:03\nt equals 0.3 is a little bit of noise.\n\n00:33:08\nwe mix some of our noise, z, into our data, x.\n\n00:33:14\nAnd those are going to be samples directly\n\n00:33:17\nSo somehow this t parameter is going to interpolate smoothly\n\n00:33:24\nAnd this is something that we can--\n\n00:33:27\ngoing to be almost always Gaussian, Something simple\n\n00:33:33\nAnd now what we're going to do is train a neural network\n\n00:33:38\nSo the neural network is going to receive some sample, which\n\n00:33:45\nwith some intermediate amount of noise.\n\n00:33:48\nto be trained to try to clean it up a little bit,\n\n00:33:52\nSo the training objective here is\n\n00:33:58\nwith some amount of noise and it tries\n\n00:34:02\nThen at inference time what we're going to do\n\n00:34:06\ndraw a noise sample directly from our noise distribution, pz,\n\n00:34:12\nto remove noise from that sample one at a time.\n\n00:34:17\nwe're going to draw a complete sample that's complete noise.\n\n00:34:21\nof the neural network, the network\n\n00:34:26\nSo it will basically be forced to hallucinate\n\n00:34:31\nAnd then once we get to some slightly less noisy example,\n\n00:34:36\nand again ask it to remove just a little bit of noise\n\n00:34:43\nAnd then it'll get a little bit less noisy\n\n00:34:47\nand it'll get a little bit less noisy.\n\n00:34:52\nthen we want to get to a situation\n\n00:34:56\nand then ask the network to remove\n\n00:35:01\nuntil eventually, we've removed all the noise\n\n00:35:07\nSo that's a weird setting.\n\n00:35:11\nbehind diffusion models.\n\n00:35:15\nIt depends.\n\n00:35:18\nI was forced to be very vague about all these things.\n\n00:35:23\nWhat does it mean to corrupt the data with respect to the noise?\n\n00:35:28\nWhat does it mean to apply it iteratively at inference?\n\n00:35:34\nof diffusion, there's a lot of different variants\n\n00:35:39\nSo this slide is intended to be a fairly high level\n\n00:35:42\nAnd then different specific implementations\n\n00:35:46\nfor what all these terms specifically mean.\n\n00:35:53\nOK, so then let's make this more concrete.\n\n00:35:59\nto a particular category of diffusion models called\n\n00:36:03\nSome people may argue with me and say that rectified flow is\n\n00:36:07\nSome people might say that they're different things.\n\n00:36:11\nTo me, rectified flow is a kind of diffusion model.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_14::seg4",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_14::seg4",
+      "global_kp_id": "kp_rectified_flow_formulation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "name": "Diffusion denoising intuition",
+      "description": "Diffusion generates by starting from noise and repeatedly removing small amounts of noise.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because diffusion denoising intuition formalizes how diffusion generates by starting from noise and repeatedly removing small amounts of noise, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_rectified_flow_formulation",
+      "name": "Rectified flow formulation",
+      "description": "Rectified flow trains a network to predict a velocity vector along a straight path between data and noise.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rectified flow formulation formalizes how rectified flow trains a network to predict a velocity vector along a straight path between data and noise, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp14"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.15,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture14-generative-models-2_transcript.txt"
+  }
+}

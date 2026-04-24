@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for procedural questions about learned forward models, planning by optimizing action sequences, receding-horizon replanning, and different state representations such as pixels, keypoints, and particles.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the role of a learned forward dynamics model in model-based planning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It predicts the next state from the current state and action",
+        "It replaces the need for any reward or goal specification",
+        "It directly outputs the globally optimal action without search",
+        "It guarantees perfect sim-to-real transfer"
+      ],
+      "answer_index": 0,
+      "explanation": "The learned model approximates how the world evolves, which lets the robot mentally test action sequences before executing them.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "predict current state and action",
+          "forward model"
+        ],
+        "timestamps": [
+          "00:42:24",
+          "00:42:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do many model-based control loops execute only the first action of an optimized plan before replanning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because later planned actions are guaranteed to be invalid",
+        "Because replanning lets the robot correct for model error using fresh observations",
+        "Because GPUs cannot optimize longer trajectories",
+        "Because the model only predicts one step ahead"
+      ],
+      "answer_index": 1,
+      "explanation": "Executing just the first action and then replanning is a practical way to stay robust when the world and the learned model are imperfect.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "only executes the first actions",
+          "re-optimize the action sequence"
+        ],
+        "timestamps": [
+          "00:43:38",
+          "00:43:49"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which representation is the best match for modeling deformable materials like granular media or dough?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A fixed classification label per object",
+        "A single Q-value for the whole scene",
+        "A particle-based dynamics representation",
+        "A bag-of-words embedding"
+      ],
+      "answer_index": 2,
+      "explanation": "Particles are a natural fit for materials whose mass redistributes and deforms, such as grains or dough, where rigid-body assumptions are too limited.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "particle dynamics models",
+          "granular media and dough"
+        ],
+        "timestamps": [
+          "00:45:48",
+          "00:46:24"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q1",
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q2",
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q3",
+      "global_kp_id": "kp_learned_forward_dynamics_for_model_based_planning",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the role of a learned forward dynamics model in model-based planning\" is a direct reinforcement check and should land on the easier side."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why do many model-based control loops execute only the first action of an optimized plan before replanning\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which representation is the best match for modeling deformable materials like granular media or dough\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the role of a learned forward dynamics model in model-based planning\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why do many model-based control loops execute only the first action of an optimized plan before replanning\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg6-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which representation is the best match for modeling deformable materials like granular media or dough\" checks whether the learner can execute the procedure reliably."
+    }
+  ]
+}

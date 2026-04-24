@@ -1,7 +1,7 @@
 """
 models/learning.py
 ------------------
-Learning activity models: Session, Interaction, MasteryScore, LearningPath.
+Canonical learning runtime tables plus compatibility session/interaction IDs.
 """
 
 import enum
@@ -19,21 +19,17 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
-    from src.models.content import KnowledgeComponent, Module, Question, Topic
     from src.models.user import User
-
-# ---------------------------------------------------------------------------
-# Enums
-# ---------------------------------------------------------------------------
 
 
 class SessionType(enum.StrEnum):
@@ -79,11 +75,6 @@ class SelectedAnswer(enum.StrEnum):
     D = "D"
 
 
-# ---------------------------------------------------------------------------
-# Session
-# ---------------------------------------------------------------------------
-
-
 class Session(UUIDPrimaryKeyMixin, Base):
     """A single learning or assessment session."""
 
@@ -99,28 +90,34 @@ class Session(UUIDPrimaryKeyMixin, Base):
     )
     topic_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("topics.id", ondelete="SET NULL"),
         nullable=True,
+        comment="Archived legacy compatibility field; no active FK/runtime reads.",
     )
     module_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("modules.id", ondelete="SET NULL"),
         nullable=True,
+        comment="Archived legacy compatibility field; no active FK/runtime reads.",
     )
-
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
     total_questions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     score_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
+    canonical_phase: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    canonical_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    canonical_section_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("course_sections.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
-    # Relationships
     user: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
-    topic: Mapped["Topic | None"] = relationship("Topic", lazy="select")  # type: ignore[name-defined]
-    module: Mapped["Module | None"] = relationship("Module", lazy="select")  # type: ignore[name-defined]
     interactions: Mapped[list["Interaction"]] = relationship(
         "Interaction", back_populates="session", lazy="select"
     )
@@ -128,14 +125,11 @@ class Session(UUIDPrimaryKeyMixin, Base):
     __table_args__ = (
         Index("ix_sessions_user_id", "user_id"),
         Index("ix_sessions_user_type", "user_id", "session_type"),
+        Index("ix_sessions_canonical_unit", "canonical_unit_id"),
+        Index("ix_sessions_canonical_section", "canonical_section_id"),
         Index("ix_sessions_started_at", "started_at"),
         CheckConstraint("score_percent >= 0 AND score_percent <= 100", name="ck_score_range"),
     )
-
-
-# ---------------------------------------------------------------------------
-# Interaction
-# ---------------------------------------------------------------------------
 
 
 class Interaction(UUIDPrimaryKeyMixin, Base):
@@ -153,15 +147,18 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
         ForeignKey("sessions.id", ondelete="CASCADE"),
         nullable=False,
     )
-    question_id: Mapped[uuid.UUID] = mapped_column(
+    question_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("questions.id", ondelete="RESTRICT"),
-        nullable=False,
+        nullable=True,
+        comment="Archived legacy compatibility field; canonical_item_id is authoritative.",
     )
-
+    canonical_item_id: Mapped[str | None] = mapped_column(
+        String(180),
+        ForeignKey("question_bank.item_id", ondelete="RESTRICT"),
+        nullable=True,
+    )
     sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
     global_sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
-
     selected_answer: Mapped["SelectedAnswer | None"] = mapped_column(
         Enum(SelectedAnswer, name="selected_answer_enum"), nullable=True
     )
@@ -170,170 +167,227 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
     changed_answer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     hint_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     explanation_viewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    # Relationships
     user: Mapped["User"] = relationship("User", back_populates="interactions")  # type: ignore[name-defined]
     session: Mapped["Session"] = relationship("Session", back_populates="interactions")
-    question: Mapped["Question"] = relationship("Question", back_populates="interactions")  # type: ignore[name-defined]
 
     __table_args__ = (
         Index("ix_interactions_user_id", "user_id"),
         Index("ix_interactions_session_id", "session_id"),
         Index("ix_interactions_question_id", "question_id"),
+        Index("ix_interactions_canonical_item_id", "canonical_item_id"),
         Index("ix_interactions_user_timestamp", "user_id", "timestamp"),
         Index("ix_interactions_global_seq", "user_id", "global_sequence_position"),
     )
 
 
-# ---------------------------------------------------------------------------
-# MasteryScore
-# ---------------------------------------------------------------------------
+class LearnerMasteryKP(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Posterior-like mastery state for a user × canonical KP pair."""
 
-
-class MasteryScore(UUIDPrimaryKeyMixin, Base):
-    """Tracks the estimated mastery probability for a user × topic (× optional KC) pair."""
-
-    __tablename__ = "mastery_scores"
+    __tablename__ = "learner_mastery_kp"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    topic_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("topics.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    kc_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("knowledge_components.id", ondelete="SET NULL"),
-        nullable=True,
-        comment="NULL means score is at topic grain, not KC grain",
-    )
+    kp_id: Mapped[str] = mapped_column(String(160), nullable=False)
+    theta_mu: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    theta_sigma: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    mastery_mean_cached: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    n_items_observed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    updated_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
-    mastery_probability: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
-    mastery_level: Mapped[MasteryLevel] = mapped_column(
-        Enum(MasteryLevel, name="mastery_level_enum"),
-        nullable=False,
-        default=MasteryLevel.not_started,
-    )
-    bloom_max_achieved: Mapped[str | None] = mapped_column(
-        String(50), nullable=True, comment="Highest Bloom level demonstrated (remember → analyze)"
-    )
-    evidence_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    recent_trend: Mapped[RecentTrend | None] = mapped_column(
-        Enum(RecentTrend, name="recent_trend_enum"), nullable=True
-    )
-    last_practiced: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False,
-    )
-
-    # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="mastery_scores")  # type: ignore[name-defined]
-    topic: Mapped["Topic"] = relationship("Topic", lazy="select")  # type: ignore[name-defined]
-    knowledge_component: Mapped["KnowledgeComponent | None"] = relationship(  # type: ignore[name-defined]
-        "KnowledgeComponent", lazy="select"
-    )
+    user: Mapped["User"] = relationship("User", back_populates="learner_mastery_kp", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
-        UniqueConstraint("user_id", "topic_id", "kc_id", name="uq_mastery_user_topic_kc"),
-        Index("ix_mastery_user_id", "user_id"),
-        Index("ix_mastery_user_topic", "user_id", "topic_id"),
+        UniqueConstraint("user_id", "kp_id", name="uq_learner_mastery_kp_user_kp"),
+        Index("ix_learner_mastery_kp_user", "user_id"),
+        Index("ix_learner_mastery_kp_kp", "kp_id"),
+        CheckConstraint("theta_sigma >= 0", name="ck_learner_mastery_kp_sigma_nonnegative"),
         CheckConstraint(
-            "mastery_probability >= 0 AND mastery_probability <= 1",
-            name="ck_mastery_probability_range",
+            "mastery_mean_cached >= 0 AND mastery_mean_cached <= 1",
+            name="ck_learner_mastery_kp_mastery_range",
+        ),
+        CheckConstraint(
+            "n_items_observed >= 0",
+            name="ck_learner_mastery_kp_items_nonnegative",
         ),
     )
 
 
-# ---------------------------------------------------------------------------
-# MasteryHistory (audit trail for every mastery change)
-# ---------------------------------------------------------------------------
+class GoalPreference(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Persistent learner goal profile for planner-scoped decisions."""
 
-
-class MasteryHistory(UUIDPrimaryKeyMixin, Base):
-    """Append-only audit log of mastery changes — one row per upsert."""
-
-    __tablename__ = "mastery_history"
+    __tablename__ = "goal_preferences"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
     )
-    topic_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("topics.id", ondelete="CASCADE"), nullable=False
-    )
-    kc_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("knowledge_components.id", ondelete="SET NULL"), nullable=True
-    )
-    old_mastery_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
-    new_mastery_probability: Mapped[float] = mapped_column(Float, nullable=False)
-    old_mastery_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    new_mastery_level: Mapped[str] = mapped_column(String(50), nullable=False)
-    evidence_count: Mapped[int] = mapped_column(Integer, nullable=False)
-    trigger_session_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="SET NULL"), nullable=True
-    )
-    changed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    goal_weights_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    selected_course_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_embedding: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_embedding_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    derived_from_course_set_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    user: Mapped["User"] = relationship("User", back_populates="goal_preferences", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
-        Index("ix_mh_user_topic", "user_id", "topic_id"),
-        Index("ix_mh_changed_at", "changed_at"),
+        Index("ix_goal_preferences_user", "user_id"),
+        Index("ix_goal_preferences_hash", "derived_from_course_set_hash"),
     )
 
 
-# ---------------------------------------------------------------------------
-# LearningPath
-# ---------------------------------------------------------------------------
+class WaivedUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Audit record for units explicitly waived/skipped by planner logic."""
 
-
-class LearningPath(UUIDPrimaryKeyMixin, TimestampMixin, Base):
-    """AI-generated personalised learning plan entry for a user."""
-
-    __tablename__ = "learning_paths"
+    __tablename__ = "waived_units"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    topic_id: Mapped[uuid.UUID] = mapped_column(
+    learning_unit_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("topics.id", ondelete="CASCADE"),
+        ForeignKey("learning_units.id", ondelete="CASCADE"),
         nullable=False,
     )
-    action: Mapped[PathAction] = mapped_column(
-        Enum(PathAction, name="path_action_enum"), nullable=False
-    )
-    estimated_hours: Mapped[float | None] = mapped_column(Float, nullable=True)
-    order_index: Mapped[int] = mapped_column(
-        Integer, nullable=False, comment="Step order within the full path"
-    )
-    week_number: Mapped[int | None] = mapped_column(
-        Integer, nullable=True, comment="Suggested calendar week (1-based)"
-    )
-    status: Mapped[PathStatus] = mapped_column(
-        Enum(PathStatus, name="path_status_enum"),
-        nullable=False,
-        default=PathStatus.pending,
-    )
+    evidence_items: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    mastery_lcb_at_waive: Mapped[float | None] = mapped_column(Float, nullable=True)
+    skip_quiz_score: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="learning_paths")  # type: ignore[name-defined]
-    topic: Mapped["Topic"] = relationship("Topic", lazy="select")  # type: ignore[name-defined]
+    user: Mapped["User"] = relationship("User", back_populates="waived_units", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
-        Index("ix_lp_user_id", "user_id"),
-        Index("ix_lp_user_status", "user_id", "status"),
-        Index("ix_lp_user_order", "user_id", "order_index"),
+        UniqueConstraint("user_id", "learning_unit_id", name="uq_waived_units_user_unit"),
+        Index("ix_waived_units_user", "user_id"),
+        Index("ix_waived_units_learning_unit", "learning_unit_id"),
+        CheckConstraint(
+            "mastery_lcb_at_waive IS NULL OR (mastery_lcb_at_waive >= 0 AND mastery_lcb_at_waive <= 1)",
+            name="ck_waived_units_mastery_lcb_range",
+        ),
+        CheckConstraint(
+            "skip_quiz_score IS NULL OR (skip_quiz_score >= 0 AND skip_quiz_score <= 100)",
+            name="ck_waived_units_skip_quiz_score_range",
+        ),
+    )
+
+
+class PlanHistory(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Planner run snapshot for audit, replay, and diffing."""
+
+    __tablename__ = "plan_history"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    parent_plan_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plan_history.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    trigger: Mapped[str] = mapped_column(String(80), nullable=False)
+    recommended_path_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_snapshot_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    weights_used_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    user: Mapped["User"] = relationship("User", back_populates="plan_histories", lazy="select")  # type: ignore[name-defined]
+    parent_plan: Mapped["PlanHistory | None"] = relationship(
+        "PlanHistory",
+        remote_side="PlanHistory.id",
+        lazy="select",
+    )
+
+    __table_args__ = (
+        Index("ix_plan_history_user", "user_id"),
+        Index("ix_plan_history_parent", "parent_plan_id"),
+        Index("ix_plan_history_trigger", "trigger"),
+    )
+
+
+class RationaleLog(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Per-unit rationale emitted by planner ranking logic."""
+
+    __tablename__ = "rationale_log"
+
+    plan_history_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plan_history.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    learning_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    rank: Mapped[int] = mapped_column(Integer, nullable=False)
+    reason_code: Mapped[str] = mapped_column(String(80), nullable=False)
+    term_breakdown_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    rationale_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    __table_args__ = (
+        Index("ix_rationale_log_plan", "plan_history_id"),
+        Index("ix_rationale_log_unit", "learning_unit_id"),
+        Index("ix_rationale_log_plan_rank", "plan_history_id", "rank"),
+    )
+
+
+class PlannerSessionState(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Planner-local session counters and sticky state across replans."""
+
+    __tablename__ = "planner_session_state"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    session_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    last_plan_history_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plan_history.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    bridge_chain_depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    consecutive_bridge_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    current_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    current_stage: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    current_progress: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    last_activity: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    state_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    user: Mapped["User"] = relationship("User", back_populates="planner_session_states", lazy="select")  # type: ignore[name-defined]
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "session_id", name="uq_planner_session_state_user_session"),
+        Index("ix_planner_session_state_user", "user_id"),
+        Index("ix_planner_session_state_last_plan", "last_plan_history_id"),
+        Index("ix_planner_session_state_current_unit", "current_unit_id"),
+        Index("ix_planner_session_state_last_activity", "last_activity"),
+        CheckConstraint(
+            "bridge_chain_depth >= 0",
+            name="ck_planner_session_state_bridge_depth_nonnegative",
+        ),
+        CheckConstraint(
+            "consecutive_bridge_count >= 0",
+            name="ck_planner_session_state_consecutive_bridge_nonnegative",
+        ),
+        CheckConstraint(
+            "current_stage IS NULL OR current_stage IN ('watching', 'quiz_in_progress', 'post_quiz', 'between_units')",
+            name="ck_planner_session_state_current_stage",
+        ),
     )

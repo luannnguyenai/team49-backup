@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture04-wordvecs-lm::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about gradient descent, learning-rate choice, SGD versus full-batch updates, and why random initialization matters for word vectors. The concepts are stated directly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why must the learning rate in gradient descent usually be kept small?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A large step always finds the global minimum faster",
+        "A large step can overshoot and even move to a worse point",
+        "A small step removes the need to compute gradients",
+        "A small step guarantees zero training error in one update"
+      ],
+      "answer_index": 1,
+      "explanation": "The learning rate scales the update. If it is too large, the optimization step can jump past a good region and increase the objective instead of decreasing it.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "step size or learning rate",
+          "worse point than we started"
+        ],
+        "timestamps": [
+          "00:04:54",
+          "00:05:34"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main reason full-batch gradient descent is usually impractical for neural networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It cannot use vector operations",
+        "It requires evaluating the objective and gradient on the whole training set before each update",
+        "It only works for convex losses",
+        "It prevents any randomness in initialization"
+      ],
+      "answer_index": 1,
+      "explanation": "Full-batch gradient descent waits for a gradient over the entire training set before making one update, which is expensive for large datasets and large models.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gradient_descent_and_sgd",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "problem for the basic gradient descent",
+          "whole training set"
+        ],
+        "timestamps": [
+          "00:05:56",
+          "00:06:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is initializing all word vectors to zero a bad idea?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Zero vectors make the loss undefined",
+        "Zero vectors create symmetry so words receive the same updates",
+        "Zero vectors force the model to use full-batch training",
+        "Zero vectors make the vocabulary too large"
+      ],
+      "answer_index": 1,
+      "explanation": "If every vector starts identically, the model cannot break symmetry: many words behave the same way and receive the same gradients, so useful distinctions never emerge.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_parameter_initialization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "all-zero vectors create false symmetries",
+          "random small numbers"
+        ],
+        "timestamps": [
+          "00:08:28",
+          "00:08:42"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "global_kp_id": "kp_gradient_descent_and_sgd",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "global_kp_id": "kp_parameter_initialization",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why must the learning rate in gradient descent usually be kept small\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the main reason full-batch gradient descent is usually impractical for neural networks\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is initializing all word vectors to zero a bad idea\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why must the learning rate in gradient descent usually be kept small\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the main reason full-batch gradient descent is usually impractical for neural networks\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg1-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is initializing all word vectors to zero a bad idea\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

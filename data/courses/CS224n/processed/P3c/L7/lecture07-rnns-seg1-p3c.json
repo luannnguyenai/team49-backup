@@ -1,0 +1,59 @@
+{
+  "unit_id": "local::lecture07-rnns::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=fyc0Jzr74y4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 1,
+  "review_summary": "Transcript is sufficient for reinforcement questions about why deep learning resurged and why sequence models became central. The core claims are stated directly, so no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture07-rnns-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What historical change motivates studying deep sequence models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Deep networks were always easy to train, so scale never mattered",
+        "Language modeling became important only after transformers were invented",
+        "A few training ideas made much deeper networks practical after years of difficulty",
+        "Backpropagation was discovered only after large language models appeared"
+      ],
+      "answer_index": 2,
+      "explanation": "The key point is that deep networks were long hard to train well, and later training ideas made much deeper models workable in practice.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "deep models with over 100 billion",
+          "ideas and tweaks helped restart progress"
+        ],
+        "timestamps": [
+          "00:03:23",
+          "00:07:38"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture07-rnns-seg1-q1",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "primary"
+    }
+  ]
+}

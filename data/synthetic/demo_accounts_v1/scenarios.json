@@ -1,0 +1,126 @@
+{
+  "dataset": "demo_accounts_v1",
+  "description": "Nine hand-authored login accounts for deterministic UX demos.",
+  "users": [
+    {
+      "email": "demo.firstlogin@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo First Login",
+      "synthetic_case": "first_login",
+      "proficiency_band": "beginner",
+      "course_scope": [],
+      "is_demo_account": true,
+      "is_onboarded": false,
+      "mastery_profile": {},
+      "learning_state": {"unit_count": 0},
+      "sessions": []
+    },
+    {
+      "email": "demo.full@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo Full Two Courses",
+      "synthetic_case": "full_2_courses",
+      "proficiency_band": "proficient",
+      "course_scope": ["cs224n", "cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": 0.75, "theta_sigma": 0.55, "mastery_mean_cached": 0.72, "n_items_observed_base": 6},
+      "learning_state": {"unit_count": 10, "current_stage": "between_units", "last_activity": "2026-04-24T08:30:00Z", "progress_strategy": "completed", "planner_action": "learn"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 4, "answer_pattern": ["correct", "correct", "wrong", "correct"], "completed": true, "response_time_ms": 32000}]
+    },
+    {
+      "email": "demo.cs231@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo CS231 Only",
+      "synthetic_case": "cs231_only",
+      "proficiency_band": "proficient",
+      "course_scope": ["cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": 0.68, "theta_sigma": 0.58, "mastery_mean_cached": 0.70, "n_items_observed_base": 5},
+      "learning_state": {"unit_count": 8, "current_stage": "between_units", "last_activity": "2026-04-24T08:20:00Z", "progress_strategy": "completed", "planner_action": "learn"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 4, "answer_pattern": ["correct", "correct", "wrong", "correct"], "completed": true, "response_time_ms": 33000}]
+    },
+    {
+      "email": "demo.cs224n@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo CS224N Only",
+      "synthetic_case": "cs224n_only",
+      "proficiency_band": "developing",
+      "course_scope": ["cs224n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": -0.2, "theta_sigma": 0.85, "mastery_mean_cached": 0.45, "n_items_observed_base": 4},
+      "learning_state": {"unit_count": 6, "current_stage": "between_units", "last_activity": "2026-04-24T08:15:00Z", "progress_strategy": "completed", "planner_action": "learn"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 4, "answer_pattern": ["correct", "wrong", "correct", "wrong"], "completed": true, "response_time_ms": 47000}]
+    },
+    {
+      "email": "demo.skipper@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo Strong Skipper",
+      "synthetic_case": "strong_skipper",
+      "proficiency_band": "advanced",
+      "course_scope": ["cs224n", "cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": 1.6, "theta_sigma": 0.35, "mastery_mean_cached": 0.91, "n_items_observed_base": 8},
+      "learning_state": {"unit_count": 8, "current_stage": "between_units", "last_activity": "2026-04-24T08:35:00Z", "progress_strategy": "completed", "planner_action": "skip"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 4, "answer_pattern": ["correct", "correct", "correct", "correct"], "completed": true, "response_time_ms": 21000}]
+    },
+    {
+      "email": "demo.reviewer@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo Review Heavy",
+      "synthetic_case": "review_heavy",
+      "proficiency_band": "proficient",
+      "course_scope": ["cs224n", "cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": 0.55, "theta_sigma": 0.72, "mastery_mean_cached": 0.63, "n_items_observed_base": 7},
+      "learning_state": {"unit_count": 7, "current_stage": "between_units", "last_activity": "2026-04-24T08:25:00Z", "progress_strategy": "completed", "planner_action": "quick_review"},
+      "sessions": [
+        {"phase": "mini_quiz", "item_count": 4, "answer_pattern": ["correct", "wrong", "correct", "correct"], "completed": true, "response_time_ms": 35000},
+        {"phase": "review", "item_count": 4, "answer_pattern": ["correct", "correct", "wrong", "correct"], "completed": true, "response_time_ms": 38000}
+      ]
+    },
+    {
+      "email": "demo.beginner@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo Weak Beginner",
+      "synthetic_case": "weak_beginner",
+      "proficiency_band": "beginner",
+      "course_scope": ["cs224n", "cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": -1.05, "theta_sigma": 1.15, "mastery_mean_cached": 0.24, "n_items_observed_base": 2},
+      "learning_state": {"unit_count": 4, "current_stage": "between_units", "last_activity": "2026-04-24T08:05:00Z", "progress_strategy": "first_only", "planner_action": "deep_practice"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 4, "answer_pattern": ["wrong", "wrong", "correct", "wrong"], "completed": true, "response_time_ms": 62000}]
+    },
+    {
+      "email": "demo.abandon.video@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo Abandon Video",
+      "synthetic_case": "abandon_mid_video",
+      "proficiency_band": "developing",
+      "course_scope": ["cs224n", "cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": -0.25, "theta_sigma": 0.9, "mastery_mean_cached": 0.43, "n_items_observed_base": 3},
+      "learning_state": {"unit_count": 3, "current_stage": "watching", "last_activity": "2026-04-24T08:10:00Z", "progress_strategy": "abandon_video", "video_progress_s": 522, "planner_action": "learn"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 2, "answer_pattern": ["correct", "wrong"], "completed": true, "response_time_ms": 50000}]
+    },
+    {
+      "email": "demo.returner@vinuni.edu.vn",
+      "password": "DemoPass123!",
+      "full_name": "Demo Long Returner",
+      "synthetic_case": "abandon_mid_quiz_long_return",
+      "proficiency_band": "proficient",
+      "course_scope": ["cs224n", "cs231n"],
+      "is_demo_account": true,
+      "is_onboarded": true,
+      "mastery_profile": {"theta_mu": 0.7, "theta_sigma": 0.8, "mastery_mean_cached": 0.68, "n_items_observed_base": 5},
+      "learning_state": {"unit_count": 4, "current_stage": "quiz_in_progress", "last_activity": "2026-04-23T10:00:00Z", "progress_strategy": "abandon_quiz", "video_progress_s": 980, "items_remaining_count": 3, "resume_expected": "quick_review", "planner_action": "quick_review"},
+      "sessions": [{"phase": "mini_quiz", "item_count": 2, "answer_pattern": ["correct", "wrong"], "completed": false, "response_time_ms": 39000}]
+    }
+  ]
+}

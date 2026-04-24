@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_15_3d_vision::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=7lxrKDKtykM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about structure-aware shape representations, relationship constraints, hierarchies, and program-like generation. The segment is conceptual and not dependent on unseen diagrams.",
+  "question_bank": [
+    {
+      "item_id": "lecture-15-3d-vision-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What important limitation of classic 3D representations motivates structure-aware shape modeling?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They cannot represent any local surface detail",
+        "They capture geometric detail but often miss global regularities such as symmetry and repetition",
+        "They require language supervision for training",
+        "They can be used only for indoor scenes"
+      ],
+      "answer_index": 1,
+      "explanation": "Standard representations often model shape locally, but they do not by themselves enforce higher-level patterns such as mirrored parts, repeated components, or relational constraints.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_structure_aware_and_programmatic_shape_representations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "chairs are symmetric",
+          "capture global regularities"
+        ],
+        "timestamps": [
+          "01:07:36",
+          "01:08:13"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What do relationship-graph representations add beyond a simple collection of object parts?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They replace geometry with text prompts only",
+        "They encode constraints such as support, symmetry, adjacency, or co-location between parts",
+        "They guarantee a signed distance field at every point",
+        "They remove the need for any hierarchical structure"
+      ],
+      "answer_index": 1,
+      "explanation": "A relationship graph does not just list parts; it also specifies how those parts should relate to one another, which is crucial for plausible structure.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_structure_aware_and_programmatic_shape_representations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "modeling the relationships",
+          "chairs is usually next to the tables"
+        ],
+        "timestamps": [
+          "01:08:55",
+          "01:09:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg8-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is program-like generation appealing for structured 3D shape synthesis?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It expresses repeated and compositional structure with reusable rules such as loops",
+        "It works only for voxel grids and never for parts",
+        "It avoids any need for geometric detail",
+        "It makes symmetry impossible to represent"
+      ],
+      "answer_index": 0,
+      "explanation": "Program-like descriptions can compactly express repeated substructures and compositional rules, which makes them a natural fit for structured objects and scenes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_structure_aware_and_programmatic_shape_representations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "shapes using some form of programs",
+          "synthesize their relations"
+        ],
+        "timestamps": [
+          "01:10:45",
+          "01:10:54"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-15-3d-vision-seg8-q1",
+      "global_kp_id": "kp_structure_aware_and_programmatic_shape_representations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg8-q2",
+      "global_kp_id": "kp_structure_aware_and_programmatic_shape_representations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-15-3d-vision-seg8-q3",
+      "global_kp_id": "kp_structure_aware_and_programmatic_shape_representations",
+      "role": "primary"
+    }
+  ]
+}

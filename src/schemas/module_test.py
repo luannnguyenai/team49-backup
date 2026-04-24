@@ -15,7 +15,7 @@ from __future__ import annotations
 import uuid
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 from src.models.content import BloomLevel, DifficultyBucket
 from src.models.learning import SelectedAnswer
@@ -26,7 +26,9 @@ from src.models.learning import SelectedAnswer
 
 
 class ModuleTestStartRequest(BaseModel):
-    module_id: uuid.UUID
+    section_id: uuid.UUID = Field(
+        validation_alias=AliasChoices("section_id", "module_id")
+    )
 
 
 class QuestionForModuleTest(BaseModel):
@@ -36,7 +38,7 @@ class QuestionForModuleTest(BaseModel):
 
     id: uuid.UUID
     item_id: str
-    topic_id: uuid.UUID
+    learning_unit_id: uuid.UUID
     bloom_level: BloomLevel
     difficulty_bucket: DifficultyBucket
     stem_text: str
@@ -47,21 +49,21 @@ class QuestionForModuleTest(BaseModel):
     time_expected_seconds: int | None
 
 
-class TopicQuestionsGroup(BaseModel):
-    """Questions for one topic within the module test."""
+class LearningUnitQuestionsGroup(BaseModel):
+    """Questions for one learning unit within the section test."""
 
-    topic_id: uuid.UUID
-    topic_name: str
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
     questions: list[QuestionForModuleTest]
 
 
 class ModuleTestStartResponse(BaseModel):
     session_id: uuid.UUID
-    module_id: uuid.UUID
-    module_name: str
-    total_topics: int
-    total_questions: int  # sum across all topics (≤ topics × 5)
-    topics: list[TopicQuestionsGroup]
+    section_id: uuid.UUID
+    section_title: str
+    total_learning_units: int
+    total_questions: int
+    learning_units: list[LearningUnitQuestionsGroup]
 
 
 # ---------------------------------------------------------------------------
@@ -79,11 +81,11 @@ class ModuleTestSubmitRequest(BaseModel):
     answers: list[ModuleTestAnswerInput] = Field(min_length=1)
 
 
-class TopicTestResult(BaseModel):
-    """Per-topic grading detail."""
+class LearningUnitTestResult(BaseModel):
+    """Per-learning-unit grading detail."""
 
-    topic_id: uuid.UUID
-    topic_name: str
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
     score: str  # e.g. "4/5"
     score_percent: float  # 0.0 – 100.0
     bloom_max: str | None  # highest Bloom level answered correctly
@@ -91,27 +93,27 @@ class TopicTestResult(BaseModel):
     weak_kcs: list[str]  # KC names linked to wrong answers
 
 
-class ReviewTopicSuggestion(BaseModel):
-    """One topic recommended for remediation (only present when verdict == fail)."""
+class ReviewLearningUnitSuggestion(BaseModel):
+    """One learning unit recommended for remediation (only present when verdict == fail)."""
 
-    topic_id: uuid.UUID
-    topic_name: str
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
     weak_kcs: list[str]
     misconceptions: list[str]  # misconception IDs triggered
     estimated_review_hours: float
 
 
-class NextModuleInfo(BaseModel):
-    module_id: uuid.UUID
-    module_name: str
+class NextSectionInfo(BaseModel):
+    section_id: uuid.UUID
+    section_title: str
 
 
 class WrongAnswerDetail(BaseModel):
     """Full detail for one incorrectly-answered question — shown in results UI."""
 
     question_id: uuid.UUID
-    topic_id: uuid.UUID
-    topic_name: str
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
     stem_text: str
     option_a: str
     option_b: str
@@ -129,22 +131,22 @@ class ModuleTestResultResponse(BaseModel):
     """
 
     session_id: uuid.UUID
-    module_id: uuid.UUID
-    module_name: str
+    section_id: uuid.UUID
+    section_title: str
 
     # Overall
     total_score_percent: float
     passed: bool  # True if total ≥ 70 %
 
-    # Per-topic breakdown
-    per_topic: list[TopicTestResult]
+    # Per-learning-unit breakdown
+    per_learning_unit: list[LearningUnitTestResult]
 
     # Remediation (non-empty only when passed == False)
-    recommended_review_topics: list[ReviewTopicSuggestion]
-    estimated_review_hours: float  # sum of review hours for weak topics
+    recommended_review_units: list[ReviewLearningUnitSuggestion]
+    estimated_review_hours: float
 
     # Progression (non-None only when passed == True)
-    next_module: NextModuleInfo | None
+    next_section: NextSectionInfo | None
 
     # Per-question wrong-answer details (for review section)
     wrong_answers: list[WrongAnswerDetail]

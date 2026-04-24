@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_16::seg9",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for two SAM questions covering promptable segmentation and ambiguity handling.",
+  "question_bank": [
+    {
+      "item_id": "lecture_16_seg9_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is promptable segmentation important in SAM?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because prompts help specify exactly which object or instance the user wants segmented",
+        "Because SAM can only segment images if the prompt is a full sentence caption",
+        "Because segmentation works only when the image contains one object category",
+        "Because promptable segmentation removes the need for an image encoder"
+      ],
+      "answer_index": 0,
+      "explanation": "Segmentation requests are often ambiguous. A point, box, or other prompt tells the model which object or region the user actually cares about.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sam_promptable_segmentation_architecture",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "point to which cat",
+          "prompt encoder"
+        ],
+        "timestamps": [
+          "00:55:33",
+          "00:56:24"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_16_seg9_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does SAM output multiple masks for a single prompt?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because a prompt can correspond to multiple valid object extents or granularities",
+        "Because the decoder cannot produce a single mask at test time",
+        "Because SAM must always segment every object in the image simultaneously",
+        "Because mask diversity replaces the need for training data"
+      ],
+      "answer_index": 0,
+      "explanation": "Even a simple point can be ambiguous about whether the user wants a part, an instance, or a larger region. Returning multiple candidates lets the system preserve those plausible interpretations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_sam_ambiguity_handling_and_data_engine",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "outputs multiple masks",
+          "different valid object extents"
+        ],
+        "timestamps": [
+          "00:57:16",
+          "00:57:16"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg9_q1",
+      "global_kp_id": "kp_sam_promptable_segmentation_architecture",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg9_q2",
+      "global_kp_id": "kp_sam_ambiguity_handling_and_data_engine",
+      "role": "primary"
+    }
+  ]
+}

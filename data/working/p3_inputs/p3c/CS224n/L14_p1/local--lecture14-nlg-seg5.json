@@ -1,0 +1,210 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture14-nlg",
+    "lecture_title": "Lecture 14 - Natural Language Generation",
+    "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY"
+  },
+  "unit": {
+    "unit_id": "local::lecture14-nlg::seg5",
+    "course_id": "cs224n",
+    "name": "Exposure bias, alternative training schemes, and RLHF context",
+    "description": "Connects training-time mismatch to generation errors and surveys methods that go beyond plain MLE.",
+    "summary": "The lecture revisits repetition from the training side and argues that maximum-likelihood language models can assign high probability to bad degenerate strings [ts=2473s]. The core diagnosis is exposure bias: under teacher forcing the model trains on gold prefixes, but at generation time it must condition on its own imperfect outputs, creating a harmful train-test mismatch [ts=2510s] [ts=2541s]. Scheduled sampling narrows this gap by mixing model-generated and gold tokens with a probability that increases through training, though the objective can be unstable [ts=2560s]. DAgger similarly augments training data with model-generated sequences so the model learns on states it will actually encounter [ts=2603s]. The lecture also presents retrieval-augmented generation, where the model begins from a retrieved prototype and edits it by insertion, deletion, or swapping, reducing exposure bias because generation no longer starts from scratch left-to-right [ts=2655s]. Reinforcement learning is then framed as an MDP over states, actions, policies, and rewards, with rewards derived from automatic metrics or human preference [ts=2693s] [ts=2827s]. The lecture warns that optimizing BLEU or ROUGE can game the metric rather than improve true quality [ts=2744s]. It finishes with the modern pipeline behind ChatGPT-style systems: large-scale pretraining, instruction tuning, and then RLHF, with RLHF viewed as difficult from scratch but effective on top of a strong pretrained model [ts=3110s] [ts=3130s].",
+    "key_points": [
+      {
+        "text": "MLE-trained language models can place high probability on degenerate repetitive strings.",
+        "timestamp_s": 2473,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Exposure bias is the mismatch between training on gold prefixes and generating from model-produced prefixes at test time.",
+        "timestamp_s": 2510,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Scheduled sampling mixes generated and gold tokens during training, gradually increasing the amount of model-generated context.",
+        "timestamp_s": 2560,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "DAgger reduces train-test mismatch by adding model-generated sequences into the training distribution.",
+        "timestamp_s": 2603,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Retrieval-augmented generation starts from a retrieved prototype and edits it, reducing exposure bias.",
+        "timestamp_s": 2655,
+        "evidence_type": "example"
+      },
+      {
+        "text": "RL for NLG treats next-token selection as actions with rewards from metrics or human preference, but optimizing proxy rewards can game the objective.",
+        "timestamp_s": 2693,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A modern ChatGPT-style pipeline is pretraining, then instruction tuning, then RLHF.",
+        "timestamp_s": 3110,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=N9L32bFieEY&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=10",
+      "start_s": 2419,
+      "end_s": 3305
+    },
+    "difficulty": 0.74,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 15,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture revisits repetition from the training side and argues that maximum-likelihood language models can assign high probability to bad degenerate strings [ts=2473s]. The core diagnosis is exposure bias: under teacher forcing the model trains on gold prefixes, but at generation time it must condition on its own imperfect outputs, creating a harmful train-test mismatch [ts=2510s] [ts=2541s]. Scheduled sampling narrows this gap by mixing model-generated and gold tokens with a probability that increases through training, though the objective can be unstable [ts=2560s]. DAgger similarly augments training data with model-generated sequences so the model learns on states it will actually encounter [ts=2603s]. The lecture also presents retrieval-augmented generation, where the model begins from a retrieved prototype and edits it by insertion, deletion, or swapping, reducing exposure bias because generation no longer starts from scratch left-to-right [ts=2655s]. Reinforcement learning is then framed as an MDP over states, actions, policies, and rewards, with rewards derived from automatic metrics or human preference [ts=2693s] [ts=2827s]. The lecture warns that optimizing BLEU or ROUGE can game the metric rather than improve true quality [ts=2744s]. It finishes with the modern pipeline behind ChatGPT-style systems: large-scale pretraining, instruction tuning, and then RLHF, with RLHF viewed as difficult from scratch but effective on top of a strong pretrained model [ts=3110s] [ts=3130s].",
+  "target_kp_ids": [
+    "kp_exposure_bias",
+    "kp_training_alternatives_to_reduce_exposure_bias",
+    "kp_reinforcement_learning_and_rlhf_for_nlg"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "video_clip_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "transcript_slice": "00:40:19\nin NLG in the last couple of years\n\n00:40:24\nFor example, the nucleus sampling paper\n\n00:40:31\nSo moving on to talk about training NLG models.\n\n00:40:39\nand I'm just trying to show them again because even though we\n\n00:40:46\nsearch, doing sampling, but it's still\n\n00:40:51\nthat your model would put so much probability\n\n00:40:56\nSo we ask this question, well, is repetition due to how\n\n00:41:04\nYou have also seen this problem before,\n\n00:41:08\nor this self-amplification effect.\n\n00:41:13\nthat model trained via MLE objective\n\n00:41:19\nby mode of the distribution, I mean the arg max\n\n00:41:22\nSo basically, they would assign high probability\n\n00:41:26\nAnd this is definitely problematic for a model\n\n00:41:30\nSo why is this the case?\n\n00:41:35\nin machine learning in general, not just machine translation?\n\n00:41:40\nThe answer here is not really, especially for text,\n\n00:41:47\nAnd we call this problem exposure bias.\n\n00:41:53\nto exposure bias at generation time\n\n00:41:58\nare gold context tokens from real human-generated texts\n\n00:42:04\nBut during generation time, our model's input become previously\n\n00:42:12\nAnd suppose that our model has minor errors, then like y hat\n\n00:42:20\nless than t.\n\n00:42:25\ncauses a discrepancy between training and test time, which\n\n00:42:31\nand we call this problem exposure bias.\n\n00:42:37\nto address this exposure bias problem.\n\n00:42:44\nmeans that with probability p, we try to decode a token\n\n00:42:52\nAnd with probability 1 minus p, we\n\n00:42:57\nSo throughout training, we try to increase p\n\n00:43:03\nfor test time generation.\n\n00:43:08\nbecause, using these p probabilities,\n\n00:43:15\nbetween training and test time.\n\n00:43:20\nand training can be very unstable.\n\n00:43:25\nand the method is called DAgger.\n\n00:43:31\nwe try to generate a sequence of texts from the current model\n\n00:43:36\ninto the training data.\n\n00:43:42\naugmentation scheme to make sure that the training\n\n00:43:47\nare closer together.\n\n00:43:52\naggregation, are ways to narrow the discrepancy\n\n00:43:56\nYes, question.\n\n00:43:58\nWhat is the?\n\n00:44:00\nOh, gold token just means human text.\n\n00:44:06\nYou will see also corpus that are human-written.\n\n00:44:13\nOK, cool.\n\n00:44:18\nSo we first learn to retrieve a sequence from some existing\n\n00:44:24\ntrain a model to actually edit the retrieved text\n\n00:44:31\nWe can add or remove tokens from this prototype\n\n00:44:39\nSo this doesn't really suffer from exposure bias\n\n00:44:44\nSo that at training time and at test time,\n\n00:44:48\nanymore because you are not generating from left to right.\n\n00:44:56\nSo here, the idea is to cast your generation problem\n\n00:45:02\nSo there is the state s, which is the model's representation\n\n00:45:08\nThere is action a, which is basically the next token\n\n00:45:13\nAnd there's policy which is the language model\n\n00:45:17\nAnd there is the reward r which is provided\n\n00:45:22\nAnd the idea here, well, we won't\n\n00:45:27\nand how it works, but we will recommend the class CS 234.\n\n00:45:36\nbecause reinforcement learning involves a reward function,\n\n00:45:40\nSo how do we do reward estimation for text generation?\n\n00:45:46\nthe evaluation metrics.\n\n00:45:51\nso why not just improve for evaluation metrics\n\n00:45:55\nFor example, in the case of machine translation,\n\n00:46:01\nIn the case of summarization, we can use ROUGE score\n\n00:46:06\nBut we really need to be careful about optimizing for tasks\n\n00:46:13\nmerely proxies for the generation quality.\n\n00:46:18\nthe BLEU score by a lot, but when you run human evaluations,\n\n00:46:26\ngenerated text is no better than the previous one or even worse\n\n00:46:31\nSo we want to be careful about this case of not\n\n00:46:37\nSo what behaviors can we tie to a reward function?\n\n00:46:42\nThere are so many things that we can do.\n\n00:46:46\nfor image captioning.\n\n00:46:52\nthat we are generating simple English that\n\n00:46:55\nWe can do formality and politeness\n\n00:47:00\nyell at you.\n\n00:47:06\nis recently is human preference.\n\n00:47:11\nthat captures human preference.\n\n00:47:14\nbehind the ChatGPT model.\n\n00:47:18\nask human to rank a bunch of generated text\n\n00:47:23\nwill use this preference data to learn a reward function which\n\n00:47:31\nthat humans might prefer and assign allow score to something\n\n00:47:37\nYeah, question.\n\n00:47:41\nLike, is it all just [INAUDIBLE]??\n\n00:47:44\nI mean, it is going to be very expensive.\n\n00:47:48\nmodels training like 170 billion parameter models,\n\n00:47:54\nwell, they can afford hiring lots of humans\n\n00:48:00\nHow much data would we need to do something like this?\n\n00:48:06\nSo I think it's kind of a mystery about how much data\n\n00:48:12\nof ChatGPT.\n\n00:48:16\nyou try to fine-tune a model on some downstream task,\n\n00:48:20\nyour model on human preference.\n\n00:48:25\non the scale of 50k to 100k.\n\n00:48:31\nreleased some dataset about human preference.\n\n00:48:36\nif I remember correctly.\n\n00:48:39\nSo we talked about earlier about how many\n\n00:48:44\nas their architecture.\n\n00:48:50\nTo-- what do you mean?\n\n00:48:53\nYeah.\n\n00:48:57\nis kind of a modeling tool.\n\n00:49:01\nthat you are trying to optimize.\n\n00:49:03\nare optimizing for an RL objective.\n\n00:49:09\nto the architecture choice.\n\n00:49:13\nYou just use transformer to give you\n\n00:49:16\nor to try to estimate probability of a sequence.\n\n00:49:22\nyou use that probability of the sequence\n\n00:49:28\nAnd then suppose that you are trying to do policy gradient\n\n00:49:32\nThen you need to estimate the probability of that sequence.\n\n00:49:38\nthrough transformer, which is doable.\n\n00:49:42\nand objectives are orthogonal.\n\n00:49:46\nIf you have a transformer, you can also do it.\n\n00:49:51\nCool.\n\n00:49:54\nYeah?\n\n00:49:58\nFor example, we can build another transformer\n\n00:50:02\nYeah, I think that's exactly what they did.\n\n00:50:07\nYou use GPT-3 as the generator that generate text,\n\n00:50:14\ncould probably also be GPT-3, but I'm\n\n00:50:19\nAnd then once you have a human preference model,\n\n00:50:24\nto put it into RL as the reward model,\n\n00:50:30\nand then you apply RL objectives and then update them.\n\n00:50:40\nOK, cool.\n\n00:50:44\nI would encourage you to come to the next lecture, where\n\n00:50:50\nRLHF is shorthand for RL using Human Feedback.\n\n00:51:00\nTeacher forcing is still the main algorithm\n\n00:51:05\nand exposure bias causes problems in text generation\n\n00:51:10\nFor example, it causes models to lose coherence,\n\n00:51:15\nAnd models must learn to recover from their own bad samples\n\n00:51:24\nAnother approach to reduce exposure bias\n\n00:51:30\nAnd we also discussed how to do training with RL.\n\n00:51:37\nthat are preferred by human--\n\n00:51:42\nSo to be very up to date, in the best language model\n\n00:51:50\nFor example, we would first pre-train a large language\n\n00:51:55\nand this kind of gets you GPT-3, which is the original version.\n\n00:52:03\nto fine-tune the language model, to fine-tune\n\n00:52:08\nto follow human instructions.\n\n00:52:13\nthat these models are well aligned with human preference.\n\n00:52:20\nit's probably going to be very hard for the model\n\n00:52:24\nfor text data, et cetera.\n\n00:52:28\nBut with all this smart tricks about pre-training\n\n00:52:36\noff to a good start.\n\n00:52:40\nAny questions so far?\n\n00:52:44\nYes?\n\n00:52:45\nThis is going [INAUDIBLE],, but is the difference\n\n00:52:51\nlong the replacement words are?\n\n00:52:58\nis how long the sequence are?\n\n00:53:05\nyou are kind of trying to-- you are trying to put\n\n00:53:10\nBut I feel like there can be variations of DAgger.\n\n00:53:14\nThere can be variations of DAgger\n\n00:53:20\nI feel like for schedule sampling is\n\n00:53:24\nbecause, for DAgger, you have to, like--\n\n00:53:29\nI am generating something.\n\n00:53:33\nI put this into the data together and then train\n\n00:53:36\nWhereas DAgger seems to be more flexible in terms\n\n00:53:41\nYes.\n\n00:53:45\nlike how does it help the model improve performance?\n\n00:53:51\nI feel like if you regress the model, for example, if you\n\n00:53:58\nI think there should be smarter ways than to exactly\n\n00:54:03\nFor example, you might still like consult\n\n00:54:07\nFor example, given that you ask the model to generate\n\n00:54:13\nsay, you ask the model generate for five tokens,\n\n00:54:19\nto be the sixth token, you probably\n\n00:54:24\nwould be a good continuations and then you\n\n00:54:30\ngeneration and some gold text and then, therefore, you\n\n00:54:38\nwent off-path a little bit by generating its own stuff.\n\n00:54:42\nhow to correct for itself.\n\n00:54:45\nIf you just ask the model to--\n\n00:54:51\nit shouldn't really work.\n\n00:54:57\nCool.\n\n00:55:05\nYes, so now we'll talk about how we are",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "global_kp_id": "kp_exposure_bias",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "global_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture14-nlg::seg5",
+      "global_kp_id": "kp_reinforcement_learning_and_rlhf_for_nlg",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_exposure_bias",
+      "name": "Exposure bias",
+      "description": "The train-test mismatch caused by training on gold prefixes but generating on self-produced prefixes.",
+      "track_tags": [
+        "distribution_shift",
+        "training"
+      ],
+      "domain_tags": [
+        "nlg",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because exposure bias formalizes how the train-test mismatch caused by training on gold prefixes but generating on self-produced prefixes, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture14-nlg::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_training_alternatives_to_reduce_exposure_bias",
+      "name": "Training alternatives to reduce exposure bias",
+      "description": "Methods such as scheduled sampling, DAgger, and retrieval-augmented generation that make training conditions closer to generation conditions.",
+      "track_tags": [
+        "sequence_learning",
+        "training"
+      ],
+      "domain_tags": [
+        "nlg",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.75,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because training alternatives to reduce exposure bias clarifies methods such as scheduled sampling, DAgger, and retrieval-augmented generation that make training conditions closer to generation conditions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture14-nlg::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reinforcement_learning_and_rlhf_for_nlg",
+      "name": "Reinforcement learning and RLHF for NLG",
+      "description": "Training text generators with reward functions, including human-preference reward models layered on top of pretrained systems.",
+      "track_tags": [
+        "alignment",
+        "training"
+      ],
+      "domain_tags": [
+        "alignment",
+        "nlg",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "alignment_research",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reinforcement learning and RLHF for NLG synthesizes training text generators with reward functions, including human-preference reward models layered on top of pretrained systems into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture14-nlg::kp10"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.59,
+    0.89
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture14-nlg_transcript.txt"
+  }
+}

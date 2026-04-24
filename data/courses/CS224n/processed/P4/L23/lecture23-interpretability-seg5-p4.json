@@ -1,0 +1,614 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "The transcript is clear enough to generate application questions about concept bottlenecks for RL, reasoning about coordination through interventions, the role of orientation in Overcooked, and the use of intervention graphs in more complex environments.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main purpose of introducing a concept bottleneck into each agent in an RL system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To compress the model into fewer parameters regardless of performance loss.",
+        "To create interpretable intermediate variables that can be intervened on or ablated at inference time.",
+        "To replace reward entirely with supervised learning.",
+        "To force every agent to use the same linear policy."
+      ],
+      "answer_index": 1,
+      "explanation": "A concept bottleneck inserts interpretable variables into the middle of the model. This makes it possible to turn off or edit a concept at inference time and observe how the system changes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "embed concepts in the middle of the bottleneck",
+          "You can intervene"
+        ],
+        "timestamps": [
+          "00:44:12",
+          "00:45:18"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the coordinated Overcooked setting, what sign is used to infer that the agents are truly coordinating?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intervening on one agent’s concept leaves both agents’ rewards almost unchanged.",
+        "Reward drops substantially after intervention, showing that one agent’s behavior depends on the other agent’s information.",
+        "Every concept has exactly the same effect on reward.",
+        "The number of valid actions in the environment increases."
+      ],
+      "answer_index": 1,
+      "explanation": "If intervening on one agent’s representation causes group reward to drop sharply, that is evidence that the agents are relying on each other to coordinate rather than acting independently.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reward deteriorated quite a lot",
+          "are coordinating"
+        ],
+        "timestamps": [
+          "00:47:15",
+          "00:47:21"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is “orientation” considered a more important concept than “position” in Overcooked?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because orientation is always fixed, making it easier to learn than position.",
+        "Because orientation provides an earlier signal about an agent’s next move, whereas position only tells us where it is now.",
+        "Because position never appears in the environment state.",
+        "Because orientation directly encodes the optimal reward of the environment."
+      ],
+      "answer_index": 1,
+      "explanation": "The interpretation given is that an agent’s facing direction predicts where it is about to move or act next. That makes it a better anticipatory signal than current position alone.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "orientation had to do with coordination",
+          "predict where they would be next"
+        ],
+        "timestamps": [
+          "00:47:52",
+          "00:48:27"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If a “lazy agent” is identified in this analysis framework, which observation pattern best fits it?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intervening on its concepts barely changes anyone’s reward.",
+        "Its embedding always shows it standing perfectly still in every episode.",
+        "It always has the highest individual reward in the group.",
+        "It is always the only agent that can see the whole environment."
+      ],
+      "answer_index": 0,
+      "explanation": "An agent that is lazy or not contributing much should have little effect on the overall outcome. So if intervening on it barely changes reward, that is evidence that it is not functionally important.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "lazy agents",
+          "doesn't impact any of their rewards"
+        ],
+        "timestamps": [
+          "00:49:05",
+          "00:49:27"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the more complex Cleanup environment, why move from raw intervention statistics to an intervention graph?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because raw statistics are always meaningless and should never be used.",
+        "Because the graph reveals subtler relational structure and helps distinguish real dependencies from accidental ones induced by the environment.",
+        "Because an intervention graph needs no human concepts at all.",
+        "Because the graph is simply a prettier visualization of the same numbers."
+      ],
+      "answer_index": 1,
+      "explanation": "In a multi-agent environment with many factors, observed relations can arise accidentally from the environment structure. An intervention graph helps separate true agent-concept influence from misleading surface statistics.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_inter_agent_relationship_graphs_from_interventions",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "intervention outcomes reveals a subtler relationship",
+          "arise accidentally from the environment"
+        ],
+        "timestamps": [
+          "00:50:31",
+          "00:51:11"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg5-q1",
+      "global_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q2",
+      "global_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q3",
+      "global_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q4",
+      "global_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q5",
+      "global_kp_id": "kp_inter_agent_relationship_graphs_from_interventions",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg5-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q3",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q4",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q5",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main purpose of introducing a concept bottleneck into each agent in an RL system?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To compress the model into fewer parameters regardless of performance loss.",
+        "To create interpretable intermediate variables that can be intervened on or ablated at inference time.",
+        "To replace reward entirely with supervised learning.",
+        "To force every agent to use the same linear policy."
+      ],
+      "answer_index": 1,
+      "explanation": "A concept bottleneck inserts interpretable variables into the middle of the model. This makes it possible to turn off or edit a concept at inference time and observe how the system changes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "embed concepts in the middle of the bottleneck",
+          "You can intervene"
+        ],
+        "timestamps": [
+          "00:44:12",
+          "00:45:18"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the coordinated Overcooked setting, what sign is used to infer that the agents are truly coordinating?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intervening on one agent’s concept leaves both agents’ rewards almost unchanged.",
+        "Reward drops substantially after intervention, showing that one agent’s behavior depends on the other agent’s information.",
+        "Every concept has exactly the same effect on reward.",
+        "The number of valid actions in the environment increases."
+      ],
+      "answer_index": 1,
+      "explanation": "If intervening on one agent’s representation causes group reward to drop sharply, that is evidence that the agents are relying on each other to coordinate rather than acting independently.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reward deteriorated quite a lot",
+          "are coordinating"
+        ],
+        "timestamps": [
+          "00:47:15",
+          "00:47:21"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is “orientation” considered a more important concept than “position” in Overcooked?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because orientation is always fixed, making it easier to learn than position.",
+        "Because orientation provides an earlier signal about an agent’s next move, whereas position only tells us where it is now.",
+        "Because position never appears in the environment state.",
+        "Because orientation directly encodes the optimal reward of the environment."
+      ],
+      "answer_index": 1,
+      "explanation": "The interpretation given is that an agent’s facing direction predicts where it is about to move or act next. That makes it a better anticipatory signal than current position alone.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "orientation had to do with coordination",
+          "predict where they would be next"
+        ],
+        "timestamps": [
+          "00:47:52",
+          "00:48:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If a “lazy agent” is identified in this analysis framework, which observation pattern best fits it?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Intervening on its concepts barely changes anyone’s reward.",
+        "Its embedding always shows it standing perfectly still in every episode.",
+        "It always has the highest individual reward in the group.",
+        "It is always the only agent that can see the whole environment."
+      ],
+      "answer_index": 0,
+      "explanation": "An agent that is lazy or not contributing much should have little effect on the overall outcome. So if intervening on it barely changes reward, that is evidence that it is not functionally important.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "lazy agents",
+          "doesn't impact any of their rewards"
+        ],
+        "timestamps": [
+          "00:49:05",
+          "00:49:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the more complex Cleanup environment, why move from raw intervention statistics to an intervention graph?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because raw statistics are always meaningless and should never be used.",
+        "Because the graph reveals subtler relational structure and helps distinguish real dependencies from accidental ones induced by the environment.",
+        "Because an intervention graph needs no human concepts at all.",
+        "Because the graph is simply a prettier visualization of the same numbers."
+      ],
+      "answer_index": 1,
+      "explanation": "In a multi-agent environment with many factors, observed relations can arise accidentally from the environment structure. An intervention graph helps separate true agent-concept influence from misleading surface statistics.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_inter_agent_relationship_graphs_from_interventions",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "intervention outcomes reveals a subtler relationship",
+          "arise accidentally from the environment"
+        ],
+        "timestamps": [
+          "00:50:31",
+          "00:51:11"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg5-q1",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from easy application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q2",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q3",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q4",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium application MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q5",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from hard application MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg5-q1",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q2",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q3",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q4",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg5-q5",
+      "eligible_phases": [
+        "mini_quiz",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "mini_quiz",
+      "phase_weight_multipliers": {
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    }
+  ]
+}

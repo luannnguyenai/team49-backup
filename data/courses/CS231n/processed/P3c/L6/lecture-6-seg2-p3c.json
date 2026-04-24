@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_6::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The available transcript evidence clearly supports two safe dropout questions, so no separate clip is necessary.",
+  "question_bank": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can dropout improve test-time generalization?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It prevents the model from over-relying on a small set of correlated features",
+        "It guarantees higher training accuracy on every step",
+        "It replaces backpropagation with a deterministic update rule",
+        "It removes the need to tune learning rates"
+      ],
+      "answer_index": 0,
+      "explanation": "Randomly masking activations during training forces the network to distribute useful information across a broader set of features instead of depending on a few feature combinations that might not generalize.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "can't over rely on features",
+          "learn a more broad set"
+        ],
+        "timestamps": [
+          "00:11:47",
+          "00:12:20"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After training with dropout probability p, what should happen at test time according to this workflow?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use all activations and multiply them by p",
+        "Keep dropping activations at the same rate p",
+        "Use all activations and divide them by p",
+        "Replace the dropout layer with max pooling"
+      ],
+      "answer_index": 0,
+      "explanation": "The goal is to keep the expected input magnitude seen by later layers consistent between training and inference. Using all activations at test time would otherwise make those inputs too large.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dropout",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "multiply by the probability",
+          "magnitude is preserved"
+        ],
+        "timestamps": [
+          "00:13:54",
+          "00:14:14"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg2_q1",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg2_q2",
+      "global_kp_id": "kp_dropout",
+      "role": "primary"
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "output_filename": "p3a__cs224n__lecture08_seq2seq.json",
+  "run_id": "run_cs224n_lecture08_seq2seq",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture08-seq2seq",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture08-seq2seq::seg1",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "formula_heavy segment defines perplexity as exp(cross-entropy / per-word negative log-likelihood and gives a diagnostic warning that log-base mismatch makes perplexity values incomparable; dominant coverage of supporting KP kp_perplexity_as_a_proxy_metric.",
+      "target_kp_ids": [
+        "kp_perplexity_as_a_proxy_metric"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway critical KP kp_vanishing_and_exploding_gradients, with formula_heavy BPTT matrix-power reasoning plus diagnostic signals for NaNs/huge updates and gradient clipping.",
+      "target_kp_ids": [
+        "kp_vanishing_and_exploding_gradients",
+        "kp_long_distance_dependencies_in_sequence_modeling"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway high KP kp_lstm_gates_and_cell_state; formula_heavy walkthrough of forget/input/output gates, cell update, and hidden-state exposure supports procedural assessment.",
+      "target_kp_ids": [
+        "kp_lstm_gates_and_cell_state"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of critical KP kp_additive_memory_and_gradient_flow_in_lstms; concrete signal is the additive cell-state path and the forget=1/input=0 copy-forward example explaining improved gradient flow.",
+      "target_kp_ids": [
+        "kp_additive_memory_and_gradient_flow_in_lstms"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant/substantial coverage of high supporting KPs kp_rnn_lstm_applications_and_conditional_language_models and kp_bidirectional_and_stacked_recurrent_networks, with application signals across tagging, sentence encoding, conditional generation, bidirectional encoders, and stacked RNNs.",
+      "target_kp_ids": [
+        "kp_rnn_lstm_applications_and_conditional_language_models",
+        "kp_bidirectional_and_stacked_recurrent_networks"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg6",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "kept despite historical opening because the segment contains core_theory signals: Bayes-style statistical MT decomposition and phrase-based MT failure analysis; dominant coverage of supporting medium KP kp_statistical_machine_translation.",
+      "target_kp_ids": [
+        "kp_statistical_machine_translation"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture08-seq2seq::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway critical KP kp_neural_machine_translation_with_seq2seq_encoder_decoders; concrete signals include encoder-decoder seq2seq formulation, decoder conditioning, autoregressive generation, and end-to-end backpropagation through encoder and decoder.",
+      "target_kp_ids": [
+        "kp_neural_machine_translation_with_seq2seq_encoder_decoders"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

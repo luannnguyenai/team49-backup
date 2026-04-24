@@ -7,13 +7,13 @@ import { Calendar, Clock, TrendingUp } from "lucide-react";
 import type { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { OnboardingFormData } from "@/lib/onboarding-schema";
-import type { ModuleDetail } from "@/types";
+import type { CourseSectionDetail } from "@/types";
 
 interface Props {
   register: UseFormRegister<OnboardingFormData>;
   errors: FieldErrors<OnboardingFormData>;
   watch: UseFormWatch<OnboardingFormData>;
-  selectedModules: ModuleDetail[];
+  selectedSections: CourseSectionDetail[];
 }
 
 // Minimum selectable date: tomorrow
@@ -27,13 +27,18 @@ export default function StepTimeSchedule({
   register,
   errors,
   watch,
-  selectedModules,
+  selectedSections,
 }: Props) {
   const hours = watch("available_hours_per_week") ?? 5;
 
-  // Compute total content hours from selected modules
-  const totalHours = selectedModules.reduce(
-    (sum, m) => sum + m.topics.reduce((s, t) => s + (t.estimated_hours_beginner ?? 0), 0),
+  // Compute total content hours from selected sections
+  const totalHours = selectedSections.reduce(
+    (sum, section) =>
+      sum +
+      section.learning_units.reduce(
+        (sectionSum, unit) => sectionSum + (unit.estimated_hours_beginner ?? 0),
+        0,
+      ),
     0
   );
   const weeksNeeded = hours > 0 ? Math.ceil(totalHours / hours) : null;
@@ -105,7 +110,7 @@ export default function StepTimeSchedule({
       </div>
 
       {/* ── Estimate preview ── */}
-      {selectedModules.length > 0 && weeksNeeded !== null && (
+      {selectedSections.length > 0 && weeksNeeded !== null && (
         <div className="rounded-xl border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 p-4">
           <div className="flex items-start gap-3">
             <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-primary-600" />
@@ -123,7 +128,7 @@ export default function StepTimeSchedule({
                 </strong>
                 , bạn cần khoảng{" "}
                 <strong className="text-primary-600">{weeksNeeded} tuần</strong> để
-                hoàn thành {selectedModules.length} module được chọn (
+                hoàn thành {selectedSections.length} section được chọn (
                 {totalHours.toFixed(1)} giờ nội dung).
               </p>
             </div>
@@ -131,12 +136,12 @@ export default function StepTimeSchedule({
         </div>
       )}
 
-      {selectedModules.length === 0 && (
+      {selectedSections.length === 0 && (
         <div
           className="rounded-xl border border-dashed p-4 text-center text-sm"
           style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
         >
-          Quay lại bước 2 để chọn modules — dự kiến thời gian sẽ xuất hiện ở đây.
+          Quay lại bước 2 để chọn sections — dự kiến thời gian sẽ xuất hiện ở đây.
         </div>
       )}
     </div>

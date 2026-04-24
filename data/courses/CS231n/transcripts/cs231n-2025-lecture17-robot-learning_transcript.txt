@@ -1,0 +1,6712 @@
+Title: Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17: Robot Learning
+URL: https://www.youtube.com/watch?v=XSfmOH_xVSU
+Video ID: XSfmOH_xVSU
+============================================================
+
+00:00:05
+We're here with our final
+guest lecturer for the course.
+
+00:00:09
+And today, we have
+Dr. Yunzhu Li.
+
+00:00:12
+He is an assistant professor
+of computer science
+
+00:00:14
+at Columbia University, where
+he leads the Robotic Perception,
+
+00:00:18
+Interaction, and Learning Lab.
+
+00:00:20
+He is also a former
+instructor of CS231N,
+
+00:00:23
+like all of our guest lecturers.
+
+00:00:24
+And he taught the course in 2023
+while he completed his postdoc
+
+00:00:28
+here at Stanford with professors
+Fei-Fei Li and Jiajun Wu.
+
+00:00:31
+His research lies
+at the intersection
+
+00:00:33
+of robotics, computer
+vision, and machine learning.
+
+00:00:36
+And specifically, his work
+focuses on robot learning
+
+00:00:40
+and aims to significantly
+expand robots' perception
+
+00:00:43
+and physical interaction
+capabilities.
+
+00:00:45
+In today's lecture, he'll
+be discussing exactly that,
+
+00:00:47
+topic robot learning.
+
+00:00:49
+And I'll now hand it off to
+Yunzhu for today's lecture.
+
+00:00:52
+Yeah, thank you, Dean, for
+the very kind introduction.
+
+00:00:55
+I'm super excited to be here.
+
+00:00:57
+The last time I was
+here giving lectures
+
+00:00:59
+was two years ago, 2023.
+
+00:01:01
+And similar, lately, I was going
+through many of the lectures.
+
+00:01:05
+And today, I'm going to be
+talking about some of the things
+
+00:01:09
+that I have been working on.
+
+00:01:10
+And it's also a
+very coherent piece
+
+00:01:13
+of this overall picture on deep
+learning for computer vision.
+
+00:01:16
+And this is specifically
+on robot learning.
+
+00:01:19
+So I'll be discussing
+what are some
+
+00:01:20
+of the interesting
+considerations
+
+00:01:23
+especially in enabling the
+robots to better perceive
+
+00:01:26
+and interact with
+the physical world
+
+00:01:28
+and how some of
+the considerations
+
+00:01:30
+might be different from some
+typical computer vision tasks
+
+00:01:33
+and computer vision methods.
+
+00:01:36
+So first of all, you
+guys have already
+
+00:01:38
+learned a lot about
+supervised learning.
+
+00:01:42
+The scene and the setup
+for supervised learning
+
+00:01:44
+is that you have data x and y.
+
+00:01:47
+X is the input,
+and y is the label.
+
+00:01:49
+And you are trying to learn a
+mapping that maps from the input
+
+00:01:53
+x to the output y.
+
+00:01:55
+There are examples you
+have already learned,
+
+00:01:56
+like classification, regression,
+object detection, et cetera.
+
+00:02:01
+And you have also learned about
+self-supervised learning, where
+
+00:02:05
+instead of having
+labels, in this case,
+
+00:02:07
+you are just having the
+data without any labels.
+
+00:02:11
+What you are trying
+to do is you come up
+
+00:02:13
+with learning algorithms that
+is able to extract or identify
+
+00:02:17
+the underlying hidden
+structures of the data,
+
+00:02:19
+just by working or designing
+some auxiliary loss.
+
+00:02:24
+Some typical examples, including
+autoencoders, and there's
+
+00:02:27
+many other examples in trying
+to do unsupervised learning
+
+00:02:31
+or self-supervised
+learning on top
+
+00:02:34
+of this mass amount
+of unlabeled data.
+
+00:02:37
+And the special thing
+and the unique things
+
+00:02:40
+about robot learning
+is that the robot
+
+00:02:42
+has to make physical
+interactions that make
+
+00:02:44
+interactions with the world.
+
+00:02:46
+So it's not just you have
+the input and outputs
+
+00:02:49
+and mapping from
+the input x to y
+
+00:02:50
+or some kind of latent
+representations.
+
+00:02:52
+It's really about
+you are influenced
+
+00:02:55
+evolutions of the environments.
+
+00:02:56
+So no matter what
+action you decide
+
+00:02:58
+to take in the real
+world, the world
+
+00:03:00
+will change as a
+result of that actions.
+
+00:03:03
+And the world will give you
+some kind of new observations
+
+00:03:05
+or reward telling
+you how the thing--
+
+00:03:09
+how the environment
+has been changing
+
+00:03:10
+and how good you are in
+executing certain tasks.
+
+00:03:13
+So the goal is trying
+to actually come up
+
+00:03:16
+with a sequence of actions with
+feedback from the environments,
+
+00:03:21
+that is, to maximize some
+reward or minimize some cost.
+
+00:03:25
+And robot learning, especially
+in the recent years,
+
+00:03:30
+has attracted significant
+attention both within academia
+
+00:03:34
+and also within industries.
+
+00:03:36
+So we have seen many startup
+companies and including,
+
+00:03:41
+for example, physical
+intelligence like Tesla bots
+
+00:03:43
+or Figure.
+
+00:03:45
+They are producing those very
+seemingly very nice and fancy
+
+00:03:49
+videos of robots doing a wide
+range of very complicated tasks,
+
+00:03:54
+like folding shirts, like
+manipulating coffee beans,
+
+00:03:56
+or trying to have this
+human noise, like doing
+
+00:03:58
+interesting tasks in
+the real physical world.
+
+00:04:01
+So this field, like I mentioned,
+has attracted a lot of attention
+
+00:04:05
+and also a lot of investments.
+
+00:04:07
+Here are just some examples
+of some recent startups
+
+00:04:10
+in the field of
+robot learnings that
+
+00:04:12
+is able to attract a huge
+amount of investments, trying
+
+00:04:15
+to build this general
+purpose robots
+
+00:04:17
+that can make
+physical interactions
+
+00:04:19
+with the environments.
+
+00:04:20
+So obviously, not only
+those startups, mainly
+
+00:04:23
+big established companies are
+also having their own robotics
+
+00:04:28
+investigations and
+initiatives, trying
+
+00:04:30
+to develop their own
+general purpose robots
+
+00:04:32
+that is able to make general
+purpose and high performance
+
+00:04:36
+physical interactions
+with the environment.
+
+00:04:39
+So for today's
+lectures, I'm going
+
+00:04:42
+to give you some
+kind of overviews
+
+00:04:44
+on some of the key
+techniques enabling
+
+00:04:47
+factors of the current success
+and boom of robot learnings.
+
+00:04:50
+We will start with
+problem formulations.
+
+00:04:53
+How can we more
+concretely define
+
+00:04:55
+the problems we
+have been building,
+
+00:04:57
+and how can we formally think
+about the robust interactions
+
+00:05:00
+with the environments?
+
+00:05:01
+So I will then discuss
+the more perception side.
+
+00:05:05
+I will talk about the
+different considerations
+
+00:05:07
+between how robots
+perceive the environments
+
+00:05:10
+and how people typically
+consider in the computer vision
+
+00:05:13
+community and what's special
+about robots' perception,
+
+00:05:16
+now talking about
+reinforcement learning, model
+
+00:05:19
+learning, model-based planning,
+imitation learning, also
+
+00:05:22
+some of the recent trends
+on robotic foundation models
+
+00:05:25
+and also using the
+remaining time to discuss
+
+00:05:29
+some of the challenges we
+still see lies ahead of us.
+
+00:05:34
+So we'll start with
+problem formulation.
+
+00:05:37
+So this is, in general,
+how the problem
+
+00:05:40
+should look like, at least
+in a graphical illustration.
+
+00:05:45
+So in the middle,
+we have this agent.
+
+00:05:47
+The agent is given
+some task objective.
+
+00:05:50
+This task objective could
+be, for example, language
+
+00:05:52
+instructions from human or some
+kind of objective functions
+
+00:05:55
+measuring how good this agent
+is in doing some specific task.
+
+00:06:00
+This agent is taking states
+from the physical world
+
+00:06:04
+or some kind of environments.
+
+00:06:06
+And the agent decides
+what action to take,
+
+00:06:09
+like this at here,
+that needs to be
+
+00:06:11
+executed in the physical world.
+
+00:06:13
+And this physical world
+will be updated and given
+
+00:06:17
+this state's st
+plus 1, as well as
+
+00:06:20
+the rewards, telling the agents
+how good it is doing its task.
+
+00:06:24
+So this is how the framework
+in general looks like.
+
+00:06:26
+So you have to be very clear on
+this type of formulation that
+
+00:06:31
+consists of goal, states,
+actions, and also rewards.
+
+00:06:36
+That specifically defines the
+problems of the robot learning
+
+00:06:41
+type of scenarios is very
+different from the computer
+
+00:06:44
+visions.
+
+00:06:45
+I would like to say
+computer vision is mostly
+
+00:06:48
+about trying to learn some
+kind of representations
+
+00:06:50
+of the environment
+based on the inputs,
+
+00:06:53
+like high-dimensional data.
+
+00:06:54
+But for robotics,
+it's basically trying
+
+00:06:56
+to solve some kind of
+optimization problems
+
+00:06:59
+where you have the
+constraints, which
+
+00:07:02
+is a physical world
+of the environment.
+
+00:07:04
+You have your
+objective functions
+
+00:07:05
+defined over your goal.
+
+00:07:06
+And you are essentially trying
+to solve this optimization
+
+00:07:09
+problems by coming up
+with a sequence of actions
+
+00:07:12
+that can maximize or minimize
+your objective functions.
+
+00:07:15
+So that's a key difference
+between robot learning
+
+00:07:17
+and what people typically
+consider in computer vision.
+
+00:07:22
+So some specific
+instantiations of this problem
+
+00:07:24
+like, for example,
+cart-pole, the goal
+
+00:07:27
+can be balance a pole on
+the top of a movable cart.
+
+00:07:31
+And the states of
+this environment
+
+00:07:33
+essentially describe the
+physical state status
+
+00:07:35
+of the systems, which can
+include the angle, the angular
+
+00:07:39
+speed, positions, horizontal
+velocities, et cetera.
+
+00:07:43
+And the action would
+be the horizontal force
+
+00:07:44
+that is applied to the carts.
+
+00:07:47
+And you can have the rewards
+where 1 indicating at each time
+
+00:07:51
+step if the poll is being
+kept as an upright position.
+
+00:07:56
+Some other example could
+include robot locomotion,
+
+00:07:59
+where the goal is to make
+these robots move forwards.
+
+00:08:03
+And the states could include
+the angle position velocities
+
+00:08:06
+of all joints within this robot.
+
+00:08:09
+And the action could
+be the torque applied
+
+00:08:11
+to each one of the joints.
+
+00:08:13
+And the reward can
+be 1 at each time.
+
+00:08:16
+The robot make a step
+forwards and also being
+
+00:08:20
+kept in an upright positions.
+
+00:08:22
+And also some
+interesting examples
+
+00:08:25
+including the Atari games.
+
+00:08:27
+The goal can be complete the
+game with the highest score, as
+
+00:08:31
+high as possible you can get.
+
+00:08:33
+And the states will be
+the raw pixel inputs
+
+00:08:35
+of the gaming screen.
+
+00:08:37
+And action could be the gaming
+control like up, down, left,
+
+00:08:41
+and right.
+
+00:08:41
+And the reward could
+be the score increase
+
+00:08:43
+and decrease at each time step.
+
+00:08:47
+And some of the more
+famous examples you
+
+00:08:50
+probably have noticed
+earlier, especially
+
+00:08:53
+with the developments
+of AlphaGo.
+
+00:08:55
+And the definition
+and the problem of Go
+
+00:08:57
+can also be defined
+in similar ways, where
+
+00:09:00
+the goal is to win the game.
+
+00:09:02
+And the states will be all
+the pieces that are currently
+
+00:09:05
+already on the Go board.
+
+00:09:06
+And action could be where
+to put the next piece down
+
+00:09:09
+on this board.
+
+00:09:10
+And the reward could be, on
+the last turn, if you win,
+
+00:09:13
+you get a reward of 1, and if
+you lose, you get a reward of 0.
+
+00:09:19
+And this not only applies to,
+for example, gaming domains.
+
+00:09:22
+Even with the recent
+developments of large language
+
+00:09:25
+models, you can also think
+about those problems,
+
+00:09:29
+especially for sequential
+generation problems,
+
+00:09:32
+in a similar manner
+where the goal could
+
+00:09:34
+be to predict the next word.
+
+00:09:37
+And the states could be the
+current words in the sentence.
+
+00:09:40
+And the action will be what
+the specific next words
+
+00:09:42
+you want to put there.
+
+00:09:43
+And if it is correct,
+you get the reward.
+
+00:09:46
+If it is incorrect,
+you get a reward of 0.
+
+00:09:51
+And similarly, now, you
+probably have already
+
+00:09:53
+played with many of the
+chatbots quite a lot.
+
+00:09:56
+And you can also define
+a problem similarly,
+
+00:09:59
+where the goal is to be a good
+companion to the human user.
+
+00:10:04
+The states could be the
+current conversation.
+
+00:10:06
+And action that should be
+generated by the chatbots
+
+00:10:10
+will be the next sentence you
+are given to the human user.
+
+00:10:14
+And according to the
+human evaluations,
+
+00:10:16
+we could define the reward
+if the person is happy.
+
+00:10:20
+If they are satisfied,
+you get a reward of 1.
+
+00:10:23
+And if you are not
+happy or neutral,
+
+00:10:25
+you get some other rewards.
+
+00:10:28
+And more specifically, for
+example, in the robotics domain.
+
+00:10:31
+And the task could be
+to fold the clothes.
+
+00:10:33
+And we want the clothes--
+we fold it nicely.
+
+00:10:36
+And the states is the
+current observations
+
+00:10:39
+the robot is getting from
+this environment, which
+
+00:10:42
+could include the
+multi-view RGB or RGBD
+
+00:10:45
+observations of the environment.
+
+00:10:47
+And the robot needs
+to decide its actions,
+
+00:10:50
+how to move its end-effectors.
+
+00:10:52
+Should it close or
+open its grippers
+
+00:10:54
+in order to
+manipulate this cloth?
+
+00:10:56
+And according to
+human evaluations,
+
+00:10:58
+if the cloth is properly
+folded, it gives the robot
+
+00:11:01
+a reward of 1, and if
+the cloth is not folded,
+
+00:11:04
+you give the reward of 0.
+
+00:11:06
+So here is actually how you
+want to more concretely think
+
+00:11:10
+about robot learning problem.
+
+00:11:12
+It really is a way that
+allows the agents to interact
+
+00:11:15
+with the world.
+
+00:11:16
+It considers the
+effect of an action
+
+00:11:19
+and also the sequential
+decision-making problems.
+
+00:11:21
+That is different from
+what people typically
+
+00:11:23
+consider in computer vision.
+
+00:11:25
+We just need to
+predict the outputs.
+
+00:11:27
+And the goal, states,
+actions, and the rewards
+
+00:11:30
+and the objective
+functions are the things
+
+00:11:33
+you need to keep
+in mind whenever
+
+00:11:34
+you are thinking about
+problems along this direction.
+
+00:11:38
+So this is about
+problem formulation.
+
+00:11:40
+So question is how specific the
+reward needs to be designed.
+
+00:11:45
+In many of the tasks, the reward
+can have many different types
+
+00:11:48
+of specifications.
+
+00:11:49
+For example, in
+the self-driving,
+
+00:11:51
+the reward could be as fast
+as possible or reward could
+
+00:11:54
+be like we want the passengers
+to feel comfortable as you
+
+00:11:58
+are driving along the roads.
+
+00:12:00
+So even for clothes
+folding, depending
+
+00:12:02
+on the user's
+preference, our clothes
+
+00:12:04
+can be folded in
+many different ways.
+
+00:12:05
+Some want the total area
+to be as small as possible.
+
+00:12:08
+Some want it to be as
+smooth as possible.
+
+00:12:11
+There could be different
+types of rewards.
+
+00:12:14
+Here, I'm just talking
+in generic terms.
+
+00:12:16
+If a person looks
+at the clothes,
+
+00:12:18
+do they think, this
+is folded, or not?
+
+00:12:20
+But more specifically, in
+terms of the reward design,
+
+00:12:22
+there's actually
+a lot of nuances
+
+00:12:25
+satisfying a specific need
+of a specific application.
+
+00:12:30
+OK.
+
+00:12:31
+So I'll continue.
+
+00:12:31
+So this is how we are thinking
+about those robot learning
+
+00:12:34
+problem that allows
+the agents to interact
+
+00:12:36
+with the physical world.
+
+00:12:38
+Now, I'm moving on
+to robot perception,
+
+00:12:41
+especially in discussing
+how the perception
+
+00:12:43
+problem within this
+robot learning domain
+
+00:12:45
+is different from
+what people typically
+
+00:12:48
+consider in computer vision.
+
+00:12:50
+So this image again--
+
+00:12:51
+you're actually going to see
+this image again and again
+
+00:12:54
+through today's lecture.
+
+00:12:55
+So this is, essentially,
+in the question
+
+00:12:58
+of how we are handling whatever
+information you are getting
+
+00:13:02
+from the physical world.
+
+00:13:04
+The physical world can
+give you, for example,
+
+00:13:06
+high-dimensional RGB observation
+or RGBD observations.
+
+00:13:09
+It could also include
+some other sensory data
+
+00:13:12
+like tactile sensings.
+
+00:13:13
+And this robot
+perception problem
+
+00:13:15
+is essentially trying
+to distill or harness
+
+00:13:18
+some structured knowledge from
+those high-dimensional data that
+
+00:13:23
+is useful for the robot to do
+the downstream decision making.
+
+00:13:27
+And essentially, the question
+we are trying to tackle
+
+00:13:30
+is trying to make sense of
+this unstructured real world.
+
+00:13:34
+And the real world
+can be very messy.
+
+00:13:37
+So essentially, the
+observations the robots
+
+00:13:39
+are getting from
+the environments
+
+00:13:41
+can only contain incomplete
+knowledge of the objects
+
+00:13:45
+and the environments.
+
+00:13:46
+There could be occlusions.
+
+00:13:47
+There could also be errors
+from the sensory data.
+
+00:13:52
+And the imperfect action
+may also lead to failure.
+
+00:13:56
+For example, the robots can
+try to grasp some objects,
+
+00:13:59
+but their grasping behavior
+may not always be successful.
+
+00:14:02
+Sometimes, you will
+accidentally drop that object,
+
+00:14:05
+which will also cause evolutions
+and unexpected changes
+
+00:14:09
+of this environment.
+
+00:14:10
+They will also need to have
+this perception system that is
+
+00:14:12
+able to handle those scenarios.
+
+00:14:14
+And also this
+environment can change.
+
+00:14:17
+It is dynamic, consists
+of not just rigid object
+
+00:14:20
+but deformable object--
+clothes, ropes, granular medias.
+
+00:14:23
+There could be other agents,
+like dogs or other kids
+
+00:14:26
+or other humans that are also
+in the same environments,
+
+00:14:29
+messing up with the world.
+
+00:14:31
+And your perception
+system needs to be
+
+00:14:33
+able to cope with all
+those kind of changes.
+
+00:14:37
+So that is why, in
+the robotics domain,
+
+00:14:40
+people typically not just
+work with a camera data.
+
+00:14:43
+They try to add as much sensor
+as possible to the robots
+
+00:14:47
+as long as they can provide
+some useful informations.
+
+00:14:51
+It's really considered, for
+example, the tactile sensings,
+
+00:14:54
+the audio information, the
+depth information, et cetera.
+
+00:14:57
+And typically, we will have
+to design a system that
+
+00:15:01
+is able to put all
+the sensors together
+
+00:15:04
+that allows them to
+complement each other,
+
+00:15:07
+whereas all the information
+might tell you things
+
+00:15:09
+about the physical context.
+
+00:15:11
+And the tactile
+information might tell you
+
+00:15:13
+about whether a graph
+is stable or not.
+
+00:15:15
+And the camera
+information tells you
+
+00:15:17
+about something that is
+more on the higher level,
+
+00:15:19
+on the grand scheme of things,
+about the overall state
+
+00:15:22
+of this environment.
+
+00:15:23
+So how these sensors
+can be composed together
+
+00:15:25
+and work together is
+very, very important
+
+00:15:28
+to design a capable robotic
+system that are working
+
+00:15:31
+in the real physical world.
+
+00:15:34
+And besides the numbers
+of sensory modalities,
+
+00:15:38
+very important difference
+between a robot vision
+
+00:15:40
+and computer vision is
+trying to really understand
+
+00:15:42
+the effect of the actions
+and also the affordance
+
+00:15:45
+of this environment.
+
+00:15:46
+On the left is a
+very typical example
+
+00:15:49
+you have already seen in
+computer vision, which is trying
+
+00:15:51
+to do instance segmentation.
+
+00:15:53
+What you are given
+is this 2D image.
+
+00:15:56
+You have segments, different
+instances from this 2D image,
+
+00:15:59
+like by drawing a contour
+over this 2D pixels.
+
+00:16:03
+But what's different in the
+robotics domain, for example,
+
+00:16:05
+on the right--
+
+00:16:07
+the robot can, for
+example, given one object.
+
+00:16:09
+And this object seems to be
+maybe just one object or maybe
+
+00:16:14
+a lot of pieces that
+are, for example, stacked
+
+00:16:16
+into each other.
+
+00:16:17
+So the robot has to know
+what type of actions
+
+00:16:20
+will allow it to have
+better understanding, better
+
+00:16:23
+perceptions about
+this environment.
+
+00:16:25
+Is this one piece of
+object or multiple
+
+00:16:27
+pieces composed together?
+
+00:16:29
+So the robot should come up
+with actions like perturb
+
+00:16:31
+and actively interact with
+the environments for the robot
+
+00:16:34
+to get a better perception about
+the state of this environment.
+
+00:16:38
+So that is why a robot vision
+is embodied, active, and also
+
+00:16:44
+environmentally situated.
+
+00:16:46
+By embodied, what
+we mean is robots
+
+00:16:49
+have this kind of physical body
+that is directly experiencing
+
+00:16:53
+the physical world directly.
+
+00:16:55
+Their actions are
+part of a dynamic
+
+00:16:58
+with the world that
+have immediate feedback
+
+00:17:00
+on their own sensations.
+
+00:17:02
+And active, meaning the
+robots are active perceivers.
+
+00:17:06
+It knows why it wishes to sense
+and chooses what to perceive
+
+00:17:09
+and determines how
+and when and where
+
+00:17:12
+to achieve that perception.
+
+00:17:14
+You can move your head around.
+
+00:17:15
+If you want to know
+what's behind this table,
+
+00:17:17
+you can just move around to
+see what's behind the table.
+
+00:17:19
+So this is the
+active part, which
+
+00:17:21
+is different from
+what people typically
+
+00:17:23
+consider in computer vision.
+
+00:17:24
+They are mostly working with a
+passively collected data set.
+
+00:17:29
+The third point
+is about situated,
+
+00:17:31
+where the robots are
+situated in the world.
+
+00:17:33
+They do not deal with abstract
+descriptions but with the here
+
+00:17:37
+and now of the world
+directly influencing
+
+00:17:39
+the behavior of the systems.
+
+00:17:42
+Robots really have to
+understand, especially
+
+00:17:45
+in clothing, there's
+perception and action loop.
+
+00:17:48
+It sees the world and
+understand its goals
+
+00:17:51
+and be able to act
+in the environment
+
+00:17:53
+upon its perceptions.
+
+00:17:55
+Sometimes, the robot don't
+have to know the full state
+
+00:17:58
+of the environment.
+
+00:17:59
+For example, if I'm
+buttoning my shirt,
+
+00:18:01
+I only have to know the local
+regions near that button for me
+
+00:18:04
+to button that shirt.
+
+00:18:05
+So some of the
+perception has to be
+
+00:18:07
+tightly coupled and
+co-designed with the task
+
+00:18:10
+and the downstream
+decision-making
+
+00:18:11
+systems for the robot to
+focus on the relevant region
+
+00:18:14
+or task-relevant regions of the
+environment to be properly--
+
+00:18:18
+a closest perception
+and action loop.
+
+00:18:22
+So this is about some very
+specific considerations
+
+00:18:25
+and how robots'
+perception might be
+
+00:18:27
+different from what
+people typically
+
+00:18:29
+consider in computer vision.
+
+00:18:31
+I will be starting to discuss
+some of the algorithms that
+
+00:18:34
+not only allow the
+robot to see but allow
+
+00:18:36
+the robot to act in the world.
+
+00:18:39
+And we'll start with
+reinforcement learning.
+
+00:18:42
+Remember, earlier, we
+have seen this image.
+
+00:18:46
+The robot has to act
+upon this environment
+
+00:18:48
+and get rewards from
+this environment.
+
+00:18:51
+So one very typical
+way of trying
+
+00:18:54
+to solve this
+optimization problem
+
+00:18:56
+is allow the robots to interact
+with the world as extensively
+
+00:19:01
+and as massively as possible.
+
+00:19:03
+You just collect all
+the experience data
+
+00:19:06
+and do this type of
+trials and errors.
+
+00:19:09
+Allow the robots to understand
+this action leads to high reward
+
+00:19:13
+and that action leads
+to lower rewards.
+
+00:19:15
+And we can pivot the
+agents' behaviors
+
+00:19:18
+towards the actions that give
+the agent some higher rewards.
+
+00:19:21
+So this is the general ideas
+of reinforcement learning
+
+00:19:25
+is really a way to allow the
+agents to constantly interact
+
+00:19:29
+with the environment
+and do this trial
+
+00:19:30
+and error to maximize the
+reward or minimize the cost.
+
+00:19:34
+And here I also want to be a
+bit more specific in discussing
+
+00:19:38
+the difference between
+reinforcement learning
+
+00:19:41
+and supervised learning.
+
+00:19:43
+So this is a typical framework
+of how reinforcement learning
+
+00:19:46
+looks like.
+
+00:19:46
+You have the environments.
+
+00:19:47
+Environment gives the
+agent some states.
+
+00:19:49
+Agents generate actions.
+
+00:19:51
+And environments give the agent
+a feedback, which is the reward.
+
+00:19:55
+And environments will change,
+where the environment will
+
+00:19:58
+give the agents the
+new states, st plus 1,
+
+00:20:01
+and essentially a sequence,
+like a temporal sequence
+
+00:20:04
+on the temporal domain where
+the robot has to-- the agent
+
+00:20:06
+has to make this
+sequential decisions.
+
+00:20:09
+And here is a typical
+image typically
+
+00:20:13
+look like for
+supervised learning.
+
+00:20:15
+So you have the data set.
+
+00:20:17
+The data set will input
+to the model this x.
+
+00:20:20
+And this model will
+generate the prediction y.
+
+00:20:23
+And you will be able to
+calculate the loss according
+
+00:20:26
+to the model's predictions
+versus the ground
+
+00:20:28
+truth from this data sets.
+
+00:20:30
+So this is a typical setup
+of supervised learning.
+
+00:20:34
+And the key difference--
+some of the key differences
+
+00:20:36
+between reinforcement learning
+and supervised learning
+
+00:20:38
+is that the environments
+might be stochastic
+
+00:20:43
+or the same actions,
+the environment
+
+00:20:45
+might change in a
+different manner.
+
+00:20:47
+Let's say, if you are
+pushing a box forward,
+
+00:20:50
+depending on the distribution
+of the supporting force,
+
+00:20:53
+the same exact actions will
+lead to-- can potentially
+
+00:20:56
+lead to the box rotating
+into different angles,
+
+00:21:00
+meaning there can be
+uncertainties and stochasticity
+
+00:21:02
+in the environments
+that will lead
+
+00:21:05
+to a stochastic behavior of
+these environments, which
+
+00:21:08
+will also give these agents
+stochastic rewards, where
+
+00:21:13
+the same action may not always
+lead to the same rewards.
+
+00:21:17
+So this is very different
+from supervised learning.
+
+00:21:19
+We are dealing with an
+uncertain dynamical system.
+
+00:21:23
+The second is about the
+question of credit assignments.
+
+00:21:27
+So for supervised learning,
+you give the inputs,
+
+00:21:30
+you predict the outputs, and
+you already calculate the loss.
+
+00:21:33
+Now, you directly know
+what are the mistakes
+
+00:21:36
+and what are the errors
+you are making by making
+
+00:21:38
+a specific prediction.
+
+00:21:40
+But in the
+reinforcement learning
+
+00:21:41
+or sequential
+decision-making domain,
+
+00:21:43
+the rewards can be
+delayed, meaning
+
+00:21:46
+if you play the game of
+Go, only until the very end
+
+00:21:50
+of this episode, do you
+realize you are winning
+
+00:21:53
+or you were losing.
+
+00:21:56
+And that rewards there 01.
+
+00:21:58
+[INAUDIBLE] is because of some
+very, very early steps, maybe
+
+00:22:02
+even the first
+steps or some steps
+
+00:22:04
+during the middle of the games.
+
+00:22:06
+So how do you properly
+assign the credits
+
+00:22:08
+you are getting along this
+sequential decision making
+
+00:22:11
+towards all the actions is
+also another very tricky
+
+00:22:15
+and important question
+people hope to answer
+
+00:22:18
+using reinforcement learning.
+
+00:22:20
+The third thing is the
+nondiffusion abilities
+
+00:22:25
+of this dynamical systems.
+
+00:22:27
+For example, for supervised
+learning, you have the inputs.
+
+00:22:30
+You feed the inputs
+through the model.
+
+00:22:32
+You get the outputs.
+
+00:22:33
+You calculate the loss.
+
+00:22:34
+So everything along this
+process is differentiable.
+
+00:22:37
+So you can directly gather
+gradients of the loss functions
+
+00:22:41
+with respect to the
+parameters within the model.
+
+00:22:44
+But that's typically
+not the case
+
+00:22:46
+for reinforcement learning where
+the environments can oftentimes
+
+00:22:50
+not differentiable.
+
+00:22:51
+So how do you properly
+get the gradients
+
+00:22:53
+of the rewards with respect
+to the actions can be tricky.
+
+00:22:57
+Sometimes, people have to
+realize on a massive sampling
+
+00:23:00
+to do those type of zero order
+estimations of the gradients
+
+00:23:04
+for you to do proper learning.
+
+00:23:06
+That also is another difference.
+
+00:23:09
+The last difference is
+about this nonstationarity
+
+00:23:13
+of this scenarios
+where the evolutions
+
+00:23:17
+and the states of
+the environments
+
+00:23:19
+is really a result
+of your actions.
+
+00:23:21
+For supervised learning,
+whatever you predict,
+
+00:23:24
+it doesn't influence
+other data points you
+
+00:23:27
+are getting from this data set.
+
+00:23:29
+But your actions will
+influence the next state
+
+00:23:32
+you are getting in this
+sequential decision-making
+
+00:23:34
+problems.
+
+00:23:35
+That is also what makes this
+kind of reinforcement learning
+
+00:23:38
+problem a little
+bit more nuanced
+
+00:23:40
+than supervised learning.
+
+00:23:43
+So here are some more
+specific examples.
+
+00:23:46
+Like for example,
+playing this Atari games,
+
+00:23:48
+like I mentioned earlier.
+
+00:23:50
+The goal could be to complete
+the games with the highest
+
+00:23:52
+score.
+
+00:23:53
+And the states would
+be the raw pixel inputs
+
+00:23:55
+from the gaming screen.
+
+00:23:57
+And the action could
+be up, down, left,
+
+00:23:59
+and right from the keyboard.
+
+00:24:00
+And we're trying to--
+
+00:24:01
+the rewards are the score
+increase and decrease
+
+00:24:05
+at each time step.
+
+00:24:07
+And some typical algorithms
+within this domain
+
+00:24:10
+either lies in the
+field of, for example,
+
+00:24:12
+like a Q-learning or, for
+example, policy iterations.
+
+00:24:16
+Here's my examples of trying
+to learn this Q function.
+
+00:24:19
+Q function essentially measures
+the discounted expected future
+
+00:24:25
+accumulated rewards like when
+you apply a specific action a at
+
+00:24:29
+a specific state s.
+
+00:24:31
+And you will be
+able to get these Q
+
+00:24:33
+functions through interactions
+with this gaming environments.
+
+00:24:37
+And after you have
+learned this Q functions,
+
+00:24:40
+you can evaluate,
+for example, what
+
+00:24:43
+are the Q values you are getting
+by applying different actions.
+
+00:24:46
+In this case, there's left
+and right, ups and downs.
+
+00:24:49
+So there could potentially
+be four actions.
+
+00:24:52
+And given these four actions,
+you can look at their Q values
+
+00:24:55
+and just execute
+the actions that
+
+00:24:57
+give you the highest Q values.
+
+00:24:59
+So that is what allows you
+to do this type of decision
+
+00:25:03
+making in this domain.
+
+00:25:06
+Because today we're going
+to cover a lot of materials,
+
+00:25:08
+so we won't go into the details
+of the reinforcement learning.
+
+00:25:12
+But some of the current
+state-of-the-art reinforcement
+
+00:25:14
+learning algorithms, including
+SAC, Soft Actor Critic,
+
+00:25:18
+and also PPO, Proximal
+Policy Optimization.
+
+00:25:22
+So if you are
+interested, you are
+
+00:25:24
+very welcome to look at
+those algorithms in detail.
+
+00:25:26
+There's a lot of open source
+implementations and tutorials
+
+00:25:30
+online.
+
+00:25:32
+But here I want to
+highlight to you
+
+00:25:33
+some of the results
+you could potentially
+
+00:25:36
+get by going through this
+reinforcement learning,
+
+00:25:39
+specifically Q-learning process.
+
+00:25:42
+This is developed by
+Google DeepMind that
+
+00:25:44
+is trying to develop
+these agents, that
+
+00:25:47
+is trying to play the game
+Breakout in this kind of Atari
+
+00:25:50
+world.
+
+00:25:51
+So just after 10 minutes
+of training, the robot,
+
+00:25:55
+the agent can already
+touch the ball
+
+00:25:59
+but, oftentimes, can still
+miss the ball quite often.
+
+00:26:03
+And after some more times
+of learning, for example,
+
+00:26:06
+two hours of training,
+and the agents
+
+00:26:10
+can control this kind
+of paths in a much more
+
+00:26:14
+reliable and consistent fashion
+that can, nearly all the time,
+
+00:26:18
+can catch the ball and
+be able to constantly get
+
+00:26:21
+more and more rewards
+by bouncing back.
+
+00:26:27
+And after full hours of
+training, something that's
+
+00:26:31
+interesting happens, where the
+agents come up with, actually,
+
+00:26:35
+a novel strategy, which possibly
+is not known to many of you,
+
+00:26:39
+that is, trying to
+push, bounce the ball
+
+00:26:42
+back to create the tunnel on
+the left side of this wall.
+
+00:26:46
+And then it will push this ball
+on the upper side of the wall
+
+00:26:50
+to do this very efficient
+reductions of those bricks.
+
+00:26:55
+This is the type
+of strategy that
+
+00:26:56
+can be discovered by
+reinforcement learning.
+
+00:26:59
+So this is what's nice
+about reinforcement
+
+00:27:01
+learning, meaning you allow
+the agents to do very extensive
+
+00:27:05
+and comprehensive exploration
+and interactions with the world.
+
+00:27:09
+And it is totally possible for
+this reinforcement learning
+
+00:27:12
+agents to discover
+some strategies that
+
+00:27:15
+are better than even
+the best human players.
+
+00:27:18
+A very typical example
+would be the game of Go.
+
+00:27:22
+So when AlphaGo came
+out in the January 2016,
+
+00:27:26
+it was also about
+the time when I
+
+00:27:29
+was trying to decide what
+type of research directions
+
+00:27:32
+I'm going to go.
+
+00:27:33
+Before that time, I was
+just working on deep
+
+00:27:36
+learning for computer vision.
+
+00:27:37
+But when AlphaGo
+came out, I'm like,
+
+00:27:40
+I have to work on this kind
+of decision-making problem.
+
+00:27:43
+So that's why I started to touch
+upon reinforcement learning,
+
+00:27:46
+imitation learning, and,
+all the way until now,
+
+00:27:48
+to do robot learning that
+allows the robots to do
+
+00:27:50
+physical interactions
+with the environments.
+
+00:27:53
+So I wasn't satisfied
+with just working
+
+00:27:55
+with a passively
+collected data set,
+
+00:27:57
+but we really want an agent
+that can do active interactions
+
+00:28:00
+with the environment.
+
+00:28:01
+So the question was,
+how does specifically
+
+00:28:05
+this Q-function works?
+
+00:28:07
+So you can see, this
+Q takes as input
+
+00:28:10
+the state s and also the action.
+
+00:28:12
+And this data would
+essentially be the parameters
+
+00:28:14
+of this Q function, where
+the Q is instantiated
+
+00:28:17
+as a neural network.
+
+00:28:19
+In this specific case,
+like I mentioned earlier,
+
+00:28:21
+the state is the
+raw pixel inputs
+
+00:28:24
+that you're actually getting
+from the gaming screen.
+
+00:28:27
+So the inputs could
+be this four steps,
+
+00:28:29
+four frames that are directly
+inputted to this Q function.
+
+00:28:33
+And if you are
+dealing with images,
+
+00:28:34
+a very straightforward way of
+instantiating this Q function
+
+00:28:38
+is to use convolutional
+neural networks.
+
+00:28:41
+So you have convolutional
+layers like shown
+
+00:28:43
+in this kind of orange blocks.
+
+00:28:44
+And then you'll be able to go
+through this fully connected
+
+00:28:46
+layers to directly
+derive this Q value.
+
+00:28:51
+And in this case, because there
+are four discrete actions--
+
+00:28:54
+in this case, probably
+just left and right.
+
+00:28:56
+But let's say there's four
+discrete actions-- up and down,
+
+00:28:59
+left and right.
+
+00:28:59
+So you will be able to
+have different Q value
+
+00:29:02
+estimations that is the results
+of this specific action a.
+
+00:29:06
+And that's how you can use
+these Q values to make decisions
+
+00:29:08
+on what action to take
+that is the most effective
+
+00:29:11
+and maximizing this Q value.
+
+00:29:12
+Does that answer your question?
+
+00:29:17
+Yes, this is when
+AlphaGo came out.
+
+00:29:20
+And obviously, since
+then, there has
+
+00:29:22
+been a lot of developments
+and evolutions
+
+00:29:24
+in making this type of gaming
+agents better and better.
+
+00:29:28
+So then later,
+there's AlphaGo Zero.
+
+00:29:31
+That is essentially a
+simplified version of AlphaGo,
+
+00:29:34
+then no longer using
+any imitation learning
+
+00:29:36
+to do any initialization.
+
+00:29:39
+And it's able to beat, at
+that time, the number one
+
+00:29:42
+player, Ke Jie.
+
+00:29:45
+So this is actually one thing,
+one lesson people learned
+
+00:29:48
+inside this AI
+communities, which
+
+00:29:51
+you can call it the bitter
+lesson from the Rich Sutton,
+
+00:29:54
+where sometimes you want to
+find the simplest recipes that
+
+00:29:57
+is the most and best
+compatible with the scaling.
+
+00:30:01
+You want to leverage the
+scale, the power of scalings.
+
+00:30:04
+And sometimes, making
+this method simpler
+
+00:30:07
+will actually give
+you better performance
+
+00:30:09
+by making it more compatible
+with whatever infrastructure
+
+00:30:13
+you can use for
+scaling things up.
+
+00:30:15
+And then later, they
+develop Alpha Zero
+
+00:30:18
+that is able to generalize
+the same set of algorithms
+
+00:30:21
+into not just chess--
+
+00:30:23
+not just Go but other
+games like chess and shogi.
+
+00:30:26
+And then they
+designed MuZero that
+
+00:30:30
+not just do this kind of
+model-free reinforcement
+
+00:30:32
+learning, but it's able to
+learn a latent space dynamics
+
+00:30:35
+model to plan over that gives
+you an even better performance.
+
+00:30:40
+So for this specific domain,
+I would say, especially
+
+00:30:42
+in the gaming developments, that
+really empowers a lot of design
+
+00:30:47
+and developments in how people
+can do better and more assembly
+
+00:30:51
+efficient and more scalable
+design of those reinforcement
+
+00:30:54
+learning agents.
+
+00:30:56
+And in November 2019, Lee Sedol,
+who was beaten by of AlphaGo,
+
+00:31:01
+announce his retirement.
+
+00:31:03
+And he realized
+they're just not--
+
+00:31:05
+it's just not possible, at that
+time, for any human players
+
+00:31:09
+to beat the best like
+AI agents out there.
+
+00:31:14
+And obviously, since
+then, there has
+
+00:31:16
+been other more complex
+games like StarCraft and Dota
+
+00:31:20
+that shows that as long as you
+put enough compute, as long
+
+00:31:23
+as you have a very well designed
+algorithms and infrastructure
+
+00:31:28
+for you to do the
+reinforcement learning,
+
+00:31:29
+you can get very, very good
+performance in games that
+
+00:31:33
+are actually noticeably
+and orders of magnitude
+
+00:31:35
+more complicated
+than the game of Go.
+
+00:31:39
+So I would say, if you have
+a game, a reasonably designed
+
+00:31:42
+game, there's a
+very good chance,
+
+00:31:45
+if you put the
+sufficient resource,
+
+00:31:48
+you can have very, very
+powerful gaming agents.
+
+00:31:51
+So not just in games,
+people have also
+
+00:31:54
+been developing this
+reinforcement learning
+
+00:31:55
+algorithms and agents
+that can work directly
+
+00:31:58
+in the real physical world.
+
+00:32:01
+So this, on the left,
+is a work from ETH
+
+00:32:04
+that was published in
+Science Robotics 2020.
+
+00:32:08
+That essentially changed my mind
+about how useful reinforcement
+
+00:32:11
+learning can be for
+real physical robots
+
+00:32:14
+because before it
+was just mostly
+
+00:32:15
+games like the [INAUDIBLE].
+
+00:32:17
+In games, there's a lot of--
+
+00:32:19
+you can just spawn as
+many games as possible.
+
+00:32:23
+But for the real world,
+there's always sim-to-real gap,
+
+00:32:26
+where you are training
+on the same game,
+
+00:32:28
+you are also testing
+on the same game.
+
+00:32:29
+But for robots, if you
+train on a simulation,
+
+00:32:32
+how much does the sim-to-real
+gap matters for the agents
+
+00:32:35
+to generalize to the
+real environments?
+
+00:32:37
+And this paper
+really convinced me
+
+00:32:40
+that, sometimes, the
+sim-to-real gap just
+
+00:32:42
+may not matter that much.
+
+00:32:44
+So we are not
+simulating the bushes.
+
+00:32:46
+We are not simulating the snows.
+
+00:32:48
+But the agents that's using
+reinforcement learning,
+
+00:32:50
+that training
+simulation, can give you
+
+00:32:52
+some very, very
+robust performance
+
+00:32:54
+in the real physical world, like
+snows and [INAUDIBLE] very, very
+
+00:32:58
+slippery surface.
+
+00:33:00
+On the right is a
+very recent video
+
+00:33:02
+released by Unitree that shows
+just another level of dexterity
+
+00:33:07
+for locomotions that can do
+this sim-to-real transfer,
+
+00:33:11
+allow these robots to
+do very, very crazy
+
+00:33:14
+and dynamic behaviors.
+
+00:33:15
+They can navigate into some very
+rough and challenging terrains.
+
+00:33:19
+I would say, in the domain
+of robot locomotion,
+
+00:33:22
+it is close to be
+a solved problem.
+
+00:33:26
+And the solution to
+this problem is exactly
+
+00:33:29
+reinforcement learning.
+
+00:33:30
+So this is about locomotion.
+
+00:33:33
+So other domain is about
+manipulations or the robot
+
+00:33:37
+has to manipulate the objects
+in the real physical world.
+
+00:33:40
+So in 2019, when
+OpenAI was still like--
+
+00:33:44
+touch upon robotics,
+they designed the systems
+
+00:33:48
+that are trying to do dexterous
+manipulations of Rubik's cube.
+
+00:33:51
+They are able to do the
+reinforcement learning
+
+00:33:54
+in simulation and do
+sim-to-real transfer that
+
+00:33:56
+allows these kind of robots
+to solve this Rubik's cube.
+
+00:34:00
+But one caveat is that their
+success rate is very, very low.
+
+00:34:04
+Although these videos seem
+to be very beautifully done,
+
+00:34:06
+but their success
+rate was very low.
+
+00:34:08
+And if you really
+look at the papers,
+
+00:34:10
+they only tested a very
+limited amount of trials.
+
+00:34:14
+And given that number,
+possibly the reliability
+
+00:34:17
+is not very satisfying.
+
+00:34:19
+But still, since
+then, people have
+
+00:34:22
+been able to extend upon this
+dexterous manipulation problems
+
+00:34:27
+and allow the robots to do
+enhanced dexterous manipulation
+
+00:34:30
+and reorientations of
+different types of objects
+
+00:34:33
+and into different
+target configurations.
+
+00:34:37
+It's all thanks to the
+developments of reinforcement
+
+00:34:40
+learning.
+
+00:34:42
+But we can see, until now,
+our examples in locomotions
+
+00:34:47
+and in hand manipulation,
+it doesn't really
+
+00:34:49
+solve the problem for them,
+but if the robot can just
+
+00:34:51
+fold the clothes for you
+or do the laundry for you
+
+00:34:53
+in your home.
+
+00:34:55
+For manipulation, still in this
+kind of very isolated domains,
+
+00:34:59
+like working with this kind
+of isolated environments.
+
+00:35:03
+So this is actually some of the
+key challenges and bottlenecks
+
+00:35:07
+of existing model-free
+reinforcement learning.
+
+00:35:10
+It is mostly learned
+from the trials and error
+
+00:35:12
+with the environments, and it
+requires extensive interactions
+
+00:35:16
+with the world.
+
+00:35:17
+For example, for
+the AlphaGo Zero,
+
+00:35:20
+it actually learns from 3,000
+years of human knowledge in 40
+
+00:35:24
+days, which is amazing.
+
+00:35:26
+But it still requires
+many, many years
+
+00:35:29
+of computation, years of
+equivalent computations
+
+00:35:32
+for the agents to learn.
+
+00:35:34
+If in domains where there's
+a huge sim-to-real gap
+
+00:35:37
+and you want to do the
+reinforcement learning
+
+00:35:39
+in the real physical world,
+that will be a huge bottleneck
+
+00:35:43
+for learning this
+reinforcement learning agents
+
+00:35:45
+very effectively.
+
+00:35:47
+And also, of course, if there
+is sim-to-real gap, if you only
+
+00:35:50
+can learn the model in
+the real environments,
+
+00:35:52
+there's a lot of
+safety concerns.
+
+00:35:54
+For example, here is
+an example showing
+
+00:35:57
+this kind of
+learning progressions
+
+00:35:58
+of an agent that is controlling
+these humanoid robots to move
+
+00:36:02
+forwards.
+
+00:36:03
+You can see that
+during this learning
+
+00:36:04
+process, although
+at the very end,
+
+00:36:05
+the robot is able
+to move forwards,
+
+00:36:08
+but there's a lot of
+very weird behaviors
+
+00:36:10
+that you can totally
+imagine if you apply
+
+00:36:12
+this agent on the
+real physical robots,
+
+00:36:14
+it will fail catastrophically.
+
+00:36:17
+And it also have a very
+limited interpretabilities.
+
+00:36:21
+And sometimes, it's very
+hard to correct things
+
+00:36:24
+when things go wrong.
+
+00:36:26
+And one interesting
+thing, if you really
+
+00:36:28
+think about how humans
+learn to interact
+
+00:36:31
+with the environment versus
+pure reinforcement learning,
+
+00:36:34
+you realize that we humans have
+a very intuitive understanding
+
+00:36:38
+of this environment.
+
+00:36:39
+We can imagine how
+the environment
+
+00:36:41
+is going to change if we
+apply a specific action.
+
+00:36:44
+So it's exactly this
+predictive capabilities
+
+00:36:47
+that allows we, humans, to
+plan our behavior in achieving
+
+00:36:50
+some specific targets.
+
+00:36:52
+And this predictive capabilities
+is also actually learned
+
+00:36:55
+from we human's
+physical interactions
+
+00:36:57
+and everyday experiences
+with the real physical world.
+
+00:37:02
+So going beyond the
+reinforcement learning,
+
+00:37:04
+the next topic I
+want to discuss will
+
+00:37:06
+be how we can endow the robots
+with similar capabilities
+
+00:37:10
+in imagining the
+effect of their actions
+
+00:37:13
+and to do model-based planning.
+
+00:37:15
+For the specific examples,
+we have a simulation.
+
+00:37:18
+Typically, the simulation people
+use would be, for example,
+
+00:37:20
+Isaac Gym or Isaac Sim
+developed by NVIDIA.
+
+00:37:23
+And there are essentially a
+bunch of rigid body simulations
+
+00:37:27
+where the robot's just
+touching this kind of a polygon
+
+00:37:30
+type of representation, like
+a representation of the floor.
+
+00:37:34
+It is not simulating,
+for example, the bushes.
+
+00:37:36
+It is not simulating
+those snows.
+
+00:37:38
+But what people
+do is to randomize
+
+00:37:40
+the simulated environments
+a lot and randomize
+
+00:37:43
+the friction, the geometry, and
+many other physical parameters
+
+00:37:47
+inside this environment such
+that people will assume whatever
+
+00:37:51
+you encounter in the real
+physical world is just one data
+
+00:37:55
+point within the
+distributions you
+
+00:37:57
+randomize within
+your simulation.
+
+00:37:59
+So if your policies
+can be robust,
+
+00:38:02
+robust in controlling this
+robots within that distribution,
+
+00:38:05
+and if the real world
+is just one data
+
+00:38:06
+point within that distribution,
+the policy can generalize.
+
+00:38:09
+And so far, at least from
+this empirical evidence,
+
+00:38:12
+this type of assumption
+actually holds,
+
+00:38:14
+and the policy actually works
+very reliably and robustly
+
+00:38:16
+in the real physical world.
+
+00:38:18
+So the question is about,
+what is the actual command?
+
+00:38:20
+So actually, in many
+of the existing demos,
+
+00:38:23
+there can be a person
+providing high-level commands
+
+00:38:26
+to the robot.
+
+00:38:27
+For example, which direction
+should the robots walk?
+
+00:38:29
+So the robot rotates in
+place or just still keep
+
+00:38:32
+walking forwards.
+
+00:38:33
+Conditioned on that high-level
+actions provided by human,
+
+00:38:37
+the robot has to decide this
+kind of low-level actions.
+
+00:38:40
+The low-level actions
+are typically,
+
+00:38:41
+for example, the
+joint torque that
+
+00:38:45
+are applied to each and
+every one of the joints
+
+00:38:47
+on top of this robot.
+
+00:38:49
+So that is how this
+typically looks
+
+00:38:52
+like, meaning humans
+give high-level commands,
+
+00:38:54
+conditional high-level commands.
+
+00:38:55
+The robot has to use
+this policy to decide
+
+00:38:57
+this kind of low-level
+actions, which is instantiated
+
+00:39:00
+using joint torque.
+
+00:39:02
+So like I mentioned,
+one biggest lesson I
+
+00:39:05
+learned from this line
+of work on locomotion
+
+00:39:08
+is that the simulation
+doesn't have to be perfect.
+
+00:39:10
+As long as you
+randomize it enough,
+
+00:39:12
+it can generalize very robustly
+in the real environments.
+
+00:39:15
+But such lesson hasn't really
+been generalized very well
+
+00:39:19
+in the manipulation domain.
+
+00:39:21
+So in the manipulation domain,
+how accurate the simulation
+
+00:39:23
+needs to be and how much
+does the sim-to-real gap
+
+00:39:26
+matters is still a research
+question people hope to answer.
+
+00:39:29
+So I can give you
+one specific example.
+
+00:39:32
+If in the simulation you
+are pushing a box forwards,
+
+00:39:34
+if in simulation, the box
+rotates for 10 degrees
+
+00:39:37
+but in reality it
+rotates for 12 degrees,
+
+00:39:39
+it may not matter that much.
+
+00:39:41
+But if in the real world,
+your grasping was successful.
+
+00:39:44
+But in simulation,
+the object just
+
+00:39:46
+flies away because of some
+kind of numerical issues.
+
+00:39:49
+Or if the object slips
+away between your fingers,
+
+00:39:52
+that's problematic.
+
+00:39:54
+So there are regions where
+sim-to-real gap matter.
+
+00:39:56
+There are other regions
+sim-to-real gap may not
+
+00:39:58
+matter that much in the
+manipulation domain.
+
+00:40:01
+And people still
+are trying to answer
+
+00:40:02
+and trying to understand how
+sim-to-real gap can happen
+
+00:40:06
+and what are some of the
+most important recipes
+
+00:40:09
+and characteristics that
+this simulation needs
+
+00:40:11
+to have for the most reliable
+sim-to-real transfer.
+
+00:40:15
+So If I understand your
+questions correctly,
+
+00:40:17
+you are asking--
+
+00:40:18
+there are still a person
+providing high-level commands
+
+00:40:21
+to the robots.
+
+00:40:22
+So the question
+is, can the robot
+
+00:40:23
+come up with better
+plans than the human?
+
+00:40:25
+So I can actually give you
+a more nuanced perspective.
+
+00:40:28
+Although many of these
+videos seems very nice,
+
+00:40:31
+there is a human operator
+operating the robots
+
+00:40:34
+to choose which route to go.
+
+00:40:37
+For example, what people
+typically do is-- for example,
+
+00:40:40
+let's say, there's some
+kind of rough terrains
+
+00:40:42
+or some pile of rocks.
+
+00:40:43
+And the humans can actually
+try to command the robot
+
+00:40:47
+to go forward, trying to
+climb those kind of rocks.
+
+00:40:50
+If that fails,
+humans can actually
+
+00:40:52
+provide some other high-level
+commands to get around
+
+00:40:54
+this pile of rocks.
+
+00:40:55
+So there can be some
+kind of learning also
+
+00:40:57
+on the human side in
+understanding the capabilities
+
+00:40:59
+of those robots.
+
+00:41:01
+So this is also why
+some of this video
+
+00:41:04
+can actually look very nice
+because humans select the routes
+
+00:41:08
+that the human knows can
+show the limits and also
+
+00:41:10
+the capabilities of this kind
+of low-level controllers.
+
+00:41:13
+And how to do that autonomously?
+
+00:41:15
+That's actually a very
+interesting question
+
+00:41:18
+people are also
+doing research upon.
+
+00:41:22
+So then I'm going to continue.
+
+00:41:25
+So I've discussed some of the
+successful examples and power
+
+00:41:28
+of reinforcement
+learning and also
+
+00:41:30
+discussed the limitations
+of reinforcement learning.
+
+00:41:32
+And we still haven't really
+seen very, very successful
+
+00:41:35
+and wide-scale deployments
+of reinforcement
+
+00:41:38
+learning in manipulation yet.
+
+00:41:40
+And we, humans, not just
+learn from trials and error.
+
+00:41:42
+We actually build this
+type of internal model.
+
+00:41:45
+So we're asking the question,
+can we actually learn
+
+00:41:47
+the models from the
+robot's interactions
+
+00:41:49
+with the environments and using
+that model for the robot to do
+
+00:41:53
+better physical interactions?
+
+00:41:55
+So specifically, what we are
+touching upon, again, back
+
+00:41:58
+to this figure, is
+how we can learn
+
+00:42:00
+and approximations of
+the real physical world,
+
+00:42:03
+and how can this
+approximated physical world
+
+00:42:07
+that runs on the
+virtual domain can help
+
+00:42:10
+guide the robot's actions
+and decide what action
+
+00:42:12
+to take in the physical world?
+
+00:42:15
+So let's say, if you
+already have the model,
+
+00:42:17
+for example, let's say, you
+have already learned the models
+
+00:42:19
+like we humans have in
+our mental environments,
+
+00:42:24
+we can predict, given
+the current state st
+
+00:42:26
+and also the action t, how
+the state of the environment
+
+00:42:29
+will change into
+states t plus 1.
+
+00:42:33
+And then we can use
+this, essentially,
+
+00:42:34
+as a forward model that, given
+the current state and action,
+
+00:42:37
+predict the next state.
+
+00:42:38
+So what actually is
+the problem for us
+
+00:42:41
+to do the planning,
+which is essentially
+
+00:42:43
+an inverse of this
+forward model?
+
+00:42:45
+Well, the planning is to give
+the current state and the target
+
+00:42:48
+states and to come up with the
+action that can allow the robot
+
+00:42:51
+to achieve the target states.
+
+00:42:54
+Given the current state
+shown in the blue dots,
+
+00:42:56
+we have the targets
+shown in the red.
+
+00:42:58
+We can have maybe some
+initial guesses of how
+
+00:43:00
+the actions might look like.
+
+00:43:02
+And our model, our
+approximated learned models,
+
+00:43:05
+will be able to
+predict the sequence
+
+00:43:07
+evolutions of the
+states, which is
+
+00:43:09
+shown in this green trajectory.
+
+00:43:13
+And then we can measure the
+distance between this green dots
+
+00:43:16
+and the red dots
+and backpropagates
+
+00:43:18
+or doing optimizations using
+the gradients of their distance
+
+00:43:24
+with respect to all the
+actions along the trajectories
+
+00:43:27
+to do this type
+of optimizations,
+
+00:43:29
+in order to know what
+actions can guide us
+
+00:43:32
+to getting us closer to the
+targets shown in the red.
+
+00:43:35
+And obviously, the model
+may not be accurate enough,
+
+00:43:38
+so we typically only
+executes the first actions,
+
+00:43:41
+and we obtain the new
+states from the environment.
+
+00:43:44
+And we can re-optimize
+the action sequence using
+
+00:43:47
+gradient descent or
+any other optimization
+
+00:43:49
+techniques you use to do this
+trajectory optimizations.
+
+00:43:53
+And one of the key benefits,
+especially recently
+
+00:43:56
+with the development of GPUs
+and also neural dynamics model,
+
+00:44:00
+is that you can use
+the GPU for parallel
+
+00:44:02
+and simultaneously
+sampling to allow
+
+00:44:05
+you to do large-scale
+sampling and optimizations
+
+00:44:07
+of those action sequences, which
+is actually quite efficient.
+
+00:44:12
+So given this, the
+general framework,
+
+00:44:14
+you have the model, which is
+this kind of forward process.
+
+00:44:17
+And you can always
+use the forward model
+
+00:44:19
+to do this inverse
+optimizations to come up
+
+00:44:22
+with the actions that can
+get you closer to your target
+
+00:44:25
+configuration.
+
+00:44:26
+And one of the key
+questions has always
+
+00:44:28
+been, what should be
+the right representation
+
+00:44:30
+of the environment?
+
+00:44:31
+What should be the
+right and most effective
+
+00:44:33
+state representation s?
+
+00:44:34
+And how we can learn
+this model based
+
+00:44:36
+on the state representation.
+
+00:44:38
+And over the years,
+there has been
+
+00:44:40
+many different investigations
+on choosing or investigating
+
+00:44:43
+different types of
+state representations.
+
+00:44:45
+Some earlier work, including
+how can using, for example,
+
+00:44:48
+just 2D images as a
+representation of the states
+
+00:44:51
+and trying to learn
+pixel dynamics,
+
+00:44:53
+meaning how the image might
+change if you apply a specific
+
+00:44:57
+action.
+
+00:44:58
+This is a work called deep
+visual foresight, which
+
+00:45:00
+set off some of
+the initial works
+
+00:45:02
+in the whole domains
+of word models.
+
+00:45:06
+And by learning this kind of
+pixel-based dynamics models,
+
+00:45:08
+people can come
+up with strategies
+
+00:45:10
+that is able to, for
+example, minimize
+
+00:45:12
+the distance between the
+current observations and some
+
+00:45:14
+can rotate the objects and push
+the objects around in order
+
+00:45:18
+to achieve the targets
+shown in green,
+
+00:45:20
+and the current state
+is shown in red.
+
+00:45:23
+So this is about pixel dynamics.
+
+00:45:26
+And what people can also
+do is to use keypoints
+
+00:45:29
+as a representation
+of the environments
+
+00:45:31
+to learn keypoints
+dynamics models.
+
+00:45:33
+And here, what we can do
+is to track the movement
+
+00:45:37
+of the keypoints on top of this
+box over the 3D space and also
+
+00:45:42
+neural dynamics model of those
+keypoints as a result of some
+
+00:45:46
+pushing actions.
+
+00:45:47
+And then we can allow
+the robots to use
+
+00:45:49
+this forward predictive models
+to plan the robot's behaviors
+
+00:45:53
+to track some specific
+trajectories in order
+
+00:45:56
+to push this box to achieve
+our target configurations.
+
+00:46:01
+So besides using
+keypoints, so what
+
+00:46:03
+if you encountered some objects
+with even higher degrees
+
+00:46:06
+of freedom?
+
+00:46:08
+So if you go one
+level finer, you
+
+00:46:10
+can also represent those objects
+using a set of particles,
+
+00:46:15
+essentially a set of points.
+
+00:46:16
+Here, which is
+actually a work that
+
+00:46:19
+was done while I was
+here as a postdoc,
+
+00:46:22
+we were representing this
+pile of granular pieces,
+
+00:46:25
+using a bunch of
+particles and trying
+
+00:46:27
+to predict how those
+particles will move around
+
+00:46:30
+if you apply a specific action.
+
+00:46:32
+And this forward model
+can allow the robots
+
+00:46:34
+to do this inverse
+decision making that
+
+00:46:37
+handle a wide range
+of granular objects
+
+00:46:40
+of different granular sizes.
+
+00:46:42
+And we come up with
+strategies that
+
+00:46:43
+can gather those
+pieces into the target
+
+00:46:46
+region shown in
+the bottom right,
+
+00:46:48
+like a corner of each segment.
+
+00:46:51
+And the same model with good
+feedback from the environments
+
+00:46:55
+allow the robots to correct
+from the model's error
+
+00:46:59
+and come up with strategies that
+can be very reliably aggregate
+
+00:47:02
+all the object pieces
+into the target region.
+
+00:47:06
+And obviously,
+this model not just
+
+00:47:08
+can generalize to
+different granular pieces
+
+00:47:11
+of different granular sizes.
+
+00:47:12
+It can also change to different
+target configurations.
+
+00:47:17
+Here, you will very
+quickly realize what
+
+00:47:18
+the target configurations are.
+
+00:47:20
+The robot has to come
+up with a strategy that
+
+00:47:23
+to do nontrivial redistributions
+of the granular pieces.
+
+00:47:27
+And after the
+redistribution, it has
+
+00:47:29
+to align the
+fine-grained details
+
+00:47:31
+with the targets like shape.
+
+00:47:33
+You want to accomplish this
+like a pile rearrangement task.
+
+00:47:36
+The task here is actually to
+rearrange this granular pieces
+
+00:47:39
+into different letter shapes,
+all the way from letter A
+
+00:47:42
+to letter Z. And with this
+kind of forward models,
+
+00:47:45
+we'll be very
+successful in coming up
+
+00:47:47
+with a sequence of
+strategies, of course,
+
+00:47:49
+with feedback from
+the environments
+
+00:47:51
+to allow the robot to rearrange
+this kind of object pieces
+
+00:47:54
+into the target regions.
+
+00:47:55
+And this is actually a
+highly nontrivial task.
+
+00:47:58
+And going beyond that, we also
+have this subsequent work,
+
+00:48:03
+which I was also
+involved and done
+
+00:48:05
+when I was here at Stanford.
+
+00:48:07
+And we designed this kind of
+dumpling-making robots, that is,
+
+00:48:11
+actually equipped the robots
+with 15 different 3D-printed
+
+00:48:15
+tools.
+
+00:48:16
+We have four RGBD cameras
+looking at the environment
+
+00:48:19
+to do a reconstruction of
+the geometry of the store.
+
+00:48:22
+And the robots will have
+to decide what tool to use
+
+00:48:25
+and what action to take to
+get this dumpling into--
+
+00:48:30
+getting this dough
+into a dumpling.
+
+00:48:32
+And the key enabling
+factor is also
+
+00:48:34
+this forward predictive models
+represented using particles.
+
+00:48:39
+Or here, the red
+dots are representing
+
+00:48:41
+the shape of the tool,
+and the blue dots
+
+00:48:43
+are representing the
+shape of the objects.
+
+00:48:46
+The first row is our model's
+open loop prediction,
+
+00:48:49
+and second row is what actually
+happens in the real environment.
+
+00:48:53
+So this learned model
+that directly learns
+
+00:48:56
+from this real-world
+interactions
+
+00:48:58
+can very accurately predict the
+change of the shape of the dough
+
+00:49:02
+when using different tools,
+applying different actions,
+
+00:49:04
+and in the end allows us to have
+this integrated system that can
+
+00:49:09
+make a dumpling out of a dough.
+
+00:49:10
+What's interesting
+about this video
+
+00:49:12
+is there's a person
+constantly perturbing
+
+00:49:14
+the robot from doing its job.
+
+00:49:17
+The robot will take the
+real-time visual feedback
+
+00:49:20
+from this environment
+to real-time
+
+00:49:22
+understanding the
+shape of the dough
+
+00:49:24
+and then using the current
+observations and also
+
+00:49:28
+the learned dynamics model that
+predicts how the environment is
+
+00:49:30
+going to change, how
+the dose shape will
+
+00:49:32
+change if you use a tool
+to apply a specific action,
+
+00:49:35
+and, based on this
+forward model,
+
+00:49:37
+is making this inverse decision.
+
+00:49:40
+This decision is
+happening at two levels,
+
+00:49:42
+both at the high level,
+which is to decide
+
+00:49:45
+what tool to use, which is a
+task-level decision making.
+
+00:49:48
+And given these
+tools, the robot also
+
+00:49:50
+have to make a lower-level,
+emotion-level decisions
+
+00:49:53
+in deciding what specific action
+to take in order to progress
+
+00:49:57
+into the next task stage.
+
+00:49:59
+Humans are just so annoying,
+adding pieces, folding
+
+00:50:01
+the dough.
+
+00:50:02
+The robot is very robust to
+this external disturbance
+
+00:50:05
+in continuing its progress
+in doing the task.
+
+00:50:08
+Here's what's interesting.
+
+00:50:09
+After the robot casts a circle,
+the human shows no mercy,
+
+00:50:13
+destroys everything.
+
+00:50:15
+The robot knows
+you actually have
+
+00:50:16
+to start from the
+very beginning,
+
+00:50:18
+redo the task from
+the beginning in order
+
+00:50:20
+to progress with this
+kind of task objective.
+
+00:50:23
+So this really shows
+the patience and also
+
+00:50:26
+the robustness of our
+systems with this type
+
+00:50:28
+of external disturbance.
+
+00:50:30
+And all of these
+capabilities is enabled
+
+00:50:32
+by this kind of neural
+dynamics model that
+
+00:50:34
+predicts how the
+shape of the dough
+
+00:50:36
+will change if you
+apply a specific action.
+
+00:50:39
+In the end, the robot
+will place the skin
+
+00:50:41
+on top of this dumpling clip
+and move this kind of fillings
+
+00:50:45
+on top of this dumpling
+skin and use a hook
+
+00:50:48
+to close the dumpling
+clip in order
+
+00:50:50
+to use this general
+purpose robot equipped
+
+00:50:52
+with 15 general purpose tools to
+make a dumpling out of a dough.
+
+00:50:57
+So this is about how
+we can learn the model
+
+00:50:59
+and how that model can be useful
+for downstream model-based
+
+00:51:03
+planning.
+
+00:51:04
+So for this specific
+case, if we want
+
+00:51:08
+to describe it
+more rigorously, we
+
+00:51:10
+are not using
+reinforcement learning.
+
+00:51:12
+We just learn the model and
+use that model to do planning,
+
+00:51:15
+although the plan can be
+distilled into a policy that
+
+00:51:18
+can be executed in the
+real environment in a more
+
+00:51:21
+efficient manner.
+
+00:51:22
+But some people also call
+it model-based reinforcement
+
+00:51:25
+learning.
+
+00:51:25
+Decide which background
+you are coming from.
+
+00:51:27
+You can either call
+it model learning
+
+00:51:29
+and model-based planning.
+
+00:51:30
+You can also call it model-based
+reinforcement learning.
+
+00:51:33
+But the key idea is you want to
+learn the model from the robot's
+
+00:51:36
+physical interactions with
+the real physical world
+
+00:51:39
+and using that
+learned model that
+
+00:51:40
+is very effective
+in helping the robot
+
+00:51:42
+to decide its behaviors
+to progress with the task
+
+00:51:45
+objective.
+
+00:51:47
+So in this specific case,
+the high-level planning
+
+00:51:49
+and low-level decision making
+is done by two different models.
+
+00:51:52
+So over the high level, we
+are given the current state,
+
+00:51:56
+current observation of the
+environments and the target's
+
+00:51:58
+the robot able to
+achieve, essentially
+
+00:52:00
+a classifier that classify
+which tool to use.
+
+00:52:04
+And conditional on this
+classifier, tool label,
+
+00:52:06
+this is a low-level
+policy that decides
+
+00:52:09
+what specific action to
+take in order to progress
+
+00:52:11
+into the next task stage.
+
+00:52:14
+Very good question.
+
+00:52:15
+So back then, this
+work was done in 2023.
+
+00:52:17
+At that time, visual language
+model wasn't very powerful.
+
+00:52:21
+So at that time, what we did
+was to allow a human operator
+
+00:52:25
+to do the data
+collection, demonstration
+
+00:52:28
+of the task for 10 times.
+
+00:52:30
+We use that data to train
+this kind of classifier
+
+00:52:33
+to classify what tool to use.
+
+00:52:35
+That allows us to actually jump
+back and forth over this chain.
+
+00:52:38
+Like I mentioned earlier,
+after the robot cuts a circle,
+
+00:52:41
+the human destroys everything.
+
+00:52:42
+The robot knows to jump back
+to some earlier stages that
+
+00:52:45
+fits to its current
+observation in order
+
+00:52:47
+to do the proper recovery from
+the external disturbances.
+
+00:52:52
+So in this specific case,
+what we have been doing
+
+00:52:54
+is a combination of
+sampling-based trajectory
+
+00:52:57
+optimization versus
+policy learning.
+
+00:53:00
+So what we have been doing
+is to give the current state
+
+00:53:02
+of this dough.
+
+00:53:03
+We have our forward
+predictive models.
+
+00:53:05
+We'll be able to sample a
+bunch of actions and sample
+
+00:53:07
+a bunch of tools to predict
+what is the evolutions
+
+00:53:11
+of the shape of that dough.
+
+00:53:13
+And then we'll compare
+the model's prediction
+
+00:53:15
+with the targets
+we hope to achieve,
+
+00:53:18
+which is similar to
+what I showed earlier.
+
+00:53:20
+For example, our model
+predicts the shape of the dough
+
+00:53:23
+will go into this green
+dots, but the target
+
+00:53:25
+is this red dots, while
+comparing their distance.
+
+00:53:28
+And then that
+allows us to select
+
+00:53:30
+the most effective actions
+that can get us to the target
+
+00:53:34
+to be as close as possible.
+
+00:53:35
+And we can do a lot
+of samples like this.
+
+00:53:37
+But sampling during the test
+time is very time-consuming.
+
+00:53:41
+So we do this type of sampling
+in an offline fashion, which
+
+00:53:44
+gives us a data set.
+
+00:53:45
+And we can use that data set
+to train a policy that can
+
+00:53:48
+be inferred at a very, very--
+
+00:53:50
+using a very short
+period of time
+
+00:53:52
+to do the inference
+during the test time.
+
+00:53:54
+There is still a neural
+network as the policies.
+
+00:53:56
+Yeah.
+
+00:53:56
+Although the policy is learned
+by distilling from our models
+
+00:54:01
+predictions over a
+huge amount of samples.
+
+00:54:04
+For this specific work, there
+is no physics-based simulation
+
+00:54:07
+at all.
+
+00:54:08
+We actually have a baseline
+that uses a state-of-the-art
+
+00:54:11
+deformable object simulator,
+which is called MPM,
+
+00:54:13
+Material Point Methods.
+
+00:54:15
+What we realize is that even
+if we do very extensive system
+
+00:54:19
+identification, like
+estimating the parameters
+
+00:54:21
+of those physics-based
+deformable object simulator,
+
+00:54:24
+the identified model is
+noticeably less accurate
+
+00:54:27
+than the model that
+directly learned
+
+00:54:28
+from the real-world
+interactions.
+
+00:54:30
+Like I showed
+earlier, for example,
+
+00:54:31
+the first row is our model's
+open loop prediction.
+
+00:54:34
+The second row is
+the ground truth.
+
+00:54:35
+Our model's prediction
+aligns very well
+
+00:54:37
+with the ground
+truth, which is just
+
+00:54:39
+much more accurate than whatever
+physics-based simulator is
+
+00:54:42
+out there.
+
+00:54:46
+OK.
+
+00:54:46
+So if there are no more
+questions, I will continue.
+
+00:54:49
+So what do we have discussed
+in this kind of model learning
+
+00:54:52
+and how this
+learned model can be
+
+00:54:54
+effective for the downstream
+model-based planning.
+
+00:54:56
+And next category of algorithms
+is imitation learning.
+
+00:55:01
+So just to recap
+a little bit, we
+
+00:55:04
+discussed
+reinforcement learning.
+
+00:55:06
+That is directly
+learning the policies
+
+00:55:08
+by doing trials and error
+with the environments, which
+
+00:55:10
+has a lot of troubles, for
+example, the sample efficiency,
+
+00:55:13
+the safety concerns.
+
+00:55:14
+And for the model learning,
+what we have been doing
+
+00:55:16
+is actually forced
+back to the category
+
+00:55:19
+of supervised learning,
+where we have the evolutions
+
+00:55:22
+of the environments.
+
+00:55:23
+You use that data
+to do supervised
+
+00:55:25
+learning to train this
+model and using this model
+
+00:55:27
+to do model-based planning.
+
+00:55:29
+And instead of just
+using supervised
+
+00:55:32
+learning to train the model,
+people are also asking,
+
+00:55:35
+can we do supervised learning
+also for the policies?
+
+00:55:38
+This is the general idea of
+imitation learning, meaning
+
+00:55:41
+can we have a big data set
+that shows how a task needs
+
+00:55:46
+to be done and
+using this data set
+
+00:55:49
+to train this kind of policies?
+
+00:55:50
+I'm showing this figure again.
+
+00:55:52
+This is trying to learn
+this kind of policy,
+
+00:55:54
+taking the states as inputs
+that predict the actions.
+
+00:55:57
+And all of this kind of learning
+signals and learning procedures
+
+00:56:00
+are done through a
+large-scale collected data,
+
+00:56:03
+from human demoing to the robots
+how a task needs to be done.
+
+00:56:09
+So learning from demonstration
+is, of course, not new.
+
+00:56:11
+It has been investigated
+for decades.
+
+00:56:14
+It's also constantly
+how we human is actually
+
+00:56:16
+learning to perform a lot
+of physical interactions
+
+00:56:19
+or social activities
+in the real world,
+
+00:56:22
+since we are very, very young.
+
+00:56:24
+So one of the most
+earlier classic imitation
+
+00:56:28
+learning algorithms is called
+behavior cloning, essentially
+
+00:56:32
+trying to learn this kind of
+mapping that maps currently
+
+00:56:35
+from this observation
+o into the action a.
+
+00:56:39
+And this policy is represented
+using this function
+
+00:56:42
+pi parameterized by the theta.
+
+00:56:45
+So one of the key issues
+for behavior cloning
+
+00:56:48
+is called cascading error
+because, like I mentioned,
+
+00:56:51
+the key difference
+between the robot learning
+
+00:56:54
+or agents' interaction
+with the environment
+
+00:56:56
+is it is a sequential
+decision-making problem.
+
+00:56:59
+It differs from a typical
+supervised learning
+
+00:57:02
+in the typical
+computer vision domain
+
+00:57:03
+in that your error
+can accumulate
+
+00:57:06
+and be amplified over time.
+
+00:57:08
+Let's say, at the
+very beginning,
+
+00:57:09
+you made a very small error.
+
+00:57:11
+That small error can lead
+to a state that slightly
+
+00:57:15
+deviates from the
+distribution of data
+
+00:57:17
+used to train your model.
+
+00:57:19
+That will lead the policy to
+make an even larger error.
+
+00:57:21
+And this error will be amplified
+over the temporal horizons.
+
+00:57:26
+That leads to a
+trajectory that can
+
+00:57:27
+deviate quite a lot from the
+demonstration trajectories.
+
+00:57:31
+So that's the typical issues
+of behavioral cloning.
+
+00:57:34
+So that's why,
+oftentimes, when people
+
+00:57:37
+are trying to make
+imitation learning work,
+
+00:57:39
+people will follow this type
+of pipeline, where, on the top,
+
+00:57:42
+we have the demonstration
+collected by the experts.
+
+00:57:45
+Then we'll use that as a
+training data to do supervised
+
+00:57:49
+learning to train this policy.
+
+00:57:51
+And we'll rule out the policy
+in the real environment
+
+00:57:53
+and observe those failure cases.
+
+00:57:56
+And we either collect
+additional data
+
+00:57:59
+or provide corrective
+behaviors that
+
+00:58:01
+allows these data sets
+to not only contain
+
+00:58:03
+the initial demonstrations but
+also those corrective behaviors
+
+00:58:07
+that gets the errors
+from the policies back
+
+00:58:11
+to the canonical trajectory
+or get back to the trajectory.
+
+00:58:13
+They can still successfully
+accomplish the task.
+
+00:58:16
+So this is actually
+a typical life cycle.
+
+00:58:18
+We are trying to develop
+any imitation learning
+
+00:58:21
+agents or imitation
+learning algorithms
+
+00:58:23
+in the real physical world.
+
+00:58:26
+And along these lines,
+because if people
+
+00:58:29
+do this kind of
+imitation learning,
+
+00:58:32
+there's not a very
+explicit definition
+
+00:58:35
+of what the task actually is.
+
+00:58:37
+The task is implicitly hidden
+within those demonstrations.
+
+00:58:41
+So there's a class
+of algorithms called
+
+00:58:44
+inverse reinforcement
+learning, where on the left
+
+00:58:47
+is what people typically
+think about for reinforcement
+
+00:58:49
+learning, whereas on the
+right, where people are trying
+
+00:58:52
+to use this inverse
+reinforcement learning
+
+00:58:54
+to summarize the rewards
+from your demonstrations
+
+00:58:58
+and be able to use
+that reward to do
+
+00:59:00
+typical reinforcement
+learning to learn
+
+00:59:02
+this kind of algorithms.
+
+00:59:04
+Some of the earlier
+success examples
+
+00:59:06
+were actually also
+developed at Stanford
+
+00:59:08
+by Pieter Abbeel
+and also Andrew Ng.
+
+00:59:11
+It allows them to control
+helicopters to do some very,
+
+00:59:16
+very crazy behaviors.
+
+00:59:17
+And this is actually
+a very old work.
+
+00:59:19
+And be able to achieve this type
+of agile and effective behaviors
+
+00:59:25
+on these real
+physical helicopters
+
+00:59:27
+is very impressive at that time.
+
+00:59:30
+So this is the power of
+learning from demonstrations
+
+00:59:32
+and using that demonstration
+to summarize the rewards.
+
+00:59:35
+And in connections with
+reinforcement learning,
+
+00:59:37
+this is what we are
+able to achieve.
+
+00:59:39
+So obviously, over
+the years, people
+
+00:59:42
+have been making the
+imitation learning algorithms
+
+00:59:45
+more and more
+effective, especially
+
+00:59:47
+in connecting with, for
+example, energy-based models.
+
+00:59:50
+So instead of learning this
+kind of explicit policy shown
+
+00:59:52
+on the left, they directly do
+the mapping from the observation
+
+00:59:55
+all through the actions.
+
+00:59:56
+If you are coming up with this
+kind of implicit policies,
+
+00:59:59
+that takes the idea
+from energy-based models
+
+01:00:01
+that direct taking the
+observation and actions
+
+01:00:04
+to predict the score and using
+this kind of energy-based model
+
+01:00:09
+to do inference to get this
+kind of predicted actions a
+
+01:00:12
+has allows the robots to
+handle demonstrations that
+
+01:00:17
+are very multi-modal
+or handle scenarios
+
+01:00:19
+where the optimization
+landscapes may not
+
+01:00:21
+be very, very smooth.
+
+01:00:23
+And the robot is able to come
+up with this kind of strategies,
+
+01:00:26
+distill these policies
+from the demonstrations
+
+01:00:28
+in doing this kind of
+content-rich manipulation tasks.
+
+01:00:32
+In order to say--
+
+01:00:34
+some of the recent,
+very recent success
+
+01:00:37
+of robot learning as a whole
+is the results of this work
+
+01:00:42
+called diffusion policy,
+which, again, is also
+
+01:00:45
+taking some of the
+advances in the community
+
+01:00:48
+of generative models.
+
+01:00:49
+For this one, for the
+implicit behavior cloning,
+
+01:00:52
+people are drawing
+inspiration from development
+
+01:00:54
+of energy-based model.
+
+01:00:55
+Energy-based model is a type
+of generative model developed
+
+01:00:58
+in the deep learning community.
+
+01:01:00
+And there's another class
+of more powerful models
+
+01:01:03
+in the deep learning community
+is called diffusion models.
+
+01:01:07
+And people are also trying to
+use the diffusion models to use
+
+01:01:10
+it as a policy function class to
+allow the agents to also inherit
+
+01:01:17
+the benefits and the properties
+from those diffusion models.
+
+01:01:20
+So this work was originally
+done at Columbia.
+
+01:01:24
+That's where I am right now.
+
+01:01:27
+And the leads, like the PI of
+this work, now come to Stanford.
+
+01:01:31
+You can see, many of the work
+I selected has a lot of roots
+
+01:01:35
+here at Stanford.
+
+01:01:37
+She is currently at the W
+departments at Stanford.
+
+01:01:41
+And this policy really
+shows a very diverse set
+
+01:01:44
+of capabilities,
+allow the robots
+
+01:01:47
+to do not just planner
+pushing, but many fine-grained
+
+01:01:51
+manipulation task.
+
+01:01:52
+Not only pick and place,
+but for example here,
+
+01:01:55
+spread butter on
+top of the spreads
+
+01:01:57
+and also scrambled eggs,
+also peeling the potatoes
+
+01:02:02
+and sliding the books.
+
+01:02:04
+So it really shows
+that this type
+
+01:02:06
+of recipe, where you collect
+a bunch of demonstrations
+
+01:02:09
+and using the best policies,
+learning mechanisms,
+
+01:02:13
+you can get a policy that works
+in the real physical world
+
+01:02:17
+in a very, very efficient
+manner, meaning you
+
+01:02:20
+collect the data in the morning.
+
+01:02:21
+You train the policy
+in the nuance.
+
+01:02:23
+In the afternoon, you can
+have a working policy working
+
+01:02:26
+in the real physical world.
+
+01:02:28
+So obviously, there's
+a lot of caveats
+
+01:02:30
+in how reliable your policy
+is and how generalizable
+
+01:02:33
+your policy is, how diversified
+the initial configuration can
+
+01:02:37
+be for the policy to
+still work very robustly.
+
+01:02:40
+But still, imitation learning is
+the most efficient way for you
+
+01:02:44
+to get a policy that
+can do something
+
+01:02:46
+interesting in the
+real physical world.
+
+01:02:49
+And for the policies to be
+very effective and robust
+
+01:02:52
+to the real-world
+variations, this type
+
+01:02:55
+of iterative data
+collections will
+
+01:02:58
+need to be in place
+for the policy
+
+01:02:59
+to cover those kind of
+unexpected behaviors
+
+01:03:03
+or some kind of
+deviating behaviors.
+
+01:03:06
+So this is about
+imitation learning.
+
+01:03:08
+So any questions?
+
+01:03:13
+OK, so if there's
+no more questions,
+
+01:03:15
+I will use the remaining
+time to discuss
+
+01:03:17
+some of the recent
+developments that
+
+01:03:20
+drive all the craziness
+about robot learning, which
+
+01:03:23
+is robotic foundation models.
+
+01:03:26
+And of course, this is
+a very involved domain.
+
+01:03:30
+Actually, for each
+one of these items,
+
+01:03:32
+you can actually have
+a course around them.
+
+01:03:35
+So for today's lecture, I'm
+just skimming through them very,
+
+01:03:38
+very quickly.
+
+01:03:39
+I only tell you the gist,
+the high-level knowledge
+
+01:03:42
+you need to get by
+looking at those terms.
+
+01:03:45
+And for robotic
+foundation models,
+
+01:03:47
+it is a type of model that is
+very similar to reinforcement
+
+01:03:53
+learning or imitation learning
+in their function class.
+
+01:03:57
+There's no explicit
+representation for them
+
+01:03:59
+of the states or
+this kind of model.
+
+01:04:01
+For example, this
+robotic foundation model
+
+01:04:03
+doesn't learn the model
+of the environments.
+
+01:04:06
+It is still a policy that
+maps from the observation
+
+01:04:09
+and goes into the actions.
+
+01:04:11
+That's still like
+a representative--
+
+01:04:13
+can be very nicely represented
+using these figures.
+
+01:04:16
+So you have this
+agents, which is
+
+01:04:17
+a policy that takes
+the current state
+
+01:04:19
+and also the goal as inputs.
+
+01:04:21
+And you're trying to
+generate these actions that
+
+01:04:23
+can be executed in the
+real physical world.
+
+01:04:26
+But you might say
+that this is very
+
+01:04:28
+similar to imitation learning
+and reinforcement learning.
+
+01:04:30
+So what's special about this
+robotic foundation models?
+
+01:04:34
+So this is actually
+all rooted back
+
+01:04:36
+to all the developments within
+the foundation model domain,
+
+01:04:39
+especially those
+language-related foundation
+
+01:04:42
+model and also those vision
+language-related foundation
+
+01:04:45
+models, meaning it is a policy.
+
+01:04:47
+But it needs to generalize much
+better than a policy that just
+
+01:04:51
+works for one specific task.
+
+01:04:54
+Here is actually my definitions.
+
+01:04:55
+I'm drawing analogies from the
+current developments of vision
+
+01:04:59
+language models, meaning
+their outputs may not always
+
+01:05:03
+be the perfect one,
+but it will always
+
+01:05:06
+generate something
+reasonable as you prompts
+
+01:05:08
+this kind of foundation model.
+
+01:05:10
+So what we hope to achieve with
+this robotic foundation model
+
+01:05:13
+is the synthesized
+action may not always
+
+01:05:16
+be the optimal
+actions as conditioned
+
+01:05:18
+by the observation and the task.
+
+01:05:19
+But the general
+trajectory will always
+
+01:05:21
+be beautiful and
+reasonable to execute
+
+01:05:24
+in the real physical world.
+
+01:05:26
+Beautiful meaning you shouldn't
+use any jiggling motions.
+
+01:05:28
+It should be smooth
+and continuous.
+
+01:05:30
+Reasonable meaning you
+should listen to the language
+
+01:05:32
+instructions you are
+given to the robots.
+
+01:05:35
+So obviously, there are also
+many different names describing
+
+01:05:39
+exactly the same things.
+
+01:05:40
+Some people call it
+Vision Language Action
+
+01:05:42
+Models like VLAs.
+
+01:05:44
+Some people call it
+large behavior models.
+
+01:05:46
+But in the essence, they are
+all describing the same thing,
+
+01:05:49
+meaning this policy, taking
+the observation and language
+
+01:05:52
+instructions or whatever,
+like a task specification.
+
+01:05:55
+You're trying to generate the
+actions that generalize widely
+
+01:05:57
+across a wide
+range of scenarios.
+
+01:06:01
+So this area is
+actually quite noisy.
+
+01:06:04
+Noisy meaning it's
+very, very hard
+
+01:06:07
+to quantify the progress
+of different kinds
+
+01:06:10
+of robotic foundation models.
+
+01:06:12
+Because you're calling
+it foundation model,
+
+01:06:14
+what does that mean?
+
+01:06:14
+That means you expect this
+model to generalize very broadly
+
+01:06:18
+over a wide range of scenarios.
+
+01:06:19
+If that's your
+expectation, you actually
+
+01:06:21
+need significant evidence
+to show it actually
+
+01:06:23
+generalizes broadly.
+
+01:06:24
+So that's why evaluation and
+quantitative measurements
+
+01:06:27
+of their progress
+is very challenging.
+
+01:06:30
+But still, by looking at
+their empirical videos,
+
+01:06:33
+you can still see a lot of
+very interesting and concrete
+
+01:06:36
+progress over the
+past two years.
+
+01:06:39
+So a lot of the
+earlier investigation
+
+01:06:41
+starts with RT-1,
+which was released
+
+01:06:45
+in the December of 2022.
+
+01:06:47
+And since then, I would say
+maybe roughly every half a year,
+
+01:06:51
+there's a new model, for
+example, RT-2, RT-X, OpenVLA,
+
+01:06:55
+and some of the recent
+ones like Pi-Zero,
+
+01:06:58
+that is making concrete progress
+along these lines of developing
+
+01:07:02
+more and more generalizable
+robotic foundation models.
+
+01:07:06
+And actually, this
+year, there's a boost.
+
+01:07:09
+There's a [INAUDIBLE] first
+of a lot of foundation models,
+
+01:07:13
+like Helix, Hi-Robot, Gemini
+Robotics, Pi-0.5, et cetera.
+
+01:07:17
+So there's a lot
+of investigations
+
+01:07:19
+and also investments
+in this domain
+
+01:07:21
+in not only like a
+capital investment
+
+01:07:24
+but talent investments in
+developing better, better,
+
+01:07:27
+and better and
+more generalizable
+
+01:07:29
+robotic foundation models.
+
+01:07:31
+So due to the time, I clearly
+cannot go into the details
+
+01:07:34
+of all these models.
+
+01:07:36
+So if you are
+interested, I actually
+
+01:07:37
+gave a tutorial two
+months ago at [INAUDIBLE],
+
+01:07:40
+specifically describing
+and discussing some
+
+01:07:42
+of the models along this axis.
+
+01:07:44
+If you are interested,
+please go and watch it.
+
+01:07:47
+And for today, I'll be mostly
+giving you a high-level overview
+
+01:07:51
+of what actually is essential
+for this kind of foundation
+
+01:07:55
+models and what it actually
+looks like, with any examples
+
+01:07:58
+from Pi-Zero.
+
+01:08:01
+So Pi-Zero was first
+released in October 2024.
+
+01:08:06
+I think this is the
+word that convinced me
+
+01:08:09
+that this type of
+robotic foundation model
+
+01:08:11
+can do some very reliable
+dexterous manipulations
+
+01:08:14
+in the real-world environments.
+
+01:08:16
+It can handle cloth
+folding and box
+
+01:08:18
+folding and many other different
+types of manipulation tasks
+
+01:08:22
+at a very reliable manner.
+
+01:08:24
+And here is how the
+framework actually
+
+01:08:26
+looks like on the high level.
+
+01:08:29
+On the left is data sets.
+
+01:08:32
+So for any model to be
+called the foundation model,
+
+01:08:34
+it needs a fuel for
+that foundation model.
+
+01:08:36
+And that fuel is data.
+
+01:08:38
+So they aggregate a lot of
+data both within academia
+
+01:08:41
+and also data
+collected by themselves
+
+01:08:43
+across many different
+embodiments,
+
+01:08:45
+where the robot
+is doing some kind
+
+01:08:46
+of interesting and useful task
+in the real-world environments.
+
+01:08:50
+And they use this data
+to do pre-training.
+
+01:08:54
+And one important caveats
+of this pre-training
+
+01:08:56
+is this starts with a
+pre-trained visual language
+
+01:08:59
+model, the vision
+language model that's
+
+01:09:01
+already trained on vast amount
+of vision-language-related data
+
+01:09:05
+that can naturally adapt those
+kind of semantically knowledge
+
+01:09:08
+from those models.
+
+01:09:10
+And together, by doing
+code fine-tuning, what
+
+01:09:13
+they call code fine-tuning,
+using both objective for action
+
+01:09:16
+predictions and also
+the objective adapted
+
+01:09:19
+from those vision question
+answering those type of tasks,
+
+01:09:22
+you will be able to first
+preserve the semantic knowledge
+
+01:09:25
+within those models.
+
+01:09:26
+But at the same time, you can
+predict the robot actions.
+
+01:09:30
+And this is the
+pre-training stage.
+
+01:09:32
+A very important design for
+many of the existing robotic
+
+01:09:36
+foundation models is
+called post-training,
+
+01:09:39
+which is also inspired by
+many of the developments
+
+01:09:42
+in the large language
+model communities
+
+01:09:44
+where you have this base model.
+
+01:09:46
+Base model can give you some
+reasonable baseline performance.
+
+01:09:48
+But if you really want the
+performance to be very, very
+
+01:09:51
+good on a specific
+task, you actually
+
+01:09:53
+have to collect task-specific
+data to fine-tune the models,
+
+01:09:56
+do post-training on the
+data for that specific task
+
+01:09:59
+for the performance
+to be satisfied.
+
+01:10:02
+So they are evaluating
+their whole systems
+
+01:10:04
+over three different categories.
+
+01:10:06
+The first one is directly
+using their base model.
+
+01:10:09
+And their base model can
+already be good enough
+
+01:10:11
+for some very simple
+in-distribution data.
+
+01:10:15
+The task is actually
+the task that
+
+01:10:18
+might have already
+been encountered
+
+01:10:19
+during the pre-training stage.
+
+01:10:22
+For different task but
+slightly more complicated,
+
+01:10:25
+you can do post-training
+to allow the base
+
+01:10:28
+model to further improve on
+those in-distribution tasks.
+
+01:10:32
+And for unseen
+task, typically you
+
+01:10:34
+have to do post-training
+by collecting
+
+01:10:36
+those task-specific data and
+fine-tune your pre-trained model
+
+01:10:40
+on these tasks for
+you to be performance.
+
+01:10:43
+And this Pi-Zero model
+is actually open sourced.
+
+01:10:46
+And you can just
+download the checkpoints.
+
+01:10:48
+The students in my
+lab have already
+
+01:10:50
+been starting to play
+with their models
+
+01:10:53
+and trying to do post-training.
+
+01:10:54
+And we're starting to see
+some very promising results.
+
+01:10:58
+So if you are interested, I
+highly encourage you to try it.
+
+01:11:01
+That is a very good question.
+
+01:11:02
+So you are essentially
+asking about the efficiency
+
+01:11:05
+of the existing robotic
+foundation models.
+
+01:11:07
+So there's a lot of reasons
+why the policy is actually
+
+01:11:10
+slower than humans.
+
+01:11:11
+One of the major reasons
+is actually adapted
+
+01:11:14
+from how the data was
+collected, how the demonstration
+
+01:11:17
+data was collected.
+
+01:11:18
+Typically, for many
+of these scenarios,
+
+01:11:20
+the demonstration
+data was collected
+
+01:11:22
+by human teleoperating the
+robots on that exact same robots
+
+01:11:26
+to do the data collection in,
+for example, folding this box.
+
+01:11:30
+And human teleoperations
+is actually
+
+01:11:32
+slower than humans just using
+their hands to do these tasks,
+
+01:11:36
+even if you have gone
+through hours of training.
+
+01:11:38
+This is because you are just
+using a different embodiment
+
+01:11:41
+than an embodiment that you
+person is the most familiar with
+
+01:11:45
+and, also at the same time,
+because the robot arms are still
+
+01:11:48
+a certain distance
+away from you.
+
+01:11:50
+There will be occlusion.
+
+01:11:51
+Sometimes, you have to look
+very closely, carefully,
+
+01:11:54
+like changing your heads,
+changing the viewing
+
+01:11:57
+angles in order to
+really understand,
+
+01:11:58
+is it the time to progress into
+the next task stage or not?
+
+01:12:02
+There's a lot of caveats
+and inefficiencies
+
+01:12:05
+of the current data
+collection regimes.
+
+01:12:08
+That is why the policy
+directly trained on those data
+
+01:12:11
+turned out to be slower
+than the human speeds.
+
+01:12:14
+So that's why there's
+a lot of investigations
+
+01:12:16
+in how we can do those
+kind of data collections
+
+01:12:18
+to be even more efficient,
+to be at human speeds.
+
+01:12:21
+That is actually a very
+active research direction.
+
+01:12:24
+So this is a very good question.
+
+01:12:26
+So for this box
+folding task, I would
+
+01:12:28
+argue this is already a
+very long horizon task.
+
+01:12:31
+So I was very impressed by how
+good this one single policy is
+
+01:12:35
+able to handle this
+long horizon task.
+
+01:12:37
+But you could
+argue, if you really
+
+01:12:39
+want this policy to be useful
+in a more larger scale,
+
+01:12:42
+like in the wild scenarios
+for them, in your home,
+
+01:12:44
+you not only want the
+robot to fold the box.
+
+01:12:47
+You want it to fold the
+shirts and clean the beds
+
+01:12:50
+and clean all the
+messes on the floor.
+
+01:12:52
+If in those type of scenarios--
+
+01:12:54
+currently, me,
+personally, I don't
+
+01:12:56
+believe one gigantic
+policy is able to adapt
+
+01:12:59
+to those scenarios.
+
+01:13:01
+Some higher-level
+abstractions or some kind
+
+01:13:03
+of scene graph, some
+symbolic representations
+
+01:13:04
+needs to be in place as a
+condition for this vision
+
+01:13:08
+language action models
+for those policy
+
+01:13:10
+to be the most effective
+and useful to steer
+
+01:13:13
+into different type
+of tasks and scale
+
+01:13:15
+to larger-scale environments
+and more complicated tasks.
+
+01:13:19
+So this started with a
+pre-trained vision language
+
+01:13:21
+model.
+
+01:13:22
+So that's why there's already
+a lot of semantic knowledge
+
+01:13:24
+that are learned through this
+large-scale pre-training using
+
+01:13:27
+this vision language data.
+
+01:13:29
+So that is why some
+of the generalization
+
+01:13:31
+are coming for free, meaning
+the base model can actually
+
+01:13:34
+have surprisingly good
+levels of generalization
+
+01:13:37
+at the semantic level.
+
+01:13:38
+And I just have to fine-tune
+this model with those robot data
+
+01:13:41
+to make sure it
+can also generalize
+
+01:13:43
+not as a semantic level but
+also as an action level.
+
+01:13:46
+So we can have the
+question maybe at the end
+
+01:13:48
+because we are
+already about time.
+
+01:13:50
+I still have maybe one--
+
+01:13:51
+the last, maybe,
+two, three minutes,
+
+01:13:53
+I will discuss some of
+the remaining challenges,
+
+01:13:56
+especially along the development
+of robot learning models.
+
+01:13:59
+So one of the major challenges
+the whole community recognizes
+
+01:14:03
+is evaluation.
+
+01:14:05
+Evaluation currently
+is primarily
+
+01:14:06
+done in the real world.
+
+01:14:07
+For example, this is a
+picture of a Google Robotics.
+
+01:14:11
+They have a grid of this kind
+of teleoperating Aloha systems
+
+01:14:14
+that they are doing data
+collection and also evaluation.
+
+01:14:17
+And real-world evaluation
+is both costly and noisy.
+
+01:14:21
+Their exact words to me
+was, for evaluation, they
+
+01:14:24
+have large enough budget
+such that they can still
+
+01:14:26
+make progress.
+
+01:14:27
+This was their
+exact words, meaning
+
+01:14:29
+if you were to do the evaluation
+or I were to do the evaluation,
+
+01:14:31
+the results can be very
+different from each other,
+
+01:14:34
+depending on how we specify
+the initial configuration
+
+01:14:36
+and how the lighting
+condition might change.
+
+01:14:38
+Even the friction
+parameters of any factor
+
+01:14:40
+can make a huge
+difference in how robust
+
+01:14:43
+your downstream policy is.
+
+01:14:44
+So this is very
+costly, and they have
+
+01:14:46
+to wait for two days for
+the results to come back.
+
+01:14:49
+And currently, there's
+very weak correlation
+
+01:14:52
+between the training loss
+and real-world success rates.
+
+01:14:55
+So this is another very
+important caveat and difference
+
+01:14:58
+between supervised
+learning and also
+
+01:15:00
+this kind of sequential
+decision making,
+
+01:15:01
+this kind of policy learning
+is, for supervised learning,
+
+01:15:05
+your training loss directly
+measures how good your model is.
+
+01:15:08
+But for this kind
+of policy learning,
+
+01:15:10
+your training loss measures how
+good this one-step prediction
+
+01:15:13
+is, which sometimes may
+not be and, actually,
+
+01:15:16
+oftentimes is not indicative
+of the performance of policy
+
+01:15:20
+over long task horizons,
+even if your loss is low.
+
+01:15:23
+But for long horizon
+task execution,
+
+01:15:25
+your policy can
+actually be worse.
+
+01:15:28
+And the training objective
+versus the task-specific metrics
+
+01:15:32
+like training
+versus test horizons
+
+01:15:34
+are some of the
+reasons explaining
+
+01:15:36
+why it is very hard
+to come up with even
+
+01:15:39
+approximate or
+approximate metrics
+
+01:15:41
+to measure the
+performance of the policy.
+
+01:15:42
+And people have to rely
+on real-world evaluations.
+
+01:15:46
+So then the question
+is, what about
+
+01:15:48
+doing the evaluation in
+the simulated environments?
+
+01:15:50
+There has been a lot
+of investigation,
+
+01:15:52
+for example, of
+behavior, which is
+
+01:15:53
+done in physics lab
+here also at Stanford
+
+01:15:56
+and also the Habitat
+3.0 from Meta.
+
+01:15:58
+Now, people are
+trying to come up
+
+01:15:59
+with this expensive
+simulated environments,
+
+01:16:02
+trying to do evaluation and
+measurements of the robot
+
+01:16:05
+policies.
+
+01:16:06
+And obviously, there
+has their own issues,
+
+01:16:09
+especially with regard
+to sim-to-real gap.
+
+01:16:12
+How can you do very accurate
+simulation of rigid body,
+
+01:16:15
+deformable object, and clothes?
+
+01:16:16
+They have good correlations
+with the real-world performance.
+
+01:16:19
+And asset is also
+another major issue,
+
+01:16:22
+where large-scale
+generalizations and generations
+
+01:16:25
+of those assets is a huge pain.
+
+01:16:27
+I can elaborate but
+maybe after the lectures.
+
+01:16:31
+And also, how do you digitize
+the real world is an issue.
+
+01:16:33
+And how to do
+procedural generations
+
+01:16:35
+of realistic and diverse
+things are all issues
+
+01:16:37
+of using simulation to do
+evaluations for robot learning
+
+01:16:41
+policies.
+
+01:16:42
+And really, when you find the
+correlation between sim and real
+
+01:16:44
+and it's calling upon the
+ImageNet in Embodied AI,
+
+01:16:48
+the reason why
+ImageNet was successful
+
+01:16:51
+is because, at least for a few
+years, any progress in ImageNet,
+
+01:16:54
+meaning progress in deep
+learning and computer vision,
+
+01:16:56
+we want the same thing.
+
+01:16:58
+We want to have this
+platform, meaning
+
+01:16:59
+any progress on that
+benchmark or platform,
+
+01:17:02
+meaning progress
+in robot learnings.
+
+01:17:04
+So that's something
+that we really want.
+
+01:17:07
+And I can maybe skip through.
+
+01:17:10
+We talk about how to build
+this foundational policies that
+
+01:17:13
+can also be investigations
+on how to build
+
+01:17:15
+a foundational world model.
+
+01:17:16
+Especially, now,
+people are collecting
+
+01:17:18
+large-scale, action-conditioned
+robot interaction
+
+01:17:21
+data to train this
+foundation policy.
+
+01:17:23
+But there's a lot of
+dynamics knowledge
+
+01:17:24
+embedded in those data.
+
+01:17:26
+If we just use those data
+to do policy learning,
+
+01:17:28
+that would be such a waste.
+
+01:17:29
+So we are also thinking
+about how can we
+
+01:17:31
+use this large-scale,
+action-conditioned robot
+
+01:17:33
+interaction data that
+was already collected
+
+01:17:36
+to train those foundational
+policy to train
+
+01:17:38
+this foundational world model
+and how they can do interplay
+
+01:17:42
+between each other.
+
+01:17:43
+And there are some
+existing works
+
+01:17:45
+that are thinking about along
+the direction of building
+
+01:17:48
+this kind of foundational
+world models.
+
+01:17:50
+And there's some very
+interesting characteristics you
+
+01:17:53
+might think about, like
+do you want it to be 3D?
+
+01:17:56
+Do you want structural prior?
+
+01:17:57
+How much learning
+versus how much physics?
+
+01:17:59
+And how you can correlate
+with the real physical world.
+
+01:18:03
+And maybe, actually, I
+think we are about time.
+
+01:18:06
+So I will end it here.
+
+01:18:08
+And this is the future we hope
+to achieve to really build
+
+01:18:12
+this foundational robotic
+model that can work very widely
+
+01:18:16
+and generalize very well
+in the unstructured data
+
+01:18:19
+environments around us.
+
+01:18:20
+And next lectures will
+be human-centered AI.
+
+01:18:23
+And that will be the
+end of today's lecture.
+
+01:18:25
+Thank you so much.

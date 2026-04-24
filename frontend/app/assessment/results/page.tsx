@@ -1,6 +1,6 @@
 "use client";
 // app/assessment/results/page.tsx
-// Assessment results: overall score · radar chart · per-topic table · misconceptions · CTA
+// Assessment results: overall score · radar chart · per-learning-unit table · misconceptions · CTA
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -83,7 +83,7 @@ function AssessmentResultsInner() {
   const [result, setResult] = useState<AssessmentResultResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [expandedLearningUnit, setExpandedLearningUnit] = useState<string | null>(null);
   const [navigating, setNavigating] = useState(false);
 
   // ── Fetch results ─────────────────────────────────────────────────────────
@@ -149,17 +149,17 @@ function AssessmentResultsInner() {
   }
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const { overall_score_percent: overall, topic_results } = result;
+  const { overall_score_percent: overall, learning_unit_results } = result;
   const { emoji, text: msg } = scoreMessage(overall);
 
-  const radarData = topic_results.map((tr) => ({
-    label: tr.topic_name,
+  const radarData = learning_unit_results.map((tr) => ({
+    label: tr.learning_unit_title,
     value: tr.score_percent,
     level: tr.mastery_level,
   }));
 
-  const allMisconceptions = topic_results.flatMap((tr) =>
-    tr.misconceptions_detected.map((m) => ({ topic: tr.topic_name, id: m }))
+  const allMisconceptions = learning_unit_results.flatMap((tr) =>
+    tr.misconceptions_detected.map((m) => ({ learningUnit: tr.learning_unit_title, id: m }))
   );
 
   // ── Results UI ────────────────────────────────────────────────────────────
@@ -206,14 +206,14 @@ function AssessmentResultsInner() {
 
           {/* Quick mastery summary chips */}
           <div className="flex flex-wrap justify-center gap-2 pt-1">
-            {topic_results.map((tr) => {
+            {learning_unit_results.map((tr) => {
               const cfg = MASTERY_CONFIG[tr.mastery_level];
               return (
                 <span
-                  key={tr.topic_id}
+                  key={tr.learning_unit_id}
                   className={cn("rounded-full px-3 py-1 text-xs font-semibold", cfg.bg, cfg.color)}
                 >
-                  {tr.topic_name}: {cfg.label}
+                  {tr.learning_unit_title}: {cfg.label}
                 </span>
               );
             })}
@@ -227,7 +227,7 @@ function AssessmentResultsInner() {
               className="self-start text-sm font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              Mastery theo topic
+              Mastery theo learning unit
             </h2>
             <div className="w-full max-w-xs">
               <RadarChart data={radarData} size={300} />
@@ -247,7 +247,7 @@ function AssessmentResultsInner() {
           </div>
         )}
 
-        {/* ── Per-topic detail table ── */}
+        {/* ── Per-learning-unit detail table ── */}
         <div className="card overflow-hidden p-0">
           <div
             className="border-b px-6 py-4"
@@ -257,7 +257,7 @@ function AssessmentResultsInner() {
               className="text-sm font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              Chi tiết theo topic
+              Chi tiết theo learning unit
             </h2>
           </div>
 
@@ -266,15 +266,15 @@ function AssessmentResultsInner() {
             className="hidden grid-cols-4 gap-4 border-b px-6 py-2.5 text-xs font-medium sm:grid"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
-            <span>Topic</span>
+            <span>Learning unit</span>
             <span className="text-center">Score</span>
             <span className="text-center">Level</span>
             <span className="text-center">Bloom Max</span>
           </div>
 
-          {topic_results.map((tr) => {
+          {learning_unit_results.map((tr) => {
             const cfg = MASTERY_CONFIG[tr.mastery_level];
-            const isExpanded = expandedTopic === tr.topic_id;
+            const isExpanded = expandedLearningUnit === tr.learning_unit_id;
 
             // Highest bloom level achieved from breakdown
             const bloomMaxKey = Object.entries(tr.bloom_breakdown)
@@ -286,20 +286,20 @@ function AssessmentResultsInner() {
               .at(-1);
 
             return (
-              <div key={tr.topic_id} style={{ borderColor: "var(--border)" }} className="border-b last:border-0">
+              <div key={tr.learning_unit_id} style={{ borderColor: "var(--border)" }} className="border-b last:border-0">
                 {/* Main row */}
                 <button
                   type="button"
                   className="flex w-full items-center px-6 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                  onClick={() => setExpandedTopic(isExpanded ? null : tr.topic_id)}
+                  onClick={() => setExpandedLearningUnit(isExpanded ? null : tr.learning_unit_id)}
                 >
                   <div className="flex flex-1 flex-col gap-1 sm:grid sm:grid-cols-4 sm:items-center sm:gap-4">
-                    {/* Topic name */}
+                    {/* Learning unit title */}
                     <span
                       className="text-sm font-medium"
                       style={{ color: "var(--text-primary)" }}
                     >
-                      {tr.topic_name}
+                      {tr.learning_unit_title}
                     </span>
 
                     {/* Score bar */}
@@ -426,7 +426,7 @@ function AssessmentResultsInner() {
                   <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                   <div>
                     <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-                      {m.topic}
+                      {m.learningUnit}
                     </p>
                     <p className="text-sm" style={{ color: "var(--text-primary)" }}>
                       {m.id}

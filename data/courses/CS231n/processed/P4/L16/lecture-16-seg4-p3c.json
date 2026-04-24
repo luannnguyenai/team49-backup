@@ -1,0 +1,216 @@
+{
+  "unit_id": "local::lecture_16::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript supports two concept questions on CLIP robustness and CoCa, so no extra clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_16_seg4_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_16_seg4_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_16_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can CLIP generalize better than standard ImageNet-trained models on datasets like ObjectNet?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Its text supervision and larger data scale expose it to richer information than category labels alone",
+        "It is evaluated only on images it saw during training",
+        "It removes all viewpoint variation from the images before training",
+        "It uses a nearest-neighbor classifier instead of learned representations"
+      ],
+      "answer_index": 0,
+      "explanation": "Text paired with images can encode attributes such as shape, color, and context, and large-scale pretraining exposes the model to much broader variation than fixed class labels alone.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_out_of_distribution_robustness",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "shape, color, and other structure",
+          "much larger data scale"
+        ],
+        "timestamps": [
+          "00:15:43",
+          "00:16:17"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_16_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does CoCa add on top of a CLIP-style contrastive setup?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A decoder with a captioning loss so the model also learns to describe images",
+        "A replacement of the image encoder with a pure CNN classifier",
+        "A rule that removes all text from training",
+        "A segmentation head that predicts masks instead of embeddings"
+      ],
+      "answer_index": 0,
+      "explanation": "CoCa keeps the contrastive alignment objective but adds caption generation, encouraging the model to learn richer visual information than simple class matching alone.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_coca_contrastive_captioning_objective",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "adds a decoder",
+          "captioning loss"
+        ],
+        "timestamps": [
+          "00:18:38",
+          "00:18:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg4_q1",
+      "global_kp_id": "kp_clip_out_of_distribution_robustness",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg4_q2",
+      "global_kp_id": "kp_coca_contrastive_captioning_objective",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_16_seg4_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can CLIP generalize better than standard ImageNet-trained models on datasets like ObjectNet\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture_16_seg4_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does CoCa add on top of a CLIP-style contrastive setup\" asks for applied understanding rather than simple recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_16_seg4_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can CLIP generalize better than standard ImageNet-trained models on datasets like ObjectNet\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture_16_seg4_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does CoCa add on top of a CLIP-style contrastive setup\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

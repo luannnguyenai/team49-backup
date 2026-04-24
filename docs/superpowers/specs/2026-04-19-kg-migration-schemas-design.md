@@ -1,6 +1,8 @@
 # KG Phase 0 — Migration + Pydantic Schemas Design
 
-**Date:** 2026-04-19  
+> **Historical spec:** This document is preserved for implementation history only. Legacy KG runtime code has been removed; use canonical `prerequisite_edges` and the current handoff docs for production graph work.
+
+**Date:** 2026-04-19
 **Scope:** Task 1 of Knowledge Graph module — Alembic migration + Pydantic v2 schemas  
 **Stack:** Python 3.11, FastAPI, SQLAlchemy 2.x async, Alembic, Pydantic v2, PostgreSQL 15 + pgvector
 

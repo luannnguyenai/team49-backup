@@ -1,0 +1,180 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture15-benchmarking",
+    "lecture_title": "Lecture 15 - Benchmarking and Evaluation",
+    "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM"
+  },
+  "unit": {
+    "unit_id": "local::lecture15-benchmarking::seg6",
+    "course_id": "cs224n-2024",
+    "name": "What people actually use today to evaluate LLMs",
+    "description": "Surveys current LLM evaluation practice across perplexity, aggregate benchmark suites, arena-style comparisons, and specialized tasks such as coding and agents.",
+    "summary": "Yann summarizes current LLM evaluation practice into three families: perplexity or validation loss, averages over many benchmark tasks, and arena-like pairwise comparisons [ts=3302s] [ts=3327s]. The 'average over everything' family includes large suites such as HELM and the Hugging Face Open LLM Leaderboard, which bundle automatically scored tasks including GSM8K, MMLU, LegalBench, and MedQA [ts=3370s] [ts=3395s]. MMLU is highlighted as the most widely believed benchmark, consisting of multiple-choice questions over 57 subject areas, while coding benchmarks are valued because they correlate with reasoning and support easy automatic evaluation via test cases [ts=3434s] [ts=3512s] [ts=3543s]. The segment also raises agent evaluation as an emerging challenge requiring sandboxed tool environments and notes that perplexity is often a surprisingly strong proxy for downstream averages in pretrained models, though it is not comparable across datasets or tokenizers and should be treated carefully [ts=3600s] [ts=3691s] [ts=3750s].",
+    "key_points": [
+      {
+        "text": "Current LLM evaluation commonly uses perplexity, average benchmark scores, or arena-like pairwise comparisons.",
+        "timestamp_s": 3308,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "HELM and the Hugging Face Open LLM Leaderboard are aggregate suites over many automatically evaluated tasks.",
+        "timestamp_s": 3370,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Common benchmark tasks include GSM8K, MMLU, LegalBench, and MedQA.",
+        "timestamp_s": 3395,
+        "evidence_type": "example"
+      },
+      {
+        "text": "MMLU is a 57-task multiple-choice benchmark that many people treat as a key indicator of general capability.",
+        "timestamp_s": 3434,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Coding is widely benchmarked because it correlates with reasoning and can be checked automatically with tests.",
+        "timestamp_s": 3512,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Agent benchmarks need sandboxed environments because evaluating real actions safely is difficult.",
+        "timestamp_s": 3600,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Perplexity on pretraining/validation data is often strongly correlated with average downstream benchmark performance.",
+        "timestamp_s": 3691,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Perplexity is not comparable across datasets or tokenizers.",
+        "timestamp_s": 3750,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+      "start_s": 3302,
+      "end_s": 3836
+    },
+    "difficulty": 0.61,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 9,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Yann summarizes current LLM evaluation practice into three families: perplexity or validation loss, averages over many benchmark tasks, and arena-like pairwise comparisons [ts=3302s] [ts=3327s]. The 'average over everything' family includes large suites such as HELM and the Hugging Face Open LLM Leaderboard, which bundle automatically scored tasks including GSM8K, MMLU, LegalBench, and MedQA [ts=3370s] [ts=3395s]. MMLU is highlighted as the most widely believed benchmark, consisting of multiple-choice questions over 57 subject areas, while coding benchmarks are valued because they correlate with reasoning and support easy automatic evaluation via test cases [ts=3434s] [ts=3512s] [ts=3543s]. The segment also raises agent evaluation as an emerging challenge requiring sandboxed tool environments and notes that perplexity is often a surprisingly strong proxy for downstream averages in pretrained models, though it is not comparable across datasets or tokenizers and should be treated carefully [ts=3600s] [ts=3691s] [ts=3750s].",
+  "target_kp_ids": [
+    "kp_current_llm_benchmark_suites_and_task_coverage",
+    "kp_perplexity_as_a_proxy_metric"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "video_clip_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "transcript_slice": "00:55:02\nSo that leads me to talking about current evaluation\n\n00:55:06\nSo I'd say there are three main ways that people currently\n\n00:55:10\nThe first one is perplexity, which\n\n00:55:15\nlosses.\n\n00:55:20\nwhich is actually surprisingly more\n\n00:55:24\nAnd the third one is this arena-like,\n\n00:55:30\nand either you use humans or you use models to do the evaluation.\n\n00:55:36\nlet's say the new--\n\n00:55:40\nthey basically mostly show perplexity\n\n00:55:44\nAnd the fine-tuned models, they usually\n\n00:55:51\nunder arena like models.\n\n00:55:57\nusually, the log likelihood that they predict is not--\n\n00:56:07\nSo what do I mean by everything?\n\n00:56:14\nlook at everything are HELM and Hugging Face Open LLM\n\n00:56:19\nIt's really just a collection of a lot of different automatically\n\n00:56:27\nSo what are some of the common benchmarks that we use?\n\n00:56:35\nSo GSM8K, that's a pretty common one.\n\n00:56:39\nMMLU is multiple choice question answering on math, science,\n\n00:56:45\nLegalBench is on the legal aspect.\n\n00:56:48\nSo I believe this is for HELM.\n\n00:56:54\nSo you basically ask many, many different questions\n\n00:57:00\nAnd you hope that by taking averages,\n\n00:57:05\nSo that's kind of like the newer version of SuperGLUE,\n\n00:57:09\nOne data set that I want to highlight, which is probably--\n\n00:57:14\nand the one that people believe the most\n\n00:57:20\nSo this is-- I think maybe Archit mentioned it last week,\n\n00:57:31\ndifferent tasks.\n\n00:57:35\neconometrics, and these type of tasks.\n\n00:57:40\n\"What is true for type Ia supernova?\n\n00:57:45\nThis type occurs in young galaxies.\"\n\n00:57:49\nSo that seems very simple.\n\n00:57:53\nseems simple.\n\n00:57:55\n\"In a population of giraffes an environmental--\" na, na, na,\n\n00:57:58\nthis is an example of directional selection.\n\n00:58:03\nBut actually, it's also more complicated\n\n00:58:08\nAnd I think I will tell you--\n\n00:58:12\nI will tell you about it later.\n\n00:58:16\nprobably the most common benchmark and what people\n\n00:58:20\nFor example, when Mark Zuckerberg\n\n00:58:27\ntalked about MMLU scores, which I find kind of crazy.\n\n00:58:32\nOther capabilities that people look at, coding.\n\n00:58:38\nfor two different reasons.\n\n00:58:44\nif you perform well on code, you usually-- actually,\n\n00:58:48\nwhich is actually pretty cool.\n\n00:58:54\nTwo, I mean, a lot of us are coders.\n\n00:59:00\nAnd three, the other point is that it's actually pretty easy\n\n00:59:05\nSo you basically ask the model to generate\n\n00:59:11\nand then you just run the test and you\n\n00:59:15\nYes.\n\n00:59:16\nGoing back to the previous set of evaluations, some of them\n\n00:59:21\nHow would you validate like short-form QA type of thing,\n\n00:59:26\nBut if it's short-answer QA, how would\n\n00:59:34\nSpeaking specifically to the top, NarrativeQA [INAUDIBLE].\n\n00:59:38\nI actually don't know.\n\n00:59:45\nYeah, I should check.\n\n00:59:47\nSo I don't know specifically for this one,\n\n00:59:55\nand they look at F1 for the true and false.\n\n01:00:01\nbecause if you say \"President Reagan\"\n\n01:00:07\nBut anyway, so they use an exact match on that.\n\n01:00:12\nYeah.\n\n01:00:14\nThanks.\n\n01:00:16\nSo MMLU coding.\n\n01:00:20\nI think Shakar is going to give a lecture on it.\n\n01:00:24\nBut one cool thing that LLMs can do right now\n\n01:00:30\nessentially, or take control of your computer.\n\n01:00:36\nSo a natural question is like, how\n\n01:00:40\nThis is a real challenge because--\n\n01:00:47\nif I really wanted to evaluate how good it is at coding\n\n01:00:51\nI need to give it access to my terminal.\n\n01:00:57\nSo you really need to sandbox environments.\n\n01:01:02\nit's pretty easy to sandbox.\n\n01:01:06\nI don't know, pings people on Slack\n\n01:01:10\nhave to write an entire sandbox environment\n\n01:01:15\nyour LLMs to have access to.\n\n01:01:19\nand something that people really have\n\n01:01:25\nWell, at least, we'll have to, because right now it's still not\n\n01:01:29\nOK.\n\n01:01:31\nor the penultimate one, perplexities.\n\n01:01:37\nor at least, the first time you see\n\n01:01:40\non pretraining is extremely highly correlated\n\n01:01:48\nfor the current types of LLMs.\n\n01:01:51\nat your training performance, just predicting the next word,\n\n01:01:56\nSo this is the x-axis, which is essentially perplexities,\n\n01:02:01\nover many different tasks.\n\n01:02:07\non perplexities will actually have higher average scores.\n\n01:02:16\nend up-- when they develop just looking at perplexities,\n\n01:02:20\ndon't need to do the downstream evaluations.\n\n01:02:24\nBut if you have to have something quick and dirty,\n\n01:02:29\nOne thing to be careful with, though,\n\n01:02:32\nto be comparable across different datasets.\n\n01:02:37\nperplexities you're looking at.\n\n01:02:41\nSo if you have LLaMA 3, and you compare it to Gemini, yeah, even\n\n01:02:51\nand it's not comparable.\n\n01:02:54\n[INAUDIBLE]\n\n01:02:58\nI mean, it's not the only answer,\n\n01:03:01\nthe size of the vocabulary changes, then, clearly,\n\n01:03:06\nI mean, everything is not--\n\n01:03:09\nYeah, most of these sequence don't [INAUDIBLE], isn't it?\n\n01:03:14\nYeah, but I'm not talking about that.\n\n01:03:18\nI mean, just think about it.\n\n01:03:21\nOh.\n\n01:03:24\nSo basically, your entropy depends--\n\n01:03:31\nof your vocabulary size.\n\n01:03:35\nCool.\n\n01:03:40\nAs I already told you, basically you compare different models.\n\n01:03:44\nand you have Elo ratings at the end.\n\n01:03:49\nI really just let the users decide,\n\n01:03:55\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg6",
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "name": "Current LLM benchmark suites and task coverage",
+      "description": "Modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains.",
+      "track_tags": [
+        "benchmark_suites",
+        "llm_eval"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "research"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because current LLM benchmark suites and task coverage clarifies modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_perplexity_as_a_proxy_metric",
+      "name": "Perplexity as a proxy metric",
+      "description": "Pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient.",
+      "track_tags": [
+        "language_modeling",
+        "metrics",
+        "evaluation"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models",
+        "nlp",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_infrastructure",
+        "research",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because perplexity as a proxy metric clarifies pretraining or validation perplexity often tracks downstream performance but is not universally comparable or sufficient, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp14",
+        "local::lecture08-seq2seq::kp1"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.46,
+    0.76
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture15-benchmarking_transcript.txt"
+  }
+}

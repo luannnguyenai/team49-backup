@@ -1,0 +1,299 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_2_image_classification_with_linear_classifiers",
+    "lecture_title": "Stanford CS231N Lecture 2: Image Classification with Linear Classifiers",
+    "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Image classification and the semantic gap",
+      "description": "Introduces image classification as a core computer vision task, explains why raw pixel tensors are hard for machines to interpret, and surveys the main nuisance factors that break naive pixel matching.",
+      "summary": "The segment defines image classification as assigning one label from a predefined label set to an image [ts=173s][ts=188s]. It emphasizes the semantic gap between human perception and machine input: a color image is treated as a tensor of pixel intensities, e.g. 800 x 600 x 3 with values in [0,255] [ts=232s][ts=246s][ts=273s]. The lecture then catalogues the major sources of variation that make recognition hard from raw pixels alone: viewpoint changes can alter essentially every pixel even when the object is unchanged [ts=321s][ts=333s], illumination changes modify RGB values through lighting and material interactions [ts=383s][ts=399s], and background clutter, occlusion, deformation, intraclass variation, and context all complicate object identity from a purely numerical view [ts=446s][ts=495s][ts=542s][ts=571s][ts=604s]. It closes by motivating modern data-driven vision: large datasets such as ImageNet made it possible to train models that bridge this gap instead of hand-coding rules [ts=645s][ts=660s][ts=692s].",
+      "key_points": [
+        {
+          "text": "Image classification assigns one label from a predefined set to an input image.",
+          "timestamp_s": 173,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A color image can be represented as a tensor of numbers, e.g. 800 x 600 x 3 with pixel values in [0,255].",
+          "timestamp_s": 246,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Viewpoint variation can change all pixel values even when the object stays the same.",
+          "timestamp_s": 321,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Illumination changes pixel values because RGB depends on scene material and lighting.",
+          "timestamp_s": 383,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Occlusion, deformation, intraclass variation, and context make raw-pixel recognition difficult.",
+          "timestamp_s": 495,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "start_s": 5,
+        "end_s": 899
+      },
+      "difficulty": 0.24,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Data-driven pipeline and nearest neighbor basics",
+      "description": "Contrasts hand-designed vision pipelines with a data-driven learning workflow, then builds the nearest neighbor classifier from its train and predict procedures.",
+      "summary": "This segment argues that hard-coded if-then logic is poorly suited to image understanding, noting older edge-and-corner pipelines were difficult to scale and required object-specific rules [ts=755s][ts=786s][ts=839s][ts=846s]. It replaces that mindset with a three-step data-driven pipeline: collect labeled images, train a classifier from examples, and evaluate on unseen images with a predict function [ts=896s][ts=947s][ts=970s][ts=983s]. The first concrete classifier is nearest neighbor: training simply memorizes all labeled examples [ts=1051s][ts=1057s], while prediction finds the most similar training image and copies its label [ts=1070s][ts=1088s][ts=1092s]. Similarity is defined with L1 distance, the sum of absolute pixel-wise differences between two images [ts=1149s][ts=1154s][ts=1178s]. The implementation is conceptually simple, but the complexity profile is poor for deployment: train is O(1) because it stores data, whereas predict is O(N) per test example because it compares against every stored image [ts=1416s][ts=1420s][ts=1457s][ts=1534s].",
+      "key_points": [
+        {
+          "text": "The data-driven recipe is: collect labeled data, train a classifier, then predict on new images.",
+          "timestamp_s": 896,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Nearest neighbor training memorizes all examples and labels.",
+          "timestamp_s": 1057,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Nearest neighbor prediction returns the label of the most similar training image.",
+          "timestamp_s": 1070,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "L1 distance is the sum of absolute pixel-wise differences between two images.",
+          "timestamp_s": 1154,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Nearest neighbor has O(1) training time and O(N) prediction time per test example.",
+          "timestamp_s": 1420,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "start_s": 900,
+        "end_s": 1562
+      },
+      "difficulty": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg3",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "k-NN decision regions and L1 versus L2 distance",
+      "description": "Explains how 1-NN and k-NN partition feature space, why outliers and ties matter, and how L1 and L2 distance induce different geometries and decision boundaries.",
+      "summary": "The lecture visualizes 1-nearest-neighbor as a partition of feature space in which each region inherits the label of the closest sample [ts=1571s][ts=1608s][ts=1617s]. A single outlier can create a large erroneous region, motivating k-nearest-neighbor with majority voting over multiple neighbors for robustness [ts=1632s][ts=1652s][ts=1664s][ts=1680s]. This introduces ambiguity regions where ties prevent a confident decision; the instructor points out that such regions are useful signals for where additional data should be collected [ts=1696s][ts=1716s][ts=1732s]. The segment then compares L1 and L2 distances geometrically: L1 has diamond-like equal-distance contours aligned with feature axes [ts=1767s][ts=1799s], while L2 has circular contours from squaring and square-rooting differences [ts=1822s][ts=1839s][ts=1849s]. The lecture uses rotation sensitivity to explain when L1 preserves meaningful feature-axis structure and why L2 yields smoother, more rotation-invariant boundaries [ts=1893s][ts=1906s][ts=2001s][ts=2073s].",
+      "key_points": [
+        {
+          "text": "1-nearest-neighbor partitions space by assigning each region to the closest labeled sample.",
+          "timestamp_s": 1608,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A single outlier can create a disproportionately large region under 1-NN.",
+          "timestamp_s": 1632,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "k-NN predicts by majority vote over the K closest neighbors.",
+          "timestamp_s": 1680,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Ambiguous tie regions indicate places where collecting more data would help.",
+          "timestamp_s": 1732,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "L1 distance yields axis-aligned diamond-like equal-distance contours; L2 yields circular contours.",
+          "timestamp_s": 1799,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "start_s": 1563,
+        "end_s": 2122
+      },
+      "difficulty": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg4",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Hyperparameters, validation, and why pixel-space k-NN breaks",
+      "description": "Uses k-NN to introduce hyperparameters and sound evaluation practice, then shows empirically why nearest neighbor on raw pixels is not a practical image classifier.",
+      "summary": "The segment motivates nearest neighbor as a vehicle for understanding hyperparameters: both K and the distance metric must be chosen for the dataset at hand [ts=2140s][ts=2165s][ts=2181s][ts=2193s]. It warns against two bad selection strategies: tuning on training data, which favors k=1 because the training set is memorized [ts=2224s][ts=2254s][ts=2263s], and tuning on the test set, which leaks information and destroys a trustworthy estimate of generalization [ts=2271s][ts=2291s][ts=2310s]. The recommended workflow is train/validation/test splitting, optionally extended to cross-validation when data is limited [ts=2321s][ts=2339s][ts=2392s][ts=2412s][ts=2444s]. On CIFAR-10, a 5-fold sweep over k suggests roughly k=7 and only about 28-29% accuracy, better than random guessing but still weak [ts=2505s][ts=2572s][ts=2581s][ts=2597s]. Visual nearest-neighbor examples reveal the core failure mode: raw pixel distances can make semantically wrong images look close, so pixel-space k-NN is not used in practice for image classification [ts=2610s][ts=2633s][ts=2650s][ts=2674s][ts=2700s].",
+      "key_points": [
+        {
+          "text": "The choice of K and the choice of distance metric are hyperparameters.",
+          "timestamp_s": 2165,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Choosing hyperparameters on the training set is bad because k=1 can memorize the training data.",
+          "timestamp_s": 2254,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Choosing hyperparameters on the test set is also bad because it leaks evaluation information.",
+          "timestamp_s": 2291,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Cross-validation averages validation performance across folds to pick hyperparameters more reliably.",
+          "timestamp_s": 2392,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "On CIFAR-10, about k=7 performs best in the shown 5-fold experiment, at roughly 28-29% accuracy.",
+          "timestamp_s": 2572,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Pixel-space nearest neighbor is not used in practice because semantically different images can have similar pixel distances.",
+          "timestamp_s": 2650,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "start_s": 2123,
+        "end_s": 2785
+      },
+      "difficulty": 0.53,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Linear classifiers as parametric models",
+      "description": "Introduces the linear classifier as a parametric mapping from image vectors to class scores, then interprets its weights visually and geometrically.",
+      "summary": "This segment transitions from nonparametric nearest neighbor to a parametric approach that learns weights W to map an input image x into class scores [ts=2824s][ts=2827s][ts=2834s][ts=2846s]. For CIFAR-10, the image is flattened into a 3072-dimensional vector and multiplied by a weight matrix W of shape 10 x 3072 to produce 10 class scores, with a bias term b added for input-independent shifts [ts=2884s][ts=2894s][ts=2914s][ts=2918s][ts=2930s]. The instructor emphasizes that such linear layers are core building blocks of larger neural networks [ts=2960s][ts=2968s][ts=2996s]. A toy 2 x 2 image example shows the algebraic computation of class scores [ts=3018s][ts=3042s][ts=3058s]. Two interpretations follow: each row of W can be viewed as a class template that the image is scored against [ts=3105s][ts=3126s][ts=3141s], and geometrically the classifier creates separating lines or hyperplanes, with bias preventing all boundaries from being forced through the origin [ts=3175s][ts=3207s][ts=3222s].",
+      "key_points": [
+        {
+          "text": "A linear classifier maps an image vector to class scores with f(x,W)=Wx+b.",
+          "timestamp_s": 2914,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "For CIFAR-10, a 32 x 32 x 3 image becomes a 3072-dimensional input vector.",
+          "timestamp_s": 2894,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "With 10 classes, W has shape 10 x 3072 and the output score vector has shape 10 x 1.",
+          "timestamp_s": 2914,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Rows of W can be interpreted as class templates learned from data.",
+          "timestamp_s": 3105,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The bias term lets geometric decision boundaries shift away from the origin.",
+          "timestamp_s": 3207,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "start_s": 2786,
+        "end_s": 3303
+      },
+      "difficulty": 0.59,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg6",
+      "course_id": "stanford_cs231n_spring_2025",
+      "name": "Linear classifier limitations, loss functions, and softmax",
+      "description": "Shows where linear separability fails, motivates a loss objective for learning good weights, and derives the softmax probability model and its negative log-likelihood loss.",
+      "summary": "The segment first shows failure cases for linear classifiers: XOR-like quadrant patterns, ring-shaped class regions, and multi-modal classes cannot be separated by one linear decision boundary [ts=3248s][ts=3258s][ts=3268s][ts=3284s]. It then states the learning problem: choose W by defining a loss or objective that measures unhappiness on training scores and then optimize W to minimize it [ts=3314s][ts=3327s][ts=3349s][ts=3361s]. The lecture instantiates this with the softmax classifier: raw scores are exponentiated to make them positive and then normalized to sum to one, yielding class probabilities [ts=3498s][ts=3533s][ts=3550s][ts=3559s][ts=3572s]. For a single example, the loss is the negative log of the correct-class probability [ts=3661s][ts=3675s][ts=3720s][ts=3730s]. The instructor also connects this same objective to maximum likelihood estimation, KL-divergence matching, and cross-entropy under one-hot labels [ts=3748s][ts=3803s][ts=3834s][ts=3862s]. Finally, the warm-start diagnostic is derived: if scores are initially nearly equal across C classes, the softmax loss is log C, which is about 2.3 for C=10 [ts=3978s][ts=4000s][ts=4009s].",
+      "key_points": [
+        {
+          "text": "Some class layouts are not linearly separable, including XOR-like quadrants, rings, and multi-modal regions.",
+          "timestamp_s": 3258,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Learning W requires a loss function that quantifies how bad the current scores are on training data.",
+          "timestamp_s": 3327,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Softmax converts raw scores into probabilities by exponentiating and normalizing.",
+          "timestamp_s": 3533,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "For one example, softmax loss is the negative log of the correct-class probability.",
+          "timestamp_s": 3720,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The same objective can be viewed as maximum likelihood, KL-divergence minimization, or cross-entropy with one-hot labels.",
+          "timestamp_s": 3748,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "If all C class probabilities are initially equal, the softmax loss is log(C), about 2.3 when C=10.",
+          "timestamp_s": 4000,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2",
+        "start_s": 3304,
+        "end_s": 4014
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 6,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture02-image-classification-with-linear-classifiers_transcript.txt"
+  }
+}

@@ -1,0 +1,5254 @@
+Title: Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 7 - Attention, Final Projects and LLM Intro
+URL: https://www.youtube.com/watch?v=J7ruSOIzhrE
+Video ID: J7ruSOIzhrE
+============================================================
+
+00:00:05
+OK, welcome everyone, to
+week four we're into now.
+
+00:00:11
+So for today, what
+I want to do is,
+
+00:00:14
+first of all,
+well, a couple more
+
+00:00:17
+bits on machine
+translation, especially
+
+00:00:20
+just talking a little bit about
+evaluating machine translation.
+
+00:00:23
+Then I want to spend
+a while on attention.
+
+00:00:27
+So attention is a very
+fundamental concept
+
+00:00:31
+of neural networks,
+which was originally
+
+00:00:34
+developed in the context
+of machine translation.
+
+00:00:37
+But there's also then
+a very central concept
+
+00:00:41
+when we're talking about
+transformers, which we then
+
+00:00:43
+start talking about on Thursday.
+
+00:00:46
+OK, so getting straight into it.
+
+00:00:51
+So this is the
+picture that we saw
+
+00:00:54
+towards the end of last time.
+
+00:00:56
+This is how we were making
+machine translation system where
+
+00:01:01
+we are using a multi-layer
+LSTM, where we were feeding
+
+00:01:05
+in a source
+sentence, and then we
+
+00:01:09
+were flipping to then
+turning the model
+
+00:01:13
+into a decoder with
+different parameters, which
+
+00:01:16
+would generate one word
+at a time to generate
+
+00:01:19
+the translated sentence.
+
+00:01:22
+So here I've got
+an German sentence,
+
+00:01:25
+and it's produced an
+English translation
+
+00:01:28
+that looks a pretty good one.
+
+00:01:31
+But we're going to want
+to have a way of deciding,
+
+00:01:35
+well, are we producing
+good translations or not.
+
+00:01:39
+And so we need some way to
+evaluate machine translation.
+
+00:01:44
+Now, this is a complex
+area because if you
+
+00:01:48
+start poking around
+in the literature,
+
+00:01:51
+people have proposed literally
+hundreds of different measures
+
+00:01:56
+that could be used to evaluate
+machine translation systems.
+
+00:01:59
+I'm guilty of writing a
+couple of papers on it myself,
+
+00:02:02
+so I'm contributed
+to the problem.
+
+00:02:05
+But by far the most common
+measure that you see to this day
+
+00:02:11
+was essentially the first
+measure proposed automatically
+
+00:02:15
+evaluate machine
+translation, which
+
+00:02:17
+was the BLEU measure, which
+was proposed to understand
+
+00:02:22
+for bilingual
+evaluation understudy,
+
+00:02:25
+though it went
+along with the fact
+
+00:02:27
+that it was proposed by IBM.
+
+00:02:29
+Probably not a coincidence.
+
+00:02:31
+So until this
+point, the only way
+
+00:02:35
+that people had really used
+for evaluating translations
+
+00:02:39
+was getting human
+beings to look at them
+
+00:02:41
+and say how good of a
+translation this is.
+
+00:02:44
+And that's still a
+gold standard measure
+
+00:02:47
+that is widely used for
+evaluating translations
+
+00:02:52
+because many of the
+automatic measures
+
+00:02:54
+have various kinds of
+biases and problems
+
+00:02:58
+that make human
+evaluation useful.
+
+00:03:02
+But on the other hand,
+a lot of the time,
+
+00:03:06
+we'd like to iterate
+quickly on evaluations.
+
+00:03:10
+We'd like to use evaluations
+and training loops
+
+00:03:13
+and things like that.
+
+00:03:14
+And the IBM people
+with the BLEU paper
+
+00:03:17
+suggest, well,
+maybe we can come up
+
+00:03:19
+with a halfway decent automatic
+method of doing translations.
+
+00:03:24
+And the idea of what
+they propose was this--
+
+00:03:27
+that we're going to have one
+or more reference translations
+
+00:03:31
+for a piece of text.
+
+00:03:33
+So these are human-written
+translations.
+
+00:03:36
+And then we can score any
+automatic translation mainly
+
+00:03:41
+on how often they have
+overlapping 1, 2, 3,
+
+00:03:47
+and 4 grams.
+
+00:03:49
+The number 4 isn't special.
+
+00:03:51
+You could have only
+gone up to 3 or 5,
+
+00:03:53
+but 4 was seen as a
+reasonable length,
+
+00:03:56
+overlapping n-grams with one
+of the reference translations.
+
+00:04:01
+And the more overlap
+you have, the better.
+
+00:04:05
+And there's discussion of this
+evaluation in the assignment.
+
+00:04:10
+So you can think
+about it a bit more.
+
+00:04:11
+And I won't go actually through
+all the formulas right now.
+
+00:04:15
+But that's most of it.
+
+00:04:18
+And so here's a picture
+of how that looks.
+
+00:04:22
+So the original idea
+was what we should do
+
+00:04:25
+is have several
+reference translations.
+
+00:04:29
+And then we'd get a
+machine translation.
+
+00:04:32
+And then we'd look at
+this machine translation
+
+00:04:35
+and try and find pieces of it
+in the reference translation.
+
+00:04:39
+So we can certainly
+find the unigram "the."
+
+00:04:43
+We can't find "American" at all,
+but we can find "International
+
+00:04:48
+Airport and its" in the
+second reference translation.
+
+00:04:52
+So we're going to get a
+4-gram match for that.
+
+00:04:55
+We can find that again.
+
+00:04:57
+That's easy.
+
+00:04:57
+"Office all receives ones
+calls self the sand Arab."
+
+00:05:01
+Not a very good
+translation this, right?
+
+00:05:03
+So that all misses.
+
+00:05:04
+But then you start to find
+other pieces that do overlap,
+
+00:05:09
+and you use those
+to work out a score.
+
+00:05:12
+The original idea was you should
+always have multiple reference
+
+00:05:15
+translations so
+that you can sample
+
+00:05:19
+the space of
+possible translations
+
+00:05:22
+and have reasonable coverage.
+
+00:05:24
+In practice for what's
+been done more recently,
+
+00:05:27
+it's not so uncommon that people
+do this with only one reference
+
+00:05:30
+translation.
+
+00:05:31
+And the argument then
+is still on a kind
+
+00:05:34
+of a probabilistic basis.
+
+00:05:36
+The more often you have
+a good translation,
+
+00:05:38
+the more often
+you'll get matches,
+
+00:05:40
+and therefore your
+score will be better.
+
+00:05:43
+Yeah.
+
+00:05:44
+So why did people
+come up with this,
+
+00:05:52
+and why is it still imperfect?
+
+00:05:55
+Well, the problem
+with translation
+
+00:05:57
+is that there isn't
+one right answer.
+
+00:06:00
+It's not like the kind
+of classification things
+
+00:06:02
+you see in machine learning
+where you show people a picture.
+
+00:06:06
+And the right answer is to
+say, the class of this object
+
+00:06:11
+is whatever a labradoodle or a
+dog breeds or something, right?
+
+00:06:16
+For any sentence, there are many
+different ways to translate it.
+
+00:06:20
+And translators can sit
+around and argue that, oh,
+
+00:06:23
+this phrasing is a little bit
+nicer than this phrasing, blah,
+
+00:06:26
+blah, blah, blah.
+
+00:06:27
+But to a first
+approximation, you
+
+00:06:28
+can translate a sentence
+in lots of ways.
+
+00:06:31
+And those different
+ways of translation
+
+00:06:33
+can involve different
+word orders.
+
+00:06:36
+So you can't really
+check the words off
+
+00:06:38
+as you come down
+in the sentence.
+
+00:06:40
+And that's what motivated
+this idea of matching n-grams
+
+00:06:44
+anywhere.
+
+00:06:45
+So you can get reasonable credit
+for having the right matches.
+
+00:06:51
+But nevertheless, it's a
+pretty crude version of it.
+
+00:06:57
+You can still get a poor BLEU
+score for a good translation
+
+00:07:01
+just because the
+words you chose didn't
+
+00:07:03
+happen to match a
+reference translation.
+
+00:07:06
+And also you can get
+points for things
+
+00:07:09
+without really having a
+good translation at all.
+
+00:07:12
+If you just have
+words that match,
+
+00:07:14
+even if they're having
+completely the wrong role
+
+00:07:17
+in the sentence, you
+will get some points.
+
+00:07:20
+But it's harder to
+get n-gram matches
+
+00:07:22
+unless you're for
+larger n, unless you're
+
+00:07:26
+using words the right way.
+
+00:07:28
+There's one other trick
+in the BLEU measure--
+
+00:07:31
+that there's a penalty for
+too short system translations
+
+00:07:35
+because otherwise
+you could leave out
+
+00:07:37
+everything difficult and
+only translate the easy part
+
+00:07:40
+of the sentence.
+
+00:07:41
+And then for the bits
+you have translated,
+
+00:07:44
+you could then be
+getting a high score
+
+00:07:46
+for the precision
+of those pieces.
+
+00:07:50
+So we'll use, when
+you're developing
+
+00:07:52
+your systems for assignment
+3, we'll use them with BLEU.
+
+00:07:58
+So now we have a
+evaluation measure.
+
+00:08:03
+We can start looking at how well
+does systems do on a BLEU score.
+
+00:08:12
+And BLEU scores are
+theoretically between 0 and 100.
+
+00:08:16
+But you're never
+going to get to 100
+
+00:08:18
+because of the variations of
+how you can translate things.
+
+00:08:22
+And so, typically, if you
+can start to get to the 20s,
+
+00:08:27
+the translations--
+
+00:08:28
+you can understand what the
+source document was about.
+
+00:08:32
+Once you get into
+the 30s and 40s,
+
+00:08:35
+the translations are
+getting much, much better.
+
+00:08:39
+Yeah.
+
+00:08:40
+So statistical phrase-based
+translation was pioneered by IBM
+
+00:08:46
+in the late 90s actually and was
+sort of redeveloped in the 2000s
+
+00:08:51
+decade and was what Google
+launched as Google Translate
+
+00:08:54
+in the 2000s decade.
+
+00:08:56
+And it continued to be worked
+on for the following decade.
+
+00:09:00
+But there was basically
+a strong sense
+
+00:09:04
+that progress in
+translation had--
+
+00:09:07
+doing statistical
+phrase-based systems
+
+00:09:10
+had basically stalled, that
+it got a little bit better
+
+00:09:14
+each year as people could build
+traditional n-gram language
+
+00:09:18
+models with more data every
+year and things like that.
+
+00:09:21
+But the numbers were
+barely going upwards.
+
+00:09:24
+So in the years from about
+2005 to '15, or maybe '14,
+
+00:09:33
+the dominant idea in the
+machine translation community
+
+00:09:36
+was the way we were going
+to get better machine
+
+00:09:39
+translation is doing
+syntax-based machine
+
+00:09:43
+translation.
+
+00:09:44
+If we actually knew the
+structure of sentences
+
+00:09:46
+and we'd pass them up, then
+we'd know what the role of words
+
+00:09:50
+was in sentences,
+and then we'd be
+
+00:09:52
+able to translate much better.
+
+00:09:54
+And this was particularly
+invoked by looking at languages
+
+00:09:58
+where translation work terribly.
+
+00:10:01
+So in those days,
+translation worked sort of
+
+00:10:04
+OK for languages like
+French to English or Spanish
+
+00:10:10
+to English, which are kind of
+similar European languages.
+
+00:10:14
+But the results worked way worse
+for Chinese to English or German
+
+00:10:20
+to English.
+
+00:10:21
+And even though English
+is a Germanic language,
+
+00:10:24
+German has a very different
+word order to English
+
+00:10:27
+with commonly verbs
+at the end of a clause
+
+00:10:30
+and different elements
+being fronted.
+
+00:10:32
+And so people tried to work
+on grammar-based, syntax-based
+
+00:10:41
+methods of statistical
+machine translation.
+
+00:10:43
+And I was one of those who
+worked on those in the late
+
+00:10:46
+2000s decade.
+
+00:10:48
+But the truth is that sort
+of didn't really work, right?
+
+00:10:51
+If the rate of progress in
+syntax-based machine translation
+
+00:10:59
+had slightly more slope than
+phrase-based machine translation
+
+00:11:03
+over these years, the amount
+of slope wasn't very much.
+
+00:11:09
+So things were
+completely then thrown
+
+00:11:11
+on their head when neural
+machine translation got
+
+00:11:15
+invented because as I explained,
+the first attempts were in 2014.
+
+00:11:20
+The first cases in which
+it was evaluated in bake
+
+00:11:23
+off evaluations was 2015.
+
+00:11:26
+And so in 2015, it wasn't as
+good as the best other machine
+
+00:11:30
+translation methods.
+
+00:11:32
+But by 2016, it was.
+
+00:11:34
+And it was just on this
+much, much steeper slope
+
+00:11:37
+of getting way, way better.
+
+00:11:39
+And this graph only
+goes up to 2019,
+
+00:11:42
+but it's continued to go up.
+
+00:11:44
+And so it's not that uncommon
+these days that you see BLEU
+
+00:11:48
+numbers in the 50s and 60s
+for neural machine translation
+
+00:11:52
+systems.
+
+00:11:54
+So that's a good news story.
+
+00:11:56
+So after this, I want to
+go on and so introduce
+
+00:12:00
+this idea of
+attention, which is now
+
+00:12:04
+a very fundamental, important
+idea in neural systems.
+
+00:12:09
+It's also interesting
+because it's actually
+
+00:12:12
+something novel that was
+invented kind of recently.
+
+00:12:17
+So for everything that we've
+done in neural networks up
+
+00:12:21
+until now, really
+it had all been
+
+00:12:24
+invented before the
+turn of the millennium.
+
+00:12:27
+So basic feedforward
+neural networks,
+
+00:12:31
+recurrent neural
+networks, LSTMs,
+
+00:12:34
+other things that we haven't
+yet haven't talked about,
+
+00:12:36
+like convolutional neural
+networks-- they were all
+
+00:12:39
+invented last millennium.
+
+00:12:41
+It was really a waiting
+game at that point
+
+00:12:45
+until there was sufficient data
+and computational power for them
+
+00:12:49
+really to show how
+good they were.
+
+00:12:52
+But attention was
+something that actually
+
+00:12:55
+got invented in 2014 in the
+origins of neural machine
+
+00:13:00
+translation.
+
+00:13:01
+And it proved to be a very
+transformative idea for making
+
+00:13:05
+neural networks more powerful.
+
+00:13:08
+So the idea of-- what
+motivated attention
+
+00:13:12
+was looking at exactly this kind
+of machine translation problem.
+
+00:13:16
+So we were running our LSTM
+over the source sentence.
+
+00:13:19
+And then we were using
+this hidden state
+
+00:13:22
+as the previous hidden
+state that we're
+
+00:13:24
+feeding into the generator,
+LSTM, for the target sentence.
+
+00:13:30
+And what that
+means is everything
+
+00:13:33
+useful about this
+sentence has to be
+
+00:13:36
+stuffed into that one vector.
+
+00:13:38
+And while that's maybe not so
+hard if you've got a four-word
+
+00:13:42
+sentence, but maybe you've got
+a 40-word sentence out here.
+
+00:13:45
+And it seems to be
+kind of implausible
+
+00:13:49
+that it'd be a good
+idea to be trying
+
+00:13:51
+to fit everything
+about that sentence
+
+00:13:54
+into this one hidden state.
+
+00:13:55
+And well, obviously there
+are crude solutions to this.
+
+00:13:58
+You make the hidden
+states bigger,
+
+00:13:59
+and then you've got more
+representational space.
+
+00:14:02
+You use a multi-layer LSTM.
+
+00:14:05
+You've got more
+representational space.
+
+00:14:07
+But it still seems a very
+questionable thing to do.
+
+00:14:12
+And it's certainly not like
+what a human being does, right?
+
+00:14:16
+If a human being is
+translating a sentence,
+
+00:14:18
+they read the
+sentence and they've
+
+00:14:20
+got some idea of its meaning.
+
+00:14:22
+But as they start
+to translate, they
+
+00:14:24
+look back at the earlier
+parts of the sentence
+
+00:14:26
+and make use of that
+and their translation.
+
+00:14:29
+And so that doesn't seem like
+it's a very plausible model.
+
+00:14:34
+So the idea should be that
+our neural network should
+
+00:14:37
+be able to attend to
+different things in the source
+
+00:14:41
+so that they can get
+information as needed,
+
+00:14:45
+looking back in the sentence.
+
+00:14:47
+And so this is the
+idea of attention.
+
+00:14:50
+So on each step of
+the decoder, we're
+
+00:14:53
+going to insert direct
+connections to the encoder
+
+00:14:57
+so we can look at particular
+words in the sentence.
+
+00:15:01
+So I've got a bunch
+of diagram sentences
+
+00:15:03
+that go through what we do.
+
+00:15:05
+And then after that, I'll
+present the equations
+
+00:15:08
+that go along with this.
+
+00:15:10
+OK, so once we're
+starting to translate,
+
+00:15:14
+we've got a hidden state,
+the start of our generator,
+
+00:15:19
+and then we're going to use
+this hidden state as our key
+
+00:15:24
+to look back into the encoder
+to try and find useful stuff.
+
+00:15:29
+So we're going to compare--
+
+00:15:33
+in a way I'll make
+precise later--
+
+00:15:35
+the hidden state, with the
+hidden state at every position
+
+00:15:41
+in the source sentence.
+
+00:15:44
+And based on our
+comparisons, we're
+
+00:15:48
+going to work out an attention
+score, where should we
+
+00:15:52
+be looking at in
+the source sentence
+
+00:15:55
+while generating here the
+first word of the translation.
+
+00:15:59
+And so based on these
+attention scores,
+
+00:16:02
+we'll stick them into a
+softmax, as we commonly do.
+
+00:16:06
+And we'll then get a probability
+distribution or a weighting
+
+00:16:10
+over the different
+positions in the sentence.
+
+00:16:13
+And then we will
+use this weighting
+
+00:16:16
+to compute a representation
+based on the encoder, which
+
+00:16:23
+is then going to be a weighted
+average of the encoder states.
+
+00:16:29
+So in this particular case,
+it will be nearly entirely
+
+00:16:33
+the representation above
+the first word "il,"
+
+00:16:36
+which means "he" in French.
+
+00:16:38
+So then we'll take
+that attention output.
+
+00:16:44
+And we'll combine it with
+hidden state of our decoder.
+
+00:16:50
+And we'll use both
+of them together
+
+00:16:53
+to generate an
+output vector, which
+
+00:16:56
+we stick through our
+softmax, and generate
+
+00:16:59
+a word as the first word
+of the translation, y1.
+
+00:17:04
+And so then at that point,
+we just repeat this over.
+
+00:17:09
+So we then go on to
+generating the second word.
+
+00:17:14
+Well, we copy down the
+first word generator
+
+00:17:17
+and start to generate
+the second word.
+
+00:17:19
+We work out attention
+at every position.
+
+00:17:22
+It gives us an--
+
+00:17:26
+sorry.
+
+00:17:27
+There's a little
+note there, which
+
+00:17:28
+is a little fine point, which
+maybe I won't deal with.
+
+00:17:32
+But it points out
+sometimes you also
+
+00:17:35
+do things like stick the
+previous time step's attention
+
+00:17:38
+output into the next
+step as an extra input.
+
+00:17:42
+And we actually do that in--
+
+00:17:44
+it should say
+assignment 3 there.
+
+00:17:46
+That's buggy.
+
+00:17:47
+So there are other
+ways to use things,
+
+00:17:49
+but I'll gloss over that.
+
+00:17:51
+So we generate another word,
+and we sort of repeat over.
+
+00:17:57
+And at each time
+step, we're looking
+
+00:18:00
+at different words
+in the source,
+
+00:18:02
+and they will help us to
+translate the sentence.
+
+00:18:06
+Yeah?
+
+00:18:07
+Why does the start words
+point to the attention score?
+
+00:18:12
+Why is that [INAUDIBLE]
+
+00:18:18
+Wait, wait.
+
+00:18:19
+Say it again.
+
+00:18:19
+So why is the green
+part pointing to--
+
+00:18:22
+'Cause the green--
+
+00:18:23
+OK, so the green vector, the
+hidden vector of the decoder,
+
+00:18:29
+is going to be used together
+with the hidden states.
+
+00:18:33
+The hidden vectors
+of the encode are
+
+00:18:36
+one at a time to calculate
+the attention scores.
+
+00:18:40
+So the attention
+score at a position
+
+00:18:42
+is going to be a function
+of the hidden state
+
+00:18:46
+of the decoder at that position
+and the current hidden state
+
+00:18:51
+of the decoder.
+
+00:18:55
+And I'll explain
+exactly how in a moment.
+
+00:18:59
+Any other questions?
+
+00:19:03
+OK.
+
+00:19:06
+Well, so here it is in math.
+
+00:19:09
+OK, so we have
+encoder hidden states,
+
+00:19:14
+which we're going to call h.
+
+00:19:17
+So we have decoder
+hidden states,
+
+00:19:20
+which we're going to call s,
+so they're something different.
+
+00:19:24
+And we're going
+to, at each point,
+
+00:19:26
+be in some particular
+time step t,
+
+00:19:29
+so we'll be dealing with st.
+So to calculate the attention
+
+00:19:35
+scores for generating
+the word for time step t,
+
+00:19:44
+we're going to
+calculate an attention
+
+00:19:47
+score for each position
+in the encoder.
+
+00:19:52
+OK, I'll discuss alternatives
+for this in a moment.
+
+00:19:56
+But the very easiest way to
+calculate an attention score,
+
+00:20:00
+which is shown here, is
+to take a dot product
+
+00:20:04
+between the hidden
+state of the encoder
+
+00:20:08
+and the current hidden
+state of the decoder.
+
+00:20:12
+And so that's what
+we're showing here.
+
+00:20:15
+So that will give us some
+dot product score, which
+
+00:20:18
+is just any number at all.
+
+00:20:21
+Then the next thing we do
+is we stick those et scores
+
+00:20:26
+into our softmax distribution.
+
+00:20:28
+And then that gives us our
+probability distribution
+
+00:20:32
+as to how much weight to put on
+each position in the encoder.
+
+00:20:37
+And so then, we are calculating
+the weighted average
+
+00:20:41
+of the encoder hidden
+states, which we're just
+
+00:20:44
+doing with the obvious
+equation that we're
+
+00:20:47
+taking the weighted sum of the
+hidden states of the encoder
+
+00:20:51
+based on the attention weights.
+
+00:20:53
+And then what we want
+to do is concatenate
+
+00:20:59
+our attention output and the
+hidden state of the decoder.
+
+00:21:05
+And we're going to--
+which is giving us
+
+00:21:07
+then a double-length vector.
+
+00:21:09
+And then we're
+going to feed that
+
+00:21:10
+into producing the next
+word from the decoder.
+
+00:21:15
+So typically that means
+we're multiplying that vector
+
+00:21:18
+by another matrix and then
+putting it through a softmax
+
+00:21:24
+to get a probability
+distribution over words
+
+00:21:29
+to output and choosing the
+highest probability word.
+
+00:21:35
+OK.
+
+00:21:37
+That makes sense, I hope.
+
+00:21:39
+Yeah.
+
+00:21:40
+OK, so attention is great.
+
+00:21:43
+So inventing this idea was
+completely transformative.
+
+00:21:49
+So the very first modern neural
+machine translation system
+
+00:21:52
+was done at Google in 2014.
+
+00:21:56
+And they used a pure but
+very large, very deep LSTM.
+
+00:22:06
+So it's an eight-layer-deep LSTM
+with a very large hidden state
+
+00:22:10
+for the time.
+
+00:22:12
+And they were able
+to get good results.
+
+00:22:15
+But very shortly
+thereafter, people
+
+00:22:20
+at the University of Montreal,
+D. Bahdanau, Kyunghyun Cho,
+
+00:22:25
+and Yoshua Bengio
+did a second version
+
+00:22:27
+of machine translation
+using attention
+
+00:22:32
+and with a much more
+modest compute budget
+
+00:22:35
+of the kind that you can
+afford in universities.
+
+00:22:38
+They were able to get better
+results because attention
+
+00:22:41
+was their secret thing.
+
+00:22:44
+So attention significantly
+improved NMT performance.
+
+00:22:48
+And essentially every neural
+machine translation system
+
+00:22:53
+since has used attention
+like we've just seen.
+
+00:22:56
+It's more human-like as I
+was indicating because it's
+
+00:23:00
+what a human would do.
+
+00:23:01
+You'd look back in
+the sentence to see
+
+00:23:02
+what you need to translate.
+
+00:23:04
+And it solves this
+bottleneck problem.
+
+00:23:07
+You now no longer have to
+stuff all the information
+
+00:23:10
+about the source sentence
+into one hidden state.
+
+00:23:14
+You can have the whole of
+your representational space
+
+00:23:17
+from your entire encoding
+and use it as you need it.
+
+00:23:21
+It also helps with the
+vanishing gradient problem.
+
+00:23:24
+This is connected to what
+I was saying last time when
+
+00:23:27
+talking about
+residual connections--
+
+00:23:29
+that a way out of the vanishing
+gradient problem is to direct
+
+00:23:33
+connect things.
+
+00:23:34
+And this provides
+shortcut connections
+
+00:23:37
+to all of the hidden
+states of the encoder.
+
+00:23:40
+And another nice thing
+that attention does
+
+00:23:44
+is it gives you some
+interpretability.
+
+00:23:46
+So by looking at where
+the model is attending,
+
+00:23:50
+you can basically see what it's
+translating at different time
+
+00:23:54
+steps.
+
+00:23:55
+And so that can
+be really useful.
+
+00:23:58
+And so it's kind of like we
+can see what we're translating
+
+00:24:03
+where without explicitly having
+trained a system that does that.
+
+00:24:07
+So for my little toy sentence
+here, if "he hit me with a pie,"
+
+00:24:12
+at the first position, it was
+looking at the first word "il,"
+
+00:24:18
+"he," which it translates.
+
+00:24:20
+Then in French, there's this
+sort of verb, "entarté."
+
+00:24:24
+It's a sort of pie, somewhat.
+
+00:24:26
+I guess in English as well, you
+can use pie as a verb, right?
+
+00:24:30
+So the "a" is a sort of
+perfect past auxiliary.
+
+00:24:37
+So it's sort of like
+"he has me pied,"
+
+00:24:40
+is what the French words
+are, one at a time.
+
+00:24:42
+And so the "hit" is already
+looking at the "pied."
+
+00:24:46
+Then the "me" is attending
+to the "m'," which means me.
+
+00:24:50
+And then the "pie" is
+attending still to "antarté,"
+
+00:24:54
+which is basically the right
+kind of alignment that you want
+
+00:24:58
+for words of a sentence.
+
+00:24:59
+So that's pretty cool, too.
+
+00:25:04
+OK.
+
+00:25:05
+So I presented, up until
+this point, just this--
+
+00:25:12
+said all we could
+do a dot product.
+
+00:25:15
+But in general, there's
+more to it than that.
+
+00:25:18
+So what we have is we
+have some values h1 to hN,
+
+00:25:23
+and we have a query vector.
+
+00:25:25
+And we want to work
+out how to do attention
+
+00:25:28
+based on these things.
+
+00:25:30
+So attention always involves
+computing some attention scores
+
+00:25:35
+and taking the softmax to
+get an attention distribution
+
+00:25:39
+and then getting an
+attention output.
+
+00:25:42
+But the part where
+there's variation
+
+00:25:45
+is how do you compute
+these attention scores.
+
+00:25:48
+And a number of different
+ways have been done for that.
+
+00:25:51
+And I just want to go
+through that a little bit.
+
+00:25:56
+So the simplest way
+that I just presented
+
+00:25:59
+is this dot-product attention.
+
+00:26:01
+We just take the
+hidden states and dot
+
+00:26:04
+product, the whole of them.
+
+00:26:07
+That sort of works, but it
+doesn't actually work great.
+
+00:26:13
+And I discussed this a bit when
+talking about LSTMs last time,
+
+00:26:18
+right?
+
+00:26:18
+That the hidden state of an LSTM
+is it's complete memory, right?
+
+00:26:25
+So it has to variously store
+lots of things in that memory.
+
+00:26:29
+It's got to be storing
+information that will help it
+
+00:26:32
+output the right word.
+
+00:26:35
+It has to be storing
+information about the future,
+
+00:26:38
+about other things
+that you want to say,
+
+00:26:40
+given the kind of
+sentence, context, grammar,
+
+00:26:44
+and previous words you've said.
+
+00:26:46
+It's got all kinds of memory.
+
+00:26:49
+And so it sort of makes
+sense that some of it
+
+00:26:52
+would be useful for linking up,
+for looking back, and some of it
+
+00:26:58
+would be less useful.
+
+00:27:00
+You sort of want to
+find the parts that
+
+00:27:02
+are related to what you
+want to say immediately,
+
+00:27:05
+not all the parts.
+
+00:27:06
+And do all of the
+rest of the future.
+
+00:27:10
+So that suggests that maybe you
+could do a more general form
+
+00:27:17
+of attention.
+
+00:27:19
+And so Tung Luong and
+me in 2015 suggested
+
+00:27:24
+maybe we could introduce what we
+call bilinear attention, which
+
+00:27:30
+I still think is a better
+name, but the rest of the world
+
+00:27:33
+came to call
+multiplicative attention,
+
+00:27:36
+where what we're doing is
+between these two vectors,
+
+00:27:41
+we're sticking a matrix.
+
+00:27:43
+And so we're then learning
+the parameters of this matrix,
+
+00:27:47
+just like everything else
+in our neural network.
+
+00:27:50
+And so, effectively,
+this matrix can
+
+00:27:53
+learn which parts of
+the generator hidden
+
+00:28:00
+state you should be
+looking to find where
+
+00:28:04
+in the hidden states
+of the encoder.
+
+00:28:07
+In particular, it
+no longer requires
+
+00:28:09
+that things have to match
+up dimension by dimension.
+
+00:28:13
+It could be the case that the
+encoder is storing information
+
+00:28:16
+about word meaning here.
+
+00:28:20
+And the decoder is
+storing information
+
+00:28:23
+about word meaning here.
+
+00:28:24
+And by learning appropriate
+parameters in this matrix,
+
+00:28:28
+we can match those together
+and work out the right place
+
+00:28:33
+to pay attention.
+
+00:28:34
+So that seemed kind of
+a cool approach to us.
+
+00:28:41
+Yeah?
+
+00:28:41
+Why don't you go all
+in with this idea
+
+00:28:43
+and even build a neural
+network that's been
+
+00:28:45
+an h as an input and output?
+
+00:28:49
+You can do that.
+
+00:28:50
+I was going to get to
+that on the next slide.
+
+00:28:52
+Actually, that's in a way
+sort of going backwards.
+
+00:28:56
+But I will get to it
+on the next slide.
+
+00:28:58
+But before I do that, now I'm
+show you these other versions.
+
+00:29:07
+So the one thing you might
+wonder about doing it
+
+00:29:13
+this way is there's
+a lot of parameters
+
+00:29:18
+that you have to
+learn in the matrix
+
+00:29:19
+W. There aren't that
+many in my example
+
+00:29:22
+because there are
+only 36, but that's
+
+00:29:24
+because my hidden states
+are only of length 6, right?
+
+00:29:27
+And if your hidden states
+are of length, 1,000 say,
+
+00:29:31
+then you've got a million
+parameters in that W matrix.
+
+00:29:35
+And that seems like it might
+be kind of problematic.
+
+00:29:39
+And so the way to
+get beyond that,
+
+00:29:44
+which was fairly quickly
+suggested thereafter, is,
+
+00:29:47
+well, maybe rather than
+having that whole big matrix
+
+00:29:50
+in the middle, instead
+what we could do
+
+00:29:53
+is form it as a low rank matrix.
+
+00:29:56
+And the easy way to
+make a low rank matrix
+
+00:29:59
+is you take two skinny
+matrices like this,
+
+00:30:02
+where this is the
+rank of the pieces
+
+00:30:05
+and multiply them
+together, which
+
+00:30:07
+would give us the big matrix
+that I showed on the last slide.
+
+00:30:11
+And so this gives you
+a low-parameter version
+
+00:30:15
+of the bilinear attention
+matrix from the last slide.
+
+00:30:21
+But at that point,
+if you just do
+
+00:30:24
+a teeny bit of linear
+algebra, this computation
+
+00:30:28
+is exactly the same
+as saying, well,
+
+00:30:31
+what I'm going to do is I'm
+going to take each of these two
+
+00:30:35
+vectors and project them to a
+lower-dimensional space using
+
+00:30:40
+this low rank
+transformation matrix.
+
+00:30:42
+And then I'm going to
+take the dot product
+
+00:30:45
+in this low-dimensional space.
+
+00:30:49
+And on Thursday, when you get to
+transformers, what you will see
+
+00:30:56
+that transformers do is this--
+
+00:30:59
+that they're taking
+the big vector
+
+00:31:03
+and they're projecting it
+to a low-dimensional space
+
+00:31:06
+and then taking
+dot-product attention
+
+00:31:09
+in that low-dimensional space.
+
+00:31:12
+OK, back to the question.
+
+00:31:16
+Yeah, you're totally right.
+
+00:31:18
+And at this point, I'm going
+in an ahistorical manner
+
+00:31:25
+because, yeah, actually the
+first form of attention that was
+
+00:31:30
+proposed in the Bahdanau et al.
+
+00:31:32
+paper was, hey, let's just
+stick a little neural net there
+
+00:31:39
+to calculate attention scores.
+
+00:31:41
+So we take the s and the h.
+
+00:31:46
+We multiply them
+both by a matrix,
+
+00:31:48
+add them, put them through a
+tanh, multiply that by a vector,
+
+00:31:53
+and we get a number.
+
+00:31:55
+This looks just like
+the kind of computations
+
+00:31:58
+we've used everywhere
+else in an LSTM.
+
+00:32:00
+So there's a little neural net
+that's calculating the attention
+
+00:32:03
+scores, and then they go into
+a softmax as useful, usual.
+
+00:32:09
+In most of the
+literature, this is
+
+00:32:10
+called additive attention,
+which also seems to me
+
+00:32:13
+a really weird name.
+
+00:32:14
+I mean, I think kind of saying
+you've got a little neural net.
+
+00:32:17
+Makes more sense for that one.
+
+00:32:22
+But anyway, so this is what
+they proposed and used.
+
+00:32:27
+And at this point, it's a little
+bit complex, to be honest.
+
+00:32:39
+When we wrote our
+paper the next year,
+
+00:32:42
+we had found that the bilinear
+attention worked better for us.
+
+00:32:47
+But there is subsequent
+work, especially
+
+00:32:49
+this massive exploration of
+neural machine translation
+
+00:32:53
+architectures, that
+argued that, actually,
+
+00:32:57
+with the right kinds of good
+hyperparameter optimization--
+
+00:33:04
+actually, this is the
+best kind-- this is better
+
+00:33:07
+than the bilinear attention.
+
+00:33:09
+But this is a lot more
+complex and a lot slower
+
+00:33:14
+than doing what you're doing
+in the upper part of the chart.
+
+00:33:18
+So regardless of whether
+it's better or not,
+
+00:33:20
+in practice, what's
+completely won is doing this.
+
+00:33:24
+And this is what
+transformers use
+
+00:33:26
+and just about all other neural
+nets that are used these days.
+
+00:33:31
+OK.
+
+00:33:32
+Questions on attention will
+be found in assignment 3.
+
+00:33:36
+Yeah.
+
+00:33:37
+So I won't say much
+more about this now.
+
+00:33:41
+And we'll see more of
+it just next lecture.
+
+00:33:45
+But attention is a
+very general technique.
+
+00:33:48
+It was a great way to
+improve machine translation,
+
+00:33:52
+and that was how it
+was first invented.
+
+00:33:55
+But for all kinds of
+neural architectures,
+
+00:33:58
+for all kinds of purposes,
+you can stick attention to
+
+00:34:02
+into them.
+
+00:34:03
+And the general finding was
+that always improved results.
+
+00:34:07
+So in general, anywhere where
+you have a vector of values,
+
+00:34:12
+a vector query, and
+you can use attention
+
+00:34:15
+to then get a weighted
+average of the values, which
+
+00:34:19
+finds relevant information
+that you can use
+
+00:34:22
+to improve your performance.
+
+00:34:26
+And so maybe I won't try and
+even give examples of that now.
+
+00:34:31
+But you'll see another
+example of attention
+
+00:34:34
+immediately when we do things
+on Thursday where we then
+
+00:34:40
+start doing self-attention
+inside transformers.
+
+00:34:43
+Yes?
+
+00:34:44
+In providing your case, did
+you also try nonlinearity?
+
+00:34:49
+No, we did not.
+
+00:34:52
+[INAUDIBLE]
+
+00:35:02
+I mean, it didn't seem
+especially necessary.
+
+00:35:05
+I don't know.
+
+00:35:05
+But no, we did not.
+
+00:35:07
+OK, well, this is the end
+of the part with attention.
+
+00:35:14
+Are there any other questions?
+
+00:35:17
+Yes?
+
+00:35:20
+For the RNN attention
+stuff, is there
+
+00:35:22
+a need for position
+information or is that not
+
+00:35:26
+required to solve the--
+
+00:35:27
+Is there a need for?
+
+00:35:28
+Positional information.
+
+00:35:34
+So there was none.
+
+00:35:36
+And it seemed like it
+wasn't very required.
+
+00:35:40
+I mean, you could--
+
+00:35:43
+yeah, I mean, you
+could make some--
+
+00:35:47
+you could make some argument
+that maybe position information
+
+00:35:51
+might have been useful.
+
+00:35:53
+But there's also a good argument
+that it wasn't necessary.
+
+00:35:58
+And the sort of recent
+everywhere usage
+
+00:36:02
+of positional information
+only becomes necessary
+
+00:36:06
+when you get to a transformer.
+
+00:36:08
+And the reason for that is,
+going back to the pictures,
+
+00:36:15
+for these encoder states,
+they are being calculated
+
+00:36:21
+with respect to the
+previous encoder state
+
+00:36:25
+because it's a recurrent
+neural network.
+
+00:36:27
+And therefore the
+representation here
+
+00:36:30
+knows something about the past.
+
+00:36:32
+So it kind of knows what
+position it's in, basically.
+
+00:36:35
+And so that's giving a
+lot of that information.
+
+00:36:40
+Or another way to think about
+it is this final representation
+
+00:36:43
+will give a certain overall
+sense of the semantics
+
+00:36:46
+of the sentence.
+
+00:36:47
+And so to the extent that
+you're looking backwards,
+
+00:36:51
+the more associative matching of
+similar semantic content that's
+
+00:36:55
+needed seems sufficient
+and you don't really
+
+00:36:58
+need additional
+positional information.
+
+00:37:03
+OK, I will go on.
+
+00:37:06
+OK.
+
+00:37:07
+So that's the neural
+networks content for today.
+
+00:37:13
+And so for the
+remaining 39 minutes,
+
+00:37:17
+I want to talk final
+projects but also a bit
+
+00:37:20
+about data experiments
+and things like that.
+
+00:37:23
+OK, so this is a
+reminder on the class.
+
+00:37:26
+So we've got the four
+assignments, which are 48%.
+
+00:37:31
+And then the big other
+part of what you need to do
+
+00:37:34
+is the final project,
+which is 49%,
+
+00:37:39
+almost completing things out
+except for the participation.
+
+00:37:44
+And let me just give one
+note back to collaboration,
+
+00:37:49
+the honor code.
+
+00:37:50
+I mean, for final
+projects, it's quite usual
+
+00:37:55
+that people use all
+sorts of stuff that
+
+00:37:57
+were written by other people.
+
+00:37:59
+That's completely fine.
+
+00:38:00
+We don't expect you to implement
+everything from scratch.
+
+00:38:04
+But you must document
+what you're using,
+
+00:38:07
+give references or URLs if
+you're using other people's code
+
+00:38:11
+rather than writing your own.
+
+00:38:12
+We do not want to know what
+code you wrote yourself
+
+00:38:15
+and what things you
+downloaded from PyPI.
+
+00:38:18
+And in particular, in
+thinking about final projects,
+
+00:38:23
+the question of interest for
+us is what value add did you
+
+00:38:27
+provide?
+
+00:38:29
+So you haven't done
+something great
+
+00:38:31
+if you've downloaded a
+really good neural network
+
+00:38:34
+and run it on some data and it
+produces really good results.
+
+00:38:37
+That's not much value add.
+
+00:38:40
+So if you want to have
+value add in that context,
+
+00:38:43
+you at least want to
+be doing something
+
+00:38:45
+interesting about understanding
+why it works so well,
+
+00:38:50
+what kind of examples.
+
+00:38:51
+It doesn't work well on doing
+some thorough experimental
+
+00:38:55
+analysis.
+
+00:39:01
+Yeah, a couple of
+other points there.
+
+00:39:05
+OK, so for the final
+project for this class,
+
+00:39:10
+there's a binary choice.
+
+00:39:13
+You can either do our
+default final project, which
+
+00:39:16
+I'll talk about
+more a bit later,
+
+00:39:19
+or you can come up with
+your own final project,
+
+00:39:21
+and I'll talk about
+that a bit too.
+
+00:39:24
+So we allow team
+sizes of one to three.
+
+00:39:29
+The complicated
+thing that comes up--
+
+00:39:35
+actually, sorry.
+
+00:39:36
+I should say the
+other point first.
+
+00:39:37
+Yeah, so if you do--
+
+00:39:41
+we generally encourage
+people to form teams.
+
+00:39:44
+It means that you can do
+something more interesting.
+
+00:39:46
+It's more motivational.
+
+00:39:48
+You can make friends, whatever.
+
+00:39:50
+So teams are good.
+
+00:39:52
+On expectations for teams,
+our expectation for teams
+
+00:39:58
+is that a bigger team
+should be able to do
+
+00:40:00
+proportionally more work now.
+
+00:40:03
+And so when we're
+grading things,
+
+00:40:05
+we expect to see more
+work from larger teams.
+
+00:40:10
+Now, how this works
+out is kind of--
+
+00:40:15
+I will admit-- a little bit
+complicated because there's
+
+00:40:18
+sort of a quality issue that's
+separate from the amount
+
+00:40:23
+of work.
+
+00:40:24
+So the reality is that
+it's just always the case
+
+00:40:29
+that several of the
+very best projects
+
+00:40:32
+are one-person efforts
+because they're just
+
+00:40:35
+somebody who has a good idea
+and knows what they want to do
+
+00:40:39
+and does it by themselves.
+
+00:40:41
+And it is great.
+
+00:40:43
+But they're also great
+multi-person projects as well.
+
+00:40:46
+But the point I'm
+meaning is, well,
+
+00:40:51
+it doesn't work if you're
+a one-person project
+
+00:40:54
+and you're trying to attempt
+a huge amount of stuff
+
+00:40:57
+and you can only get one
+third of the way through it.
+
+00:41:00
+That's not a good recipe for
+doing well in the final project.
+
+00:41:04
+For any project, you really
+need to be completing something
+
+00:41:09
+and showing something.
+
+00:41:10
+But nevertheless, if
+you're a one person
+
+00:41:14
+and you can show something
+kind of interesting,
+
+00:41:17
+even if our reaction
+is, well, this
+
+00:41:21
+would have been much
+better if they'd
+
+00:41:23
+shown it was better than
+this other kind of model,
+
+00:41:26
+or it would have
+been really nice
+
+00:41:27
+if they'd run ablations
+to work things out.
+
+00:41:31
+Well, if you're one person
+we'll give you a bye
+
+00:41:33
+and say, oh, but it was only
+one person, whereas if you're
+
+00:41:37
+a three-person team and it seems
+like you obviously should have
+
+00:41:41
+compared it to some other
+models and you obviously
+
+00:41:43
+could have run it on some other
+data sets, then we'll feel like,
+
+00:41:48
+well, it's a three-person team.
+
+00:41:49
+They obviously should have done
+that, and therefore, we should
+
+00:41:53
+give them a less good score.
+
+00:41:55
+And that's how
+that is worked out.
+
+00:41:58
+The complication comes
+with other things people
+
+00:42:03
+are doing at the same time.
+
+00:42:05
+We allow people to do
+final projects that are
+
+00:42:08
+shared with multiple classes.
+
+00:42:12
+But our expectation is, again,
+that you'll do more work.
+
+00:42:15
+So if there are two of you who
+are using one project for both
+
+00:42:18
+this class and
+CS231N, say, then it's
+
+00:42:22
+sort of like a
+four-person project
+
+00:42:25
+and you should be doing
+a lot of work for it.
+
+00:42:29
+There are other cases.
+
+00:42:30
+Sometimes people have RAships
+or they're PhD rotation students
+
+00:42:35
+or other things.
+
+00:42:36
+If you're doing it
+for other things,
+
+00:42:38
+we'd like you to tell us.
+
+00:42:39
+And we expect you to be
+doing more work for it.
+
+00:42:45
+OK.
+
+00:42:46
+I'm very happy to talk to
+people about final projects
+
+00:42:49
+and have been talking to
+people about final projects.
+
+00:42:52
+But unfortunately
+there's only one of me,
+
+00:42:54
+so I definitely can't talk to
+500 people about final projects.
+
+00:42:58
+So I do also
+encourage you to talk
+
+00:43:00
+to all of the TAs
+about final projects.
+
+00:43:03
+So on the office hours
+page, under all of the TAs,
+
+00:43:07
+there's some information about
+things that they know about.
+
+00:43:11
+So if you know what
+your project is about,
+
+00:43:13
+you could at least try and
+find one of the most useful TAs
+
+00:43:17
+or just find a TA
+with a friendly face.
+
+00:43:20
+Whatever mechanism you use, talk
+to TAs about final projects.
+
+00:43:26
+Yeah.
+
+00:43:26
+So default final project.
+
+00:43:29
+So what it's going to be is--
+
+00:43:32
+so BERT was a famous
+early transformer.
+
+00:43:36
+And we're going to be
+building and experimenting
+
+00:43:40
+with a minimal BERT
+implementation.
+
+00:43:43
+So if you do this,
+there's a part
+
+00:43:48
+of an implementation
+of BERT, and you're
+
+00:43:50
+meant to finish it off.
+
+00:43:52
+And you're meant to fine-tune
+it and get some data results
+
+00:43:56
+for doing sentiment analysis.
+
+00:43:59
+And then, basically, we want
+even the default final project
+
+00:44:04
+to be an open-ended
+project where
+
+00:44:06
+people can do different things.
+
+00:44:08
+And so then, there's
+lots of other ideas,
+
+00:44:10
+or you can come up
+with your own of ways
+
+00:44:13
+you could extend this
+system and make it better,
+
+00:44:17
+which might be with paraphrasing
+contrastive learning, low rank
+
+00:44:21
+adaptation, something,
+and you can do something.
+
+00:44:24
+And that is your final project.
+
+00:44:28
+So why choose the final project?
+
+00:44:32
+So if you haven't had much
+experience with research,
+
+00:44:37
+you don't have any
+real idea of what
+
+00:44:39
+you want to do for
+a final project,
+
+00:44:42
+or you'd like something
+with clear guidance
+
+00:44:45
+and a goal and a leaderboard
+because we provide
+
+00:44:48
+a leaderboard for
+people doing the default
+
+00:44:50
+final project of how
+good your performance is
+
+00:44:53
+on the tasks we provide.
+
+00:44:56
+Then you can do
+the final project.
+
+00:44:58
+And I mean, honestly, I
+think, for many people,
+
+00:45:01
+the best option is to
+do the final project.
+
+00:45:04
+For past performance, typically
+about half the students
+
+00:45:08
+do the final project,
+including some people who
+
+00:45:12
+start off thinking, I'll
+do a custom final project.
+
+00:45:15
+Then after a couple
+of weeks, they
+
+00:45:18
+decide, huh, this makes no
+sense what I was suggesting.
+
+00:45:20
+It's not working at all.
+
+00:45:22
+I'm just going to
+abandon and flip
+
+00:45:23
+to the default final project.
+
+00:45:27
+OK.
+
+00:45:27
+But we also allow
+custom final projects.
+
+00:45:30
+And there are good reasons
+to do custom final projects.
+
+00:45:33
+So if you have some
+topic or research
+
+00:45:37
+idea that you're excited
+about, maybe you're
+
+00:45:39
+already even
+working on it or you
+
+00:45:42
+want to try something
+different on your own,
+
+00:45:45
+or you just like to have more
+of the experience of trying
+
+00:45:49
+to come up with a research
+goal, finding the necessary data
+
+00:45:52
+and tools, and starting from
+scratch, which is actually
+
+00:45:56
+very educational, if
+considerably harder,
+
+00:45:59
+well then, the custom final
+project is fine for you.
+
+00:46:05
+Restriction on topics.
+
+00:46:07
+I think we'd already sort
+of signaled this on Ed.
+
+00:46:10
+We insist for CS224n
+final projects
+
+00:46:16
+that they have to
+substantively involve
+
+00:46:19
+both human language
+and neural networks
+
+00:46:22
+because this is the NLP class.
+
+00:46:25
+So we'd like people
+to know and learn
+
+00:46:28
+something about human language.
+
+00:46:31
+I'm totally aware
+of the fact that you
+
+00:46:33
+can use these same models
+for bioinformatics sequencers
+
+00:46:38
+or music or radar, whatever.
+
+00:46:42
+But we'd like you
+to do something
+
+00:46:44
+with human language
+for this class.
+
+00:46:47
+That doesn't mean it has to
+be only about human language.
+
+00:46:51
+So people have done things like
+visual language models or music
+
+00:46:56
+and language.
+
+00:46:58
+So it can have a
+combination of modalities,
+
+00:47:02
+but it has to, substantively,
+not completely trivially,
+
+00:47:07
+involve human language.
+
+00:47:08
+If you've got any
+questions about that, ask.
+
+00:47:10
+And it also has to substantively
+involve neural networks.
+
+00:47:14
+So again, it doesn't have to be
+wholly about neural networks.
+
+00:47:17
+If you've got some
+ideas thinking,
+
+00:47:18
+oh, I think I could show using
+kernel machines that they work
+
+00:47:22
+just as well as having
+multi-layer neural networks
+
+00:47:25
+or something like that, that's
+of course fine to do as well.
+
+00:47:30
+Gamesmanship.
+
+00:47:32
+The default final
+project is more guided.
+
+00:47:36
+But it's not meant to be
+a complete slacker's ride.
+
+00:47:40
+We're hoping that people
+do the same amount of work
+
+00:47:43
+for either kind of project.
+
+00:47:45
+But on the other hand, it
+does give you a clearer focus
+
+00:47:49
+and course of things to do.
+
+00:47:52
+But it's still an
+open-ended project.
+
+00:47:56
+So for both default
+final projects
+
+00:48:00
+and custom final projects,
+there are great projects.
+
+00:48:03
+And there are
+not-so-great projects.
+
+00:48:07
+If anything, there's
+a bit more variance
+
+00:48:10
+in the custom final project.
+
+00:48:11
+So the path of success
+is not to try and do
+
+00:48:17
+something for a custom
+final project that
+
+00:48:20
+just looks really weak
+compared to people's default
+
+00:48:23
+final projects.
+
+00:48:25
+OK.
+
+00:48:26
+You can get good
+grades either way.
+
+00:48:30
+We give best project awards
+to both kinds of projects.
+
+00:48:34
+So yeah, it's really not
+that there's some secret one
+
+00:48:37
+you have to pick.
+
+00:48:39
+Computing.
+
+00:48:41
+Yeah, so-- to be honest,
+with the confessions
+
+00:48:46
+right at the beginning,
+we're actually
+
+00:48:48
+in a less good
+position for computing
+
+00:48:52
+than we've been in recent years.
+
+00:48:54
+And it's all OpenAI's
+fault. Now, that part is--
+
+00:48:58
+[LAUGHS]
+
+00:48:59
+But up until and
+including last year,
+
+00:49:04
+we actually had
+invariably managed
+
+00:49:08
+to get very generous cloud
+computing giveaways from one
+
+00:49:13
+or other cloud
+computing provider,
+
+00:49:15
+which really provided a
+lot of computing support.
+
+00:49:21
+But there's the
+great GPU shortage
+
+00:49:24
+on at the moment due to the
+great success of large language
+
+00:49:27
+models.
+
+00:49:28
+And it turns out that cloud
+compute providers just
+
+00:49:32
+aren't being as generous
+as they used to be.
+
+00:49:34
+And gee, I guess the
+AWS rep was pointing out
+
+00:49:38
+that my course was the single
+largest grant of free GPU
+
+00:49:44
+last year, so it's
+getting harder to do.
+
+00:49:47
+So really people will
+have to patch things
+
+00:49:52
+together more in many cases.
+
+00:49:55
+And so we'll be relying on
+the ingenuity of students
+
+00:49:59
+to be able to find
+free and cheap stuff.
+
+00:50:03
+So Google is giving $50 credit
+per person on GCP, which
+
+00:50:08
+can be used for assignments
+3, 4, and the final project.
+
+00:50:13
+On all the clouds,
+if you haven't
+
+00:50:15
+used a cloud with
+an account before,
+
+00:50:18
+you can usually get some
+free starter credits,
+
+00:50:21
+which can be a useful thing.
+
+00:50:24
+There are the sort of Jupyter
+Notebooks in the cloud.
+
+00:50:28
+So the most used
+one is Google Colab,
+
+00:50:32
+which allows limited GPU use.
+
+00:50:35
+It often tends to get
+tighter later in the quarter,
+
+00:50:40
+so you might find
+it a good investment
+
+00:50:42
+to not have a couple of
+lattes and pay $10 a month
+
+00:50:46
+to get Colab Pro, which gives
+you much better access to GPUs.
+
+00:50:52
+But there are
+alternatives to that which
+
+00:50:53
+you might also want to look at.
+
+00:50:55
+So AWS provides a Jupyter
+Notebook environment SageMaker
+
+00:50:59
+Studio Lab.
+
+00:51:01
+And also owned by Google,
+Kaggle separately provides
+
+00:51:06
+Kaggle Notebooks, which actually
+commonly give you better GPU
+
+00:51:10
+access than Google
+Colab provides,
+
+00:51:14
+even though they're
+otherwise not as nice.
+
+00:51:18
+[LAUGHS] Kaggle Notebooks
+are just bare-bones Jupyter
+
+00:51:23
+Notebooks, whereas Colab
+has some fancier UI stuff
+
+00:51:27
+grafted on it.
+
+00:51:29
+So other possibilities.
+
+00:51:31
+Modal is a low-priced
+GPU provider
+
+00:51:33
+and allows a certain amount
+of free GPU usage a month,
+
+00:51:38
+so that could be handy.
+
+00:51:40
+There are other lower-cost
+GPU providers like fast.ai,
+
+00:51:43
+which could be of relevance.
+
+00:51:46
+And then the other
+thing that I'll
+
+00:51:47
+say more about in a minute is
+the way things have changed
+
+00:51:51
+with large language models,
+there are lots of projects
+
+00:51:55
+that you might want to do where
+you're not actually building
+
+00:51:58
+models at all yourself but
+you're wanting to do experiments
+
+00:52:03
+on large language
+models or you're
+
+00:52:06
+wanting to do in-context
+learning with large language
+
+00:52:09
+models or other
+things of that sort.
+
+00:52:13
+And then what you
+want is to have access
+
+00:52:16
+to large language models.
+
+00:52:18
+And in particular, you probably
+want to have API access,
+
+00:52:22
+so you can automate things.
+
+00:52:24
+So another thing that
+we have been able to get
+
+00:52:27
+is through the generosity
+of Together AI,
+
+00:52:30
+that Together AI is
+providing $50 of API access
+
+00:52:34
+to large language models,
+which can actually be a lot.
+
+00:52:39
+How much of a lot it is depends
+on how big a model you're using.
+
+00:52:44
+So something you should think
+about is how big a model do you
+
+00:52:47
+really need to use to show
+something because if you can run
+
+00:52:51
+a 7-billion-parameter
+language model on Together,
+
+00:52:55
+you can put a huge number of
+tokens through it for $50,
+
+00:52:59
+whereas if you want to
+run a much bigger model,
+
+00:53:02
+then the number of tokens
+starts you can get through,
+
+00:53:05
+it goes down by
+orders of magnitude.
+
+00:53:09
+So that's good.
+
+00:53:11
+And I mentioned some other ones.
+
+00:53:12
+So we've already put a whole
+bunch of documents up on Ed
+
+00:53:17
+that talk about these
+different GPU options.
+
+00:53:20
+So do look at those.
+
+00:53:24
+OK, jumping ahead.
+
+00:53:26
+So the first thing you have
+to do as a project proposal--
+
+00:53:30
+so it's one per team.
+
+00:53:32
+So I guess the first step is
+to work out who your team is.
+
+00:53:36
+And so for the project
+proposal, part of it
+
+00:53:39
+is actually giving us the
+details of your project.
+
+00:53:43
+But there's another
+major part of it,
+
+00:53:46
+which is writing a
+review of a key research
+
+00:53:50
+paper for your topic.
+
+00:53:53
+For the default final project,
+we provide some suggestions
+
+00:53:56
+so you can find something else.
+
+00:53:58
+If you've got
+another idea for how
+
+00:53:59
+to extend the project
+for your custom project,
+
+00:54:02
+you're finding your own.
+
+00:54:03
+But what we want you to
+do is get some practice
+
+00:54:06
+at looking at a research paper,
+understanding what it's doing,
+
+00:54:11
+understanding what's convincing,
+what it didn't consider,
+
+00:54:15
+what it failed to do.
+
+00:54:16
+And so we want you to write a
+two-page summary of a research
+
+00:54:20
+paper.
+
+00:54:22
+And the goal is for
+you to be thinking
+
+00:54:24
+critically about this
+research paper, of what
+
+00:54:29
+did it do that was
+exciting versus what
+
+00:54:31
+did it claim was exciting but
+was really obvious or perhaps
+
+00:54:35
+even wrong, et cetera.
+
+00:54:38
+OK.
+
+00:54:41
+So after that, we want you to
+say what you're planning to do.
+
+00:54:48
+That may be very straightforward
+for a default final project,
+
+00:54:52
+but it's really important
+for a custom final project.
+
+00:54:57
+And in particular, tell us
+about the literature you're
+
+00:55:04
+going to use, if any,
+and the kind of models
+
+00:55:06
+you're going to explore.
+
+00:55:08
+But it turns out that when
+we're unhappy with custom
+
+00:55:12
+final projects, the two
+commonest complaints about what
+
+00:55:16
+you tell us about
+custom final projects
+
+00:55:19
+is you don't make
+clear what data
+
+00:55:21
+you're going to use because
+we're worried already
+
+00:55:25
+if you haven't worked out by the
+project proposal deadline what
+
+00:55:29
+data you can use for
+your final project
+
+00:55:31
+and if you don't
+tell us how you're
+
+00:55:34
+going to evaluate your system.
+
+00:55:36
+We want to know how you're
+going to measure whether you're
+
+00:55:39
+getting any success.
+
+00:55:41
+As a new thing this
+year, we'd like
+
+00:55:45
+you to include an
+ethical considerations
+
+00:55:48
+paragraph outlining potential
+ethical challenges of your work
+
+00:55:52
+if it were deployed
+in the real world
+
+00:55:54
+and how that might be mitigated.
+
+00:55:57
+This is something that now a
+lot of conferences are requiring
+
+00:56:01
+and a lot of grants
+are requiring.
+
+00:56:03
+So we want to give you a
+little bit of practice on that
+
+00:56:06
+by writing a paragraph of that.
+
+00:56:08
+How much there is to talk
+about varies somewhat
+
+00:56:12
+on what you're trying
+to do and whether it
+
+00:56:15
+has a lot of ethical
+problems or whether it's
+
+00:56:17
+a fairly straightforward
+question-answering system.
+
+00:56:20
+But in all cases,
+you might think
+
+00:56:22
+about what are the possible
+ethical considerations
+
+00:56:26
+of this piece of work.
+
+00:56:28
+OK, the whole thing
+is maximum four pages.
+
+00:56:33
+OK.
+
+00:56:34
+So for the research
+paper summary,
+
+00:56:38
+yeah, do think critically.
+
+00:56:41
+I mean, the worst
+summaries are essentially
+
+00:56:49
+people that just paraphrase
+what's in the abstract
+
+00:56:52
+and introduction of the paper.
+
+00:56:54
+And we want you to think
+a bit harder about this.
+
+00:56:58
+What were the novel
+contributions of the paper?
+
+00:57:03
+Is it something
+that you could use
+
+00:57:05
+for different kinds of
+problems in different ways,
+
+00:57:08
+or was it really exploiting
+a trick of one data set?
+
+00:57:12
+Are there things that it seemed
+like they missed or could
+
+00:57:16
+have done differently
+or you weren't
+
+00:57:17
+convinced were done properly?
+
+00:57:20
+Is it similar or
+distinctive to other
+
+00:57:23
+papers that are dealing
+with the same topic?
+
+00:57:26
+Does it suggest
+perhaps something
+
+00:57:28
+that you could try that
+extends beyond the paper?
+
+00:57:32
+OK.
+
+00:57:33
+And for grading these
+final project proposals,
+
+00:57:37
+most of the points are
+on that paper review.
+
+00:57:41
+And so do pay attention to it.
+
+00:57:44
+There are some points
+on the project plan.
+
+00:57:48
+But really we're wanting
+to mainly give you
+
+00:57:52
+formative feedback
+on the project plan
+
+00:57:54
+and comments as to how we think
+it's realistic or unrealistic.
+
+00:57:59
+But nevertheless,
+we're expecting
+
+00:58:01
+you to have an idea, have
+thought through how you can
+
+00:58:06
+investigate it, thought through
+how you can evaluate it,
+
+00:58:09
+data sets, baselines,
+things like that.
+
+00:58:12
+Oh yeah, I should
+emphasize this.
+
+00:58:14
+Do have an appropriate baseline.
+
+00:58:17
+So anything that
+you're doing, you
+
+00:58:21
+should have something you
+can compare it against,
+
+00:58:23
+so sometimes it's
+the previous system
+
+00:58:26
+that exactly the same thing.
+
+00:58:27
+But if you're doing something
+more novel and interesting,
+
+00:58:30
+you should be thinking of some
+seat-of-the-pants obvious way
+
+00:58:35
+to do things and proving
+that you can do it better.
+
+00:58:38
+And what that is depends a
+lot on what your project is.
+
+00:58:41
+But if you're building some
+complex neural net that's
+
+00:58:47
+going to be used to work out
+textural similarity between two
+
+00:58:51
+pieces of text,
+well, a simple way
+
+00:58:53
+of working out textural
+similarity between two pieces
+
+00:58:56
+of text is to look
+up the word vectors
+
+00:58:59
+for every word in the text and
+average them together and work
+
+00:59:02
+out the dot product between
+those average vectors.
+
+00:59:07
+And unless you're
+complex, neural network
+
+00:59:09
+is significantly
+better than that.
+
+00:59:11
+It doesn't seem like
+it's a very good system,
+
+00:59:14
+so you should always attempt
+to have some baselines.
+
+00:59:18
+After the project
+proposal, we also
+
+00:59:22
+have a project milestone
+stuck in the middle
+
+00:59:25
+to make sure everybody
+has making some progress.
+
+00:59:29
+This is just to help make sure
+people do get through things
+
+00:59:33
+and keep working on it so
+we'll have good final projects.
+
+00:59:37
+For most final projects--
+
+00:59:40
+I'll say more about
+this in a minute--
+
+00:59:43
+the crucial thing we
+expect for the milestone
+
+00:59:46
+is that you've got set up
+and you can run something.
+
+00:59:51
+It might just be your baseline
+of looking up the word vectors.
+
+00:59:54
+But it means you've got the data
+and the framework and something
+
+00:59:58
+that you can run and
+produce a number from it.
+
+01:00:02
+And then there's
+the final project.
+
+01:00:05
+We have people submit their
+code for the final projects.
+
+01:00:09
+But final projects are
+evaluated almost entirely,
+
+01:00:16
+unless there's some major
+worries or concerns based
+
+01:00:20
+on your project report.
+
+01:00:22
+So make sure you put time
+into the project report, which
+
+01:00:26
+is essentially a research
+paper, like a conference paper.
+
+01:00:30
+And they can be
+up to eight pages.
+
+01:00:33
+And it varies on
+what you're doing,
+
+01:00:35
+but this is the kind
+of picture typically
+
+01:00:38
+of what a paper will look like.
+
+01:00:40
+You'll have an abstract
+and introduction.
+
+01:00:42
+You'll talk about
+other related work.
+
+01:00:45
+It will present the model you're
+using, the data you're using,
+
+01:00:48
+and your experiments
+and their results
+
+01:00:51
+and have some insightful
+comments in its analysis
+
+01:00:54
+and conclusion at the end.
+
+01:00:57
+OK.
+
+01:00:58
+Finding research topics
+for custom projects.
+
+01:01:03
+All kinds of things you can do.
+
+01:01:06
+Basic philosophy of science,
+you're normally either starting
+
+01:01:10
+off with, here's some problem I
+want to make some progress on,
+
+01:01:14
+or here's this cool idea
+for a theoretical technique
+
+01:01:18
+or a change in
+something, and I want
+
+01:01:20
+to show it's better than
+other ways of doing it.
+
+01:01:23
+And you're working from that.
+
+01:01:25
+We allow different
+kinds of projects.
+
+01:01:30
+One common type of project is
+you've got some task of interest
+
+01:01:34
+and you're going to try and
+solve it or make progress on it
+
+01:01:38
+somehow, that you want
+to get information out
+
+01:01:42
+of state department
+documents, and you're
+
+01:01:46
+going to see how well you
+can do it with neural NLP.
+
+01:01:50
+A second kind is you've got
+some ideas of doing something
+
+01:01:53
+different with neural networks.
+
+01:01:55
+And then you're going to
+see how well it works.
+
+01:01:58
+Or maybe, given there are large
+language models these days,
+
+01:02:02
+you're going to see how
+using large language models,
+
+01:02:05
+you can do something
+interesting by in-context
+
+01:02:08
+learning or building a larger
+language model program.
+
+01:02:12
+So nearly all 224n projects
+are in those first three types
+
+01:02:20
+where, at the end of the day,
+you've got some kind of system
+
+01:02:25
+and you've got some kind of data
+and you're going to evaluate it.
+
+01:02:30
+But that's not 100% requirement.
+
+01:02:33
+There are different kinds
+of projects you can do
+
+01:02:36
+and a few people do.
+
+01:02:37
+So you can do an analysis
+interpretability project.
+
+01:02:41
+So you could be
+interested in something
+
+01:02:44
+like how could these transformer
+models possibly understand
+
+01:02:50
+what I say to them and give the
+right answers to my statements.
+
+01:02:55
+Let me try and look
+inside the neural networks
+
+01:02:59
+and see what they're
+computing, how.
+
+01:03:01
+Recently there's
+been a lot of work
+
+01:03:03
+on this topic,
+often under titles
+
+01:03:05
+like mechanistic
+interpretability circuit
+
+01:03:09
+training and things like that.
+
+01:03:10
+So you can do some kind of
+analysis or interpretability
+
+01:03:13
+project.
+
+01:03:14
+Or you could even just do it--
+
+01:03:17
+looking at the behavior
+of models of some task.
+
+01:03:21
+So you could take
+some linguistic task
+
+01:03:24
+like metaphor
+interpretation and see
+
+01:03:28
+which neural networks can
+interpret them correctly
+
+01:03:31
+and which can't, or
+which kinds of ones
+
+01:03:33
+they can interpret correctly or
+not, and do things like that.
+
+01:03:37
+Another kind is a
+theoretical project.
+
+01:03:42
+Occasionally, people
+have done things,
+
+01:03:45
+looking at the behavior of--
+
+01:03:51
+well, that's a good example.
+
+01:03:53
+Somewhere that's in the math.
+
+01:03:56
+So an example that was
+actually done a few years ago
+
+01:04:00
+and turned into a
+conference paper
+
+01:04:02
+was looking at,
+in the estimation
+
+01:04:05
+of word vectors, the
+stability of the word vectors
+
+01:04:10
+that were computed by
+different algorithms, Word2vec
+
+01:04:15
+versus GloVe, and
+deriving results
+
+01:04:20
+with proofs about the
+stability of the vectors that
+
+01:04:27
+were calculated.
+
+01:04:28
+So that's allowed.
+
+01:04:29
+But we don't see many of those.
+
+01:04:31
+Here very quickly,
+just random things.
+
+01:04:37
+So a lot of past projects you
+can find on the 224n web page,
+
+01:04:42
+you can just find different
+past year reports.
+
+01:04:45
+And you can look at them
+to get ideas as you wish.
+
+01:04:50
+So deep poetry was
+a gated LSTM, where
+
+01:04:54
+the idea was as well sought,
+a language model that
+
+01:04:58
+generates successive words.
+
+01:05:00
+They had extra stuff
+in it to make it
+
+01:05:03
+rhyme in a poetry-like pattern.
+
+01:05:06
+That was kind of fun.
+
+01:05:08
+You can do a reimplementation
+of a paper that
+
+01:05:13
+has been done previously.
+
+01:05:14
+This is actually a kind of an
+old one, but I remember it well.
+
+01:05:18
+So back in the days
+before transformers,
+
+01:05:21
+DeepMind did these kind
+of interesting papers
+
+01:05:24
+on neural Turing machines and
+differentiable neural computers.
+
+01:05:31
+But they didn't release
+implementations of them.
+
+01:05:34
+And so Carol said about
+writing her own implementation
+
+01:05:38
+of a differentiable neural
+computer, which in a way
+
+01:05:41
+was a little bit crazy.
+
+01:05:44
+And a few days
+before the deadline,
+
+01:05:47
+she still hadn't
+gotten it working.
+
+01:05:48
+So it could have been
+a complete disaster.
+
+01:05:50
+But she did get it working
+before the deadline
+
+01:05:53
+and got it to run, producing
+some interesting results.
+
+01:05:57
+So that was kind of cool.
+
+01:05:58
+So if it's something
+interesting,
+
+01:06:00
+it doesn't have to be original.
+
+01:06:02
+It can be sort of reimplementing
+something interesting.
+
+01:06:07
+OK.
+
+01:06:09
+Sometimes papers do
+get published later
+
+01:06:12
+as interesting ones.
+
+01:06:13
+This was a paper that was sort
+of-- again, from the early days,
+
+01:06:16
+and it was sort
+of fairly simple,
+
+01:06:19
+but it was a novel thing
+that gave progress.
+
+01:06:22
+So the way we've
+presented these RNNs,
+
+01:06:26
+you have word
+vectors at the bottom
+
+01:06:28
+and then you compute
+the softmax at the top.
+
+01:06:31
+But if you think about the
+multiplying by the output matrix
+
+01:06:37
+and then putting that
+into the softmax,
+
+01:06:39
+that output matrix is also
+like a set of word vectors
+
+01:06:43
+because you have a
+column for each word.
+
+01:06:45
+And then you put it to-- you get
+a score for each output word.
+
+01:06:49
+And then you're putting
+a softmax over that.
+
+01:06:52
+And so their idea
+was, well, maybe
+
+01:06:54
+you could share those
+two sets of vectors,
+
+01:06:59
+and you'd be able to get
+improvements from that
+
+01:07:01
+and you could.
+
+01:07:04
+OK.
+
+01:07:05
+Maybe I won't talk
+about that one.
+
+01:07:07
+Sometimes people have
+worked on quantized models.
+
+01:07:10
+That's sort of a general
+neural network technique.
+
+01:07:14
+But providing you show you
+can do useful things with it,
+
+01:07:17
+like have good language
+modeling results even
+
+01:07:20
+with quantized vectors, we'll
+count that as using language.
+
+01:07:25
+So in recent times--
+
+01:07:28
+these last two are from 2024.
+
+01:07:32
+A lot of the time,
+people are doing projects
+
+01:07:36
+with pretrained large
+language models, which
+
+01:07:38
+we will be talking about
+in the next three models,
+
+01:07:41
+three lectures, and then
+doing things with them.
+
+01:07:44
+And so you can do lightweight,
+parameter-efficient fine-tuning
+
+01:07:48
+methods.
+
+01:07:49
+You can do in-context learning
+methods and things like this.
+
+01:07:52
+And I suspect that
+probably quite a few of you
+
+01:07:55
+will do projects of this kind.
+
+01:07:59
+So here's an example.
+
+01:08:01
+So lots of work has been done on
+producing code language models.
+
+01:08:10
+And so these people
+decided to improve
+
+01:08:16
+the generation of Fortran.
+
+01:08:18
+Maybe they are
+physicists, I don't know.
+
+01:08:20
+[LAUGHS] And so they were able
+to show that they could use
+
+01:08:29
+parameter-efficient
+fine-tuning to improve Code
+
+01:08:32
+Llama for producing Fortran.
+
+01:08:35
+Now, where was the
+natural language?
+
+01:08:37
+Code has natural
+language comments in it,
+
+01:08:40
+and the comments can be
+useful for explaining
+
+01:08:44
+what you want the code to do.
+
+01:08:46
+And so it was effectively
+doing translation
+
+01:08:50
+from human language, explanation
+of what the code was meant
+
+01:08:56
+to do into pieces of code.
+
+01:09:00
+Here was another one, which
+was doing AI fashion-driven
+
+01:09:07
+cataloging, transforming images
+into textual descriptions,
+
+01:09:12
+which, again, was starting off
+with an existing visual language
+
+01:09:15
+model and looking at
+how to fine-tune it.
+
+01:09:18
+OK.
+
+01:09:20
+Other places to look for stuff.
+
+01:09:22
+So you can get lots of
+ideas of areas and things
+
+01:09:27
+people do by looking
+at past papers.
+
+01:09:30
+You're also welcome to have
+your own original ideas
+
+01:09:32
+thinking about anything you
+know or work on in the world.
+
+01:09:36
+So in NLP papers, there's a site
+called the ACL Anthology that's
+
+01:09:40
+good for them.
+
+01:09:42
+There are lots of
+papers on language
+
+01:09:44
+that also appear in machine
+learning conferences.
+
+01:09:47
+So you can look at the
+NeurIPS or ICLR proceedings.
+
+01:09:51
+You can look at
+past 224n projects.
+
+01:09:54
+And then the arXiv
+preprint servers
+
+01:09:57
+got tons of papers on
+everything, including NLP,
+
+01:10:01
+and you can look there.
+
+01:10:02
+But I do actually think it's--
+
+01:10:04
+some of the funnest,
+best projects
+
+01:10:06
+are actually people that
+find their own problem, which
+
+01:10:09
+is an interesting
+problem in their world.
+
+01:10:12
+If there's anything about a
+cool website that has text on it
+
+01:10:16
+and you think you could get
+information out of automatically
+
+01:10:20
+by using a language
+model or something,
+
+01:10:21
+there's probably something
+interesting and different
+
+01:10:24
+you can do there.
+
+01:10:25
+Another place to
+look is that there
+
+01:10:28
+are various leaderboards
+for the state of the art
+
+01:10:30
+on different problems.
+
+01:10:32
+And you can start looking
+through leaderboards for stuff
+
+01:10:35
+and see what you find there.
+
+01:10:39
+But on the other
+hand, the disadvantage
+
+01:10:41
+of looking at things
+like leaderboards
+
+01:10:43
+and past conferences
+is you tend to be
+
+01:10:47
+trying to do a bit better on a
+problem someone else has done.
+
+01:10:50
+And that's part of why
+really, often in research,
+
+01:10:55
+it's a clever thing to think
+of something different,
+
+01:10:58
+perhaps not too far from things
+that other people have done,
+
+01:11:01
+but somehow different.
+
+01:11:03
+So you'll be able
+to do something
+
+01:11:05
+a bit more original and
+different for what you're doing.
+
+01:11:10
+Yeah, I do want to go
+through this a bit quickly.
+
+01:11:20
+For the decade that I've
+been doing natural language
+
+01:11:24
+processing with deep
+learning, there's
+
+01:11:26
+sort of been a sea change
+in what's possible.
+
+01:11:31
+So in the early days of
+the deep learning revival,
+
+01:11:36
+most of the work
+in people's papers
+
+01:11:38
+were trying to find better
+deep learning architectures.
+
+01:11:42
+So that would be, here is some
+question-answering system.
+
+01:11:47
+I've got an idea of how I could
+add attention in some new place,
+
+01:11:50
+or I could add a new layer
+into the neural network
+
+01:11:54
+and the numbers will go up.
+
+01:11:57
+And there were lots
+of papers like that.
+
+01:12:00
+And there was a lot of fun.
+
+01:12:02
+And that's what a lot of good
+CS224n projects did, too.
+
+01:12:07
+And people were often
+able to build systems
+
+01:12:10
+from scratch that were close
+to the state of the art.
+
+01:12:14
+But in the last five years,
+your chances of doing this
+
+01:12:18
+have become pretty
+slim, frankly.
+
+01:12:24
+If you've really got a good
+idea and it's something
+
+01:12:26
+different and original, by all
+means, but it's kind of hard.
+
+01:12:31
+So most work these
+days, even for people
+
+01:12:35
+who are professional
+researchers,
+
+01:12:39
+they're making use of existing
+large pretrained models
+
+01:12:44
+in some way.
+
+01:12:45
+And then once you're doing that,
+that actually sort of fixes
+
+01:12:49
+a lot of your
+architectural choices
+
+01:12:51
+because your large
+pretrained neural
+
+01:12:53
+network has a
+certain architecture
+
+01:12:55
+and you kind of have
+to live with that.
+
+01:12:57
+You might be able to do
+interesting things by adapting
+
+01:13:01
+it with something like low
+rank adaptation around the site
+
+01:13:04
+or something.
+
+01:13:05
+But nevertheless,
+there's constraints
+
+01:13:07
+on what you want to do.
+
+01:13:09
+So for just about any
+practical project,
+
+01:13:13
+you've got some data
+set and you want
+
+01:13:15
+to understand it and get
+facts out of it or something
+
+01:13:18
+like that.
+
+01:13:19
+Essentially, the
+only sensible choice
+
+01:13:21
+is to say, I am going to use
+Hugging Face transformers,
+
+01:13:27
+which we have a tutorial
+on coming up ahead.
+
+01:13:30
+And I will load some
+pretrained model,
+
+01:13:33
+and I will be running
+it over the text.
+
+01:13:35
+And then I'll be working
+out some other stuff I
+
+01:13:37
+can do on top and around that.
+
+01:13:39
+So building your
+own architecture
+
+01:13:42
+is really only a
+sensible choice.
+
+01:13:44
+If you can do something in
+the small, which is more
+
+01:13:48
+a sort of exploring
+architectures project,
+
+01:13:51
+if you've kind of
+got an idea of,
+
+01:13:53
+hey, I've got an idea for
+a different nonlinearity
+
+01:13:56
+that I think will work
+better than using a ReLU,
+
+01:13:59
+let me investigate kind
+of thing because then you
+
+01:14:01
+can do small experiments.
+
+01:14:05
+Yeah, maybe I won't read
+out all of this list.
+
+01:14:08
+But there are lists of
+some of the ideas of what's
+
+01:14:13
+more interesting now.
+
+01:14:16
+But do be cognizant of the world
+we're in in terms of scale.
+
+01:14:23
+I mean, one of the
+problems we now have
+
+01:14:25
+is that people have seen
+the latest paper that
+
+01:14:31
+was being pushed by
+DeepMind, whoever,
+
+01:14:34
+doing some cool graph-structured
+reasoning search to do things,
+
+01:14:39
+and they turn up and say, I
+want to do this for my project.
+
+01:14:43
+But a lot of the time, if you
+read further into the paper,
+
+01:14:48
+you'll find that they were doing
+it on 30 to a 100 for a month.
+
+01:14:53
+And that's not the
+scale of compute
+
+01:14:55
+that you're going to have
+available to you in almost
+
+01:14:59
+or any all circumstances.
+
+01:15:00
+Maybe they're one or
+two industry students
+
+01:15:02
+for the-- industry students
+that you can do that.
+
+01:15:05
+And if so, go for it.
+
+01:15:06
+But for the vast majority
+of people, not likely.
+
+01:15:10
+So you do have to do
+something that is practical.
+
+01:15:16
+But that practicality is
+true for a vast majority
+
+01:15:20
+of the people in the world.
+
+01:15:21
+And if you look around
+in blogs and so on
+
+01:15:24
+you find lots of people doing
+stuff in lightweight ways
+
+01:15:29
+and describing how to do that.
+
+01:15:31
+And that's why methods like
+parameter-efficient fine-tuning
+
+01:15:34
+are really popular because you
+can do them in lightweight ways.
+
+01:15:38
+The question related to that--
+
+01:15:41
+and I'll end on this--
+
+01:15:43
+is-- I just want
+to mention again--
+
+01:15:50
+if you want to you're welcome
+to use GPT-4 or Gemini
+
+01:15:53
+Pro or Claude Opus or any of
+these models in your project.
+
+01:16:00
+But it has to be then API usage.
+
+01:16:04
+You can't possibly train
+your own big models.
+
+01:16:08
+I mean, even for the models
+that are available, open source
+
+01:16:11
+and like those, for big models,
+you can't even load them
+
+01:16:17
+into the kind of GPUs you have.
+
+01:16:19
+So probably you can
+load a LLaMA 7B model,
+
+01:16:23
+but you can't just load into
+your GPU LLaMA 70B model.
+
+01:16:27
+So you have to be
+realistic on that size.
+
+01:16:33
+But there's actually now
+lots of interesting things
+
+01:16:36
+you can do with API
+access, doing things
+
+01:16:39
+like in-context learning
+and prompting and exploring
+
+01:16:42
+that or building
+larger language model
+
+01:16:44
+programs around these
+language model components.
+
+01:16:48
+And you're certainly
+encouraged to do that.
+
+01:16:51
+Lots of other things you can do,
+such as analysis projects, which
+
+01:16:55
+look at these models sexist
+and racist still, or do they
+
+01:17:00
+have good understanding
+of analogies,
+
+01:17:03
+or can they interpret
+love letters or whatever
+
+01:17:07
+is your topic of interest.
+
+01:17:09
+Lots of things you can do,
+and that's totally allowed.
+
+01:17:13
+But again, remember
+that we'll be
+
+01:17:17
+trying to evaluate us on what
+interesting stuff you did.
+
+01:17:21
+So your project shouldn't be,
+I ran this stuff through GPT-4
+
+01:17:25
+and it produced great
+summaries of the documents.
+
+01:17:28
+I am done.
+
+01:17:29
+The question is, what
+did you do in addition
+
+01:17:33
+to that to have an
+interesting research project?
+
+01:17:36
+OK, I'll stop there.
+
+01:17:37
+Thanks a lot.

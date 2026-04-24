@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture13-generative-models-1::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript is sufficient for questions about the ELBO, the reparameterization trick, and the tradeoff between faithful reconstruction and a sampleable latent space in a VAE.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-13-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-13-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-13-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-13-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the ELBO a lower bound on log p(x) in VAE inference?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because it drops a nonnegative KL divergence term, so the remainder can never exceed log p(x).",
+        "Because the reconstruction term is always larger than log p(x).",
+        "Because the prior p(z) is always exactly equal to the posterior p(z|x).",
+        "Because ELBO is defined only for labeled data and is therefore bounded below."
+      ],
+      "answer_index": 0,
+      "explanation": "In the derivation, log p(x) is written as terms that include a KL divergence between q(z|x) and p(z|x). Since KL divergence is always nonnegative, dropping that term yields a quantity that is less than or equal to log p(x), which is the ELBO.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_elbo_as_the_vae_training_objective",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "KL is nonnegative",
+          "ELBO lower bound"
+        ],
+        "timestamps": [
+          "01:08:06",
+          "01:08:06"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-13-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the purpose of the reparameterization trick in a VAE?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It allows the model to sample z while still propagating gradients through the sampling step.",
+        "It removes the prior term entirely from the loss function.",
+        "It turns the decoder into a discriminative classifier.",
+        "It guarantees that every z has expectation exactly zero."
+      ],
+      "answer_index": 0,
+      "explanation": "If sampling is treated as a disconnected random step, gradients cannot pass through it. Reparameterization rewrites sampling in terms of a standard noise variable plus the mean and variance predicted by the encoder, so backpropagation still works.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reparameterization_latent_sampling_and_disentangling_intuition",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reparameterization trick",
+          "backpropagating through the sampling step"
+        ],
+        "timestamps": [
+          "01:09:53",
+          "01:09:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-13-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What balance is created by the reconstruction loss and the prior-matching loss in a VAE?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "One term pushes the model to reconstruct data faithfully, while the other pushes the latent code to stay close to the prior so it remains easy to sample from.",
+        "Both terms only try to push the latent code as far away from the prior as possible.",
+        "One term optimizes class labels, and the other optimizes bounding-box IoU.",
+        "Both terms only aim to reduce the number of decoder layers."
+      ],
+      "answer_index": 0,
+      "explanation": "The reconstruction term encourages the encoder to keep enough information for the decoder to reconstruct x well. The KL-to-prior term pulls the latent distribution toward a simple prior, which makes the latent space smoother and easier to sample from. A good VAE balances those two pressures.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_elbo_as_the_vae_training_objective",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reconstruction and prior losses fight",
+          "smooth latent interpolations"
+        ],
+        "timestamps": [
+          "01:10:26",
+          "01:10:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-13-seg7-q1",
+      "global_kp_id": "kp_elbo_as_the_vae_training_objective",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg7-q1",
+      "global_kp_id": "kp_elbo_as_the_vae_training_objective",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg7-q2",
+      "global_kp_id": "kp_reparameterization_latent_sampling_and_disentangling_intuition",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg7-q2",
+      "global_kp_id": "kp_elbo_as_the_vae_training_objective",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg7-q3",
+      "global_kp_id": "kp_elbo_as_the_vae_training_objective",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg7-q3",
+      "global_kp_id": "kp_reparameterization_latent_sampling_and_disentangling_intuition",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-13-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.85,
+      "discrimination_prior": 1.06,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why is the ELBO a lower bound on log p(x) in VAE inference\" requires deeper synthesis and deserves a hard prior before response data arrives."
+    },
+    {
+      "item_id": "lecture-13-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the purpose of the reparameterization trick in a VAE\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture-13-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What balance is created by the reconstruction loss and the prior-matching loss in a VAE\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-13-seg7-q1",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is the ELBO a lower bound on log p(x) in VAE inference\" is a stronger synthesis item suited to later assessment."
+    },
+    {
+      "item_id": "lecture-13-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the purpose of the reparameterization trick in a VAE\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture-13-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What balance is created by the reconstruction loss and the prior-matching loss in a VAE\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

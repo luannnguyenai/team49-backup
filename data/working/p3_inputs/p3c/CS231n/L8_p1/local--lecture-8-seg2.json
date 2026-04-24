@@ -1,0 +1,204 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_8",
+    "lecture_title": "Lecture 8: Attention and Transformers",
+    "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture_8::seg2",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Attention inside sequence-to-sequence RNNs",
+    "description": "Derives the original attention mechanism for encoder-decoder RNNs by computing alignment scores, softmax attention weights, and a fresh context vector at every decoder step.",
+    "summary": "To remove the single-vector bottleneck, the decoder is allowed to look back at the full encoder sequence at every output step [ts=540s][ts=548s]. For each decoder state, the model computes scalar alignment scores against every encoder hidden state, normalizes them with softmax into attention weights, and then forms a context vector as a weighted sum of encoder states [ts=590s][ts=660s][ts=738s]. This context vector is concatenated into the decoder computation so the decoder can focus on the most relevant input tokens for the current output token, such as attending more to “we see” when predicting the Italian word corresponding to that phrase [ts=816s][ts=856s]. The whole mechanism is differentiable and learned end-to-end with the standard output loss, so the model does not need explicit supervision of alignments [ts=882s][ts=900s]. Repeating this process at every decoder time step produces a different context vector each time and removes the original fixed-context bottleneck [ts=1080s][ts=1147s].",
+    "key_points": [
+      {
+        "text": "Alignment scores compare the decoder state to each encoder state: e_{t,i} = f_att(s_{t-1}, h_i).",
+        "timestamp_s": 590,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Softmax converts alignment scores into attention weights that form a probability distribution over input positions.",
+        "timestamp_s": 660,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The context vector is a weighted sum of encoder states: c_t = sum_i a_{t,i} h_i.",
+        "timestamp_s": 738,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "When predicting the Italian word for “we see,” the model should place larger weights on the corresponding English tokens than on “the sky.”",
+        "timestamp_s": 856,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Attention weights are learned without direct supervision because the entire computation is differentiable and trained end-to-end.",
+        "timestamp_s": 885,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A new context vector is recomputed at each decoder step instead of reusing one fixed summary vector for the whole output sequence.",
+        "timestamp_s": 1094,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=8",
+      "start_s": 540,
+      "end_s": 1259
+    },
+    "difficulty": 0.63,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "transcript_slice": "00:09:01\nwill work much better.\n\n00:09:04\nled to attention and transformers and all\n\n00:09:08\nIt all came-- one way of telling the story\n\n00:09:13\nin recurrent neural networks.\n\n00:09:18\nand endow a recurrent neural network with the ability\n\n00:09:23\nSo here, we're going to start with the same thing.\n\n00:09:28\nno changes there.\n\n00:09:32\nfor the output sequence.\n\n00:09:38\nin some way.\n\n00:09:42\nwhat we're going to do is look back at the input sequence.\n\n00:09:46\nthat is by computing some alignment scores by comparing\n\n00:09:53\nvalue for each step in the input sequence that says,\n\n00:09:59\ns0, how much does that decoder state match each token\n\n00:10:04\nSo in this case, there were four tokens in the input sequence.\n\n00:10:10\nis just a single number that says,\n\n00:10:16\nthe token of the input sequence, and this initial decoder state\n\n00:10:22\nNow, there's a lot of ways that we could\n\n00:10:26\nBut a simple way is just use a simple linear layer\n\n00:10:30\nAnd so that linear layer is going to input--\n\n00:10:35\nwith one of the encoder hidden states,\n\n00:10:39\nand then apply a linear transform that squashes that\n\n00:10:43\nAnd that's just a linear operator\n\n00:10:46\nand learned jointly via gradient descent, just in the way\n\n00:10:51\nSo now at this point, we've got this scalar alignment score\n\n00:10:57\nAnd now, we want to apply a softmax function.\n\n00:11:03\nThey're arbitrary real values from minus infinity to infinity.\n\n00:11:08\nto prevent things from blowing up.\n\n00:11:13\nSo we've got four scalar values telling us\n\n00:11:18\nwith each of the encoder hidden states.\n\n00:11:22\nto give us a distribution over those four values.\n\n00:11:28\nthat we saw a few lectures ago is going\n\n00:11:32\nand convert it into a probability distribution.\n\n00:11:36\nthat each entry in the output softmax probabilities\n\n00:11:42\nSo we can think of-- so whenever we\n\n00:11:46\nwe can think of the thing we get out\n\n00:11:50\na discrete probability distribution\n\n00:11:54\nSo in this case--\n\n00:11:57\nand run them through a softmax, what we've essentially done\n\n00:12:04\ntokens, given that decoder hidden state.\n\n00:12:10\nover the input tokens and use them\n\n00:12:18\nSo the way that we do that is we take our attention scores, which\n\n00:12:26\nthey're all between 0 and 1.\n\n00:12:29\nWe're going to take a linear combination now\n\n00:12:34\nand take a linear combination of those encoder hidden states\n\n00:12:40\nAnd this will give us a context vector\n\n00:12:45\nis going to summarize the information in the encoder\n\n00:12:52\nweights.\n\n00:12:57\nsome linear combination of the input encoder states, h1 to h4.\n\n00:13:03\ndid in the non-attention case.\n\n00:13:06\nWe concatenate it with our first token of the output sequence,\n\n00:13:14\nto get our next hidden state of the decoder recurrent neural\n\n00:13:22\nrecurrent neural network.\n\n00:13:27\ndid not really change.\n\n00:13:32\nin a different way using this attention linear combination\n\n00:13:36\nBut now, crucially, so the intuition here\n\n00:13:42\nattends, or looks at different parts of the input sequence that\n\n00:13:49\nat this moment in time.\n\n00:13:54\nas part of the input sequence has this token, these two words\n\n00:13:59\nSo then in trying to produce that one word in Italian that\n\n00:14:05\nwants to go back and look at those two words in the input\n\n00:14:11\nSo we might expect--\n\n00:14:16\nwhen trying to produce the word, \"vediamo,\"\n\n00:14:23\nand put higher attention weights on those.\n\n00:14:27\nbecause those words are not necessary for producing\n\n00:14:32\nAnd that's the kind of intuition.\n\n00:14:35\nto look back at the relevant parts of the input\n\n00:14:39\nat this moment in time.\n\n00:14:43\nis that this is all differentiable.\n\n00:14:47\nWe don't need to tell it which words in the input sequence\n\n00:14:52\nInstead, this is just a big computational graph composed\n\n00:14:56\nAll of this can be learned end-to-end via gradient descent.\n\n00:15:00\ngoing to have this cross-entropy softmax loss, where\n\n00:15:05\nsequence.\n\n00:15:09\nthe right tokens in the output sequence,\n\n00:15:12\nto attend to different parts of the input sequence.\n\n00:15:17\nIf we had to go in and supervise and tell the network\n\n00:15:21\nwould be very difficult to get training data\n\n00:15:24\nThe question is, how do we initialize the decoder?\n\n00:15:28\nwe're using the word \"initialize\"\n\n00:15:31\nSo one question is, the decoder is itself a neural network that\n\n00:15:35\nWhen we start training that network,\n\n00:15:39\nSo then we will typically initialize\n\n00:15:43\nvia gradient descent, just as we do with any other neural network\n\n00:15:47\nBut there's a second notion of initialize.\n\n00:15:51\na sequence, whatever its current value of the weights are,\n\n00:15:58\nwe start processing an output sequence.\n\n00:16:05\nto set that initial hidden state of the decoder output sequence.\n\n00:16:10\nSometimes, you might initialize it\n\n00:16:15\nis one thing you'll sometimes do.\n\n00:16:20\nhas some learned projection from the last decoder state\n\n00:16:23\nfrom the last encoder state to the first decoder state.\n\n00:16:28\nthe first hidden state of the decoder to be all zeros.\n\n00:16:34\nto expect that kind of input.\n\n00:16:37\nwill this cause a problem?\n\n00:16:39\nThis is a hard problem.\n\n00:16:42\nto try to hope the network can disentangle this.\n\n00:16:49\nIt takes in the decoder.\n\n00:16:52\nhidden state.\n\n00:16:55\nAnd it takes the current token in the output sequence.\n\n00:17:01\nAnd then from the next hidden state,\n\n00:17:04\nSo that's actually the same setup\n\n00:17:08\nI guess there's an implicit connection\n\n00:17:13\nWell, so there should have been another arrow from s0 to s1.\n\n00:17:20\nWell, we're basically letting the network\n\n00:17:24\nsequence that it thinks might be relevant for the task at hand.\n\n00:17:31\nand might be helpful for the network\n\n00:17:36\nthere often is some kind of correspondence\n\n00:17:40\nAnd we want to let the network look back and pick out\n\n00:17:45\nthis bit of the output.\n\n00:17:48\nWe're not telling it how to use these attention scores.\n\n00:17:52\nthat's a plausible thing that it might choose to do,\n\n00:17:56\nOK, so that's one tick of the output.\n\n00:18:02\nWe do this whole process again for every time\n\n00:18:06\nRemember, the problem we were trying to solve\n\n00:18:10\nthrough a single vector.\n\n00:18:12\ninstead of bottlenecking through a single vector,\n\n00:18:17\na new context vector for the second time step of the decoder\n\n00:18:22\nyet again.\n\n00:18:27\nis our computed first hidden state in the decoder,\n\n00:18:32\nYou take s1, go back and compute comparison,\n\n00:18:38\nsimilarity scores between s1 and all of the hidden states\n\n00:18:43\nThat will compute our similarity scores,\n\n00:18:48\nused at the first time step, compute these alignment scores,\n\n00:18:55\nover the input sequence for the second decoder time step,\n\n00:19:00\nof the encoder hidden states, now weighted\n\n00:19:05\nstep.\n\n00:19:12\nthat now is a different summarization of the input\n\n00:19:18\nof the input encoder hidden states.\n\n00:19:23\nWe have a new context vector.\n\n00:19:29\nthat will now does include that mysterious missing\n\n00:19:34\nSo then given our new context vector,\n\n00:19:39\nand given the s1 hidden state of the decoder,\n\n00:19:45\ncompute another token of the output sequence.\n\n00:19:49\nRemember, in this case, it's producing il,\n\n00:19:55\nI hope that's true.\n\n00:19:58\na one-to-one correspondence between the word\n\n00:20:03\nof the words in the output-- and one of the words in the input.\n\n00:20:07\nput relatively high attention weight\n\n00:20:12\nand relatively low attention weight on all the other words,\n\n00:20:15\nBut again, we don't supervise this.\n\n00:20:18\nhow to make use of this mechanism, all\n\n00:20:23\nAnd this whole thing is we're just\n\n00:20:27\nof the decoder RNN.\n\n00:20:32\nWe are no longer bottlenecking the input sequence\n\n00:20:36\nInstead, we have this new mechanism,\n\n00:20:40\nthe network looks back at the entire input sequence,\n\n00:20:47\nvector on the fly for this one time step of the decoder,\n\n00:20:51\nSo this is a pretty cool mechanism.\n\n00:20:56\nis attending, or looking at different parts of the input",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "global_kp_id": "kp_attention_scoring",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "global_kp_id": "kp_context_vector_as_a_weighted_sum",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_8::seg2",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_attention_scoring",
+      "name": "Attention scoring and alignment weights",
+      "description": "Attention begins by comparing a decoder/query state with each candidate source state, then applying softmax to turn those scores into normalized attention weights. Attention scores can be computed with dot-product, bilinear/multiplicative, low-rank projected dot-product, or additive neural-net scoring.",
+      "track_tags": [
+        "architectures",
+        "attention",
+        "deep_learning",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "ml_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because attention scoring and alignment weights clarifies attention begins by comparing a decoder/query state with each candidate source state, then applying softmax to turn those scores into normalized attention weights, sharpening later modeling, analysis, or evaluation choices though importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09-attention::kp5",
+        "local::lecture_8::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_context_vector_as_a_weighted_sum",
+      "name": "Context vector as a weighted sum",
+      "description": "The output of attention is a context vector formed by weighting source hidden states with attention weights and summing them.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because context vector as a weighted sum clarifies the output of attention is a context vector formed by weighting source hidden states with attention weights and summing them, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_8::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "name": "Seq2seq bottleneck motivation for attention",
+      "description": "Encoder-decoder RNNs compress the input sequence into one context vector, which limits performance on longer sequences because all input-output communication must pass through that fixed-size representation. A single encoder hidden state is too narrow a bottleneck for long source sentences, motivating selective access to all encoder states during decoding.",
+      "track_tags": [
+        "attention",
+        "deep_learning",
+        "sequence_models",
+        "sequence_to_sequence"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "applied_scientist",
+        "ml_engineer",
+        "ml_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because seq2seq bottleneck motivation for attention clarifies encoder-decoder RNNs compress the input sequence into one context vector, which limits performance on longer sequences because all input-output communication must pass through that fixed-size representation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09-attention::kp3",
+        "local::lecture_8::kp1"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.48,
+    0.78
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L8_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture08-attention-and-transformers_transcript.txt"
+  }
+}

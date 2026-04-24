@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is mapping every unseen word to a single UNK token a weak strategy for modern NLP models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It erases information that may be recoverable from the word's characters or morphemes.",
+        "It makes common words too frequent during training.",
+        "It prevents the model from using punctuation as tokens.",
+        "It forces the model to learn a separate vector for every sentence."
+      ],
+      "answer_index": 0,
+      "explanation": "A novel word often contains meaningful parts, such as a stem, affix, typo pattern, or morphology. Collapsing all unseen strings into one UNK token makes very different words indistinguishable.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_subword_tokenization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "this UNK, right",
+          "totally"
+        ],
+        "timestamps": [
+          "00:04:18",
+          "00:04:28"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In learned subword tokenization, what is the main purpose of merging frequent adjacent character sequences?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To build larger reusable units so common words stay compact while rare words remain decomposable.",
+        "To remove all punctuation before the model sees the text.",
+        "To guarantee every word becomes exactly one token.",
+        "To replace all morphology with a language-specific grammar table."
+      ],
+      "answer_index": 0,
+      "explanation": "Starting from characters gives coverage for almost any string. Merging frequent pairs creates useful larger units, reducing sequence length for common patterns while preserving the ability to represent unseen forms.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_subword_tokenization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "start with all characters",
+          "split words into sequences"
+        ],
+        "timestamps": [
+          "00:06:32",
+          "00:06:26"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg1-q1",
+      "global_kp_id": "kp_subword_tokenization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg1-q2",
+      "global_kp_id": "kp_subword_tokenization",
+      "role": "primary"
+    }
+  ]
+}

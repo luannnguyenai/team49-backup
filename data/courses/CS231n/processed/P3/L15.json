@@ -1,0 +1,141 @@
+{
+    "output_filename": "p3a__cs231n__lecture_15_3d_vision.json",
+    "run_id": "",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_15_3d_vision",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg1",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of main KP kp_point_clouds plus substantial coverage of gateway main KP kp_explicit_vs_implicit_geometry_taxonomy makes this foundational core theory, and item_generation_worthiness is high.",
+            "target_kp_ids": [
+                "kp_point_clouds",
+                "kp_explicit_vs_implicit_geometry_taxonomy"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg2",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main-KP coverage of parametric surfaces with substantial gateway coverage of implicit geometry and formula_heavy examples gives this strong assessment value.",
+            "target_kp_ids": [
+                "kp_parametric_curves_and_surfaces",
+                "kp_implicit_functions_for_geometry"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg3",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of main KP kp_level_sets_and_voxels plus formula_heavy treatment of composition, signed distance, and voxelization makes this instructionally valuable but not a top lecture peak.",
+            "target_kp_ids": [
+                "kp_level_sets_and_voxels"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg4",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "This unit has dominant coverage of main KP kp_3d_datasets_and_ai_geometry_task_space and a clear task taxonomy/2D-to-3D bridge, so it works as motivation despite some historical framing and only medium item_generation_worthiness.",
+            "target_kp_ids": [
+                "kp_3d_datasets_and_ai_geometry_task_space"
+            ],
+            "question_intent": "application",
+            "content_type": "motivation",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 2,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg5",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant main-KP coverage of multi-view and voxel-based 3D learning with explicit method trade-offs supports solid comparison questions, though the unit is more survey-like than gateway material.",
+            "target_kp_ids": [
+                "kp_multi_view_and_voxel_based_3d_deep_learning"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg6",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Two main KPs receive dominant coverage here, including gateway-critical PointNet invariances and capstone AtlasNet/deep implicit decoders, and section_flags mark high item_generation_worthiness.",
+            "target_kp_ids": [
+                "kp_pointnet_and_point_set_invariances",
+                "kp_atlasnet_and_deep_implicit_shape_decoders"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg7",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of capstone-critical NeRF with substantial Gaussian-splatting follow-through, plus formula_heavy differentiable rendering content, makes this a lecture highlight.",
+            "target_kp_ids": [
+                "kp_neural_radiance_fields_and_differentiable_volume_rendering",
+                "kp_3d_gaussian_splatting"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_15_3d_vision::seg8",
+            "is_worth_learning": true,
+            "salience_score": "low",
+            "rationale": "The main KP is dominant but structurally optional and the section is a brief forward-looking wrap-up, so it merits at most one motivation-style assessment item.",
+            "target_kp_ids": [
+                "kp_structure_aware_and_programmatic_shape_representations"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "motivation",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 1,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

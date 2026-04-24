@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture15-benchmarking::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "Transcript is sufficient for reinforcement questions on this unit's evaluation concepts. The key distinctions, caveats, and examples are stated directly, so no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture15-benchmarking-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is chatbot evaluation especially hard compared with many older NLP benchmarks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because chatbot outputs are always multiple choice",
+        "Because the system may receive arbitrary tasks and generate arbitrarily long responses",
+        "Because there are no prompts available",
+        "Because evaluation can use only perplexity"
+      ],
+      "answer_index": 1,
+      "explanation": "A chatbot can be asked many different things and can answer with variable-length text, so the output space is broad and hard to score with a single fixed metric.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "any task",
+          "arbitrarily long text"
+        ],
+        "timestamps": [
+          "00:43:32",
+          "00:43:40"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core idea behind pairwise chatbot evaluation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Ask one model to produce two answers and average them",
+        "Show two model responses to the same prompt and decide which is better",
+        "Score each answer only by BLEU",
+        "Judge answers only by length"
+      ],
+      "answer_index": 1,
+      "explanation": "Pairwise evaluation simplifies judging by asking which of two responses is preferable for the same prompt, rather than assigning an absolute score in isolation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two model responses",
+          "which is better"
+        ],
+        "timestamps": [
+          "00:43:48",
+          "00:43:58"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What role does Elo play in Chatbot Arena?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It converts pairwise wins and losses into overall ratings",
+        "It computes perplexity from held-out text",
+        "It fine-tunes GPT-4 judges",
+        "It removes all human bias from evaluation"
+      ],
+      "answer_index": 0,
+      "explanation": "Arena-style pairwise outcomes can be aggregated using Elo, treating model comparisons like matches in a tournament and yielding an overall rating.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Elo scores",
+          "as if it was a tournament"
+        ],
+        "timestamps": [
+          "00:44:22",
+          "00:44:30"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are GPT-4-style judge models attractive for benchmarks like AlpacaEval?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are slower and more expensive than human studies",
+        "They are much faster and cheaper while still correlating well with human-majority preferences",
+        "They avoid all systematic bias",
+        "They require no baseline model"
+      ],
+      "answer_index": 1,
+      "explanation": "Judge models can reduce cost and latency dramatically while still tracking human preferences reasonably well, which makes them useful for iterative model development.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "100x faster and 100x cheaper",
+          "correlating strongly with human-majority preferences"
+        ],
+        "timestamps": [
+          "00:46:10",
+          "00:46:58"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which evaluation issue does AlpacaEval explicitly try to correct when GPT-4 compares a model against a baseline?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Tokenization mismatch bias",
+        "Length bias toward longer answers",
+        "Image-resolution bias",
+        "Training-set contamination from MMLU"
+      ],
+      "answer_index": 1,
+      "explanation": "Judge models often prefer longer responses, so AlpacaEval reweights outcomes to reduce the influence of that systematic length preference.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "length bias is corrected by reweighting",
+          "preference for longer outputs"
+        ],
+        "timestamps": [
+          "00:51:42",
+          "00:50:00"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg5-q1",
+      "global_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q2",
+      "global_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q3",
+      "global_kp_id": "kp_pairwise_chatbot_evaluation_and_elo_ranking",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q4",
+      "global_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg5-q5",
+      "global_kp_id": "kp_llm_as_a_judge_and_alpacaeval",
+      "role": "primary"
+    }
+  ]
+}

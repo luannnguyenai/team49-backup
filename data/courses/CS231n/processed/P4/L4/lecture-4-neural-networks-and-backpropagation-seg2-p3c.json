@@ -1,0 +1,318 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript clearly describes the move from linear models to a two-layer fully connected network, and the content is sufficient for question generation without a clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and clean after the earlier review pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the most important role of a nonlinear activation between two linear transformations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It allows the model to represent nonlinear decision boundaries.",
+        "It guarantees that all hidden units share the same weights.",
+        "It turns the final output into probabilities.",
+        "It removes the need for bias terms entirely."
+      ],
+      "answer_index": 0,
+      "explanation": "If you only stack linear transformations, the entire network is still equivalent to a single linear transformation. Nonlinearity is what lets the network solve problems that are not linearly separable in the original space.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_activation_functions",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "create a non-linearity",
+          "very important part"
+        ],
+        "timestamps": [
+          "00:12:07",
+          "00:12:15"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the expression for a two-layer network, what does H usually represent?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The number of hidden units or hidden neurons.",
+        "The number of output classes.",
+        "The size of each minibatch.",
+        "The number of regularization parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "H is the size of the hidden representation, meaning the number of neurons in the hidden layer. It determines how many intermediate features the network can learn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_feedforward_neural_networks",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "define H",
+          "neurons"
+        ],
+        "timestamps": [
+          "00:11:37",
+          "00:11:49"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can adding hidden units be more useful than learning only one template per class in a linear classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the network can learn shared parts or subpatterns that are reused across classes.",
+        "Because hidden units force every class to use the same weight vector.",
+        "Because hidden units make the number of output classes equal to the number of training examples.",
+        "Because hidden units remove the need to optimize the loss."
+      ],
+      "answer_index": 0,
+      "explanation": "Hidden units can learn intermediate features such as object parts. Those features can be reused across many classes instead of making each class rely on a single global template.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_feedforward_neural_networks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "create some more templates",
+          "shared"
+        ],
+        "timestamps": [
+          "00:16:11",
+          "00:17:05"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "global_kp_id": "kp_activation_functions",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "global_kp_id": "kp_feedforward_neural_networks",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "The need for nonlinearity between linear layers is a standard foundational concept and should be easy."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.35,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Recognizing H as the hidden-layer width is a direct architecture-notation item and should be easy."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "This asks why hidden units improve expressivity over linear templates, which requires a deeper conceptual step."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a basic readiness check for neural-network intuition."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is concise and works well for short reinforcement."
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg2-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The question is strongest when learners must reason about representational capacity."
+    }
+  ]
+}

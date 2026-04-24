@@ -1,5 +1,7 @@
 # Schema v1 Migration Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. It describes a pre-canonical schema using now-dropped runtime tables; use `README.md` and `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` as the active production contract.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Migrate the question-bank backend to Schema v1 forward-compatible design — adding new fields/tables that allow Phase 0 (rule-based) to Phase 1 (IRT + embeddings + FSRS) transition via data-only UPDATE jobs, with zero `ALTER TABLE` or code changes at transition time.

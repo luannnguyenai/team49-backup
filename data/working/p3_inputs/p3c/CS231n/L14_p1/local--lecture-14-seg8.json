@@ -1,0 +1,167 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_14",
+    "lecture_title": "CS231N Lecture 14: Generative Models (Part 2)",
+    "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_14::seg8",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Text-to-video diffusion and distillation",
+    "description": "Extends latent diffusion to video, explains scaling bottlenecks, and introduces distillation for faster sampling.",
+    "summary": "Text-to-video diffusion keeps the same broad latent diffusion pipeline as text-to-image, but the latent tensor gains a temporal dimension in addition to height and width [ts=3530s], [ts=3544s]. The decoder becomes a spatial-temporal autoencoder that upsamples latents into video pixels [ts=3555s]. The major bottleneck is sequence length: high-resolution, high-FPS, many-frame video produces far more tokens than images [ts=3580s]. The lecture contrasts roughly 1,024 image tokens in a state-of-the-art text-to-image model with about 76,000 video tokens in the discussed text-to-video example [ts=3592s], [ts=3609s]. It frames 2024-2025 as a rapid era of video diffusion models, with Sora cited as an influential scaling moment for video diffusion transformers [ts=3623s], [ts=3661s]. The instructor also mentions very recent video generation examples that jointly model audio with video [ts=3703s], [ts=3730s]. The segment ends with diffusion distillation: because sampling may require 30-50 or more model evaluations, distillation attempts to reduce inference steps while preserving sample quality, sometimes even reaching single-step sampling at a quality cost [ts=3750s], [ts=3783s].",
+    "key_points": [
+      {
+        "text": "Text-to-video diffusion adds a temporal dimension to the latent tensor.",
+        "timestamp_s": 3544,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Video decoders are spatial-temporal autoencoders that upsample latent videos into pixels.",
+        "timestamp_s": 3555,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Video diffusion is expensive because high-resolution, high-frame-rate video creates very long token sequences.",
+        "timestamp_s": 3580,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The example contrasts about 1,024 image tokens with about 76,000 video tokens.",
+        "timestamp_s": 3592,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Sora is described as a major scaling moment for video diffusion transformers.",
+        "timestamp_s": 3661,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Diffusion sampling is slow because it requires many iterative model evaluations.",
+        "timestamp_s": 3750,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Distillation reduces the number of inference steps while trying to preserve sample quality.",
+        "timestamp_s": 3774,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Some distillation methods reach single-step sampling but usually trade off generation quality.",
+        "timestamp_s": 3807,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+      "start_s": 3530,
+      "end_s": 3839
+    },
+    "difficulty": 4.0,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 5,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "transcript_slice": "00:58:50\nAnother task that people care about a lot is text to video.\n\n00:58:54\noutput the pixels of a video that follow that text prompt.\n\n00:59:00\nSo you're going to input a text through your pre-trained text\n\n00:59:04\nImportantly, the only difference is that your latents now\n\n00:59:09\nSo in addition to two spatial dimensions hw,\n\n00:59:14\nand that will give you clean latents.\n\n00:59:17\ngoing to be a spatial temporal autoencoder now.\n\n00:59:22\nSo then it will take your latents\n\n00:59:26\nwhich will give you a video.\n\n00:59:31\nthat came out last year.\n\n00:59:39\non this thing.\n\n00:59:42\nis that they get very expensive to train due to the sequence\n\n00:59:47\nhigh FPS, high resolution, high frame rate video,\n\n00:59:52\nSo we said that with a fairly state of the art text to image\n\n00:59:59\non a sequence of 1,024 image tokens.\n\n01:00:03\neven though the overall architecture\n\n01:00:07\nis in the sequence length.\n\n01:00:13\nto process this, to create this high resolution video with a lot\n\n01:00:16\nSo that's where the expense happens\n\n01:00:20\nthese really long sequences.\n\n01:00:25\nhas pretty much been the era of video diffusion models.\n\n01:00:33\nthere's been a new interesting video diffusion\n\n01:00:37\nAnd these have been a mix of open source models, models\n\n01:00:42\nSo they give you some details about the model architecture\n\n01:00:47\nwhere they don't tell you anything,\n\n01:00:49\nand let you generate samples from it.\n\n01:00:55\nbut I just wanted to give the sense\n\n01:01:01\nAnd in particular there was this really influential\n\n01:01:06\nin March 2024, which was not the first diffusion model on videos,\n\n01:01:13\nresults.\n\n01:01:17\nplus rectified flow.\n\n01:01:20\nusing rectified flow in Sora.\n\n01:01:24\nto really scale up these diffusion transformers\n\n01:01:28\nAnd then that was the four minute mile moment\n\n01:01:32\nAnd then all the other big companies took notice of that\n\n01:01:36\nSo I said it's felt like for the past year and a half\n\n01:01:41\na brand new, state of the art video diffusion model.\n\n01:01:47\nat 11:00 AM this morning, Google announced Veo 3,\n\n01:01:55\nout there right now.\n\n01:01:58\nwas in the car on the way here, but it seems cool.\n\n01:02:04\nSo these are actually generated videos\n\n01:02:10\nAlso this model also models sound jointly\n\n01:02:17\nThis is another generated one, so you\n\n01:02:21\nIt'll fly over here and looks crazy.\n\n01:02:30\nOK, so one big problem with diffusion\n\n01:02:35\nWe said that sampling was this iterative procedure.\n\n01:02:39\nThese can be models with tens of billions\n\n01:02:42\nof tens of thousands or more.\n\n01:02:47\nbecause even with rectified flow,\n\n01:02:54\nSo the solution is a category of algorithms\n\n01:02:59\nI just wanted to put a couple of references here,\n\n01:03:03\nSo distillation algorithms are basically\n\n01:03:07\nwould take 30, 50, 100 iterations at inference time\n\n01:03:14\nsuch that you can take many, many fewer steps on inference\n\n01:03:18\nThey tend to sacrifice sample quality.\n\n01:03:22\nis trying to maintain the sample quality as good as you\n\n01:03:26\nsamples at inference time.\n\n01:03:29\ndown to single step sampling, which is really cool,\n\n01:03:35\nwhen you do that.\n\n01:03:40\nbut I just put some references here\n\n01:03:44\nif you want to take a look.\n\n01:03:47\nSo if you look at these references,\n\n01:03:52\nSo these are stuff that people are working on right\n\n01:03:56\nhow do we get diffusion models to be more",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_14::seg8",
+      "global_kp_id": "kp_text_to_video_diffusion_scaling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_14::seg8",
+      "global_kp_id": "kp_diffusion_distillation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_text_to_video_diffusion_scaling",
+      "name": "Text-to-video diffusion scaling",
+      "description": "Text-to-video extends latent diffusion to temporal latents, creating very long sequences and high computational cost.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because text-to-video diffusion scaling clarifies text-to-video extends latent diffusion to temporal latents, creating very long sequences and high computational cost, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp23"
+      ]
+    },
+    {
+      "global_kp_id": "kp_diffusion_distillation",
+      "name": "Diffusion distillation",
+      "description": "Distillation reduces iterative sampling steps while trying to preserve sample quality.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because diffusion distillation extends the core thread to distillation reduces iterative sampling steps while trying to preserve sample quality without being required for the main pipeline.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp24"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.85,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture14-generative-models-2_transcript.txt"
+  }
+}

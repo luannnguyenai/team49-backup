@@ -1,0 +1,150 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_10",
+    "lecture_title": "Lecture 10: Video Understanding",
+    "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_10::seg6",
+    "course_id": "CS231N_Spring_2025",
+    "name": "Motion, optical flow, and two-stream action recognition",
+    "description": "Motivates separating appearance and motion, defines optical flow, and explains two-stream networks for action recognition.",
+    "summary": "The lecture shifts from treating space and time uniformly to asking whether temporal information should be modeled explicitly as motion [ts=2399s] [ts=2414s]. A point-light action example demonstrates that humans can recognize actions from motion alone, without appearance information, motivating separate processing pathways for appearance and motion [ts=2420s] [ts=2463s] [ts=2477s]. Optical flow is introduced as an explicit motion representation: for each pixel in one frame, estimate how it moves to the next frame, producing a flow field F(x,y)=(dx,dy) where the next-frame location x+dx, y+dy corresponds to the current pixel [ts=2503s] [ts=2522s] [ts=2540s]. Horizontal and vertical flow components can be visualized separately and capture low-level motion cues [ts=2580s] [ts=2603s]. Two-stream networks then combine an appearance stream over RGB frames with a temporal stream over stacked optical-flow maps, aggregating their predictions [ts=2612s] [ts=2651s]. On UCF-101, motion-only performance is surprisingly strong; the instructor hypothesizes that motion is less prone to overfitting because it removes distracting background appearance and keeps key movement cues [ts=2662s] [ts=2688s] [ts=2695s].",
+    "key_points": [
+      {
+        "text": "Actions can often be recognized from motion alone, even with only point-like visual cues and little appearance information.",
+        "timestamp_s": 2420,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Optical flow estimates how each pixel in one frame moves to the next frame.",
+        "timestamp_s": 2503,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The flow field can be written as F(x,y) = (dx,dy), relating I_{t+1}(x+dx,y+dy) to I_t(x,y).",
+        "timestamp_s": 2540,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Horizontal flow dx and vertical flow dy can be visualized separately to show low-level motion cues.",
+        "timestamp_s": 2580,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A two-stream network uses an RGB appearance stream and a temporal stream over stacked optical-flow maps, then aggregates predictions.",
+        "timestamp_s": 2612,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "On UCF-101, the temporal motion stream works surprisingly well and can outperform the spatial appearance-only stream.",
+        "timestamp_s": 2662,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=wElqklprhPE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=10",
+      "start_s": 2400,
+      "end_s": 2721
+    },
+    "difficulty": 3.5,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 5,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "transcript_slice": "00:40:05\ntime in a separate way. Because that, indeed, very different things-- spatial information,\n\n00:40:14\ntry to model things that exists there temporally. That is motion.\n\n00:40:26\ntake a guess what actions the humans are doing here in this\n\n00:40:45\nYeah, just from these very- few points, you can actually do a good job just to recognize\n\n00:41:03\nthere are not any appearance information. Just a few points. Just motion.\n\n00:41:11\nthat is going on in these videos. So that's why how we process appearance and motion\n\n00:41:22\nthat's kind of motivation for this work that was introduced in 2014.\n\n00:41:37\nthe motion information separately. So basically, one way to explicitly measure of motion is to use\n\n00:41:48\nwe want to measure the motion, the changes of the motion, of the pixels in adjacent frames.\n\n00:41:58\nhow it's going to move in the second frame. So it calculates the velocity\n\n00:42:06\nin the next frame, a sequence. For example, in this case, like for frame T and p plus 1.\n\n00:42:20\nmove in the next frame. So F(x, y) is equal to (dx, dy). And then the I t plus 1 (x plus dx),\n\n00:42:35\nSo it's a way to measure, explicitly measure motion of the pixels. So there are many papers\n\n00:42:46\nframes. There are ways to make different types of assumptions. Some work assume the optic flow,\n\n00:42:57\nmove. And then trying to propose some techniques to compute this optic flow.\n\n00:43:03\nfor two adjacent frames. And also, these are two dimensions because it's trying to\n\n00:43:14\nvisualize it separately. You can visualize it the horizontal motion, horizontal flow,\n\n00:43:23\nhorizontal motion, the vertical motion. So we capture this kind of low level motion cues.\n\n00:43:32\nthen people trying to propose two-stream networks to train a motion classifier and appearance\n\n00:43:43\nsingle frame model that's doing appearance classification to tell what action it is.\n\n00:43:55\noptic flow. For every two adjacent frames, it computes the optical flow map. And also,\n\n00:44:06\nthem together. And then they process them using a temporal stream convolution neural network.\n\n00:44:14\nresults for both the motion stream and the appearance stream to get the\n\n00:44:22\nAnd it actually works pretty good. It's on another dataset called UCF-101. There are\n\n00:44:33\nthing you can see that is using only motion actually works very well, surprisingly well.\n\n00:44:45\nstring. And the temporal only, that's the motion stream. You can see that the motion\n\n00:44:55\nSo my hypothesis is that it's less easier to overfit. Because for the motion,\n\n00:45:09\nfor the action classification. But for the motion stream,\n\n00:45:17\nwhich are less easier to overfit. Actually, you can get better results on this dataset.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_10::seg6",
+      "global_kp_id": "kp_optical_flow",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_10::seg6",
+      "global_kp_id": "kp_two_stream_networks",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_optical_flow",
+      "name": "Optical flow",
+      "description": "Optical flow estimates per-pixel motion between adjacent frames as horizontal and vertical displacement fields.",
+      "track_tags": [
+        "motion",
+        "optical_flow"
+      ],
+      "domain_tags": [
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because optical flow formalizes how optical flow estimates per-pixel motion between adjacent frames as horizontal and vertical displacement fields, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_two_stream_networks",
+      "name": "Two-stream networks",
+      "description": "Two-stream action networks combine an RGB appearance stream with an optical-flow motion stream and aggregate predictions.",
+      "track_tags": [
+        "action_recognition",
+        "two_stream"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because two-stream networks clarifies two-stream action networks combine an RGB appearance stream with an optical-flow motion stream and aggregate predictions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_10::kp11"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.35,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L10_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture10-video-understanding_transcript.txt"
+  }
+}

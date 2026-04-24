@@ -1,0 +1,151 @@
+{
+  "unit_id": "local::lecture12-huggingface::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "The transcript is sufficient to generate 3 reinforcement questions about model introspection, evaluation mode, inspecting hidden states and attention outputs, and one code-style API check.",
+  "question_bank": [
+    {
+      "item_id": "lecture12_huggingface_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What configuration is needed if you want a Hugging Face model to return internal hidden states and attention tensors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Load it with output_attentions=True and output_hidden_states=True",
+        "Only switch the tokenizer to batch mode",
+        "Set padding=True and truncation=True",
+        "Use Trainer instead of a direct model call"
+      ],
+      "answer_index": 0,
+      "explanation": "Those two flags tell the model to include internal activations and attention weights in its outputs so they can be inspected.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "output attention",
+          "output_hidden_states"
+        ],
+        "timestamps": [
+          "00:25:01",
+          "00:25:08"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is model.eval() called before inspecting hidden states and attention?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the goal is evaluation or analysis rather than training, so training-time behavior is disabled",
+        "Because eval mode changes the tokenizer vocabulary",
+        "Because eval mode forces the model to return logits only",
+        "Because eval mode adds more attention heads for visualization"
+      ],
+      "answer_index": 0,
+      "explanation": "Evaluation mode is the standard PyTorch setting when you want to inspect or run a pretrained model without training-time behavior such as dropout affecting the output.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "set the model to be in eval mode",
+          "we do not actually want to backpropagate"
+        ],
+        "timestamps": [
+          "00:25:15",
+          "00:25:29"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture12_huggingface_seg4_q3",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "Why are output_hidden_states=True and output_attentions=True useful in this code?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "They make the model return internal hidden-state and attention information for inspection",
+        "They automatically fine-tune the model on the input batch",
+        "They force the model into training mode so dropout is enabled",
+        "They replace token ids with decoded strings in the output"
+      ],
+      "answer_index": 0,
+      "explanation": "Those flags request intermediate representations from the forward pass so the model can be inspected instead of treated as a black box.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "difficulty": "medium",
+      "code_question_style": "concept_from_code",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "from transformers import AutoModel\nmodel = AutoModel.from_pretrained(\n    \"bert-base-uncased\",\n    output_hidden_states=True,\n    output_attentions=True,\n)",
+        "highlight_lines": [
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "evidence": {
+        "source": "code",
+        "transcript_quotes": [
+          "hidden states",
+          "attention"
+        ],
+        "timestamps": [
+          "00:00:00"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture12_huggingface_seg4_q1",
+      "global_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg4_q2",
+      "global_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg4_q3",
+      "global_kp_id": "kp_model_introspection_with_hidden_states_and_attention",
+      "role": "primary"
+    }
+  ]
+}

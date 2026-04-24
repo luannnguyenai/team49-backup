@@ -1,0 +1,862 @@
+{
+  "lecture_title": "Lecture 12: Self-Supervised Learning",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Motivation, learned representations, and the self-supervised setup",
+      "start_s": 5,
+      "end_s": 925
+    },
+    {
+      "section_index": 2,
+      "title": "Rotation prediction as a pretext task",
+      "start_s": 926,
+      "end_s": 1395
+    },
+    {
+      "section_index": 3,
+      "title": "Patch rearrangement and inpainting",
+      "start_s": 1396,
+      "end_s": 1874
+    },
+    {
+      "section_index": 4,
+      "title": "Colorization and video color propagation",
+      "start_s": 1875,
+      "end_s": 2770
+    },
+    {
+      "section_index": 5,
+      "title": "Masked Autoencoders (MAE)",
+      "start_s": 2771,
+      "end_s": 3508
+    },
+    {
+      "section_index": 6,
+      "title": "Contrastive learning and InfoNCE",
+      "start_s": 3509,
+      "end_s": 3975
+    },
+    {
+      "section_index": 7,
+      "title": "SimCLR, MoCo, CPC, and DINO overview",
+      "start_s": 3976,
+      "end_s": 4475
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture_12::seg1",
+      "course_id": "cs231n_spring_2025",
+      "name": "Motivation and mechanics of self-supervised learning",
+      "description": "Explains why large-scale labeled datasets are a bottleneck, then defines self-supervised learning as pretraining an encoder on automatically generated targets before transferring that encoder to labeled downstream tasks.",
+      "summary": "The lecture motivates self-supervised learning by revisiting learned representations: feature-space embeddings from CNNs or transformers can serve as useful image descriptors and support simple downstream classifiers, but training such representations at scale with supervised objectives requires expensive manual labels [ts=131s] [ts=217s]. The segment defines self-supervised learning as creating a pretext task whose targets come from the data itself, training an encoder plus decoder/classifier/regressor on unlabeled data, then reusing the trained encoder for a smaller labeled downstream task [ts=285s] [ts=470s]. It also states the two requirements for a good pretext task—automatic labels and feature learning that transfers—and emphasizes that downstream-task performance is the most important evaluation criterion, with pretext-task accuracy, representation visualization, robustness, and efficiency as supporting diagnostics [ts=615s] [ts=724s].",
+      "key_points": [
+        {
+          "text": "Large-scale supervised training is bottlenecked by the need for extensive manual labeling, especially for dense tasks like segmentation.",
+          "timestamp_s": 217,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A self-supervised pretext task should derive labels/targets automatically from the data rather than from human annotation.",
+          "timestamp_s": 285,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The trained encoder is transferred to a downstream task, where a shallow classifier or small network can be added on top of learned representations.",
+          "timestamp_s": 470,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Good pretext tasks should both yield useful features and avoid manual labeling.",
+          "timestamp_s": 615,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The most important evaluation criterion is downstream-task performance, not just pretext-task accuracy.",
+          "timestamp_s": 724,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 5,
+        "end_s": 925
+      },
+      "difficulty": 0.35,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "duration_min": 15,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_12::seg2",
+      "course_id": "cs231n_spring_2025",
+      "name": "Rotation prediction for visual commonsense",
+      "description": "Introduces rotation prediction as a concrete pretext task, explains why it may induce holistic image understanding, and reviews empirical transfer results.",
+      "summary": "Rotation prediction is introduced as a pretext task based on the hypothesis that a model can identify the correct orientation of an object only if it has learned visual commonsense about how the object should normally appear [ts=956s] [ts=974s]. The specific example uses four discrete rotations—0, 90, 180, and 270 degrees—so the task becomes 4-way classification rather than direct angle regression [ts=1004s] [ts=1048s]. The lecture then describes transfer results: on CIFAR-10, a rotation-pretrained model starts from a stronger initial accuracy and can match supervised training on an easy task, while on harder downstream tasks and Pascal VOC benchmarks it substantially outperforms random initialization and approaches fully supervised ImageNet pretraining [ts=1092s] [ts=1284s]. The segment ends by noting that self-supervised attention maps often cover more of the object than supervised ones because the representation must remain useful across unknown downstream tasks [ts=1332s] [ts=1375s].",
+      "key_points": [
+        {
+          "text": "Rotation prediction is motivated by the idea that correct orientation recognition requires visual commonsense about unperturbed objects.",
+          "timestamp_s": 956,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Using the set {0, 90, 180, 270} turns rotation prediction into a 4-class classification problem.",
+          "timestamp_s": 1032,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In the CIFAR-10 experiment, conv1 and conv2 are frozen while later layers and a linear head are adapted with labeled data.",
+          "timestamp_s": 1092,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Rotation pretraining is much better than random initialization and gets close to supervised ImageNet pretraining on Pascal VOC transfer tasks.",
+          "timestamp_s": 1244,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Self-supervised attention maps are often more holistic than supervised ones because the representation must support multiple possible downstream tasks.",
+          "timestamp_s": 1332,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 926,
+        "end_s": 1395
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_12::seg3",
+      "course_id": "cs231n_spring_2025",
+      "name": "Patch rearrangement and inpainting pretext tasks",
+      "description": "Covers relative-patch and jigsaw-style rearrangement objectives, then moves to inpainting as masked reconstruction with optional adversarial refinement.",
+      "summary": "The lecture first revisits patch-based spatial reasoning tasks: predicting relative patch location in a 3x3 grid is framed as 8-way classification, while the jigsaw-puzzle variant predicts a permutation index instead of a single offset [ts=1401s] [ts=1465s]. Because 9! permutations are too many, the jigsaw method restricts training to a lookup table of 64 plausible permutations, making the problem a 64-class classification task [ts=1513s] [ts=1548s]. The segment then introduces inpainting: mask part of an image, encode the visible context, and decode the missing region so the model reconstructs missing pixels using the original image as supervision [ts=1590s] [ts=1634s]. It notes a key limitation of pure reconstruction—blurry outputs—and explains that an added adversarial objective can encourage more realistic completions, though detailed GAN mechanics are deferred to the next lecture [ts=1706s] [ts=1802s].",
+      "key_points": [
+        {
+          "text": "Relative patch prediction uses a 3x3 grid with the center patch as reference and predicts one of 8 relative positions.",
+          "timestamp_s": 1401,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The jigsaw formulation predicts a permutation index for shuffled image patches rather than a single patch offset.",
+          "timestamp_s": 1465,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A practical jigsaw setup restricts the permutation space to 64 selected permutations, yielding a 64-way classification task.",
+          "timestamp_s": 1513,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Inpainting masks part of the image and trains an encoder-decoder to reconstruct the missing pixels from context.",
+          "timestamp_s": 1590,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Pure reconstruction tends to produce overly smooth outputs, so an adversarial loss can be added to make inpainted regions look more realistic.",
+          "timestamp_s": 1706,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 1396,
+        "end_s": 1874
+      },
+      "difficulty": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_12::seg4",
+      "course_id": "cs231n_spring_2025",
+      "name": "Colorization and temporal color propagation",
+      "description": "Uses cross-channel prediction as a self-supervised task, then extends the idea to videos where color propagation induces tracking-like behavior.",
+      "summary": "Colorization is presented in LAB color space, where the L channel captures lightness and the a/b channels capture color; the pretext task is to predict color channels from lightness, using labels already present in the original image [ts=1922s] [ts=1951s]. The lecture then generalizes this to split-brain autoencoders, where one network predicts color from lightness and another predicts complementary channels, showing the broader idea of cross-channel prediction [ts=1983s] [ts=2026s]. Beyond pretraining value, image colorization itself yields useful qualitative behavior, such as consistent coloring of reflections and semantically related regions [ts=2165s] [ts=2196s]. The video extension uses a colored reference frame and attention-like correspondences between target pixels and reference pixels, so predicted colors become weighted averages over the reference frame; the lecturer emphasizes that this implicitly teaches tracking of pixels, segments, and keypoints without labels [ts=2234s] [ts=2448s].",
+      "key_points": [
+        {
+          "text": "In LAB space, the pretext task is: given L, predict a and b.",
+          "timestamp_s": 1951,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Split-brain autoencoders use cross-channel prediction in both directions rather than only color-from-lightness.",
+          "timestamp_s": 1983,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Cross-channel prediction can be generalized beyond color, for example predicting depth from RGB and vice versa.",
+          "timestamp_s": 2065,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Video colorization uses attention-like correspondences from a colored reference frame to target frames.",
+          "timestamp_s": 2316,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Tracking behavior can emerge from video colorization because the model must find consistent pixel/object correspondences over time.",
+          "timestamp_s": 2267,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 1875,
+        "end_s": 2770
+      },
+      "difficulty": 0.52,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 15,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "course_id": "cs231n_spring_2025",
+      "name": "Masked Autoencoders as scalable reconstruction pretraining",
+      "description": "Explains MAE as an asymmetric masked-reconstruction framework built on ViT-style patch encoders, and highlights why it became a dominant pretraining approach.",
+      "summary": "MAE is introduced as a modern reconstruction-based method that masks a very large portion of image patches and trains a model to reconstruct the full image from the visible subset [ts=2781s] [ts=2825s]. The lecturer explains that images are split into patches like a ViT, around 75% of patches are masked, and only the visible 25% are fed to a large transformer encoder, making the pretext task challenging and allowing many distinct masked views per image during training [ts=2898s] [ts=2960s]. Missing patches are represented with a shared learned mask token before a separate decoder reconstructs the image, so the architecture is explicitly asymmetric and the decoder is used only for reconstruction during pretraining [ts=3009s] [ts=3050s]. Training uses pixel-space mean squared error computed only on masked patches, and the learned encoder can be evaluated via linear probing or full fine-tuning; the lecture also notes that ablations found random masking and roughly 75% masking to work especially well, with MAE outperforming strong contrastive baselines such as DINO and MoCo v3 in the presented comparisons [ts=3062s] [ts=3235s].",
+      "key_points": [
+        {
+          "text": "MAE masks a large fraction of image patches and reconstructs them from the visible remainder.",
+          "timestamp_s": 2781,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The encoder only processes visible patches, typically about 25% of the image after 75% masking.",
+          "timestamp_s": 2898,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Masked patches are represented with a shared learned mask token before decoding, yielding an asymmetric encoder-decoder design.",
+          "timestamp_s": 3009,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "MAE training uses pixel-space mean squared error computed only on masked patches.",
+          "timestamp_s": 3062,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Linear probing measures representation quality, while full fine-tuning better reflects the model's downstream potential.",
+          "timestamp_s": 3125,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Ablations in the discussion highlight 75% masking and random masking as strong design choices.",
+          "timestamp_s": 3170,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 2771,
+        "end_s": 3508
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_12::seg6",
+      "course_id": "cs231n_spring_2025",
+      "name": "Contrastive learning formulation and InfoNCE",
+      "description": "Shifts from task-specific transformations to a general attract-repel objective based on positive and negative pairs, then derives the intuition behind InfoNCE.",
+      "summary": "The lecture transitions from hand-designed pretext tasks to a more general idea: transformed views of the same object should be close in representation space, while views from different objects should be pushed apart [ts=3590s] [ts=3634s]. It formalizes contrastive learning with a reference sample x, positive samples x+ derived from the same object, and negative samples x- from other objects, then asks the score of the positive pair to exceed the scores of negatives [ts=3638s] [ts=3675s]. This leads to a softmax-style loss over one positive and many negatives that the lecturer explicitly identifies as the same core idea as multiclass cross-entropy, now used for contrastive representation learning [ts=3709s] [ts=3837s]. The segment names this objective InfoNCE and states two theoretical takeaways: minimizing InfoNCE maximizes a lower bound on mutual information between positive pairs, and using more negative samples tightens that bound, which explains the need for large batches in many contrastive methods [ts=3843s] [ts=3947s].",
+      "key_points": [
+        {
+          "text": "Contrastive learning treats transformed views of the same object as positives and other objects as negatives.",
+          "timestamp_s": 3638,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The loss encourages score(x, x+) to be larger than scores between the reference and negative samples.",
+          "timestamp_s": 3675,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The contrastive objective can be interpreted as an N-way softmax / multiclass cross-entropy problem over one positive and many negatives.",
+          "timestamp_s": 3831,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "InfoNCE is described as a lower bound on mutual information between positive pairs.",
+          "timestamp_s": 3843,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "More negative samples tighten the bound, which is why large batch sizes help contrastive training.",
+          "timestamp_s": 3925,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 3509,
+        "end_s": 3975
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "course_id": "cs231n_spring_2025",
+      "name": "SimCLR, MoCo, CPC, and DINO in the modern SSL landscape",
+      "description": "Surveys major contrastive and near-contrastive methods, focusing on SimCLR's design choices and MoCo's queue-based alternative, then briefly situates CPC and DINO.",
+      "summary": "SimCLR is introduced as an instance-contrastive method that creates two augmented views per image, encodes both, and uses all other non-positive samples in the batch as negatives, so a batch of N images yields 2N views and a positive partner for each view [ts=3976s] [ts=4104s]. The lecture highlights SimCLR's empirical impact—linear evaluation and semi-supervised results comparable to supervised learning—and singles out two design choices as especially important: a nonlinear projection head that preserves extra information in h while applying contrastive loss in z, and very large batch sizes that supply many negatives [ts=4137s] [ts=4259s]. MoCo is presented as a remedy for the batch-size bottleneck: it keeps a queue of negative keys across batches, updates a separate key encoder with momentum from the query encoder, and thereby decouples the number of negatives from minibatch size; combining MoCo's queue with SimCLR-style projection heads and augmentations yields a stronger MoCo v2 [ts=4280s] [ts=4414s]. The closing remarks only briefly mention CPC as sequence-level contrastive predictive coding and DINO/MoCo v3 as widely used later frameworks, with DINO noted as student-teacher self-distillation rather than plain contrastive learning [ts=4425s] [ts=4475s].",
+      "key_points": [
+        {
+          "text": "SimCLR forms positive pairs by sampling two augmentations of the same image and treats all other views in the batch as negatives.",
+          "timestamp_s": 3976,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "With N input images, SimCLR operates on 2N augmented views, and each view has exactly one positive counterpart in the batch.",
+          "timestamp_s": 4069,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A nonlinear projection head is used so contrastive loss acts on z while richer information can remain in h for downstream tasks.",
+          "timestamp_s": 4206,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Large batches are important for SimCLR because more negatives improve training, but this increases memory cost.",
+          "timestamp_s": 4252,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "MoCo replaces in-batch negatives with a running queue of keys and updates the key encoder through momentum.",
+          "timestamp_s": 4283,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "CPC is mentioned as sequence-level contrastive predictive coding, and DINO as a student-teacher feature-learning framework rather than plain contrastive learning.",
+          "timestamp_s": 4425,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+        "start_s": 3976,
+        "end_s": 4475
+      },
+      "difficulty": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture_12::kp1",
+      "name": "Self-supervised pretraining pipeline",
+      "description": "The encoder is first trained on a pretext task with targets generated from unlabeled data, then transferred to a labeled downstream task.",
+      "track_tags": [
+        "self_supervised_learning",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the lecture's organizing idea: the speaker explicitly defines pretext and downstream tasks and revisits it several times as the mechanism that makes all later methods useful [ts=285s] [ts=470s].",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=285s], the slide shows a two-stage pipeline from an unlabeled dataset and pretext objective to a trained encoder and then a labeled downstream objective."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp2",
+      "name": "Representation learning under label scarcity",
+      "description": "The motivation for self-supervision is that good image representations are valuable, but manual labeling is a major bottleneck at scale.",
+      "track_tags": [
+        "representation_learning",
+        "data"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineering",
+        "applied_ai"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture begins by connecting embeddings to nearest-neighbor retrieval and simple downstream classifiers, then argues that large-scale supervised training is limited by labeling cost [ts=131s] [ts=217s].",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=154s], the slides contrast pixel-space nearest neighbors with feature-space nearest neighbors and then highlight the need for many labels for large-scale training."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp3",
+      "name": "Evaluation by downstream transfer",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning.",
+      "track_tags": [
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "ml_engineering"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The speaker explicitly says downstream performance is the most important aspect and later repeatedly interprets results through freezing, linear probing, and fine-tuning [ts=724s] [ts=3110s].",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=780s], the evaluation slides depict learning on unlabeled data, then training a shallow classifier on a small labeled target set."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp4",
+      "name": "Rotation prediction",
+      "description": "A pretext task that predicts discrete image rotations to encourage representations with visual commonsense about object orientation.",
+      "track_tags": [
+        "pretext_tasks",
+        "image_transformations"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "computer_vision_engineering"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Rotation is the first fully worked example and anchors the intuition that pretext tasks can transfer to classification, detection, and segmentation [ts=956s] [ts=1284s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=1032s], the slides show the same image rotated to 0°, 90°, 180°, and 270° and label the task as 4-way classification."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp5",
+      "name": "Rearrangement and inpainting pretext tasks",
+      "description": "Patch-ordering and masked-reconstruction objectives supply automatic supervision from image structure and context.",
+      "track_tags": [
+        "pretext_tasks",
+        "reconstruction"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "computer_vision_engineering"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "These tasks broaden the space of pretext objectives beyond rotation and show early design choices like restricting permutations or adding adversarial refinement [ts=1465s] [ts=1802s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=1513s], the jigsaw slide shows shuffled 3x3 patches with a 64-way permutation lookup; around [ts=1750s], the inpainting slide shows reconstruction plus adversarial loss."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp6",
+      "name": "Colorization as cross-channel prediction",
+      "description": "Predicting missing color channels from other channels, and propagating color through videos, can learn features and induce tracking-like correspondences.",
+      "track_tags": [
+        "pretext_tasks",
+        "cross_channel_prediction",
+        "video"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "The segment extends SSL beyond static image tasks and links color propagation to attention and tracking, but it is presented as an illustrative family rather than the lecture's main modern method [ts=1951s] [ts=2448s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=1951s], the colorization slides show L-channel input and predicted a/b outputs; around [ts=2316s], later slides depict attention from a reference video frame to target frames."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp7",
+      "name": "Masked Autoencoders (MAE)",
+      "description": "A scalable masked-reconstruction approach using a large encoder over visible patches and a lightweight decoder over visible plus mask tokens.",
+      "track_tags": [
+        "masked_modeling",
+        "transformers",
+        "reconstruction"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "vision_transformers",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "foundation_models"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecturer explicitly says MAE is one of the most used frameworks right now and spends the longest modern-method block explaining why it scales and why its design choices matter [ts=2774s] [ts=3235s].",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=2781s], the slides show aggressive 50% and 75% masking examples; subsequent slides visualize an asymmetric encoder-decoder MAE architecture."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp8",
+      "name": "Contrastive learning and InfoNCE",
+      "description": "A general SSL formulation that attracts positive pairs and repels negatives, optimized with the InfoNCE objective.",
+      "track_tags": [
+        "contrastive_learning",
+        "loss_functions"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "representation_learning",
+        "information_theory"
+      ],
+      "career_path_tags": [
+        "research",
+        "ml_engineering"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the lecture's second major pillar after pretext transformations and provides the common objective underpinning SimCLR, MoCo, and CPC [ts=3590s] [ts=3947s].",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=3638s], the slides move from 'same object / different object' to an attract-repel diagram and then to the InfoNCE equation over one positive and many negatives."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp9",
+      "name": "SimCLR and MoCo design tradeoffs",
+      "description": "SimCLR uses in-batch negatives and a projection head, while MoCo uses a momentum-updated key encoder and a queue to reduce batch-size dependence.",
+      "track_tags": [
+        "contrastive_learning",
+        "instance_level_ssl"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "foundation_models"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "These are the main named methods that operationalize the contrastive formulation, and the lecture spends the closing segment comparing their implementation constraints and improvements [ts=3976s] [ts=4414s].",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=4069s], the SimCLR slides show 2N augmented views in a batch; around [ts=4283s], the MoCo slides depict a FIFO queue and momentum-updated key encoder."
+    },
+    {
+      "local_kp_id": "local::lecture_12::kp10",
+      "name": "CPC and DINO as broader SSL directions",
+      "description": "CPC extends contrastive learning to sequences, while DINO uses a student-teacher self-distillation setup related to but distinct from plain contrastive learning.",
+      "track_tags": [
+        "sequence_modeling",
+        "self_distillation"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "research",
+        "foundation_models"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture only briefly mentions these methods at the end, but it uses them to place the main contrastive material in a wider modern SSL ecosystem [ts=4425s] [ts=4475s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "Around [ts=4425s], the closing slides name CPC, MoCo v3, and DINO, with DINO visually presented as a student-teacher vision transformer method."
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture_12::seg1",
+      "local_kp_id": "local::lecture_12::kp1",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Defines pretext task, trained encoder, and downstream task explicitly [ts=285s] [ts=470s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg1",
+      "local_kp_id": "local::lecture_12::kp2",
+      "planner_role": "support",
+      "instruction_role": "intro",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Motivation comes from feature usefulness and label scarcity at scale [ts=131s] [ts=217s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg1",
+      "local_kp_id": "local::lecture_12::kp3",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Evaluation criteria are laid out, with downstream performance emphasized [ts=615s] [ts=724s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg2",
+      "local_kp_id": "local::lecture_12::kp4",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment is centered on the rotation hypothesis, 4-way setup, and transfer results [ts=956s] [ts=1284s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg2",
+      "local_kp_id": "local::lecture_12::kp3",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "CIFAR-10 and Pascal VOC transfer experiments are used to evaluate representation quality [ts=1092s] [ts=1284s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg3",
+      "local_kp_id": "local::lecture_12::kp5",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Covers relative patch prediction, jigsaw permutations, and inpainting losses in sequence [ts=1401s] [ts=1802s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg3",
+      "local_kp_id": "local::lecture_12::kp3",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "mention",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Patch and inpainting methods are briefly tied to downstream comparisons [ts=1564s] [ts=1831s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg4",
+      "local_kp_id": "local::lecture_12::kp6",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The segment explains LAB colorization, split-brain prediction, and video color propagation/tracking [ts=1922s] [ts=2448s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg4",
+      "local_kp_id": "local::lecture_12::kp1",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "A student question leads back to how decoder-generated targets train the encoder in the SSL pipeline [ts=2522s] [ts=2659s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "local_kp_id": "local::lecture_12::kp7",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The entire block is about MAE architecture, masking strategy, training objective, and ablations [ts=2781s] [ts=3235s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "local_kp_id": "local::lecture_12::kp3",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Linear probing vs full fine-tuning is explicitly explained as MAE evaluation and adaptation protocol [ts=3110s] [ts=3151s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "local_kp_id": "local::lecture_12::kp1",
+      "planner_role": "support",
+      "instruction_role": "support",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "MAE is framed as the currently common pretraining route before downstream adaptation [ts=2774s] [ts=3509s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg6",
+      "local_kp_id": "local::lecture_12::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Defines positive/negative pairs, score functions, softmax-style contrastive loss, and InfoNCE interpretation [ts=3638s] [ts=3947s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "local_kp_id": "local::lecture_12::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "SimCLR setup, projection head, batch-size dependence, and MoCo queue/momentum updates dominate the segment [ts=3976s] [ts=4414s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "local_kp_id": "local::lecture_12::kp8",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "All method descriptions rely on the previously defined InfoNCE and positive/negative pair structure [ts=3976s] [ts=4069s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "local_kp_id": "local::lecture_12::kp10",
+      "planner_role": "support",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "CPC, MoCo v3, and DINO are mentioned briefly as neighboring methods or successors [ts=4425s] [ts=4475s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture_12::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Foundational definitions and evaluation criteria recur throughout the lecture; slides are conceptual rather than formula-heavy [ts=285s] [ts=724s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg2",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "A concrete worked example with clear transfer evidence makes it good review material, but the segment is mostly conceptual/empirical rather than mathematical [ts=956s] [ts=1284s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg3",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The segment mixes task intuition with reconstruction/adversarial loss discussion, so it supports quiz questions on both setup and loss design [ts=1590s] [ts=1802s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg4",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The colorization block is rich in examples and applications, especially video attention/tracking, but lighter on explicit equations [ts=1951s] [ts=2448s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "MAE is presented as a modern, widely used method and includes architectural details, masking ratios, and training objectives [ts=2781s] [ts=3235s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "This is the main mathematical block for contrastive learning, centered on the score-based softmax loss and InfoNCE interpretation [ts=3675s] [ts=3947s]."
+    },
+    {
+      "unit_id": "local::lecture_12::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "The closing survey covers method distinctions and practical design tradeoffs—projection heads, large batches, queues, and momentum updates—that are likely review targets [ts=3976s] [ts=4414s]."
+    }
+  ],
+  "self_critique_trace": null
+}

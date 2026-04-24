@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_16::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=mQOK0Mfyrkk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript gives enough grounded detail for two questions on CLIP’s practical strengths and limitations.",
+  "question_bank": [
+    {
+      "item_id": "lecture_16_seg5_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is CLIP especially useful for retrieval and open-vocabulary use?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because images and text share an embedding space where similarity can be computed efficiently with dot products",
+        "Because it must retrain its text encoder for every query",
+        "Because it stores a segmentation mask for every training image",
+        "Because it converts every image into a caption before comparing examples"
+      ],
+      "answer_index": 0,
+      "explanation": "Once images and text are embedded into the same space, fast similarity search becomes possible, and users can query with arbitrary text rather than a fixed closed set of labels.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_retrieval_open_vocabulary_use_and_chainability",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "dot-product similarity is efficient",
+          "arbitrary text descriptions"
+        ],
+        "timestamps": [
+          "00:20:15",
+          "00:20:47"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_16_seg5_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which example best reflects a known CLIP limitation discussed here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Confusing “a mug in grass” with “grass in a mug” because relationships are not grounded reliably",
+        "Failing only when the image resolution is below 224x224",
+        "Being unable to compare any two text queries with each other",
+        "Requiring a segmentation mask for every caption during pretraining"
+      ],
+      "answer_index": 0,
+      "explanation": "Contrastive image-level supervision can capture the presence of concepts without fully representing how those concepts relate to each other or where they are in the scene.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "mug in grass",
+          "captions omit grounding information"
+        ],
+        "timestamps": [
+          "00:21:13",
+          "00:24:57"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_16_seg5_q1",
+      "global_kp_id": "kp_clip_retrieval_open_vocabulary_use_and_chainability",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_16_seg5_q2",
+      "global_kp_id": "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+      "role": "primary"
+    }
+  ]
+}

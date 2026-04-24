@@ -1,0 +1,410 @@
+{
+  "unit_id": "local::lecture04-wordvecs-lm::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Transcript is sufficient for reinforcement questions about artificial neurons, logistic regression, hidden feature learning, and the value of depth. The conceptual claims are stated clearly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is binary logistic regression connected to the artificial-neuron analogy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is presented as a simplified artificial neuron with weighted inputs and a nonlinearity",
+        "It exactly reproduces biological spikes",
+        "It replaces all hidden layers with recurrence",
+        "It works only for unsupervised learning"
+      ],
+      "answer_index": 0,
+      "explanation": "Logistic regression can be viewed as a simple neuron-like unit: inputs are weighted, combined into an excitation value, and passed through a nonlinear activation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_artificial_neuron_as_logistic_regression",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "binary logistic regression",
+          "simple model"
+        ],
+        "timestamps": [
+          "01:16:00",
+          "01:16:37"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the role of negative weights in the neuron analogy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They represent inhibitory inputs that reduce activation",
+        "They force every neuron to output zero",
+        "They convert logistic regression into softmax",
+        "They indicate missing training labels"
+      ],
+      "answer_index": 0,
+      "explanation": "Negative weights act like inhibitory inputs: they pull the excitation downward instead of increasing it.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_artificial_neuron_as_logistic_regression",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "negative",
+          "inhibitory inputs"
+        ],
+        "timestamps": [
+          "01:16:14",
+          "01:16:21"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can deeper neural networks be more powerful than a single logistic-regression unit?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They guarantee perfect generalization",
+        "They stack many simple units so later layers can build on learned intermediate features",
+        "They eliminate the need for nonlinearities",
+        "They always use fewer parameters"
+      ],
+      "answer_index": 1,
+      "explanation": "Depth allows the network to build successive internal representations, making it possible to learn features that simplify later classification or decision making.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_depth_and_hidden_feature_learning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a bunch of logistic regressions at once",
+          "more layers"
+        ],
+        "timestamps": [
+          "01:17:30",
+          "01:18:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do hidden units not need human-defined meanings?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because hidden units are never trained",
+        "Because the training objective can make intermediate units learn whatever internal functions help the final task",
+        "Because hidden units are copied from a dictionary",
+        "Because every hidden unit corresponds to one word"
+      ],
+      "answer_index": 1,
+      "explanation": "The goal is not to hand-design the meaning of each intermediate unit. Training encourages hidden layers to discover useful internal features automatically.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_depth_and_hidden_feature_learning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "don't need to define",
+          "learn useful functions automatically"
+        ],
+        "timestamps": [
+          "01:17:44",
+          "01:18:02"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q1",
+      "global_kp_id": "kp_artificial_neuron_as_logistic_regression",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q2",
+      "global_kp_id": "kp_artificial_neuron_as_logistic_regression",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q3",
+      "global_kp_id": "kp_depth_and_hidden_feature_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q4",
+      "global_kp_id": "kp_depth_and_hidden_feature_learning",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How is binary logistic regression connected to the artificial-neuron analogy\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the role of negative weights in the neuron analogy\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can deeper neural networks be more powerful than a single logistic-regression unit\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why do hidden units not need human-defined meanings\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How is binary logistic regression connected to the artificial-neuron analogy\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the role of negative weights in the neuron analogy\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can deeper neural networks be more powerful than a single logistic-regression unit\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg8-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why do hidden units not need human-defined meanings\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

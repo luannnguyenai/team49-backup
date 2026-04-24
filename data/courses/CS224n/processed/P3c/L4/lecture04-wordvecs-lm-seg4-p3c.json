@@ -1,0 +1,235 @@
+{
+  "unit_id": "local::lecture04-wordvecs-lm::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=nBor4jfWetQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript is sufficient for reinforcement questions about co-occurrence matrices, SVD, count-based vectors, and GloVe's co-occurrence-ratio intuition. The mathematical ideas are described verbally, so no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a word-word co-occurrence matrix record?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The probability that two words are antonyms",
+        "How often each word appears in the context of other words",
+        "Only the document frequency of each word",
+        "The order in which words are first seen in the corpus"
+      ],
+      "answer_index": 1,
+      "explanation": "A co-occurrence matrix counts how often words appear near one another according to a chosen context window.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_co_occurrence_matrix_word_representations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "co-occurrence count matrix",
+          "in the context of other words"
+        ],
+        "timestamps": [
+          "00:35:13",
+          "00:35:22"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why are raw count-based word vectors often considered unwieldy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They require labeled training data",
+        "Their dimensionality grows with the vocabulary, creating a huge square matrix",
+        "They cannot represent frequent words",
+        "They only work for verbs"
+      ],
+      "answer_index": 1,
+      "explanation": "If every row uses the whole vocabulary as its feature space, the representation becomes extremely high-dimensional and expensive to store or manipulate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_co_occurrence_matrix_word_representations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "400,000 words in our vocabulary",
+          "size of this matrix"
+        ],
+        "timestamps": [
+          "00:36:01",
+          "00:36:12"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does truncated SVD help with count-based word vectors?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It adds more rows to the co-occurrence matrix",
+        "It factorizes the matrix and keeps only the larger singular directions to get lower-dimensional vectors",
+        "It converts all counts into probabilities exactly",
+        "It replaces context windows with parse trees"
+      ],
+      "answer_index": 1,
+      "explanation": "SVD decomposes the matrix into major directions of variation. Keeping only the larger singular components yields a compact low-dimensional representation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_svd_dimensionality_reduction_for_word_vectors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "singular value decomposition",
+          "smaller low dimensional vectors"
+        ],
+        "timestamps": [
+          "00:37:00",
+          "00:38:07"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the key intuition behind GloVe?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only exact co-occurrence counts matter, not ratios",
+        "Ratios of co-occurrence probabilities can reveal meaning differences",
+        "Every useful meaning component comes from syntax only",
+        "GloVe ignores context windows entirely"
+      ],
+      "answer_index": 1,
+      "explanation": "GloVe focuses on how contexts differ between words. Ratios of co-occurrence probabilities can highlight semantic contrasts such as solid versus gas.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "ratios of co-occurrence probabilities",
+          "encode meaning differences"
+        ],
+        "timestamps": [
+          "00:42:01",
+          "00:42:10"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the GloVe derivation take logarithms of co-occurrence probabilities?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "To force all vectors to unit length",
+        "Because logs turn ratios into differences that fit a bilinear vector model",
+        "To remove the need for biases",
+        "Because cosine similarity requires logarithms"
+      ],
+      "answer_index": 1,
+      "explanation": "Taking logs converts multiplicative ratios into additive differences, which aligns naturally with vector differences and dot-product modeling.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "taking logs",
+          "ratios become differences"
+        ],
+        "timestamps": [
+          "00:44:08",
+          "00:44:20"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q1",
+      "global_kp_id": "kp_co_occurrence_matrix_word_representations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q2",
+      "global_kp_id": "kp_co_occurrence_matrix_word_representations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q3",
+      "global_kp_id": "kp_svd_dimensionality_reduction_for_word_vectors",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q4",
+      "global_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture04-wordvecs-lm-seg4-q5",
+      "global_kp_id": "kp_glove_log_bilinear_co_occurrence_ratio_model",
+      "role": "primary"
+    }
+  ]
+}

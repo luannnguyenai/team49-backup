@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_9::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Phần này ngắn nhưng ý chính của instance segmentation và Mask R-CNN khá rõ; transcript là đủ để tạo bộ câu hỏi nhỏ an toàn.",
+  "question_bank": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Khác biệt cốt lõi giữa semantic segmentation và instance segmentation là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Instance segmentation tách các đối tượng cùng lớp thành từng cá thể riêng.",
+        "Semantic segmentation luôn dự đoán bounding box còn instance segmentation thì không.",
+        "Semantic segmentation chỉ làm việc với ảnh y khoa.",
+        "Instance segmentation không cần thông tin lớp của đối tượng."
+      ],
+      "answer_index": 0,
+      "explanation": "Semantic segmentation chỉ nói pixel thuộc lớp nào, còn instance segmentation còn phải phân biệt pixel thuộc cá thể nào. Vì vậy hai con chó cùng lớp vẫn phải được tách ra thành hai thực thể khác nhau.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "instance segmentation",
+          "different dog"
+        ],
+        "timestamps": [
+          "00:58:10",
+          "00:58:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Mask R-CNN mở rộng pipeline R-CNN theo cách nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Thêm một nhánh dự đoán mask bên cạnh đầu ra lớp và bounding box.",
+        "Bỏ hoàn toàn region proposal network.",
+        "Thay mọi convolution bằng self-attention.",
+        "Chỉ giữ lại nhánh mask và bỏ phát hiện đối tượng."
+      ],
+      "answer_index": 0,
+      "explanation": "Mask R-CNN giữ lại phần phát hiện đối tượng quen thuộc rồi bổ sung thêm một đầu ra để dự đoán mặt nạ theo pixel cho từng vùng phát hiện. Vì vậy nó vừa định vị, vừa phân loại, vừa phân đoạn từng đối tượng.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "also generates the mask",
+          "more multitask"
+        ],
+        "timestamps": [
+          "00:58:43",
+          "00:59:14"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Mask head trong Mask R-CNN dự đoán đầu ra nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một pixel-level mask cho từng đối tượng được phát hiện.",
+        "Một learning rate riêng cho từng proposal.",
+        "Một positional embedding cho mỗi ảnh.",
+        "Một class token để phân loại toàn ảnh."
+      ],
+      "answer_index": 0,
+      "explanation": "Đầu mask hoạt động ở mức không gian chi tiết hơn đầu phân loại. Nó dự đoán vùng pixel nào thuộc về từng đối tượng đã được phát hiện trong proposal tương ứng.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "masks for that object",
+          "pixel level"
+        ],
+        "timestamps": [
+          "00:59:14",
+          "00:59:26"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "global_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q1",
+      "global_kp_id": "kp_fully_convolutional_segmentation_and_per_pixel_loss",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "global_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q2",
+      "global_kp_id": "kp_region_proposals_and_the_r_cnn_progression",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "global_kp_id": "kp_mask_r_cnn_for_instance_segmentation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg5-q3",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    }
+  ]
+}

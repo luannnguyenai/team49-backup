@@ -1,0 +1,530 @@
+{
+  "unit_id": "local::lecture02-python-review::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "The transcript is sufficient to create application questions about broadcasting, shape compatibility, and why vectorization should be preferred over Python loops, including one code question about broadcasting.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture02-python-review-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture02-python-review-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core rule that allows two arrays to broadcast with each other?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "At each compared dimension, the two sizes must be equal or one of them must be 1.",
+        "It is enough for the two arrays to have the same total number of elements.",
+        "It is enough for one dimension to be divisible by the other.",
+        "They must have the same number of dimensions and exactly the same shape."
+      ],
+      "answer_index": 0,
+      "explanation": "Broadcasting does not require two arrays to be identical, but each dimension must be compatible. The rule 'equal or one dimension is 1' is the key condition.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "all of the dimensions",
+          "equal to 1"
+        ],
+        "timestamps": [
+          "00:40:44",
+          "00:40:55"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When adding an array of shape (3,4) to an array of shape (3,1), what does NumPy do behind the scenes?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Repeat the (3,1) array along the column dimension so it becomes shape (3,4).",
+        "Repeat the (3,4) array along the row dimension so it becomes shape (1,4).",
+        "Flatten both arrays into one-dimensional vectors before adding them.",
+        "Raise an error immediately because 4 is not equal to 1."
+      ],
+      "answer_index": 0,
+      "explanation": "The two arrays are compatible because the first dimension is 3 in both cases, while the second dimensions are 4 and 1. The dimension with size 1 is repeated to match the other one.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "duplicate this y along the second dimension",
+          "3 comma 1"
+        ],
+        "timestamps": [
+          "00:41:30",
+          "00:41:05"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can a vector of shape (3,1) and its transpose of shape (1,3) broadcast with each other, while sizes 6 and 3 do not naturally broadcast?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because when comparing (3,1) and (1,3) dimension by dimension, each case is either equal or has a 1, while 6 and 3 do not satisfy that rule.",
+        "Because any pair of sizes with the same product can broadcast.",
+        "Because NumPy always chooses to broadcast any vectors together regardless of shape.",
+        "Because 6 and 3 can broadcast only if both are prime numbers."
+      ],
+      "answer_index": 0,
+      "explanation": "Broadcasting checks dimensions one by one rather than using divisibility. The pair (3,1) and (1,3) is valid because each dimension has one side equal to 1, while 6 and 3 do not.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same or a 1",
+          "6 and 3, that's not compatible"
+        ],
+        "timestamps": [
+          "00:44:54",
+          "00:45:27"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should vectorized NumPy code be preferred over Python loops when working with large matrices?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because NumPy uses optimized operations on large arrays and is often much faster than Python loops.",
+        "Because vectorization changes the mathematical result to make it more accurate.",
+        "Because Python loops cannot access array elements.",
+        "Because broadcasting only works when there is at least one for loop."
+      ],
+      "answer_index": 0,
+      "explanation": "When working with large data, expressing computation at the array level lets NumPy execute optimized implementations instead of looping over elements in Python. That often leads to a very large performance difference.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vectorization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "large data matrices",
+          "100 times slower"
+        ],
+        "timestamps": [
+          "00:46:02",
+          "00:46:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q5",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "What shape does this NumPy code print?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "(3, 4)",
+        "(3, 1)",
+        "(1, 4)",
+        "Broadcasting fails"
+      ],
+      "answer_index": 0,
+      "explanation": "The (3,1) array is broadcast along the column dimension to match (3,4), so the addition is valid and the result keeps the larger shape, (3,4).",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "medium",
+      "code_question_style": "output_prediction",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "import numpy as np\na = np.ones((3, 4))\nb = np.arange(3).reshape(3, 1)\nprint((a + b).shape)",
+        "highlight_lines": [
+          2,
+          3,
+          4
+        ]
+      },
+      "evidence": {
+        "source": "code",
+        "transcript_quotes": [
+          "broadcasting",
+          "shape"
+        ],
+        "timestamps": [
+          "00:00:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture02-python-review-seg5-q1",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q1",
+      "global_kp_id": "kp_vectorization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q2",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q2",
+      "global_kp_id": "kp_vectorization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q3",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q3",
+      "global_kp_id": "kp_vectorization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q4",
+      "global_kp_id": "kp_vectorization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q4",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture02-python-review-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the core rule that allows two arrays to broadcast with each other\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"When adding an array of shape (3,4) to an array of shape (3,1), what does NumPy do behind the scenes\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why can a vector of shape (3,1) and its transpose of shape (1,3) broadcast with each other, while sizes 6 and 3 do not naturally broadcast\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why should vectorized NumPy code be preferred over Python loops when working with large matrices\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.3,
+      "discrimination_prior": 1.0,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What shape does this NumPy code print\" asks for applied understanding rather than pure recall, so a medium prior fits. The code context nudges the prior slightly upward."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture02-python-review-seg5-q1",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the core rule that allows two arrays to broadcast with each other\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q2",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"When adding an array of shape (3,4) to an array of shape (3,1), what does NumPy do behind the scenes\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "bridge_check",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why can a vector of shape (3,1) and its transpose of shape (1,3) broadcast with each other, while sizes 6 and 3 do not naturally broadcast\" naturally belongs in transfer-style evaluation."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q4",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "bridge_check",
+        "mini_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "low",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why should vectorized NumPy code be preferred over Python loops when working with large matrices\" is more useful for contextual reinforcement than for initial placement."
+    },
+    {
+      "item_id": "lecture02-python-review-seg5-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What shape does this NumPy code print\" is well suited to checking whether the learner can reason through code rather than just recall facts."
+    }
+  ]
+}

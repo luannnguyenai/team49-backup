@@ -38,18 +38,23 @@ from src.routers.content import content_router
 from src.routers.courses import courses_router
 from src.routers.history import history_router
 from src.routers.learning_path import learning_path_router
+from src.routers.learning_session import learning_session_router
 from src.routers.module_test import module_test_router
+from src.routers.placement_lite import placement_lite_router
 from src.routers.quiz import quiz_router
+from src.routers.review import review_router
 from src.routers.test_support import test_support_router
 from src.config import settings
-from src.kg.router import router as kg_router
 
 logger = logging.getLogger(__name__)
 DATA_ROOT = Path("data").resolve()
 PROTECTED_DATA_PREFIXES = (
-    "CS231n/videos/",
-    "CS231n/slides/",
-    "CS231n/transcripts/",
+    "courses/CS224n/videos/",
+    "courses/CS224n/slides/",
+    "courses/CS224n/transcripts/",
+    "courses/CS231n/videos/",
+    "courses/CS231n/slides/",
+    "courses/CS231n/transcripts/",
 )
 
 # ---------------------------------------------------------------------------
@@ -106,10 +111,12 @@ app.include_router(courses_router)
 app.include_router(assessment_router)
 app.include_router(history_router)
 app.include_router(learning_path_router)
+app.include_router(learning_session_router)
 app.include_router(module_test_router)
+app.include_router(placement_lite_router)
 app.include_router(quiz_router)
+app.include_router(review_router)
 app.include_router(test_support_router)
-app.include_router(kg_router)
 
 
 # ---------------------------------------------------------------------------

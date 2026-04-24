@@ -15,11 +15,12 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from sqlalchemy import select
 
-from src.config import DEFAULT_MODEL
+from src.config import DEFAULT_MODEL, settings
 from src.database import tutor_thread_async_session_factory
 from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory
 from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.lecture_scope_service import get_lecture_scope_metadata
+from src.services.llm_rate_limiter import enforce_llm_rate_limit
 from src.services.sandbox import run_python_code
 from src.services.router import route_question
 
@@ -151,6 +152,7 @@ def _get_llm_with_tools():
 
 
 def call_model(state: AgentState):
+    enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
     response = _get_llm_with_tools().invoke(state["messages"])
     return {"messages": [response]}
 

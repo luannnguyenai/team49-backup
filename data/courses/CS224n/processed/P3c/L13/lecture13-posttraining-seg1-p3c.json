@@ -1,0 +1,101 @@
+{
+  "unit_id": "local::lecture13-posttraining::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về động lực của post-training, quy mô pretraining hiện đại, và vì sao next-token prediction có thể tạo ra năng lực vượt ra ngoài việc chỉ học cú pháp.",
+  "question_bank": [
+    {
+      "item_id": "lecture13-posttraining-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vai trò cốt lõi của post-training là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Biến một mô hình dự đoán token thành trợ lý hữu dụng kiểu ChatGPT.",
+        "Thay thế hoàn toàn giai đoạn pretraining bằng dữ liệu đối thoại nhỏ.",
+        "Chỉ dùng để nén mô hình xuống ít tham số hơn.",
+        "Chỉ dùng để sửa lỗi cú pháp trong quá trình sinh văn bản."
+      ],
+      "answer_index": 0,
+      "explanation": "Post-training không thay thế pretraining mà tận dụng năng lực đã học từ pretraining rồi định hướng nó thành hành vi hữu ích cho người dùng, như làm theo chỉ dẫn và trả lời theo mục đích của câu hỏi.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Post-training is framed as the bridge from pretrained models to ChatGPT-like assistants.",
+          "The central question is how to transform a simple text predictor into"
+        ],
+        "timestamps": [
+          "00:00:40",
+          "00:06:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao tối ưu next-token prediction vẫn có thể tạo ra năng lực rất phong phú?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì trong quá trình dự đoán token kế tiếp, mô hình có thể học cả kiến thức, ngữ nghĩa và các mẫu suy luận ngầm.",
+        "Vì loss này trực tiếp tối ưu theo phản hồi sở thích của con người.",
+        "Vì mô hình được gắn nhãn thủ công cho mọi hành vi như toán, code và y khoa.",
+        "Vì pretraining chỉ cần học cú pháp, còn mọi năng lực khác đến từ RLHF."
+      ],
+      "answer_index": 0,
+      "explanation": "nhấn mạnh rằng next-token prediction không chỉ học bề mặt ngôn ngữ. Để dự đoán đúng token tiếp theo, mô hình phải nắm nhiều cấu trúc sâu hơn như tri thức, ngữ nghĩa và các quan hệ giữa tác nhân, niềm tin hay hành động.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Next-token prediction can learn knowledge, syntax, semantics, and richer models of agents"
+        ],
+        "timestamps": [
+          "00:02:28"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture13-posttraining-seg1-q1",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg1-q2",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary"
+    }
+  ]
+}

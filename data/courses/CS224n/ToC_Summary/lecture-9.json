@@ -1,0 +1,91 @@
+{
+    "lecture_title": "CS224N: Natural Language Processing with Deep Learning - Pretraining",
+    "table_of_contents": [
+        {
+            "section_number": 1,
+            "timestamp": "00:00:00",
+            "topic_title": "Introduction and Course Logistics",
+            "detailed_summary": "The instructor introduces the topics for the current and upcoming lectures, focusing on modern natural language processing and model pretraining. Reminders are given for Assignment 5, which covers self-attention and transformers, as well as the upcoming deadline for final project proposals. The lecture promises to be less technically dense than previous ones but crucial for understanding modern NLP paradigms.",
+            "key_takeaways": [
+                "Assignment 5 covers self-attention and transformers.",
+                "Final project proposals are due soon, and prompt feedback will be provided."
+            ]
+        },
+        {
+            "section_number": 2,
+            "timestamp": "00:02:05",
+            "topic_title": "Word Structure and Subword Modeling",
+            "detailed_summary": "The instructor explains the limitations of fixed-vocabulary models (like standard word2vec), which map novel, out-of-vocabulary words to a useless 'UNK' (unknown) token. This approach loses massive amounts of information and fails for languages with complex morphology (e.g., Swahili, which has hundreds of verb conjugations). To solve this, the field moved to subword modeling using the Byte-Pair Encoding (BPE) algorithm. BPE starts with a character-level vocabulary and iteratively finds and merges the most common adjacent character pairs into new subword tokens. This allows the model to process novel words, misspellings ('laern'), and complex derivational morphology ('transformerify') by breaking them down into known, frequently co-occurring subword units.",
+            "key_takeaways": [
+                "Fixed vocabularies fail to capture morphological variations and out-of-vocabulary words.",
+                "Byte-Pair Encoding (BPE) builds a vocabulary of subwords by iteratively merging common character sequences.",
+                "Subword tokens eliminate the 'UNK' problem and improve processing for morphologically rich languages and novel terms."
+            ]
+        },
+        {
+            "section_number": 3,
+            "timestamp": "00:14:55",
+            "topic_title": "Motivating Model Pretraining from Word Embeddings",
+            "detailed_summary": "Revisiting J.R. Firth's distributional semantics quote ('You shall know a word by the company it keeps'), the instructor critiques static pretrained word embeddings. A static embedding assigns a single vector to a word regardless of polysemy (e.g., the noun vs. the verb form of 'record'). The modern NLP paradigm abandons random weight initialization for the bulk of the network. Instead, it pretrains all parameters of a large model (like a Transformer) on massive amounts of unlabeled text, allowing the model to learn deep contextual representations. After pretraining, the model is fine-tuned on smaller, task-specific labeled datasets. Stochastic Gradient Descent (SGD) during fine-tuning tends to stay relatively close to the pretrained parameter weights, which helps the model generalize well and avoid overfitting on the smaller dataset.",
+            "key_takeaways": [
+                "Static word embeddings fail to capture polysemy and deep contextual meaning.",
+                "Modern NLP pretrains the entire model architecture on massive unlabeled datasets, providing strong parameter initialization.",
+                "Fine-tuning leverages the general linguistic knowledge from pretraining, requiring much less labeled data to achieve high performance."
+            ]
+        },
+        {
+            "section_number": 4,
+            "timestamp": "00:35:55",
+            "topic_title": "Pretraining Encoders: Masked Language Modeling",
+            "detailed_summary": "Encoders possess bidirectional context, meaning standard autoregressive language modeling (predicting the next word) is trivialized because the model can 'look ahead' at the future context. To pretrain encoders, researchers developed Masked Language Modeling (MLM), popularized by BERT. BERT randomly masks 15% of subword tokens (replacing 80% with [MASK], 10% with a random word, and leaving 10% unchanged) and tasks the network with predicting the original tokens. This forces the model to build strong representations for all words, preventing complacency. The instructor discusses extensions like SpanBERT, which masks contiguous spans of text to create a harder, more useful learning task, and RoBERTa, which proved BERT's Next Sentence Prediction (NSP) objective was unnecessary. The section concludes with parameter-efficient (lightweight) fine-tuning techniques, such as Prefix-tuning and Low-Rank Adaptation, which freeze the massive pretrained weights and only train a tiny fraction of new parameters.",
+            "key_takeaways": [
+                "Encoders cannot use standard causal language modeling due to their bidirectional nature.",
+                "Masked Language Modeling (MLM) forces the model to predict corrupted input, teaching it syntax, semantics, and context.",
+                "Parameter-efficient fine-tuning allows models to adapt to new tasks without the massive memory and compute overhead of updating all pretrained weights."
+            ]
+        },
+        {
+            "section_number": 5,
+            "timestamp": "00:58:40",
+            "topic_title": "Pretraining Encoder-Decoders: Span Corruption",
+            "detailed_summary": "For encoder-decoder architectures (like Google's T5), the most effective pretraining objective is span corruption (or denoising). In this method, multiple spans of text in the input sequence are replaced by unique placeholder tokens. The encoder processes this corrupted sequence with bidirectional context, and the decoder must autoregressively generate the exact missing spans. The instructor highlights a fascinating emergent property of T5: after being pretrained on massive text corpora, it can perform open-domain question answering. For example, when fine-tuned on trivia questions, T5 implicitly retrieves factual knowledge (like birth dates of historical figures) directly from its pretrained weights without needing an external database.",
+            "key_takeaways": [
+                "Encoder-decoders are best pretrained using span corruption, generating missing input segments.",
+                "Models like T5 learn to implicitly store and retrieve vast amounts of factual knowledge directly within their parameter weights."
+            ]
+        },
+        {
+            "section_number": 6,
+            "timestamp": "01:02:29",
+            "topic_title": "Pretraining Decoders: Generative Pretrained Transformers",
+            "detailed_summary": "Decoders utilize unidirectional (causal) context, making them perfectly suited for standard language modeling (predicting the next word). The instructor outlines the evolution of OpenAI's GPT models. GPT (117M parameters) and GPT-2 (1.5B parameters) were trained purely to predict the next word but demonstrated an incredible ability to generate highly fluent and coherent text. These models can be fine-tuned for discriminative tasks (like Natural Language Inference) by formatting the input data as a continuous sequence of text separated by special tokens (e.g., [START] and [DELIM]). Because of their simplicity and scalability, decoder-only models dominate the current landscape of large language models.",
+            "key_takeaways": [
+                "Decoders naturally excel at text generation through causal next-word prediction.",
+                "Discriminative tasks can be adapted for decoders by formatting the inputs and labels as continuous text sequences.",
+                "Decoder-only architectures represent the vast majority of modern, highly scaled language models."
+            ]
+        },
+        {
+            "section_number": 7,
+            "timestamp": "01:06:40",
+            "topic_title": "In-Context Learning, Scaling Laws, and Chain of Thought",
+            "detailed_summary": "With the release of GPT-3 (175 billion parameters), a new interaction paradigm emerged: in-context learning. GPT-3 can perform novel tasks simply by observing a few examples within its input prompt, requiring zero gradient updates or fine-tuning. The lecture then discusses scaling laws, noting that while larger models perform better, data size is equally critical; DeepMind's Chinchilla model (70B parameters) outperformed GPT-3 by being trained on significantly more data, proving GPT-3 was heavily undertrained. Finally, the instructor explains Chain-of-Thought prompting. By prompting the model to generate a sequence of intermediate reasoning steps before outputting a final answer, the model effectively uses the output sequence as a 'scratchpad,' vastly improving its performance on complex logic and arithmetic problems.",
+            "key_takeaways": [
+                "In-context learning allows massive models to solve tasks dynamically based purely on prompt examples.",
+                "Model performance relies on an optimal ratio of parameter count to training tokens (as shown by Chinchilla).",
+                "Chain-of-Thought prompting drastically enhances reasoning capabilities by forcing the model to compute intermediate steps."
+            ]
+        },
+        {
+            "section_number": 8,
+            "timestamp": "01:14:10",
+            "topic_title": "What Pretraining Teaches: Capabilities and Limitations",
+            "detailed_summary": "The lecture concludes by summarizing what pretraining actually teaches neural networks. Through the simple objective of predicting text, models implicitly learn complex syntax, lexical semantics, trivia, physical world properties, and logical reasoning. However, this unsupervised learning on internet-scale data comes with severe drawbacks. The models inevitably learn and exacerbate human biases, including racism and sexism. Furthermore, they memorize portions of their training data, making them susceptible to membership inference attacks where malicious users can extract private information (like emails and addresses) or copyrighted material directly from the model.",
+            "key_takeaways": [
+                "Pretraining implicitly teaches advanced linguistic and factual knowledge through simple prediction objectives.",
+                "Models inherit and amplify dangerous biases present in internet training data.",
+                "Data memorization poses severe privacy and copyright risks, as private data can be extracted from the network."
+            ]
+        }
+    ]
+}

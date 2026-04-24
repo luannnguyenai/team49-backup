@@ -5,6 +5,7 @@ Pure business logic for authentication and user management.
 No HTTP concerns here — can be tested independently.
 """
 
+import json
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -14,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.models.user import User
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.user_repo import UserRepository
 from src.schemas.auth import OnboardingRequest, RegisterRequest, TokenPayload
 
@@ -151,5 +153,45 @@ async def update_onboarding(
 
     db.add(user)
     await db.flush()
+    await _write_goal_preferences_if_enabled(db, user, data)
     await db.refresh(user)
     return user
+
+
+async def _write_goal_preferences_if_enabled(
+    db: AsyncSession,
+    user: User,
+    data: OnboardingRequest,
+) -> None:
+    """
+    Persist the course-first goal-preference snapshot used by the planner.
+    """
+    if not settings.write_goal_preferences_enabled:
+        return
+
+    repo = GoalPreferenceRepository(db)
+    goal_weights_json = {
+        "available_hours_per_week": data.available_hours_per_week,
+        "preferred_method": data.preferred_method.value,
+        "desired_section_count": len(data.desired_section_ids),
+        "known_unit_count": len(data.known_unit_ids),
+        "selected_course_count": len(data.selected_course_ids),
+    }
+    notes = json.dumps(
+        {
+            "desired_section_ids": [str(section_id) for section_id in data.desired_section_ids],
+            "known_unit_ids": [str(unit_id) for unit_id in data.known_unit_ids],
+            "selected_course_ids": data.selected_course_ids,
+            "source": "auth_onboarding_course_first_runtime",
+        },
+        sort_keys=True,
+    )
+    await repo.upsert_for_user(
+        user_id=user.id,
+        goal_weights_json=goal_weights_json,
+        selected_course_ids=data.selected_course_ids or None,
+        goal_embedding=None,
+        goal_embedding_version=None,
+        derived_from_course_set_hash=None,
+        notes=notes,
+    )

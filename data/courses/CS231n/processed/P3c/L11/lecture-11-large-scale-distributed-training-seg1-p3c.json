@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_11_large_scale_distributed_training::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions about why large-scale distributed training matters, why a very large model is a useful systems case study, and how to think about GPUs at a high level. The evidence is verbal and does not require a separate clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What best captures why distributed training is now the default for modern deep learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Most state-of-the-art models are still trained on a single GPU, but evaluated on many devices",
+        "Modern training commonly spans many devices, often from tens up to tens of thousands",
+        "Distributed training is only used when data augmentation fails",
+        "Large models avoid parallelism because synchronization is too costly"
+      ],
+      "answer_index": 1,
+      "explanation": "Modern training jobs are usually too large for a single accelerator, so systems distribute computation across many devices working together.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_large_scale_distributed_training",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "But as we'll see nowadays, the new norm",
+          "on one GPU, one device, and it was"
+        ],
+        "timestamps": [
+          "00:00:36",
+          "00:00:32"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is a 400B-scale model a useful running case study for large-scale distributed training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is the only large model released after GPT-4",
+        "It uses no GPUs and therefore simplifies the hardware story",
+        "Its paper reveals unusually detailed training-system information compared with many frontier-model papers",
+        "It was trained entirely on one server, making distributed ideas unnecessary"
+      ],
+      "answer_index": 2,
+      "explanation": "The model is useful as a teaching example because its paper shares concrete implementation and system details that many frontier-model reports omit.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_large_scale_distributed_training",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "we're going to be talking a lot about Llama3-405B,",
+          "and new ways of thinking in order to do that."
+        ],
+        "timestamps": [
+          "00:00:51",
+          "00:00:45"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In large-scale training, what is the most useful high-level way to think about a GPU?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A graphics processor that is now widely used as a general parallel processor",
+        "A storage device optimized for checkpoint files",
+        "A network switch specialized for all-reduce traffic",
+        "A CPU feature that only accelerates integer arithmetic"
+      ],
+      "answer_index": 0,
+      "explanation": "GPUs began as graphics hardware, but their massively parallel computation made them useful as general accelerators for deep learning workloads.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gpu_memory_hierarchy",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So first, we're going to talk a little bit about GPU hardware.",
+          "is Graphics Processing Unit."
+        ],
+        "timestamps": [
+          "00:03:06",
+          "00:03:11"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg1-q1",
+      "global_kp_id": "kp_large_scale_distributed_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg1-q2",
+      "global_kp_id": "kp_large_scale_distributed_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg1-q3",
+      "global_kp_id": "kp_gpu_memory_hierarchy",
+      "role": "primary"
+    }
+  ]
+}

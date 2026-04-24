@@ -23,5 +23,5 @@ class CourseEntryServiceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.reason, "learning_ready")
         self.assertEqual(
             result.target,
-            "/courses/cs231n/learn/lecture-1-introduction",
+            "/courses/cs231n/learn/lecture-1-introduction-seg1",
         )

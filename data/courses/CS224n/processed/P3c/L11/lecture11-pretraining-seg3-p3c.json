@@ -1,0 +1,240 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In language-model pretraining, what task is the model trained to perform?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Predict the next token from the preceding tokens.",
+        "Predict whether two sentences are paraphrases using labeled pairs.",
+        "Map each word to an UNK token before training.",
+        "Classify every token as a noun, verb, or adjective."
+      ],
+      "answer_index": 0,
+      "explanation": "Autoregressive language modeling factors text into next-token prediction problems. The model learns from prefixes and is trained to assign high probability to the observed next token.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "predict the next word",
+          "teacher-forcing thing"
+        ],
+        "timestamps": [
+          "00:25:24",
+          "00:25:27"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the standard pretrain–fine-tune workflow?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Learn broadly from large unlabeled text, then adapt the same parameters on a smaller labeled task.",
+        "Train only on labeled task data, then discard the trained parameters.",
+        "Pretrain on the downstream labels, then fine-tune on random text.",
+        "Use a hand-built vocabulary and never update the model weights."
+      ],
+      "answer_index": 0,
+      "explanation": "Pretraining gives the model general linguistic and world knowledge from abundant text. Fine-tuning then specializes those parameters to a task with fewer labeled examples.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "ton of text",
+          "adapt the pretrained model"
+        ],
+        "timestamps": [
+          "00:26:06",
+          "00:26:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is unlabeled text especially valuable for pretraining?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is far more abundant than labeled task data, so it can support broad representation learning.",
+        "It removes the need for any loss function during training.",
+        "It guarantees the model will never overfit during fine-tuning.",
+        "It makes every downstream task use the exact same evaluation metric."
+      ],
+      "answer_index": 0,
+      "explanation": "Raw text supplies enormous numbers of self-supervised prediction examples. This lets the model absorb general structure before labeled downstream data is used.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "just text, no annotations",
+          "a ton of data"
+        ],
+        "timestamps": [
+          "00:27:25",
+          "00:25:09"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is perplexity useful during language-model pretraining even if it is not the final goal?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is an efficient proxy for how well the model predicts text and may correlate with harder downstream evaluations.",
+        "It directly measures fairness, factuality, and every downstream skill.",
+        "It proves that no fine-tuning will be needed.",
+        "It evaluates only the size of the vocabulary, not the model predictions."
+      ],
+      "answer_index": 0,
+      "explanation": "Perplexity tracks next-token prediction quality, which is cheap to measure during training. It is not a complete evaluation, but it can indicate whether pretraining is improving.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_autoregressive_language_modeling",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "evaluate the perplexity",
+          "correlates with all the stuff"
+        ],
+        "timestamps": [
+          "00:29:18",
+          "00:29:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can fine-tuning from pretrained weights outperform training the same architecture from random initialization?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The optimizer starts near parameters that already encode useful language structure.",
+        "Pretrained weights make the downstream loss convex for every task.",
+        "Fine-tuning prevents gradients from changing the model.",
+        "Random initialization always uses too many parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "Pretraining provides a strong starting point. Fine-tuning still performs gradient updates, but it begins from weights that already capture useful regularities rather than from noise.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "start at theta hat",
+          "starting parameters"
+        ],
+        "timestamps": [
+          "00:30:39",
+          "00:30:12"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg3-q1",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q2",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q2",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q3",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q4",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg3-q5",
+      "global_kp_id": "kp_pretraining_and_fine_tuning_transfer",
+      "role": "primary"
+    }
+  ]
+}

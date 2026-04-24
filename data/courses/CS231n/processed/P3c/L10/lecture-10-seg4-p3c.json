@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_10::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for diagnostic questions about temporal shift invariance and the advantage of sliding local temporal windows in 3D convolution.",
+  "question_bank": [
+    {
+      "item_id": "lecture_10_seg4_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does early-fusion 2D convolution lack temporal shift invariance?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Its filters extend across the full time dimension, so the same motion at different times may require different filters",
+        "It only works on grayscale videos",
+        "It pools over time before any convolution happens",
+        "Its filters are local in time and slide across frames"
+      ],
+      "answer_index": 0,
+      "explanation": "If a filter spans the entire temporal axis at once, it is tied to where a motion pattern appears in time. A repeated pattern occurring earlier or later may not be matched by the same filter.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_temporal_receptive_field_and_shift_invariance",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "extends fully in time",
+          "different filter"
+        ],
+        "timestamps": [
+          "00:26:55",
+          "00:28:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_10_seg4_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What advantage does a 3D convolution get from using a local temporal window that slides over time?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can reuse the same filter to detect a motion pattern at different time positions",
+        "It guarantees zero computational overhead compared with 2D CNNs",
+        "It removes the need for any pooling layers",
+        "It prevents the network from learning spatial features"
+      ],
+      "answer_index": 0,
+      "explanation": "A local temporal window makes motion detection more like ordinary spatial convolution. The same kernel can respond to a pattern wherever it appears in time, not just at one fixed position.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "slides over time",
+          "temporal shift invariance"
+        ],
+        "timestamps": [
+          "00:29:14",
+          "00:29:14"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg4_q1",
+      "global_kp_id": "kp_temporal_receptive_field_and_shift_invariance",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg4_q2",
+      "global_kp_id": "kp_3d_cnn_and_slow_fusion",
+      "role": "primary"
+    }
+  ]
+}

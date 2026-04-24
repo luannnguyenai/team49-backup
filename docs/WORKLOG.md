@@ -6,6 +6,62 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ## Các Quyết Định Kỹ Thuật (ADR)
 
+### [ADR-6] Ưu tiên Database-First Evolution cho phase production hardening — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và demo đã đủ chạy, nút thắt lớn nhất không còn nằm ở prompt/pipeline nữa mà nằm ở sự lệch giữa runtime schema cũ (`topic/module`) và target schema mới (`kp/unit + planner audit`). Nếu tiếp tục nối service trực tiếp lên runtime cũ thì càng về sau càng khó migrate.
+
+**Quyết định:** Khóa một hướng đi rõ ràng:
+
+1. Xem canonical JSONL là ingestion contract sạch.
+2. Xem course-first tables là business shell của sản phẩm.
+3. Thêm learner/planner stub tables làm landing zone production:
+   - `learner_mastery_kp`
+   - `goal_preferences`
+   - `waived_units`
+   - `plan_history`
+   - `rationale_log`
+   - `planner_session_state`
+4. Chưa wire logic service ngay trong lượt này; phần đó sẽ được làm có kiểm soát ở phase integration sau.
+
+**Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
+
+### [ADR-7] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và learner/planner tables đã có landing zone, cùng một bài toán xuất hiện ở nhiều lớp: nếu runtime tiếp tục đọc/ghi theo `topic/module/questions/mastery_scores` cũ thì production sẽ bị kẹt ở schema legacy; nếu cắt thẳng sang canonical không kiểm soát thì dễ fabricate mapping hoặc phá web hiện tại.
+
+**Quyết định:** Gom các quyết định canonical DB/runtime cutover của phase production hardening thành một chiến lược additive, sau feature flags:
+
+1. Materialize canonical content artifacts thành DB tables:
+   - `concepts_kp`
+   - `units`
+   - `unit_kp_map`
+   - `question_bank`
+   - `item_calibration`
+   - `item_phase_map`
+   - `item_kp_map`
+   - `prerequisite_edges`
+   - `pruned_edges`
+2. Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, validate manifest counts và upsert idempotent bằng natural keys.
+3. Thêm bridge columns thay vì suy luận ngầm:
+   - `courses.canonical_course_id`
+   - `learning_units.canonical_unit_id`
+   - `sessions.canonical_phase`
+   - `interactions.canonical_item_id`
+4. Runtime chỉ nối các path có grain an toàn:
+   - onboarding ghi compatibility snapshot vào `goal_preferences`
+   - legacy planner ghi audit vào `plan_history`, `rationale_log`, `planner_session_state`
+   - canonical assessment đọc `question_bank` + `item_phase_map`
+   - canonical assessment submit ghi `interactions.canonical_item_id`
+   - canonical mastery update ghi `learner_mastery_kp` qua `item_kp_map`
+   - canonical planner đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
+5. Giữ `waived_units` chưa wire cho đến khi skip flow có `learning_unit_id` thật.
+6. Tạo handoff contract ở `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`.
+7. Thêm parity checker trước khi freeze legacy tables.
+
+Tất cả read/write path mới đều nằm sau feature flags. Không drop/truncate bảng cũ trong lượt này.
+
+**Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật. UI không bị đụng trong lượt DB/runtime cutover này.
+
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
@@ -128,3 +184,224 @@ Merge kết quả về `main` bằng merge commit `fe3ea17` để preserve histo
 - Bổ sung lecture-aware scope guard để tutor không vượt ngữ cảnh learning unit đang học.
 
 **Hệ quả:** Hướng migration dài hạn rõ ràng hơn, UI không còn bị khóa vào lecture model cũ. Đổi lại, hệ thống phải duy trì thêm mapping/guard ở tầng adapter trong giai đoạn chuyển tiếp.
+
+---
+
+### [ADR-8] Tách `data/` theo vai trò pipeline: `bootstrap / courses / working / final_artifacts` — 22/04/2026
+
+**Bối cảnh:** Sau khi chạy các prompt pipeline P1→P5 cho CS224n và CS231n, thư mục `data/` bắt đầu lẫn nhiều loại artifact khác nhau:
+- bootstrap fixture cho app runtime,
+- course asset gốc,
+- working inputs/output trung gian cho prompt pipeline,
+- final cross-course artifacts dùng để ingest,
+- experiment outputs cho ModernBERT / SciBERT / GPT review.
+
+Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro:
+- script và test tiếp tục trỏ vào path cũ hoặc nhầm artifact cũ với artifact final,
+- các file P2/P5 cross-course bị đặt sai ngữ nghĩa trong folder của một course đơn lẻ,
+- review/debug sau này khó phân biệt cái nào là canonical, cái nào chỉ là working scratch.
+
+**Các lựa chọn đã xem xét:**
+- **Giữ nguyên layout cũ và chỉ ghi chú bằng README**: ít thay đổi path nhưng không giải quyết được drift và ambiguity trong runtime/test.
+- **Bundle toàn bộ final data thành JSONL export riêng**: rõ ràng cho ingest nhưng thêm một lớp artifact mới, dễ lệch với file source thật của prompt pipeline.
+- **Tổ chức lại `data/` theo vai trò lưu trữ**: giữ file source thật, chỉ đổi vị trí để semantic rõ hơn, rồi patch runtime/test/scripts theo layout mới.
+
+**Quyết định:** Chọn layout vai trò:
+- `data/bootstrap/` cho fixture seed nhẹ của app,
+- `data/courses/CS224n`, `data/courses/CS231n` cho raw + processed per-course assets,
+- `data/working/` cho `p2`, `p3_inputs`, `p5` và các artifact trung gian còn phục vụ validation/rerun,
+- `data/final_artifacts/cs224n_cs231n_v1/` cho canonical cross-course final outputs (`p2`, `p5`, `gpt54`, visualizations, model experiment logs).
+
+Đồng thời:
+- thêm `src/data_paths.py` làm nơi định nghĩa canonical path dùng lại cho scripts/services,
+- sửa `.gitignore` để **chỉ ignore video assets** dưới `data/courses/**/videos/*`,
+- loại bỏ bản `P2` single-course lỗi thời của CS224n vì đã bị supersede bởi bản cross-course final,
+- chuẩn hóa `CS231n/syllabus.json` theo schema của `CS224n/syllabus.json` nhưng vẫn giữ `lecture_id` canonical cũ để không phá compatibility.
+
+**Hệ quả:** 
+- Path runtime/test/script rõ vai trò hơn và ít nhầm artifact hơn.
+- Các final outputs dùng để ingest/review được gom đúng chỗ, không còn lẫn trong tree của từng course.
+- Đổi lại, nhiều file metadata và script mặc định phải được patch lại đồng bộ; việc review path cũ sau refactor trở thành bước bắt buộc.
+
+---
+
+### [ADR-9] Hard Canonical Cutover: drop legacy curriculum/mastery/planner tables — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical importer, product-shell backfill, learner/planner sidecar tables và parity checker đã ổn, phần còn lại của rủi ro production nằm ở chỗ runtime vẫn có thể vô tình đọc/ghi các bảng legacy như `modules`, `topics`, `questions`, `mastery_scores`, `learning_paths`. Giữ chúng quá lâu sẽ khiến team tiếp tục build nhầm lên schema cũ.
+
+**Quyết định:**
+- cắt assessment / quiz / module-test sang canonical-only runtime
+- bỏ package `src/kg/*` khỏi runtime codebase vì app không còn mount/use
+- xóa repository/service/test legacy không còn tác dụng
+- bỏ các config allow-flags cho legacy fallback
+- tạo migration `20260423_drop_legacy` để drop thật:
+  - `modules`
+  - `topics`
+  - `knowledge_components`
+  - `questions`
+  - `mastery_scores`
+  - `mastery_history`
+  - `learning_paths`
+
+**Hệ quả:**
+- source-of-truth production rõ hơn nhiều: product/content đi qua `courses/course_sections/learning_units` + canonical artifact tables; mastery/planner đi qua `learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
+- `sessions` và `interactions` vẫn được giữ, nhưng chỉ còn mang nghĩa shared runtime tables với canonical refs
+- đổi lại, mọi contract/document còn dùng từ vựng `topic/module/question` phải được rà lại để không đánh lừa người làm integration/frontend
+
+### Bổ sung 24/04/2026
+
+- Hoàn tất semantic cleanup cho các surface canonical còn lại:
+  - quiz dùng `learning_unit_id`
+  - module-test dùng `section_id`
+  - history filter dùng `section_id`
+- Nối execution-state write model thật:
+  - `learning_progress_records` là source-of-truth cho learner progress/status
+  - `waived_units` ghi audit khi user skip learning unit
+  - quiz complete tự mark `completed` và clear waive cũ nếu có
+- Thêm migration `20260424_lp_skipped` để mở rộng `learning_progress_status_enum` với giá trị `skipped`
+- Re-verify:
+  - `38 passed`
+  - `check_legacy_cleanup_readiness -> ready`
+  - `check_canonical_runtime_parity -> ready`
+
+### Bổ sung kiểm thử production runtime — 24/04/2026
+
+- Sửa frontend production build sau cutover:
+  - thêm `Suspense` boundary cho các page dùng `useSearchParams`
+  - dọn warning dependency trong `InContextTutor`
+  - ignore cache/test output sinh bởi TypeScript/Playwright
+- Thêm contract tests ở route layer để khóa canonical runtime:
+  - `/api/quiz/start` nhận/trả `learning_unit_id`
+  - `/api/module-test/start` nhận/trả `section_id`
+  - `/api/learning-path/{id}/status` trả `learning_unit_id`, không quay lại `topic_id`
+- Sửa signed asset guard:
+  - protected prefix giờ khớp path thật `courses/<course>/videos|slides|transcripts`
+  - asset contract tests không còn phụ thuộc vào video thật trong `data/`
+- Đồng bộ e2e với canonical labels/slug mới từ DB.
+- Re-verify:
+  - `npm --prefix frontend run type-check`
+  - `npm --prefix frontend run build`
+  - `44 passed` cho canonical contract/service regression set
+  - `7 passed` cho Playwright course discovery/gating e2e
+
+### Bổ sung abandon/resume runtime state — 24/04/2026
+
+- Mở rộng `planner_session_state` cho abandon/resume:
+  - `current_unit_id`
+  - `current_stage`
+  - `current_progress`
+  - `last_activity`
+- Thêm policy helper cho quiz abandon:
+  - `<24h` tiếp tục phần còn lại
+  - `>=24h` regenerate quiz gate mới, nhưng không rollback `interactions`
+- Thêm policy helper cho resume route:
+  - `<24h` seamless resume
+  - `1-7d` welcome-back
+  - `7-30d` quick review
+  - `>30d` placement-lite
+- Planner read hiện áp dụng mastery staleness on-read từ `learner_mastery_kp.updated_at` bằng cách inflate `theta_sigma`, không ghi đè evidence raw.
+
+### Bổ sung course-first onboarding contract — 24/04/2026
+
+- Đổi onboarding payload chính sang:
+  - `known_unit_ids`
+  - `desired_section_ids`
+  - `selected_course_ids`
+- Frontend onboarding gửi trực tiếp course scope để `goal_preferences.selected_course_ids` không còn phải để `null`.
+- Backend vẫn nhận alias tạm `known_topic_ids` / `desired_module_ids` để tránh phá client cũ, nhưng docs và frontend dùng contract mới.
+- `course-sections` response có thêm `course_id` và `canonical_course_id` để frontend derive planner scope từ section selection.
+
+### Bổ sung semantic naming cleanup — 24/04/2026
+
+- Đổi assessment result contract từ `topic_results` / `TopicResult` sang `learning_unit_results` / `LearningUnitResult`.
+- Đổi module-test DTO từ `TopicQuestionsGroup`, `TopicTestResult`, `ReviewTopicSuggestion` sang `LearningUnitQuestionsGroup`, `LearningUnitTestResult`, `ReviewLearningUnitSuggestion`.
+- Đổi learning-path counts từ `total_topics/completed_topics/in_progress_topics` sang `total_units/completed_units/in_progress_units`.
+- Đổi history question detail từ `topic_name` sang `learning_unit_title`.
+- Frontend type-check pass sau rename, không đổi layout/visual.
+
+### Bổ sung README / historical docs sweep — 24/04/2026
+
+- Rewrite README theo source-of-truth hiện tại:
+  - product shell: `courses/course_sections/learning_units`
+  - canonical content: `question_bank/item_phase_map/item_kp_map/item_calibration`
+  - learner/planner: `learner_mastery_kp`, `learning_progress_records`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
+- Gỡ claim sai rằng production đã có BKT/IRT 2PL calibrated; README giờ nói rõ scoring hiện tại là bootstrap KP-level cho đến khi có calibration job thật.
+- Đánh dấu các plan/spec trong `docs/superpowers` là historical để người mới không dùng chúng như active contract.
+
+### Bổ sung orphan legacy helper cleanup — 24/04/2026
+
+- Xóa helper dead không còn caller:
+  - `src/utils/topological_sort.py`
+  - `src/services/timeline_builder.py`
+  - `src/scripts/build_kg.py`
+- Chuyển `scripts/seed.py` thành canonical bootstrap wrapper:
+  - import `canonical/*.jsonl`
+  - import product shell `courses/course_sections/learning_units`
+  - chạy parity report sau import
+- `make seed`, `make seed-check`, và `start.sh` không còn nhắc seed `modules/topics/questions`.
+- Giữ các script `*legacy*` trong `src/scripts/pipeline` vì chúng là archive/guard tooling; đã thêm docstring để phân biệt với runtime data source.
+
+### Bổ sung mastery scoring phase-1 — 24/04/2026
+
+- Thay bootstrap delta cố định bằng 2PL-lite prior scoring:
+  - đọc `item_calibration` theo `canonical_item_id`
+  - dùng calibrated params nếu `is_calibrated=true`, ngược lại dùng priors
+  - residual `observed - predicted_probability` quyết định delta `theta_mu`
+  - `item_kp_map.weight` và discrimination scale evidence theo Q-matrix
+- Thêm `estimate_mastery_lcb` / `estimate_mastery_lcb_on_read` và dùng chung cho planner + waive evidence.
+- Thêm `item_calibration_service` làm boundary cho calibration readiness, tách response thật với synthetic.
+- Chưa generate synthetic data; task synthetic được đưa xuống dưới cùng để chốt rule/volume riêng trước khi sinh.
+
+### Bổ sung learner runtime cases phase 1-5 — 24/04/2026
+
+- Phase 1: skip/waive không còn là status update tự do. Runtime kiểm tra `mastery_lcb >= 0.8` hoặc `skip_verification_score >= 80` trước khi ghi `waived_units`; fail thì trả `403`.
+- Phase 2: thêm learning-session API cho abandon/resume:
+  - `GET /api/learning-session/resume`
+  - `PUT /api/learning-session/learning-units/{id}/progress`
+  - dữ liệu lưu vào `learning_progress_records` và `planner_session_state.current_unit_id/current_stage/current_progress/last_activity`.
+- Phase 3: quiz mini-quiz đồng bộ state đang làm dở vào `planner_session_state.current_progress`:
+  - `quiz_id`
+  - `quiz_phase`
+  - `items_answered`
+  - `items_remaining`
+  - score khi complete
+- Phase 4: thêm `/api/review/start` cho quick-check khi user quay lại sau lâu ngày; selector đọc `item_phase_map.phase='review'` và ưu tiên KP thiếu/weak/stale.
+- Phase 5: thêm `/api/placement-lite/start` cho placement-lite; selector đọc `item_phase_map.phase='placement'`, sampling giới hạn theo learning units trong selected courses.
+
+Case runtime đã handle:
+
+| Case | Trạng thái | Ghi chú tích hợp |
+| --- | --- | --- |
+| User học đầy đủ 2 course | Covered | `goal_preferences.selected_course_ids` + planner unit-grain + progress/complete/assessment canonical. |
+| User chỉ học CS231 | Covered | Course scope nằm trong `goal_preferences.selected_course_ids`; planner/placement-lite/review lọc theo selected course. |
+| User thích skip | Covered | Skip chỉ được waive nếu có mastery LCB hoặc skip-verification score đủ ngưỡng. |
+| User bỏ ngang video | Covered backend | Progress API lưu `video_progress_s`, `video_finished`, current unit/stage. |
+| User bỏ ngang quiz | Covered backend | Quiz answers đã gửi vẫn là evidence trong `interactions`; phần còn lại nằm trong `items_remaining`. |
+| User quay lại sau lâu ngày | Covered backend | Resume classifier + review endpoint + placement-lite endpoint đã có; frontend resume UX là bước tích hợp riêng. |
+| User thích ôn lại | Covered backend | `/api/review/start` chọn câu hỏi review theo KP weak/stale/missing mastery. |
+| Synthetic learner data | Deferred | Chưa generate. Cần chốt volume, latent profiles, tagging synthetic và calibration separation trước khi sinh. |
+
+### Bổ sung deterministic synthetic demo users — 24/04/2026
+
+- Thêm scenario JSON thủ công và script importer:
+  - `data/synthetic/demo_accounts_v1/scenarios.json`
+  - `data/synthetic/cohort_30_v1/scenarios.json`
+  - `src/scripts/pipeline/generate_synthetic_demo_users.py`
+  - `src/scripts/pipeline/reset_demo_accounts.py`
+  - `src/scripts/pipeline/reset_synthetic_cohort.py`
+- Dataset tách rõ:
+  - `demo_accounts_v1`: 9 account login demo, email `@vinuni.edu.vn`, password chung `DemoPass123!`
+  - `cohort_30_v1`: 30 user nền cho dashboard/history/planner volume, không phải account demo chính
+- Không dùng random và không tự suy luận năng lực bằng thuật toán:
+  - năng lực từng user nằm trong `mastery_profile` của scenario JSON
+  - câu đúng/sai nằm trong `sessions[].answer_pattern`
+  - script chỉ validate, resolve unit/item thật, rồi import/reset
+  - stable UUID bằng `uuid5`
+  - fixed `DEMO_NOW = 2026-04-24T09:00:00Z`
+- Cohort 30 có trình độ đa dạng:
+  - `beginner`: 6
+  - `developing`: 7
+  - `proficient`: 10
+  - `advanced`: 7
+- Không state-lock. Nếu demo làm thay đổi state, chạy `.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts` để reset riêng 9 demo accounts. Cohort 30 có command riêng để tránh reset nhầm khi đang demo.
+- Synthetic vẫn không được tính là real calibration evidence; calibration readiness tiếp tục tách real vs synthetic response counts.

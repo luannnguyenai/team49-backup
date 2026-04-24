@@ -1,0 +1,196 @@
+{
+  "unit_id": "local::lecture16-efficient-training::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture16-efficient-training-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the central parameter-saving idea behind LoRA?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Freeze the base weight matrix and learn a low-rank update represented as the product of two smaller matrices.",
+        "Replace every transformer layer with a recurrent layer during fine-tuning.",
+        "Train only the output softmax while deleting all attention weights.",
+        "Quantize the model to integers and stop computing gradients."
+      ],
+      "answer_index": 0,
+      "explanation": "LoRA assumes the useful task update can live in a low-dimensional subspace. It learns a small low-rank offset rather than a full matrix-sized update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_lora_low_rank_adaptation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two low rank",
+          "only trainable parameters"
+        ],
+        "timestamps": [
+          "00:46:29",
+          "00:47:24"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does increasing the LoRA rank r affect adaptation capacity?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It increases the expressiveness of the low-rank update, moving LoRA closer to full fine-tuning.",
+        "It forces the model to ignore the pretrained weights completely.",
+        "It reduces the number of trainable parameters to zero.",
+        "It changes the tokenizer so fewer subwords are needed."
+      ],
+      "answer_index": 0,
+      "explanation": "A higher rank allows a richer update matrix because the low-rank product has more degrees of freedom. At very high rank, it approaches the flexibility of a full update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_lora_low_rank_adaptation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "increase R",
+          "converge"
+        ],
+        "timestamps": [
+          "00:47:45",
+          "00:47:50"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the LoRA alpha parameter control?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How strongly the task-specific low-rank update modifies the pretrained model's existing behavior.",
+        "Which GPUs store the optimizer state during FSDP.",
+        "How many tokens are removed from each input sequence.",
+        "Whether the base model uses BF16 or FP16 arithmetic."
+      ],
+      "answer_index": 0,
+      "explanation": "Alpha scales the LoRA offset. Small values preserve more of the pretrained model, while larger values let the task-specific update have more influence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_lora_low_rank_adaptation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "term alpha",
+          "task specific knowledge"
+        ],
+        "timestamps": [
+          "00:46:57",
+          "00:47:08"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is LoRA convenient when serving many task-specific adaptations of the same large model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each task can store only its small LoRA matrices rather than a full copy or full parameter delta of the base model.",
+        "Each task must retrain the entire base model, but only once per GPU.",
+        "LoRA permanently overwrites the pretrained model, so no task files are needed.",
+        "LoRA requires no learned parameters for each task."
+      ],
+      "answer_index": 0,
+      "explanation": "The base model can remain shared, while small low-rank adapter weights are swapped in for different tasks. That greatly reduces storage compared with saving a full model update per task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_peft",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "switch to a different task",
+          "way lower than storing"
+        ],
+        "timestamps": [
+          "00:48:09",
+          "00:48:29"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture16-efficient-training-seg5-q1",
+      "global_kp_id": "kp_lora_low_rank_adaptation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q2",
+      "global_kp_id": "kp_lora_low_rank_adaptation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q3",
+      "global_kp_id": "kp_lora_low_rank_adaptation",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q4",
+      "global_kp_id": "kp_peft",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture16-efficient-training-seg5-q4",
+      "global_kp_id": "kp_lora_low_rank_adaptation",
+      "role": "secondary"
+    }
+  ]
+}

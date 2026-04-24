@@ -1,0 +1,229 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture03-pytorch",
+    "lecture_title": "Lecture 3 - PyTorch Tutorial",
+    "youtube_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture03-pytorch::seg1",
+      "course_id": "cs224n-2024",
+      "name": "PyTorch overview and tensor basics",
+      "description": "Introduces PyTorch as a deep learning framework, explains tensors as PyTorch's multidimensional array abstraction, and covers tensor creation, dtypes, basic utilities, elementwise ops, broadcasting, and matrix multiplication.",
+      "summary": "The segment frames PyTorch around two main benefits: easy tensor manipulation with GPU support and convenient neural-network building blocks [ts=73s] [ts=86s]. It defines tensors as PyTorch's analogue of NumPy arrays and explains that course data and model computations are represented as multidimensional arrays, including examples such as images and batches of RGB images with batch, channel, width, and height dimensions [ts=133s] [ts=159s]. The instructor demonstrates creating tensors from Python list-of-lists, notes that tensors carry a dtype, and shows how float32 can be inferred or explicitly set [ts=211s] [ts=247s]. Basic constructors like zeros, ones, and arange are introduced for convenient initialization [ts=328s] [ts=374s]. The segment also emphasizes that scalar addition and multiplication are elementwise by default, while PyTorch follows NumPy-style broadcasting rules when shapes are compatible [ts=398s] [ts=427s]. A practical NLP note is that variable-length sequences are usually padded rather than represented as jagged tensors so computations can stay matrix-based [ts=458s] [ts=491s]. The section closes with matrix multiplication via matmul or the @ operator, including shape reasoning for multiplying a 3x2 tensor by a 2x4 tensor to get a 3x4 result, and a brief explanation that batched matmul preserves batch dimensions when broadcast semantics line up [ts=508s] [ts=600s].",
+      "key_points": [
+        {
+          "text": "PyTorch mainly helps with tensor/GPU manipulation and composing neural-network building blocks.",
+          "timestamp_s": 73,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A tensor is the PyTorch equivalent of a NumPy multidimensional array used to represent data and neural-network computations.",
+          "timestamp_s": 133,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Tensor dtypes can be specified explicitly, and floating-point input can cause PyTorch to infer a floating dtype.",
+          "timestamp_s": 247,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "torch.zeros, torch.ones, and torch.arange are basic utilities for instantiating tensors of desired shapes or ranges.",
+          "timestamp_s": 328,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Simple arithmetic on tensors is elementwise by default, while broadcasting follows NumPy-compatible shape rules.",
+          "timestamp_s": 398,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Variable-length sentence tensors are typically padded to fixed shapes so matrix operations remain feasible.",
+          "timestamp_s": 458,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Matrix multiplication uses torch.matmul or the @ operator, and a 3x2 tensor multiplied by a 2x4 tensor yields a 3x4 tensor.",
+          "timestamp_s": 508,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 5,
+        "end_s": 683
+      },
+      "difficulty": 0.29,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture03-pytorch::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Tensor shapes, reshaping, reduction, and indexing",
+      "description": "Covers shape inspection as a debugging strategy, reshaping/view operations, vectorized reductions such as sum and mean, and NumPy-like indexing and slicing semantics for higher-dimensional tensors.",
+      "summary": "This segment begins by stressing that printing tensor shapes is one of the most useful debugging practices in PyTorch, especially once operations are stacked and internal reshaping can obscure the real source of an error [ts=683s] [ts=727s]. It then introduces reshape as a way to reorganize data for batching or sequence modeling, such as turning a flat list into batched examples or tensors with batch, sequence, and embedding dimensions [ts=770s] [ts=823s]. The instructor notes a distinction between view and reshape, describing view as producing a view of underlying storage and reshape as modifying the tensor layout more directly [ts=845s] [ts=855s]. The segment next motivates tensors through vectorized operations and demonstrates reductions such as sum over a chosen dimension, explaining that the specified dimension is the one being collapsed [ts=904s] [ts=967s]. That same intuition is extended to averages: preserving rows means reducing over dim=1, while preserving columns means reducing over dim=0 [ts=1140s] [ts=1208s]. The latter half walks through indexing on a 3x2x2 tensor, showing that selecting x[0] collapses the first dimension to a 2x2 tensor and that more elaborate slicing or list indexing can select ranges or multiple rows at once [ts=1266s] [ts=1499s]. The segment ends with a practical scalar-conversion reminder: some operations expect Python scalars rather than tensors, and .item() extracts a scalar from a 1x1 tensor [ts=1572s] [ts=1618s].",
+      "key_points": [
+        {
+          "text": "Printing tensor shapes is a primary debugging strategy because stacked operations and PyTorch internals can obscure shape mistakes.",
+          "timestamp_s": 697,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "reshape reorganizes tensors to support batching or other downstream operations on differently structured data.",
+          "timestamp_s": 770,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The reduction dimension in operations like sum is the dimension being collapsed.",
+          "timestamp_s": 960,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "For a 2x3 tensor, row averages use dim=1 and column averages use dim=0.",
+          "timestamp_s": 1140,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Indexing x[0] into a 3x2x2 tensor yields a 2x2 tensor because the first dimension is selected away.",
+          "timestamp_s": 1266,
+          "evidence_type": "example"
+        },
+        {
+          "text": "List indexing can retrieve multiple selected rows at once by indexing with a list of row indices.",
+          "timestamp_s": 1468,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Calling .item() converts a 1x1 tensor into a Python scalar when downstream code expects a scalar value.",
+          "timestamp_s": 1572,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 683,
+        "end_s": 1620
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 16,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture03-pytorch::seg3",
+      "course_id": "cs224n-2024",
+      "name": "Autograd and gradient accumulation",
+      "description": "Explains PyTorch autograd, requires_grad, backward passes, gradient storage in .grad, and why gradients accumulate unless explicitly zeroed.",
+      "summary": "The segment introduces autograd as PyTorch's automatic differentiation system: when the forward pass defines computations over tensors, PyTorch tracks dependencies so that a later backward pass can apply the chain rule and cache gradients needed for optimization [ts=1623s] [ts=1688s]. A tensor with requires_grad participates in gradient tracking, and the instructor motivates disabling gradients at inference time because they add computation when no parameter updates are needed [ts=1706s] [ts=1745s]. The core example defines y = 3x^2 for x = 2, calls backward, and explains that x.grad becomes 12 because dy/dx = 6x and x=2 [ts=1779s] [ts=1805s]. Repeating a backward pass on another expression with the same dependency raises x.grad to 24, which is used to show that PyTorch accumulates rather than overwrites gradients by default [ts=1822s] [ts=1868s]. The instructor then connects this to minibatch training: accumulated gradients are desirable across examples before a parameter update, but they must be reset between training iterations so previous batches do not contaminate later updates [ts=1881s] [ts=2049s].",
+      "key_points": [
+        {
+          "text": "Autograd automatically applies the chain rule over the computation graph and caches gradients for optimization.",
+          "timestamp_s": 1623,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "requires_grad controls whether PyTorch stores gradients for a tensor, and gradients can be disabled at inference time to avoid unnecessary computation.",
+          "timestamp_s": 1706,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "For y = 3x^2 with x = 2, calling backward produces x.grad = 12.",
+          "timestamp_s": 1779,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Calling backward multiple times on quantities depending on the same tensor accumulates gradients instead of overwriting them.",
+          "timestamp_s": 1822,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Training loops must zero gradients between iterations to prevent previous updates from being double-counted.",
+          "timestamp_s": 1881,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 1620,
+        "end_s": 2078
+      },
+      "difficulty": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture03-pytorch::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Neural-network modules and the training loop",
+      "description": "Shows how to define layers with torch.nn, compose them into blocks and custom modules, inspect parameters, choose losses and optimizers, and implement a full PyTorch training loop.",
+      "summary": "This final segment moves from tensors to neural-network construction. It introduces torch.nn and explains nn.Linear as a layer parameterized by input and output dimensions that maps the last dimension of its input to the specified output size, effectively acting like an affine transformation with optional bias [ts=2098s] [ts=2163s]. A worked example passes a 2x3x4 tensor through a linear layer with output size 2 and obtains a 2x3x2 tensor; a mismatched input dimension example is used to argue again for printing shapes when debugging layer errors [ts=2183s] [ts=2286s]. The instructor shows that model parameters, including weights and bias, can be inspected and that they store gradients to be updated during training [ts=2383s] [ts=2419s]. Other module building blocks are briefly surveyed, including convolutions, batch normalization, upsampling, and pooling [ts=2424s] [ts=2451s]. The segment then adds nonlinearities with sigmoid and uses nn.Sequential to compose a linear layer and activation into a reusable block [ts=2474s] [ts=2528s]. A custom multilayer perceptron is implemented by subclassing nn.Module, defining parameters in **init**, and defining the computation in forward [ts=2531s] [ts=2632s]. Finally, optimization is introduced through torch.optim: the model, Adam optimizer, and cross-entropy loss are instantiated, and the canonical training loop is demonstrated as zero_grad, forward pass, loss computation, backward, and optimizer step [ts=2645s] [ts=2762s]. The segment ends by emphasizing that PyTorch abstracts away manual backpropagation and optimizer details so students can focus on assembling architectures from reusable components [ts=2769s] [ts=2813s].",
+      "key_points": [
+        {
+          "text": "nn.Linear takes an input dimension and output dimension and transforms the last input dimension to the output size, with an optional bias term.",
+          "timestamp_s": 2108,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Passing a 2x3x4 tensor through a linear layer with output size 2 yields a 2x3x2 output tensor.",
+          "timestamp_s": 2183,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Printing shapes is an effective way to debug layer mismatch errors because internal error messages may flatten or reinterpret tensor shapes.",
+          "timestamp_s": 2255,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Neural-network parameters include both weights and bias and are accessible for inspection through the layer's parameters.",
+          "timestamp_s": 2383,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "nn.Sequential can compose layers such as a linear transform followed by sigmoid into a single callable block.",
+          "timestamp_s": 2498,
+          "evidence_type": "example"
+        },
+        {
+          "text": "To define a custom network in PyTorch, subclass nn.Module, initialize components in **init**, and implement the forward pass in forward.",
+          "timestamp_s": 2531,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A standard training loop is: optimizer.zero_grad(), predictions = model(x), compute loss, loss.backward(), optimizer.step().",
+          "timestamp_s": 2705,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Uv0AIRr3ptg&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=22",
+        "start_s": 2078,
+        "end_s": 2813
+      },
+      "difficulty": 0.55,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 4,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture03-pytorch_transcript.txt"
+  }
+}

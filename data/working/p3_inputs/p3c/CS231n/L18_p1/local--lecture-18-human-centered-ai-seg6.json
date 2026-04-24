@@ -1,0 +1,165 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_18_human_centered_ai",
+    "lecture_title": "What We See and What We Value: AI with the Human Perspective",
+    "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_18_human_centered_ai::seg6",
+    "course_id": "cs231n_spring_2025",
+    "name": "AI augmentation for healthcare and labor shortages",
+    "description": "Reframes AI from replacement to augmentation and presents ambient-intelligence systems for clinical and home health settings.",
+    "summary": "The final section begins by acknowledging real labor disruption from AI while arguing that healthcare and eldercare also suffer from acute labor shortages, so the more useful framing is augmentation rather than replacement [ts=2315s] [ts=2455s]. Fei-Fei Li calls hospitals, patient rooms, pharmacies, and homes the 'dark spaces of health' and presents ambient intelligence as smart sensors plus machine learning that extract clinically relevant signals for patients, families, and providers [ts=2467s] [ts=2497s]. She then gives three concrete examples: privacy-preserving hand-hygiene monitoring that outperforms sparse human auditing, ICU mobility monitoring for bed/chair transitions, and home sensing for infection, mobility, sleep, and diet in aging populations [ts=2622s] [ts=2790s].",
+    "key_points": [
+      {
+        "text": "The lecture reframes AI's labor role from replacement toward augmentation in domains with worker shortages.",
+        "timestamp_s": 2455,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The 'dark spaces of health' are settings where there are not enough human eyes to monitor critical events.",
+        "timestamp_s": 2475,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Ambient intelligence combines smart sensors with machine learning to extract health-critical insights.",
+        "timestamp_s": 2497,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Depth-based hand-hygiene monitoring is more consistent than human auditing and preserves privacy.",
+        "timestamp_s": 2625,
+        "evidence_type": "example"
+      },
+      {
+        "text": "ICU mobilization monitoring tracks actions such as getting in or out of bed and chair because movement supports recovery.",
+        "timestamp_s": 2717,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Home sensing can support aging in place by monitoring infection risk, mobility, sleep, and diet.",
+        "timestamp_s": 2826,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=18",
+      "start_s": 2304,
+      "end_s": 2870
+    },
+    "difficulty": 0.45,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 9,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "transcript_slice": "00:38:27\nto see what humans want to see.\n\n00:38:32\nWe're going to connect seeing and doing together.\n\n00:38:42\none of the biggest anxiety is labor.\n\n00:38:51\nRobots taking over jobs.\n\n00:38:58\nDenying job change is wrong.\n\n00:39:05\nhas caused labor market change, and some of them\n\n00:39:10\nSome of them can lead to even civil wars and wars.\n\n00:39:20\nAnd a tiny digression.\n\n00:39:27\nthat we have been hearing, think about physical labors.\n\n00:39:34\nif you look at GenAI's impact is white collar jobs\n\n00:39:42\nespecially software engineering and analytical work in offices.\n\n00:39:53\nBut in the meantime, we also need\n\n00:39:59\nWe actually fundamentally have human labor shortages\n\n00:40:08\nhealth.\n\n00:40:12\nhuman life expectancy increases.\n\n00:40:21\nAnd that's a good thing.\n\n00:40:28\nYoung people need to work.\n\n00:40:33\nEconomy vibrant.\n\n00:40:37\nWho are taking care of our chronically ill?\n\n00:40:45\nof health care workers, especially nurses,\n\n00:40:55\nSo instead of thinking about this word replace,\n\n00:41:03\nAnd you got a glimpse of that in my surgery room example.\n\n00:41:12\nthat we don't have enough pairs of eyes.\n\n00:41:19\nFrom surgery room to patient room to pharmaceutical to homes\n\n00:41:26\nSo how do we make AI help?\n\n00:41:31\nleading a ton of this work.\n\n00:41:37\nat this problem of ambient intelligence for health,\n\n00:41:45\nto glean health critical insights from these situations\n\n00:41:57\nmembers or doctors in time to help patients.\n\n00:42:05\nwe published a couple of years ago.\n\n00:42:10\nOne example is this hand hygiene project, which actually\n\n00:42:16\nAnd hand hygiene turns out to be really important for keeping\n\n00:42:25\nHospital acquired infection is actually\n\n00:42:32\nfatality in our hospitals.\n\n00:42:39\nnationwide, and it is really hard to control.\n\n00:42:46\nto patient room.\n\n00:42:50\nSo what do we do?\n\n00:42:55\nbut we just talked about, we don't even have enough nurses,\n\n00:43:00\nAnd also you cannot hire enough of them.\n\n00:43:05\nWe just talk about human attention problem.\n\n00:43:12\nThere were some technological solutions like RFID,\n\n00:43:17\nIf the badge or the person wearing the badge\n\n00:43:25\ndispenser, it gives you the hint that the person,\n\n00:43:31\nBut that's very nonspecific.\n\n00:43:34\nAnd the hospital rooms are pretty small,\n\n00:43:40\ndoesn't mean you're doing it.\n\n00:43:45\nwhere we put smart sensors that protects privacy\n\n00:43:54\nor the blue video there.\n\n00:44:01\nIs the person washing hand or not washing hand?\n\n00:44:08\nwith the algorithm output versus human outputs or human detection\n\n00:44:21\nconsistent than humans.\n\n00:44:29\nto get almost as good as AI, and this is just not plausible.\n\n00:44:40\nand that's not good.\n\n00:44:43\nAnother application we worked on is his ICUs.\n\n00:44:52\nICU is also where 1% of US GDP is spent.\n\n00:45:04\nis a top priority.\n\n00:45:10\nis to get our patients safely out of ICU\n\n00:45:17\nSo one of the most important thing people have learned in ICU\n\n00:45:26\nProper movement, which we call mobilization,\n\n00:45:32\nBut this is a very dicey situation.\n\n00:45:36\nDoctors have to give orders, and you have to move properly,\n\n00:45:45\nAnd you have to assess the movement\n\n00:45:49\nSo we collaborated with Stanford as well as Utah's Intermountain\n\n00:45:57\nand help doctors to monitor patient movement,\n\n00:46:05\ngetting out of bed, getting in bed, getting out of chair,\n\n00:46:09\nThese things are so important for ICU patients.\n\n00:46:15\nbut this really is critical.\n\n00:46:23\nand prediction that is so helpful for doctors, especially\n\n00:46:30\nLast, but not the least example is aging in place.\n\n00:46:38\nPeople are seniors, want to live at home independently\n\n00:46:43\nAnd I remember during the beginning of COVID\n\n00:46:54\nA lot has to do with hospital overrun and overtaxed hospital\n\n00:47:04\nin their homes is really critical.\n\n00:47:10\nearly detection of infection, especially\n\n00:47:16\nwe just talked about in ICU, similar here\n\n00:47:22\ndietary patterns.\n\n00:47:26\nby AI and smart sensors.\n\n00:47:33\nlabor shortage after smart sensors.\n\n00:47:40\ngathering system, but they cannot go there and help to turn",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_18_human_centered_ai::seg6",
+      "global_kp_id": "kp_privacy_preserving_visual_ai",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_augmentation_over_replacement",
+      "name": "AI augmentation over replacement",
+      "description": "Smart sensing and machine learning can compensate for labor shortages by supporting monitoring and decision-making in clinical and home settings. The lecture's closing principle is that AI should enhance human capability and care rather than simply replace people.",
+      "track_tags": [
+        "ambient_intelligence",
+        "healthcare_ai",
+        "human_centered_ai",
+        "societal_impact"
+      ],
+      "domain_tags": [
+        "ai_ethics",
+        "computer_vision",
+        "digital_health",
+        "robotics"
+      ],
+      "career_path_tags": [
+        "healthcare_ai",
+        "policy",
+        "product",
+        "research"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because aI augmentation over replacement synthesizes smart sensing and machine learning can compensate for labor shortages by supporting monitoring and decision-making in clinical and home settings into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp12",
+        "local::lecture_18_human_centered_ai::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_privacy_preserving_visual_ai",
+      "name": "Privacy-preserving visual AI",
+      "description": "Vision systems should preserve useful activity signals while withholding identity or other sensitive information.",
+      "track_tags": [
+        "privacy",
+        "responsible_ai"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "healthcare_ai",
+        "research",
+        "security"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because privacy-preserving visual AI clarifies vision systems should preserve useful activity signals while withholding identity or other sensitive information, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp11"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.3,
+    0.6
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L18_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture18-human-centered-ai_transcript.txt"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_18_human_centered_ai::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về human-centered AI, vai trò của thị giác trong tiến hóa, và vì sao visual intelligence là một trục trung tâm; không cần cắt clip riêng.",
+  "question_bank": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Tư duy human-centered AI nhấn mạnh điều gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Đặt AI trong góc nhìn con người thay vì chỉ giới thiệu thêm thuật toán mới.",
+        "Chứng minh một kiến trúc mới vượt trội hơn mọi mô hình thị giác trước đó.",
+        "Trình bày chi tiết công thức tối ưu cho nhận dạng đối tượng.",
+        "So sánh benchmark giữa các bộ dữ liệu segmentation hiện đại."
+      ],
+      "answer_index": 0,
+      "explanation": "Phần mở đầu dùng bài giảng như một buổi nhìn lại rộng hơn: AI được đặt trong mối liên hệ với con người, lịch sử, tác động và giá trị, thay vì chỉ thêm một kỹ thuật mới.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "human perspective",
+          "not going to teach"
+        ],
+        "timestamps": [
+          "00:00:18",
+          "00:00:42"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Ví dụ về Cambrian explosion minh họa điều gì về vai trò của thị giác trong tiến hóa trí thông minh?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Sự xuất hiện của thị giác tạo ra một cuộc chạy đua tiến hóa, làm bùng nổ đa dạng loài.",
+        "Thị giác chỉ trở nên quan trọng sau khi con người phát minh máy ảnh.",
+        "Khả năng nghe mới là nguyên nhân chính khiến động vật đa dạng hóa mạnh.",
+        "Tiến hóa của thị giác hầu như không liên quan đến hành vi sinh tồn."
+      ],
+      "answer_index": 0,
+      "explanation": "Ví dụ này nhấn mạnh rằng khi động vật bắt đầu nhìn thấy môi trường, săn mồi và né tránh trở nên hiệu quả hơn, từ đó tạo áp lực chọn lọc rất mạnh và thúc đẩy đa dạng hóa.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "driver of the Cambrian",
+          "evolutionary arms race"
+        ],
+        "timestamps": [
+          "00:01:23",
+          "00:01:56"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao visual intelligence được xem là một trục trung tâm của human-centered AI?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "AI thấy điều con người thấy, điều con người không thấy, và điều con người muốn thấy.",
+        "AI cho thị giác, AI cho ngôn ngữ, và AI cho tối ưu hóa số.",
+        "Học có giám sát, học không giám sát, và học tăng cường.",
+        "Phân loại, phát hiện, và sinh ảnh."
+      ],
+      "answer_index": 0,
+      "explanation": "Ba phần này tạo nên khung human-centered cho toàn bài: bắt đầu từ việc mô phỏng năng lực của con người, mở rộng sang năng lực vượt giới hạn con người, rồi quay về câu hỏi giá trị và nhu cầu thực sự của con người.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "three chunks",
+          "want to see"
+        ],
+        "timestamps": [
+          "00:04:18",
+          "00:04:44"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q1",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q2",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg1-q3",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    }
+  ]
+}

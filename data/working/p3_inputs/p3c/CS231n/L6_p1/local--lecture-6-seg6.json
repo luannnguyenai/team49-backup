@@ -1,0 +1,108 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_6",
+    "lecture_title": "Training CNNs and CNN Architectures",
+    "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8"
+  },
+  "unit": {
+    "unit_id": "local::lecture_6::seg6",
+    "course_id": "stanford_cs231n_spring_2025",
+    "name": "Weight initialization for stable CNN training",
+    "description": "Shows why too-small or too-large initial weights destabilize activations and introduces Kaiming initialization as the practical default.",
+    "summary": "This segment explains weight initialization as the final step needed to make an architecture ready for training, with the central goal of keeping activation statistics stable across layers [ts=2531s][ts=2604s]. If weights are initialized too small, the mean and standard deviation of activations shrink toward zero as depth increases [ts=2565s][ts=2600s]. If initialized too large, activations grow layer by layer and quickly become unmanageable in very deep models [ts=2608s][ts=2637s]. The practical recipe presented is Kaiming/MSRA initialization, with scale sqrt(2 / D_in) for ReLU networks, which approximately preserves activation mean and standard deviation across depth [ts=2674s][ts=2736s]. The same principle applies to convolutional layers by taking D_in from the kernel dimensions and channel count [ts=2777s][ts=2796s].",
+    "key_points": [
+      {
+        "text": "Too-small weight initialization causes activation means and standard deviations to shrink toward zero in deeper layers.",
+        "timestamp_s": 2592,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Too-large weight initialization makes activations grow layer by layer and destabilizes deep networks.",
+        "timestamp_s": 2624,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Kaiming/MSRA initialization uses std = sqrt(2 / D_in) for ReLU-style networks.",
+        "timestamp_s": 2677,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The purpose of Kaiming initialization is to keep activation statistics relatively constant across layers.",
+        "timestamp_s": 2712,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "For convolutional layers, D_in is computed from kernel height, kernel width, and input channels.",
+        "timestamp_s": 2777,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=6",
+      "start_s": 2528,
+      "end_s": 2949
+    },
+    "difficulty": 0.68,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "transcript_slice": "00:42:11\nand prime them to be ready for training is how do you actually\n\n00:42:19\nSo depending on what values you choose,\n\n00:42:27\nwhich would cause significant issues for your model\n\n00:42:30\nSo here it's basically a six layer network where we have\n\n00:42:40\nAnd this is just six layers of fully connected model\n\n00:42:45\nHere this is getting a unit Gaussian random\n\n00:42:50\nto get very small values close to 0\n\n00:42:55\nSo if you plot the forward pass of this model,\n\n00:43:02\nyou get a relatively high-- because there's ReLU\n\n00:43:08\nbut you'll have a mean and standard deviation\n\n00:43:12\nBut as each layer progresses, because we\n\n00:43:17\nit becomes smaller and smaller mean and standard deviation.\n\n00:43:21\nall of these to be the same for each layer\n\n00:43:26\nnicer to solve.\n\n00:43:33\ncan anyone imagine what might be the issue here if we set it\n\n00:43:38\nSo when it's too small, it goes to 0, basically.\n\n00:43:44\nYeah, basically the activations get larger and larger\n\n00:43:48\nSo if you plot it here, you can see that by the end\n\n00:43:54\nAnd if you're training 152 layer ResNet and you\n\n00:44:00\nSo how do you actually do this?\n\n00:44:07\nis 0.022 or something, but how would you actually know that\n\n00:44:13\nThere are a few different ways you can initialize weights.\n\n00:44:18\ntoday in class, but no, there are other ones.\n\n00:44:22\nis the dimension of your values here.\n\n00:44:33\nconnected layer versus a 2048.\n\n00:44:37\nis called Kaiming Initialization.\n\n00:44:42\nSo Kaiming, he was very famous.\n\n00:44:47\nresearcher.\n\n00:44:50\nscientists of the last 10 or 15 years, maybe the most.\n\n00:44:57\nAnd he also came up with this idea\n\n00:45:05\nover your input dimension size.\n\n00:45:09\nfor how they derived this and showed that with a ReLU\n\n00:45:15\nand mean to be relatively constant throughout the layers.\n\n00:45:20\nso you can almost think of this as a magic formula\n\n00:45:24\nAnd if you want to know the derivation,\n\n00:45:28\nfeel free to look into that, but you can just take our word.\n\n00:45:33\nbut it does this desired effect where the mean and standard\n\n00:45:37\nAnd you can also imagine that for any given setup,\n\n00:45:42\ntry to find what is the value here.\n\n00:45:50\nhow you initialize weights, how you\n\n00:45:53\nto form a CNN architecture, which activation functions\n\n00:46:01\nSo I think already we covered quite a few topics.\n\n00:46:04\nto see if there's any questions about these.\n\n00:46:08\nactually much less dense than the first part.\n\n00:46:13\nof nice practical tips for when you're training these models.\n\n00:46:19\nfor CNNs?\n\n00:46:23\nbut your dimension n here is the size of your kernel.\n\n00:46:29\nsay 6 would be 3 times 3 times 6, but it's the same idea.\n\n00:46:36\ndepending on the layer, the type of layer.\n\n00:46:43\nin each operation, but it does depend on the layer.\n\n00:46:49\nbut this is specifically for CNNs\n\n00:46:54\nYeah, so the question is, why do your activations\n\n00:46:59\nSo you imagine at each layer of your initialized network\n\n00:47:08\nAnd if they're very large, then when you do your--\n\n00:47:15\nAnd that doesn't actually cap the outputs of your layer.\n\n00:47:23\nSo if you have too large of a set of values\n\n00:47:29\nbecause you're initializing all the weights\n\n00:47:35\nyou'll be multiplying one set of large values\n\n00:47:40\nthat it becomes larger at each iteration afterwards.\n\n00:47:47\nwhere because they're all initialized randomly\n\n00:47:53\nand you would want in a simple recurrence relation,\n\n00:47:56\nBut because we have a vector of values\n\n00:48:01\nit depends on the dimension of the vector, what\n\n00:48:10\nhave basically a standard deviation for what\n\n00:48:14\nThen you remove all the negative ones\n\n00:48:18\nand if you have a really large values,\n\n00:48:22\nSo when you remove the bottom half of it,\n\n00:48:29\nDid that make sense to--\n\n00:48:33\nMostly, sorry.\n\n00:48:35\nIt's actually not too bad to read I think.\n\n00:48:43\nhere is that normalization would solve this activation issue\n\n00:48:48\nmight be harder to optimize.\n\n00:48:54\npost explaining this in more detail,\n\n00:48:58\nIt would solve, I think, this particular issue,\n\n00:49:03\nYeah, it's a good question.\n\n00:49:09\nCool.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_6::seg6",
+      "global_kp_id": "kp_kaiming_msra_initialization",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_kaiming_msra_initialization",
+      "name": "Kaiming/MSRA initialization",
+      "description": "A ReLU-aware initialization rule that scales weights by sqrt(2 / D_in) to keep activation statistics stable through depth.",
+      "track_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "domain_tags": [
+        "cnn_training",
+        "initialization"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because kaiming/MSRA initialization clarifies a ReLU-aware initialization rule that scales weights by sqrt(2 / D_in) to keep activation statistics stable through depth, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_6::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.53,
+    0.83
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L6_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture06-cnn-architectures_transcript.txt"
+  }
+}

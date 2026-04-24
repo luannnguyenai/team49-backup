@@ -227,89 +227,49 @@ class QuestionSummary(BaseModel):
 
 
 # ===========================================================================
-# Content API response schemas  (GET /api/modules, /api/topics)
+# Canonical content route response schemas
 # ===========================================================================
 
 
-class TopicSummary(BaseModel):
-    """Lightweight topic row — used inside ModuleDetailResponse."""
-
-    model_config = {"from_attributes": True}
+class LearningUnitSelectionItem(BaseModel):
+    """Learning-unit row used by canonical section detail and selection UIs."""
 
     id: uuid.UUID
-    name: str
+    canonical_unit_id: str | None = None
+    title: str
     description: str | None
     order_index: int
     estimated_hours_beginner: float | None
     estimated_hours_intermediate: float | None
 
 
-class ModuleListItem(BaseModel):
-    """One row in GET /api/modules."""
-
-    model_config = {"from_attributes": True}
+class CourseSectionListItem(BaseModel):
+    """One row in GET /api/course-sections."""
 
     id: uuid.UUID
-    name: str
+    course_id: uuid.UUID
+    canonical_course_id: str | None = None
+    title: str
     description: str | None
     order_index: int
-    prerequisite_module_ids: list[uuid.UUID] | None
-    topics_count: int
+    prerequisite_section_ids: list[uuid.UUID] | None
+    learning_units_count: int
 
 
-class ModuleDetailResponse(BaseModel):
-    """GET /api/modules/{id} — full module with topic list."""
+class CourseSectionDetailResponse(CourseSectionListItem):
+    """GET /api/course-sections/{id} — section with ordered learning units."""
 
-    model_config = {"from_attributes": True}
-
-    id: uuid.UUID
-    name: str
-    description: str | None
-    order_index: int
-    prerequisite_module_ids: list[uuid.UUID] | None
-    topics_count: int
-    topics: list[TopicSummary]
+    learning_units: list[LearningUnitSelectionItem]
     created_at: datetime
     updated_at: datetime
 
 
-class PrerequisiteTopic(BaseModel):
-    """Resolved prerequisite topic node for graph rendering."""
+class LearningUnitContentResponse(BaseModel):
+    """GET /api/learning-units/{id}/content — canonical learning material."""
 
-    model_config = {"from_attributes": True}
-
-    id: uuid.UUID
-    name: str
-    order_index: int
-
-
-class TopicDetailResponse(BaseModel):
-    """GET /api/topics/{id} — topic detail + resolved prerequisite graph."""
-
-    model_config = {"from_attributes": True}
-
-    id: uuid.UUID
-    module_id: uuid.UUID
-    name: str
-    description: str | None
-    order_index: int
-    estimated_hours_beginner: float | None
-    estimated_hours_intermediate: float | None
-    estimated_hours_review: float | None
-    # Raw UUID list (for programmatic use)
-    prerequisite_topic_ids: list[uuid.UUID] | None
-    # Resolved nodes (for DAG rendering)
-    prerequisites: list[PrerequisiteTopic]
-    created_at: datetime
-    updated_at: datetime
-
-
-class TopicContentResponse(BaseModel):
-    """GET /api/topics/{id}/content — learning material + video."""
-
-    topic_id: uuid.UUID
-    topic_name: str
-    module_id: uuid.UUID
-    module_name: str
+    learning_unit_id: uuid.UUID
+    title: str
+    section_id: uuid.UUID
+    section_title: str
     content_markdown: str | None
     video_url: str | None

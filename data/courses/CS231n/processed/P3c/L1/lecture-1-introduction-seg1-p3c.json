@@ -1,0 +1,166 @@
+{
+  "unit_id": "local::lecture_1_introduction::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript supports three cautious reinforcement questions about course scope, the role of visual intelligence within AI, and why visual AI ideas transfer across domains. A separate video clip is not necessary.",
+  "question_bank": [
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "course_specific",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What best describes the stated scope of CS231n in this unit?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The core overlap between computer vision and deep learning",
+        "The complete breadth of machine learning across all domains",
+        "Only the history of artificial intelligence",
+        "A general survey of every area of computer science"
+      ],
+      "answer_index": 0,
+      "explanation": "The focus is narrower than all of machine learning or all of computer vision. It centers on where deep learning methods meet core computer vision problems.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs231n_focuses_on_the_intersection_of_deep_learning_and_computer_vision",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "It's about computer vision and deep learning",
+          "core intersection of these two"
+        ],
+        "timestamps": [
+          "00:00:40",
+          "00:02:09"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which relationship among AI, computer vision, and machine learning is most consistent with this framing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Computer vision is an important part of AI, and machine learning is a major tool for pursuing AI.",
+        "Computer vision is unrelated to AI because it only concerns camera hardware.",
+        "Machine learning replaces AI rather than contributing methods to it.",
+        "Deep learning is presented as disconnected from both machine learning and computer vision."
+      ],
+      "answer_index": 0,
+      "explanation": "Computer vision addresses visual aspects of intelligence, while machine learning provides mathematical methods used to build AI systems. This makes their overlap a natural place to study modern visual intelligence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_visual_intelligence_and_recognition",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "computer vision is very much an integral part of AI",
+          "cornerstone to intelligence",
+          "solving AI is machine learning"
+        ],
+        "timestamps": [
+          "00:01:02",
+          "00:01:10",
+          "00:01:25"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can ideas from visual AI be relevant across many different fields?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because visual intelligence problems often connect perception with domains such as robotics, medicine, education, law, and business.",
+        "Because visual AI is only useful when every field uses the same camera and the same dataset.",
+        "Because computer vision avoids machine learning and therefore stays independent of other AI methods.",
+        "Because deep learning methods are designed only for one narrow scientific discipline."
+      ],
+      "answer_index": 0,
+      "explanation": "Many real-world fields depend on interpreting visual information, so ideas from visual AI transfer beyond one application area. The same core methods can support different domains once they are adapted to the task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_visual_intelligence_and_recognition",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "apply it to whichever discipline",
+          "an interdisciplinary field",
+          "law to education and business"
+        ],
+        "timestamps": [
+          "00:00:44",
+          "00:02:20",
+          "00:02:46"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q1",
+      "global_kp_id": "kp_cs231n_focuses_on_the_intersection_of_deep_learning_and_computer_vision",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q1",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q2",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q2",
+      "global_kp_id": "kp_cs231n_focuses_on_the_intersection_of_deep_learning_and_computer_vision",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q3",
+      "global_kp_id": "kp_visual_intelligence_and_recognition",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg1::q3",
+      "global_kp_id": "kp_cs231n_focuses_on_the_intersection_of_deep_learning_and_computer_vision",
+      "role": "secondary"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+  "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for application-oriented questions about robotic foundation models, large cross-embodiment datasets, VLM-based initialization, post-training, and current limitations in generalization and speed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-17-robot-learning-seg8-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes a robot policy a foundation model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It uses only reinforcement learning and no demonstrations",
+        "It is goal-conditioned and aims to generalize broadly across tasks and situations",
+        "It contains an explicit physics simulator inside the network",
+        "It avoids using language or vision pretraining"
+      ],
+      "answer_index": 1,
+      "explanation": "The distinguishing goal is breadth: the policy should take observations plus goals or instructions and behave reasonably across many scenarios, not just one narrow task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "generalize much better",
+          "something reasonable"
+        ],
+        "timestamps": [
+          "01:04:36",
+          "01:05:10"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg8-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do these robotic foundation models typically start from pretrained vision-language backbones?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because action prediction destroys semantic knowledge otherwise",
+        "Because pretrained backbones already contain broad perceptual and semantic knowledge that can be adapted for action generation",
+        "Because robot datasets are always larger than web-scale vision-language data",
+        "Because post-training is unnecessary once pretraining is done"
+      ],
+      "answer_index": 1,
+      "explanation": "The idea is to reuse strong visual and semantic priors from large-scale pretraining, then adapt them to the robot-action setting instead of learning everything from scratch.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "vision-language model",
+          "adding action prediction"
+        ],
+        "timestamps": [
+          "01:08:31",
+          "01:09:05"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg8-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What limitation is emphasized about current large robot policies?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are already faster than humans in all settings",
+        "One giant policy is likely sufficient for all home robotics needs today",
+        "They often inherit slow teleoperated behavior and may still need higher-level structure beyond one monolithic policy",
+        "They cannot use post-training on task-specific data"
+      ],
+      "answer_index": 2,
+      "explanation": "The segment warns that current policies inherit constraints from the data they are trained on and may need additional abstraction or structure to scale to broad, real household tasks.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "teleoperated demonstrations are slower",
+          "one giant policy may not be enough"
+        ],
+        "timestamps": [
+          "01:11:02",
+          "01:12:54"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-17-robot-learning-seg8-q1",
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg8-q2",
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-17-robot-learning-seg8-q3",
+      "global_kp_id": "kp_robotic_foundation_models_with_pretraining_and_post_training",
+      "role": "primary"
+    }
+  ]
+}

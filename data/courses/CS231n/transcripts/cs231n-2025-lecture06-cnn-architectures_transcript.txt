@@ -1,0 +1,6151 @@
+Title: Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 6: CNN Architectures
+URL: https://www.youtube.com/watch?v=aVJy4O5TOk8
+Video ID: aVJy4O5TOk8
+============================================================
+
+00:00:05
+Hi, everyone.
+
+00:00:06
+My name is Zain.
+
+00:00:07
+I realized I actually
+didn't introduce myself
+
+00:00:09
+on the first lecture I gave,
+which was lecture three,
+
+00:00:12
+but I'm one of the
+co-instructors for the course.
+
+00:00:14
+My name is Zain Durante.
+
+00:00:15
+I'm co-advised by
+Ehsan and Fei-Fei.
+
+00:00:17
+I'm a fourth year PhD student
+at Stanford and in this lecture
+
+00:00:22
+today, lecture six,
+we'll be talking
+
+00:00:24
+about training convolutional
+neural networks
+
+00:00:26
+and also CNN architectures.
+
+00:00:29
+So I would say this
+lecture is really broken up
+
+00:00:33
+into two different components.
+
+00:00:34
+The first one is
+just telling you
+
+00:00:36
+how to piece together all of
+the different building blocks
+
+00:00:39
+that we've learned like
+convolutional layers,
+
+00:00:42
+linear layers or
+fully connected layers
+
+00:00:43
+together to create
+a CNN architecture.
+
+00:00:46
+We'll go through some
+examples and then
+
+00:00:48
+also we'll talk about
+how you actually
+
+00:00:50
+train these and all the
+steps involved there.
+
+00:00:53
+So as I mentioned
+before, we'll have
+
+00:00:54
+basically two different topics.
+
+00:00:56
+The first one is
+how to build CNNs
+
+00:00:58
+and by this I mean how
+do you actually define
+
+00:00:59
+your CNN architecture to
+set it up to be trained.
+
+00:01:02
+And then the second
+set of topics
+
+00:01:04
+today is how do you train CNNs?
+
+00:01:05
+So starting with the
+first set of topics here,
+
+00:01:09
+we'll go through the layers in
+convolutional neural networks.
+
+00:01:12
+And if you recall
+from last lecture,
+
+00:01:14
+we learned about the key
+layer in these models,
+
+00:01:17
+which is the convolution layer.
+
+00:01:18
+And the way that these layers
+work is they have these filters.
+
+00:01:23
+You have a predefined
+number of filters per one
+
+00:01:26
+of these convolution
+layers, in this case six.
+
+00:01:28
+They match the depth of
+your input data here.
+
+00:01:31
+So in this case, we have
+a 32 by 32 RGB image
+
+00:01:34
+so we three depth channels.
+
+00:01:35
+Each of these filters
+slides across the image
+
+00:01:38
+and calculates a
+score at each point.
+
+00:01:40
+At that location
+in the image, you
+
+00:01:42
+take the dot product of
+the values in the filter
+
+00:01:44
+with the values in the image.
+
+00:01:45
+So you multiply all these values
+together, you sum them together
+
+00:01:48
+and then you add a bias term.
+
+00:01:49
+And this is how you calculate
+each value in your output
+
+00:01:54
+activation map on the right.
+
+00:01:56
+So you have these
+sliding windows
+
+00:01:57
+that go across the image.
+
+00:01:59
+They calculate a
+score at each position
+
+00:02:01
+and that's how you get
+these activation maps.
+
+00:02:04
+And you have one
+per each filter.
+
+00:02:06
+Normally, we'll
+do a sort of ReLU
+
+00:02:08
+or a non-linearity activation
+function at the end here.
+
+00:02:11
+So this is from last lecture.
+
+00:02:13
+I won't spend too
+much time on it.
+
+00:02:15
+The question is,
+for images the depth
+
+00:02:17
+is equal to the number
+of channels RGB,
+
+00:02:19
+but here the depth is
+6 for the output here.
+
+00:02:23
+So if we had a second
+convolution layer afterwards
+
+00:02:25
+they would need
+to be filters that
+
+00:02:27
+go across all six of
+these activation maps
+
+00:02:31
+so the next layer
+would be a depth of 6.
+
+00:02:34
+OK, and then the second
+layer we talked about,
+
+00:02:36
+which is much simpler than
+the convolution layer,
+
+00:02:38
+is this idea of a pooling layer.
+
+00:02:40
+So here it's still
+this filter that we're
+
+00:02:43
+sliding across the image, 2
+by 2 filter with stride 2.
+
+00:02:47
+So we're skipping over.
+
+00:02:48
+We're not doing every
+single location.
+
+00:02:49
+And here is a max pooling.
+
+00:02:51
+So we're just taking the
+max of each of these areas
+
+00:02:53
+and that's the
+value we get here.
+
+00:02:55
+Or you could do an
+average pooling.
+
+00:02:57
+These are both commonly
+used, I would say.
+
+00:02:59
+And depending on
+the architecture,
+
+00:03:01
+you would probably
+just, if you're
+
+00:03:02
+creating new architecture,
+you would try both of them
+
+00:03:03
+and see what
+performs better here.
+
+00:03:05
+But the basic idea
+is to consolidate
+
+00:03:07
+among the height and width
+dimensions for your image.
+
+00:03:11
+OK, so we've basically
+gone over at this point
+
+00:03:15
+in the course all the
+top row here, which
+
+00:03:17
+is convolution layers,
+pooling layers and also
+
+00:03:20
+the fully connected layers.
+
+00:03:21
+These are the first
+layers that we
+
+00:03:22
+talked about in the
+neural networks lecture
+
+00:03:24
+where it's basically one
+matrix multiply followed
+
+00:03:27
+by an activation function.
+
+00:03:29
+And for the rest
+of this lecture,
+
+00:03:31
+I'll talk about the
+remaining layers
+
+00:03:32
+that you see in CNNs, at least
+the commonly used ones, which
+
+00:03:36
+include normalization layers,
+which I'll go into those,
+
+00:03:39
+and then also dropout,
+which is a regularization
+
+00:03:42
+technique that's used
+actually in the model
+
+00:03:44
+architecture itself.
+
+00:03:45
+And then finally, we'll revisit
+the activation functions
+
+00:03:48
+and I'll tell you about here
+are the most commonly used
+
+00:03:50
+ones both historically and in
+the modern era of deep learning.
+
+00:03:55
+So starting out with
+normalization layers,
+
+00:03:57
+the basic idea
+here is we're going
+
+00:03:59
+to be calculating statistics
+like the mean and standard
+
+00:04:01
+deviation for our input
+data and then using
+
+00:04:05
+those to normalize the data.
+
+00:04:06
+And then we'll
+basically learn what
+
+00:04:10
+is the optimal
+distribution for the model
+
+00:04:13
+to learn at that point.
+
+00:04:15
+So very concretely
+we learn parameters
+
+00:04:18
+that will scale
+and shift our input
+
+00:04:19
+data by a learned mean and a
+learned standard deviation.
+
+00:04:24
+So how all of these
+normalization layers work is
+
+00:04:27
+there's two steps.
+
+00:04:28
+The first is to normalize
+the data coming in
+
+00:04:31
+to be a unit Gaussian, so mean
+0, our standard deviation 1.
+
+00:04:34
+And then we will
+scale and shift it.
+
+00:04:36
+So multiply by some value
+to increase or decrease
+
+00:04:40
+the standard deviation
+and then shift
+
+00:04:42
+it to change where the mean is.
+
+00:04:43
+And all normalization
+layers do this technique,
+
+00:04:46
+but the way that
+they differ is how
+
+00:04:47
+they calculate the statistics.
+
+00:04:49
+So how are you calculating the
+mean and standard deviation
+
+00:04:52
+and which values
+are you applying
+
+00:04:53
+these calculated statistics to,
+but all normalization layers are
+
+00:04:56
+doing this high level process.
+
+00:04:59
+So I'll talk about
+layer norm, which
+
+00:05:03
+is the most commonly used
+normalization layer I would
+
+00:05:06
+say today in deep learning.
+
+00:05:07
+And it's really commonly used
+in transformers specifically.
+
+00:05:11
+And so you can imagine you
+have some data coming in,
+
+00:05:13
+x, which is a batch size of n.
+
+00:05:16
+So we have n samples
+coming into our model.
+
+00:05:19
+And each of these are
+vectors of dimension D.
+
+00:05:22
+So what LayerNorm
+does is we calculate
+
+00:05:25
+a mean and standard deviation
+for each of our samples
+
+00:05:29
+separately.
+
+00:05:29
+So we're calculating
+what is the mean
+
+00:05:32
+along the depth or
+the dimension D here
+
+00:05:35
+and what is the
+standard deviation.
+
+00:05:37
+Then we learn parameters.
+
+00:05:40
+And so these are
+learnable parameters
+
+00:05:42
+learned via gradient
+descent in our model
+
+00:05:45
+to then apply to each sample.
+
+00:05:47
+So after we calculate
+our statistics
+
+00:05:49
+in this way, treating
+each sample separately
+
+00:05:51
+to calculate the mean
+and standard deviation,
+
+00:05:54
+we then apply these learned
+scale and shift or parameters
+
+00:05:59
+here.
+
+00:06:00
+So we subtract the mean and
+divide by the standard deviation
+
+00:06:03
+within our input
+data to normalize it
+
+00:06:06
+and then we apply the scale
+here with multiplication
+
+00:06:09
+and the shift.
+
+00:06:10
+So this is the idea
+behind LayerNorm.
+
+00:06:13
+And at a high level idea all of
+these different normalization
+
+00:06:19
+layers are all computing
+very similar things,
+
+00:06:22
+but the main difference
+is how are they
+
+00:06:25
+computing the mean and
+standard deviation.
+
+00:06:28
+So this is a really
+nice visualization
+
+00:06:30
+from a paper called Group
+Normalization that introduces
+
+00:06:33
+a new way to normalize.
+
+00:06:35
+Its I would say not so
+commonly used these days,
+
+00:06:38
+but this is actually
+a really great way
+
+00:06:39
+to gain intuition about how
+these different normalization
+
+00:06:42
+layers are different.
+
+00:06:43
+So for LayerNorm I described
+the really simple case
+
+00:06:47
+where we just have vectors
+that were normalizing,
+
+00:06:50
+but in the case for
+convolutional neural networks,
+
+00:06:52
+we have a channel
+dimension or the depth
+
+00:06:56
+and the height and the width
+or the spatial dimensions
+
+00:06:58
+of the image.
+
+00:06:59
+So what LayerNorm does
+is for each sample,
+
+00:07:02
+we're still processing
+it separately
+
+00:07:04
+and we're calculating
+the mean across all
+
+00:07:07
+of the channels, all of the
+heights and all the widths.
+
+00:07:10
+So if we look back
+into this diagram here,
+
+00:07:14
+you would basically
+be calculating
+
+00:07:18
+one mean and one
+standard deviation
+
+00:07:22
+over all of these values.
+
+00:07:23
+So for each of our
+input data points
+
+00:07:26
+we're calculating one mean
+and one standard deviation
+
+00:07:28
+across all of the channels,
+all of the height and width
+
+00:07:31
+dimensions.
+
+00:07:31
+So this is what
+LayerNorm is doing.
+
+00:07:33
+But you could imagine feasibly
+that you could calculate
+
+00:07:36
+these statistics differently.
+
+00:07:38
+BatchNorm, you're
+taking each channel
+
+00:07:41
+so each channel is being
+calculated as one mean and one
+
+00:07:44
+standard deviation.
+
+00:07:45
+And you're applying it
+just to that channel
+
+00:07:46
+and so you're averaging across
+all the data in your batch.
+
+00:07:49
+InstanceNorm is even more
+granular and then a GroupNorm.
+
+00:07:52
+So I just want to point
+out all these layers
+
+00:07:54
+are kind of trying to do
+the same thing where you're
+
+00:07:57
+basically normalizing
+your data and then
+
+00:07:58
+having these learnable scaling
+and shifting parameters,
+
+00:08:01
+but the way they do it is
+different because they're
+
+00:08:03
+calculating the statistics using
+different subsets of your input
+
+00:08:07
+data.
+
+00:08:08
+Yeah, so the question
+is for LayerNorm,
+
+00:08:10
+are we calculating one mean
+and one standard deviation
+
+00:08:12
+for each image or input data?
+
+00:08:14
+Yes, they're all
+calculated separately,
+
+00:08:17
+but for BatchNorm
+it would not be
+
+00:08:19
+the case in this example here.
+
+00:08:21
+Yeah.
+
+00:08:22
+For BatchNorm it's actually
+within the mini batch for when
+
+00:08:25
+you're doing gradient descent.
+
+00:08:26
+You have a small batch of
+data you're looking at.
+
+00:08:28
+You feed it into your model.
+
+00:08:30
+You're calculating
+the per channel
+
+00:08:34
+mean and standard
+deviation based on all
+
+00:08:37
+of the data in your batch.
+
+00:08:41
+Yeah, I think this is a good--
+if you can understand this
+
+00:08:43
+diagram, I think you understand
+what all the different
+
+00:08:46
+normalization layers are doing,
+so it might be worthwhile after
+
+00:08:49
+lecture if you still
+don't fully understand it,
+
+00:08:51
+just to go through and make
+sure you understand what--
+
+00:08:54
+and shaded in blue,
+these are the values
+
+00:08:56
+we're both calculating our
+statistics over and then
+
+00:08:58
+applying the mean and
+standard deviations to.
+
+00:09:00
+Yeah, one final question
+and then we'll go on.
+
+00:09:02
+For channel, same
+has the layers?
+
+00:09:05
+So channel here
+is the depth here.
+
+00:09:10
+So the number of values you
+have at each spatial location.
+
+00:09:21
+OK, cool.
+
+00:09:23
+So we talked about
+normalization layers.
+
+00:09:27
+The key idea is you're
+calculating the statistics,
+
+00:09:29
+applying them to your input
+data and then learning
+
+00:09:33
+a scale and shift parameter
+that you then apply.
+
+00:09:37
+So the next type of layer we'll
+talk about is called dropout.
+
+00:09:41
+And this is a regularization
+layer in CNN's.
+
+00:09:44
+And this is the final
+layer that you'll
+
+00:09:46
+need to learn in
+order to-- basically,
+
+00:09:48
+we can start going through
+all these different CNN
+
+00:09:50
+architectures that people
+have created over the years.
+
+00:09:53
+So with dropout,
+the basic idea is
+
+00:09:56
+to add randomization
+during the training process
+
+00:09:59
+that we then take
+away at test time.
+
+00:10:01
+And the goal is to make
+it harder for the model
+
+00:10:03
+to learn the training data, but
+then it will generalize better.
+
+00:10:06
+So this is a form
+of regularization.
+
+00:10:09
+The way we do it concretely
+is that in each forward pass
+
+00:10:12
+of our layer, we'll
+actually randomly zero out
+
+00:10:15
+some of the outputs or
+activations from that layer.
+
+00:10:19
+And the main parameter you
+have for this dropout layer,
+
+00:10:24
+which is just a
+fixed hyperparameter,
+
+00:10:25
+is the probability of
+dropping out the values.
+
+00:10:28
+And 0.5 is probably
+the most common or 0.25
+
+00:10:32
+is also commonly used here.
+
+00:10:34
+So you're just dropping out a
+fixed percentage of the values
+
+00:10:37
+here.
+
+00:10:37
+And so going forward to the
+next layer these would be 0.
+
+00:10:41
+And so you don't really need
+to calculate the values here.
+
+00:10:45
+So I mean, basically all the
+outputs here are 0 at this point
+
+00:10:50
+so there's some tricks you can
+do with masking so you don't
+
+00:10:52
+even need to calculate
+the values because 0
+
+00:10:54
+times any value will be 0.
+
+00:10:57
+So I think in general you
+might ask, why does this work?
+
+00:11:01
+And I would say this is more of
+an empirical thing than a well
+
+00:11:07
+studied from a
+theoretical standpoint,
+
+00:11:11
+but there are
+actually some ways you
+
+00:11:13
+can view what dropout is
+doing to gain intuition
+
+00:11:16
+of why this might be useful.
+
+00:11:17
+So it basically forces
+your network to--
+
+00:11:21
+you can imagine it forces it to
+have redundant representations.
+
+00:11:24
+So if we have a list of features
+that we're learning at a given
+
+00:11:27
+layer, say the layer right
+before the output of our model,
+
+00:11:31
+and we have a CNN that is
+basically extracting each
+
+00:11:34
+of these features so it
+can detect if there's
+
+00:11:37
+ears in the image or if
+there's a tail, if it's furry,
+
+00:11:40
+it has claws and
+you want your model
+
+00:11:43
+to output the probability
+of a cat score.
+
+00:11:45
+So one of the things
+that's useful about this
+
+00:11:47
+is because some of these
+values might randomly
+
+00:11:49
+be dropped out during training.
+
+00:11:51
+Your model can't over
+rely on certain features
+
+00:11:53
+being present in
+some of the classes
+
+00:11:56
+and actually needs to
+learn a more broad set
+
+00:11:59
+of correspondences between
+your features and your output
+
+00:12:02
+classes.
+
+00:12:03
+So the model can't just
+hard focus on, OK, well,
+
+00:12:07
+if it has an ear and is
+furry, it just so happens
+
+00:12:11
+that these are always cats
+or something like this
+
+00:12:14
+or if it has claws
+and it has an ear,
+
+00:12:17
+it'll almost always be
+a cat on your data set.
+
+00:12:20
+So it'll actually
+help you generalize
+
+00:12:22
+better to new features, despite
+the fact that in your data
+
+00:12:25
+set there might actually be
+really strong correlations
+
+00:12:28
+between the codependency of
+certain features and your output
+
+00:12:30
+class.
+
+00:12:31
+By having dropout,
+you're essentially
+
+00:12:33
+making it so the
+model can't rely
+
+00:12:35
+on these during
+the training phase
+
+00:12:36
+because it won't always see
+the pairs of features together.
+
+00:12:40
+So this is an example for cat.
+
+00:12:43
+And the question is if we had
+something like tree instead
+
+00:12:46
+how would you determine
+which features to drop out?
+
+00:12:48
+So the dropping out part is
+actually completely random
+
+00:12:52
+so we're not making
+any choices about this.
+
+00:12:54
+It's just in this case 50% of
+your features at any given step
+
+00:12:59
+will be dropped
+out and set to 0.
+
+00:13:01
+So yeah, you don't
+have to make choices
+
+00:13:04
+about it, which is kind of nice,
+but it is completely random.
+
+00:13:08
+How would the model
+know if you're only
+
+00:13:10
+seeing a subset of the features
+like tail and claw here?
+
+00:13:13
+The point is you will actually
+do worse on the training data
+
+00:13:15
+because you're only seeing
+a subset of the features.
+
+00:13:18
+So it does make the
+model worse by not having
+
+00:13:20
+all the information,
+but then it does better
+
+00:13:22
+at test time, this idea.
+
+00:13:23
+So worst training
+time and better
+
+00:13:25
+and test time
+because at test time
+
+00:13:27
+you're basically no longer
+having this drop out.
+
+00:13:30
+So the final component
+here, which maybe I
+
+00:13:32
+should have explained first
+before fielding questions,
+
+00:13:35
+is the idea at test time
+you're no longer dropping out
+
+00:13:38
+any of the values.
+
+00:13:39
+So this is randomness that we're
+adding during the training phase
+
+00:13:41
+only.
+
+00:13:41
+Then at test time
+we're never masking
+
+00:13:45
+any of the output activations
+and we're removing this dropout
+
+00:13:49
+idea altogether.
+
+00:13:50
+Now one thing we need to note is
+that because if we were dropping
+
+00:13:54
+out 50% of the activations
+during training time,
+
+00:13:57
+at test time, you're
+basically having
+
+00:13:58
+50% more values that are being
+input to each of your layers.
+
+00:14:04
+And so this can cause issues
+if you don't scale it.
+
+00:14:06
+So what you need to do is
+multiply by the probability
+
+00:14:09
+of dropout so that the
+magnitude of the values coming
+
+00:14:14
+into each layer is preserved
+during training and test time.
+
+00:14:17
+Otherwise, if you're
+dropping 50% of the values
+
+00:14:19
+and then at test time, you
+just include all of them,
+
+00:14:21
+you'll get really weird
+behavior because you'll
+
+00:14:24
+be seeing much larger magnitude
+of inputs than before.
+
+00:14:27
+Yeah, so what about
+for backward prop?
+
+00:14:30
+So for back prop when you
+have these zeroed values,
+
+00:14:34
+yeah, it's like you don't
+need to traverse that path
+
+00:14:40
+of your directed graph anymore.
+
+00:14:41
+It's very similar to ReLU.
+
+00:14:43
+If you have a zeroed
+value at that point
+
+00:14:46
+the gradient becomes 0.
+
+00:14:47
+So anything further back in
+your computational graph,
+
+00:14:54
+there's no gradients
+calculated at that point.
+
+00:14:56
+If you're dropping out
+certain values or activations,
+
+00:15:01
+the weights associated with
+those specific activations
+
+00:15:03
+will not be updated
+during gradient descent
+
+00:15:06
+if you're dropping them out.
+
+00:15:08
+So the question is--
+
+00:15:10
+maybe I'll reframe it.
+
+00:15:11
+What are we doing at test time?
+
+00:15:13
+So at test time, we are using
+all of the output activations.
+
+00:15:17
+We're not dropping
+them out anymore,
+
+00:15:18
+but we need to scale by the
+probability of drop out.
+
+00:15:21
+So we multiply each of
+our output activations
+
+00:15:23
+by this p value because now
+we're using all of them.
+
+00:15:26
+So otherwise you
+can imagine you have
+
+00:15:29
+each node is seeing a
+significantly higher number
+
+00:15:32
+of inputs than it did during
+training at test time.
+
+00:15:35
+So you need to multiply
+by this p value
+
+00:15:37
+to maintain the same magnitude
+of your inputs coming in.
+
+00:15:41
+And the variance
+stays the same in all
+
+00:15:43
+these different properties.
+
+00:15:44
+It works very nicely
+if you do it like this.
+
+00:15:47
+So the question is, can you just
+add noise to the image instead?
+
+00:15:50
+The answer is yes
+and we'll go over how
+
+00:15:51
+to do that in future slides.
+
+00:15:53
+Yes, that's a great idea
+to add noise to your image
+
+00:15:57
+OK, some specific code here.
+
+00:15:59
+I won't go over this because
+we already mentioned this,
+
+00:16:01
+but you're dropping a p
+percentage of your activations
+
+00:16:06
+here and then you multiply
+here at test time.
+
+00:16:11
+The next topic I'll talk
+about is activation functions.
+
+00:16:13
+So you all have basically
+learned all of the key layers
+
+00:16:15
+now in CNNs.
+
+00:16:17
+And now we're going to be
+talking about these activation
+
+00:16:19
+functions.
+
+00:16:20
+If you remember, the whole point
+of these activation functions
+
+00:16:23
+is to introduce
+nonlinearities to our model.
+
+00:16:25
+So right now with these
+convolution operators,
+
+00:16:29
+the kernel sliding
+across the image
+
+00:16:30
+and the fully connected
+layers without activations,
+
+00:16:35
+they're all just
+linear operations
+
+00:16:37
+because they're
+multiplications and additions.
+
+00:16:39
+And the whole point of
+the activation function
+
+00:16:41
+is to add non-linearity.
+
+00:16:43
+So historically, sigmoid was a
+really commonly used activation
+
+00:16:49
+function, but there's actually
+a key problem with sigmoid
+
+00:16:52
+that is the reason why
+it's no longer used today.
+
+00:16:55
+And so sigmoid, if you
+graph it, looks like this.
+
+00:16:57
+You can see the equation in the
+top right of the slide here.
+
+00:17:01
+And the main issue is that
+empirically what happened
+
+00:17:06
+was after many
+layers of sigmoids,
+
+00:17:08
+you would get smaller
+and smaller gradients
+
+00:17:10
+as you're computing backprop.
+
+00:17:12
+So starting from the
+end, the gradients
+
+00:17:13
+are fairly large in magnitude.
+
+00:17:15
+And as you undergo multiple
+layers of backpropagation,
+
+00:17:18
+go to the initial early
+layers of your model,
+
+00:17:20
+you would get smaller
+and smaller gradients
+
+00:17:22
+as you do this process.
+
+00:17:23
+So I'll actually open this
+question up to the class.
+
+00:17:27
+This isn't a phenomenon we
+see that occurs with sigmoid.
+
+00:17:30
+And so in what
+regions in our graph
+
+00:17:33
+does sigmoid have a
+really small gradient?
+
+00:17:36
+Yeah, so very negative and very
+positive values is correct.
+
+00:17:39
+And this is actually
+a huge issue.
+
+00:17:40
+I mean, you can
+visually see here
+
+00:17:42
+in the graph the
+gradient is very flat.
+
+00:17:44
+You're taking the
+derivative here.
+
+00:17:45
+It's very small.
+
+00:17:46
+And so basically for
+almost all of our input
+
+00:17:49
+space from negative infinity
+to positive infinity
+
+00:17:52
+you have very small gradients.
+
+00:17:53
+And it's only this narrow
+range in the middle
+
+00:17:55
+where you have something
+that's non-zero
+
+00:17:58
+so it basically
+approaches 0 very quickly
+
+00:18:00
+on both ends of the extremes.
+
+00:18:02
+And so this means that if the
+values coming into sigmoid
+
+00:18:05
+are very large or
+very small, then
+
+00:18:07
+your gradient will
+be very small.
+
+00:18:11
+So this is one of
+the main reasons
+
+00:18:13
+why ReLU became super
+popular because now
+
+00:18:15
+in the positive region we don't
+have any of this behavior.
+
+00:18:19
+It's just derivative of 1 here,
+but in practice, you still
+
+00:18:24
+have this flat portion
+here on the left
+
+00:18:27
+where your gradient is 0.
+
+00:18:31
+So now we basically have
+half of our input domain.
+
+00:18:36
+Here we get a gradient
+of 1 and the other half
+
+00:18:38
+is 0, which is better
+than almost all
+
+00:18:41
+of it being 0 or very close
+to 0 except for a small region
+
+00:18:43
+in the middle.
+
+00:18:44
+So in practice
+these work better.
+
+00:18:47
+Also, it's much
+cheaper to just compute
+
+00:18:48
+a max operation between 0
+and your input value then
+
+00:18:51
+the sigmoid function.
+
+00:18:52
+So for those two reasons,
+ReLU became super popular.
+
+00:18:56
+But you still have this issue
+where for any negative input
+
+00:18:59
+you get a 0 gradient and
+so more recently there's
+
+00:19:03
+been popular activation
+functions that avoid this
+
+00:19:07
+by basically having a non-flat
+section of the activation
+
+00:19:12
+function in the nearby
+neighborhood to near 0.
+
+00:19:17
+So this is GELU, And
+there's also SELU,
+
+00:19:20
+which I'll show in a slide, but
+I won't go over the formula.
+
+00:19:23
+They look very similar.
+
+00:19:24
+The basic idea is to smoothen
+out this non-smooth jump here
+
+00:19:31
+in the derivative from
+0 to 1 at 0.0 for ReLU.
+
+00:19:35
+So this is a very sharp and
+non-smooth function with ReLU,
+
+00:19:41
+but the nice part about
+GELU is we actually
+
+00:19:44
+have non-zero gradients here.
+
+00:19:46
+And in the limit as x approaches
+infinity or negative infinity,
+
+00:19:49
+it does converge
+to ReLU as well,
+
+00:19:52
+but you get more smooth
+behavior in the middle here.
+
+00:19:55
+And specifically
+what GELU calculates
+
+00:19:57
+is this Gaussian
+error linear unit.
+
+00:20:01
+So this is the cumulative
+distribution function
+
+00:20:05
+of a Gaussian normal.
+
+00:20:06
+So if you imagine the area
+under the curve of a Gaussian,
+
+00:20:09
+that's what this phi
+of x is at any point x.
+
+00:20:11
+So if you have a
+really negative value
+
+00:20:14
+here you'll have a
+value close to 0,
+
+00:20:16
+which is why it
+converges to ReLU 0 here.
+
+00:20:19
+And at a very high
+positive value
+
+00:20:22
+it gets very close to 1,
+the area under the curve
+
+00:20:24
+so it converges to x here.
+
+00:20:26
+So this is GELU.
+
+00:20:28
+It has these nice properties
+and it converges to ReLU
+
+00:20:30
+at the extremes too.
+
+00:20:31
+And this is the main activation
+function used in transformers
+
+00:20:35
+today.
+
+00:20:38
+If you look at all of them
+and you squint, a lot of these
+
+00:20:40
+look the same.
+
+00:20:41
+The basic idea is
+something relatively flat.
+
+00:20:43
+And then in the limit, it
+approaches f of x equals x
+
+00:20:49
+and it becomes a linear line.
+
+00:20:53
+So SELU is actually
+x times sigmoid
+
+00:20:56
+of x, which also
+has this property
+
+00:20:59
+of for very negative value,
+you have something close to 0
+
+00:21:02
+and for very positive
+value it's close to 1.
+
+00:21:05
+So it's actually similar to
+the cumulative distribution
+
+00:21:08
+function for the unit
+Gaussian that is phi here.
+
+00:21:11
+So that's why the
+shapes are actually
+
+00:21:12
+really similar looking too.
+
+00:21:17
+So you might ask where are
+these activations used in CNNs
+
+00:21:20
+and the general
+answer is that they're
+
+00:21:21
+placed after linear operators.
+
+00:21:24
+So almost any time we have a
+feedforward or a linear layer
+
+00:21:27
+or a fully connected
+layer, these
+
+00:21:29
+are all words for
+the same layer,
+
+00:21:31
+so matrix multiply followed
+by a activation function.
+
+00:21:34
+Or if we have a convolutional
+layer, pretty much after these
+
+00:21:37
+is where we place the--
+
+00:21:39
+so after the
+convolutional layer,
+
+00:21:40
+after these linear layers, we'll
+put the activation function.
+
+00:21:45
+OK, so you've learned
+everything now
+
+00:21:47
+about all the
+components of CNNs.
+
+00:21:49
+And I'll now go
+through some examples
+
+00:21:51
+of how we put them
+together and how people
+
+00:21:53
+have created state of the art
+convolutional neural network
+
+00:21:56
+architectures.
+
+00:21:58
+I think this is a really
+neat slide because it
+
+00:22:00
+plots two different values.
+
+00:22:02
+So on one hand, we
+have the error rate,
+
+00:22:04
+which is these blue bars.
+
+00:22:06
+And this is over time so these
+are different models people have
+
+00:22:08
+trained on ImageNet.
+
+00:22:09
+And then you have
+these orange triangles
+
+00:22:12
+which represent the number
+of layers that models have.
+
+00:22:16
+And you can see
+at the same point
+
+00:22:17
+that we have a significant
+drop in error where we actually
+
+00:22:21
+surpass human performance
+for the first time,
+
+00:22:24
+we see a huge increase
+in the number of layers.
+
+00:22:27
+So we'll go over
+in class today how
+
+00:22:29
+they were able to
+achieve this, and what
+
+00:22:31
+were the design challenges and
+goals for how they did this.
+
+00:22:35
+Historically, AlexNet
+was the first CNN
+
+00:22:38
+based paper that worked
+really well on ImageNet.
+
+00:22:41
+And they were able to
+train it by using GPUs.
+
+00:22:43
+We talked about this
+earlier in lecture,
+
+00:22:45
+so I won't spend too much
+details around AlexNet from
+
+00:22:48
+a historical lens, but I do
+want to compare it to another
+
+00:22:51
+architecture called VGG,
+which was a really standard
+
+00:22:55
+and commonly used
+architecture in the 2010s.
+
+00:22:59
+And I think I can plot the
+two CNN architectures together
+
+00:23:05
+side by side here.
+
+00:23:06
+So in general in AI, we like
+to plot our model architectures
+
+00:23:09
+using block diagrams,
+where each block represents
+
+00:23:13
+a different layer
+or a group of layers
+
+00:23:15
+that are stacked together.
+
+00:23:17
+And it also helps
+you gain intuition
+
+00:23:19
+about what are the
+general differences just
+
+00:23:22
+at an initial glance.
+
+00:23:23
+So these orange blocks, which
+are the common ones here,
+
+00:23:26
+are 3 by 3 convolution layers.
+
+00:23:28
+So these are
+convolution layers that
+
+00:23:30
+have filters that are sliding
+across that are size 3 by 3.
+
+00:23:33
+Their stride is 1
+so they're visiting
+
+00:23:36
+every location in the image,
+not skipping over anything.
+
+00:23:39
+And they add padding
+of 1 around the outside
+
+00:23:42
+so that we're not shrinking as
+we do these convolution layers.
+
+00:23:47
+And so they also add these max
+pooling layers throughout here
+
+00:23:52
+too.
+
+00:23:52
+And you'll notice that for all
+of these after a pooling layer
+
+00:23:57
+they'll start doing two sets
+of fully connected layers
+
+00:24:01
+of dimension 4,096 followed
+by a dimension of 1,000.
+
+00:24:05
+And the reason we have 1,000 at
+the end is because ImageNet was
+
+00:24:08
+1,000 different
+image categories.
+
+00:24:10
+So we need to have scores
+for each of these categories.
+
+00:24:13
+So the final layer is
+always equal to the number
+
+00:24:16
+of classes you have for an
+image classification problem.
+
+00:24:21
+And so you can see it actually
+looks extremely similar.
+
+00:24:23
+It's just like a scaled
+up version of AlexNet
+
+00:24:26
+with more layers here.
+
+00:24:28
+And also they're now doing some
+three groups of convolutions
+
+00:24:31
+at a time, followed by
+pooling rather than two layers
+
+00:24:34
+in a pooling or even one.
+
+00:24:37
+So it's actually
+pretty remarkable
+
+00:24:39
+that there's only basically
+three different types of layers
+
+00:24:42
+in these models, but they
+perform extremely well
+
+00:24:46
+compared to anything people
+had tried before at this point.
+
+00:24:49
+So these are, I would
+say, the simplest models
+
+00:24:52
+we're going to
+discuss today, but you
+
+00:24:54
+might ask why are they
+doing 3 by 3 convolutions.
+
+00:24:57
+How do they pick this value?
+
+00:24:59
+And there is actually
+some intuition
+
+00:25:02
+behind how they chose 3
+by 3 and specifically they
+
+00:25:08
+have groups of three
+or even four of these.
+
+00:25:10
+So I'll ask you all a question.
+
+00:25:13
+What is the effective
+receptive field?
+
+00:25:16
+So we looked at receptive
+field last time,
+
+00:25:19
+but it's basically the idea of
+the parts of your input image
+
+00:25:22
+that a particular value in your
+activation map has seen before.
+
+00:25:26
+So what values have been used
+to compute the final activation
+
+00:25:30
+map after many
+layers of your model?
+
+00:25:32
+So you have three
+of these layers that
+
+00:25:34
+are all 3 by 3 convolutions
+with the sliding filter
+
+00:25:36
+with stride of 1.
+
+00:25:38
+What is the effective
+receptive field
+
+00:25:39
+of each value in our
+activation map A3 here?
+
+00:25:43
+So this is after
+the third layer.
+
+00:25:46
+So I'm showing one
+of the layers here.
+
+00:25:48
+You can see for each value in A3
+it's computed by looking at a 3
+
+00:25:52
+by 3 grid of values in A2.
+
+00:25:54
+And then conceivably for
+each one in A2 it's a 3
+
+00:25:57
+by 3 grid in A1.
+
+00:25:58
+And for each of those it's
+a 3 by 3 grid in our input.
+
+00:26:01
+So I'll let you all think
+about this for a little bit.
+
+00:26:05
+Maybe it will help to
+see the next layer here.
+
+00:26:09
+So it is actually really
+helpful to visualize this.
+
+00:26:11
+So at A1 each of
+the corners here,
+
+00:26:15
+we're calculating from
+a new 3 by 3 grid here.
+
+00:26:21
+So from our input, how large
+is this overall square?
+
+00:26:26
+7 by 7.
+
+00:26:27
+Yeah, exactly.
+
+00:26:27
+So this first one is 3 by 3.
+
+00:26:29
+This next one is 5 by 5 And?
+
+00:26:31
+Then the next one is 7 by 7.
+
+00:26:33
+And we can visualize
+it here pretty easily.
+
+00:26:36
+So the nice thing about the 3
+by 3 convolution with stride one
+
+00:26:39
+is that you're basically
+always adding 2
+
+00:26:42
+to your receptive
+field at each layer
+
+00:26:44
+because each point here,
+you're looking to the left
+
+00:26:48
+and to the right and
+above and below it.
+
+00:26:50
+So after you have
+many blocks of those,
+
+00:26:51
+you're just adding
+two each time.
+
+00:26:57
+So we basically just
+showed that a stack
+
+00:27:00
+of three of these 3 by 3
+convolution and stride 1 layers
+
+00:27:04
+has the same effective
+field as one 7 by 7 layer.
+
+00:27:08
+Yeah, so the question
+is how much of this
+
+00:27:09
+is justification after the
+fact versus how much of this
+
+00:27:12
+is intuition that they then use
+to, say, design the experiments?
+
+00:27:16
+I think it actually probably
+depends on the architecture.
+
+00:27:18
+So for some of them it's
+more intuition focused.
+
+00:27:20
+And actually the one we're going
+to cover next I think really
+
+00:27:23
+was--
+
+00:27:24
+the whole research direction was
+spawned by an empirical finding
+
+00:27:27
+that there was a thought
+experiment about.
+
+00:27:28
+So that's ResNets and
+I think for there,
+
+00:27:30
+there's actually a
+pretty good intuition
+
+00:27:32
+that led the whole investigation
+into what will work well.
+
+00:27:35
+But then for this one, I mean,
+I can't speak for the authors
+
+00:27:40
+whether it's justification
+after the fact
+
+00:27:43
+or based on empirical
+findings or if it
+
+00:27:49
+was involved in
+the design choices
+
+00:27:51
+because I haven't seen them
+speak publicly about that yet.
+
+00:27:53
+But for ResNets, I do know
+it was the hypothesis that
+
+00:27:58
+led to the creation, but this is
+actually a really nice property.
+
+00:28:02
+So three of these 3 by 3s have
+the same effective receptive
+
+00:28:04
+field as one 7 by 7 layer.
+
+00:28:06
+And it actually has
+fewer parameters too.
+
+00:28:08
+So if you imagine our channel
+dimension is staying the same,
+
+00:28:13
+you have these 3 by 3
+grids where you have
+
+00:28:17
+your input number of channels.
+
+00:28:19
+So 3 times 3 times C would
+be the number of values
+
+00:28:21
+in each of these filters.
+
+00:28:22
+And if we have C of these
+filters it's 3 times 3 times
+
+00:28:26
+C times C or 3
+squared C squared.
+
+00:28:28
+And we have three layers total.
+
+00:28:30
+So if we look at it
+through this lens,
+
+00:28:35
+it's actually fewer parameters.
+
+00:28:37
+And we're having a more
+complex and more nonlinear
+
+00:28:41
+model that we're building here.
+
+00:28:43
+So fewer parameters and it can
+model more complex relationships
+
+00:28:47
+among your input data.
+
+00:28:49
+So this is maybe why
+stacking these 3 by 3 layers
+
+00:28:52
+together could be better than
+having just a larger filter
+
+00:28:56
+that you're sliding across.
+
+00:28:57
+So fewer parameters
+and then also
+
+00:28:59
+you can model more
+complex relationships.
+
+00:29:02
+OK, I'll now talk
+about ResNets, which
+
+00:29:05
+I guess I'll very much
+bring up the thought
+
+00:29:07
+experiment that someone
+just asked a question about.
+
+00:29:09
+So there was actually
+an empirical finding
+
+00:29:13
+that spawned a lot
+of the conversation
+
+00:29:16
+and thought around
+designing ResNets.
+
+00:29:19
+And the idea was actually shown
+that if you keep stacking deeper
+
+00:29:23
+layers on a plain CNN
+network, something like this
+
+00:29:27
+and you just keep
+adding layers to it,
+
+00:29:29
+you build it larger and
+larger, what happens?
+
+00:29:31
+So what we found
+and what they found
+
+00:29:33
+is that the 20 layer model
+will actually have a lower test
+
+00:29:38
+error than a 56 layer model.
+
+00:29:40
+And you might think that this
+is because of overfitting,
+
+00:29:42
+but it's actually not because if
+we look at the training error,
+
+00:29:45
+the training error of this
+20 layer model is also lower.
+
+00:29:48
+So it has a lower training and
+a lower test error basically
+
+00:29:51
+means that the model is
+doing better on all accounts.
+
+00:29:55
+So why is this 56 layer
+model performing worse
+
+00:29:59
+than a 20 layer model?
+
+00:30:02
+It might be confusing.
+
+00:30:04
+And we know as I
+mentioned before, it's not
+
+00:30:07
+caused by overfitting.
+
+00:30:09
+So these deeper models have
+more representational power,
+
+00:30:12
+and theoretically they
+should be able to represent
+
+00:30:16
+any model that a more
+shallow network can model.
+
+00:30:20
+So the set of possible
+mappings between your inputs
+
+00:30:25
+and different values
+for your larger networks
+
+00:30:28
+is a superset for
+your smaller networks
+
+00:30:31
+because theoretically you could
+imagine that you basically
+
+00:30:35
+are just setting
+some of these layers
+
+00:30:36
+to be the identity
+function where
+
+00:30:40
+the layer is doing nothing.
+
+00:30:41
+And then if you set half
+your layers to do nothing,
+
+00:30:44
+you have exactly the
+same representation power
+
+00:30:46
+as a model one half the size.
+
+00:30:49
+So the idea is not
+that these models
+
+00:30:53
+are worse in terms of the
+representational power,
+
+00:30:56
+but they're actually
+harder to optimize
+
+00:30:58
+because the set of possible
+models for your deeper networks
+
+00:31:03
+is larger and it contains
+all of the possible models
+
+00:31:05
+that your more shallow
+networks could learn.
+
+00:31:11
+So I hinted at it before,
+but how specifically could
+
+00:31:16
+the deeper model learn
+to be at least as
+
+00:31:17
+good as a shallow model?
+
+00:31:19
+It's by setting.
+
+00:31:20
+So if we have a two layer model
+versus a one layer, so one layer
+
+00:31:23
+here and two layer on the right,
+if we set one of the layers
+
+00:31:26
+to just essentially be an
+identity matrix or this
+
+00:31:29
+is just an identity
+function, The?
+
+00:31:32
+Model should be at least as
+good as the shallow model.
+
+00:31:36
+It should be at least as
+good as the shallow model.
+
+00:31:40
+So how do we actually build
+this intuition into our models?
+
+00:31:43
+We want them to be
+able to be just as
+
+00:31:45
+good as a shallower
+model if they
+
+00:31:48
+want to be during optimization.
+
+00:31:50
+So the way that we
+do this is actually
+
+00:31:53
+by fitting what's called
+a residual mapping instead
+
+00:31:56
+of directly trying to fit a
+desired underlying mapping.
+
+00:32:00
+And what this looks like is
+we basically take the value x
+
+00:32:04
+and we copy it over past
+our convolution layers
+
+00:32:07
+so that the value at
+this point is already
+
+00:32:12
+receiving x, our original input,
+as well as the output of our two
+
+00:32:16
+convolution stacks.
+
+00:32:18
+So basically at
+this point this F
+
+00:32:20
+of x, which is called
+the residual map here,
+
+00:32:23
+it could just learn zero values
+for all the conv filters.
+
+00:32:29
+And the output would be 0 here.
+
+00:32:31
+And then we would just add x
+along here and we would get x.
+
+00:32:35
+So it allows a very
+simple way for the model
+
+00:32:37
+to bypass these layers if it
+doesn't need to learn anything
+
+00:32:40
+for the layers.
+
+00:32:41
+And what this means is you
+can really easily now learn
+
+00:32:45
+basically this identity function
+that we talked about earlier
+
+00:32:47
+by just learning zero filters.
+
+00:32:51
+So your filters all are
+filled with zero values,
+
+00:32:53
+for example or in this
+case more practically
+
+00:32:57
+what happens is they
+just need to learn
+
+00:32:59
+very small values because
+instead of learning
+
+00:33:03
+this entire mapping from
+x to h of x, they just
+
+00:33:06
+need to learn this
+difference, which is F of x.
+
+00:33:08
+So you're now just
+learning this sort
+
+00:33:11
+of difference between
+your desired output
+
+00:33:14
+here and the copied over block.
+
+00:33:18
+This is called a residual
+block or residual connection
+
+00:33:22
+when you copy over values
+from an earlier layer
+
+00:33:24
+into a later layer in
+your model and then
+
+00:33:26
+you just add it to the
+values at that point.
+
+00:33:30
+So I talked a bit
+about the intuition,
+
+00:33:32
+which was this observed
+phenomenon that these larger
+
+00:33:36
+networks were achieving worse
+training and worse test error
+
+00:33:39
+because they were
+harder to optimize.
+
+00:33:41
+So the intuition was we need to
+build a model that can really
+
+00:33:44
+easily model the
+shallower networks so it
+
+00:33:47
+can be at least as good
+as a shallower model.
+
+00:33:49
+The way they did this was by
+adding a residual connection so
+
+00:33:51
+that you can just copy
+over the values easily,
+
+00:33:54
+build that into the
+architecture itself,
+
+00:33:56
+rather than trying to
+learn some identity mapping
+
+00:33:59
+among the convolutional layers.
+
+00:34:00
+And empirically, this showed
+to work extremely well too.
+
+00:34:04
+Yeah, so what is the
+residual block carry?
+
+00:34:06
+So we have our input x.
+
+00:34:07
+We pass it through two
+different convolutional layers
+
+00:34:10
+and we get our output F of x.
+
+00:34:12
+x is just copied over here.
+
+00:34:14
+So this is exactly the
+same as x and we add it
+
+00:34:17
+to the output of these two
+blocks which is F of x.
+
+00:34:21
+Yeah, x is the output of
+one of the previous layers
+
+00:34:24
+or if it's the very first
+layer of the model it
+
+00:34:26
+would be the image.
+
+00:34:28
+Yeah, so the question
+is if maybe you just
+
+00:34:30
+don't have enough data and
+if you added enough data,
+
+00:34:32
+then maybe you could train a
+model without these blocks.
+
+00:34:35
+I think these blocks actually
+do extremely help you
+
+00:34:38
+with learning from more data.
+
+00:34:40
+I think the issue, it was
+really an optimization problem.
+
+00:34:43
+So transformers
+used residual blocks
+
+00:34:45
+for exactly the same
+reason because--
+
+00:34:47
+and I think it
+actually helps you
+
+00:34:48
+model these more complex
+models and it actually
+
+00:34:51
+enables you to use more data.
+
+00:34:53
+So I think it's very good.
+
+00:34:55
+Residual blocks help
+you use more data
+
+00:34:57
+more efficiently because you're
+able to model a greater number--
+
+00:35:00
+you're able to more easily model
+a greater number of functions.
+
+00:35:04
+Yeah, so the question
+is that maybe if we just
+
+00:35:09
+trained for longer, the
+performance would eventually
+
+00:35:13
+converge to the value
+of the smaller network.
+
+00:35:15
+And maybe it's just harder
+to optimize because it takes
+
+00:35:17
+longer to train a larger model.
+
+00:35:20
+And I think the answer
+is no, that they were not
+
+00:35:25
+converging to the performance
+of the smaller model,
+
+00:35:28
+regardless of how
+long you trained it.
+
+00:35:30
+And the reason is
+because it's being stuck
+
+00:35:32
+in essentially local minimum.
+
+00:35:36
+And when you add these
+residual connections,
+
+00:35:39
+you're avoiding these.
+
+00:35:41
+This is the actual explanation
+why this is the case is still,
+
+00:35:44
+I would say, being a more
+active area of research.
+
+00:35:48
+It's really hard to
+understand exactly what causes
+
+00:35:51
+these models to avoid
+a global or, sorry,
+
+00:35:56
+to avoid local minimum and
+not get an optimal solution
+
+00:35:58
+or what causes them to not
+train and find better solutions.
+
+00:36:03
+And oftentimes this is
+really an empirical finding,
+
+00:36:06
+but there's some
+intuition behind it.
+
+00:36:07
+And in this case,
+the intuition was
+
+00:36:09
+that we want to enable our
+models to do at least as
+
+00:36:11
+well as the shallower models,
+which we know were performing
+
+00:36:14
+better at the time.
+
+00:36:15
+So it's not that you could
+just train it for longer
+
+00:36:17
+and it would do better.
+
+00:36:19
+It was actually a
+limitation it was just
+
+00:36:23
+completely unable to achieve as
+good as the shallower models.
+
+00:36:31
+OK, so here's the overall
+ResNet architecture.
+
+00:36:38
+We have these stacks
+of residual blocks now.
+
+00:36:41
+So that's what these two
+blocks here together mean.
+
+00:36:44
+It's a residual block.
+
+00:36:47
+So we have a 3 by 3 convolution
+with a ReLU followed
+
+00:36:49
+by another 3 by 3 convolution.
+
+00:36:51
+And we're copying over
+this x value here.
+
+00:36:54
+We're adding it to
+the outputs here
+
+00:36:55
+and then we're having
+a ReLU afterwards.
+
+00:36:57
+So each of these pairs of
+blocks is one of these residual.
+
+00:37:00
+And that's why you see this
+line skipping over here
+
+00:37:03
+because the value is
+getting added forward.
+
+00:37:06
+The cool thing
+about ResNets also
+
+00:37:08
+is that they basically had a
+lot of these different depths
+
+00:37:14
+that they created.
+
+00:37:14
+So they created a
+whole family of models,
+
+00:37:16
+some smaller and some larger.
+
+00:37:17
+And they showed that as they
+increased the number of layers,
+
+00:37:20
+their performance
+was increasing,
+
+00:37:22
+albeit the difference
+in performance
+
+00:37:25
+as you got to the larger and
+larger models became smaller.
+
+00:37:28
+So it was reaching a point
+of, given the data set,
+
+00:37:31
+they weren't able to scale any
+significant amount by adding
+
+00:37:35
+more layers further
+than that, but they
+
+00:37:38
+saw significant improvements
+in performance among especially
+
+00:37:40
+the earlier models.
+
+00:37:41
+And then 101 to 152 is
+where the performance,
+
+00:37:43
+it wasn't really changing.
+
+00:37:44
+It was marginally better,
+but performance changes maybe
+
+00:37:47
+only 1% at that point.
+
+00:37:49
+Yeah, how did they
+get the number of 152?
+
+00:37:51
+I actually don't know how
+they got the number of 152.
+
+00:37:54
+I think they wanted to
+try different values here.
+
+00:37:58
+And you can see that--
+
+00:37:59
+I mean, they're not
+exactly doubling,
+
+00:38:00
+but there's a significant
+increase in each time.
+
+00:38:05
+I don't know how
+they picked 152.
+
+00:38:07
+That's a good question.
+
+00:38:08
+Maybe they showed it somehow
+worked better than other.
+
+00:38:11
+I actually don't though.
+
+00:38:13
+So generally when you're trying
+multiple different number
+
+00:38:16
+of layers for your
+model, given that
+
+00:38:18
+say these are the number
+of layers you want to try,
+
+00:38:21
+what you'll do is you'll first
+train the smallest model,
+
+00:38:24
+see performance and
+then add more layers,
+
+00:38:26
+see if your performance
+increases and go on so forth.
+
+00:38:29
+So that's probably why
+they stopped at 152
+
+00:38:31
+is because performance wasn't
+increased as much anymore.
+
+00:38:34
+And also there's GPU
+memory limitations
+
+00:38:36
+so as you get larger
+and larger models,
+
+00:38:38
+it becomes harder to train
+from a hardware perspective
+
+00:38:40
+because you need to fit more
+parameters into your GPU memory.
+
+00:38:43
+So there is a limit for, given
+your compute setup, how large
+
+00:38:47
+of a model you can train.
+
+00:38:49
+I think you need to train
+these models separately though,
+
+00:38:51
+so you have one model
+run for 18 layers and one
+
+00:38:55
+for 34, et cetera.
+
+00:38:57
+So the question is how to think
+of intuition of CNN blocks,
+
+00:39:03
+given we're using these
+residual connections because you
+
+00:39:07
+can still think of it as
+higher levels of abstraction.
+
+00:39:09
+And this is shown to
+be true in the layers.
+
+00:39:11
+So instead of learning--
+
+00:39:16
+within the block itself, instead
+of just learning the higher
+
+00:39:18
+level features, you're
+learning the delta
+
+00:39:20
+from the original image to
+get the higher level features.
+
+00:39:23
+That's what you're
+learning in the block.
+
+00:39:24
+So you're learning the
+delta, but you're still
+
+00:39:27
+achieving these higher level
+representations at each step.
+
+00:39:29
+So that part is the same,
+but the actual functional way
+
+00:39:32
+of doing it is you learn
+this F of x that you
+
+00:39:38
+add your previous input to.
+
+00:39:41
+So it's like you're
+learning the delta.
+
+00:39:43
+The question is,
+if you do addition,
+
+00:39:44
+does that require you to
+have the same tensor size?
+
+00:39:46
+The answer is yes.
+
+00:39:47
+And it's part of the
+reason why it's really
+
+00:39:51
+the nice property
+that all of these ones
+
+00:39:52
+have this 3 by 3 convolution
+with stride 1 and 1 padding
+
+00:39:57
+so that you maintain the same
+size at every layer going
+
+00:40:01
+forward.
+
+00:40:01
+So after you had, say,
+a pooling layer, I mean,
+
+00:40:05
+you could maybe
+come up with a way
+
+00:40:06
+to do it where you
+unspool the values,
+
+00:40:12
+but after pooling
+layer, for example,
+
+00:40:14
+you couldn't do a
+naive addition anymore
+
+00:40:16
+because the size of your
+tensors are different.
+
+00:40:18
+So these are done before a
+pool, at least the regular one.
+
+00:40:23
+I mean, you could
+get around it by just
+
+00:40:25
+having each value be spread
+out into multiple values,
+
+00:40:28
+for example.
+
+00:40:30
+OK, so these are basically the
+main takeaways for ResNets.
+
+00:40:35
+One other neat trick
+they do is they basically
+
+00:40:38
+periodically after a certain
+number of these blocks,
+
+00:40:40
+they'll double the
+number of filters
+
+00:40:42
+and downsample the
+spatial dimension.
+
+00:40:46
+So basically you
+can imagine if you
+
+00:40:48
+start with a really flat
+image, as the activations get
+
+00:40:53
+pushed through the network,
+it becomes smaller spatially,
+
+00:40:55
+but then the depth is larger.
+
+00:40:57
+So this is how to think of it.
+
+00:40:59
+And then at the
+very end, it just
+
+00:41:00
+becomes a vector that you
+then use for classification.
+
+00:41:03
+So that's how you should
+be visualizing what's
+
+00:41:05
+happening to the values
+in the network itself
+
+00:41:07
+and the shape of them.
+
+00:41:08
+And then one other
+sort of thing that's
+
+00:41:11
+somewhat unique to ResNets,
+other architectures do this too,
+
+00:41:14
+but before all these layers
+with the residual blocks,
+
+00:41:17
+they have this relatively
+larger convolutional layer.
+
+00:41:21
+And here is just
+empirically shown
+
+00:41:23
+that it did better if
+they added this here.
+
+00:41:25
+So this one is purely
+empirical finding.
+
+00:41:29
+OK, I think basically
+to highlight,
+
+00:41:34
+it did extremely well,
+these larger models.
+
+00:41:37
+It was the first time they were
+able to train 100 plus layer
+
+00:41:39
+models successfully so
+it was a really big deal.
+
+00:41:42
+And basically ResNets were used
+in a huge variety of computer
+
+00:41:45
+vision tasks afterwards.
+
+00:41:47
+Almost every task
+in computer vision
+
+00:41:48
+was using a ResNet at
+the time because they
+
+00:41:50
+performed so well because of
+these residual connections.
+
+00:41:54
+So we talked about some CNN
+architectures, the main one
+
+00:41:59
+being ResNet and then
+also VGG historically.
+
+00:42:02
+So we talked about why the
+smaller filter size is useful
+
+00:42:05
+and having many layers
+of these is useful.
+
+00:42:07
+So the final thing I'll
+talk about in terms
+
+00:42:09
+of how we actually
+construct the CNNs
+
+00:42:11
+and prime them to be ready for
+training is how do you actually
+
+00:42:15
+initialize the weight values
+of the individual layers?
+
+00:42:19
+So depending on what
+values you choose,
+
+00:42:24
+you could either put values
+that are too small or too large,
+
+00:42:27
+which would cause significant
+issues for your model
+
+00:42:29
+during training.
+
+00:42:30
+So here it's basically a six
+layer network where we have
+
+00:42:36
+4,096 dimensional features.
+
+00:42:40
+And this is just six layers
+of fully connected model
+
+00:42:43
+and we initialize them.
+
+00:42:45
+Here this is getting
+a unit Gaussian random
+
+00:42:48
+and then we
+multiplying it by 0.01
+
+00:42:50
+to get very small
+values close to 0
+
+00:42:53
+and we have ReLU
+at each layer too.
+
+00:42:55
+So if you plot the forward
+pass of this model,
+
+00:43:00
+you would actually see
+that at the beginning
+
+00:43:02
+you get a relatively
+high-- because there's ReLU
+
+00:43:06
+so all the means are
+going to be positive,
+
+00:43:08
+but you'll have a mean
+and standard deviation
+
+00:43:10
+that is relatively high.
+
+00:43:12
+But as each layer
+progresses, because we
+
+00:43:14
+had a really small
+weight initialization,
+
+00:43:17
+it becomes smaller and smaller
+mean and standard deviation.
+
+00:43:20
+And really ideally we
+would want basically
+
+00:43:21
+all of these to be the
+same for each layer
+
+00:43:24
+because it makes our
+optimization problem much
+
+00:43:26
+nicer to solve.
+
+00:43:28
+So if we say use
+0.05 instead of 0.01,
+
+00:43:33
+can anyone imagine what might
+be the issue here if we set it
+
+00:43:36
+to too large of a value?
+
+00:43:38
+So when it's too small,
+it goes to 0, basically.
+
+00:43:42
+What happens if it's too large?
+
+00:43:44
+Yeah, basically the activations
+get larger and larger
+
+00:43:47
+at each layer.
+
+00:43:48
+So if you plot it here,
+you can see that by the end
+
+00:43:51
+there's some massive mean
+and standard deviation.
+
+00:43:54
+And if you're training
+152 layer ResNet and you
+
+00:43:57
+can imagine that this becomes
+quite an issue very quickly.
+
+00:44:00
+So how do you actually do this?
+
+00:44:03
+So in this case maybe
+the optimal value I think
+
+00:44:07
+is 0.022 or something, but how
+would you actually know that
+
+00:44:10
+and how would you do this more
+generally across any layer?
+
+00:44:13
+There are a few different ways
+you can initialize weights.
+
+00:44:16
+And I'll go over the
+most commonly used one
+
+00:44:18
+today in class, but no,
+there are other ones.
+
+00:44:20
+And generally what
+they're a function of
+
+00:44:22
+is the dimension of
+your values here.
+
+00:44:27
+So you'll have a different value
+for a 4,096 dimension fully
+
+00:44:33
+connected layer versus a 2048.
+
+00:44:34
+And the specific
+formula we'll go through
+
+00:44:37
+is called Kaiming
+Initialization.
+
+00:44:40
+It's actually the same
+person who created ResNets.
+
+00:44:42
+So Kaiming, he was very famous.
+
+00:44:45
+I mean, he still is a very
+famous computer vision
+
+00:44:47
+researcher.
+
+00:44:48
+I think he's one of the
+most widely cited computer
+
+00:44:50
+scientists of the last 10
+or 15 years, maybe the most.
+
+00:44:53
+So he's extremely well known in
+the computer vision community.
+
+00:44:57
+And he also came
+up with this idea
+
+00:45:00
+of initializing the values
+to the square root of 2
+
+00:45:05
+over your input dimension size.
+
+00:45:07
+And I won't go over
+all the details
+
+00:45:09
+for how they derived this
+and showed that with a ReLU
+
+00:45:12
+activation, this will cause
+the standard deviation
+
+00:45:15
+and mean to be relatively
+constant throughout the layers.
+
+00:45:17
+But if you do plot it, you
+see this does have the effect
+
+00:45:20
+so you can almost think
+of this as a magic formula
+
+00:45:22
+where if you plug it in
+get the desired properties.
+
+00:45:24
+And if you want to
+know the derivation,
+
+00:45:26
+you can actually-- we
+link the paper here so
+
+00:45:28
+feel free to look into that,
+but you can just take our word.
+
+00:45:31
+I won't go through
+the details here,
+
+00:45:33
+but it does this desired effect
+where the mean and standard
+
+00:45:36
+deviation is unchanging.
+
+00:45:37
+And you can also imagine
+that for any given setup,
+
+00:45:40
+you could also, just
+through testing,
+
+00:45:42
+try to find what
+is the value here.
+
+00:45:46
+OK, so these are
+how you we discuss
+
+00:45:50
+how you initialize
+weights, how you
+
+00:45:52
+combine these different
+layers together
+
+00:45:53
+to form a CNN architecture,
+which activation functions
+
+00:45:58
+people use, and then all the
+different layers in CNNs.
+
+00:46:01
+So I think already we
+covered quite a few topics.
+
+00:46:03
+So I think I'll
+pause very briefly
+
+00:46:04
+to see if there's any
+questions about these.
+
+00:46:06
+And the second part
+of the lecture, it's
+
+00:46:08
+actually much less dense
+than the first part.
+
+00:46:11
+So we'll be mainly
+going over a lot
+
+00:46:13
+of nice practical tips for when
+you're training these models.
+
+00:46:17
+So the question is, how do
+you do weight initialization
+
+00:46:19
+for CNNs?
+
+00:46:20
+So you still use the
+same initialization,
+
+00:46:23
+but your dimension n here
+is the size of your kernel.
+
+00:46:26
+So if you have a 3 by
+3 kernel with channels
+
+00:46:29
+say 6 would be 3 times 3 times
+6, but it's the same idea.
+
+00:46:33
+It's just you calculate
+your dimensions differently
+
+00:46:36
+depending on the layer,
+the type of layer.
+
+00:46:40
+You can think of it as the
+number of values roughly
+
+00:46:43
+in each operation, but it
+does depend on the layer.
+
+00:46:46
+And some layers use different
+weight initializations,
+
+00:46:49
+but this is
+specifically for CNNs
+
+00:46:51
+how this initialization
+applies to it.
+
+00:46:54
+Yeah, so the question is,
+why do your activations
+
+00:46:56
+explode if you have too large
+of an initialization value?
+
+00:46:59
+So you imagine at each layer
+of your initialized network
+
+00:47:04
+you have a set of randomly
+initialized values.
+
+00:47:08
+And if they're very large,
+then when you do your--
+
+00:47:13
+you have a ReLU
+activation afterwards.
+
+00:47:15
+And that doesn't actually cap
+the outputs of your layer.
+
+00:47:21
+You can go to
+infinity with ReLU.
+
+00:47:23
+So if you have too
+large of a set of values
+
+00:47:27
+that you're essentially
+repeating the same operation on
+
+00:47:29
+because you're initializing
+all the weights
+
+00:47:31
+to the same set of random
+values, then at each layer,
+
+00:47:35
+you'll be multiplying
+one set of large values
+
+00:47:38
+by a set that's been
+initialized to large so
+
+00:47:40
+that it becomes larger at
+each iteration afterwards.
+
+00:47:44
+I mean, you could think of it as
+it's like a recurrence relation
+
+00:47:47
+where because they're
+all initialized randomly
+
+00:47:50
+at the start where it's
+being multiplied by a value
+
+00:47:53
+and you would want in a
+simple recurrence relation,
+
+00:47:55
+you'd want it to be one.
+
+00:47:56
+But because we have
+a vector of values
+
+00:47:59
+that are being
+multiplied by our matrix,
+
+00:48:01
+it depends on the dimension
+of the vector, what
+
+00:48:03
+your average output would be
+and after the ReLU because you
+
+00:48:10
+have basically a standard
+deviation for what
+
+00:48:12
+is your activations.
+
+00:48:14
+Then you remove all
+the negative ones
+
+00:48:16
+and you're left with what are
+your outputs at that point
+
+00:48:18
+and if you have a
+really large values,
+
+00:48:20
+you have a really large
+standard deviation.
+
+00:48:22
+So when you remove
+the bottom half of it,
+
+00:48:26
+your mean starts moving more
+positive and more positive.
+
+00:48:29
+Did that make sense to--
+
+00:48:31
+I didn't have slides
+to show it, but OK.
+
+00:48:33
+Mostly, sorry.
+
+00:48:33
+Yeah, you can see more
+details in the paper.
+
+00:48:35
+It's actually not too
+bad to read I think.
+
+00:48:40
+So the conclusion
+of the discussion
+
+00:48:43
+here is that normalization would
+solve this activation issue
+
+00:48:47
+where they're blowing
+up, but it still
+
+00:48:48
+might be harder to optimize.
+
+00:48:50
+Maybe we should
+probably do a follow up
+
+00:48:54
+post explaining
+this in more detail,
+
+00:48:55
+but I think it's a really
+good question actually, yeah.
+
+00:48:58
+It would solve, I think,
+this particular issue,
+
+00:49:00
+but maybe it's still hard to
+optimize this in the discussion.
+
+00:49:03
+Yeah, it's a good question.
+
+00:49:06
+OK.
+
+00:49:09
+Cool.
+
+00:49:10
+So I'll talk about
+these steps now.
+
+00:49:12
+So how do you actually
+train your model?
+
+00:49:14
+And the nice thing for
+data pre-processing
+
+00:49:16
+is it's really easy for images.
+
+00:49:17
+So if you have your
+giant image data set,
+
+00:49:19
+the standard way to do it is
+you calculate the average red,
+
+00:49:23
+the average green, and
+the average blue pixel
+
+00:49:25
+along with the
+standard deviations.
+
+00:49:27
+And you take your input
+image, you subtract the mean
+
+00:49:30
+and you divide by the
+standard deviation.
+
+00:49:32
+And this is how you do data
+normalization for images.
+
+00:49:36
+Is actually very
+straightforward.
+
+00:49:38
+So it does require
+you to pre-compute
+
+00:49:40
+the means and standard deviation
+for each pixel channel.
+
+00:49:44
+So sometimes what
+people will do is
+
+00:49:45
+they'll use means that have
+already been calculated.
+
+00:49:48
+A very common one is
+to use the ImageNet
+
+00:49:51
+means and standard
+deviations and apply those
+
+00:49:54
+to your input images, even if
+you're training a model not
+
+00:49:57
+on ImageNet.
+
+00:49:58
+So it is very data set dependent
+is the way to think of this.
+
+00:50:05
+And different models will
+use different values here
+
+00:50:07
+depending on their data set,
+but the most commonly used one
+
+00:50:10
+is just use the mean
+and standard deviation
+
+00:50:11
+from ImageNet.
+
+00:50:14
+Yeah, so any input image,
+you apply this operation
+
+00:50:16
+before the model sees it.
+
+00:50:23
+So yeah, that one
+was really quick.
+
+00:50:25
+And then in terms of
+data augmentation,
+
+00:50:27
+so someone had a suggestion
+earlier in the class
+
+00:50:31
+why don't we just add
+noise to our image.
+
+00:50:34
+And that's a great idea.
+
+00:50:35
+And we'll talk about the
+different ways you can add noise
+
+00:50:37
+to your image here.
+
+00:50:37
+This helps with regularization
+and helps prevent your model
+
+00:50:40
+from overfitting.
+
+00:50:42
+So we talked about it before,
+but this is a common pattern
+
+00:50:47
+with regularization,
+where during training time
+
+00:50:49
+you add some kind of randomness.
+
+00:50:50
+And then at testing time you
+then average out the randomness.
+
+00:50:53
+So sometimes this
+is approximate,
+
+00:50:56
+but for example, for dropout,
+we saw that during training time
+
+00:51:00
+we'll randomly drop, say,
+50% of the activations.
+
+00:51:02
+And then at testing time
+we'll use all the activations,
+
+00:51:05
+but then we'll need
+to scale it down
+
+00:51:06
+by this probability
+of dropout p.
+
+00:51:09
+So this is a really
+common pattern.
+
+00:51:11
+And it's also used
+for data augmentation.
+
+00:51:13
+So you can imagine this
+being this cylinder here
+
+00:51:21
+is like your data set.
+
+00:51:22
+You load an image and a label.
+
+00:51:24
+So we have a cat label and
+we have our original image
+
+00:51:26
+from our data set.
+
+00:51:28
+Before we actually pass it into
+our model, it's extremely common
+
+00:51:31
+and basically always in
+modern deep learning,
+
+00:51:35
+people will always use data
+augmentation for training
+
+00:51:39
+computer vision models.
+
+00:51:40
+But the basic idea is to
+apply some transformations
+
+00:51:42
+to the image to make it
+look different but still
+
+00:51:45
+recognizable for
+the category class
+
+00:51:47
+and then pass that to
+your model and you're
+
+00:51:50
+computing the loss here.
+
+00:51:51
+So one of the nice
+benefits of this
+
+00:51:53
+is you can effectively increase
+the size of your data set
+
+00:51:55
+because instead of seeing
+each image multiple times,
+
+00:51:58
+it will be seeing different
+versions of the image
+
+00:52:00
+with different
+transformations that all still
+
+00:52:02
+are the same category label.
+
+00:52:04
+So you can basically
+get more data
+
+00:52:06
+and therefore it increases your
+generalization capabilities,
+
+00:52:09
+but your training loss will be
+higher because you're not just
+
+00:52:12
+seeing the same example
+over and over again.
+
+00:52:14
+So it makes it harder for
+the model to just memorize.
+
+00:52:18
+So how do we know the weight
+initialization is just right?
+
+00:52:20
+So we know it's
+right in this case,
+
+00:52:23
+because the means and
+the standard deviations
+
+00:52:25
+are relatively constant
+throughout the layers
+
+00:52:28
+of the network.
+
+00:52:28
+And we're not seeing--
+
+00:52:30
+in this case, we saw
+mode collapse to 0.
+
+00:52:34
+In this case, it was
+blowing up to infinity as we
+
+00:52:38
+increased the number of layers.
+
+00:52:40
+So the way you can
+ensure it always happens
+
+00:52:43
+is by using the formula.
+
+00:52:44
+This will always
+initialize them well.
+
+00:52:46
+So in practice that's
+how people do it.
+
+00:52:49
+If you were creating
+a new layer that
+
+00:52:52
+maybe does some different
+kind of operation
+
+00:52:54
+that no one's done
+before, then you probably
+
+00:52:56
+would need to try a bunch of
+different weight initialization
+
+00:52:59
+schemes and see what works best.
+
+00:53:01
+But generally for
+these linear layers
+
+00:53:04
+or the convolutional layers,
+you can use this formula here,
+
+00:53:09
+which is called the
+timing initialization.
+
+00:53:14
+OK.
+
+00:53:14
+So back to data
+augmentation, so what
+
+00:53:17
+are the different augmentations
+you can do specifically?
+
+00:53:20
+So one of them is
+horizontal flipping.
+
+00:53:21
+This depends on the problem.
+
+00:53:23
+So if you want to
+have a model that
+
+00:53:25
+reads text this would be
+a very bad augmentation
+
+00:53:28
+to use because the
+text is now-- it's
+
+00:53:30
+like you're looking
+through a mirror
+
+00:53:31
+and you can't read it properly.
+
+00:53:33
+So this is sometimes useful
+for everyday objects.
+
+00:53:37
+It's usually pretty good
+because most objects
+
+00:53:40
+are symmetrical so this property
+actually works pretty well.
+
+00:53:44
+And then you could also
+imagine if you're looking maybe
+
+00:53:46
+at images from a
+microscope or overhead
+
+00:53:48
+that you could also
+do a vertical flip
+
+00:53:50
+and that would make sense.
+
+00:53:51
+But for everyday objects,
+vertical flipping actually
+
+00:53:53
+doesn't really make sense
+because a cat is almost
+
+00:53:56
+always seen in this
+position, but maybe
+
+00:53:58
+if you had a data
+set where cats were
+
+00:53:59
+in all different
+orientations, you
+
+00:54:00
+could imagine that flipping or
+rotating or all these things
+
+00:54:02
+would make sense
+for your data set.
+
+00:54:06
+Another type of augmentation is
+this resizing and cropping idea.
+
+00:54:11
+So what ResNets and
+many different image
+
+00:54:16
+models in deep learning
+do is they basically take
+
+00:54:21
+a random crop of the
+image and then resize
+
+00:54:25
+that to be your image size.
+
+00:54:27
+They might even take
+another crop afterwards.
+
+00:54:28
+So the most common
+strategy is you
+
+00:54:30
+pick the length of
+what is basically
+
+00:54:33
+the short side of your image.
+
+00:54:35
+So if you have a input image
+size to your model of 224
+
+00:54:40
+by 224 pixels, you would pick
+a value larger than this first
+
+00:54:43
+and find some crop of your image
+that contains this larger scale
+
+00:54:51
+L and these are
+commonly used values.
+
+00:54:53
+You crop the image.
+
+00:54:58
+Sorry, you don't crop.
+
+00:54:59
+You resize the image
+to be that scale.
+
+00:55:01
+So instead say this
+is a 800 by 600 image,
+
+00:55:04
+if we use 256 here we resize
+the short side, so 600 to be 256
+
+00:55:10
+and then 800 would be
+scaled correspondingly.
+
+00:55:12
+So we scale it to this L.
+We scale the short side to L
+
+00:55:15
+and then we crop a
+random patch of 224
+
+00:55:19
+by 224 pixels from that image.
+
+00:55:21
+So you're scaling the
+image by first preserving--
+
+00:55:24
+you've preserved the
+relative resolution,
+
+00:55:26
+but you make it smaller
+or larger to fit this L
+
+00:55:29
+and then you take a
+random crop of that.
+
+00:55:31
+And this is by far the
+most commonly used--
+
+00:55:35
+random resized crop is what
+it's called in most libraries.
+
+00:55:37
+So this is used in most problems
+because it works pretty well
+
+00:55:40
+and it reserves the relative
+resolution of your images.
+
+00:55:44
+And then there's
+another neat trick
+
+00:55:46
+you can do with augmentation
+called test time augmentation.
+
+00:55:49
+So if you really just want
+to get the best performance
+
+00:55:51
+possible, you can basically get
+a bunch of these different crops
+
+00:55:54
+and resizes and run them
+all through your model
+
+00:55:56
+and then average your
+predictions at the end.
+
+00:55:58
+And for ResNets,
+people will often
+
+00:56:01
+try a bunch of different scales,
+a bunch of different crop
+
+00:56:04
+locations and
+maybe even flip it.
+
+00:56:07
+And usually you'll start
+getting diminishing returns,
+
+00:56:10
+but you can get actually
+pretty good 1% to 2%
+
+00:56:13
+performance boost by using this
+sort of test time augmentation.
+
+00:56:15
+So if you're in a setting
+where it really matters,
+
+00:56:18
+you're trying to eke out every
+last bit of percentage points,
+
+00:56:20
+then this is actually
+a really great trick
+
+00:56:22
+that you can use for almost
+any computer vision problem.
+
+00:56:27
+OK, so a final
+few augmentations.
+
+00:56:31
+One is color jitter, so
+here we're specifically
+
+00:56:34
+randomizing the
+contrast and brightness
+
+00:56:36
+and scaling the image
+correspondingly.
+
+00:56:37
+So maybe images
+look more muted or I
+
+00:56:40
+say the colors look more
+muted or more brighter,
+
+00:56:43
+but these are very traditional
+image processing techniques.
+
+00:56:47
+And usually with all these
+different augmentations,
+
+00:56:49
+you'll try different
+values and see
+
+00:56:52
+which ones make your images
+still look in distribution
+
+00:56:55
+and look normal
+to you as a human.
+
+00:56:56
+And that's a pretty
+good way to judge
+
+00:56:58
+what values you should
+pick for how much jitter
+
+00:57:00
+you should have, how much
+brightness, variance, et cetera.
+
+00:57:02
+So normally when I'm
+starting a problem,
+
+00:57:04
+I'll try a bunch of these
+different augmentations.
+
+00:57:06
+I'll see what is
+making the data look
+
+00:57:08
+different from
+the original data,
+
+00:57:09
+but then still recognizable
+to me and still very easy
+
+00:57:13
+to recognize.
+
+00:57:13
+And that's generally a good
+set of augmentations to use.
+
+00:57:18
+Final one is you
+can imagine just
+
+00:57:19
+like cropping out
+parts of the image
+
+00:57:21
+where you just are
+basically putting
+
+00:57:22
+a black or a gray box over it.
+
+00:57:25
+And I think this one's
+maybe less commonly used,
+
+00:57:27
+but it kind of shows
+you how you can
+
+00:57:29
+get creative with
+the augmentations
+
+00:57:30
+depending on your problem.
+
+00:57:32
+Say you're in a setting
+where things will get covered
+
+00:57:35
+like the camera will be occluded
+so it won't be able to see
+
+00:57:38
+the objects fully, this
+could be a really neat trick
+
+00:57:40
+you do to make your model
+more resilient to stuff
+
+00:57:42
+blocking parts of your objects.
+
+00:57:44
+So you could almost imagine
+for your given setting,
+
+00:57:46
+what augmentations make sense.
+
+00:57:48
+What ways can you
+transform your input data
+
+00:57:51
+so that it's still
+recognizable to you as a human,
+
+00:57:53
+but it makes it harder for the
+model to memorize the training
+
+00:57:56
+examples?
+
+00:57:58
+OK, so the final
+set of topics here
+
+00:58:02
+are basically
+extremely practical.
+
+00:58:04
+So when you're,
+say, doing a project
+
+00:58:06
+or training a model, so say
+for your course project,
+
+00:58:11
+I think you should basically
+do the exact things we're
+
+00:58:14
+going to be describing
+in the coming slides,
+
+00:58:16
+but this also applies
+outside the course
+
+00:58:18
+to any computer vision domain
+you could be practicing in.
+
+00:58:21
+So in practice in many
+times we don't actually
+
+00:58:25
+have so much data.
+
+00:58:26
+ImageNet, the original
+version had a million images.
+
+00:58:29
+Maybe you don't have a million
+images for your problem,
+
+00:58:32
+which almost none of
+us do unless you've
+
+00:58:33
+been collecting vast amount
+of data with a huge team.
+
+00:58:36
+So if you don't have a lot of
+data, can you still train CNNs?
+
+00:58:40
+And the short answer
+is yes, you can,
+
+00:58:42
+but you need to be a little
+bit smart with how you do it.
+
+00:58:45
+So I think in one of the--
+
+00:58:48
+I think maybe it
+was last lecture,
+
+00:58:49
+we showed how the different
+filters in your CNN
+
+00:58:52
+are extracting different
+types of features.
+
+00:58:56
+So this goes back
+to someone asked
+
+00:58:57
+about the hierarchy of features
+in convolutional neural
+
+00:59:00
+networks.
+
+00:59:00
+So at the beginning, it's
+more of just edges or patterns
+
+00:59:03
+or really small shapes.
+
+00:59:05
+And then at the
+highest level, you
+
+00:59:08
+can imagine if we put
+an image into our CNN
+
+00:59:11
+and we get this final vector
+right before we get our class
+
+00:59:16
+scores, and we compare that to
+other images in our data set,
+
+00:59:21
+you'll actually see
+that these values
+
+00:59:25
+of the vector of our image
+are actually really close.
+
+00:59:27
+So you can think of this as the
+nearest neighbors thing we did
+
+00:59:31
+before, but instead of it being
+the pixels of the image where
+
+00:59:34
+we're looking at the vector at
+the very end of your CNN right
+
+00:59:38
+before you have the
+classification layer,
+
+00:59:41
+so this would be like the
+4,096 or the 2048 layer.
+
+00:59:45
+And if we look at the difference
+here, it's the L2 distance.
+
+00:59:49
+You'll find that
+for a given image,
+
+00:59:52
+if you put it into
+your model and you
+
+00:59:53
+look at the other
+images that are
+
+00:59:55
+close to the model
+in this vector space
+
+00:59:57
+right here after you go
+through all the layers
+
+01:00:00
+except the last one, that you'll
+find the images are extremely
+
+01:00:03
+close to each other when the
+items are in the same category.
+
+01:00:06
+So intuitively, what
+this basically means
+
+01:00:08
+is that these features here
+are actually really good at--
+
+01:00:14
+you could build a linear
+classifier on top of them
+
+01:00:17
+or a K nearest
+neighbor classifier
+
+01:00:19
+and be able to classify
+objects extremely well.
+
+01:00:23
+So how could you use
+this in practice?
+
+01:00:25
+So what you would do
+is you would first
+
+01:00:28
+train your model on
+ImageNet or you would just
+
+01:00:30
+grab a model someone else
+is trained on ImageNet
+
+01:00:33
+or one of these really large
+web internet scale data sets.
+
+01:00:37
+And you can just freeze
+all of these layers
+
+01:00:40
+so you don't train any of them.
+
+01:00:42
+You keep them exactly the same
+as before and you replace this
+
+01:00:45
+final layer instead of it being
+in the case of ImageNet 1,000
+
+01:00:48
+classes, you replace it with
+the number of classes you have
+
+01:00:51
+in your data set.
+
+01:00:52
+And then when you're
+training the model,
+
+01:00:54
+you only train this layer here.
+
+01:00:56
+So if we think about
+we talked about how
+
+01:01:00
+in the old paradigm
+of computer vision
+
+01:01:02
+you had feature
+extractors, which
+
+01:01:03
+was a predefined
+set of operations
+
+01:01:05
+to get stuff like
+color histograms
+
+01:01:07
+and other predefined features.
+
+01:01:10
+You could almost think of the
+frozen model as doing this.
+
+01:01:13
+It's a predefined
+feature extractor
+
+01:01:15
+that we're not
+changing in any way,
+
+01:01:17
+but we're using it to
+calculate features that we then
+
+01:01:19
+train a model on top of.
+
+01:01:20
+It's actually extremely
+similar under that paradigm
+
+01:01:23
+because you're not
+training it here.
+
+01:01:25
+And if you have a
+larger data set, what
+
+01:01:27
+tends to work best
+in practice is
+
+01:01:29
+to actually train
+the whole model,
+
+01:01:32
+but you're initializing
+it from these values that
+
+01:01:35
+were pre-trained on ImageNet or
+some other really large internet
+
+01:01:38
+scale data set.
+
+01:01:39
+So I think pretty much for
+all of the problems I ever
+
+01:01:43
+work on, I'm doing this step
+three here because I have maybe
+
+01:01:48
+a million or 10 million
+training examples.
+
+01:01:51
+So I'll start it with a model
+that was trained on billions
+
+01:01:54
+that I don't have
+the compute for
+
+01:01:55
+and then I'll fine tune
+the model on my relatively
+
+01:01:59
+smaller data set.
+
+01:02:00
+And I'll get better
+performance than if I just
+
+01:02:02
+tried to train a model myself.
+
+01:02:03
+Because the model is
+basically seen more data.
+
+01:02:05
+It's created a better
+feature extractor.
+
+01:02:08
+And then when I fine
+tune the whole thing,
+
+01:02:10
+it can still be specific
+enough to my problem.
+
+01:02:12
+You're basically
+taking-- say let's
+
+01:02:14
+use a very concrete
+case where we're
+
+01:02:16
+training a model on ImageNet.
+
+01:02:18
+We're taking this model and
+we're replacing the final layer
+
+01:02:21
+so that it's no longer
+outputting 1,000 classes.
+
+01:02:25
+It's outputting the number
+of classes in your data set.
+
+01:02:28
+And we're initializing this
+randomly using the Kaiming
+
+01:02:31
+Initialization we
+talked about before,
+
+01:02:33
+but the rest of these layers
+are maintaining their values
+
+01:02:36
+that they had before.
+
+01:02:38
+So we're not
+changing these values
+
+01:02:40
+and during gradient
+descent we're
+
+01:02:41
+never changing these values.
+
+01:02:42
+So these values are unchanged.
+
+01:02:45
+We basically take our image.
+
+01:02:46
+We pass it through our model.
+
+01:02:47
+And now it's just like we have
+a-- it's almost like you're just
+
+01:02:50
+training a linear classifier
+where your input are these 4,096
+
+01:02:54
+vectors for each image that we
+calculate by passing it through
+
+01:02:57
+the whole model.
+
+01:02:58
+Then we have our
+vector of 4,096.
+
+01:03:00
+And we're just mapping that
+to the number of classes.
+
+01:03:02
+And we're only training
+this mapping at the end.
+
+01:03:05
+Yeah, so the question is, will
+you have some bias in your model
+
+01:03:09
+because it was
+trained on ImageNet?
+
+01:03:10
+The answer is definitely.
+
+01:03:12
+So the model if you
+do this number two,
+
+01:03:17
+this way of training, then
+it will do best on data sets
+
+01:03:22
+that look very
+similar to ImageNet.
+
+01:03:24
+So these would be pictures of
+everyday things like laptops
+
+01:03:27
+or maybe a classroom or a
+person, things like this where
+
+01:03:31
+ImageNet is everyday objects.
+
+01:03:32
+But if it was, say, photos of
+Mars, it would do a lot worse.
+
+01:03:35
+So there's definitely
+bias based on the training
+
+01:03:37
+data of the pre-trained model.
+
+01:03:39
+And you want to
+get something that
+
+01:03:40
+is in the same type
+of distribution
+
+01:03:42
+where you're seeing the same
+kinds of objects or locations
+
+01:03:45
+or things like that.
+
+01:03:47
+So the question is, what do you
+do when your data set is out
+
+01:03:50
+of distribution?
+
+01:03:51
+I actually have a slide
+here to cover some of that.
+
+01:03:55
+So it's a great question.
+
+01:03:57
+So if you have a very similar
+data set but very little data,
+
+01:04:00
+you can use the
+linear classifier
+
+01:04:02
+strategy we just mentioned.
+
+01:04:03
+If you have a similar data
+set, quite a lot of data,
+
+01:04:05
+you'll get best performance
+by fine tuning all the layers.
+
+01:04:07
+These are strategies
+two and three
+
+01:04:08
+on this slide that
+I mentioned earlier.
+
+01:04:10
+But what about when you have
+a very different data set?
+
+01:04:12
+So if you have a lot
+of data you might just
+
+01:04:16
+want to start from scratch or
+you might get better performance
+
+01:04:20
+if you still initialize.
+
+01:04:21
+Here you would test, but
+there's no guaranteed way
+
+01:04:23
+to know that performance
+would be better or worse.
+
+01:04:26
+And then, yeah, if you have very
+little data or a very different
+
+01:04:29
+data set, you
+probably want to try
+
+01:04:31
+to find a model that's
+trained on something close.
+
+01:04:33
+There are specific
+techniques that researchers
+
+01:04:35
+have looked into for
+out-of-domain generalization
+
+01:04:38
+and this basic idea of
+you have one domain,
+
+01:04:41
+you train a model on
+one domain and you're
+
+01:04:43
+trying to learn a new domain,
+that's different in some ways.
+
+01:04:45
+So this is an active
+area of research,
+
+01:04:47
+but I wouldn't say there's a
+general technique that always
+
+01:04:50
+works and it's a bit problem
+dependent in that setting,
+
+01:04:52
+whereas this is for everything
+except the upper right quadrant
+
+01:04:56
+here.
+
+01:04:56
+It works pretty
+well in practice.
+
+01:04:58
+So there are actually
+techniques for this.
+
+01:04:59
+And it's a pretty
+active area of research.
+
+01:05:01
+And certain models
+generalize better.
+
+01:05:02
+I think language
+models are pretty
+
+01:05:04
+good at learning a lot of
+different domains, for example.
+
+01:05:07
+But yeah, it's definitely
+the worst scenario
+
+01:05:10
+to be in where you have a
+completely different problem
+
+01:05:12
+that anyone's ever
+worked on before
+
+01:05:14
+and you don't have
+a lot of data.
+
+01:05:15
+It's by far the hardest to
+train a model in that setting.
+
+01:05:17
+So the question is, do you ever
+do anything between training
+
+01:05:19
+one final layer and all layers?
+
+01:05:20
+Yeah, people have
+actually done a lot
+
+01:05:22
+of work looking into training
+a subset of the layers.
+
+01:05:25
+There's also a
+technique called LoRA,
+
+01:05:27
+which we might go into in
+the transformers lecture.
+
+01:05:29
+I'm not sure if they'll
+make it this year,
+
+01:05:31
+but the basic idea
+is to fine tune
+
+01:05:34
+all the layers in a way
+where you're not changing all
+
+01:05:36
+the values exactly, but you're
+learning basically low rank
+
+01:05:41
+differences between
+the different layers
+
+01:05:44
+where you're fine
+tuning the differences
+
+01:05:47
+between the original
+layers rather than fine
+
+01:05:49
+tuning the layers themselves.
+
+01:05:51
+So yeah, there's techniques
+you could use LoRA.
+
+01:05:55
+And it would need
+more explanation,
+
+01:05:57
+but the basic idea is instead of
+fine tuning the actual values,
+
+01:06:00
+you're fine tuning these
+differences between the value
+
+01:06:03
+layers like how a ResNet,
+you're learning the difference.
+
+01:06:06
+LoRAs are like
+that, but you do it
+
+01:06:07
+with a very small
+number of parameters.
+
+01:06:09
+I think the question is,
+how do they basically
+
+01:06:12
+decide how many layers to pick?
+
+01:06:13
+Why did they pick a
+large number of layers?
+
+01:06:16
+Specifically why are there
+two convolution layers
+
+01:06:18
+of each size instead of one?
+
+01:06:20
+So it's actually really
+similar to the example
+
+01:06:23
+we showed earlier with VGG where
+if you have three of these 3
+
+01:06:26
+by 3 convolutions, you're able
+to have the same receptive field
+
+01:06:30
+as a 7 by 7
+convolution, but you're
+
+01:06:32
+able to model more non-linear
+relationships because you have
+
+01:06:35
+these three activation functions
+rather than just one activation
+
+01:06:38
+on the 7 by 7 filter.
+
+01:06:40
+So basically 3 by 3
+is more expressive,
+
+01:06:42
+but you're still looking
+at the same set of values
+
+01:06:44
+as long as you have
+enough of them.
+
+01:06:46
+So a larger set
+of smaller filters
+
+01:06:48
+is more expressive than a
+smaller set of larger filters.
+
+01:06:55
+OK, so we'll go on.
+
+01:06:57
+Yeah, basically try
+to find a large data
+
+01:06:59
+set that has similar data.
+
+01:07:00
+Get a model that
+was trained on that
+
+01:07:02
+and then fine tune
+it on your own data.
+
+01:07:04
+Some good links.
+
+01:07:06
+PyTorch image models
+has a bunch of models
+
+01:07:08
+that are trained on
+ImageNet and other data
+
+01:07:10
+sets and then also just in the
+PyTorch version, a GitHub repo.
+
+01:07:14
+You'll find some too.
+
+01:07:15
+OK, I'll talk over
+very briefly at the end
+
+01:07:17
+for hyperparameter selection.
+
+01:07:19
+So if you're having
+difficulty training your model
+
+01:07:22
+and it's not working
+right away, I
+
+01:07:24
+think the best thing you can do
+is to overfit on a small sample.
+
+01:07:27
+So this is the default
+debugging strategy
+
+01:07:29
+in deep learning where you
+just have one data point
+
+01:07:31
+and you want to see your
+training loss basically go to 0.
+
+01:07:34
+Your model should be able to
+memorize one training example
+
+01:07:36
+and if it's not able to do
+that have a bug somewhere
+
+01:07:38
+in your code or you're not
+picking the right kind of model
+
+01:07:41
+to model your problem.
+
+01:07:42
+So this is a really
+good training problem.
+
+01:07:45
+And it'll also tell you
+what learning rates work
+
+01:07:47
+or what ones don't work.
+
+01:07:49
+And you'll get a rough idea of
+the neighborhood of learning
+
+01:07:50
+rates you should explore.
+
+01:07:51
+So this is a good way to make
+sure your model is correct,
+
+01:07:54
+make sure your learning
+rate is reasonable
+
+01:07:57
+and also to make sure you
+don't have any other bugs that
+
+01:07:59
+could be impacting your code.
+
+01:08:00
+So this is always step one.
+
+01:08:02
+If you're having issues
+just running some code,
+
+01:08:06
+this is how you debug.
+
+01:08:08
+The second thing
+you would want to do
+
+01:08:09
+after you get this is maybe
+you try a very coarse grid
+
+01:08:12
+of hyperparameters.
+
+01:08:12
+So I would first try with
+different learning rates
+
+01:08:15
+and see how if you trained model
+on different learning rates,
+
+01:08:18
+what do the training
+losses look like.
+
+01:08:19
+You want one that has the
+most sustained decreasing
+
+01:08:23
+in the training loss
+over maybe one epoch.
+
+01:08:25
+That's a pretty good estimation,
+but you can train for longer.
+
+01:08:29
+Once you get a good
+set of learning rates,
+
+01:08:30
+you could then look into
+other hyperparameters too.
+
+01:08:33
+And specifically,
+besides the loss,
+
+01:08:35
+you'll also want to look
+at the accuracy curves.
+
+01:08:38
+So you have your
+training accuracy
+
+01:08:39
+and your validation accuracy.
+
+01:08:41
+If they're still
+going up, it means
+
+01:08:43
+you want to keep training
+pretty reasonable,
+
+01:08:45
+but you might have a
+scenario where the training
+
+01:08:48
+loss is going up, but your
+validation loss is going down.
+
+01:08:50
+This is overfitting.
+
+01:08:52
+So we need to either
+increase the regularization
+
+01:08:56
+or if we can get more
+data, that could also work,
+
+01:08:58
+but you need to
+do one of the two
+
+01:09:00
+in order to improve
+your performance further
+
+01:09:02
+beyond the peak
+right here I guess
+
+01:09:04
+would be the best
+model you have so far.
+
+01:09:07
+If you're seeing very
+little of a gap here,
+
+01:09:09
+then you can probably train for
+longer because generally you
+
+01:09:14
+do want to just get to the point
+where your validation loss has
+
+01:09:18
+been maximized.
+
+01:09:19
+So if you could
+just keep training,
+
+01:09:21
+you could keep training.
+
+01:09:22
+So even if there's not
+a significant gap here
+
+01:09:25
+or anything, if you see
+the validation accuracy is
+
+01:09:31
+similar to the
+training accuracy,
+
+01:09:32
+you can probably keep training
+until your training accuracy
+
+01:09:35
+starts diverging from
+your validation accuracy.
+
+01:09:39
+And you basically can repeat
+this process over and over
+
+01:09:41
+again.
+
+01:09:42
+One final note is in terms
+of for hyperparameter search,
+
+01:09:46
+normally people think you have
+two hyperparameters or more
+
+01:09:49
+that you're searching
+over, should you
+
+01:09:50
+try every combination
+of the hyperparameters
+
+01:09:53
+or what is the
+best way to do it?
+
+01:09:54
+I think in practice, random
+search over the hyperparameter
+
+01:09:57
+space works a lot better
+than a grid search
+
+01:10:00
+where you're trying every
+set of a predefined set.
+
+01:10:03
+And the reason is
+mainly because you
+
+01:10:05
+can imagine you have one
+axis, which is an unimportant
+
+01:10:08
+hyperparameter where
+depending on the value,
+
+01:10:09
+your performance will
+be roughly the same
+
+01:10:11
+versus an important one.
+
+01:10:12
+If you do random values
+across all of these,
+
+01:10:14
+you'll actually search
+the hyperparameter space
+
+01:10:16
+of your important
+parameter much more
+
+01:10:19
+thoroughly, whereas you're
+wasting time doing on the grid
+
+01:10:23
+search rechecking
+multiple values
+
+01:10:25
+for an unimportant
+hyperparameter.
+
+01:10:26
+So in practice,
+you should define
+
+01:10:28
+the ranges you want to
+try and then just randomly
+
+01:10:30
+collect hyperparameters with
+values from those ranges.
+
+01:10:34
+And that's probably
+the best way to do it.
+
+01:10:35
+And you just keep running
+until you get the best model.
+
+01:10:38
+OK, that's it.
+
+01:10:39
+So we talked about layers in
+CNNs activation functions,
+
+01:10:42
+CNN architectures, and
+weight initialization,
+
+01:10:44
+how do you actually predefine
+and build these models
+
+01:10:46
+and then we talked about how
+do you actually train it.
+
+01:10:48
+How do you change your data
+to be input to the model?
+
+01:10:51
+How do you augment it?
+
+01:10:52
+Transfer learning is
+a really neat trick
+
+01:10:54
+for improving performance and
+then how do you pick the best
+
+01:10:56
+hyperparameters.
+
+01:10:57
+So yeah, we covered a
+lot in lecture today.
+
+01:10:59
+Thank you all so much.
+
+01:11:00
+Yeah.

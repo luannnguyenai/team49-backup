@@ -1,0 +1,167 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture23-interpretability",
+    "lecture_title": "Lecture 23 - Model Interpretability and Editing",
+    "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs"
+  },
+  "unit": {
+    "unit_id": "local::lecture23-interpretability::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Attribution methods, hypothesis testing, and the limits of saliency maps",
+    "description": "Explains saliency-style explanations, then argues theoretically and empirically that popular attribution methods often cannot support behavioral conclusions about a model.",
+    "summary": "The lecture first defines a saliency map as a feature-wise estimate of how prediction changes locally around an input, using ImageNet pixels as the intuitive example [ts=602s] [ts=623s]. Kim then gives several reasons a gap can arise between what machines know and what humans think they know, and drills into attribution methods by showing that trained and untrained networks can produce nearly identical saliency maps, while inserted bugs such as label noise, spurious correlations, or OOD shifts are not reliably surfaced by explanations [ts=671s] [ts=743s] [ts=789s]. She reformulates the user’s interpretation problem as hypothesis testing and argues that IG and SHAP cannot validate such hypotheses better than random in theory and around random in practical end tasks like recourse and spurious-correlation detection [ts=935s] [ts=965s] [ts=1074s]. Her practical replacement is simple local sampling around the point of interest, with usefulness governed by sample count, output resolution, and feature count, plus careful validation before deploying these methods in high-stakes settings [ts=1115s] [ts=1147s] [ts=1240s].",
+    "key_points": [
+      {
+        "text": "A saliency map assigns each feature a number intended to reflect the local shape of the prediction function around that feature.",
+        "timestamp_s": 623,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Trained and untrained networks can yield very similar saliency maps, so meaningful and random predictions may receive nearly indistinguishable explanations.",
+        "timestamp_s": 743,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Inserted model problems such as labeling errors, spurious correlations, and out-of-distribution shifts are not reliably diagnosed by these explanations.",
+        "timestamp_s": 782,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "IG and SHAP are framed as hypothesis-testing tools, but the lecture argues they cannot validate user hypotheses better than random guessing.",
+        "timestamp_s": 965,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "For local function-shape questions, a direct sampling strategy around the input is recommended over complex attribution heuristics.",
+        "timestamp_s": 1115,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The result is said to apply to any model that can be treated as a function, not only vision models.",
+        "timestamp_s": 1264,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+      "start_s": 597,
+      "end_s": 1391
+    },
+    "difficulty": 0.73,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 13,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture first defines a saliency map as a feature-wise estimate of how prediction changes locally around an input, using ImageNet pixels as the intuitive example [ts=602s] [ts=623s]. Kim then gives several reasons a gap can arise between what machines know and what humans think they know, and drills into attribution methods by showing that trained and untrained networks can produce nearly identical saliency maps, while inserted bugs such as label noise, spurious correlations, or OOD shifts are not reliably surfaced by explanations [ts=671s] [ts=743s] [ts=789s]. She reformulates the user’s interpretation problem as hypothesis testing and argues that IG and SHAP cannot validate such hypotheses better than random in theory and around random in practical end tasks like recourse and spurious-correlation detection [ts=935s] [ts=965s] [ts=1074s]. Her practical replacement is simple local sampling around the point of interest, with usefulness governed by sample count, output resolution, and feature count, plus careful validation before deploying these methods in high-stakes settings [ts=1115s] [ts=1147s] [ts=1240s].",
+  "target_kp_ids": [
+    "kp_limits_of_attribution_methods_for_behavioral_inference",
+    "kp_hypothesis_testing_view_of_local_explanation_and_sampling"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "video_clip_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "transcript_slice": "00:10:01\nmethods.\n\n00:10:04\nhave an image like this.\n\n00:10:06\nThe explanation is going to take a form of the same image\n\n00:10:13\nwith a number that is supposed to imply\n\n00:10:23\nAnd one definition of that importance\n\n00:10:29\nlike around this pixel.\n\n00:10:35\nthe function moves up like the yellow curve.\n\n00:10:40\nlike the green curve.\n\n00:10:47\nmaybe that feature is irrelevant to predicting bird.\n\n00:10:51\nThen it's maybe more important because the value\n\n00:10:56\nfunction value here like a prediction value.\n\n00:11:04\nthis gap might exist.\n\n00:11:07\nThey overlap a little bit but helpful for us to think about.\n\n00:11:12\nSo this alien, again--\n\n00:11:16\nworks in a completely different-- perhaps completely\n\n00:11:20\nexperiences about the world.\n\n00:11:25\nthat we do just like we do, like having the Gestalt phenomenon,\n\n00:11:32\nMaybe machines have that too.\n\n00:11:35\nSo maybe our assumptions about these machines are wrong.\n\n00:11:41\nWe thought it was doing x, but it was actually doing y.\n\n00:11:48\nMaybe it's showing something superhuman that humans just\n\n00:11:55\nI'm going to dig deeper into one of--\n\n00:11:59\nThis is more recent work.\n\n00:12:03\nabout saliency map, we're going to play\n\n00:12:08\nNow, in 2018, we stumbled upon this phenomenon\n\n00:12:16\nthat we were actually trying to write some different paper.\n\n00:12:20\nBut we were testing something, and we\n\n00:12:26\nhas the same very similar saliency map.\n\n00:12:31\nand meaningful prediction were giving me the same explanation.\n\n00:12:37\nWe thought we had a bug, but it turned out we didn't.\n\n00:12:44\nand quantitatively.\n\n00:12:47\nBut then we wondered, maybe this is one-off case.\n\n00:12:56\nSo we tested that in a follow-up paper.\n\n00:13:02\nMaybe it has a labeling error.\n\n00:13:06\nMaybe it had out-of-distribution at test time.\n\n00:13:12\ncan explanation tell us that there's\n\n00:13:17\nIt turns out that that's also not quite true.\n\n00:13:24\nAnother follow-up also showed that this is also not the case.\n\n00:13:31\nBut then still we say, maybe there's\n\n00:13:38\nMaybe this is again a lab-setting test.\n\n00:13:44\nMaybe there's still some hope.\n\n00:13:51\nthat some of these methods, very popular methods,\n\n00:13:56\nSo I'm going to talk a little bit about that.\n\n00:14:01\nI'm missing Pang Wei in the author list, I just realized.\n\n00:14:07\nSo let's first talk about our expectation.\n\n00:14:13\nNow, the original paper that developed this method, IG\n\n00:14:21\nused for accounting the contributions of each feature.\n\n00:14:27\nzero attribution to a pixel, we're going to say, OK, well,\n\n00:14:33\nAnd that means that f will be insensitive\n\n00:14:40\nAnd in fact, this is how it's been used in practice.\n\n00:14:45\nThey use a SHAP to figure out the eligibility\n\n00:14:53\nWhat we show in this work is that none\n\n00:15:00\nAnd in fact, just because popular attribution methods\n\n00:15:06\nyou cannot conclude anything about the actual model\n\n00:15:12\nSo how does that work?\n\n00:15:20\nA few.\n\n00:15:21\nI'll tell you, I learned about theory proving\n\n00:15:25\nSo I'll tell you like the way that we\n\n00:15:30\nthink about this problem.\n\n00:15:34\nthat we know how to solve.\n\n00:15:40\nbecause once you formulated the hypothesis testing\n\n00:15:45\nyou can use to prove this.\n\n00:15:49\nThe hypothesis is that I'm a user.\n\n00:15:55\nAnd I have a mental model of, ah,\n\n00:16:01\nThen the hypothesis is that, whether that's true or not.\n\n00:16:09\nhave, you cannot do better than random guessing in validating\n\n00:16:17\nAnd that means yes, sometimes it's right.\n\n00:16:24\nyes or no.\n\n00:16:25\nBecause like, what's the point of doing it\n\n00:16:30\nright?\n\n00:16:35\nfor this graph, it's just a visualization of our result\n\n00:16:41\nAnd the line is random guessing because this\n\n00:16:44\nThat's the best method.\n\n00:16:47\nMethods that we know, SHAP and IG, all\n\n00:16:55\nOh, it's bad news.\n\n00:17:02\nMaybe there were some assumptions\n\n00:17:07\nSo does this phenomenon hold in practice?\n\n00:17:13\nWe now have more image graphs and more bigger models,\n\n00:17:19\nthat people care about in interpretability\n\n00:17:24\nor spurious correlation.\n\n00:17:28\nis you're getting a loan, and you\n\n00:17:32\nhave a high chance of getting a loan.\n\n00:17:37\nif my value goes up or down.\n\n00:17:41\npretty significant implications socially.\n\n00:17:50\nboil down to this hypothesis testing framework\n\n00:17:54\nThey are all all around the random guessing line\n\n00:18:01\nSo you might say, oh, no.\n\n00:18:03\nA lot of people are using these tools, so what do we do?\n\n00:18:10\nSo people like developing complex tools.\n\n00:18:18\nbecause a lot of times simple methods work, Occam's razor.\n\n00:18:25\nThere is a reason perhaps a lot of times why they work.\n\n00:18:31\nthey make sense.\n\n00:18:35\nSo again, your goal is to estimate a function shape.\n\n00:18:39\nWell, the simplest thing you do is\n\n00:18:45\nand evaluate the function around that point.\n\n00:18:50\nIf it goes down, maybe function is coming down, right?\n\n00:18:58\nBut then the question is, how many samples do we need?\n\n00:19:05\nYou're lifting this line upwards that way\n\n00:19:10\nIt's proportional to the number of samples.\n\n00:19:14\nMakes sense.\n\n00:19:17\nHow much resolution do you care?\n\n00:19:23\ncare 0 slope 2 like slope 1?\n\n00:19:28\nAnd number of features, of course.\n\n00:19:35\non function shape, sample.\n\n00:19:42\nSo can we infer the model behavior\n\n00:19:47\nThe answer is no.\n\n00:19:53\nWe're currently working on even bigger models\n\n00:19:59\nthat, yes, it just really doesn't work.\n\n00:20:03\nbefore using these methods.\n\n00:20:09\nIf your function is kind of crazy, of course,\n\n00:20:13\nSo what is the definition?\n\n00:20:17\nAnd finally, we haven't quite given up yet\n\n00:20:22\nin economics and Shapley values and all that.\n\n00:20:29\nwhere these methods work.\n\n00:20:34\nWe just have to figure out when.\n\n00:20:40\nin a given function, I can test it\n\n00:20:44\nYes, I can use IG here.\n\n00:20:47\nAnd that would be still very useful.\n\n00:20:51\nBefore I go to the next one, any questions?\n\n00:20:56\nDo the findings you have about these models,\n\n00:21:01\nor does it apply to NLP language models?\n\n00:21:07\nOK.\n\n00:21:10\nActually, simplest proof that can show simply any function,\n\n00:21:16\nAny other questions?\n\n00:21:21\nYeah, Chris?\n\n00:21:24\nBut it sort of seems like for the last couple of years,\n\n00:21:32\nwriting papers using Shapley values.\n\n00:21:42\nor that a lot of it might be OK because the whatever conditions\n\n00:21:51\nSo two answers to that question.\n\n00:21:57\nSo maybe in the optimistic case, 50% of those papers--\n\n00:22:04\n--you hit it.\n\n00:22:08\non the second note even if-- maybe SHAP wasn't perfect.\n\n00:22:13\nBut even if it helped human at the end task,\n\n00:22:19\nidentifying bugs and whatnot--\n\n00:22:23\nwith the right control testing setup, then I think it's good.\n\n00:22:31\nwork with human in the loop maybe.\n\n00:22:34\nAnd I personally really like SHAP paper.\n\n00:22:39\nAnd I love all his work.\n\n00:22:43\nour expectations so that our expectations are better\n\n00:22:49\nAll right.\n\n00:22:52\nkind of similar flavor.\n\n00:22:56\nSo this is one of those papers just like the many other papers\n\n00:23:04\nSo initially, Peter came up as an intern,\n\n00:23:10\nin these large language models.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture23-interpretability::seg2",
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg2",
+      "global_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_limits_of_attribution_methods_for_behavioral_inference",
+      "name": "Limits of attribution methods for behavioral inference",
+      "description": "Saliency, IG, and SHAP may look plausible but often do not justify conclusions about what a model actually uses or how it will behave.",
+      "track_tags": [
+        "evaluation",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "ml",
+        "nlp",
+        "vision"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "responsible_ai"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because limits of attribution methods for behavioral inference formalizes how saliency, IG, and SHAP may look plausible but often do not justify conclusions about what a model actually uses or how it will behave, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_hypothesis_testing_view_of_local_explanation_and_sampling",
+      "name": "Hypothesis-testing view of local explanation and sampling",
+      "description": "Interpreting attribution can be cast as hypothesis testing, and direct local sampling offers a more reliable way to estimate function shape.",
+      "track_tags": [
+        "interpretability",
+        "theory"
+      ],
+      "domain_tags": [
+        "ml",
+        "statistics"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.77,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because hypothesis-testing view of local explanation and sampling clarifies interpreting attribution can be cast as hypothesis testing, and direct local sampling offers a more reliable way to estimate function shape, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp4"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.58,
+    0.88
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L23_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture23-interpretability_transcript.txt"
+  }
+}

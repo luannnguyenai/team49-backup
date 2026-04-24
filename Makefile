@@ -5,7 +5,7 @@
 #   make dev          Start development stack (hot-reload)
 #   make dev-build    Rebuild images then start dev stack
 #   make down         Stop all containers
-#   make seed         Seed curriculum data into the database
+#   make seed         Import canonical content and product shell into the database
 #   make migrate      Run Alembic migrations (upgrade head)
 #   make test         Run backend + frontend tests
 #   make test-be      Run backend pytest only
@@ -20,7 +20,7 @@
 #   make help         Print this message
 # =============================================================================
 
-.PHONY: help dev dev-build down seed migrate \
+.PHONY: help dev dev-build down seed seed-check migrate \
         test test-be test-fe \
         deploy logs logs-be \
         shell-be db-shell redis-cli clean
@@ -78,13 +78,13 @@ migrate: ## Run Alembic migrations (upgrade head)
 	@echo "$(GREEN)▶ Running database migrations...$(RESET)"
 	docker exec $(BE_CTR) alembic upgrade head
 
-seed: ## Seed curriculum data (modules, topics, questions)
-	@echo "$(GREEN)▶ Seeding curriculum data...$(RESET)"
+seed: ## Import canonical content and product shell data
+	@echo "$(GREEN)▶ Importing canonical content and product shell...$(RESET)"
 	docker exec $(BE_CTR) python scripts/seed.py
 
-seed-clear: ## Clear existing data then re-seed (DESTRUCTIVE)
-	@echo "$(GREEN)▶ Clearing and re-seeding...$(RESET)"
-	docker exec $(BE_CTR) python scripts/seed.py --clear
+seed-check: ## Validate canonical content and product shell inputs without DB writes
+	@echo "$(GREEN)▶ Validating canonical content and product shell inputs...$(RESET)"
+	docker exec $(BE_CTR) python scripts/seed.py --dry-run
 
 # ---------------------------------------------------------------------------
 # Testing

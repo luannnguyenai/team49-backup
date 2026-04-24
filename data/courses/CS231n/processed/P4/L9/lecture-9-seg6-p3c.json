@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_9::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "The transcript explains saliency, CAM, Grad-CAM, and attention visualization in ViT directly enough to support transcript-only questions.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the earlier cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is a saliency map defined approximately in this discussion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "As the gradient of the class score with respect to the input pixels.",
+        "As the weights of the final class layer with respect to model parameters.",
+        "As a map of bounding boxes after non-maximum suppression.",
+        "As the attention matrix between all patches in a ViT."
+      ],
+      "answer_index": 0,
+      "explanation": "A saliency map asks how much the class score would change if each pixel were changed slightly. The input gradient therefore indicates which pixels most strongly influence the current class prediction.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_saliency_via_input_gradients",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "which pixel matters",
+          "pixel values"
+        ],
+        "timestamps": [
+          "01:04:41",
+          "01:06:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main difference between Grad-CAM and CAM in this discussion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Grad-CAM uses weights inferred from gradients and keeps positive evidence through ReLU.",
+        "Grad-CAM applies only to linear classifiers and not to CNNs.",
+        "CAM is always more accurate because it does not need spatial features.",
+        "CAM and Grad-CAM are exactly the same computation and differ only in coloring."
+      ],
+      "answer_index": 0,
+      "explanation": "CAM relies on weights attached directly to the class, whereas Grad-CAM infers feature importance from gradients with respect to the target class. ReLU is often used to keep the positive evidence for that class.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cam_and_grad_cam",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "used instead of the weights",
+          "use ReLU"
+        ],
+        "timestamps": [
+          "01:10:34",
+          "01:11:04"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why was ViT described here as making visualization easier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because attention maps can be displayed directly over patches or image space.",
+        "Because ViT does not need gradients, so its explanations are always exact.",
+        "Because every ViT filter always has only three channels, making it easy to draw.",
+        "Because ViT automatically generates a ground-truth mask for every class."
+      ],
+      "answer_index": 0,
+      "explanation": "In ViT, attention already provides interaction weights between tokens, so we can inspect which regions the model attends to more directly. That gives a more natural visualization path than only inspecting deep CNN filters.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vit_attention_visualization",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "much better way",
+          "pixel space"
+        ],
+        "timestamps": [
+          "01:12:32",
+          "01:13:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "global_kp_id": "kp_cam_and_grad_cam",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "global_kp_id": "kp_cam_and_grad_cam",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "global_kp_id": "kp_vit_attention_visualization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "global_kp_id": "kp_cam_and_grad_cam",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Saliency is a medium technical concept because the learner must map a derivative to an interpretation."
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 1.0,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Distinguishing CAM from Grad-CAM is one of the more technical interpretability comparisons in this lecture."
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The item is medium because it asks for an architectural reason why one family is easier to visualize than another."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-9-seg6-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item checks whether the learner can connect interpretability to gradient sensitivity."
+    },
+    {
+      "item_id": "lecture-9-seg6-q2",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is best used when checking a more precise understanding of CNN interpretability methods."
+    },
+    {
+      "item_id": "lecture-9-seg6-q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "review",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This transfers because it compares interpretability affordances across model families."
+    }
+  ]
+}

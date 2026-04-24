@@ -1,0 +1,209 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture22-nlp-linguistics",
+    "lecture_title": "Lecture 22 - NLP, Linguistics, and Philosophy",
+    "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4"
+  },
+  "unit": {
+    "unit_id": "local::lecture22-nlp-linguistics::seg1",
+    "course_id": "cs224n-2024",
+    "name": "Course recap: what made modern NLP work",
+    "description": "A compressed review of the ideas that structured CS224N, from word vectors to transformers and foundation models.",
+    "summary": "The lecture opens by reviewing the arc of CS224N: word vectors and dense hidden representations, sequence models, transformers, and the modern recipe of pretraining plus post-training for high-performance foundation models [ts=69s] [ts=99s]. Manning emphasizes that distributional semantics—representing words by their contexts—has driven both statistical and neural NLP, starting with word vectors and continuing through transformers [ts=121s] [ts=165s]. He also stresses two engineering enablers: residual connections made deep models much easier to train reliably, and language modeling emerged as a universal pretraining task because both linguistic knowledge and world knowledge help next-word prediction [ts=179s] [ts=227s]. The segment ends by noting the striking empirical regularity that performance has improved roughly linearly as data, compute, and model size scale up, even though that does not mean NLP is solved [ts=250s] [ts=275s].",
+    "key_points": [
+      {
+        "text": "Modern NLP in the course progresses from word vectors and feedforward networks to sequence models, transformers, and foundation models.",
+        "timestamp_s": 69,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Distributional semantics represents words by their contexts: 'you shall know a word by the company it keeps.'",
+        "timestamp_s": 132,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Residual connections made deep transformer training far more stable and reliable.",
+        "timestamp_s": 179,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Language modeling became a universal pretraining task because linguistic and world knowledge both improve next-word prediction.",
+        "timestamp_s": 219,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Scaling data, compute, and model size has produced near-linear empirical performance gains.",
+        "timestamp_s": 250,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=18",
+      "start_s": 5,
+      "end_s": 499
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 8,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture opens by reviewing the arc of CS224N: word vectors and dense hidden representations, sequence models, transformers, and the modern recipe of pretraining plus post-training for high-performance foundation models [ts=69s] [ts=99s]. Manning emphasizes that distributional semantics—representing words by their contexts—has driven both statistical and neural NLP, starting with word vectors and continuing through transformers [ts=121s] [ts=165s]. He also stresses two engineering enablers: residual connections made deep models much easier to train reliably, and language modeling emerged as a universal pretraining task because both linguistic knowledge and world knowledge help next-word prediction [ts=179s] [ts=227s]. The segment ends by noting the striking empirical regularity that performance has improved roughly linearly as data, compute, and model size scale up, even though that does not mean NLP is solved [ts=250s] [ts=275s].",
+  "target_kp_ids": [
+    "kp_distributional_semantics",
+    "kp_foundation_model_pretraining_and_adaptation_paradigm"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "video_clip_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "transcript_slice": "00:00:05\nOK.\n\n00:00:07\nI'll get started for the last class.\n\n00:00:13\nWell, welcome.\n\n00:00:17\nto the last real lecture of CS224N.\n\n00:00:24\nThe lecture is titled, \"NLP, Linguistics, and Philosophy,\"\n\n00:00:31\nwanted to.\n\n00:00:35\nSo this is what we're going to go through, talk\n\n00:00:41\nand open problems, some of the more foundational questions\n\n00:00:51\nmeaning in linguistics and NLP.\n\n00:00:57\nin the world.\n\n00:01:05\nlooked at in CS224N.\n\n00:01:11\nthe idea of neural NLP systems.\n\n00:01:18\ninto doing sequence models, language models, RNNs, LSTMs.\n\n00:01:25\nthat's been very influential, the transformer.\n\n00:01:32\nit's not exactly an architecture but model\n\n00:01:36\nto produce high-performance NLP systems,\n\n00:01:42\na post-training phase of various techniques\n\n00:01:50\nmodels that understand language so well.\n\n00:01:54\nabout various particular topics, like benchmarking and reasoning.\n\n00:02:01\nwere this idea that you could get a long way\n\n00:02:09\nour hidden representations in neural networks--\n\n00:02:14\nrepresenting words by their contexts.\n\n00:02:21\nAnd I'll come back to that a bit later\n\n00:02:25\nBut that's essentially been the idea\n\n00:02:33\nwhether it's the earliest statistical NLP phase or more\n\n00:02:38\nAnd in this world, we start instantiating that\n\n00:02:45\nBut the same contextual idea is then\n\n00:02:50\nWe looked at both the challenges and opportunities\n\n00:02:59\npeople developed ideas and tricks such as having\n\n00:03:05\npossible and stable to do successfully,\n\n00:03:11\nseemed black magic that was hard to get right to people\n\n00:03:17\nhigh-performance transformer models.\n\n00:03:23\ngood about them and some of their problems\n\n00:03:29\nby adopting this different architecture of transformers,\n\n00:03:35\nAnd then we moved into the modern form\n\n00:03:41\nlanguage modeling seems a simple thing,\n\n00:03:47\nBut it emerges as what we think of as a universal pretraining\n\n00:03:56\nhelp you to do this task of predicting words better.\n\n00:04:04\nto produce the kind of powerful, knowledgeable models\n\n00:04:10\nAnd up until now, there's been this amazing property\n\n00:04:19\nbasically--\n\n00:04:21\nIt's extremely linear improvements as performance\n\n00:04:30\nup by orders of magnitude.\n\n00:04:38\nThere are lots of things that people still\n\n00:04:45\nAnd a few of these are mentioned on the next few slides.\n\n00:04:56\ngood at actually learning to be able to do things generally,\n\n00:05:07\nthat a lot of the benefits of what we're getting\n\n00:05:12\nis that they've seen a huge amount of stuff,\n\n00:05:19\nthey've seen every pattern before,\n\n00:05:23\nI've occasionally used the analogy\n\n00:05:28\nlike a talking encyclopedia, that they're really,\n\n00:05:37\nsomething that is intelligent in the sense of being able to work\n\n00:05:44\nas human beings do.\n\n00:05:51\ntransformer models are actually worse\n\n00:05:58\nSo here's just one little graph I'm not going\n\n00:06:03\nBut this was looking at data that's\n\n00:06:09\nand then trying to learn it from a limited amount of data\n\n00:06:19\nAnd the observation is that at the scales that they're working,\n\n00:06:27\nthe LSTM is basically at ceiling the entire of this graph.\n\n00:06:36\nin good ways because of its LSTM architecture,\n\n00:06:44\nactually learns the patterns well.\n\n00:06:52\nintelligence is actually we're amazing at figuring\n\n00:07:02\nThere's something that you don't know how to do.\n\n00:07:09\nand by and large, you'll improve a few times with practice.\n\n00:07:16\nfrom these single shot examples.\n\n00:07:26\nThere's a lot of interest in what's\n\n00:07:31\nneural networks still appear as black boxes,\n\n00:07:37\ndoing what they're doing.\n\n00:07:42\nthe main thing you're doing is measuring the final performance\n\n00:07:50\nSo there's a lot of interest in better understanding what\n\n00:07:55\nwhy do they succeed and fail.\n\n00:07:59\nto look more closely into what's happening inside neural network\n\n00:08:05\nThere is some work of that sort that actually\n\n00:08:10\nSo here's an old blog post by Andrej Karpathy\n\n00:08:18\nand he was looking at LSTMs and how do they learn.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "global_kp_id": "kp_distributional_semantics",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "global_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture22-nlp-linguistics::seg1",
+      "global_kp_id": "kp_generalization_versus_memorization",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_distributional_semantics",
+      "name": "Distributional semantics",
+      "description": "A word’s meaning is inferred from the contexts in which it appears, summarized by the slogan that a word is known by the company it keeps. The idea that linguistic representations gain meaning from the contexts in which words occur; presented as a central engine of modern NLP.",
+      "track_tags": [
+        "nlp",
+        "representation_learning",
+        "semantics"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "natural_language_processing",
+        "nlp",
+        "semantics"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "nlp_researcher",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because distributional semantics formalizes how a word’s meaning is inferred from the contexts in which it appears, summarized by the slogan that a word is known by the company it keeps, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture22-nlp-linguistics::kp1",
+        "local::lecture01-wordvecs::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_foundation_model_pretraining_and_adaptation_paradigm",
+      "name": "Foundation-model pretraining and adaptation paradigm",
+      "description": "A foundation model is pretrained broadly and then adapted to many downstream tasks through fine-tuning, prompting, zero-shot, or few-shot use. The core recipe is broad pretraining followed by task-directed post-training or adaptation.",
+      "track_tags": [
+        "foundation_models",
+        "llms",
+        "multimodal_ml",
+        "nlp"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "natural_language_processing",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because foundation-model pretraining and adaptation paradigm formalizes how a foundation model is pretrained broadly and then adapted to many downstream tasks through fine-tuning, prompting, zero-shot, or few-shot use, which later units use as core machinery rather than background context while importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture22-nlp-linguistics::kp2",
+        "local::lecture_16::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_generalization_versus_memorization",
+      "name": "Generalization versus memorization",
+      "description": "The concern that LLM success may rely heavily on memorized exposure rather than flexible generalization from limited data.",
+      "track_tags": [
+        "evaluation",
+        "generalization",
+        "nlp"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because generalization versus memorization clarifies the concern that LLM success may rely heavily on memorized exposure rather than flexible generalization from limited data, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture22-nlp-linguistics::kp3"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L22_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture22-nlp-linguistics_transcript.txt"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "unit_id": "local::lecture02-python-review::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi củng cố về động lực dùng Python trong NLP/deep learning, kiểu gán động, và các quy tắc cú pháp cơ bản như None, == và thụt lề.",
+  "question_bank": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "lý do quan trọng nhất khiến Python được dùng rộng rãi trong NLP và deep learning là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì Python dễ đọc, có thư viện tính toán khoa học mạnh, và làm việc trực tiếp với framework như PyTorch/TensorFlow.",
+        "Vì Python luôn chạy nhanh hơn C và C++ ở mọi phép toán mức thấp.",
+        "Vì Python bắt buộc mọi biến phải khai báo kiểu trước khi dùng.",
+        "Vì Python không cần thư viện ngoài cho tính toán ma trận."
+      ],
+      "answer_index": 0,
+      "explanation": "Python được ưa chuộng vì cân bằng giữa tính dễ đọc và hệ sinh thái khoa học mạnh. Các thư viện như NumPy cùng việc tích hợp tốt với framework học sâu giúp nó rất phù hợp cho NLP và deep learning.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_python_for_nlp_and_deep_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "high level language",
+          "interface directly with Python"
+        ],
+        "timestamps": [
+          "00:01:37",
+          "00:02:05"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Phát biểu nào mô tả đúng hành vi biến và cú pháp cơ bản trong Python?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một biến có thể giữ số rồi sau đó giữ chuỗi; dùng == để so sánh và = để gán.",
+        "Một biến sau khi nhận giá trị int thì không thể đổi sang string.",
+        "None là cùng một giá trị với 0 nên có thể thay thế hoàn toàn cho nhau.",
+        "Python dùng dấu ngoặc nhọn để xác định khối lệnh thay vì thụt lề."
+      ],
+      "answer_index": 0,
+      "explanation": "Python là ngôn ngữ gán động nên cùng một tên biến có thể trỏ tới giá trị thuộc kiểu khác nhau theo thời điểm. Ngoài ra, = là phép gán còn == là phép kiểm tra bằng nhau.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "x is equal to 10",
+          "single equal sign versus two"
+        ],
+        "timestamps": [
+          "00:03:17",
+          "00:06:01"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "global_kp_id": "kp_python_for_nlp_and_deep_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q1",
+      "global_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "global_kp_id": "kp_dynamic_variables_and_basic_python_operations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg1-q2",
+      "global_kp_id": "kp_python_truth_values_none_operators_and_indentation",
+      "role": "secondary"
+    }
+  ]
+}

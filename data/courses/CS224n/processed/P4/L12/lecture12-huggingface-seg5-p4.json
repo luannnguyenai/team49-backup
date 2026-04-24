@@ -1,0 +1,607 @@
+{
+  "unit_id": "local::lecture12-huggingface::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=b80by3Xk_A8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 6,
+  "review_summary": "The transcript provides enough grounded detail to generate 6 reinforcement questions about preparing an IMDb DatasetDict, tokenizing with datasets.map, connecting the result to a standard PyTorch fine-tuning loop, and one code-style preprocessing check.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which dataset is used in the fine-tuning walkthrough?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "IMDb sentiment reviews",
+        "SQuAD question answering",
+        "MNLI entailment pairs",
+        "WikiText language modeling"
+      ],
+      "answer_index": 0,
+      "explanation": "The walkthrough fine-tunes on the IMDb sentiment dataset provided through the datasets library.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "IMDb",
+          "sentiment analysis"
+        ],
+        "timestamps": [
+          "00:32:13",
+          "00:32:21"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is a small demonstration DatasetDict constructed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "By shuffling the training data and selecting 128 train examples and 32 validation examples",
+        "By downloading only the test split and duplicating it",
+        "By merging IMDb with SST-2 and then filtering neutral labels",
+        "By keeping the full dataset but removing all labels"
+      ],
+      "answer_index": 0,
+      "explanation": "A small CPU-friendly demonstration DatasetDict can be made by shuffling and selecting a limited number of training and validation examples.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "128 examples",
+          "validation"
+        ],
+        "timestamps": [
+          "00:33:12",
+          "00:32:55"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After tokenizing the dataset with map, what cleanup steps are performed before using it with PyTorch?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Remove the raw text column, rename label to labels, and set the format to Torch",
+        "Convert every label to a string and decode the input IDs",
+        "Delete the attention mask and keep only text",
+        "Replace the tokenizer output with logits from the model"
+      ],
+      "answer_index": 0,
+      "explanation": "Once the text has been tokenized, the raw text field is no longer needed. Renaming label to labels and setting Torch format makes the dataset fit the model interface naturally.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "remove the text column",
+          "format to Torch"
+        ],
+        "timestamps": [
+          "00:36:00",
+          "00:36:09"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What do the labels mean in this sentiment dataset?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "1 means positive and 0 means negative",
+        "1 means negative and 0 means positive",
+        "1 means neutral and 0 means mixed",
+        "Labels are string categories rather than integers"
+      ],
+      "answer_index": 0,
+      "explanation": "The dataset uses integer labels, where 1 denotes positive sentiment and 0 denotes negative sentiment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "positive or negative",
+          "label here corresponds"
+        ],
+        "timestamps": [
+          "00:34:29",
+          "00:36:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Once the tokenized dataset is wrapped in a DataLoader, how different is the fine-tuning loop from ordinary PyTorch training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is basically the standard PyTorch loop: compute loss, backpropagate, and step the optimizer",
+        "It no longer needs an optimizer or loss function",
+        "It can only run through Trainer and not manual PyTorch code",
+        "It must decode model outputs back to text before each gradient step"
+      ],
+      "answer_index": 0,
+      "explanation": "After data preparation, Hugging Face models can be fine-tuned much like ordinary PyTorch modules inside a standard training loop.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pytorch_training_loop",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same as what",
+          "backpropagate"
+        ],
+        "timestamps": [
+          "00:39:09",
+          "00:40:26"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "item_type": "code_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "code_block_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main purpose of calling map with a tokenization function on a DatasetDict?",
+      "stem_format": "text_plus_code",
+      "choices_format": "plain_text",
+      "choices": [
+        "To apply the tokenizer across dataset examples and add model-ready token fields",
+        "To shuffle the dataset and drop all labels",
+        "To run backpropagation on every training example",
+        "To convert the dataset directly into model predictions"
+      ],
+      "answer_index": 0,
+      "explanation": "datasets.map is used here as a preprocessing pass that transforms raw text examples into tokenized features suitable for training.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "difficulty": "medium",
+      "code_question_style": "concept_from_code",
+      "requires_monospace": true,
+      "code_block": {
+        "language": "python",
+        "snippet": "def tokenize_fn(batch):\n    return tokenizer(batch[\"text\"], truncation=True)\n\ntokenized = dataset.map(tokenize_fn, batched=True)",
+        "highlight_lines": [
+          1,
+          2,
+          4
+        ]
+      },
+      "evidence": {
+        "source": "code",
+        "transcript_quotes": [
+          "datasets.map",
+          "tokenizer"
+        ],
+        "timestamps": [
+          "00:00:00"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "global_kp_id": "kp_pytorch_training_loop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "global_kp_id": "kp_dataset_preparation_with_datasets_and_datasetdict",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which dataset is used in the fine-tuning walkthrough\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"How is a small demonstration DatasetDict constructed\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"After tokenizing the dataset with map, what cleanup steps are performed before using it with PyTorch\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.3,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What do the labels mean in this sentiment dataset\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Once the tokenized dataset is wrapped in a DataLoader, how different is the fine-tuning loop from ordinary PyTorch training\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.25,
+      "discrimination_prior": 0.99,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the main purpose of calling map with a tokenization function on a DatasetDict\" asks for applied understanding rather than pure recall, so a medium prior fits. The code context nudges the prior slightly upward."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture12_huggingface_seg5_q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which dataset is used in the fine-tuning walkthrough\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How is a small demonstration DatasetDict constructed\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"After tokenizing the dataset with map, what cleanup steps are performed before using it with PyTorch\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q4",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What do the labels mean in this sentiment dataset\" fits guided practice better than final evaluation."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Once the tokenized dataset is wrapped in a DataLoader, how different is the fine-tuning loop from ordinary PyTorch training\" checks whether the learner can execute the procedure reliably."
+    },
+    {
+      "item_id": "lecture12_huggingface_seg5_q6",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the main purpose of calling map with a tokenization function on a DatasetDict\" is well suited to checking whether the learner can reason through code rather than just recall facts."
+    }
+  ]
+}

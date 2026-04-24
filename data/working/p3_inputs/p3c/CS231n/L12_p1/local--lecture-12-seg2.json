@@ -1,0 +1,157 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_12",
+    "lecture_title": "Lecture 12: Self-Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM"
+  },
+  "unit": {
+    "unit_id": "local::lecture_12::seg2",
+    "course_id": "cs231n_spring_2025",
+    "name": "Rotation prediction for visual commonsense",
+    "description": "Introduces rotation prediction as a concrete pretext task, explains why it may induce holistic image understanding, and reviews empirical transfer results.",
+    "summary": "Rotation prediction is introduced as a pretext task based on the hypothesis that a model can identify the correct orientation of an object only if it has learned visual commonsense about how the object should normally appear [ts=956s] [ts=974s]. The specific example uses four discrete rotations—0, 90, 180, and 270 degrees—so the task becomes 4-way classification rather than direct angle regression [ts=1004s] [ts=1048s]. The lecture then describes transfer results: on CIFAR-10, a rotation-pretrained model starts from a stronger initial accuracy and can match supervised training on an easy task, while on harder downstream tasks and Pascal VOC benchmarks it substantially outperforms random initialization and approaches fully supervised ImageNet pretraining [ts=1092s] [ts=1284s]. The segment ends by noting that self-supervised attention maps often cover more of the object than supervised ones because the representation must remain useful across unknown downstream tasks [ts=1332s] [ts=1375s].",
+    "key_points": [
+      {
+        "text": "Rotation prediction is motivated by the idea that correct orientation recognition requires visual commonsense about unperturbed objects.",
+        "timestamp_s": 956,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Using the set {0, 90, 180, 270} turns rotation prediction into a 4-class classification problem.",
+        "timestamp_s": 1032,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "In the CIFAR-10 experiment, conv1 and conv2 are frozen while later layers and a linear head are adapted with labeled data.",
+        "timestamp_s": 1092,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Rotation pretraining is much better than random initialization and gets close to supervised ImageNet pretraining on Pascal VOC transfer tasks.",
+        "timestamp_s": 1244,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Self-supervised attention maps are often more holistic than supervised ones because the representation must support multiple possible downstream tasks.",
+        "timestamp_s": 1332,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+      "start_s": 926,
+      "end_s": 1395
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "transcript_slice": "00:15:26\nSo let's start with the first part.\n\n00:15:36\nSo I talked quite a lot about rotation, predicting rotations.\n\n00:15:45\nwith random or arbitrary degrees and predict the rotation\n\n00:15:56\nAnd our hypothesis here is that the model, a model\n\n00:16:05\nonly if it has the common sense visual common\n\n00:16:14\nSo these models mostly are designed around this concept\n\n00:16:23\nAnd then if the model is able to capture\n\n00:16:32\nthe image, the entire image, into a useful set of features,\n\n00:16:42\nThis paper published in 2018 implemented this\n\n00:16:53\n19, 90, 180, and 270, these rotating images with one\n\n00:17:08\nto basically predict what each of these\n\n00:17:14\nAnd because they only created four different outputs,\n\n00:17:19\nhas four different cases.\n\n00:17:23\nof the angle, the degrees.\n\n00:17:31\none of these four classes of 0, 1, 2, or 3.\n\n00:17:42\nSo with that, the authors were able to learn\n\n00:17:50\nAnd with those representations, they\n\n00:17:57\nat a downstream application, basically fine\n\n00:18:07\nand also the classifier.\n\n00:18:19\nand then they fine tuned the last convolution\n\n00:18:25\nSo it's not entirely fine tuning the entire network,\n\n00:18:35\nThis is on CIFAR10 data set, one of the data\n\n00:18:42\nYou see that when the model is pre-trained,\n\n00:18:48\nSo it means that it already is in a good shape,\n\n00:18:57\neven in the very first iterations.\n\n00:19:04\nCIFAR10 is actually not too hard to train a model for.\n\n00:19:12\nthe fully supervised version, and the one that\n\n00:19:17\nsame accuracy.\n\n00:19:22\nin very hard application, in much harder to applications,\n\n00:19:27\ndo any pre-training, large scale pre-training,\n\n00:19:31\nOK.\n\n00:19:42\nsome experiments on this PASCAL VOC 2017 data\n\n00:19:53\nincluding classification, detection, and segmentation.\n\n00:20:03\nthey've used different setups of just training\n\n00:20:10\nof the layers for the classification, detection,\n\n00:20:16\nIf you look at the ImageNet labels,\n\n00:20:23\nand we pre-train on that data set.\n\n00:20:29\nBut again, have this in mind that this\n\n00:20:34\nfor the pre-training.\n\n00:20:40\nand the pre-training is all based on self-supervised,\n\n00:20:49\ndoing a much better job than many of the other counterparts,\n\n00:21:01\ngo into many of the detail of many of those,\n\n00:21:09\nAnd see how it's different, how much better it\n\n00:21:17\nSo the random initialization versus this pretraining\n\n00:21:24\nThe difference is huge, and this rotation pretext task is not\n\n00:21:33\non the entire ImageNet.\n\n00:21:40\ninto in this paper was looking at the features\n\n00:21:48\nI mentioned earlier that one of the ways of evaluating\n\n00:21:56\nlearning frameworks, is to look at the features.\n\n00:22:01\nfrom the fully connected layers.\n\n00:22:07\nframeworks, how we can go from the features\n\n00:22:12\nSo this evaluation involves projecting those\n\n00:22:19\nIf you look at the attention maps for the supervised model,\n\n00:22:25\nfocused maps because it's only trying\n\n00:22:33\nSo if it captures the eye and the shape around it,\n\n00:22:39\nBut in cases of self-supervised learning,\n\n00:22:45\ncovered because it has to have a more holistic understanding\n\n00:22:52\nthe downstream task is, but the goal\n\n00:23:00\nSo that's one of the tasks.\n\n00:23:05\nI'll stop after going over some of the tasks.\n\n00:23:10\nthen I would be happy to answer that.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_12::seg2",
+      "global_kp_id": "kp_rotation_prediction",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_12::seg2",
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_rotation_prediction",
+      "name": "Rotation prediction",
+      "description": "A pretext task that predicts discrete image rotations to encourage representations with visual commonsense about object orientation.",
+      "track_tags": [
+        "image_transformations",
+        "pretext_tasks"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineering",
+        "research"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rotation prediction clarifies a pretext task that predicts discrete image rotations to encourage representations with visual commonsense about object orientation, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_12::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_downstream_transfer_evaluation",
+      "name": "Downstream transfer and extrinsic evaluation",
+      "description": "Self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning. A pre-trained encoder can be reused for downstream tasks by adding lightweight supervised heads such as linear classifiers or decoders.",
+      "track_tags": [
+        "computer_vision",
+        "evaluation",
+        "transfer_learning"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "downstream_adaptation",
+        "linear_probe",
+        "machine_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because downstream transfer and extrinsic evaluation clarifies self-supervised methods should be judged mainly by how useful their learned representations are for downstream tasks, often via linear evaluation or fine-tuning, sharpening later modeling, analysis, or evaluation choices while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-wordvecs-lm::kp14",
+        "local::lecture_12::kp3",
+        "local::lecture_16::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L12_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture12-self-supervised-learning_transcript.txt"
+  }
+}

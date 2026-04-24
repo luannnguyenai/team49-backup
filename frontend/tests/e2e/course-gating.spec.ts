@@ -31,23 +31,25 @@ async function createLearnerWithAssessableTopic(
     access_token: string;
   };
 
-  const modulesResponse = await request.get("http://127.0.0.1:8000/api/modules");
-  expect(modulesResponse.ok()).toBeTruthy();
+  const sectionsResponse = await request.get("http://127.0.0.1:8000/api/course-sections");
+  expect(sectionsResponse.ok()).toBeTruthy();
 
-  const modules = (await modulesResponse.json()) as Array<{ id: string; name: string }>;
+  const sections = (await sectionsResponse.json()) as Array<{ id: string; title: string }>;
 
-  for (const module of modules) {
+  for (const section of sections) {
     const detailResponse = await request.get(
-      `http://127.0.0.1:8000/api/modules/${module.id}`,
+      `http://127.0.0.1:8000/api/course-sections/${section.id}`,
     );
     expect(detailResponse.ok()).toBeTruthy();
 
     const detail = (await detailResponse.json()) as {
-      name: string;
-      topics: Array<{ id: string; name: string }>;
+      title: string;
+      learning_units: Array<{ id: string; canonical_unit_id: string | null; title: string }>;
     };
 
-    for (const topic of detail.topics) {
+    for (const unit of detail.learning_units) {
+      if (!unit.canonical_unit_id) continue;
+
       const assessmentStart = await request.post(
         "http://127.0.0.1:8000/api/assessment/start",
         {
@@ -55,7 +57,7 @@ async function createLearnerWithAssessableTopic(
             Authorization: `Bearer ${tokens.access_token}`,
           },
           data: {
-            topic_ids: [topic.id],
+            canonical_unit_ids: [unit.canonical_unit_id],
           },
         },
       );
@@ -64,8 +66,8 @@ async function createLearnerWithAssessableTopic(
         return {
           email,
           password,
-          moduleName: detail.name,
-          topicName: topic.name,
+          moduleName: detail.title,
+          topicName: unit.title,
         };
       }
     }
@@ -149,8 +151,9 @@ async function registerAuthenticatedLearner(
         Authorization: `Bearer ${tokens.access_token}`,
       },
       data: {
-        known_topic_ids: [],
-        desired_module_ids: [],
+        known_unit_ids: [],
+        desired_section_ids: [],
+        selected_course_ids: ["course_cs231n"],
         available_hours_per_week: 6,
         target_deadline: "2026-12-31",
         preferred_method: "video",
@@ -311,7 +314,9 @@ test.describe("US2: course gating flow", () => {
     await page.waitForURL(/\/courses\/cs231n\/learn\/lecture-1-introduction/, {
       timeout: 20000,
     });
-    await expect(page.getByText("Lecture 1: Introduction")).toBeVisible();
+    await expect(
+      page.getByText("Framing CS231n within AI, machine learning, and deep learning").first(),
+    ).toBeVisible();
   });
 });
 

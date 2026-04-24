@@ -1,0 +1,183 @@
+{
+  "unit_id": "local::lecture13-posttraining::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 4,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về chain-of-thought prompting, zero-shot chain-of-thought, và bài học rằng prompt đúng có thể khơi ra năng lực vốn đã tiềm ẩn trong mô hình.",
+  "question_bank": [
+    {
+      "item_id": "lecture13-posttraining-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Chain-of-thought prompting khác prompt ví dụ thông thường ở điểm nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Nó cung cấp cả vết suy luận trung gian thay vì chỉ cho đáp án cuối.",
+        "Nó luôn yêu cầu cập nhật tham số mô hình sau mỗi ví dụ.",
+        "Nó chỉ dùng cho bài toán dịch máy.",
+        "Nó loại bỏ hoàn toàn nhu cầu về prompt mẫu."
+      ],
+      "answer_index": 0,
+      "explanation": "Điểm khác biệt là mô hình không chỉ thấy cặp vào-ra của nhiệm vụ mà còn thấy cách đi từ đề bài đến lời giải. Điều đó giúp nó bắt chước cả chiến lược suy luận.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Chain-of-thought prompting shows reasoning traces, not just answers."
+        ],
+        "timestamps": [
+          "00:17:58"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao thêm ví dụ có reasoning trace thường cải thiện kết quả ở các bài toán nhiều bước?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì mô hình học được mẫu suy nghĩ từng bước trước khi kết luận.",
+        "Vì prompt dài hơn luôn làm mọi mô hình đúng tuyệt đối.",
+        "Vì reasoning trace thay thế hoàn toàn nhu cầu pretraining.",
+        "Vì mô hình chỉ chấm điểm câu trả lời cuối, không sinh chuỗi trung gian."
+      ],
+      "answer_index": 0,
+      "explanation": "Khi được cho ví dụ giải có từng bước, mô hình được chỉ ra cả cấu trúc suy luận chứ không chỉ đáp án. Điều này đặc biệt hữu ích cho các bài toán đòi hỏi nhiều bước trung gian.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Reasoning examples can cause the model to reason before answering and improve"
+        ],
+        "timestamps": [
+          "00:18:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Zero-shot chain-of-thought được kích hoạt bằng cách nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Thêm câu gợi ý như 'Let's think step by step'.",
+        "Thêm 100 ví dụ mẫu có gradient update sau mỗi ví dụ.",
+        "Chỉ đổi tokenizer sang từ vựng lớn hơn.",
+        "Tăng temperature lên cực đại để mô hình đa dạng hơn."
+      ],
+      "answer_index": 0,
+      "explanation": "Một câu gợi ý rất ngắn có thể đẩy mô hình sang chế độ giải từng bước. Ý chính là prompt đúng có thể khơi ra hành vi vốn đã tiềm ẩn trong mô hình.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Zero-shot chain-of-thought can be induced with 'Let's think step by step'."
+        ],
+        "timestamps": [
+          "00:19:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Bài học tổng quát của phần chain-of-thought là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mô hình có thể đã có năng lực, nhưng prompt phải đủ đúng để khơi ra năng lực đó.",
+        "Nếu prompt không tốt thì mô hình chắc chắn không hề có năng lực tương ứng.",
+        "Mọi hành vi tốt đều phải đến từ supervised fine-tuning, không thể đến từ prompt.",
+        "Zero-shot chain-of-thought luôn tốt hơn chain-of-thought có ví dụ."
+      ],
+      "answer_index": 0,
+      "explanation": "Phần này nhấn mạnh sự khác biệt giữa 'mô hình không có năng lực' và 'prompt chưa kích hoạt đúng năng lực'. Thiết kế prompt phù hợp có thể làm lộ ra hành vi đã được học ngầm từ pretraining.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "A good prompt can induce behavior already latent in the model."
+        ],
+        "timestamps": [
+          "00:21:08"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture13-posttraining-seg3-q1",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg3-q2",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg3-q3",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg3-q4",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    }
+  ]
+}

@@ -8,6 +8,10 @@ import axios, {
 } from "axios";
 import Cookies from "js-cookie";
 import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
+import {
+  buildCanonicalAssessmentStartPayload,
+  mapCourseCatalogItemToSectionCard,
+} from "@/lib/canonical-content";
 
 // ---------------------------------------------------------------------------
 // Token cookie helpers
@@ -152,16 +156,20 @@ import type {
   AnswerInput,
   AssessmentResultResponse,
   AssessmentStartResponse,
+  CanonicalAssessmentStartPayload,
+  CourseCatalogItem,
+  CourseSectionDetail,
+  CourseSectionListItem,
   HistoryResponse,
+  LearningUnitContentById,
   LoginPayload,
-  ModuleDetail,
-  ModuleListItem,
   ModuleTestAnswerInput,
   ModuleTestResultResponse,
   ModuleTestStartResponse,
   CourseCatalogResponse,
   CourseCatalogView,
   CourseOverviewResponse,
+  CourseUnitListItem,
   LearningUnitResponse,
   OnboardingPayload,
   ForgotPasswordPayload,
@@ -174,15 +182,14 @@ import type {
   SessionType,
   StartLearningDecisionResponse,
   TokenPair,
-  TopicContent,
   User,
   UserSkillOverview,
 } from "@/types";
 
 export const assessmentApi = {
-  start: (topicIds: string[]) =>
+  start: (learningUnitIds: string[]) =>
     api
-      .post<AssessmentStartResponse>("/api/assessment/start", { topic_ids: topicIds })
+      .post<AssessmentStartResponse>("/api/assessment/start", { learning_unit_ids: learningUnitIds })
       .then((r) => r.data),
 
   submit: (sessionId: string, answers: AnswerInput[]) =>
@@ -194,17 +201,6 @@ export const assessmentApi = {
     api
       .get<AssessmentResultResponse>(`/api/assessment/${sessionId}/results`)
       .then((r) => r.data),
-};
-
-export const contentApi = {
-  modules: () =>
-    api.get<ModuleListItem[]>("/api/modules").then((r) => r.data),
-
-  moduleDetail: (id: string) =>
-    api.get<ModuleDetail>(`/api/modules/${id}`).then((r) => r.data),
-
-  topicContent: (id: string) =>
-    api.get<TopicContent>(`/api/topics/${id}/content`).then((r) => r.data),
 };
 
 export const courseApi = {
@@ -238,16 +234,68 @@ export const courseApi = {
 
   listUnits: (courseSlug: string) =>
     api
-      .get<{ units: { slug: string; title: string; status: string; unit_type: string; order_index: number }[] }>(
+      .get<{ units: CourseUnitListItem[] }>(
         `/api/courses/${courseSlug}/units`
       )
       .then((r) => r.data.units),
 };
 
-export const quizApi = {
-  start: (topicId: string) =>
-    api.post<QuizStartResponse>("/api/quiz/start", { topic_id: topicId }).then((r) => r.data),
+export const canonicalSectionApi = {
+  list: () =>
+    api
+      .get<CourseSectionListItem[]>("/api/course-sections")
+      .then((r) => r.data),
 
+  detail: (id: string) =>
+    api
+      .get<CourseSectionDetail>(`/api/course-sections/${id}`)
+      .then((r) => r.data),
+
+  catalogCards: (params?: {
+    view?: CourseCatalogView;
+    includeUnavailable?: boolean;
+  }) =>
+    courseApi.catalog(params).then((response) =>
+      response.items.map((course: CourseCatalogItem) =>
+        mapCourseCatalogItemToSectionCard(course),
+      ),
+    ),
+};
+
+export const learningUnitApi = {
+  contentById: (id: string) =>
+    api
+      .get<LearningUnitContentById>(`/api/learning-units/${id}/content`)
+      .then((r) => r.data),
+};
+
+export const canonicalAssessmentApi = {
+  start: (payload: CanonicalAssessmentStartPayload | string[]) =>
+    api
+      .post<AssessmentStartResponse>(
+        "/api/assessment/start",
+        Array.isArray(payload)
+          ? buildCanonicalAssessmentStartPayload(payload)
+          : payload,
+      )
+      .then((r) => r.data),
+};
+
+export const canonicalQuizApi = {
+  start: (learningUnitId: string) =>
+    api
+      .post<QuizStartResponse>("/api/quiz/start", { learning_unit_id: learningUnitId })
+      .then((r) => r.data),
+};
+
+export const canonicalModuleTestApi = {
+  start: (sectionId: string) =>
+    api
+      .post<ModuleTestStartResponse>("/api/module-test/start", { section_id: sectionId })
+      .then((r) => r.data),
+};
+
+export const quizApi = {
   answer: (
     sessionId: string,
     data: { question_id: string; selected_answer: SelectedAnswer; response_time_ms: number | null }
@@ -261,14 +309,14 @@ export const quizApi = {
 export const historyApi = {
   list: (params: {
     session_type?: SessionType;
-    module_id?: string;
+    section_id?: string;
     days?: number;
     page?: number;
     page_size?: number;
   }) => {
     const q = new URLSearchParams();
     if (params.session_type) q.set("session_type", params.session_type);
-    if (params.module_id) q.set("module_id", params.module_id);
+    if (params.section_id) q.set("section_id", params.section_id);
     if (params.days != null) q.set("days", String(params.days));
     if (params.page != null) q.set("page", String(params.page));
     if (params.page_size != null) q.set("page_size", String(params.page_size));
@@ -284,11 +332,6 @@ export const historyApi = {
 };
 
 export const moduleTestApi = {
-  start: (moduleId: string) =>
-    api
-      .post<ModuleTestStartResponse>("/api/module-test/start", { module_id: moduleId })
-      .then((r) => r.data),
-
   submit: (sessionId: string, answers: ModuleTestAnswerInput[]) =>
     api
       .post<ModuleTestResultResponse>(`/api/module-test/${sessionId}/submit`, { answers })

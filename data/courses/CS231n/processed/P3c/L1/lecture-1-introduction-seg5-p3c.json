@@ -1,0 +1,165 @@
+{
+  "unit_id": "local::lecture_1_introduction::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=2fq9wYslV0A",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript gives enough detail to assess the deep-learning resurgence through backpropagation, data scale, and responsible deployment concerns. The items avoid relying on slide-only timeline details, so no clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the central role of backpropagation in neural network training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It sends error information backward through the network so parameters can be adjusted.",
+        "It manually fixes every parameter before training begins.",
+        "It replaces the need for labeled examples or output comparisons.",
+        "It converts every image into a hand-drawn sketch before classification."
+      ],
+      "answer_index": 0,
+      "explanation": "Backpropagation links output errors to internal parameters. This allows a multilayer network to learn by updating weights based on how far its predictions are from the desired outputs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "take the difference",
+          "propagate the information back",
+          "called backpropagation"
+        ],
+        "timestamps": [
+          "00:29:10",
+          "00:29:17",
+          "00:29:33"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why was large-scale visual data important for the resurgence of deep learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "High-capacity models need many examples to learn patterns that generalize beyond the training set.",
+        "Large datasets make model learning unnecessary because labels can be ignored.",
+        "More images only matter for storage hardware, not for recognition accuracy.",
+        "Large datasets mainly help hand-design every convolution parameter."
+      ],
+      "answer_index": 0,
+      "explanation": "A high-capacity model can fit complex patterns, but it needs enough varied data to learn generalizable structure rather than memorizing narrow examples.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "lack of data",
+          "high capacity algorithms",
+          "learn to generalize",
+          "ImageNet challenge"
+        ],
+        "timestamps": [
+          "00:31:22",
+          "00:31:29",
+          "00:31:39",
+          "00:33:02"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What risk follows from building large vision systems on data produced by human activity?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Biases in the data can propagate into model behavior, especially in high-stakes settings.",
+        "Data-driven systems are guaranteed to be neutral because they use many examples.",
+        "Bias disappears automatically when a model has more parameters.",
+        "Vision systems cannot affect people outside image classification benchmarks."
+      ],
+      "answer_index": 0,
+      "explanation": "Data reflects the world and the people who collect or label it. If that data contains bias, a model can learn patterns that cause unfair or harmful outcomes in real applications.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_ai",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "data carry our bias",
+          "face recognition algorithms",
+          "deciding your job"
+        ],
+        "timestamps": [
+          "00:42:40",
+          "00:42:47",
+          "00:43:05"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q1",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q2",
+      "global_kp_id": "kp_modern_vision_extends_beyond_classification",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_1_introduction::seg5::q3",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "role": "secondary"
+    }
+  ]
+}

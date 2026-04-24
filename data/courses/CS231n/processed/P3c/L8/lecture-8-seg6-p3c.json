@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_8::seg6",
+  "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit is well grounded for transformer architecture questions. The available text supports comparing sequence primitives, explaining the transformer block, and transferring the architecture to vision via image patches.",
+  "question_bank": [
+    {
+      "item_id": "lecture-8-seg6-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main tradeoff of self-attention compared with RNNs and convolutions for sequence processing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It gives global, parallel interaction, but has quadratic cost in sequence length.",
+        "It is strictly sequential, but has constant memory for any sequence length.",
+        "It only mixes local neighborhoods, but has no trainable parameters.",
+        "It cannot be parallelized, but removes all need for matrix multiplication."
+      ],
+      "answer_index": 0,
+      "explanation": "Self-attention lets every vector interact with every other vector in one layer and can be implemented with large matrix multiplies. The cost is that pairwise interactions scale quadratically with sequence length.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_architecture",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "looks at every other vector",
+          "n squared"
+        ],
+        "timestamps": [
+          "01:00:08",
+          "01:00:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg6-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What components are included in a typical transformer block as described here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Self-attention, residual connections, layer normalization, and a per-vector MLP/FFN.",
+        "A recurrent hidden state, max pooling, a convolution kernel, and a final CRF decoder.",
+        "Only a single dot product followed by nearest-neighbor lookup.",
+        "A hand-coded alignment table and a fixed context vector."
+      ],
+      "answer_index": 0,
+      "explanation": "A transformer block combines interaction across vectors through self-attention with independent per-vector processing through an MLP/FFN. Residual connections and normalization help the block train stably.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_architecture",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "residual connections",
+          "also called FFN"
+        ],
+        "timestamps": [
+          "01:02:56",
+          "01:03:37"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg6-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How can a transformer be applied to image classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Split the image into patches, project patches to vectors, run a transformer, then pool outputs for classification.",
+        "Translate each pixel into a word and feed the words into a recurrent decoder only.",
+        "Use one fixed context vector for the whole image and forbid patch-to-patch interaction.",
+        "Apply a hand-crafted color histogram and skip all learned projections."
+      ],
+      "answer_index": 0,
+      "explanation": "A vision transformer turns image patches into a set or sequence of vectors. Self-attention then mixes information across patches, and a pooled representation can be used to predict classes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformers_as_a_cross_domain_backbone",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "divide the image",
+          "separately into a vector"
+        ],
+        "timestamps": [
+          "01:04:45",
+          "01:04:49"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-8-seg6-q1",
+      "global_kp_id": "kp_transformer_architecture",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg6-q2",
+      "global_kp_id": "kp_transformer_architecture",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg6-q3",
+      "global_kp_id": "kp_transformers_as_a_cross_domain_backbone",
+      "role": "primary"
+    }
+  ]
+}

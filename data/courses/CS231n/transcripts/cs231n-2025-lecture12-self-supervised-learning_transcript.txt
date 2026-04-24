@@ -1,0 +1,4464 @@
+Title: Stanford CS231N | Spring 2025 | Lecture 12: Self-Supervised Learning
+URL: https://www.youtube.com/watch?v=4howBU7THbM
+Video ID: 4howBU7THbM
+============================================================
+
+00:00:05
+Last time, on Tuesday this
+week, we had a lecture on GPUs
+
+00:00:12
+and how to train,
+how to use them,
+
+00:00:14
+and how to use multiple GPUs
+for training, larger scaling,
+
+00:00:18
+your trainings, and so on.
+
+00:00:20
+An exciting, a new
+topic that we've
+
+00:00:23
+added to this class
+this year, which
+
+00:00:26
+is, I think, timely
+and very important
+
+00:00:29
+with the increase of model
+sizes and applications
+
+00:00:34
+that you see the AI
+models have these days.
+
+00:00:39
+And before that, we talked about
+we covered all of the key tasks
+
+00:00:47
+in computer vision,
+from classification,
+
+00:00:50
+semantic segmentation,
+object detection, instance
+
+00:00:53
+segmentation, and so on.
+
+00:00:56
+And we're going to revisit
+some of these topics, some
+
+00:00:59
+of the results of the
+models we talk about today.
+
+00:01:02
+So those tasks are
+still quite important.
+
+00:01:09
+And then we talked about
+visualizing and understanding
+
+00:01:12
+the models and seeing what
+the models are learning.
+
+00:01:19
+One of the things
+that we've discussed
+
+00:01:21
+was, for example, using
+just in the early sessions,
+
+00:01:27
+we talked about nearest
+neighbor and in the pixel space
+
+00:01:31
+and how we can actually do
+find the class of images
+
+00:01:37
+based on only
+pixels-based distances,
+
+00:01:40
+and we discussed how it's
+actually not efficient.
+
+00:01:45
+And one of the things
+that we talked about
+
+00:01:47
+was if we use the embedding
+layers or the feature
+
+00:01:53
+space, feature layers, one of
+those fully connected layers
+
+00:01:56
+in the feature maps there, from
+a convolutional neural network
+
+00:02:03
+or any other network
+architecture that we
+
+00:02:05
+use there, that could actually
+be a good representation
+
+00:02:10
+of images.
+
+00:02:11
+And we talked about
+the L2 distance,
+
+00:02:14
+if we use that as the
+metric for nearest neighbor
+
+00:02:19
+in the feature space, feature
+of these models, right?
+
+00:02:23
+So this means that
+these features
+
+00:02:25
+are quite meaningful
+for the specific task
+
+00:02:28
+that we had at hand.
+
+00:02:30
+And this means that
+specifically, OK,
+
+00:02:34
+if we run a neural network,
+a CNN, a ResNet, or even
+
+00:02:39
+the transformer models, and
+look at the representations,
+
+00:02:46
+the learned representations,
+in different contexts,
+
+00:02:49
+you may see these as referred
+to with different names.
+
+00:02:54
+Learned large
+representations, features,
+
+00:02:56
+embeddings, latent
+space, and so on.
+
+00:02:59
+But these learned
+representations or features
+
+00:03:04
+are very good representatives
+of the images.
+
+00:03:07
+And if we have a way
+to extract those,
+
+00:03:12
+we can always get the class
+labels out of those features
+
+00:03:17
+as well by a simple linear
+model, as you can see at the end
+
+00:03:21
+here.
+
+00:03:22
+But the major
+challenge that exists
+
+00:03:24
+is training or
+building these networks
+
+00:03:30
+at larger scale is
+always challenging.
+
+00:03:33
+And can you tell me why
+there is a challenge here?
+
+00:03:37
+So the thing is that
+at larger scale,
+
+00:03:40
+we need a lot of labeled data
+because this network is trained
+
+00:03:45
+starting from an image, and at
+the end, we have class labels.
+
+00:03:49
+If we train this network,
+yes, these features
+
+00:03:51
+are going to be very useful for
+getting those class labels out,
+
+00:03:56
+right?
+
+00:03:57
+But at scale, we need a lot
+of manual labeling efforts
+
+00:04:02
+to sit down and label
+the images one by one.
+
+00:04:05
+If the task is
+segmentation, you have
+
+00:04:06
+to label the pixels one
+by one in every image,
+
+00:04:10
+and that is going to
+be very challenging.
+
+00:04:14
+So the question
+is is there a way
+
+00:04:18
+we can train neural networks
+without the need for huge
+
+00:04:22
+manually labeled data sets?
+
+00:04:25
+So these manual labels
+are the challenge,
+
+00:04:29
+and we want to see
+if we can bypass them
+
+00:04:32
+in a way to train a
+neural network that
+
+00:04:36
+gets us very good features.
+
+00:04:39
+And with that, the topic
+of self-supervised learning
+
+00:04:44
+comes in light.
+
+00:04:45
+And that's what we are
+going to cover today.
+
+00:04:48
+So having a large data set of,
+say, images without any labels,
+
+00:04:58
+our hypothesis is that we
+can train a neural network
+
+00:05:02
+using an objective function, a
+pretext task that gets us good
+
+00:05:08
+features from images.
+
+00:05:12
+And then when it comes to
+learning on a specific data set
+
+00:05:17
+with a smaller set of data
+points, which have labels,
+
+00:05:23
+we can basically train, we can
+transfer this trained encoder
+
+00:05:28
+and use that to extract
+features for a downstream task
+
+00:05:32
+or downstream objective.
+
+00:05:34
+So here, we want to define
+a pretext task, a task that
+
+00:05:38
+is general enough
+to be able to learn
+
+00:05:43
+some good features
+from the images
+
+00:05:47
+and then use that encoder,
+let's call it encoder,
+
+00:05:53
+to solve another
+problem, what we call
+
+00:05:56
+downstream task,
+downstream objective, which
+
+00:05:59
+is the application
+that you care about.
+
+00:06:02
+Like for example, we have a lot
+of natural images downloaded
+
+00:06:06
+from the internet.
+
+00:06:08
+We can train
+something out of it.
+
+00:06:10
+And then we have a small
+data set of, for example,
+
+00:06:13
+one of these
+industrial applications
+
+00:06:14
+or medical applications that
+we have few labeled images on.
+
+00:06:18
+And we can now use that
+transferred knowledge
+
+00:06:21
+to extract features and then
+classify or perform the task
+
+00:06:26
+that we are interested in.
+
+00:06:29
+So we want to delve
+into this topic
+
+00:06:32
+and go a little bit
+deeper in understanding
+
+00:06:35
+the different components.
+
+00:06:37
+In a nutshell, what
+self-supervised learning is,
+
+00:06:40
+as I said, defining this
+pretext task on the data
+
+00:06:45
+set with no labels.
+
+00:06:47
+Encoder often gets us some
+learned representations.
+
+00:06:55
+And then another module
+of the same neural network
+
+00:06:59
+generates or does transfer
+the learned representations
+
+00:07:04
+into the output
+space, which could
+
+00:07:06
+be labels or outputs
+that automatically
+
+00:07:10
+are generated from the data.
+
+00:07:11
+They are not manual annotations.
+
+00:07:14
+So if we can do this, then we
+have an objective function,
+
+00:07:22
+a loss function,
+and a neural network
+
+00:07:25
+to be trained with
+loss function.
+
+00:07:29
+As you can see here, we call the
+second part sometimes decoder,
+
+00:07:33
+a classifier, a regressor,
+depending on how
+
+00:07:36
+we define our pretext task.
+
+00:07:38
+I will give you some
+examples, but these
+
+00:07:40
+could be any form of framework.
+
+00:07:44
+But when it's encoder
+and then a decoder,
+
+00:07:47
+this is more of an
+autoencoding framework
+
+00:07:49
+that I'll talk briefly about.
+
+00:07:52
+So after we do this training
+with the pretext task,
+
+00:07:59
+now we can use the encoder
+and the learn representations
+
+00:08:03
+for a downstream
+task, which we just
+
+00:08:07
+need to add one layer or even a
+fully connected neural network,
+
+00:08:12
+a linear function, or a fully
+connected neural network that
+
+00:08:16
+predicts the labels, and
+these labels are coming now
+
+00:08:18
+from the data set.
+
+00:08:20
+So that's the major,
+that's the main concept
+
+00:08:24
+of self-supervised learning,
+that the pretext version of it,
+
+00:08:31
+a portion of it doesn't
+require any labeled data to do
+
+00:08:35
+the training.
+
+00:08:37
+But how to define
+the pretext task
+
+00:08:39
+itself is not that
+straightforward.
+
+00:08:43
+There are many different
+ways of defining those.
+
+00:08:46
+For example, just
+keep in mind that we
+
+00:08:50
+want to define the
+pretext task in a way
+
+00:08:56
+that it's, first, general enough
+that can get us good features
+
+00:09:02
+and doesn't require
+manual labeling.
+
+00:09:04
+So the labels should come
+from the data itself, right?
+
+00:09:07
+So one example would be image
+completion, where we half
+
+00:09:14
+of the image or
+parts of the image.
+
+00:09:16
+And we define a task to given
+the parts that are unmasked,
+
+00:09:21
+predict the parts
+that are masked.
+
+00:09:23
+Or for example, we rotate the
+image with a specific angle,
+
+00:09:28
+and the task is to
+take the image as input
+
+00:09:32
+and predict what's the rotation
+angle that it's gone through.
+
+00:09:37
+And the other one could
+be a jigsaw puzzle,
+
+00:09:41
+where we have patches of the
+image that are not ordered,
+
+00:09:44
+but the task is to output the
+correct order of these patches.
+
+00:09:50
+And colorization is
+one of the popular ones
+
+00:09:53
+that these are the
+four that we'll
+
+00:09:55
+be covering very quickly today.
+
+00:09:58
+But given the black and
+white version of the image,
+
+00:10:04
+predict the colors for
+each of the pixels.
+
+00:10:08
+So solving the pretext
+task allows the model
+
+00:10:12
+to learn good features.
+
+00:10:13
+That's what we wanted.
+
+00:10:15
+And we can
+automatically generate
+
+00:10:18
+labels for the pretext tasks.
+
+00:10:20
+So the two points
+that I mentioned
+
+00:10:22
+we need for a task that could
+be qualified as a good pretext
+
+00:10:27
+task for self-supervised
+learning.
+
+00:10:30
+Some other quick
+considerations to always
+
+00:10:34
+keep in mind, how to evaluate
+a self-supervised learning
+
+00:10:38
+framework.
+
+00:10:39
+There are many different pieces
+and areas that you can actually
+
+00:10:44
+look into the
+pretext task itself
+
+00:10:47
+because we are generating
+the labels and so on.
+
+00:10:50
+It gives us the power
+to do some evaluation
+
+00:10:53
+of how good the model is able
+to solve that pretext task.
+
+00:10:59
+So that's one of the factors.
+
+00:11:03
+Then representation
+quality itself
+
+00:11:06
+is sometimes very important.
+
+00:11:08
+Looking at, for example,
+only representations
+
+00:11:14
+without any fine
+tuning or anything
+
+00:11:15
+that I'll be talking
+about or even
+
+00:11:17
+clustering the
+representations to see,
+
+00:11:20
+do we see a pattern in
+the representations?
+
+00:11:23
+And sometimes, there are some
+good dimensionality reduction
+
+00:11:27
+algorithms.
+
+00:11:28
+I'm referring to t-SNE here,
+which we didn't very much talk
+
+00:11:33
+about, but this is a
+dimensionality reduction
+
+00:11:35
+framework that you can
+reduce the dimensionality
+
+00:11:37
+of the learned representations
+and then visualize it in 2D
+
+00:11:41
+or 3D and see if there is
+a pattern that you can find
+
+00:11:45
+in your representations.
+
+00:11:48
+So robustness, generalization,
+and computational efficiency,
+
+00:11:52
+these are all quite important.
+
+00:11:54
+But the most important thing,
+the most important aspect
+
+00:11:59
+that we are after
+is the performance
+
+00:12:04
+on the downstream task.
+
+00:12:06
+Because we are doing the
+entire self-supervised learning
+
+00:12:11
+and define the
+tasks, pretext tasks,
+
+00:12:14
+and so on to be able
+to improve results
+
+00:12:17
+for a task of interest or
+something that we care about.
+
+00:12:21
+Let's see some quick examples
+of how this could be done.
+
+00:12:25
+This is an example of
+let's rotate the images
+
+00:12:31
+and then predict the degree
+of rotation as the output.
+
+00:12:36
+So we can train this in
+a self-supervised manner
+
+00:12:39
+without the need for labels
+of the objects in the image.
+
+00:12:43
+And we have a bunch of
+convolutional layers
+
+00:12:45
+in this example and then a
+fully connected neural network
+
+00:12:48
+at the end to do this either
+regression or classification
+
+00:12:52
+task.
+
+00:12:53
+And this means that
+this is giving us
+
+00:12:56
+a set of good features, a
+good feature extractor, which
+
+00:13:02
+we can at the end remove
+these tasks, pretext
+
+00:13:07
+task, specific parts, the FC
+layers, and put one layer,
+
+00:13:13
+or in some cases,
+multiple layers
+
+00:13:17
+to classify the features
+into the object label.
+
+00:13:21
+So this time, we use the object
+labels to do the prediction
+
+00:13:26
+and train this linear
+function itself.
+
+00:13:30
+So we often look for
+a shallow network
+
+00:13:33
+because if the features
+are good enough, then
+
+00:13:35
+we don't need to do
+a lot of training
+
+00:13:42
+on getting the class labels out.
+
+00:13:47
+So this is self-supervised
+learning in general.
+
+00:13:52
+And although we are talking
+about the computer vision
+
+00:13:56
+applications.
+
+00:13:57
+But this paradigm of
+self-supervised learning
+
+00:14:01
+was actually what enabled all
+of these large language models.
+
+00:14:07
+GPT-4 and all of
+these frameworks
+
+00:14:10
+are trained with mostly raw data
+without any manual labeling.
+
+00:14:18
+And not just in language
+models, in speech,
+
+00:14:21
+and these days,
+quite a lot in robot
+
+00:14:25
+and robotics and
+reinforcement learning.
+
+00:14:29
+Because when we don't
+need any me labeling data,
+
+00:14:34
+we can start capturing data,
+raw data without any manual
+
+00:14:41
+labeling and use
+those for training.
+
+00:14:43
+And that's why you see so many
+self-driving cars in the Bay
+
+00:14:47
+Area collecting data because
+that's getting them the data,
+
+00:14:51
+and they don't have to
+really annotate the data,
+
+00:14:53
+but they can still
+train models based on.
+
+00:14:57
+So with that, today's agenda
+will cover some of these pretext
+
+00:15:03
+tasks from image
+transformations,
+
+00:15:06
+and then I will
+talk a little bit
+
+00:15:08
+about a set of
+algorithms that are
+
+00:15:13
+around contrastive
+representation learning that
+
+00:15:19
+are slightly different from
+these image transformation based
+
+00:15:22
+pretext tasks but
+have shown promise.
+
+00:15:26
+So let's start with
+the first part.
+
+00:15:30
+And there we will cover
+the tasks one by one.
+
+00:15:36
+So I talked quite a lot about
+rotation, predicting rotations.
+
+00:15:41
+Let's see if we can
+actually rotate the images
+
+00:15:45
+with random or arbitrary
+degrees and predict the rotation
+
+00:15:54
+angle with a model.
+
+00:15:56
+And our hypothesis here
+is that the model, a model
+
+00:16:00
+could recognize the correct
+rotation of an object
+
+00:16:05
+only if it has the common
+sense visual common
+
+00:16:09
+sense of what the object
+should look like unperturbed.
+
+00:16:14
+So these models mostly are
+designed around this concept
+
+00:16:19
+of visual common sense.
+
+00:16:23
+And then if the model
+is able to capture
+
+00:16:28
+that it means that it is
+also able to summarize
+
+00:16:32
+the image, the entire image,
+into a useful set of features,
+
+00:16:40
+good features.
+
+00:16:42
+This paper published in
+2018 implemented this
+
+00:16:48
+with just exploring four
+different angles of 0,
+
+00:16:53
+19, 90, 180, and 270, these
+rotating images with one
+
+00:17:03
+of these angles and then using
+a convolutional neural network
+
+00:17:08
+to basically predict
+what each of these
+
+00:17:12
+rotations the output is.
+
+00:17:14
+And because they only created
+four different outputs,
+
+00:17:17
+this is a classification
+task because it only
+
+00:17:19
+has four different cases.
+
+00:17:21
+It doesn't have to
+predict the exact value
+
+00:17:23
+of the angle, the degrees.
+
+00:17:26
+But it's actually
+just predicting
+
+00:17:31
+one of these four
+classes of 0, 1, 2, or 3.
+
+00:17:38
+y0, 1, 2, or 3.
+
+00:17:42
+So with that, the authors
+were able to learn
+
+00:17:49
+good representations.
+
+00:17:50
+And with those
+representations, they
+
+00:17:55
+started training
+the neural network
+
+00:17:57
+at a downstream
+application, basically fine
+
+00:18:00
+tuning the neural network based
+on fine tuning the encoders
+
+00:18:07
+and also the classifier.
+
+00:18:12
+Actually, in this case, they
+froze first and second layers,
+
+00:18:19
+and then they fine tuned
+the last convolution
+
+00:18:23
+layer and the linear layer.
+
+00:18:25
+So it's not entirely fine
+tuning the entire network,
+
+00:18:32
+but they were able to
+get very good results.
+
+00:18:35
+This is on CIFAR10 data
+set, one of the data
+
+00:18:39
+sets that we've
+talked about earlier.
+
+00:18:42
+You see that when the
+model is pre-trained,
+
+00:18:45
+it starts with a good
+accuracy to start with.
+
+00:18:48
+So it means that it
+already is in a good shape,
+
+00:18:52
+and it's having a good
+understanding of the objects,
+
+00:18:57
+even in the very
+first iterations.
+
+00:19:01
+But if the task
+is simple enough,
+
+00:19:04
+CIFAR10 is actually not too
+hard to train a model for.
+
+00:19:09
+If the task is simple enough,
+the supervised version,
+
+00:19:12
+the fully supervised
+version, and the one that
+
+00:19:14
+starts with pre-training, often
+converge to the same number,
+
+00:19:17
+same accuracy.
+
+00:19:19
+But again, if the
+task is simple enough,
+
+00:19:22
+in very hard application, in
+much harder to applications,
+
+00:19:25
+often the supervised learning
+frameworks, if we don't
+
+00:19:27
+do any pre-training,
+large scale pre-training,
+
+00:19:29
+we don't get as good results.
+
+00:19:31
+OK.
+
+00:19:34
+So they've done also
+some applications,
+
+00:19:42
+some experiments on this
+PASCAL VOC 2017 data
+
+00:19:51
+sets which involves
+a number of tasks,
+
+00:19:53
+including classification,
+detection, and segmentation.
+
+00:19:59
+And of these three
+sets of tasks,
+
+00:20:03
+they've used different
+setups of just training
+
+00:20:08
+a few fully connected
+layers or all
+
+00:20:10
+of the layers for the
+classification, detection,
+
+00:20:13
+and segmentation tasks.
+
+00:20:16
+If you look at the
+ImageNet labels,
+
+00:20:19
+like if we have a
+huge labeled data set,
+
+00:20:23
+and we pre-train
+on that data set.
+
+00:20:27
+We already get a
+very high accuracy.
+
+00:20:29
+But again, have this
+in mind that this
+
+00:20:31
+is ImageNet with all
+of the labels involved
+
+00:20:34
+for the pre-training.
+
+00:20:36
+But if we don't do any
+supervised pre-training,
+
+00:20:40
+and the pre-training is all
+based on self-supervised,
+
+00:20:44
+it's showing that this
+rotation framework is
+
+00:20:49
+doing a much better job than
+many of the other counterparts,
+
+00:20:54
+any of the other methods
+that we don't actually
+
+00:21:01
+go into many of the
+detail of many of those,
+
+00:21:04
+but it's showing efficacy for
+this rotation pretext task.
+
+00:21:09
+And see how it's different,
+how much better it
+
+00:21:12
+is if you start with a random
+initialization of the weights.
+
+00:21:17
+So the random initialization
+versus this pretraining
+
+00:21:21
+with rotation, pretext task.
+
+00:21:24
+The difference is huge, and this
+rotation pretext task is not
+
+00:21:29
+equal, but it's
+close to pre-training
+
+00:21:33
+on the entire ImageNet.
+
+00:21:35
+So one other thing
+that they've looked
+
+00:21:40
+into in this paper was
+looking at the features
+
+00:21:43
+and how the learned
+features are meaningful.
+
+00:21:48
+I mentioned earlier that one
+of the ways of evaluating
+
+00:21:54
+the pretext tasks,
+generally self-supervised
+
+00:21:56
+learning frameworks, is
+to look at the features.
+
+00:21:59
+And you can always
+go from the features
+
+00:22:01
+from the fully connected layers.
+
+00:22:03
+We talked about grad cam and all
+of those other attention-based
+
+00:22:07
+frameworks, how we can
+go from the features
+
+00:22:10
+back to the image space.
+
+00:22:12
+So this evaluation
+involves projecting those
+
+00:22:15
+into the image space and seeing
+what the model is looking at.
+
+00:22:19
+If you look at the attention
+maps for the supervised model,
+
+00:22:22
+often the supervised
+model has more
+
+00:22:25
+focused maps because
+it's only trying
+
+00:22:29
+to solve one single
+task of classification.
+
+00:22:33
+So if it captures the eye
+and the shape around it,
+
+00:22:36
+it doesn't care about the
+other parts very much.
+
+00:22:39
+But in cases of
+self-supervised learning,
+
+00:22:42
+often, more features,
+more areas are
+
+00:22:45
+covered because it has to have
+a more holistic understanding
+
+00:22:50
+of the image because
+we don't know what
+
+00:22:52
+the downstream task
+is, but the goal
+
+00:22:55
+is to perform equally
+well in many of those.
+
+00:23:00
+So that's one of the tasks.
+
+00:23:02
+If you do have any
+questions, keep it.
+
+00:23:05
+I'll stop after going
+over some of the tasks.
+
+00:23:08
+And if your question
+was not answered,
+
+00:23:10
+then I would be
+happy to answer that.
+
+00:23:13
+OK.
+
+00:23:16
+Another one, another
+popular pretext task
+
+00:23:21
+was to basically
+create this 3 by 3 grid
+
+00:23:26
+and then use networks to
+predict the location of each
+
+00:23:33
+of the given patches with
+respect to the sensor patch.
+
+00:23:36
+So for this patch,
+which is from here,
+
+00:23:40
+the output should be 3
+because we only have 8--
+
+00:23:46
+This is 3 by 3, and the
+center patch is the reference.
+
+00:23:50
+So this also turns out to be an
+eight-way classification task.
+
+00:23:56
+It's getting any
+of these patches,
+
+00:23:59
+and it's trying to output what
+the location of that given patch
+
+00:24:04
+is with respect to
+the center patch.
+
+00:24:16
+So this was another example.
+
+00:24:18
+But this other follow-up
+paper, paper publication,
+
+00:24:25
+which turned this into a
+jigsaw puzzle framework,
+
+00:24:29
+was instead of asking
+the model to just predict
+
+00:24:34
+which of these
+eight patches it is,
+
+00:24:37
+it tried to predict
+the exact permutation,
+
+00:24:41
+the right permutation.
+
+00:24:42
+So what they've done was they
+used the same three by three
+
+00:24:46
+grid, took all of the patches,
+shuffled them randomly, and then
+
+00:24:50
+ask the neural network
+to say which one should
+
+00:24:59
+be the correct permutation.
+
+00:25:01
+So they basically predict
+the correct permutations.
+
+00:25:04
+Can you tell me what is
+the number of permutations
+
+00:25:06
+you can have for this setup?
+
+00:25:11
+Say again?
+
+00:25:13
+9 factorial.
+
+00:25:14
+Yes, exactly.
+
+00:25:14
+So it's a huge number, right?
+
+00:25:16
+300,000 something, I think.
+
+00:25:19
+But what they've
+done was they've
+
+00:25:22
+created this lookup table with
+only 64 plausible, possible
+
+00:25:32
+permutations.
+
+00:25:33
+And then only they
+consider 64 permutations.
+
+00:25:38
+And then they're shuffling
+that, they do the shuffling
+
+00:25:41
+based on one of these 64.
+
+00:25:43
+And then the output will also
+be just the 60, 64 sized vector.
+
+00:25:48
+So again, this turns out to be
+just a simple classification
+
+00:25:52
+task with 64 output classes.
+
+00:25:56
+And they've shown this
+is also a great idea
+
+00:25:59
+for solving to define
+as a pretext task,
+
+00:26:04
+and on the same data set
+with similar type of tasks
+
+00:26:09
+that I talked about and how
+the supervision is done.
+
+00:26:14
+They've shown their
+method was outperforming
+
+00:26:17
+some of the more previous
+models, previous frameworks.
+
+00:26:25
+And again, remember that
+this was published in 2016.
+
+00:26:30
+So next pretext task
+is just inpainting
+
+00:26:36
+predicting what is missing.
+
+00:26:38
+So what they have done here
+was a simple masking strategy,
+
+00:26:44
+you mask parts of the
+image and then you
+
+00:26:47
+ask the model to inpaint
+those parts that are masked.
+
+00:26:51
+So how it was done, simple
+masking on the input image.
+
+00:26:57
+But because we have
+all of the images,
+
+00:27:00
+we actually have
+the desired output.
+
+00:27:02
+So an encoder turns this
+into a feature space,
+
+00:27:06
+and then that feature
+space is also,
+
+00:27:08
+there are some fully connected
+layers in the middle,
+
+00:27:12
+and then there is a
+decoder that decodes
+
+00:27:14
+the parts that is missing.
+
+00:27:16
+And the loss function
+is comparing the output
+
+00:27:22
+with what the ground truth was.
+
+00:27:27
+And this is basically learning
+to reconstruct the missing
+
+00:27:32
+pixels.
+
+00:27:34
+Again, we've talked about
+autoencoders a couple of times
+
+00:27:38
+before, and this is also some
+form of an autoencoder that
+
+00:27:43
+encodes the input image
+into a representation
+
+00:27:47
+that you want to
+decode the output.
+
+00:27:51
+But this autoencoder is trained
+with a masking strategy, masking
+
+00:27:57
+objective.
+
+00:27:58
+So just to show
+you some examples,
+
+00:28:03
+the inpainting evaluations
+are a little bit
+
+00:28:07
+interesting and tricky because
+when you want to inpaint,
+
+00:28:10
+there are so many different ways
+of inpainting this image, right?
+
+00:28:13
+And we can say there is just one
+output to do in this case here.
+
+00:28:26
+Reconstruction-based
+frameworks, earlier
+
+00:28:28
+reconstruction-based
+frameworks were actually
+
+00:28:31
+creating a lot of fuzzy
+and very smooth outputs.
+
+00:28:42
+And that's why this paper
+that I'm referring to here
+
+00:28:49
+was actually using an
+additional adversarial objective
+
+00:28:54
+function, which I'm not going
+to go into details because this
+
+00:28:56
+is a topic of discussion for the
+next lecture, generative models.
+
+00:29:00
+But generally, how
+these frameworks work,
+
+00:29:05
+we have a reconstruction loss.
+
+00:29:07
+And reconstruction
+loss is basically
+
+00:29:09
+calculating the difference
+between the patch,
+
+00:29:13
+between the image x and
+the image after it's
+
+00:29:18
+passed through the encoder.
+
+00:29:24
+And then this is element
+wise multiplication.
+
+00:29:33
+And we also have this
+mask here because we
+
+00:29:35
+want to only calculate
+the loss function,
+
+00:29:38
+the objective function,
+only on the masked area.
+
+00:29:41
+So we do element wise
+multiplication with the mask
+
+00:29:45
+as well.
+
+00:29:46
+And this basically gives
+us the reconstruction loss
+
+00:29:51
+for that part of the
+mask that we had.
+
+00:29:55
+So as I said, it's
+also supplemented
+
+00:29:59
+with an adversarial objective
+adversarial learning loss
+
+00:30:02
+function, which ensures the
+images that are generated
+
+00:30:09
+are real looking.
+
+00:30:10
+So with that, they have
+been able to improve
+
+00:30:17
+the parts that are reconstructed
+to look a little bit better.
+
+00:30:24
+But again, details will be
+discussed in the next lecture.
+
+00:30:31
+So this reconstruction
+framework was actually
+
+00:30:35
+able to again
+provide, and this ours
+
+00:30:39
+is the same, provide
+additional benefit when
+
+00:30:43
+it's run on the same
+classification, detection,
+
+00:30:46
+and segmentation task on
+same set of data sets.
+
+00:30:52
+I will come back to this
+reconstruction-based frameworks
+
+00:30:56
+and masking in a
+bit because it's
+
+00:30:59
+one of the most used models or
+pretext tasks that these days
+
+00:31:05
+are used for pre-training.
+
+00:31:07
+So I'll come back to this.
+
+00:31:10
+But before that, let me
+introduce this other pretext
+
+00:31:15
+task of image coloring.
+
+00:31:19
+And this is another very
+simple framework setup
+
+00:31:24
+that we turn a colored image
+because our data set is mostly
+
+00:31:30
+colored images, right?
+
+00:31:30
+We turn that colored image
+into its components or channels
+
+00:31:36
+that separate the lightness,
+the illumination from the color
+
+00:31:41
+itself.
+
+00:31:42
+There are several
+color spaces if you've
+
+00:31:44
+taken courses like
+computer graphics
+
+00:31:47
+or CS-131, other
+computer vision class.
+
+00:31:51
+You know that there are so
+many different color spaces.
+
+00:31:54
+Mostly, in computer
+vision, we use RGB.
+
+00:31:57
+But if you want to separate
+lightness, illumination
+
+00:32:02
+from color, there are
+some other color spaces.
+
+00:32:04
+For example, LAB
+color space, LAB,
+
+00:32:08
+is one of those color spaces
+that separates lightness
+
+00:32:12
+from color.
+
+00:32:14
+So we have one channel for
+lightness and two channels
+
+00:32:18
+for defining the actual color.
+
+00:32:21
+And if we add these two
+all together L, A, and B,
+
+00:32:27
+all three channels
+together, we can actually
+
+00:32:29
+get the colored image.
+
+00:32:31
+So the pretext task
+here is simple.
+
+00:32:34
+Given the L channel, predict
+the A and B channels, right?
+
+00:32:40
+So again, we don't need to
+do any manual annotation.
+
+00:32:44
+It's already in the data.
+
+00:32:47
+And this was extended
+into other frameworks.
+
+00:32:52
+Why should we only look at
+like given L, predict A and B.
+
+00:32:56
+We can also do the
+reverse, right?
+
+00:32:58
+And that led us to
+split, something
+
+00:33:03
+that we call a split
+brain autoencoder, where
+
+00:33:06
+the input image is split, is
+basically turned into one.
+
+00:33:12
+The L channel, lightness
+channel, and the color channels.
+
+00:33:16
+These two images,
+this is one channel.
+
+00:33:18
+This is two channels of color.
+
+00:33:20
+And we train two functions,
+two neural networks,
+
+00:33:24
+sets of layers to
+predict the other one.
+
+00:33:26
+And then at the end, in order
+to calculate the loss function
+
+00:33:30
+and backprop, we
+just merge these two
+
+00:33:34
+to generate the actual
+image and a loss an L2 loss.
+
+00:33:39
+Any distance function
+can help with training
+
+00:33:42
+this neural network.
+
+00:33:45
+In a more generic
+framework or formulation,
+
+00:33:49
+the idea is given one
+channel or a set of channels,
+
+00:33:55
+predict the others,
+and do the same for X2.
+
+00:34:00
+So sets of channels X1,
+sets of channels X2.
+
+00:34:04
+So given one we can predict
+the other one, and these
+
+00:34:07
+are the neural
+networks for those.
+
+00:34:09
+Merging them we'll get
+the value the image
+
+00:34:16
+and then loss function
+would be simple.
+
+00:34:18
+So if we have such
+a framework we
+
+00:34:21
+can run it on everything, not
+just color and illumination.
+
+00:34:25
+We can have data from some
+of these RGBD sensors, those
+
+00:34:32
+that have RGB channels
+and depth channels,
+
+00:34:35
+like for example,
+connect and other sensors
+
+00:34:38
+that they use in robotics.
+
+00:34:40
+And given the RGB channel,
+predict the depth and vice
+
+00:34:46
+versa.
+
+00:34:47
+And this was a very
+successful downstream task
+
+00:34:51
+that was used for
+different applications.
+
+00:34:54
+And as you can see this
+model and this paper
+
+00:34:59
+that I just the split brain and
+the papers that the model that
+
+00:35:06
+predicts colorizes the images
+is those features themselves.
+
+00:35:12
+They do have actually
+a very good level
+
+00:35:14
+of accuracy for predicting
+the class labels.
+
+00:35:19
+And you can see, there are
+many different other frameworks
+
+00:35:22
+that are used also in
+terms of comparisons.
+
+00:35:29
+Again, this is not as good
+as supervised learning
+
+00:35:32
+because there is no
+label involved here
+
+00:35:36
+and it's just based on
+the learned features
+
+00:35:40
+with concatenated
+features out of F1 and F2.
+
+00:35:43
+OK, so the image
+coloring pretext task
+
+00:35:49
+was actually very interesting
+because now we could not only
+
+00:35:55
+use it for pre-training
+neural networks,
+
+00:35:57
+but it was also
+itself useful somehow,
+
+00:35:59
+because now we could
+colorize images that we
+
+00:36:03
+don't have a colored version.
+
+00:36:05
+So we could colorize
+images and videos
+
+00:36:09
+that we don't have a
+colored version of those.
+
+00:36:15
+And not only that, one of
+the other interesting results
+
+00:36:18
+that they've shown
+in the paper was
+
+00:36:21
+this image of Yosemite and the
+Half Dome that they colorized.
+
+00:36:27
+The interesting thing
+that is seen in this image
+
+00:36:32
+is the consistency
+between the actual object,
+
+00:36:36
+the Half Dome or trees, or
+the bridge and its reflection
+
+00:36:40
+in the water.
+
+00:36:41
+So the model was also
+able to understand
+
+00:36:44
+that this reflection
+should also somehow
+
+00:36:47
+preserve the color based
+on how it was trained
+
+00:36:51
+on vast amounts of data.
+
+00:36:53
+Again, keep in mind
+that these models
+
+00:36:57
+are all pre-large language,
+large vision models.
+
+00:37:01
+And they have been
+trained on specific tasks.
+
+00:37:04
+So they're not trained
+for solving everything.
+
+00:37:09
+So this could be actually
+extended into video settings.
+
+00:37:14
+Because now if we have a video,
+we can have a reference frame
+
+00:37:17
+that has the color and do the
+coloring for the follow-up
+
+00:37:21
+frames and how this is done.
+
+00:37:23
+This is very simple
+because with--
+
+00:37:26
+this is also very useful because
+with colorizing future frames
+
+00:37:32
+in the video, what
+we are doing is
+
+00:37:34
+we basically try to track
+pixels and objects in the video,
+
+00:37:41
+and the model
+implicitly learns how
+
+00:37:44
+these tracks should be formed.
+
+00:37:47
+So the hypothesis is learning
+to color video frames
+
+00:37:51
+should allow a model to
+learn to track regions
+
+00:37:54
+or objects without labels.
+
+00:37:59
+And learning to color
+videos because there
+
+00:38:02
+are a lot of correspondences is
+an interesting task by itself.
+
+00:38:06
+I would suggest taking
+a look at the details.
+
+00:38:10
+I'll very briefly
+to talk about them.
+
+00:38:13
+So if you have a
+reference frame, what
+
+00:38:16
+we need to do is for
+coloring the input frame,
+
+00:38:20
+we need to find the
+pointers of where that's
+
+00:38:23
+a specific object or pixel is.
+
+00:38:26
+And then based on that
+see what the color
+
+00:38:28
+is and copy what the
+color is as the color
+
+00:38:31
+for that pixel as the
+output, as the target color.
+
+00:38:36
+And how this is done
+is very much similar
+
+00:38:39
+to the same topic of attention
+that we talked about.
+
+00:38:43
+So it's about forming
+attention for each
+
+00:38:48
+of the pixels for each
+input frame, sorry reference
+
+00:38:51
+frame and target frame.
+
+00:38:53
+We often run a CNN to see what
+features around those pixels
+
+00:38:58
+should be used.
+
+00:38:59
+And using those features,
+now we can calculate,
+
+00:39:02
+for each of the
+target pixels, we
+
+00:39:05
+can calculate the
+attention or the distance
+
+00:39:09
+to all of the frames, all of the
+pixels in the reference frame.
+
+00:39:13
+And then after defining
+this attention with respect
+
+00:39:18
+to the pixel of
+interest in the target
+
+00:39:25
+frame with all of the pixels
+in the reference frame.
+
+00:39:31
+Now we can do an average
+color of all of based
+
+00:39:37
+on those attention modules.
+
+00:39:38
+So attention is basically just
+similarity between the two.
+
+00:39:42
+So anyways with
+that, what we can do
+
+00:39:45
+is we can just get
+the output color
+
+00:39:48
+as an average with that tension
+and then ultimately calculate
+
+00:39:55
+the loss function because we
+have the values of the colors,
+
+00:40:00
+the right colors of
+those pixels in our data.
+
+00:40:04
+And this was able to,
+with this reference frame,
+
+00:40:08
+colorize the images.
+
+00:40:10
+You see how consistent this
+becomes in terms of coloring.
+
+00:40:15
+If we color them separately
+without this consistency
+
+00:40:18
+over time, you often see, for
+example, the person's shirt
+
+00:40:25
+or clothing changes color
+because there is no constraint
+
+00:40:32
+to keep it consistent.
+
+00:40:34
+And then there has been
+also some very interesting
+
+00:40:38
+applications, because now that
+you are calculating attention
+
+00:40:42
+to a reference frame,
+you're actually
+
+00:40:44
+able to track objects,
+track segments in videos,
+
+00:40:48
+and even identify key
+points in the videos.
+
+00:40:54
+That's a good question.
+
+00:40:56
+You're asking your question
+is about this slide basically,
+
+00:41:03
+and how the encoder knows
+about the data to begin with
+
+00:41:09
+and gets us good
+learned representations.
+
+00:41:13
+So all of these tasks that
+I presented and defined
+
+00:41:18
+are trying to do something here
+at either decoding, classifying,
+
+00:41:26
+or using regression to
+generate some outputs to be
+
+00:41:30
+able to train this encoder.
+
+00:41:32
+So if your original
+images, if these
+
+00:41:34
+are all natural images taken
+off of internet or ImageNet
+
+00:41:37
+or whatever, then you
+are learning an encoder
+
+00:41:41
+that can extract features
+from those types of images
+
+00:41:45
+with the pretext task.
+
+00:41:47
+And then when you
+remove the decoder
+
+00:41:50
+and add this
+classifier to the end,
+
+00:41:52
+you only need to
+train this part,
+
+00:41:56
+because this encoder was
+already trained with all
+
+00:41:58
+of these pre-training tasks
+that I just talked about.
+
+00:42:02
+You're asking if the
+labels are coming
+
+00:42:04
+from the decoder for
+pre-training the encoder,
+
+00:42:07
+and the answer to that is, yes.
+
+00:42:09
+That's why we define
+the pretext tasks,
+
+00:42:12
+because we want to have
+some labels, some outputs.
+
+00:42:16
+And then based on
+those outputs we try
+
+00:42:20
+to train this entire network.
+
+00:42:23
+And on the way of
+predicting the right labels,
+
+00:42:28
+this encoder is also trained.
+
+00:42:31
+Good question.
+
+00:42:32
+You're asking if encoder and
+decoder are one big neural
+
+00:42:34
+network or there is differences.
+
+00:42:37
+In different papers,
+in different works,
+
+00:42:41
+it has been
+completely different.
+
+00:42:44
+In some cases, your encoder
+and not just decoder,
+
+00:42:47
+that's why I'm
+calling it classifier.
+
+00:42:49
+In the example that I showed
+you about predicting the degree,
+
+00:42:54
+this is just a simple
+neural network.
+
+00:42:57
+The decoder is these FC layers.
+
+00:42:59
+So this could be
+one entire network.
+
+00:43:02
+And then you're replacing
+it with something
+
+00:43:04
+for your downstream task.
+
+00:43:06
+But in some cases, for example,
+when I talked about auto
+
+00:43:09
+encoding an image and then
+decoding another image,
+
+00:43:14
+you often have two
+neural networks
+
+00:43:16
+that are trained
+end-to-end because you
+
+00:43:19
+want to make use of that
+representation space
+
+00:43:21
+in the middle.
+
+00:43:22
+And in the next thing
+that I want to talk about,
+
+00:43:26
+masked autoencoders, even there
+is no symmetry between encoders
+
+00:43:31
+and decoders.
+
+00:43:32
+They can be just two
+different frameworks,
+
+00:43:35
+two different neural networks,
+even without any symmetry
+
+00:43:39
+to train the task.
+
+00:43:43
+So this is very
+much task dependent,
+
+00:43:45
+pretext task dependent.
+
+00:43:47
+But there could be belonging
+to the same architecture
+
+00:43:51
+that we know about,
+say, CNN or ResNet,
+
+00:43:55
+or there could be two
+different architectures, even
+
+00:43:58
+without any symmetry.
+
+00:44:00
+Remember that these are
+the very first methods
+
+00:44:05
+for self-supervised learning.
+
+00:44:08
+So they're not supposed
+to be solving everything.
+
+00:44:11
+That's just a quick
+disclaimer, but the idea
+
+00:44:15
+is, the hypothesis here
+is, if the model is
+
+00:44:17
+able to say this is
+90 degree rotated,
+
+00:44:20
+it means that implicitly,
+it's understanding
+
+00:44:22
+the right rotation, sorry,
+right orientation and direction.
+
+00:44:28
+And then it will
+be able to if given
+
+00:44:33
+a right an unrotated image,
+it's able to recognize
+
+00:44:39
+what it is in it.
+
+00:44:42
+But this is a limited task
+by itself, I agree with that.
+
+00:44:46
+The question that you have
+is why here they use 64.
+
+00:44:52
+That's a good question.
+
+00:44:54
+But that's also an arbitrary
+choice, almost arbitrary choice.
+
+00:44:59
+As I said, there are
+many different types
+
+00:45:01
+of different number of
+permutations here 9 factorial.
+
+00:45:05
+So it's a very big number.
+
+00:45:07
+It doesn't make sense for us
+to be predicting all of those.
+
+00:45:10
+What the authors did
+here, they decided
+
+00:45:12
+to select a few of
+those perturbations
+
+00:45:16
+that there is enough
+variation because many
+
+00:45:19
+of those perturbations is just
+like one patch switched only.
+
+00:45:24
+So they selected 64 of those
+that they have the largest
+
+00:45:30
+difference distance
+between them,
+
+00:45:31
+and they just selected
+64 because they wanted
+
+00:45:33
+to solve the classification
+problem instead
+
+00:45:36
+of other types of tasks.
+
+00:45:41
+OK.
+
+00:45:42
+So I've been talking about
+these frameworks that
+
+00:45:47
+often do some transformation
+on the image or the videos
+
+00:45:54
+and so on.
+
+00:45:55
+And this brings us to
+this newer framework,
+
+00:45:58
+which is published in 2021.
+
+00:46:00
+And then there has been so
+many follow-ups on this,
+
+00:46:05
+and it's been a great framework
+for pre-training for many tasks,
+
+00:46:11
+even if these days when
+we want to pre-train
+
+00:46:14
+on a data set on raw data sets,
+we often use this MAE framework.
+
+00:46:21
+It's called Masked
+Auto Encoders.
+
+00:46:24
+It is also reconstruction
+based framework
+
+00:46:27
+similar to that masking strategy
+in painting that I mentioned,
+
+00:46:30
+but this is far more detailed.
+
+00:46:34
+And as you can
+see, this framework
+
+00:46:39
+is not just selecting one mask.
+
+00:46:41
+There are so many different
+patches and places
+
+00:46:44
+that they do masking with
+even more aggressive sampling
+
+00:46:48
+rates, 50% masking or 75
+masking rates and ratios.
+
+00:46:54
+And through training
+in larger scale,
+
+00:46:58
+they have shown
+that not only they
+
+00:47:00
+are able to reconstruct
+all of those masked areas,
+
+00:47:05
+they are also getting very good
+encoders that can summarize
+
+00:47:11
+the images into good features.
+
+00:47:14
+And how this was done
+was through defining
+
+00:47:20
+a encoder and a decoder.
+
+00:47:22
+And that's one of
+the examples that I
+
+00:47:23
+said these are not symmetric.
+
+00:47:26
+And encoders and decoder,
+so a large portion
+
+00:47:30
+of the input masks.
+
+00:47:32
+Input patches are masked and
+the ones that are not masked,
+
+00:47:37
+they are given to the encoder
+to encode in two features that
+
+00:47:43
+are then passed through decoder
+to generate the complete image.
+
+00:47:49
+But let's go a little bit into
+details of what this means.
+
+00:47:53
+I do have some of
+the details on how
+
+00:47:56
+these models are trained here.
+
+00:47:59
+But I very briefly
+just explained to you
+
+00:48:04
+how these models often work.
+
+00:48:07
+The encoder here is very
+much similar to ViTs.
+
+00:48:13
+All of them are based on
+transformers, the ViTs
+
+00:48:16
+that we've talked about.
+
+00:48:18
+Similar to the ViTs, the
+images are split into patches.
+
+00:48:23
+The patches are then
+sampled, so uniform sampling
+
+00:48:29
+is what they've done
+and they've shown 75%
+
+00:48:32
+sampling was quite efficient
+in the experiments.
+
+00:48:40
+And they use a
+high masking ratio,
+
+00:48:45
+and then this makes the
+prediction task very challenging
+
+00:48:50
+and challenging in
+the set of pretext
+
+00:48:54
+for pretext tasks in
+self-supervised learning
+
+00:48:56
+means the task is meaningful.
+
+00:48:58
+The task is very good
+because the model
+
+00:49:00
+has to learn good features
+to be able to reconstruct it.
+
+00:49:05
+So with that high
+sampling, high ratio
+
+00:49:09
+of sampling, what it can
+do is they can actually
+
+00:49:14
+augment the data by a lot
+too, because each time you
+
+00:49:17
+mask 75% of the data, so
+you can reuse the same image
+
+00:49:20
+multiple and multiple
+times during training.
+
+00:49:23
+So you will have so much of
+data to train this encoder with.
+
+00:49:29
+And then that's why they use
+a huge encoder, a large ViT
+
+00:49:36
+in as their encoder.
+
+00:49:38
+So this encoder itself only
+sees 25% of the samples.
+
+00:49:43
+The patches embeds those two
+with first linear projection
+
+00:49:49
+to some embedding spaces.
+
+00:49:51
+Then positional embeddings
+are added exactly same
+
+00:49:55
+as what we mentioned for ViTs.
+
+00:49:59
+And all of these are
+transformer blocks.
+
+00:50:02
+And the encoder is very large,
+that's what I just mentioned.
+
+00:50:09
+And then when it comes
+to the decoding part,
+
+00:50:13
+so we have the embeddings
+of all of those patches
+
+00:50:17
+that were present for the
+patches that were masked
+
+00:50:21
+or were missing.
+
+00:50:23
+For those, there is a
+trainable parameter,
+
+00:50:26
+very much similar to that
+class token that we had.
+
+00:50:29
+A shared masked masked
+token that is basically
+
+00:50:34
+in some sort of average.
+
+00:50:36
+We can consider that
+as an average patch,
+
+00:50:39
+an average representation
+that is put for the ones that
+
+00:50:43
+are missing are masked, and then
+the decoder has to transfer them
+
+00:50:48
+to the image patches
+of the entire image,
+
+00:50:54
+and then the entire image is
+the output target is the output.
+
+00:51:02
+So how we train this,
+this is a simple MSE
+
+00:51:06
+based mean squared error loss
+function for between the image
+
+00:51:16
+and the reconstructed
+image, the loss function
+
+00:51:18
+is only computed for
+the masked patches
+
+00:51:21
+similar to the previous one
+that I just talked about.
+
+00:51:25
+And then what it has is--
+
+00:51:30
+When we do the training,
+they've shown in the paper
+
+00:51:33
+that you can do either linear
+probing or full fine tuning
+
+00:51:42
+to use it for your
+downstream tasks,
+
+00:51:44
+for any of the applications
+that you have in mind.
+
+00:51:47
+And in linear
+probing, what happens
+
+00:51:50
+is you often have your
+encoder frozen and then use
+
+00:51:55
+the learned representations and
+only learn a linear function
+
+00:51:58
+for the final task.
+
+00:52:00
+And this mark, it means
+that it's being trained,
+
+00:52:04
+but in full fine
+tuning, in fine tuning,
+
+00:52:06
+the pre-trained
+encoders are also
+
+00:52:08
+fine tuned, either all of them
+or just few transformer blocks.
+
+00:52:14
+And that's the fine
+tuning framework.
+
+00:52:19
+The linear probing
+provides a measure
+
+00:52:22
+of representation quality,
+how those representations
+
+00:52:25
+features are, and fine
+tuning always exploits models
+
+00:52:31
+near to potential to
+adapt for new tasks.
+
+00:52:37
+OK, so if you're
+interested in this topic
+
+00:52:43
+and if you're planning
+to use this paper,
+
+00:52:45
+I highly advise looking at
+the paper in its follow-ups.
+
+00:52:49
+There are so many discussions
+around different aspects
+
+00:52:53
+model choices,
+hyperparameters, masking ratio
+
+00:52:56
+is one thing they've shown with
+the masking ratio that the 75%
+
+00:53:00
+is actually giving them
+a very high accuracy.
+
+00:53:04
+So 75% that's the reason
+that it was chosen.
+
+00:53:07
+Decoder depth, decoder width,
+mask tokens, reconstruction
+
+00:53:13
+targets, data augmentation
+how it's helpful
+
+00:53:18
+and mask sampling method I'm
+showing the results here again.
+
+00:53:22
+Mask sampling method
+is mostly around
+
+00:53:25
+should they use some random
+masking blocks or grid
+
+00:53:30
+type of masking.
+
+00:53:31
+You see the examples here, and
+they've came to the conclusion
+
+00:53:35
+that this random masking
+was the best choice.
+
+00:53:39
+And finally they've
+been able to show
+
+00:53:43
+that MAE is doing a
+much better job compared
+
+00:53:49
+to many of the other
+methods that were used.
+
+00:53:53
+So some of the other
+state of the art methods
+
+00:53:56
+were actually Dino and Moco V3.
+
+00:53:58
+If you have time, I will
+briefly go over them.
+
+00:54:00
+But this framework was
+actually outperforming
+
+00:54:06
+those that are more at the
+time, advanced frameworks
+
+00:54:13
+of contrastive learning.
+
+00:54:16
+So I'll stop for a few
+questions if you have any.
+
+00:54:22
+Let me just summarize
+what we've talked about.
+
+00:54:28
+Pretext tasks were
+actually very important.
+
+00:54:30
+And as I said their
+focus is on understanding
+
+00:54:33
+the visual common sense.
+
+00:54:36
+And one of the things
+that also related
+
+00:54:40
+to some of the questions
+that were asked, we can see
+
+00:54:44
+is coming up with an individual
+pretext task is often
+
+00:54:48
+challenging because the
+learned representations may not
+
+00:54:52
+be general enough because of the
+type of tasks that you define.
+
+00:54:58
+For example, if you're using
+completion, rotation prediction,
+
+00:55:05
+or jigsaw puzzle
+or colorization,
+
+00:55:08
+you learned representations
+are good for solving
+
+00:55:11
+those specific tasks,
+and they may not
+
+00:55:14
+be very good for
+general pretext tasks.
+
+00:55:19
+So the question is in
+split brain autoencoder,
+
+00:55:22
+how does the model know how to
+predict the other channel given
+
+00:55:28
+for example L channel,
+the illumination channel,
+
+00:55:33
+lightness channel.
+
+00:55:34
+So let me answer your
+question with a question.
+
+00:55:39
+When you're training a model
+to predict classes of objects
+
+00:55:43
+in the image, how
+does the encoder
+
+00:55:45
+know what features to extract
+to predict the class of models?
+
+00:55:51
+Labeled data, because what
+you're doing is you're
+
+00:55:55
+back propagating a
+loss value that is
+
+00:55:59
+calculated around those labels.
+
+00:56:02
+It's the same story here.
+
+00:56:03
+We define the network that
+takes one of the channels
+
+00:56:07
+and outputs the other channel.
+
+00:56:09
+How this was trained
+was by back propagating
+
+00:56:13
+what the output should be.
+
+00:56:15
+The output was
+the other channel.
+
+00:56:17
+We do have the other
+channel in the data.
+
+00:56:20
+So instead of defining the
+task being a classification
+
+00:56:23
+of predicting the
+class of the objects,
+
+00:56:26
+here we define the
+task to be predicting
+
+00:56:28
+the color of the pixels.
+
+00:56:32
+And the color of the
+pixels, we already
+
+00:56:33
+have them in the data set,
+so the loss function still
+
+00:56:36
+can be calculated
+and back propagated.
+
+00:56:40
+So the question is
+how these outputs are
+
+00:56:42
+used as input to the decoder.
+
+00:56:44
+So this is, again, a VIT
+transformer style framework
+
+00:56:51
+encoder that turns every input
+to a token as the output that
+
+00:56:58
+is representation of that
+specific input patch.
+
+00:57:02
+So we've talked about this.
+
+00:57:04
+But then we know that this is
+not the list of all patches,
+
+00:57:10
+there are some of the
+patches that are masked.
+
+00:57:12
+For those that are
+masked, we also
+
+00:57:15
+train this encoder
+outputs a shared mask
+
+00:57:20
+token, a token that is basically
+an average token, for example.
+
+00:57:25
+It's a learnable parameter.
+
+00:57:27
+We can't necessarily
+interpret it,
+
+00:57:29
+but we can say it's
+probably something
+
+00:57:31
+that is similar to a mask
+like an average token.
+
+00:57:35
+So that's shared mask token
+is put in the place of those
+
+00:57:40
+that are missing.
+
+00:57:42
+And then this long vector,
+long sequence is created.
+
+00:57:46
+Decoder, another
+transformer framework
+
+00:57:49
+takes this long set of
+tokens and outputs those
+
+00:57:55
+that are projected as
+the output pixel value.
+
+00:58:01
+Perfect, so we only have 15
+minutes and a lot of things
+
+00:58:12
+to cover.
+
+00:58:14
+But I think what I wanted
+to get out of this session,
+
+00:58:21
+was for you to understand
+what pretext tasks are,
+
+00:58:24
+and how we define them.
+
+00:58:26
+And one of the most
+used frameworks
+
+00:58:29
+right now is the masked
+autoencoder, which we actually
+
+00:58:32
+covered to some extent.
+
+00:58:36
+But anyways, I was
+here that we did look
+
+00:58:42
+at these transformations,
+and then we
+
+00:58:45
+know that all of
+these transformations
+
+00:58:49
+are actually the same object
+as the original image,
+
+00:58:52
+just in a different form.
+
+00:58:54
+But then we also have the
+knowledge that in the data set,
+
+00:58:59
+we have other objects that
+look completely different.
+
+00:59:02
+So if I define a
+task that can say
+
+00:59:08
+these that belong to the
+same object, same pixel,
+
+00:59:11
+try to bring them close in
+the representation space,
+
+00:59:15
+basically attract them to each
+other in the representation
+
+00:59:18
+space, and those that are not--
+
+00:59:21
+that they do not belong
+to the same object,
+
+00:59:27
+try to maximize the
+distance between them
+
+00:59:30
+in the latent space, basically
+repel the representation
+
+00:59:34
+of these two images.
+
+00:59:37
+Then this is another
+task that is often
+
+00:59:40
+referred to as contrastive
+learning, contrastive
+
+00:59:44
+representation
+learning, and there
+
+00:59:46
+are quite a number of very
+interesting methods to look at.
+
+00:59:52
+We have sampled there are so
+many papers in this space,
+
+00:59:56
+especially around
+2019's to 2020's, and so
+
+01:00:04
+on around those years.
+
+01:00:07
+Sinclair McCaw, CBC, and
+then ultimately dyno,
+
+01:00:10
+which actually borrows concepts
+from contrastive learning
+
+01:00:13
+but is not necessarily
+contrastive learning framework.
+
+01:00:19
+And what we do there is in order
+to define, attract and repel
+
+01:00:26
+functions, characteristics
+or regularize the model based
+
+01:00:33
+on those, we define the
+reference image as x, and then
+
+01:00:38
+all of those that
+are transformations
+
+01:00:40
+of the same as positive
+samples and all
+
+01:00:44
+of the other objects
+in the data set,
+
+01:00:46
+or in the batch as
+negative samples.
+
+01:00:49
+And these positive
+and negative samples
+
+01:00:52
+will basically
+define a way for us
+
+01:00:55
+to calculate the loss function.
+
+01:00:58
+How can we do that?
+
+01:01:00
+Assume we have a
+scoring function.
+
+01:01:02
+We want to get a
+scoring function that
+
+01:01:04
+says the score for the
+reference image encoded version,
+
+01:01:09
+features of the reference
+image and the features
+
+01:01:11
+of a positive sample should be
+larger than the score that is,
+
+01:01:15
+comparing the reference image
+and the negative samples.
+
+01:01:24
+So with this type of
+scoring function, if we--
+
+01:01:30
+so basically to define this
+type of scoring function,
+
+01:01:35
+we define a loss
+function based on that.
+
+01:01:38
+After training the
+scoring function S,
+
+01:01:43
+you can see this S is
+the same as the score
+
+01:01:46
+in the previous slide.
+
+01:01:48
+So if we have that
+scoring function,
+
+01:01:50
+now in order to
+attract and repel,
+
+01:01:54
+we can use this
+framework of turn
+
+01:01:58
+them a softmax setup with
+exp that turn those scores
+
+01:02:05
+into probability values.
+
+01:02:07
+And then in the
+denominator, you see
+
+01:02:09
+all of the other negative
+samples that are used
+
+01:02:15
+are considered.
+
+01:02:17
+In order to
+implement actually we
+
+01:02:18
+use this we use the
+batch learning framework.
+
+01:02:21
+All of the other
+negative samples
+
+01:02:23
+that belong to other
+objects in the batch
+
+01:02:27
+are taken as negative samples,
+and one of the transform
+
+01:02:31
+is as the positive sample.
+
+01:02:33
+So we define the loss
+function like this.
+
+01:02:36
+And a score for
+the positive pair,
+
+01:02:39
+score for all of the
+other negative pairs.
+
+01:02:43
+And this function is very
+similar to what we've actually
+
+01:02:48
+discussed before.
+
+01:02:50
+Any ideas?
+
+01:02:51
+This is the cross entropy
+for multi classes.
+
+01:02:54
+So if we have n samples--
+
+01:02:57
+sorry n samples, yes, then in
+this case, we have n samples.
+
+01:03:04
+So the softmax is if you
+have multiple classes,
+
+01:03:09
+if you have 10
+classes as the output,
+
+01:03:11
+it wants to maximize the
+score for one of those 10,
+
+01:03:15
+and minimize for the rest of it.
+
+01:03:17
+It's the same story here.
+
+01:03:19
+We want to maximize
+this score, but minimize
+
+01:03:23
+the score between a
+negative and reference.
+
+01:03:26
+So it's the same concept
+that we discussed
+
+01:03:29
+about multi-class
+classification,
+
+01:03:31
+but put it in the
+form of formulation
+
+01:03:34
+of contrastive for
+this loss function
+
+01:03:37
+as contrastive learning.
+
+01:03:39
+This function is called info
+NCE or the information Noise
+
+01:03:44
+Contrastive
+Estimation loss, which
+
+01:03:47
+was proposed in this paper.
+
+01:03:51
+And there are a lot of
+theoretical discussions
+
+01:03:55
+in the paper that this
+objective, this loss function
+
+01:03:58
+measures the dependencies,
+sorry that it's a lower bound
+
+01:04:04
+on mutual information.
+
+01:04:07
+And what mutual information
+is, when you have two images
+
+01:04:12
+and you calculate the mutual
+information between them,
+
+01:04:14
+it's basically measuring
+the dependencies
+
+01:04:18
+or shared information
+between these two images.
+
+01:04:21
+So what we want
+to do is, we want
+
+01:04:23
+to maximize shared information
+between x and x plus,
+
+01:04:27
+but minimize the shared
+information for x and x minuses.
+
+01:04:32
+So the paper says and
+again, this will itself
+
+01:04:38
+take half an hour to go into.
+
+01:04:40
+So you should definitely
+take a look at the paper
+
+01:04:42
+if you're interested, that the
+negative of this loss function
+
+01:04:47
+info NCE, is a lower bound on
+mutual information between x
+
+01:04:52
+and x plus.
+
+01:04:54
+So a lower bound on
+mutual information
+
+01:04:57
+if the negative of it is a lower
+bound on mutual information.
+
+01:05:03
+If I minimize the info
+NCE, I'm basically
+
+01:05:07
+maximizing the
+mutual information
+
+01:05:10
+between x and x plus.
+
+01:05:11
+So this is what I really want.
+
+01:05:14
+So that's why we take
+this as the loss function
+
+01:05:17
+and start minimizing that value.
+
+01:05:23
+There is also another
+theoretical aspect
+
+01:05:25
+in the info NCE paper
+that says the larger
+
+01:05:29
+the number of negative
+samples the tighter the bound.
+
+01:05:33
+So it tightens the bound
+based on the number
+
+01:05:36
+of negative samples.
+
+01:05:38
+So that's why for training and
+loss function a neural network
+
+01:05:43
+with this type of loss function,
+we need a huge batch size.
+
+01:05:47
+With a larger number
+of negative samples,
+
+01:05:51
+we'll get better and much
+faster training convergence.
+
+01:05:59
+And then this loss function
+was used in a number
+
+01:06:03
+of different frameworks.
+
+01:06:06
+And in the next few
+minutes, I'm just
+
+01:06:09
+going to tell you what
+those frameworks are.
+
+01:06:12
+For example, Sinclair
+is a simple framework
+
+01:06:16
+for contrastive learning, is
+basically taking each image,
+
+01:06:22
+do the two transformations
+of the same image,
+
+01:06:24
+transfer it into the
+representation space.
+
+01:06:27
+And what it does
+is it calculates
+
+01:06:29
+the cosine similarity between
+embeddings representations.
+
+01:06:36
+But before doing that, it does a
+linear or non-linear projection
+
+01:06:40
+into a set of features z,
+that calculates the distance
+
+01:06:47
+between those in this space.
+
+01:06:49
+And this is the way
+that they do this,
+
+01:06:55
+generating this
+positive samples.
+
+01:06:57
+And for generating
+positive samples,
+
+01:07:00
+all sorts of transformations
+would make sense.
+
+01:07:05
+The details are
+basically covered here.
+
+01:07:09
+Generate a positive pair by
+sampling data augmentation
+
+01:07:14
+functions.
+
+01:07:15
+So we sample a few of those
+then we calculate the inverse
+
+01:07:20
+and see loss on the pairs.
+
+01:07:22
+And this is what we iterate
+because each sample has 2n
+
+01:07:29
+multiplied by n samples
+that we have created.
+
+01:07:32
+So what happens is we
+take a list of images
+
+01:07:39
+in the mini batch, in
+the batch that we have,
+
+01:07:43
+and pass them through
+encoder for both variations
+
+01:07:48
+of the same image.
+
+01:07:49
+So each of the images basically
+will have a transformed version
+
+01:07:55
+of it.
+
+01:07:56
+And next, so we have sub 2n
+samples in the batch now.
+
+01:08:02
+And then this
+means that for each
+
+01:08:05
+of the samples the next one,
+these two are positive samples,
+
+01:08:10
+and everything else is negative.
+
+01:08:12
+So for the first one, the
+second image is positive.
+
+01:08:16
+Everything else is negative.
+
+01:08:17
+For the second one
+the first is positive
+
+01:08:19
+and everything else is negative.
+
+01:08:21
+And this repeats for all
+of the samples there.
+
+01:08:24
+So this is a high level
+definition of SimCLR.
+
+01:08:31
+Please note that we have
+in assignment 3, a question
+
+01:08:36
+related to SimCLR that you will
+be exploring this framework
+
+01:08:42
+a little bit more.
+
+01:08:44
+But be careful that the
+definition is slightly
+
+01:08:47
+different from what the
+standard definition that I
+
+01:08:49
+presented here.
+
+01:08:51
+And make sure you follow the
+instructions in the assignment.
+
+01:08:57
+So SimCLR was actually
+very successful.
+
+01:08:59
+It was able to without
+the use of labels or--
+
+01:09:05
+and then a training
+a linear classifier
+
+01:09:07
+on top of the features,
+it was able to surpass
+
+01:09:13
+all of the previous works
+and even basically generate
+
+01:09:19
+results comparable to
+the supervised learning,
+
+01:09:22
+fully supervised
+learning frameworks.
+
+01:09:25
+Although we need a larger
+neural network because now
+
+01:09:28
+we are learning more
+generic features.
+
+01:09:30
+But in terms of
+accuracy, this was
+
+01:09:32
+not as it was comparable to what
+we had for supervised learning.
+
+01:09:38
+So the interesting
+thing with SimCLR
+
+01:09:44
+and some of the
+results around it
+
+01:09:47
+was that there
+are a few choices.
+
+01:09:53
+Actually, let me spend
+time on the main choices.
+
+01:09:58
+You may have this question of
+why did we project the features
+
+01:10:02
+into a new variable instead of
+using the same representations?
+
+01:10:06
+So this was a design choice
+that they made in SimCLR,
+
+01:10:10
+because they rightly
+so assume that when
+
+01:10:16
+we have an objective
+function that
+
+01:10:17
+does this contrast
+between samples,
+
+01:10:20
+you often lose some
+more information,
+
+01:10:24
+some extra information
+that do not
+
+01:10:26
+help with the contrastive
+learning framework.
+
+01:10:28
+So in order to preserve all
+of those extra features,
+
+01:10:34
+representations
+are defined as h,
+
+01:10:36
+but then there is this linear
+or non-linear projection--
+
+01:10:40
+in their paper they use
+non-linear projection,
+
+01:10:42
+to get the z values that they
+can calculate influencer.
+
+01:10:49
+So that's one important
+design choice.
+
+01:10:52
+And the other one is I mentioned
+earlier large batch sizes.
+
+01:10:56
+You need huge batch
+sizes, larger batch sizes
+
+01:10:59
+to be able to get better
+SimCLR performance.
+
+01:11:04
+And we talked about it, how
+and why this is the case.
+
+01:11:08
+But we can't always
+do large batch sizes
+
+01:11:11
+for many of the
+tasks that we have
+
+01:11:13
+at hand because of constraints
+in memory and so on.
+
+01:11:20
+And that was why a
+number of follow ups,
+
+01:11:23
+for example, mocha was proposed
+momentum contrastive learning.
+
+01:11:29
+Instead of using the samples,
+all of the negative samples
+
+01:11:34
+in the batch, what it
+does is it creates a queue
+
+01:11:39
+and keeps a history of
+the negative samples
+
+01:11:46
+across batches over
+time in the model.
+
+01:11:49
+So it doesn't only depend on the
+negative samples in the batch,
+
+01:11:53
+it has a separate
+queue that is defined
+
+01:11:57
+and keeps a number of negative
+samples and changes it,
+
+01:12:01
+updates it over time to train,
+to do the inference loss,
+
+01:12:11
+the contrastive loss here.
+
+01:12:13
+But because we have this
+queue, we cannot back propagate
+
+01:12:17
+because those samples are
+not in the batch anymore.
+
+01:12:19
+So we cannot back propagate
+for the negative samples,
+
+01:12:25
+and that's why it had
+to separate the encoder
+
+01:12:27
+for positive samples,
+which are now called query.
+
+01:12:30
+And the negative
+samples which are now
+
+01:12:32
+called key in this architecture.
+
+01:12:38
+So the training only impacts
+encoder and over time
+
+01:12:42
+the Q encoder, using a momentum
+m, it updates the key encoder,
+
+01:12:51
+the momentum encoder.
+
+01:12:53
+So this is a framework
+that has actually
+
+01:12:57
+been very successful in
+terms of implementation,
+
+01:13:01
+and follow up versions of it.
+
+01:13:03
+There is a lot of
+interesting results,
+
+01:13:07
+but then what they've
+done was basically
+
+01:13:13
+tried hybrid versions of using
+some non-linear projection heads
+
+01:13:19
+and data augmentation
+from SimCLR
+
+01:13:22
+and using this mini batch style,
+the decoupling of the mini batch
+
+01:13:26
+and negative samples
+from MoCo, and they've
+
+01:13:29
+shown that actually if you do
+this together, MoCo version 2,
+
+01:13:34
+it improves the
+performance by a lot.
+
+01:13:39
+So I will stop here, but
+there was some notions
+
+01:13:45
+of CPC, the Contrastive
+Predictive Coding,
+
+01:13:50
+as another example, that you
+can look at in the slides.
+
+01:13:55
+And then a better version of
+MoCo, MoCo version 3 and DINO
+
+01:14:00
+is also one of the widely
+used frameworks which actually
+
+01:14:04
+has a similar type of
+architecture as MoCo,
+
+01:14:11
+but it's not
+necessarily contrastive
+
+01:14:14
+learning because now we have
+students and teacher networks.
+
+01:14:17
+So I'll leave that for
+a separate discussion,
+
+01:14:20
+and if you're interested,
+we can discuss maybe
+
+01:14:24
+in the future slides,
+in future lectures.
+
+01:14:27
+But anyways, this is also one
+of the widely used frameworks
+
+01:14:32
+for extracting features
+from images and also videos
+
+01:14:35
+sometimes.

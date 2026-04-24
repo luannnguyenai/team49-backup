@@ -1,0 +1,203 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture23-interpretability",
+    "lecture_title": "Lecture 23 - Model Interpretability and Editing",
+    "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs"
+  },
+  "unit": {
+    "unit_id": "local::lecture23-interpretability::seg5",
+    "course_id": "cs224n-2024",
+    "name": "Controlled study: concept bottlenecks and intervention graphs in RL",
+    "description": "Builds concept-bottleneck multi-agent systems so specific concepts can be intervened on, then uses intervention outcomes to infer coordination patterns and hidden social dynamics.",
+    "summary": "Kim next switches from pure observation to control by extending concept bottleneck models to reinforcement learning, training agents to solve the task while also predicting explicit concepts so those concepts can be ablated at inference time [ts=2648s] [ts=2701s] [ts=2718s]. In Overcooked, the setup distinguishes coordinated from non-coordinated environments, and intervention analyses reveal that orientation—not position—is especially important because it gives the earliest cue about another agent’s next move [ts=2774s] [ts=2839s] [ts=2923s]. The same framework can also expose lazy agents whose interventions do not affect rewards [ts=2945s] [ts=2963s]. In the more complex Cleanup game, raw intervention statistics suggest one agent mainly influences another, but a graph built from intervention outcomes reveals a subtler relationship structure and shows that apparent dependencies can arise accidentally from the environment rather than genuine coordination [ts=3036s] [ts=3142s] [ts=3211s]. She closes by noting that the controllable model can match baseline performance, but it depends on having or constructing useful human-interpretable concepts such as position and orientation [ts=3270s] [ts=3285s].",
+    "key_points": [
+      {
+        "text": "A concept bottleneck inserts interpretable variables into each agent so concepts can be manipulated during inference.",
+        "timestamp_s": 2648,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Training optimizes task reward together with agreement between predicted concepts and true concepts.",
+        "timestamp_s": 2701,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "In Overcooked, stronger reward degradation under intervention indicates coordination between agents.",
+        "timestamp_s": 2830,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Agent orientation is more informative than position because it signals the other agent’s next move.",
+        "timestamp_s": 2923,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Intervention graphs over agent-concept nodes can reveal true inter-agent relationships and expose misleading surface statistics.",
+        "timestamp_s": 3142,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The controllable system can perform comparably to the original RL system, but it requires labeled or otherwise available concepts.",
+        "timestamp_s": 3270,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+      "start_s": 2610,
+      "end_s": 3296
+    },
+    "difficulty": 0.79,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 11,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Kim next switches from pure observation to control by extending concept bottleneck models to reinforcement learning, training agents to solve the task while also predicting explicit concepts so those concepts can be ablated at inference time [ts=2648s] [ts=2701s] [ts=2718s]. In Overcooked, the setup distinguishes coordinated from non-coordinated environments, and intervention analyses reveal that orientation—not position—is especially important because it gives the earliest cue about another agent’s next move [ts=2774s] [ts=2839s] [ts=2923s]. The same framework can also expose lazy agents whose interventions do not affect rewards [ts=2945s] [ts=2963s]. In the more complex Cleanup game, raw intervention statistics suggest one agent mainly influences another, but a graph built from intervention outcomes reveals a subtler relationship structure and shows that apparent dependencies can arise accidentally from the environment rather than genuine coordination [ts=3036s] [ts=3142s] [ts=3211s]. She closes by noting that the controllable model can match baseline performance, but it depends on having or constructing useful human-interpretable concepts such as position and orientation [ts=3270s] [ts=3285s].",
+  "target_kp_ids": [
+    "kp_concept_bottlenecks_for_controllable_rl_interventions",
+    "kp_inter_agent_relationship_graphs_from_interventions"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "video_clip_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "transcript_slice": "00:43:33\nI'm going to talk about this work with Niko and Natasha\n\n00:43:39\nSo here, this time, we're going to intervene.\n\n00:43:43\nbut hopefully, we'll learn a little more.\n\n00:43:48\na new multi-agent system.\n\n00:43:51\nthat we can do control testing.\n\n00:43:54\nsacrifice the performance.\n\n00:43:59\nof the overall system.\n\n00:44:03\nI had this paper collaboration with folks\n\n00:44:08\nwhere we propose this pretty simple idea, which\n\n00:44:12\nWhy don't we embed concepts in the middle of the bottleneck,\n\n00:44:20\nstripes, and just train the model end to end?\n\n00:44:25\nWell, because then at inference time,\n\n00:44:29\nYou can pretend predicting zebra,\n\n00:44:33\nSo I'm going to zero out this neuron\n\n00:44:37\nSo it was particularly useful in the medical setting,\n\n00:44:41\nWe can cancel out and test.\n\n00:44:48\nIt's actually not as simple extension then as we thought.\n\n00:44:54\nBut essentially, we're doing that.\n\n00:44:59\nfor each agent.\n\n00:45:04\nyou usually do, typical PPO.\n\n00:45:09\nplus minimizing the difference between the true concept\n\n00:45:14\nThat's all you do.\n\n00:45:18\nYou can intervene.\n\n00:45:22\nthat you can't see Agent 1.\n\n00:45:25\nThat's what we're doing here.\n\n00:45:31\nFirst domain, how many people saw this cooking game before?\n\n00:45:41\nin reinforcement learning, very simple.\n\n00:45:46\nand they're going to make soup.\n\n00:45:49\nThey get a reward.\n\n00:45:53\nto the cooking pot.\n\n00:45:56\nThe goal is to deliver as many soups as possible, given\n\n00:46:01\nAnd here, concepts that we use are\n\n00:46:06\nhas dish, et cetera, et cetera, something that's immediately\n\n00:46:10\nAnd you can, of course, tweak the environment\n\n00:46:14\nSo you can make it that they have to collaborate.\n\n00:46:19\nso that they have to work together in order\n\n00:46:25\nYou can work independently or together, whatever your choice.\n\n00:46:33\nwas that you can detect the emerging\n\n00:46:41\nSo when the impassable environment,\n\n00:46:45\nand suppose that RL system that we trained worked.\n\n00:46:50\nThen you see that when we intervene-- oh, this graph.\n\n00:46:54\nThis is a reward of an agent 1 when\n\n00:46:59\nSo this is perfectly good world.\n\n00:47:04\nThis is the average value of intervening on all concepts,\n\n00:47:10\nIf you compare left and right, you\n\n00:47:15\nreward deteriorated quite a lot for both of them.\n\n00:47:21\nare coordinating because somehow intervening\n\n00:47:30\nBut this is what was really interesting to me,\n\n00:47:34\nAnyone can guess.\n\n00:47:39\nbut except I'm plotting for intervention for each concept.\n\n00:47:46\nteam has tomato, et cetera, et cetera.\n\n00:47:52\nor rather when we intervene on team orientation,\n\n00:47:59\nthat we believe that orientation had to do with subcoordination.\n\n00:48:12\nIt's not the position but it's orientation.\n\n00:48:20\nJust a clarification question on orientation.\n\n00:48:24\nYes.\n\n00:48:27\nlet you predict where they would be next.\n\n00:48:31\nYes.\n\n00:48:34\nmy hair over this question?\n\n00:48:37\nAnd initially, I was really puzzled.\n\n00:48:40\nBecause I expect it to be position.\n\n00:48:43\nThat's exactly right.\n\n00:48:47\nthat an agent can get about the next move of the other agent.\n\n00:48:53\nIf they're facing the tomato, they're\n\n00:48:57\nReally interesting intuition.\n\n00:49:05\nAnd, of course, you can use this to identify lazy agents.\n\n00:49:11\nyellow agent, our friend just chilling in the background.\n\n00:49:18\nAnd if you train RL agent, there's always some agents\n\n00:49:21\nThey're just not doing anything.\n\n00:49:27\nIf I intervene, it just doesn't impact any of their rewards.\n\n00:49:32\n[LAUGHS]\n\n00:49:36\nto look at a little more complex domain.\n\n00:49:42\nSo in this domain, there is a little bit of tension.\n\n00:49:47\nWe have four agents.\n\n00:49:52\nor green things are apples.\n\n00:49:56\nthen apple stops to grow.\n\n00:50:01\nAnd you can see if you are four people trying to collect\n\n00:50:06\nSomeone else has to wait until someone else to clean the river\n\n00:50:11\nAnd in fact, that's sometimes what happens.\n\n00:50:20\nposition, orientation, and pollution, positions,\n\n00:50:26\nSo when we first plotted the same graph\n\n00:50:36\nSo the story here is that when I intervene on Agent 1,\n\n00:50:45\nif you look at these three different graphs of reward--\n\n00:50:53\nIt's Agent 3 and 4 or 5, but it seems that only Agent 2\n\n00:50:57\nSame with idle time.\n\n00:51:00\nSo we were like, oh, maybe that's true.\n\n00:51:04\nThere's like a lot going on in this domain.\n\n00:51:09\nSo we decided to take another step.\n\n00:51:18\nWe're going to build the graph to discover\n\n00:51:22\nThis is the simplest dumbest way to build a graph.\n\n00:51:27\nSo how do you build a graph?\n\n00:51:30\na graph between movies.\n\n00:51:34\nwhat we're trying to do.\n\n00:51:37\nWe're going to build a matrix.\n\n00:51:42\nconsists of features of these movies.\n\n00:51:47\nAnd the simplest way to build a graph is to do a regression.\n\n00:51:56\ngoing to regress over everyone else.\n\n00:52:02\nfor each of these.\n\n00:52:07\nstrengths of the edges.\n\n00:52:10\nand not the other movie.\n\n00:52:12\nIt's the dumbest way.\n\n00:52:15\ndo this in a lot of times, but this\n\n00:52:20\nSo we did the same thing here.\n\n00:52:26\non concept C on Agent N as our node.\n\n00:52:34\nto use intervention outcome, which\n\n00:52:39\nfor reward, resource collected, and many other things.\n\n00:52:47\nyou get betas that represent relationship\n\n00:52:53\nSo I had a graph of that matrix.\n\n00:53:00\nBut imagine there was a matrix.\n\n00:53:04\nbetween Agent 1 and 4 and that only,\n\n00:53:10\nAnd this is the video of it.\n\n00:53:15\nturns out that there is no high edge, strong edges\n\n00:53:22\nSo we were like, that's weird.\n\n00:53:26\nSo we like dig deeper into it, watched a lot of sessions\n\n00:53:31\nAnd it turns out that the story was a lot more complicated.\n\n00:53:38\nBut when that fails, Agent 1 and 2 kind of gets cornered in.\n\n00:53:44\nAgent 4 kind of get--\n\n00:53:48\nsorry, 1 and 2, blue and yellow agent,\n\n00:53:51\nThey kind of get stuck.\n\n00:53:56\nthat we built this environment.\n\n00:54:00\nBut the raw statistics wouldn't have\n\n00:54:06\nIn fact, there was no correlation, no coordination\n\n00:54:10\nBut only after the graph, we realized this was the case.\n\n00:54:16\nBut you know what?\n\n00:54:19\nwant to detect, a lot of them will be one-off case.\n\n00:54:25\nrather than having some surface-level statistics.\n\n00:54:34\nthat enables intervention and performs as well?\n\n00:54:38\nThere's a graph that shows the red line and blue line, roughly\n\n00:54:41\nThat's good news.\n\n00:54:45\nBut remember these concepts.\n\n00:54:48\nto have some way of getting those concepts, positions,\n\n00:54:52\nThere might be something that we would\n\n00:54:56\nBefore I go on, any questions?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture23-interpretability::seg5",
+      "global_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg5",
+      "global_kp_id": "kp_inter_agent_relationship_graphs_from_interventions",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg5",
+      "global_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_concept_bottlenecks_for_controllable_rl_interventions",
+      "name": "Concept bottlenecks for controllable RL interventions",
+      "description": "Embedding explicit concepts inside agents enables targeted intervention studies that expose coordination structure and causal dependencies.",
+      "track_tags": [
+        "control",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "multi_agent_systems",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because concept bottlenecks for controllable RL interventions clarifies embedding explicit concepts inside agents enables targeted intervention studies that expose coordination structure and causal dependencies, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_inter_agent_relationship_graphs_from_interventions",
+      "name": "Inter-agent relationship graphs from interventions",
+      "description": "Graphs built from intervention outcomes can reveal hidden social or coordination structure that raw statistics miss.",
+      "track_tags": [
+        "causal_analysis",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "multi_agent_systems",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "research_scientist",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because inter-agent relationship graphs from interventions clarifies graphs built from intervention outcomes can reveal hidden social or coordination structure that raw statistics miss, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_observational_discovery_of_emergent_rl_behaviors",
+      "name": "Observational discovery of emergent RL behaviors",
+      "description": "Latent-variable modeling of state-action traces can reveal recurring multi-agent behaviors without hand labeling every trajectory.",
+      "track_tags": [
+        "interpretability",
+        "representation_learning"
+      ],
+      "domain_tags": [
+        "multi_agent_systems",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "research_scientist",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because observational discovery of emergent RL behaviors clarifies latent-variable modeling of state-action traces can reveal recurring multi-agent behaviors without hand labeling every trajectory, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture23-interpretability::kp7"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.64,
+    0.94
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L23_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture23-interpretability_transcript.txt"
+  }
+}

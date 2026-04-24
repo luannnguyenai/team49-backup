@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_8::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit is suitable for questions on interpreting attention maps and abstracting attention as a query-to-data operator. The text provides enough detail to assess diagonal alignments, reordering, and the general attention pipeline.",
+  "question_bank": [
+    {
+      "item_id": "lecture-8-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a translation attention heatmap, what does a mostly diagonal pattern usually indicate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Input and output tokens are largely aligned in the same order.",
+        "The model has ignored the input sequence entirely.",
+        "Every output token depends equally on every input token.",
+        "The decoder is using only the final encoder hidden state."
+      ],
+      "answer_index": 0,
+      "explanation": "A diagonal attention pattern means that early output tokens attend to early input tokens, middle to middle, and so on. That is the visual signature of mostly in-order alignment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_attention_heatmaps_as_learned_alignments",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "diagonal structure",
+          "in order"
+        ],
+        "timestamps": [
+          "00:23:23",
+          "00:23:40"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does an off-diagonal or blocky region in an attention map often suggest?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The model has learned a reordering or phrase-level alignment rather than a simple one-to-one mapping.",
+        "The attention weights failed to pass through softmax.",
+        "The input and output sequences must have identical lengths.",
+        "The model is computing a convolution instead of attention."
+      ],
+      "answer_index": 0,
+      "explanation": "Attention maps can reveal alignments that are not one-to-one or strictly ordered. Blocks and off-diagonal regions often arise when phrases reorder or multiple words correspond across languages.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_attention_heatmaps_as_learned_alignments",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "non-diagonal",
+          "not been a one-to-one correspondence"
+        ],
+        "timestamps": [
+          "00:25:16",
+          "00:25:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-8-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Abstractly, what does an attention operator do for each query vector?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It compares the query with data vectors and returns a query-specific summary of those data vectors.",
+        "It sorts data vectors and returns only the first one in the sorted list.",
+        "It deletes all data vectors that are not adjacent to the query.",
+        "It converts every query into a fixed one-hot class label."
+      ],
+      "answer_index": 0,
+      "explanation": "Attention is a content-based retrieval operation. A query determines which data vectors matter, and the output is a weighted summary tailored to that query.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_attention_as_a_query_to_data_operator",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "query vector",
+          "summarize the data vectors"
+        ],
+        "timestamps": [
+          "00:27:50",
+          "00:28:09"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-8-seg3-q1",
+      "global_kp_id": "kp_attention_heatmaps_as_learned_alignments",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg3-q2",
+      "global_kp_id": "kp_attention_heatmaps_as_learned_alignments",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg3-q3",
+      "global_kp_id": "kp_attention_as_a_query_to_data_operator",
+      "role": "primary"
+    }
+  ]
+}

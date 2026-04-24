@@ -1,21 +1,25 @@
-from src.repositories.assessment_repo import AssessmentRepository
 from src.repositories.base import BaseRepository
+from src.repositories.canonical_content_repo import CanonicalContentRepository
+from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.course_recommendation_repo import CourseRecommendationRepository
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.history_repo import HistoryRepository
-from src.repositories.question_repo import QuestionRepository
-from src.repositories.mastery_repo import MasteryRepository
-from src.repositories.session_repo import SessionRepository
-from src.repositories.interaction_repo import InteractionRepository
+from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
+from src.repositories.learning_progress_repo import LearningProgressRepository
+from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.repositories.user_repo import UserRepository
+from src.repositories.waived_unit_repo import WaivedUnitRepository
 
 __all__ = [
-    "AssessmentRepository",
     "BaseRepository",
+    "CanonicalContentRepository",
+    "CanonicalQuestionRepository",
     "CourseRecommendationRepository",
+    "GoalPreferenceRepository",
     "HistoryRepository",
-    "QuestionRepository",
-    "MasteryRepository",
-    "SessionRepository",
-    "InteractionRepository",
+    "LearnerMasteryKPRepository",
+    "LearningProgressRepository",
+    "PlannerAuditRepository",
     "UserRepository",
+    "WaivedUnitRepository",
 ]

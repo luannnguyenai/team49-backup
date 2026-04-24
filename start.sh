@@ -75,12 +75,12 @@ fi
 log_ok "GEMINI_API_KEY đã cấu hình"
 
 # Kiểm tra data
-if [ -d "data/CS231n" ]; then
-  VIDEO_COUNT=$(find data/CS231n/videos -name "*.mp4" 2>/dev/null | wc -l)
-  TRANSCRIPT_COUNT=$(find data/CS231n/transcripts -name "*.txt" -o -name "*.json" 2>/dev/null | wc -l)
+if [ -d "data/courses/CS231n" ]; then
+  VIDEO_COUNT=$(find data/courses/CS231n/videos -name "*.mp4" 2>/dev/null | wc -l)
+  TRANSCRIPT_COUNT=$(find data/courses/CS231n/transcripts -name "*.txt" -o -name "*.json" 2>/dev/null | wc -l)
   log_ok "Data CS231n: ${VIDEO_COUNT} videos, ${TRANSCRIPT_COUNT} transcripts"
 else
-  log_warn "Không tìm thấy data/CS231n/ — AI Tutor sẽ không có bài giảng để truy vấn"
+  log_warn "Không tìm thấy data/courses/CS231n/ — AI Tutor sẽ không có bài giảng để truy vấn"
 fi
 
 # =============================================================================
@@ -208,14 +208,14 @@ log_ok "Backend healthy tại http://localhost:8000"
 # =============================================================================
 log_section "Bước 3 — Seed dữ liệu"
 
-# Kiểm tra bảng modules có data chưa — chỉ seed nếu rỗng
-MODULE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM modules;" 2>/dev/null | tr -d '[:space:]' || echo "0")
-if [ "$MODULE_COUNT" = "0" ]; then
-  log_info "Seed curriculum (modules, topics, questions)..."
-  docker compose exec -T backend uv run python scripts/seed.py 2>&1 && log_ok "Seed curriculum hoàn tất" \
+# Kiểm tra product shell canonical có data chưa — chỉ import nếu rỗng
+UNIT_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM learning_units;" 2>/dev/null | tr -d '[:space:]' || echo "0")
+if [ "$UNIT_COUNT" = "0" ]; then
+  log_info "Import canonical content và product shell..."
+  docker compose exec -T backend uv run python scripts/seed.py 2>&1 && log_ok "Import canonical content hoàn tất" \
     || log_warn "seed.py thất bại — bỏ qua, tiếp tục"
 else
-  log_ok "Curriculum đã có sẵn (${MODULE_COUNT} module) — bỏ qua seed"
+  log_ok "Canonical product shell đã có sẵn (${UNIT_COUNT} learning unit) — bỏ qua import"
 fi
 
 # Kiểm tra bảng lectures có data chưa — chỉ seed nếu rỗng
@@ -223,7 +223,7 @@ LECTURE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "
 if [ "$LECTURE_COUNT" = "0" ]; then
   log_info "Seed bài giảng CS231n..."
   docker compose exec -T backend uv run python scripts/seed_lectures.py 2>&1 && log_ok "Seed bài giảng hoàn tất" \
-    || log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/CS231n/)"
+    || log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/courses/CS231n/)"
 else
   log_ok "Lectures đã có sẵn (${LECTURE_COUNT} bài) — bỏ qua seed"
 fi
@@ -238,7 +238,7 @@ docker compose exec -T backend python - <<'EOF'
 import os, json
 
 data_path = "/app/data"
-cs231n_path = "/app/data/CS231n"
+cs231n_path = "/app/data/courses/CS231n"
 
 print(f"  data/ exists: {os.path.exists(data_path)}")
 
@@ -250,15 +250,24 @@ if os.path.exists(cs231n_path):
     print(f"  CS231n/transcripts: {len(transcripts)} files")
     print(f"  CS231n/ToC_Summary: {len(toc)} files")
 else:
-    print("  [WARN] CS231n/ không tồn tại trong container")
+    print("  [WARN] courses/CS231n/ không tồn tại trong container")
 
-for f in ["modules.json", "topics.json", "question_bank.json"]:
-    path = f"{data_path}/{f}"
+for f in ["courses.json", "overviews.json", "units.json"]:
+    path = f"{data_path}/bootstrap/{f}"
     if os.path.exists(path):
         data = json.load(open(path))
         print(f"  {f}: {len(data)} records")
     else:
         print(f"  [WARN] {f} không tồn tại")
+
+canonical_path = "/app/data/final_artifacts/cs224n_cs231n_v1/canonical"
+for f in ["question_bank.jsonl", "item_phase_map.jsonl", "item_kp_map.jsonl"]:
+    path = f"{canonical_path}/{f}"
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as handle:
+            print(f"  canonical/{f}: {sum(1 for _ in handle)} rows")
+    else:
+        print(f"  [WARN] canonical/{f} không tồn tại")
 EOF
 
 # =============================================================================

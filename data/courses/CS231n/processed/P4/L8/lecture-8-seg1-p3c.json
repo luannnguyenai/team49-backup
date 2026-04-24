@@ -1,0 +1,301 @@
+{
+  "unit_id": "local::lecture_8::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=RQowiOF_FvQ",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit is suitable for concept checks on the seq2seq bottleneck that motivates attention. The available text clearly supports questions about encoder-decoder RNNs, context vectors, and why fixed-size summaries struggle with longer inputs.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a basic encoder-decoder RNN for translation, what is the role of the context vector?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It summarizes the input sequence so the decoder can generate the output sequence.",
+        "It stores a separate output probability for every possible target word.",
+        "It replaces the recurrent hidden states inside both encoder and decoder.",
+        "It prevents the decoder from using previously generated tokens."
+      ],
+      "answer_index": 0,
+      "explanation": "The encoder processes the input sequence and compresses its information into a context vector. The decoder then uses that summary, together with its own state and previous outputs, to generate the target sequence.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "summarize the entire input sequence",
+          "single vector called the context vector"
+        ],
+        "timestamps": [
+          "00:05:17",
+          "00:05:52"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does a single fixed-size context vector become a bottleneck in sequence-to-sequence translation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "All information from the input must pass through one vector before the decoder can use it.",
+        "It forces the decoder to produce exactly the same number of tokens as the input.",
+        "It prevents the encoder from updating hidden states over time.",
+        "It makes the model use hand-coded word alignments instead of learned parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "A fixed-size summary has limited capacity. As the input grows, it becomes harder for one vector to preserve all details the decoder may need at different output steps.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "through one fixed-length vector",
+          "information bottleneck"
+        ],
+        "timestamps": [
+          "00:07:15",
+          "00:07:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which recurrence best describes the encoder-side update in an RNN sequence model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The next hidden state depends on the current input token and previous hidden state.",
+        "The next hidden state depends only on the final output token.",
+        "Every hidden state is computed independently from all other time steps.",
+        "The context vector is updated by sorting input tokens alphabetically."
+      ],
+      "answer_index": 0,
+      "explanation": "A recurrent encoder carries information forward through hidden states. Each step combines the current token representation with the previous hidden state, allowing sequence history to accumulate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_seq2seq_attention_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "on two inputs",
+          "next hidden state"
+        ],
+        "timestamps": [
+          "00:04:04",
+          "00:04:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "global_kp_id": "kp_seq2seq_attention_bottleneck",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.35,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "The role of the context vector in encoder-decoder RNNs is a basic seq2seq concept."
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The fixed-size bottleneck is a medium motivation-for-attention question."
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.94,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Picking the correct encoder recurrence is a medium mechanics question tied to seq2seq equations."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-8-seg1-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is an early check on seq2seq vocabulary and architecture."
+    },
+    {
+      "item_id": "lecture-8-seg1-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item checks whether the learner understands why attention is needed."
+    },
+    {
+      "item_id": "lecture-8-seg1-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "review",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is most useful as equation-level reinforcement rather than as a placement item."
+    }
+  ]
+}

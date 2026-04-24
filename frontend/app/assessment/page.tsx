@@ -3,7 +3,7 @@
 // Full-screen assessment flow:
 //   load → start session → question-by-question → submit → /assessment/results
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Bookmark,
@@ -17,11 +17,16 @@ import {
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
-import { assessmentApi, contentApi } from "@/lib/api";
+import { assessmentApi, canonicalAssessmentApi } from "@/lib/api";
+import {
+  buildAssessmentAnswerInput,
+  clearPendingAssessmentContext,
+  getAssessmentQuestionKey,
+  readPendingCanonicalAssessment,
+} from "@/lib/canonical-assessment-session";
 import { cn } from "@/lib/utils";
 import type {
   AnswerInput,
-  ModuleDetail,
   QuestionForAssessment,
   SelectedAnswer,
 } from "@/types";
@@ -61,7 +66,7 @@ function useElapsedTimer(active: boolean) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function AssessmentPage() {
+function AssessmentPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -70,7 +75,7 @@ export default function AssessmentPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuestionForAssessment[]>([]);
-  const [topicNames, setTopicNames] = useState<Record<string, string>>({});
+  const [learningUnitNames, setLearningUnitNames] = useState<Record<string, string>>({});
   const [currentIdx, setCurrentIdx] = useState(0);
 
   // questionId → chosen option  (undefined = not yet answered, null = skipped)
@@ -94,47 +99,21 @@ export default function AssessmentPage() {
 
     async function bootstrap() {
       try {
-        const topicIdsRaw = sessionStorage.getItem("al_pending_topic_ids");
-        const topicNamesRaw = sessionStorage.getItem("al_pending_topic_names");
-
-        let topicIds: string[] = topicIdsRaw ? JSON.parse(topicIdsRaw) as string[] : [];
-        let nameMap: Record<string, string> = topicNamesRaw
-          ? JSON.parse(topicNamesRaw) as Record<string, string>
-          : {};
-
-        if (topicIds.length === 0) {
-          const moduleIdsRaw = sessionStorage.getItem("al_pending_module_ids");
-          if (moduleIdsRaw) {
-            const moduleIds = JSON.parse(moduleIdsRaw) as string[];
-            const mods: ModuleDetail[] = await Promise.all(
-              moduleIds.map((id) => contentApi.moduleDetail(id))
-            );
-            mods.forEach((m) =>
-              m.topics.forEach((t) => {
-                topicIds.push(t.id);
-                nameMap[t.id] = t.name;
-              })
-            );
+        const { canonicalUnitIds, unitNameMap } = readPendingCanonicalAssessment();
+        if (canonicalUnitIds.length === 0) {
+          if (!cancelled) {
+            setErrorMsg("Không tìm thấy learning units cho assessment. Hãy quay lại onboarding.");
+            setPhase("error");
           }
+          return;
         }
 
-        if (topicIds.length === 0) {
-          const allModules = await contentApi.modules();
-          const details: ModuleDetail[] = await Promise.all(
-            allModules.map((m) => contentApi.moduleDetail(m.id))
-          );
-          details.forEach((m) =>
-            m.topics.forEach((t) => {
-              topicIds.push(t.id);
-              nameMap[t.id] = t.name;
-            })
-          );
-        }
-
-        const resp = await assessmentApi.start(topicIds);
+        const resp = await canonicalAssessmentApi.start({
+          canonical_unit_ids: canonicalUnitIds,
+        });
         if (cancelled) return;
 
-        setTopicNames(nameMap);
+        setLearningUnitNames(unitNameMap);
         setSessionId(resp.session_id);
         setQuestions(resp.questions);
         questionStart.current = Date.now();
@@ -161,20 +140,21 @@ export default function AssessmentPage() {
 
   // ── Current question ───────────────────────────────────────────────────────
   const question = questions[currentIdx] ?? null;
-  const selectedOption = question ? (answers[question.id] ?? undefined) : undefined;
+  const questionKey = question ? getAssessmentQuestionKey(question) : null;
+  const selectedOption = questionKey ? (answers[questionKey] ?? undefined) : undefined;
   const isAnswered = selectedOption != null;
   const isLastQuestion = currentIdx === questions.length - 1;
 
   // ── Select an option ───────────────────────────────────────────────────────
   const selectOption = useCallback(
     (opt: SelectedAnswer) => {
-      if (!question) return;
-      if (answers[question.id] === undefined) {
-        responseTimes.current[question.id] = Date.now() - questionStart.current;
+      if (!question || !questionKey) return;
+      if (answers[questionKey] === undefined) {
+        responseTimes.current[questionKey] = Date.now() - questionStart.current;
       }
-      setAnswers((prev) => ({ ...prev, [question.id]: opt }));
+      setAnswers((prev) => ({ ...prev, [questionKey]: opt }));
     },
-    [question, answers]
+    [question, questionKey, answers]
   );
 
   // ── Navigate to next question ──────────────────────────────────────────────
@@ -190,8 +170,8 @@ export default function AssessmentPage() {
 
   // ── Skip current question ──────────────────────────────────────────────────
   const skip = useCallback(() => {
-    if (!question) return;
-    setAnswers((prev) => ({ ...prev, [question.id]: null }));
+    if (!question || !questionKey) return;
+    setAnswers((prev) => ({ ...prev, [questionKey]: null }));
     if (isLastQuestion) {
       submitAssessment();
     } else {
@@ -199,7 +179,7 @@ export default function AssessmentPage() {
       setCurrentIdx((i) => i + 1);
       questionStart.current = Date.now();
     }
-  }, [question, isLastQuestion, currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [question, questionKey, isLastQuestion, currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Jump to any question ───────────────────────────────────────────────────
   const jumpTo = useCallback((idx: number) => {
@@ -224,12 +204,18 @@ export default function AssessmentPage() {
     setPhase("submitting");
 
     const answerList: AnswerInput[] = questions
-      .filter((q) => answers[q.id] != null && answers[q.id] !== null)
       .map((q) => ({
-        question_id: q.id,
-        selected_answer: answers[q.id] as SelectedAnswer,
-        response_time_ms: responseTimes.current[q.id] ?? null,
-      }));
+        question: q,
+        key: getAssessmentQuestionKey(q),
+      }))
+      .filter(({ key }) => answers[key] != null && answers[key] !== null)
+      .map(({ question: q, key }) =>
+        buildAssessmentAnswerInput(
+          q,
+          answers[key] as SelectedAnswer,
+          responseTimes.current[key] ?? null,
+        ),
+      );
 
     if (answerList.length === 0) {
       setErrorMsg("Bạn chưa trả lời câu nào. Vui lòng trả lời ít nhất 1 câu.");
@@ -240,9 +226,7 @@ export default function AssessmentPage() {
     try {
       await assessmentApi.submit(sessionId, answerList);
       const next = searchParams.get("next");
-      sessionStorage.removeItem("al_pending_module_ids");
-      sessionStorage.removeItem("al_pending_topic_ids");
-      sessionStorage.removeItem("al_pending_topic_names");
+      clearPendingAssessmentContext();
       const resultsParams = new URLSearchParams({ session_id: sessionId });
       if (next) {
         resultsParams.set("next", next);
@@ -325,10 +309,14 @@ export default function AssessmentPage() {
 
   if (!question) return null;
 
-  const bloom = BLOOM_BADGE[question.bloom_level];
-  const topicName = topicNames[question.topic_id] ?? "Assessment";
+  const bloom = question.bloom_level ? BLOOM_BADGE[question.bloom_level] : undefined;
+  const learningUnitName = question.canonical_unit_id
+    ? learningUnitNames[question.canonical_unit_id] ?? "Assessment"
+    : question.topic_id
+    ? learningUnitNames[question.topic_id] ?? "Assessment"
+    : "Assessment";
   const progress = Math.round(((currentIdx + 1) / questions.length) * 100);
-  const isFlagged = flagged.has(question.id);
+  const isFlagged = questionKey ? flagged.has(questionKey) : false;
 
   // ── Main assessment UI ────────────────────────────────────────────────────
 
@@ -366,14 +354,15 @@ export default function AssessmentPage() {
         <div className="flex-1 overflow-y-auto p-3">
           <div className="grid grid-cols-4 gap-1.5">
             {questions.map((q, idx) => {
-              const isAns = answers[q.id] != null;
-              const isSkipped = answers[q.id] === null;
+              const qKey = getAssessmentQuestionKey(q);
+              const isAns = answers[qKey] != null;
+              const isSkipped = answers[qKey] === null;
               const isCur = idx === currentIdx;
-              const isQFlagged = flagged.has(q.id);
+              const isQFlagged = flagged.has(qKey);
 
               return (
                 <button
-                  key={q.id}
+                  key={qKey}
                   onClick={() => jumpTo(idx)}
                   title={`Câu ${idx + 1}${isQFlagged ? " · Đánh dấu review" : ""}`}
                   className={cn(
@@ -448,7 +437,7 @@ export default function AssessmentPage() {
             <div className="flex-1 min-w-0">
               <div className="mb-1.5 flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
                 <span className="truncate font-medium" style={{ color: "var(--text-secondary)" }}>
-                  {topicName}
+                  {learningUnitName}
                 </span>
                 <span className="shrink-0 ml-2">
                   Câu {currentIdx + 1} / {questions.length}
@@ -510,7 +499,7 @@ export default function AssessmentPage() {
 
                 {/* Bookmark / flag button */}
                 <button
-                  onClick={() => toggleFlag(question.id)}
+                  onClick={() => questionKey && toggleFlag(questionKey)}
                   title={isFlagged ? "Bỏ đánh dấu review" : "Đánh dấu để review lại"}
                   className={cn(
                     "ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all duration-150",
@@ -635,5 +624,19 @@ export default function AssessmentPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AssessmentPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
+      <AssessmentPageInner />
+    </Suspense>
   );
 }

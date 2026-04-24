@@ -1,0 +1,344 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture23-interpretability",
+    "lecture_title": "Lecture 23 - Model Interpretability and Editing",
+    "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture23-interpretability::seg1",
+      "course_id": "cs224n-2024",
+      "name": "Motivation: communicate with machines to benefit humanity",
+      "description": "Frames interpretability as the problem of building shared representations so humans can learn from, align with, and safely collaborate with powerful models.",
+      "summary": "Been Kim frames modern AI systems as impressive but potentially frightening colleagues whose capabilities could either help humanity or go catastrophically wrong, so she argues we should directly optimize for human benefit rather than wait [ts=118s] [ts=184s]. She uses AlphaGo’s Move 37 against Lee Sedol as the emblem of machine knowledge that humans do not yet have language for, then argues that meaningful conversation requires overlap between human and machine representational spaces [ts=291s] [ts=419s]. She also positions this as an AI-safety problem, since understanding a system’s true goals and reasoning is necessary for avoiding reward hacking, and sets up the rest of the lecture as a search for tools that can estimate what machines actually know [ts=368s] [ts=551s].",
+      "key_points": [
+        {
+          "text": "AI systems can be treated as colleagues that are useful but may have very different values, experiences, and goals from humans.",
+          "timestamp_s": 198,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Move 37 in AlphaGo is presented as an example of a strong machine concept or strategy humans could not readily fathom.",
+          "timestamp_s": 291,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A shared vocabulary or overlapping representational space is necessary for humans and machines to exchange meaning.",
+          "timestamp_s": 389,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Meaningful communication with models is described as a superset of solving AI-safety issues like reward hacking.",
+          "timestamp_s": 368,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 101,
+        "end_s": 596
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg2",
+      "course_id": "cs224n-2024",
+      "name": "Attribution methods, hypothesis testing, and the limits of saliency maps",
+      "description": "Explains saliency-style explanations, then argues theoretically and empirically that popular attribution methods often cannot support behavioral conclusions about a model.",
+      "summary": "The lecture first defines a saliency map as a feature-wise estimate of how prediction changes locally around an input, using ImageNet pixels as the intuitive example [ts=602s] [ts=623s]. Kim then gives several reasons a gap can arise between what machines know and what humans think they know, and drills into attribution methods by showing that trained and untrained networks can produce nearly identical saliency maps, while inserted bugs such as label noise, spurious correlations, or OOD shifts are not reliably surfaced by explanations [ts=671s] [ts=743s] [ts=789s]. She reformulates the user’s interpretation problem as hypothesis testing and argues that IG and SHAP cannot validate such hypotheses better than random in theory and around random in practical end tasks like recourse and spurious-correlation detection [ts=935s] [ts=965s] [ts=1074s]. Her practical replacement is simple local sampling around the point of interest, with usefulness governed by sample count, output resolution, and feature count, plus careful validation before deploying these methods in high-stakes settings [ts=1115s] [ts=1147s] [ts=1240s].",
+      "key_points": [
+        {
+          "text": "A saliency map assigns each feature a number intended to reflect the local shape of the prediction function around that feature.",
+          "timestamp_s": 623,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Trained and untrained networks can yield very similar saliency maps, so meaningful and random predictions may receive nearly indistinguishable explanations.",
+          "timestamp_s": 743,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Inserted model problems such as labeling errors, spurious correlations, and out-of-distribution shifts are not reliably diagnosed by these explanations.",
+          "timestamp_s": 782,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "IG and SHAP are framed as hypothesis-testing tools, but the lecture argues they cannot validate user hypotheses better than random guessing.",
+          "timestamp_s": 965,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "For local function-shape questions, a direct sampling strategy around the input is recommended over complex attribution heuristics.",
+          "timestamp_s": 1115,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The result is said to apply to any model that can be treated as a function, not only vision models.",
+          "timestamp_s": 1264,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 597,
+        "end_s": 1391
+      },
+      "difficulty": 0.73,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 13,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg3",
+      "course_id": "cs224n-2024",
+      "name": "ROME, MEMIT, and why localization does not predict editing success",
+      "description": "Analyzes model editing in NLP and argues that causal-tracing-based localization of factual knowledge is largely unrelated to how successfully a fact can be edited.",
+      "summary": "Kim introduces an NLP project that began with the hope of locating ethical knowledge in large language models and then editing it, but the work turned into a critique of that premise [ts=1392s] [ts=1441s]. She reviews ROME’s causal tracing setup: run a clean example like “The Space Needle is in Seattle,” corrupt the subject tokens with noise, then restore one module at a time and measure recovery of the correct object to estimate where the fact is carried during the forward pass [ts=1534s] [ts=1606s] [ts=1617s]. The key empirical result is that factual peaks are spread across layers, while successful editing depends far more on the chosen layer than on the tracing score; the tracing-effect/rewrite relationship is near zero or even anti-correlated, with layer choice explaining most variance [ts=1681s] [ts=1770s] [ts=1802s]. She concludes that causal tracing may still reveal where factual information appears during computation, but it should not be used to validate localization by editing success or to motivate editing methods as if localization and editability were the same thing [ts=1992s] [ts=2025s] [ts=2038s].",
+      "key_points": [
+        {
+          "text": "The original goal was to locate ethical knowledge in LLMs and edit it to make the model more ethical.",
+          "timestamp_s": 1392,
+          "evidence_type": "example"
+        },
+        {
+          "text": "ROME uses causal tracing by corrupting the subject tokens and restoring one module at a time to test recovery of the correct factual object.",
+          "timestamp_s": 1538,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Many facts peak outside the layers used by ROME or MEMIT, even though editing at those layers can still succeed.",
+          "timestamp_s": 1681,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Tracing effect and rewrite score are near-zero or negatively correlated, so localization does not predict editing success.",
+          "timestamp_s": 1770,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Layer choice explains much more variance in successful edits than localization score does.",
+          "timestamp_s": 1802,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Causal tracing may reveal when facts appear during forward computation, but not where to edit for best effect.",
+          "timestamp_s": 1992,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 1392,
+        "end_s": 2099
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg4",
+      "course_id": "cs224n-2024",
+      "name": "Observational study of emergent behaviors in multi-agent systems",
+      "description": "Treats RL agents like a new species to be observed, using latent-variable modeling of state-action traces to discover recurring behaviors without manual labels.",
+      "summary": "After arguing that current explanation tools may be missing basic groundwork, Kim proposes studying machine systems like a new species: first by observation, then by intervention [ts=2131s] [ts=2159s]. In the observational setup, only state-action pairs are used, and a latent-variable generative model with shared and per-agent embeddings is fit so that clustering structure in the learned spaces reveals recurring behaviors [ts=2275s] [ts=2337s] [ts=2351s]. On a MuJoCo leg-control task, tight cross-agent mappings correspond to better coordinated running, while more dispersed mappings correspond to worse behavior [ts=2417s] [ts=2438s]. Applied to OpenAI hide-and-seek, the learned spaces separate some behaviors such as running/chasing and partially disentangle role-specific concepts like fort building for hiders, but the method still needs human exploration and cannot by itself name clusters or explain superhuman concepts [ts=2462s] [ts=2525s] [ts=2581s].",
+      "key_points": [
+        {
+          "text": "Machines are proposed to be studied like a new species, beginning with observational study before controlled intervention.",
+          "timestamp_s": 2148,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The observational method uses only state-action pairs and discovers behaviors by clustering latent embeddings learned with a generative model.",
+          "timestamp_s": 2275,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In the MuJoCo example, tight embedding-space correspondences between agents align with better running behavior.",
+          "timestamp_s": 2417,
+          "evidence_type": "example"
+        },
+        {
+          "text": "In hide-and-seek, running/chasing is relatively separable while some other behaviors remain entangled across roles.",
+          "timestamp_s": 2523,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Observed clusters still need human interpretation and may fail to capture truly superhuman concepts.",
+          "timestamp_s": 2581,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 2100,
+        "end_s": 2609
+      },
+      "difficulty": 0.67,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 8,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg5",
+      "course_id": "cs224n-2024",
+      "name": "Controlled study: concept bottlenecks and intervention graphs in RL",
+      "description": "Builds concept-bottleneck multi-agent systems so specific concepts can be intervened on, then uses intervention outcomes to infer coordination patterns and hidden social dynamics.",
+      "summary": "Kim next switches from pure observation to control by extending concept bottleneck models to reinforcement learning, training agents to solve the task while also predicting explicit concepts so those concepts can be ablated at inference time [ts=2648s] [ts=2701s] [ts=2718s]. In Overcooked, the setup distinguishes coordinated from non-coordinated environments, and intervention analyses reveal that orientation—not position—is especially important because it gives the earliest cue about another agent’s next move [ts=2774s] [ts=2839s] [ts=2923s]. The same framework can also expose lazy agents whose interventions do not affect rewards [ts=2945s] [ts=2963s]. In the more complex Cleanup game, raw intervention statistics suggest one agent mainly influences another, but a graph built from intervention outcomes reveals a subtler relationship structure and shows that apparent dependencies can arise accidentally from the environment rather than genuine coordination [ts=3036s] [ts=3142s] [ts=3211s]. She closes by noting that the controllable model can match baseline performance, but it depends on having or constructing useful human-interpretable concepts such as position and orientation [ts=3270s] [ts=3285s].",
+      "key_points": [
+        {
+          "text": "A concept bottleneck inserts interpretable variables into each agent so concepts can be manipulated during inference.",
+          "timestamp_s": 2648,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Training optimizes task reward together with agreement between predicted concepts and true concepts.",
+          "timestamp_s": 2701,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In Overcooked, stronger reward degradation under intervention indicates coordination between agents.",
+          "timestamp_s": 2830,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Agent orientation is more informative than position because it signals the other agent’s next move.",
+          "timestamp_s": 2923,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Intervention graphs over agent-concept nodes can reveal true inter-agent relationships and expose misleading surface statistics.",
+          "timestamp_s": 3142,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The controllable system can perform comparably to the original RL system, but it requires labeled or otherwise available concepts.",
+          "timestamp_s": 3270,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 2610,
+        "end_s": 3296
+      },
+      "difficulty": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 11,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg6",
+      "course_id": "cs224n-2024",
+      "name": "Toward Move 37: AlphaZero and teaching superhuman chess concepts",
+      "description": "Presents an ongoing research direction that tries to discover machine chess strategies humans do not know and test whether a world champion can learn them.",
+      "summary": "Kim returns to the motivating question of Move 37 and describes a chess program of research designed to carve out a solvable subproblem: understanding what AlphaZero knows that humans do not [ts=3313s] [ts=3346s]. She reviews prior work that tracks when human chess concepts arise in AlphaZero and shows that AlphaZero’s opening repertoire differs substantially from human play, suggesting there may be superhuman strategic concepts to discover [ts=3374s] [ts=3391s] [ts=3409s]. The new proposal is to discover novel strategies by explicitly forgetting existing strategies, learning a concept graph over known relationships, generating board positions corresponding to the new concept, and then testing whether Magnus Carlsen can apply the taught concept on new puzzles [ts=3464s] [ts=3481s] [ts=3598s]. The evaluation target is not whether another engine can solve the puzzle, but whether at least some machine-discovered concepts are digestible by a human expert [ts=3621s] [ts=3645s].",
+      "key_points": [
+        {
+          "text": "AlphaZero is introduced as a self-trained chess system that exceeds human skill and differs from humans in opening preferences.",
+          "timestamp_s": 3359,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Earlier work probed when and where known human chess concepts appear in AlphaZero’s network.",
+          "timestamp_s": 3374,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The new project aims to teach a world champion a genuinely new superhuman chess strategy.",
+          "timestamp_s": 3441,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Board positions for puzzles are generated from AlphaZero’s embedding space and predicted moves via MCTS.",
+          "timestamp_s": 3562,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Success is defined as a human expert being able to learn and apply at least some machine-discovered concepts.",
+          "timestamp_s": 3641,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 3313,
+        "end_s": 3709
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "low",
+      "duration_min": 7,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture23-interpretability::seg7",
+      "course_id": "cs224n-2024",
+      "name": "Broader discussion: transfer, deployment, language interfaces, and neuroscience",
+      "description": "Uses audience questions to generalize the lecture’s themes across modalities, safety-critical deployment, human-language interfaces, and links to neuroscience.",
+      "summary": "In discussion, Kim distinguishes between domain-general interpretability theory and application-specific deployment work: proofs about tools like SHAP and IG may transfer across modalities, but practical systems still require customized validation in context [ts=3739s] [ts=3770s]. She argues that interpretability tools are especially valuable for surfacing unexpected failure modes before deployment, since real risk often comes from surprises rather than known test cases [ts=3892s] [ts=3938s]. On human-language interfaces, she says mapping only human concepts into machine space can help but will inevitably miss machine-native concepts like Move 37, so progress likely requires both translating existing human language and learning new vocabulary from machines [ts=3979s] [ts=4014s] [ts=4073s]. Finally, she connects interpretability to neuroscience while warning that brain-inspired neuron-wise thinking may reflect tooling limits rather than the right abstraction for neural networks, where whole embeddings and transformations can be probed directly [ts=4169s] [ts=4230s] [ts=4243s].",
+      "key_points": [
+        {
+          "text": "Some interpretability theory transfers across modalities, but application-specific validation remains necessary.",
+          "timestamp_s": 3739,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A major deployment goal is discovering surprises before real users are harmed.",
+          "timestamp_s": 3920,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Mapping human concepts into machine space is helpful but incomplete because machines may have important concepts humans lack words for.",
+          "timestamp_s": 3990,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Neuroscience may bias interpretability toward single-neuron explanations because biological probing tools are limited.",
+          "timestamp_s": 4181,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In artificial networks, whole embeddings and transformations can be intervened on directly, not just individual neurons.",
+          "timestamp_s": 4241,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=20",
+        "start_s": 3722,
+        "end_s": 4261
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "duration_min": 9,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L23_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture23-interpretability_transcript.txt"
+  }
+}

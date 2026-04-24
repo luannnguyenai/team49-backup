@@ -1,0 +1,190 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "lecture_title": "Lecture 17: Robot Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU"
+  },
+  "unit": {
+    "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+    "course_id": "stanford::cs231n::spring_2025",
+    "name": "Problem formulation for robot learning",
+    "description": "Defines robot learning problems using goals, states, actions, rewards, and physical-world feedback, then grounds the abstraction with examples from control, games, language, chatbots, and cloth folding.",
+    "summary": "Li formalizes robot learning with an agent that receives a task objective, observes state from the physical world, takes an action, and receives both the next state and reward [ts=345s] [ts=373s]. He stresses that, unlike much of computer vision, robotics is framed as optimization under physical constraints: the system must choose actions that improve an objective in the real world [ts=405s] [ts=416s]. The segment walks through cart-pole, robot locomotion, Atari, Go, text generation, chatbots, and cloth folding to show that the same goal-state-action-reward template applies broadly [ts=442s] [ts=476s] [ts=505s] [ts=596s] [ts=631s]. It closes by noting that reward design is application-specific, such as balancing speed versus comfort in driving or compactness versus smoothness in cloth folding [ts=705s] [ts=720s] [ts=742s].",
+    "key_points": [
+      {
+        "text": "A robot learning problem is specified by goal, state, action, reward, and the resulting next state.",
+        "timestamp_s": 386,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Robotics is posed as optimization in a physical world rather than only representation learning from high-dimensional inputs.",
+        "timestamp_s": 405,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Cart-pole uses pole angle and cart state as inputs, horizontal force as action, and uprightness as reward.",
+        "timestamp_s": 442,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Robot locomotion uses joint states, torques, and forward/upright reward.",
+        "timestamp_s": 476,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Chatbots can also be cast as sequential decision making with conversation state, next-sentence action, and human-evaluation reward.",
+        "timestamp_s": 596,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Reward design is nuanced and must match the application, such as comfort in driving or smoothness in cloth folding.",
+        "timestamp_s": 705,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=17",
+      "start_s": 334,
+      "end_s": 757
+    },
+    "difficulty": 0.46,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 7,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=XSfmOH_xVSU",
+  "transcript_slice": "00:05:37\nSo this is, in general, how the problem\n\n00:05:45\nSo in the middle, we have this agent.\n\n00:05:50\nThis task objective could be, for example, language\n\n00:05:55\nmeasuring how good this agent is in doing some specific task.\n\n00:06:04\nor some kind of environments.\n\n00:06:09\nlike this at here, that needs to be\n\n00:06:13\nAnd this physical world will be updated and given\n\n00:06:20\nthe rewards, telling the agents how good it is doing its task.\n\n00:06:26\nSo you have to be very clear on this type of formulation that\n\n00:06:36\nThat specifically defines the problems of the robot learning\n\n00:06:44\nvisions.\n\n00:06:48\nabout trying to learn some kind of representations\n\n00:06:53\nlike high-dimensional data.\n\n00:06:56\nto solve some kind of optimization problems\n\n00:07:02\nis a physical world of the environment.\n\n00:07:05\ndefined over your goal.\n\n00:07:09\nproblems by coming up with a sequence of actions\n\n00:07:15\nSo that's a key difference between robot learning\n\n00:07:22\nSo some specific instantiations of this problem\n\n00:07:27\ncan be balance a pole on the top of a movable cart.\n\n00:07:33\nessentially describe the physical state status\n\n00:07:39\nspeed, positions, horizontal velocities, et cetera.\n\n00:07:44\nthat is applied to the carts.\n\n00:07:51\nstep if the poll is being kept as an upright position.\n\n00:07:59\nwhere the goal is to make these robots move forwards.\n\n00:08:06\nof all joints within this robot.\n\n00:08:11\nto each one of the joints.\n\n00:08:16\nThe robot make a step forwards and also being\n\n00:08:22\nAnd also some interesting examples\n\n00:08:27\nThe goal can be complete the game with the highest score, as\n\n00:08:33\nAnd the states will be the raw pixel inputs\n\n00:08:37\nAnd action could be the gaming control like up, down, left,\n\n00:08:41\nAnd the reward could be the score increase\n\n00:08:47\nAnd some of the more famous examples you\n\n00:08:53\nwith the developments of AlphaGo.\n\n00:08:57\ncan also be defined in similar ways, where\n\n00:09:02\nAnd the states will be all the pieces that are currently\n\n00:09:06\nAnd action could be where to put the next piece down\n\n00:09:10\nAnd the reward could be, on the last turn, if you win,\n\n00:09:19\nAnd this not only applies to, for example, gaming domains.\n\n00:09:25\nmodels, you can also think about those problems,\n\n00:09:32\nin a similar manner where the goal could\n\n00:09:37\nAnd the states could be the current words in the sentence.\n\n00:09:42\nyou want to put there.\n\n00:09:46\nIf it is incorrect, you get a reward of 0.\n\n00:09:53\nplayed with many of the chatbots quite a lot.\n\n00:09:59\nwhere the goal is to be a good companion to the human user.\n\n00:10:06\nAnd action that should be generated by the chatbots\n\n00:10:14\nAnd according to the human evaluations,\n\n00:10:20\nIf they are satisfied, you get a reward of 1.\n\n00:10:25\nyou get some other rewards.\n\n00:10:31\nAnd the task could be to fold the clothes.\n\n00:10:36\nAnd the states is the current observations\n\n00:10:42\ncould include the multi-view RGB or RGBD\n\n00:10:47\nAnd the robot needs to decide its actions,\n\n00:10:52\nShould it close or open its grippers\n\n00:10:56\nAnd according to human evaluations,\n\n00:11:01\na reward of 1, and if the cloth is not folded,\n\n00:11:06\nSo here is actually how you want to more concretely think\n\n00:11:12\nIt really is a way that allows the agents to interact\n\n00:11:16\nIt considers the effect of an action\n\n00:11:21\nThat is different from what people typically\n\n00:11:25\nWe just need to predict the outputs.\n\n00:11:30\nand the objective functions are the things\n\n00:11:34\nyou are thinking about problems along this direction.\n\n00:11:40\nSo question is how specific the reward needs to be designed.\n\n00:11:48\nof specifications.\n\n00:11:51\nthe reward could be as fast as possible or reward could\n\n00:11:58\nare driving along the roads.\n\n00:12:02\non the user's preference, our clothes\n\n00:12:05\nSome want the total area to be as small as possible.\n\n00:12:11\nThere could be different types of rewards.\n\n00:12:16\nIf a person looks at the clothes,\n\n00:12:20\nBut more specifically, in terms of the reward design,\n\n00:12:25\nsatisfying a specific need of a specific application.\n\n00:12:31\nSo I'll continue.\n\n00:12:34\nproblem that allows the agents to interact",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "global_kp_id": "kp_goal_state_action_reward_formulation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "global_kp_id": "kp_reward_design_and_task_specification",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+      "global_kp_id": "kp_robot_learning_as_interactive_sequential_decision_making",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_goal_state_action_reward_formulation",
+      "name": "Goal-state-action-reward formulation",
+      "description": "Robot learning problems are structured around a task goal, current state, action choice, reward signal, and resulting next state.",
+      "track_tags": [
+        "reinforcement_learning",
+        "robotics"
+      ],
+      "domain_tags": [
+        "control",
+        "problem_formulation",
+        "robot_learning"
+      ],
+      "career_path_tags": [
+        "ml_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.41,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because goal-state-action-reward formulation formalizes how robot learning problems are structured around a task goal, current state, action choice, reward signal, and resulting next state, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reward_design_and_task_specification",
+      "name": "Reward design and task specification",
+      "description": "Reward functions are not uniquely determined by the task name; they encode the specific preferences and metrics that define success in an application.",
+      "track_tags": [
+        "robotics",
+        "task_design"
+      ],
+      "domain_tags": [
+        "control_objectives",
+        "reward_design"
+      ],
+      "career_path_tags": [
+        "applied_ml_engineer",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reward design and task specification clarifies reward functions are not uniquely determined by the task name; they encode the specific preferences and metrics that define success in an application, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_robot_learning_as_interactive_sequential_decision_making",
+      "name": "Robot learning as interactive sequential decision-making",
+      "description": "Robot learning is distinguished from standard prediction problems because actions change the environment, generate new observations, and must be chosen over time to improve reward.",
+      "track_tags": [
+        "decision_making",
+        "robotics"
+      ],
+      "domain_tags": [
+        "robot_learning",
+        "sequential_decision_making"
+      ],
+      "career_path_tags": [
+        "embodied_ai_researcher",
+        "robotics_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because robot learning as interactive sequential decision-making clarifies robot learning is distinguished from standard prediction problems because actions change the environment, generate new observations, and must be chosen over time to improve reward, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::cs231n_spring2025_lecture17_robot_learning::kp1"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.31,
+    0.61
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture17-robot-learning_transcript.txt"
+  }
+}

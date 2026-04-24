@@ -1,0 +1,311 @@
+{
+  "unit_id": "local::lecture_12::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit has sufficient grounding for questions on SimCLR and MoCo design choices. The questions focus on transferable distinctions between in-batch negatives, projection heads, and queue-based contrastive learning.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-12-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-12-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-12-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-12-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In SimCLR, how is a positive pair formed?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "By taking two different augmentations of the same image.",
+        "By pairing two images that share a manually annotated class label.",
+        "By pairing each image with the oldest item in a memory queue.",
+        "By using one grayscale image and one depth map from unrelated scenes."
+      ],
+      "answer_index": 0,
+      "explanation": "SimCLR creates two transformed views from the same source image. Those two views form the positive pair, while other views in the batch act as negatives.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "positive samples",
+          "same image"
+        ],
+        "timestamps": [
+          "01:06:57",
+          "01:07:48"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-12-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does SimCLR use a projection head before applying the contrastive loss?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "So the contrastive loss acts on z while h can preserve richer information for downstream tasks.",
+        "So the model can replace all augmentations with manual labels.",
+        "So the encoder output h is forced to contain only rotation labels.",
+        "So the batch no longer needs any negative samples."
+      ],
+      "answer_index": 0,
+      "explanation": "The projection head maps representations into a space used for contrastive training. This can let the upstream representation retain information that may help downstream tasks.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "preserve all of those extra features",
+          "get the z values"
+        ],
+        "timestamps": [
+          "01:10:28",
+          "01:10:42"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-12-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What problem does MoCo address compared with relying only on SimCLR-style in-batch negatives?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It supplies many negatives through a queue and a momentum-updated key encoder without requiring huge minibatches.",
+        "It eliminates contrastive learning by replacing positives with reconstruction targets.",
+        "It requires all negatives to be backpropagated through the query encoder.",
+        "It uses only one augmented view per image and no stored keys."
+      ],
+      "answer_index": 0,
+      "explanation": "MoCo decouples the number of negatives from the current minibatch by storing key representations in a queue. A momentum-updated key encoder keeps those stored negatives compatible over time.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "creates a queue",
+          "using a momentum"
+        ],
+        "timestamps": [
+          "01:11:34",
+          "01:12:42"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-12-seg7-q1",
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg7-q1",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-12-seg7-q2",
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg7-q3",
+      "global_kp_id": "kp_simclr_and_moco_design_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg7-q3",
+      "global_kp_id": "kp_contrastive_learning_and_infonce",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-12-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Positive-pair formation in SimCLR is a straightforward mechanics question."
+    },
+    {
+      "item_id": "lecture-12-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The projection head in SimCLR is a medium representation-learning design question."
+    },
+    {
+      "item_id": "lecture-12-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.9,
+      "discrimination_prior": 1.06,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The problem MoCo addresses versus pure in-batch negatives is a hard design-and-scaling item."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-12-seg7-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is concise reinforcement on the SimCLR setup."
+    },
+    {
+      "item_id": "lecture-12-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item checks whether the learner understands why the contrastive head is separated from the reusable encoder."
+    },
+    {
+      "item_id": "lecture-12-seg7-q3",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "transfer",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "low",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is best used when testing deeper understanding of memory-bank and queue-based contrastive tradeoffs."
+    }
+  ]
+}

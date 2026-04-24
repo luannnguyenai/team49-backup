@@ -11,8 +11,11 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.content import KnowledgeComponent, Module, Question, Topic
+from src.models.canonical import QuestionBankItem
+from src.models.course import CourseSection, LearningUnit
 from src.models.learning import Interaction, Session
+
+HistoryDetailRow = tuple[Interaction, None, QuestionBankItem | None, None]
 
 
 class HistoryRepository:
@@ -25,7 +28,7 @@ class HistoryRepository:
         )
         return result.scalar() or 0
 
-    async def fetch_history_page(
+    async def fetch_history_page_canonical_only(
         self,
         *,
         filters: list,
@@ -33,16 +36,9 @@ class HistoryRepository:
         page_size: int,
     ) -> list[tuple[Session, str | None, str | None]]:
         result = await self.session.execute(
-            select(
-                Session,
-                Topic.name.label("topic_name"),
-                Module.name.label("module_name"),
-            )
-            .outerjoin(Topic, Session.topic_id == Topic.id)
-            .outerjoin(
-                Module,
-                (Session.module_id == Module.id) | (Topic.module_id == Module.id),
-            )
+            select(Session, LearningUnit.title, CourseSection.title)
+            .outerjoin(LearningUnit, Session.canonical_unit_id == LearningUnit.id)
+            .outerjoin(CourseSection, Session.canonical_section_id == CourseSection.id)
             .where(*filters)
             .order_by(Session.started_at.desc())
             .offset((page - 1) * page_size)
@@ -70,23 +66,20 @@ class HistoryRepository:
         )
         return result.scalar_one_or_none()
 
-    async def fetch_session_detail_rows(
+    async def fetch_session_detail_rows_canonical_only(
         self,
         session_id: uuid.UUID,
-    ) -> list[tuple[Interaction, Question, str | None]]:
+    ) -> list[HistoryDetailRow]:
         result = await self.session.execute(
-            select(Interaction, Question, Topic.name.label("topic_name"))
-            .join(Question, Interaction.question_id == Question.id)
-            .outerjoin(Topic, Question.topic_id == Topic.id)
+            select(
+                Interaction,
+                QuestionBankItem,
+            )
+            .outerjoin(QuestionBankItem, Interaction.canonical_item_id == QuestionBankItem.item_id)
             .where(Interaction.session_id == session_id)
             .order_by(Interaction.sequence_position)
         )
-        return result.all()
-
-    async def resolve_kc_names(self, kc_ids: list[uuid.UUID]) -> dict[str, str]:
-        if not kc_ids:
-            return {}
-        result = await self.session.execute(
-            select(KnowledgeComponent).where(KnowledgeComponent.id.in_(kc_ids))
-        )
-        return {str(kc.id): kc.name for kc in result.scalars().all()}
+        return [
+            (interaction, None, canonical_item, None)
+            for interaction, canonical_item in result.all()
+        ]

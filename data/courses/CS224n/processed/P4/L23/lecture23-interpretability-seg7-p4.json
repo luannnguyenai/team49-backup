@@ -1,0 +1,264 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "review_summary": "The transcript is clear enough to generate conceptual questions about cross-domain transfer of interpretability and why a human-machine language interface cannot stop at concepts humans already have.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement best reflects the view on transferring interpretability techniques across domains such as vision, NLP, and RL?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Once there is a theoretical proof in one domain, deployment in another domain needs no further modification or validation.",
+        "Some theories and intuitions can transfer across domains, but concrete applications still require customization and validation in context.",
+        "Every interpretability technique can only be used in the exact domain where it was invented.",
+        "Only fairness methods transfer across domains; interpretability does not."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture distinguishes between results that may generalize across domains and practical deployment. Some ideas can transfer broadly, but real applications still need context-specific confirmation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "transfer across modalities",
+          "customized validation remains necessary"
+        ],
+        "timestamps": [
+          "01:02:04",
+          "01:02:44"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is it not enough to only map the \"conceptual language of humans\" into the representational space of the machine?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because machines cannot represent any human concepts at all.",
+        "Because that may help, but it would still miss important machine-native concepts like Move 37 that humans do not yet have words for.",
+        "Because every human concept is already identical to every machine concept, so no mapping is needed.",
+        "Because increasing the number of neurons alone will make machines speak human language fully."
+      ],
+      "answer_index": 1,
+      "explanation": "Mapping human language into machine space is useful, but it is only half the story. If machines have genuinely novel concepts that humans have not yet named, we also need a way to learn back from the machine.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "helpful but incomplete",
+          "miss machine-native concepts like Move 37"
+        ],
+        "timestamps": [
+          "01:06:21",
+          "01:06:50"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "global_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "global_kp_id": "kp_shared_representational_overlap",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which statement best reflects the view on transferring interpretability techniques across domains such as vision, NLP, and RL?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Once there is a theoretical proof in one domain, deployment in another domain needs no further modification or validation.",
+        "Some theories and intuitions can transfer across domains, but concrete applications still require customization and validation in context.",
+        "Every interpretability technique can only be used in the exact domain where it was invented.",
+        "Only fairness methods transfer across domains; interpretability does not."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture distinguishes between results that may generalize across domains and practical deployment. Some ideas can transfer broadly, but real applications still need context-specific confirmation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cross_domain_transfer_and_human_language_interfaces",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "transfer across modalities",
+          "customized validation remains necessary"
+        ],
+        "timestamps": [
+          "01:02:04",
+          "01:02:44"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is it not enough to only map the \"conceptual language of humans\" into the representational space of the machine?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because machines cannot represent any human concepts at all.",
+        "Because that may help, but it would still miss important machine-native concepts like Move 37 that humans do not yet have words for.",
+        "Because every human concept is already identical to every machine concept, so no mapping is needed.",
+        "Because increasing the number of neurons alone will make machines speak human language fully."
+      ],
+      "answer_index": 1,
+      "explanation": "Mapping human language into machine space is useful, but it is only half the story. If machines have genuinely novel concepts that humans have not yet named, we also need a way to learn back from the machine.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_representational_overlap",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "helpful but incomplete",
+          "miss machine-native concepts like Move 37"
+        ],
+        "timestamps": [
+          "01:06:21",
+          "01:06:50"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium conceptual MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium conceptual MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg7-q1",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg7-q2",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "review": 0.7
+      }
+    }
+  ]
+}

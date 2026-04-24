@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_7::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for BPTT, shared-weight gradients, and truncated BPTT. The sequence of gradient ideas is explained verbally without needing a cut clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-7-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When the same weight matrix W is reused at every time step, how is its gradient update formed conceptually?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use only the gradient from the first time step",
+        "Use only the gradient from the last time step",
+        "Average the activations before backpropagation",
+        "Sum the gradients contributed from each time step"
+      ],
+      "answer_index": 3,
+      "explanation": "Because the same parameter is used repeatedly, each time step contributes to its total gradient, and those contributions are accumulated into one update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_shared_weight_computational_graph",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same weight",
+          "sum all the gradients"
+        ],
+        "timestamps": [
+          "00:25:59",
+          "00:26:12"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-7-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main idea of truncated backpropagation through time?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Freeze the hidden state so it never changes",
+        "Train on fixed windows, carry the hidden state forward, and stop gradients across window boundaries",
+        "Use a different weight matrix in every window",
+        "Backpropagate only through the output projection"
+      ],
+      "answer_index": 1,
+      "explanation": "Truncated BPTT keeps the forward recurrent state moving across windows, but it cuts the backward graph between windows to reduce memory and computation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_truncated_bptt",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "truncated back propagation through time",
+          "beginning of your next block"
+        ],
+        "timestamps": [
+          "00:28:24",
+          "00:29:00"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-7-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a many-to-one RNN with a single final output, can earlier hidden states still receive gradient from the loss?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "No, only the final hidden state gets any gradient",
+        "Yes, because the final loss backpropagates through the earlier recurrent states",
+        "No, unless each time step also has its own loss",
+        "Yes, but only if the weights are not shared"
+      ],
+      "answer_index": 1,
+      "explanation": "Even one final loss depends on the chain of hidden states that produced the last representation, so gradients can flow backward through earlier time steps.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_backpropagation_through_time",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "single output",
+          "previous hidden states"
+        ],
+        "timestamps": [
+          "00:29:46",
+          "00:29:46"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-7-seg5-q1",
+      "global_kp_id": "kp_shared_weight_computational_graph",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg5-q2",
+      "global_kp_id": "kp_truncated_bptt",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg5-q3",
+      "global_kp_id": "kp_backpropagation_through_time",
+      "role": "primary"
+    }
+  ]
+}

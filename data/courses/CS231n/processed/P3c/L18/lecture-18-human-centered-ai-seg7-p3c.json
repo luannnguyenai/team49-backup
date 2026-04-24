@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_18_human_centered_ai::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Có đủ thông tin để tạo câu hỏi về embodied AI như vòng perception-action, mục tiêu open-world robot generalization, và vai trò LLM/VLM trong lập kế hoạch chuyển động.",
+  "question_bank": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Embodied AI được mô tả ngắn gọn nhất là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Đóng vòng lặp giữa nhận thức và hành động để hệ thống không chỉ thấy mà còn hành động trong thế giới.",
+        "Chỉ là một mô hình captioning cho robot.",
+        "Một bộ dữ liệu mới cho segmentation đa lớp.",
+        "Cách thay thế hoàn toàn planning bằng nhận dạng đối tượng."
+      ],
+      "answer_index": 0,
+      "explanation": "Điểm cốt lõi của embodied AI là cảm nhận thế giới để ra quyết định hành động, rồi dùng kết quả hành động đó tiếp tục cập nhật nhận thức. Đây là khác biệt lớn so với các hệ chỉ phân tích ảnh tĩnh.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perception_action_integration",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "closes the loop",
+          "perception and action"
+        ],
+        "timestamps": [
+          "00:48:07",
+          "00:48:26"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "“Open-world” robot control trong ví dụ này nhằm giải quyết hạn chế nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Tránh việc phải định nghĩa sẵn một tập tác vụ đóng và huấn luyện robot chỉ cho các nhiệm vụ cố định.",
+        "Loại bỏ hoàn toàn nhu cầu hiểu ngôn ngữ tự nhiên.",
+        "Chỉ tối ưu tốc độ mô phỏng mà không cần tổng quát hóa.",
+        "Biến mọi bài toán robot thành nhận dạng ảnh tĩnh."
+      ],
+      "answer_index": 0,
+      "explanation": "Nếu robot chỉ học một danh sách tác vụ đóng, nó khó hoạt động ngoài đời thật. Mục tiêu open-world là tiếp nhận chỉ dẫn mở và tổng quát hóa sang tình huống mới hơn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perception_action_integration",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "closed world",
+          "without pretraining everything"
+        ],
+        "timestamps": [
+          "00:49:29",
+          "00:49:55"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong ví dụ “mở ngăn kéo nhưng tránh cái bình”, vai trò kết hợp của LLM và VLM là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "LLM biến chỉ dẫn thành các bước có cấu trúc, còn VLM định vị đối tượng liên quan để cập nhật bản đồ chuyển động nên đi và nên tránh.",
+        "LLM trực tiếp điều khiển mô-tơ, còn VLM chỉ sinh caption cho video kết quả.",
+        "Cả hai chỉ dùng để nhận diện văn bản trên màn hình robot.",
+        "VLM viết mã điều khiển còn LLM chỉ phát hiện vật thể."
+      ],
+      "answer_index": 0,
+      "explanation": "Bài toán cần cả hiểu ngôn ngữ lẫn grounding thị giác. Ngôn ngữ cho biết mục tiêu và ràng buộc, còn thị giác xác định chúng đang ở đâu để planner tạo ra vùng nên đến và vùng phải né.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_perception_action_integration",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "use LLM and VLM",
+          "watch out for the vase"
+        ],
+        "timestamps": [
+          "00:51:02",
+          "00:52:25"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "global_kp_id": "kp_perception_action_integration",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q1",
+      "global_kp_id": "kp_dynamic_multi_actor_activity_understanding",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "global_kp_id": "kp_perception_action_integration",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q2",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "global_kp_id": "kp_perception_action_integration",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg7-q3",
+      "global_kp_id": "kp_image_captioning_and_multimodal_scene_description",
+      "role": "secondary"
+    }
+  ]
+}

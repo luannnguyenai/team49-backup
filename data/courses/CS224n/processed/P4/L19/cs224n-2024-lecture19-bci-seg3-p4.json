@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::cs224n-2024-lecture19-bci::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=tfVgHsKpRC8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": "The transcript provides enough evidence to generate 5 reinforcement questions about spikes, tuning curves, noisy single-neuron responses, and population decoding without needing a clip.",
+  "qa_outputs": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is an action potential in this context?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A sharp electrical spike produced by a neuron",
+        "A slow blood-flow response to a task",
+        "A repeated eye movement used for communication",
+        "A software classification score"
+      ],
+      "answer_index": 0,
+      "explanation": "The unit introduces neural recordings as brief spike events generated when neurons communicate, so action potentials are the sharp spikes measured near the neuron.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_neural_spikes_as_the_basic_recorded_unit",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "generate some action",
+          "spike train"
+        ],
+        "timestamps": [
+          "00:13:03",
+          "00:14:08"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is decoding movement from a single neuron unreliable?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Its firing varies across repeated trials and can be noisy",
+        "A single neuron always fires at a fixed rate",
+        "Single neurons encode every movement direction perfectly",
+        "Single-neuron recordings cannot be measured electrically"
+      ],
+      "answer_index": 0,
+      "explanation": "Even under the same condition, a neuron can fire slightly differently from trial to trial, so one neuron's activity is noisy and ambiguous by itself.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "very noisy",
+          "slightly different across trials"
+        ],
+        "timestamps": [
+          "00:15:19",
+          "00:16:19"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does a cosine-like tuning curve represent for a movement-related neuron?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How the neuron's firing rate changes with movement direction",
+        "How often an electrode drifts across days",
+        "How much blood flow changes during speech",
+        "How long it takes to train the decoder"
+      ],
+      "answer_index": 0,
+      "explanation": "A tuning curve summarizes that a neuron prefers some movement directions more than others, often with firing highest near a preferred direction and lower away from it.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "cosine tuning curve",
+          "prefers to firing the most"
+        ],
+        "timestamps": [
+          "00:16:43",
+          "00:17:17"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does combining multiple neurons improve decoding of intended movement?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Different neurons provide complementary evidence that reduces ambiguity from any single noisy neuron",
+        "The decoder stops needing labels once two neurons are used",
+        "Multiple neurons guarantee noise disappears completely",
+        "Each neuron always encodes a different body part"
+      ],
+      "answer_index": 0,
+      "explanation": "Population decoding works better because several neurons together constrain the likely movement much more than one noisy neuron can.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "with two neurons",
+          "classification problem"
+        ],
+        "timestamps": [
+          "00:18:30",
+          "00:19:58"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What practical problem does electrode drift create for long-term BCIs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The same channel may not always record the same neuron over time",
+        "The participant loses all motor-cortex signals instantly",
+        "The decoder becomes non-monotonic",
+        "The electrode starts measuring blood oxygen instead of voltage"
+      ],
+      "answer_index": 0,
+      "explanation": "If electrodes shift relative to soft tissue, the signal identity on a channel can change, which makes stable long-term decoding harder.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same neuron is imperfect",
+          "electrodes can shift"
+        ],
+        "timestamps": [
+          "00:21:22",
+          "00:21:59"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q1",
+      "global_kp_id": "kp_neural_spikes_as_the_basic_recorded_unit",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q2",
+      "global_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q3",
+      "global_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q4",
+      "global_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q5",
+      "global_kp_id": "kp_population_decoding_from_noisy_motor_cortex_activity",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is an action potential in this context\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why is decoding movement from a single neuron unreliable\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What does a cosine-like tuning curve represent for a movement-related neuron\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why does combining multiple neurons improve decoding of intended movement\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What practical problem does electrode drift create for long-term BCIs\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is an action potential in this context\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is decoding movement from a single neuron unreliable\" is useful for surfacing misconceptions early in practice."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does a cosine-like tuning curve represent for a movement-related neuron\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why does combining multiple neurons improve decoding of intended movement\" is best when checking whether misconceptions are truly resolved."
+    },
+    {
+      "item_id": "cs224n_2024_lecture19_bci_seg3_q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What practical problem does electrode drift create for long-term BCIs\" is best when checking whether misconceptions are truly resolved."
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_3::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=dyNGd06MWn4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The recap contains enough direct grounding for concept-level reinforcement on image classification, kNN validation practice, and linear-classifier losses; no separate clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture-3-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is image classification difficult when the input is represented only as pixels?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because the same semantic object can produce very different pixel tensors under changes like viewpoint, lighting, occlusion, and deformation.",
+        "Because all images in the same class always have the same RGB values.",
+        "Because computers cannot store RGB images as numeric tensors.",
+        "Because image classification requires predicting every pixel value rather than a label."
+      ],
+      "answer_index": 0,
+      "explanation": "A classifier sees arrays of numbers, not object meaning directly. Robust recognition must handle nuisance factors that change pixels while preserving the object's semantic category.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_image_classification",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "grid of pixel values",
+          "same category"
+        ],
+        "timestamps": [
+          "00:01:07",
+          "00:02:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a k-nearest-neighbor classifier, what is the correct role of validation and test data?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use validation data to choose settings such as k, then use the test set only for final evaluation on unseen data.",
+        "Use the test set repeatedly to choose k, then report validation accuracy.",
+        "Train on the validation set, choose k on the training set, and ignore the test set.",
+        "Use validation and test data interchangeably because neither is used for training."
+      ],
+      "answer_index": 0,
+      "explanation": "Validation data supports model-selection decisions such as choosing k. The test set should remain untouched until the final evaluation so it gives a trustworthy estimate of unseen-data performance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_data_driven_knn_and_validation_test_splits",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "use this validation set",
+          "purpose of the test set"
+        ],
+        "timestamps": [
+          "00:03:44",
+          "00:04:14"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-3-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a linear image classifier, what does the loss function measure?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "How bad the current scores are, typically averaged over training examples and optionally combined with regularization.",
+        "How many pixels are present in the input image after flattening.",
+        "How far the nearest training image is from the test image.",
+        "How many labels are included in the dataset, independent of model predictions."
+      ],
+      "answer_index": 0,
+      "explanation": "A loss turns model performance into a quantity to minimize. For classification, it penalizes score assignments that give low confidence to the correct class.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_linear_classifier_scores_and_loss_functions",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "dataset loss is averaged",
+          "correct class has low predicted"
+        ],
+        "timestamps": [
+          "00:10:26",
+          "00:10:50"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-3-seg1-q1",
+      "global_kp_id": "kp_image_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg1-q2",
+      "global_kp_id": "kp_data_driven_knn_and_validation_test_splits",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-3-seg1-q3",
+      "global_kp_id": "kp_linear_classifier_scores_and_loss_functions",
+      "role": "primary"
+    }
+  ]
+}

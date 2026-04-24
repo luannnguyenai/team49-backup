@@ -1,0 +1,166 @@
+{
+    "output_filename": "p3a__cs231n__cs231n_spring2025_lecture17_robot_learning.json",
+    "run_id": "<run_id>",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "cs231n_spring2025_lecture17_robot_learning",
+    "learning_salience": [
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg1",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main high-importance KP on robot learning as interactive sequential decision-making plus demo-heavy motivation makes this assessable framing content.",
+            "target_kp_ids": [
+                "kp_robot_learning_as_interactive_sequential_decision_making",
+                "kp_goal_state_action_reward_formulation"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "motivation",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg2",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main critical gateway KP on goal-state-action-reward formulation and high item_generation_worthiness support multiple assessment items.",
+            "target_kp_ids": [
+                "kp_goal_state_action_reward_formulation",
+                "kp_reward_design_and_task_specification",
+                "kp_robot_learning_as_interactive_sequential_decision_making"
+            ],
+            "question_intent": "application",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg3",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant and substantial coverage of main high-importance KPs on multimodal perception and embodied robot vision with high item_generation_worthiness makes this core conceptual material.",
+            "target_kp_ids": [
+                "kp_multimodal_robot_perception",
+                "kp_embodied_active_and_situated_robot_vision",
+                "kp_perception_action_integration"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg4",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the critical gateway RL KP plus formula_heavy and demo_heavy Q-function material gives strong assessment value.",
+            "target_kp_ids": [
+                "kp_reinforcement_learning_through_trial_and_error",
+                "kp_q_functions_and_value_based_action_selection",
+                "kp_why_rl_is_harder_than_supervised_learning"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 6,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg5",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main high-importance KP on model-free RL successes and limitations is reinforced by demo-heavy case studies and practical failure modes.",
+            "target_kp_ids": [
+                "kp_model_free_rl_successes_and_sim_to_real_limitations",
+                "kp_reinforcement_learning_through_trial_and_error"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg6",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the critical gateway KP on learned forward dynamics plus formula_heavy and demo_heavy planning examples makes this a central assessment target.",
+            "target_kp_ids": [
+                "kp_learned_forward_dynamics_for_model_based_planning",
+                "kp_state_representations_for_learned_world_models",
+                "kp_model_free_rl_successes_and_sim_to_real_limitations"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 6,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg7",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main high-importance behavior cloning KP and high item_generation_worthiness around cascading error and correction supports rich assessment.",
+            "target_kp_ids": [
+                "kp_behavior_cloning_and_iterative_correction",
+                "kp_inverse_rl_implicit_bc_and_diffusion_policies"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg8",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of a critical gateway KP on robotic foundation models with demo-heavy Pi-Zero pipeline examples justifies high salience despite high-level treatment.",
+            "target_kp_ids": [
+                "kp_robotic_foundation_models_with_pretraining_and_post_training"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::cs231n_spring2025_lecture17_robot_learning::seg9",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of the main high-importance evaluation bottlenecks KP and medium item_generation_worthiness make this useful but less central than the algorithmic sections.",
+            "target_kp_ids": [
+                "kp_evaluation_bottlenecks_and_foundation_world_models",
+                "kp_robotic_foundation_models_with_pretraining_and_post_training",
+                "kp_learned_forward_dynamics_for_model_based_planning"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

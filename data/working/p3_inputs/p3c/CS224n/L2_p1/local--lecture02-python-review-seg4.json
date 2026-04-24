@@ -1,0 +1,260 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture02-python-review",
+    "lecture_title": "Lecture 2 - Python Review Session",
+    "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74"
+  },
+  "unit": {
+    "unit_id": "local::lecture02-python-review::seg4",
+    "course_id": "cs224n-2024",
+    "name": "NumPy reductions, linear algebra operations, and indexing",
+    "description": "Covers axis-based reductions, keepdims, elementwise versus matrix multiplication, dot products, and array indexing techniques.",
+    "summary": "The segment starts with NumPy reduction operations such as np.max: applying max to a full array returns one scalar, while applying it with an axis reduces over a chosen dimension [ts=1613s]. The key diagnostic rule is that the axis is the dimension being compared/reduced over, not the shape of the final result; the lecturer describes axis 0 as the row axis and axis 1 as the column axis, while also recommending shape inspection and experimentation with min/max to build intuition [ts=1648s] [ts=1698s] [ts=1715s]. keepdims is introduced as a way to preserve the original number of dimensions, e.g. returning a 3x1-style result rather than a plain one-dimensional list-like result after reducing across columns [ts=1768s]. The lecturer then distinguishes elementwise multiplication using * from matrix multiplication: elementwise multiplication compares corresponding entries and requires matching shapes, whereas matrix multiplication multiplies rows of one matrix by columns of another and requires the second dimension of the first matrix to match the first dimension of the second [ts=1808s] [ts=1835s]. np.matmul and the @ operator are given as matrix multiplication options [ts=1903s]. Dot products are explained as multiplying corresponding vector entries and summing them, but np.dot on higher-dimensional matrices is treated like matrix multiplication, so shape alignment matters [ts=1936s] [ts=1976s]. The segment ends with indexing: a colon takes all values in a dimension and returns a copy, row/column selections can be specified separately, Boolean indexing extracts values satisfying a condition such as x > 0.5, and np.newaxis-style expansion adds a dimension for reshaping-like behavior [ts=2095s] [ts=2129s] [ts=2196s] [ts=2232s].",
+    "key_points": [
+      {
+        "text": "np.max over a full array returns one value, while axis-specific max reduces over a chosen dimension.",
+        "timestamp_s": 1613,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The axis argument names the dimension to reduce or compare over, not the shape of the output.",
+        "timestamp_s": 1648,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "keepdims preserves the original number of dimensions after a reduction.",
+        "timestamp_s": 1768,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The * operator performs elementwise multiplication, not matrix multiplication, and requires same-sized matrices.",
+        "timestamp_s": 1808,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "For matrix multiplication A-by-B times B-by-C, the inner dimensions must match.",
+        "timestamp_s": 1835,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "np.matmul and the @ operator both perform matrix multiplication.",
+        "timestamp_s": 1903,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A vector dot product multiplies corresponding entries and sums them, e.g. 1*1 + 2*10 + 3*100.",
+        "timestamp_s": 1936,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Boolean indexing can extract all entries satisfying a condition such as x > 0.5.",
+        "timestamp_s": 2196,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=21",
+      "start_s": 1613,
+      "end_s": 2295
+    },
+    "difficulty": 3.2,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 11,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The segment starts with NumPy reduction operations such as np.max: applying max to a full array returns one scalar, while applying it with an axis reduces over a chosen dimension [ts=1613s]. The key diagnostic rule is that the axis is the dimension being compared/reduced over, not the shape of the final result; the lecturer describes axis 0 as the row axis and axis 1 as the column axis, while also recommending shape inspection and experimentation with min/max to build intuition [ts=1648s] [ts=1698s] [ts=1715s]. keepdims is introduced as a way to preserve the original number of dimensions, e.g. returning a 3x1-style result rather than a plain one-dimensional list-like result after reducing across columns [ts=1768s]. The lecturer then distinguishes elementwise multiplication using * from matrix multiplication: elementwise multiplication compares corresponding entries and requires matching shapes, whereas matrix multiplication multiplies rows of one matrix by columns of another and requires the second dimension of the first matrix to match the first dimension of the second [ts=1808s] [ts=1835s]. np.matmul and the @ operator are given as matrix multiplication options [ts=1903s]. Dot products are explained as multiplying corresponding vector entries and summing them, but np.dot on higher-dimensional matrices is treated like matrix multiplication, so shape alignment matters [ts=1936s] [ts=1976s]. The segment ends with indexing: a colon takes all values in a dimension and returns a copy, row/column selections can be specified separately, Boolean indexing extracts values satisfying a condition such as x > 0.5, and np.newaxis-style expansion adds a dimension for reshaping-like behavior [ts=2095s] [ts=2129s] [ts=2196s] [ts=2232s].",
+  "target_kp_ids": [
+    "kp_elementwise_multiplication_matrix_multiplication_and_dot_products",
+    "kp_axis_based_reductions_and_keepdims",
+    "kp_numpy_indexing_boolean_masks_and_new_axes"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "video_clip_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "transcript_slice": "00:26:56\nSo I started off with this array x.\n\n00:27:01\nfor example, a max operation, sometimes you\n\n00:27:05\nSo if I do the max of an the entire array--\n\n00:27:09\nJust the entire thing.\n\n00:27:11\nSo if I just do np.max of x, it'll return one value.\n\n00:27:16\nWell, let's say I want the max of every row.\n\n00:27:22\nthe max of each row.\n\n00:27:24\nHow do you do that?\n\n00:27:28\nin most of their functions, an axis variable.\n\n00:27:32\nis it'll tell you which of these dimensions\n\n00:27:37\nAnd the way to think about it is--\n\n00:27:40\nbut the way people describe it is the axis\n\n00:27:46\nWhat you want to reduce over.\n\n00:27:49\nthe shape of the original array.\n\n00:27:52\nI want to apply axis 1.\n\n00:27:57\nIt'll be 0, 1.\n\n00:28:01\nThe second dimension means that for each of these, essentially,\n\n00:28:09\nSo it's all along the rows.\n\n00:28:12\nAnd so compare this entire column to this entire column.\n\n00:28:20\nrefers to the row axis and the axis 1 refers\n\n00:28:24\nIf you don't even want to remember that,\n\n00:28:28\nof these it's referring to and that's the dimension you want\n\n00:28:35\nSo it can be a little bit harder to grasp around it.\n\n00:28:39\nis to just play with a bunch of operations of min, max\n\n00:28:44\nBut just remember like the axis is\n\n00:28:49\nSo axis 1 means your column.\n\n00:28:52\nI want to get-- for example, compare 1 to 2, 3 to 4, 5 to 6.\n\n00:29:00\nOK.\n\n00:29:05\nit'll just return--\n\n00:29:07\nit'll just return a result in column.\n\n00:29:12\nyou get three values, because you're\n\n00:29:16\nhas three values.\n\n00:29:19\nI get two values, right?\n\n00:29:23\nwhich is just indicating that it's just a list.\n\n00:29:26\nIt's just a list.\n\n00:29:28\nMaybe I want to do those operations\n\n00:29:31\nInstead of reshaping which is always there,\n\n00:29:35\nuse this feature called keepdims.\n\n00:29:41\nwhich is two dimensions because you have 3, 2,\n\n00:29:46\nSo it'll be 3, 1.\n\n00:29:51\njust the extracted column, which is just a list,\n\n00:29:57\nof the original sort of x and it'll\n\n00:30:04\nAll right.\n\n00:30:08\nSo in NumPy, you can use an asterisk as an element\n\n00:30:13\nSo an asterisk means that I'm going\n\n00:30:17\nto every single corresponding value in another matrix\n\n00:30:22\nbe the same size for this one.\n\n00:30:25\nIt's not a matrix multiplication so you\n\n00:30:28\nSo this will compare, for example, 1 into 3, 2 into 3,\n\n00:30:34\nAll right.\n\n00:30:37\nwhich is a different operation entirely.\n\n00:30:42\nmultiplication, you would basically\n\n00:30:47\nwith a column of another matrix and for that to be necessary,\n\n00:30:53\nbe equal to the first dimension of the second array.\n\n00:31:04\ninto C shaped matrices, these two\n\n00:31:10\nJust something to keep in mind because oftentimes\n\n00:31:15\nyou have to make sure that these dimensions are the same, which\n\n00:31:26\nbut this can sometimes throw an error.\n\n00:31:32\nSo it's just important to make sure\n\n00:31:35\nthat these are exactly equal.\n\n00:31:37\nand make sure that these are equal to be\n\n00:31:40\nAnd then for matrix multiplication,\n\n00:31:46\nThe first one is just np.matmul which is NP dot matrix\n\n00:31:50\nYou can also just use the add operation.\n\n00:31:55\nYou can choose whichever one.\n\n00:31:58\nAnd just a quick search-- let me show.\n\n00:32:04\nso it'll come like 1, 2 versus 3, 4.\n\n00:32:11\nSo that's what matrix multiplication will do.\n\n00:32:16\nAnd then dot products will--\n\n00:32:20\nSo usually it operates on vectors.\n\n00:32:23\nlike a one dimensional matrix.\n\n00:32:29\nIt'll element wise multiply between two different vectors,\n\n00:32:33\nAnd so here, what a dot product would do\n\n00:32:39\nAnd for a NumPy, you can just do NP dot and then\n\n00:32:45\nThis one is just a side on how you\n\n00:32:51\nFor arrays that are more--\n\n00:32:54\nSo to phrase this the best way.\n\n00:33:01\nAnytime it's a multiple dimensional matrix,\n\n00:33:07\nThe NP dot, dot function.\n\n00:33:12\nit's not going to return the sum.\n\n00:33:17\nThat's just something to keep in mind.\n\n00:33:23\nin the correct way, you would want\n\n00:33:27\nto what I was talking about earlier, that--\n\n00:33:33\nI think the best way to show it.\n\n00:33:37\nSo you would want the second, like what I mentioned,\n\n00:33:43\nto match with the first dimension of the next one\n\n00:33:48\nHere, the error that it's throwing\n\n00:33:55\nthat would be to have this be like, for example,\n\n00:34:03\nIt's really a dimension matching thing at this point.\n\n00:34:09\nthe main thing to keep in mind is like for single dimensional\n\n00:34:14\ndirectly and it'll give you the dot product value.\n\n00:34:18\nas a matrix multiplication.\n\n00:34:23\nvalues to ensure that you're getting a dot product,\n\n00:34:28\naligned similar to these.\n\n00:34:34\nany matrix that doesn't have a single dimension in any\n\n00:34:40\nThe same thing.\n\n00:34:45\nAll right.\n\n00:34:46\nI'm going to move to indexing.\n\n00:34:50\nwith lists I was saying if you just do the semicolon,\n\n00:34:55\nSame deal here.\n\n00:34:57\nfrom the original array.\n\n00:35:00\nSo it returns a deep copy.\n\n00:35:04\nOK.\n\n00:35:07\ndo you want to index quickly.\n\n00:35:13\nand I only want to select the 0 and the second rows,\n\n00:35:17\nSo what's useful is that you can sort of treat a NumPy,\n\n00:35:22\nfor indexing.\n\n00:35:25\nin that dimension, which for example, here there's\n\n00:35:29\nmeans I'm taking all of the column values.\n\n00:35:35\nit's saying a NumPy array of 0 and 2.\n\n00:35:41\nwhich means only the zeroth row and only the second row.\n\n00:35:47\nlike I have a matrix.\n\n00:35:55\nI have a matrix and I only want to select the zeroth row\n\n00:36:01\nZero and second.\n\n00:36:07\nAll right.\n\n00:36:10\nwant to select in the column dimension,\n\n00:36:16\nthe first row, I can do that.\n\n00:36:18\nYou can think, how many columns do I want?\n\n00:36:21\nAnd then index those separately.\n\n00:36:24\nas you want in your entire tensor.\n\n00:36:31\nI have this-- let me print that actually x here.\n\n00:36:37\nOK.\n\n00:36:38\nSo if I want to take all the values of x\n\n00:36:43\ncan do that by using what's called Boolean indexing.\n\n00:36:51\nin x that's bigger than 0.5.\n\n00:36:55\nin this entire array that are bigger than 0.5.\n\n00:37:01\nThis one is also another way to do reshaping.\n\n00:37:06\nhave this list of three elements and you want to reshape it\n\n00:37:12\nYou can also use what's called NumPy.mulaxis.\n\n00:37:18\nin whatever dimension you want.\n\n00:37:24\nby 4 to 3 by 4 by 1, then I can just add a NumPy.mulaxis there.\n\n00:37:33\nwould be like a 2 comma to a 2, 1.\n\n00:37:39\nto do what essentially what would\n\n00:37:45\nDoes that make sense?\n\n00:37:47\nlet me just make it a little bit more concrete.\n\n00:38:00\nI have a singular list and then in that list,\n\n00:38:04\nSo I have a list with element 1 and list of element 2.\n\n00:38:10\nAnd what NumPy.mulaxis will enable you to do as well.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_axis_based_reductions_and_keepdims",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_elementwise_multiplication_matrix_multiplication_and_dot_products",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg4",
+      "global_kp_id": "kp_numpy_indexing_boolean_masks_and_new_axes",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_reshape_and_indexing",
+      "name": "Reshaping and indexing",
+      "description": "PyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures. How (3,), (1,3), and (3,1) differ, and how reshape changes array dimensions when element counts match.",
+      "track_tags": [
+        "array_shapes",
+        "data_manipulation",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "array_ops",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reshaping and indexing clarifies pyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp11",
+        "local::lecture03-pytorch::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_axis_based_reductions_and_keepdims",
+      "name": "Axis-based reductions and keepdims",
+      "description": "Using axis arguments to reduce over dimensions and keepdims to preserve dimensionality.",
+      "track_tags": [
+        "array_operations",
+        "numpy"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because axis-based reductions and keepdims clarifies using axis arguments to reduce over dimensions and keepdims to preserve dimensionality, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_elementwise_multiplication_matrix_multiplication_and_dot_products",
+      "name": "Elementwise multiplication, matrix multiplication, and dot products",
+      "description": "Distinguishing *, np.matmul/@, and np.dot behavior with attention to dimensional compatibility.",
+      "track_tags": [
+        "linear_algebra",
+        "numpy"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "machine_learning",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because elementwise multiplication, matrix multiplication, and dot products formalizes how distinguishing *, np.matmul/@, and np.dot behavior with attention to dimensional compatibility, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_numpy_indexing_boolean_masks_and_new_axes",
+      "name": "NumPy indexing, Boolean masks, and new axes",
+      "description": "Colon indexing, row/column selection, Boolean indexing, and adding singleton dimensions with newaxis-like syntax.",
+      "track_tags": [
+        "array_indexing",
+        "numpy"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because numPy indexing, Boolean masks, and new axes clarifies colon indexing, row/column selection, Boolean indexing, and adding singleton dimensions with newaxis-like syntax, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp14"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    3.05,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture02-python-review_transcript.txt"
+  }
+}

@@ -42,9 +42,9 @@ assessment_router = APIRouter(prefix="/api/assessment", tags=["Assessment"])
     "/start",
     response_model=AssessmentStartResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Start a new assessment session for the given topics",
+    summary="Start a new assessment session for the given learning units",
     description=(
-        "Selects 5 questions per topic (1 remember · 2 understand/apply · 2 analyze), "
+        "Selects questions per learning unit (1 remember · 2 understand/apply · 2 analyze), "
         "excluding questions the user has previously answered. "
         "Returns the session ID and question list — **correct_answer is never included**."
     ),
@@ -54,7 +54,13 @@ async def api_start_assessment(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AssessmentStartResponse:
-    return await start_assessment(db, user.id, body.topic_ids)
+    return await start_assessment(
+        db,
+        user.id,
+        body.learning_unit_ids,
+        canonical_unit_ids=body.canonical_unit_ids,
+        phase=body.phase,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -68,7 +74,7 @@ async def api_start_assessment(
     summary="Submit answers and receive scored results with mastery evaluation",
     description=(
         "Grades every answer, persists Interactions, computes bloom-weighted mastery "
-        "scores per topic, upserts MasteryScore records, and returns a full breakdown "
+        "scores per learning unit, updates canonical mastery state, and returns a full breakdown "
         "including weak KCs and detected misconceptions."
     ),
 )

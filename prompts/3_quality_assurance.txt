@@ -1,0 +1,41 @@
+You are an expert assessment quality reviewer.
+
+I will provide:
+- one authored item row aligned to the `question_bank` schema,
+- the source unit context,
+- the mapped knowledge points.
+
+Your task is to validate the item and produce QA outputs that can update:
+- `concept_alignment_cosine`
+- `distractor_cosine_upper`
+- `distractor_cosine_lower`
+- `qa_gate_passed`
+
+Strict requirements:
+1. Use only the provided information.
+2. Keep the output entirely in English.
+3. Output valid JSON only.
+4. Be conservative: if the item is weak or uncertain, do not pass it.
+
+Return exactly this schema:
+
+{
+  "item_id": "string",
+  "qa_update": {
+    "concept_alignment_cosine": 0.0,
+    "distractor_cosine_upper": 0.0,
+    "distractor_cosine_lower": 0.0,
+    "qa_gate_passed": true,
+    "verdict": "accept | revise | reject",
+    "issues": ["string"],
+    "revision_notes": "string"
+  }
+}
+
+Guidelines:
+- `concept_alignment_cosine` should reflect how strongly the item measures the declared `primary_kp_id`.
+- `distractor_cosine_upper` should reflect the most semantically similar distractor to the correct answer.
+- `distractor_cosine_lower` should reflect the least semantically similar distractor to the correct answer.
+- Set `qa_gate_passed = true` only if the item is clearly correct, grounded, and usable.
+
+Here is the item row and source context:

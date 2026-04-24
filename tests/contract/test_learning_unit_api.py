@@ -68,7 +68,7 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("video_url", data["content"])
         self.assertIsNotNone(data["content"]["video_url"])
         parsed_video_url = urlparse(data["content"]["video_url"])
-        self.assertTrue(parsed_video_url.path.startswith("/data/CS231n/videos/"))
+        self.assertTrue(parsed_video_url.path.startswith("/data/courses/CS231n/videos/"))
         self.assertIn("exp", parse_qs(parsed_video_url.query))
         self.assertIn("sig", parse_qs(parsed_video_url.query))
 

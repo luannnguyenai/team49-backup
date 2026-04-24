@@ -1,0 +1,244 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture02-python-review",
+    "lecture_title": "Lecture 2 - Python Review Session",
+    "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74"
+  },
+  "unit": {
+    "unit_id": "local::lecture02-python-review::seg5",
+    "course_id": "cs224n-2024",
+    "name": "Broadcasting and vectorized NumPy code",
+    "description": "Explains NumPy broadcasting rules, connects broadcasting to batched deep learning computation, and closes with a vectorization performance example.",
+    "summary": "Broadcasting is introduced as one of NumPy's most useful and defining features because it lets arrays of different but compatible shapes interact efficiently without manually constructing duplicated arrays [ts=2299s]. The lecturer explains that a vector such as [1,2,3] can be duplicated along either a row or column dimension on the backend, allowing elementwise operations with a larger matrix without explicit loops or manual array construction [ts=2337s] [ts=2390s]. The central rule is that every dimension between the two arrays must be compatible: either the dimension sizes are equal or one of them is 1 [ts=2439s]. Examples include a 3x4 array with a 3x1 array, where NumPy duplicates along the column dimension to get a 3x4-compatible array, and a 1x4 array, where it duplicates along the row dimension [ts=2462s] [ts=2518s]. The lecture connects this to deep learning batches: the same weight matrix may be applied to many batch elements without manually duplicating the weights hundreds or thousands of times; homework 2 will implement a feed-forward network in NumPy using weights and biases [ts=2548s] [ts=2576s]. Additional examples show that a 3x1 vector plus its 1x3 transpose can broadcast because each dimension is either equal or 1, while dimensions such as 6 and 3 are not compatible merely because one divides the other [ts=2644s] [ts=2694s] [ts=2724s]. The session ends with a performance tip: avoid Python loops over large data matrices when NumPy vectorization can express the same operation, since loops are described as often about 100 times slower; an example adds 5 to rows 100 onward of a 1000x1000 matrix using NumPy indexing/arange instead of looping [ts=2758s] [ts=2776s].",
+    "key_points": [
+      {
+        "text": "Broadcasting lets NumPy operate on arrays of different shapes when repeated backend duplication can make them compatible.",
+        "timestamp_s": 2299,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Broadcasting can duplicate a vector along row or column dimensions instead of manually building a larger array.",
+        "timestamp_s": 2337,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Broadcasting compatibility requires every dimension to be either equal or equal to 1 in one of the arrays.",
+        "timestamp_s": 2439,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For a 3x4 array and a 3x1 array, NumPy duplicates along the column dimension to enable addition.",
+        "timestamp_s": 2462,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Broadcasting is useful in deep learning batches because a shared weight matrix can be applied across many inputs without manual duplication.",
+        "timestamp_s": 2548,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A 3x1 vector and its 1x3 transpose are broadcast-compatible because each compared dimension is equal or 1.",
+        "timestamp_s": 2694,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Dimension sizes such as 6 and 3 are not broadcast-compatible merely because they are divisible.",
+        "timestamp_s": 2724,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Prefer vectorized NumPy operations over loops for large matrices because loops are described as about 100 times slower.",
+        "timestamp_s": 2758,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=8j4wpU98Q74&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=21",
+      "start_s": 2295,
+      "end_s": 2826
+    },
+    "difficulty": 3.7,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 9,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Broadcasting is introduced as one of NumPy's most useful and defining features because it lets arrays of different but compatible shapes interact efficiently without manually constructing duplicated arrays [ts=2299s]. The lecturer explains that a vector such as [1,2,3] can be duplicated along either a row or column dimension on the backend, allowing elementwise operations with a larger matrix without explicit loops or manual array construction [ts=2337s] [ts=2390s]. The central rule is that every dimension between the two arrays must be compatible: either the dimension sizes are equal or one of them is 1 [ts=2439s]. Examples include a 3x4 array with a 3x1 array, where NumPy duplicates along the column dimension to get a 3x4-compatible array, and a 1x4 array, where it duplicates along the row dimension [ts=2462s] [ts=2518s]. The lecture connects this to deep learning batches: the same weight matrix may be applied to many batch elements without manually duplicating the weights hundreds or thousands of times; homework 2 will implement a feed-forward network in NumPy using weights and biases [ts=2548s] [ts=2576s]. Additional examples show that a 3x1 vector plus its 1x3 transpose can broadcast because each dimension is either equal or 1, while dimensions such as 6 and 3 are not compatible merely because one divides the other [ts=2644s] [ts=2694s] [ts=2724s]. The session ends with a performance tip: avoid Python loops over large data matrices when NumPy vectorization can express the same operation, since loops are described as often about 100 times slower; an example adds 5 to rows 100 onward of a 1000x1000 matrix using NumPy indexing/arange instead of looping [ts=2758s] [ts=2776s].",
+  "target_kp_ids": [
+    "kp_tensor_shapes_and_broadcasting",
+    "kp_vectorization"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "video_clip_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "transcript_slice": "00:38:16\nI think we are good for time.\n\n00:38:24\nAnd what's really great about broadcasting\n\n00:38:30\nare of different shapes, but can be, sort of--\n\n00:38:35\nit allows for that in a very efficient manner.\n\n00:38:39\nuseful things about NumPy and one of its defining features.\n\n00:38:46\nIf we go back to this example that I had with--\n\n00:38:51\nHow do I generate this array versus how do\n\n00:38:57\nInstead of me saying, OK, element 00 plus 1,\n\n00:39:05\nInstead of doing that one by one, what broadcasting allows\n\n00:39:13\n3 and depending on how I do the broadcasting which I'll come to\n\n00:39:21\nor I can duplicate it along the column dimension.\n\n00:39:25\nIt'll do that on its own in the back end.\n\n00:39:29\nis I don't need to, for example, create a new array\n\n00:39:36\nwhich is already like this and then add those two together.\n\n00:39:41\nAll right.\n\n00:39:43\nAnd let me just quickly visually also just show\n\n00:39:47\nOh, sorry.\n\n00:39:54\nI have this 1 by 1 1, 2, 3 vector, right,\n\n00:40:02\nonly the columns with this 1, 2, 3 vector.\n\n00:40:07\nis you only pass these two values in and on the back end,\n\n00:40:13\nSo let's say, I have 123123123 and then it'll do the addition.\n\n00:40:23\nand I want it to be added to each of the rows instead\n\n00:40:27\nby sort of duplicating it on the back end.\n\n00:40:33\nAll right.\n\n00:40:36\nSo how does NumPy know when and how to do broadcasting?\n\n00:40:44\nit can only happen if all of the dimensions,\n\n00:40:49\nAnd when they say what is compatible?\n\n00:40:55\nis equal to 1.\n\n00:40:58\nSo for example, I start off with this x array.\n\n00:41:05\nWill y is equal to 3 comma 1 be compatible?\n\n00:41:10\nWhy?\n\n00:41:13\nwhich are the same and in the second dimension, you have 4\n\n00:41:16\nSo those are compatible values.\n\n00:41:20\nis I'm doing, for example, an addition operation x plus y.\n\n00:41:26\nbut 4 and 1 are not the same.\n\n00:41:30\nSo I need to duplicate this y along the second dimension,\n\n00:41:37\nAnd once it does that, it duplicates it.\n\n00:41:42\nAnd it does that really fast.\n\n00:41:46\nthen for you to create a separate array already\n\n00:41:51\nSimilarly, I have this z array, which is 1, 4.\n\n00:42:00\nOK, is that compatible?\n\n00:42:03\nand you have one in the second and 4 and 4 are compatible.\n\n00:42:06\nSo let's say I know that these two are compatible.\n\n00:42:10\nIn the first dimension, it'll know\n\n00:42:13\nSo it'll know to duplicate z and so\n\n00:42:18\nCreate a separate array and then multiply those two.\n\n00:42:25\nI have y and then the final shape will be 3, 4.\n\n00:42:31\nwill have the same--\n\n00:42:37\nbut you want to apply, let's say,\n\n00:42:41\nAnd instead of duplicating that weight matrix a hundred or even\n\n00:42:47\nlike 1,000 times and then adding those together,\n\n00:42:51\nknow OK, if I'm going to be duplicating over the batch\n\n00:42:56\nSo it's used a lot of times in deep learning because of this.\n\n00:43:00\nthat's basically what you'll be doing.\n\n00:43:05\nand it'll say you have this W matrix,\n\n00:43:09\nwe'll come to those in class--\n\n00:43:13\nbecause that's basically what you're doing.\n\n00:43:16\nyou have a weight matrix, which will somehow scale it\n\n00:43:21\nwill be applied to multiple images in your batch.\n\n00:43:24\nbut their sizes will be the same and it's optimized for that.\n\n00:43:31\nSo this is just more examples of the same thing.\n\n00:43:37\nLet's see.\n\n00:43:40\nright here, which is that I have this array of let's say zeros.\n\n00:43:47\nwhat size would this be?\n\n00:43:49\nBecause you have one outer list and inside this,\n\n00:43:53\nSo it's just basically one row and then three values inside\n\n00:43:57\nAnd so would this be compatible?\n\n00:44:03\ndimension.\n\n00:44:04\nin the row dimensions.\n\n00:44:08\nwhat's happening here.\n\n00:44:12\nit says more complex behavior.\n\n00:44:16\nthat if I have this B vector, which is 3, 1.\n\n00:44:24\ntranspose is just changing the dimensions.\n\n00:44:26\nSo if I have a 2 by 3 matrix, a transpose will be a 3\n\n00:44:30\nWhat that means visually is something\n\n00:44:36\nwill get switched.\n\n00:44:44\nSo like three rows versus like three columns.\n\n00:44:54\nboth of those vectors will be compatible\n\n00:44:57\nit's either the same or a 1.\n\n00:45:03\nand that's what's happening here.\n\n00:45:07\nSo I think we are right at time.\n\n00:45:11\nplaying with variations of this for broadcasting and see-- just\n\n00:45:16\nis just if it's compatible, it's either the same value\n\n00:45:20\nAnd whatever is the 1 dimension is\n\n00:45:24\nSo yeah, it's not going to be compatible if they're\n\n00:45:27\nSo if you have let's say 6 and 3, that's not compatible.\n\n00:45:34\nthere's tricks you can use where you're\n\n00:45:39\nthis data to be multiplied?\n\n00:45:44\nand then multiply everything and then reshape it back.\n\n00:45:48\nfor example, 6 by 3-- make that compatible.\n\n00:45:52\nSo I think let's wrap up.\n\n00:45:57\ncode.\n\n00:46:02\nwhenever you're dealing with large data matrices.\n\n00:46:10\nNumPy is usually very, very efficient.\n\n00:46:13\nyou can accomplish with NumPy and the same thing using loops.\n\n00:46:20\nby 1,000 and I want to apply--\n\n00:46:26\nwith plus 5.\n\n00:46:30\nlike I have this full matrix and I want everything here\n\n00:46:41\nThen in a loop format, I can basically\n\n00:46:46\nand do that or in NumPy, I can basically\n\n00:46:51\nin basically 1, 2, 3, 4, 5, 6, all the way up\n\n00:46:55\nIn this case, it's between 100 and 1,000.\n\n00:46:58\nto 1,000 in the first dimension, and then just add that with 5.\n\n00:47:04\nyou would switch from using loops to using NumPy",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture02-python-review::seg5",
+      "global_kp_id": "kp_vectorization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "name": "Tensor shapes and broadcasting",
+      "description": "Reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication. Core shape vocabulary for rectangular matrices, one-dimensional vectors, higher-dimensional tensors, and NumPy shape notation.",
+      "track_tags": [
+        "broadcasting",
+        "debugging",
+        "deep_learning",
+        "linear_algebra",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "linear_algebra",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "nlp_engineer",
+        "research_engineer"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because tensor shapes and broadcasting formalizes how reasoning about tensor dimensions, shape compatibility, and broadcasting is necessary for elementwise operations, batching, and matrix multiplication, which later units use as core machinery rather than background context though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp10",
+        "local::lecture02-python-review::kp15",
+        "local::lecture03-pytorch::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reshape_and_indexing",
+      "name": "Reshaping and indexing",
+      "description": "PyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures. How (3,), (1,3), and (3,1) differ, and how reshape changes array dimensions when element counts match.",
+      "track_tags": [
+        "array_shapes",
+        "data_manipulation",
+        "numpy",
+        "tensor_programming"
+      ],
+      "domain_tags": [
+        "array_ops",
+        "machine_learning",
+        "pytorch",
+        "scientific_computing"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reshaping and indexing clarifies pyTorch supports reshaping tensors, reducing dimensions with operations like sum and mean, and NumPy-style slicing and indexing for selecting substructures, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture02-python-review::kp11",
+        "local::lecture03-pytorch::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vectorization",
+      "name": "Vectorization",
+      "description": "Implementing neural computation with vectors, matrices, and tensors instead of explicit loops. Using NumPy indexing and array operations instead of slow Python loops over large matrices.",
+      "track_tags": [
+        "deep_learning_fundamentals",
+        "numpy",
+        "performance",
+        "vectorization"
+      ],
+      "domain_tags": [
+        "machine_learning",
+        "numerical_computing",
+        "scientific_computing",
+        "systems_for_ml"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "machine_learning_engineer",
+        "ml_engineer",
+        "software_engineer"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because vectorization clarifies implementing neural computation with vectors, matrices, and tensors instead of explicit loops, sharpening later modeling, analysis, or evaluation choices though importance labels split between high and medium.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp4",
+        "local::lecture02-python-review::kp16"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    3.55,
+    1.0
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture02-python-review_transcript.txt"
+  }
+}

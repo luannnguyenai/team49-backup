@@ -5,11 +5,13 @@
 import { z } from "zod";
 
 export const onboardingSchema = z.object({
-  known_topic_ids: z.array(z.string()),
+  known_unit_ids: z.array(z.string()),
 
-  desired_module_ids: z
+  desired_section_ids: z
     .array(z.string())
-    .min(1, "Chọn ít nhất 1 module để tiếp tục"),
+    .min(1, "Chọn ít nhất 1 section để tiếp tục"),
+
+  selected_course_ids: z.array(z.string()),
 
   available_hours_per_week: z
     .number({ invalid_type_error: "Phải là số" })

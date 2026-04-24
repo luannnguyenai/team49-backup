@@ -1,0 +1,156 @@
+{
+  "unit_id": "local::lecture13-posttraining::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=35X6zlhoCy4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi về các giới hạn của supervised fine-tuning: chi phí dữ liệu chuyên gia, tác vụ mở không có một đáp án chuẩn, và mismatch giữa objective token-level với sở thích con người.",
+  "question_bank": [
+    {
+      "item_id": "lecture13-posttraining-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Một hạn chế thực tế lớn của supervised fine-tuning là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Cần nhiều câu trả lời mẫu chất lượng cao từ con người, đặc biệt cho tác vụ chuyên môn.",
+        "Không thể dùng với mô hình decoder-only.",
+        "Không thể áp dụng cho câu hỏi mở.",
+        "Luôn tạo ra reward hacking ngay ở bước huấn luyện."
+      ],
+      "answer_index": 0,
+      "explanation": "Khi câu hỏi càng khó và chuyên môn hơn, việc thu thập câu trả lời mẫu đúng và tốt từ con người càng tốn kém. Đây là một nút thắt lớn của SFT.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limitations_of_supervised_fine_tuning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Collecting expert demonstrations is expensive for complex or specialized tasks."
+        ],
+        "timestamps": [
+          "00:34:52"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao token-level loss có thể không phản ánh tốt chất lượng câu trả lời trong tác vụ mở?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì nó có thể phạt các lỗi khác mức độ ý nghĩa theo cách gần như giống nhau.",
+        "Vì nó chỉ dùng được cho dữ liệu hình ảnh, không dùng cho văn bản.",
+        "Vì nó bắt buộc mô hình sinh đúng từng token của mọi câu trả lời khả dĩ cùng lúc.",
+        "Vì nó luôn tối ưu trực tiếp sở thích của con người rồi mới tối ưu token."
+      ],
+      "answer_index": 0,
+      "explanation": "Trong tác vụ mở, không phải mọi sai khác đều nghiêm trọng như nhau. Một lỗi hơi lệch nghĩa và một lỗi rất sai có thể bị loss token-level đối xử khá giống nhau, dù trải nghiệm người dùng khác hẳn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_limitations_of_supervised_fine_tuning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Token-level loss can penalize semantically mild and severe mistakes equally."
+        ],
+        "timestamps": [
+          "00:35:35"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vấn đề mục tiêu cốt lõi của SFT là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mục tiêu thật là đầu ra con người thích, nhưng SFT vẫn tối ưu next-token prediction trên dữ liệu được chọn lọc.",
+        "SFT tối ưu trực tiếp reward của con người nên không còn mismatch mục tiêu.",
+        "SFT tối ưu tốc độ sinh nên bỏ qua hoàn toàn nội dung câu trả lời.",
+        "SFT chỉ gặp vấn đề khi mô hình quá nhỏ, còn mô hình lớn thì không."
+      ],
+      "answer_index": 0,
+      "explanation": "Đây là lý do phần trình bày chuyển sang preference optimization. Dù dữ liệu đã được tuyển chọn kỹ hơn, hàm mục tiêu của SFT vẫn là dự đoán token chứ không trực tiếp mô hình hóa điều con người thích ở đầu ra cuối cùng.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rlhf_preference_optimization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "SFT still optimizes next-token prediction rather than human preference directly."
+        ],
+        "timestamps": [
+          "00:36:55"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture13-posttraining-seg5-q1",
+      "global_kp_id": "kp_limitations_of_supervised_fine_tuning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q1",
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q2",
+      "global_kp_id": "kp_limitations_of_supervised_fine_tuning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q2",
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q3",
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture13-posttraining-seg5-q3",
+      "global_kp_id": "kp_limitations_of_supervised_fine_tuning",
+      "role": "secondary"
+    }
+  ]
+}

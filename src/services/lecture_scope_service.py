@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 import re
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
+from src.data_paths import CS231N_DIR
 
-_SYLLABUS_PATH = Path("data/CS231n/syllabus.json")
+_SYLLABUS_PATH = CS231N_DIR / "syllabus.json"
 _LECTURE_ID_PATTERN = re.compile(r"lecture[-_ ]?0*(\d+)", re.IGNORECASE)
 
 

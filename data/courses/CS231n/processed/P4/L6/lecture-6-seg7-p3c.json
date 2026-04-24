@@ -1,0 +1,217 @@
+{
+  "unit_id": "local::lecture_6::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "The text provides enough explicit guidance for two preprocessing and augmentation questions, so no clip cut is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_6_seg7_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is clean, grounded, and aligned, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_6_seg7_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is clean, grounded, and aligned, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_6_seg7_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the standard preprocessing step for each RGB channel before feeding images to the model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Subtract the channel mean and divide by the channel standard deviation",
+        "Subtract the channel standard deviation and divide by the channel mean",
+        "Multiply by the channel mean and add the channel standard deviation",
+        "Only rescale the image height and width without changing pixel values"
+      ],
+      "answer_index": 0,
+      "explanation": "Channel-wise normalization centers and rescales each input channel so the model receives values with more stable statistics. The mean is removed first, then the result is divided by the standard deviation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_image_normalization_preprocessing",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "subtract the mean",
+          "divide by the standard deviation"
+        ],
+        "timestamps": [
+          "00:49:19",
+          "00:49:30"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_6_seg7_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does data augmentation often improve generalization in image models?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It adds label-preserving randomness, increasing effective dataset diversity",
+        "It guarantees that training loss is always lower on every epoch",
+        "It removes the need for input normalization",
+        "It converts every dataset into ImageNet automatically"
+      ],
+      "answer_index": 0,
+      "explanation": "Useful augmentations keep the example recognizable while presenting varied versions of it during training. That makes memorization harder and exposes the model to a broader set of inputs for the same label.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_data_augmentation",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "apply some transformations",
+          "same category label",
+          "increase the size of your data set"
+        ],
+        "timestamps": [
+          "00:51:40",
+          "00:51:58"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg7_q1",
+      "global_kp_id": "kp_image_normalization_preprocessing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg7_q2",
+      "global_kp_id": "kp_data_augmentation",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_6_seg7_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.55,
+      "discrimination_prior": 0.84,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Per-channel normalization is a standard preprocessing step and should be easy."
+    },
+    {
+      "item_id": "lecture_6_seg7_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.35,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Why augmentation helps generalization is an easy-to-medium concept with broad applicability."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_6_seg7_q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is an early competency check on the image preprocessing pipeline."
+    },
+    {
+      "item_id": "lecture_6_seg7_q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is broad enough to be useful both for screening and for transfer-oriented review."
+    }
+  ]
+}

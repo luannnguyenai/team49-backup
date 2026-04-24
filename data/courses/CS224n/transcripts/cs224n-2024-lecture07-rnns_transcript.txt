@@ -1,0 +1,5349 @@
+Title: Stanford CS224N: NLP with Deep Learning | Spring 2024 | Lecture 5 - Recurrent Neural Networks
+URL: https://www.youtube.com/watch?v=fyc0Jzr74y4
+Video ID: fyc0Jzr74y4
+============================================================
+
+00:00:05
+OK, let me get
+started for today.
+
+00:00:09
+So for today, first
+of all, I'm going
+
+00:00:13
+to spend a few minutes
+talking about a couple
+
+00:00:16
+more neural net
+concepts, including
+
+00:00:19
+actually a couple
+of the concepts that
+
+00:00:21
+turn up in assignment two.
+
+00:00:25
+Then the bulk of
+today is then going
+
+00:00:28
+to be moving on to introducing
+what are language models.
+
+00:00:34
+And then after introducing
+language models,
+
+00:00:37
+we're going to introduce a new
+kind of neural network, which
+
+00:00:42
+is one way to build
+language models, which
+
+00:00:44
+is recurrent neural networks.
+
+00:00:47
+They're important
+thing to know about,
+
+00:00:49
+and we use them in
+assignment three,
+
+00:00:52
+but they're certainly
+not the only way
+
+00:00:54
+to build language models.
+
+00:00:56
+In fact, probably a
+lot of you already
+
+00:00:57
+know that there's this other
+kind of neural network called
+
+00:01:00
+transformers, and
+we'll get on to those
+
+00:01:03
+after we've done
+recurrent neural nets.
+
+00:01:06
+Talk a bit about problems
+with recurrent neural networks
+
+00:01:10
+and well, if I have time,
+I'll get on to the recap.
+
+00:01:13
+Before getting into the
+content of the class,
+
+00:01:15
+I thought I could just
+spend a minute on giving you
+
+00:01:18
+the stats of who is in CS224N.
+
+00:01:23
+Who's in CS224N
+looks like the pie
+
+00:01:26
+charts they show in CS106A these
+days, except more grad students,
+
+00:01:32
+I guess.
+
+00:01:33
+So the four big groups are the
+computer science undergrads,
+
+00:01:37
+the computer science grads,
+the undeclared undergraduates
+
+00:01:42
+and the NDO grads.
+
+00:01:44
+So this is a large portion
+of the SCPD students, though.
+
+00:01:47
+Some of them are in the
+computer science grads.
+
+00:01:50
+So that makes up about
+60% of the audience.
+
+00:01:55
+And if you're not in one
+of those four big groups,
+
+00:01:58
+you're in the other 40%
+and everybody is somewhere.
+
+00:02:01
+So there are lots of other
+interesting groups down here.
+
+00:02:04
+So the bright orange
+down here, that's
+
+00:02:07
+where the math and physics
+PhDs are, Up here, I
+
+00:02:13
+mean, interestingly, we
+now have more statistics
+
+00:02:16
+grad students than there
+are census undergrads.
+
+00:02:19
+It didn't used to be that
+way around in NLP classes.
+
+00:02:23
+And one of my favorite groups,
+the little magenta group
+
+00:02:28
+down here, these are the
+humanities undergrads.
+
+00:02:33
+Yeah, humanities undergrads.
+
+00:02:36
+In terms of years, it
+breaks down like this.
+
+00:02:40
+First year grad students
+are the biggest group.
+
+00:02:42
+Tons of juniors and seniors
+and a couple of brave frosh.
+
+00:02:47
+Any brave frosh here today?
+
+00:02:49
+Yeah.
+
+00:02:53
+OK.
+
+00:02:55
+Welcome.
+
+00:02:56
+Yeah.
+
+00:02:57
+So modern neural networks,
+especially language models,
+
+00:03:03
+are enormous.
+
+00:03:06
+This chart's sort of out of date
+because it only goes up to 2022,
+
+00:03:11
+but it's sort of actually
+hard to make an accurate
+
+00:03:14
+chart for 2024 because in
+the last couple of years,
+
+00:03:18
+the biggest language
+model makers
+
+00:03:20
+have in general stopped saying
+how large their language models
+
+00:03:23
+are in terms of parameters.
+
+00:03:24
+But at any rate, they're
+clearly huge models,
+
+00:03:28
+which have over 100
+billion parameters.
+
+00:03:34
+And so large and then deep
+in terms of very many layers
+
+00:03:39
+neural nets are a cornerstone
+of modern NLP systems.
+
+00:03:44
+We're going to be pretty
+quickly working our way up
+
+00:03:48
+to look at those
+kind of deep models.
+
+00:03:51
+But for starting off
+with something simpler,
+
+00:03:55
+I did just want to key
+you in for a few minutes
+
+00:04:00
+into a little bit of history.
+
+00:04:03
+So the last time neural nets
+were popular was in the 80s
+
+00:04:09
+and 90s, and that was
+when people worked out
+
+00:04:12
+the backpropagation algorithm.
+
+00:04:14
+Jeff Hinton and colleagues
+made famous the backpropagation
+
+00:04:17
+algorithm that we've looked at.
+
+00:04:19
+And that allowed the training of
+neural nets with hidden layers.
+
+00:04:25
+And so, but in those days,
+pretty much all the neural
+
+00:04:29
+nets with hidden layers
+that were trained
+
+00:04:31
+were trained with
+one hidden layer.
+
+00:04:34
+You had the input, the
+hidden layer and the output,
+
+00:04:37
+and that's all that there was.
+
+00:04:39
+And the reason for that was
+for a very, very long time,
+
+00:04:45
+people couldn't really
+get things to work
+
+00:04:49
+with more hidden layers.
+
+00:04:51
+So that only started to change
+in the resurgence of what's
+
+00:04:55
+often got called deep learning,
+but anyway, back to neural nets,
+
+00:05:00
+started around 2006.
+
+00:05:03
+And this was one of the
+influential papers at the time.
+
+00:05:07
+Greedy Layer-Wise Training
+of Deep Neural Networks
+
+00:05:10
+by Yoshua, Bengio
+and colleagues.
+
+00:05:12
+And so right at the
+beginning of that paper,
+
+00:05:14
+they observe the problem.
+
+00:05:17
+"However, until
+recently, it was believed
+
+00:05:20
+too difficult to train deep
+multi-layer neural networks.
+
+00:05:23
+Empirically, deep networks
+were generally found to be not
+
+00:05:27
+better, and often worse, than
+neural networks with one or two
+
+00:05:31
+hidden layers."
+
+00:05:32
+Jerry Tesauro was
+actually a faculty member
+
+00:05:35
+who worked very
+early on autonomous
+
+00:05:37
+driving with neural networks.
+
+00:05:39
+"As this is a negative result,
+it has not been much reported
+
+00:05:43
+in the machine
+learning literature."
+
+00:05:46
+So although people had neural
+networks and back propagation
+
+00:05:52
+and recurrent neural networks--
+we're going to talk about
+
+00:05:54
+today--
+
+00:05:55
+that for a very
+long period of time,
+
+00:06:00
+15 years or so, things
+seemed completely stuck,
+
+00:06:05
+in that you couldn't--
+although in theory,
+
+00:06:07
+it seemed like deep neural
+networks should be promising.
+
+00:06:09
+In practice, they didn't work.
+
+00:06:13
+And so it really then
+took some new developments
+
+00:06:17
+that happened in the late 2000's
+decade and then more profoundly,
+
+00:06:21
+in the 2010's decade
+to actually figure out
+
+00:06:25
+how we could have deep neural
+networks that actually worked,
+
+00:06:30
+working far better than
+the shallow neural networks
+
+00:06:33
+and leading into the
+networks that we have today.
+
+00:06:37
+And, we're going to be
+starting to talk about some
+
+00:06:40
+of those things in this class
+and coming up with classes.
+
+00:06:47
+And I mean, I think
+the tendency when
+
+00:06:51
+you see the things that got
+neural networks to work much
+
+00:06:54
+better, the natural reaction
+is to shrug and be underwhelmed
+
+00:07:04
+and think is this
+all there is to it?
+
+00:07:06
+This doesn't exactly seem
+like difficult science.
+
+00:07:10
+And in some sense that's true.
+
+00:07:13
+They're fairly
+little introductions
+
+00:07:16
+of new ideas and
+tweaks of things.
+
+00:07:19
+But nevertheless, a handful
+of little ideas and tweaks
+
+00:07:24
+of things turn things
+around from a field
+
+00:07:28
+that was stuck for 15
+years going nowhere
+
+00:07:32
+and which nearly everyone
+had abandoned because of that
+
+00:07:35
+to suddenly turning around
+and there being the ability
+
+00:07:39
+to train these deeper neural
+networks, which then behaved
+
+00:07:43
+amazingly better as
+machine learning systems
+
+00:07:46
+than other things
+that had preceded them
+
+00:07:49
+and dominated for
+the intervening time.
+
+00:07:52
+So that took a lot of time.
+
+00:07:55
+So what are these things?
+
+00:07:57
+One of them, which you
+can greet with a bit
+
+00:08:00
+of a yawn in some sense, is
+doing better regularization
+
+00:08:05
+of neural nets.
+
+00:08:07
+So regularization is the
+idea that beyond just having
+
+00:08:13
+a loss that we want to minimize
+in terms of describing the data,
+
+00:08:18
+we want to, in some other
+ways, manipulate what
+
+00:08:22
+parameters we learn so that
+our models work better.
+
+00:08:26
+And so normally we have some
+more complex loss function
+
+00:08:32
+that does some regularization.
+
+00:08:35
+The most common
+way of doing this
+
+00:08:37
+is what's called L2 loss,
+where you add on this parameter
+
+00:08:42
+squared term at the end.
+
+00:08:44
+And this regularization
+says, it would
+
+00:08:49
+be good to find a model with
+small parameter weights.
+
+00:08:54
+So you should be finding the
+smallest parameter weights that
+
+00:08:57
+will explain your data well.
+
+00:09:00
+And there's a lot you can
+say about regularization,
+
+00:09:05
+these losses.
+
+00:09:07
+They get talked about a
+lot more in other classes
+
+00:09:10
+like CS229, machine learning.
+
+00:09:13
+And so I'm not going to
+say very much about it.
+
+00:09:16
+This is a machine
+learning theory class.
+
+00:09:19
+But I do just want to
+put in one note that's
+
+00:09:24
+very relevant to what's happened
+in recent neural networks work.
+
+00:09:33
+So the classic view
+of regularization
+
+00:09:35
+was we needed this
+kind of regularization
+
+00:09:38
+to prevent our networks
+from overfitting,
+
+00:09:42
+meaning that they would do
+a very good job at modeling
+
+00:09:46
+the training data, but then
+they would generalize badly
+
+00:09:51
+to new data that was shown.
+
+00:09:53
+And so the picture
+that you got shown
+
+00:09:55
+was this, that as you train
+on some training data,
+
+00:10:00
+your error
+necessarily goes down.
+
+00:10:04
+However, after some
+point, you start
+
+00:10:08
+learning specific
+properties of things
+
+00:10:11
+that happen to turn up in
+those training examples
+
+00:10:14
+and that you're learning
+things that are only
+
+00:10:17
+good for the training examples.
+
+00:10:19
+And so they won't generalize
+well to different pieces of data
+
+00:10:23
+you see at test time.
+
+00:10:24
+So if you have a separate
+validation set or a final test
+
+00:10:29
+set and you traced out the
+error or loss on that validation
+
+00:10:36
+or test set, that
+after some point
+
+00:10:39
+it would start to go up again.
+
+00:10:41
+This is a quirk in
+my bad PowerPoint.
+
+00:10:44
+It's just meant to go up.
+
+00:10:45
+And the fact that
+it goes up is then
+
+00:10:49
+you have overfit to
+your training data.
+
+00:10:51
+And making the parameters
+numerically small
+
+00:10:55
+is meant to lessen the
+extent to which you
+
+00:10:57
+overfit on your training data.
+
+00:11:00
+This is not a picture
+that modern neural network
+
+00:11:05
+people believe at all.
+
+00:11:08
+Instead, the picture
+is changed like this.
+
+00:11:12
+We don't believe that
+overfitting exists anymore.
+
+00:11:17
+But what we are
+concerned about is
+
+00:11:20
+models that will generalize
+well to different data
+
+00:11:25
+so that when we train--
+
+00:11:29
+so in classical
+statistics, the idea
+
+00:11:32
+that you could train
+billions of parameters
+
+00:11:35
+like large neural nets now have
+would be seen as ridiculous
+
+00:11:40
+because you could not possibly
+estimate those parameters well.
+
+00:11:45
+And so you just have
+all of this noisy mess.
+
+00:11:48
+But what's actually been
+found is that yeah, it's true.
+
+00:11:53
+You can't estimate the
+numbers well, but what you get
+
+00:11:56
+is an interesting
+averaging function
+
+00:11:59
+from all these myriad numbers.
+
+00:12:01
+And if you do it
+right, what happens
+
+00:12:04
+is as you go on training
+that for a while,
+
+00:12:09
+it might look like you're
+starting to overfit.
+
+00:12:12
+But if you keep on training in
+a huge network, not only will
+
+00:12:16
+your training loss continue to
+go down very infinitesimally,
+
+00:12:21
+but your validation loss
+will go down as well.
+
+00:12:25
+And so on huge
+networks these days,
+
+00:12:30
+we train our models so that they
+overfit to the training data
+
+00:12:36
+almost completely.
+
+00:12:37
+So that if you train a huge
+network now on a training set,
+
+00:12:42
+you can essentially
+train them to get 0 loss.
+
+00:12:46
+Maybe it's 0.000007
+loss or something,
+
+00:12:50
+but you can train them to get
+0 loss because you've got such
+
+00:12:53
+rich models.
+
+00:12:54
+You can perfectly fit, memorize
+the entire training set.
+
+00:12:59
+Now, classically, that would
+have been seen as a disaster
+
+00:13:01
+because you've overfit
+the training data.
+
+00:13:03
+With modern, large
+neural networks,
+
+00:13:05
+it's not seen as a
+disaster because providing
+
+00:13:09
+you've done regularization
+well, that your model will also
+
+00:13:13
+generalize well
+to different data.
+
+00:13:16
+However, the flip side
+of that is normally
+
+00:13:20
+this kind of L2
+regularization or similar ones
+
+00:13:23
+like L1 regularization aren't
+strong enough regularization
+
+00:13:27
+to achieve that effect.
+
+00:13:28
+And so neural
+network people have
+
+00:13:31
+turned to other methods of
+regularization, of which
+
+00:13:34
+everyone's favorite is dropout.
+
+00:13:37
+So this is one of the things
+that's on the assignment.
+
+00:13:40
+And at this point, I should.
+
+00:13:46
+apologize or something because
+the way drop out is done,
+
+00:13:52
+the way drop out
+is presented here
+
+00:13:54
+is the original formulation.
+
+00:13:56
+The way you drop
+out is presented
+
+00:13:57
+on the assignment is the
+way it's now normally done
+
+00:14:00
+in deep learning packages.
+
+00:14:01
+So there are a couple of
+details that vary a bit.
+
+00:14:06
+And let me just present the main
+idea here and not worry too much
+
+00:14:11
+about the details of the math.
+
+00:14:13
+So the idea of dropout
+is at training time,
+
+00:14:17
+every time you are doing
+a piece of training
+
+00:14:21
+with an example, what
+you're going to do
+
+00:14:24
+is inside the middle layers
+of the neural network,
+
+00:14:28
+you're just going to throw
+away some of the inputs.
+
+00:14:31
+And so technically,
+the way you do this is
+
+00:14:34
+have a random mask
+that you sample
+
+00:14:37
+each time of zeros and ones.
+
+00:14:40
+You do a Hadamard product
+of that with the data.
+
+00:14:43
+So some of the
+data items go to 0
+
+00:14:46
+and you have different
+masks each time.
+
+00:14:49
+So for the next thing, I've
+now masked out something
+
+00:14:55
+different this time.
+
+00:14:56
+And so you're just sort
+of randomly throwing away
+
+00:15:00
+the inputs.
+
+00:15:01
+And the effect of this is that
+you're training the model,
+
+00:15:06
+that it has to be robust
+and work well and make
+
+00:15:10
+as much use of every
+input as it can.
+
+00:15:13
+It can't decide that it can be
+extremely reliant on components
+
+00:15:18
+17 of the vector because
+sometimes it's just
+
+00:15:21
+going to randomly disappear.
+
+00:15:23
+So if there are other features
+that you could use instead
+
+00:15:26
+that would let you work
+out what to do next,
+
+00:15:29
+you should also know how to
+make use of those features.
+
+00:15:32
+So at training time you
+randomly delete things.
+
+00:15:36
+At test time for efficiency,
+but also quality of the answer,
+
+00:15:41
+You don't delete anything.
+
+00:15:42
+You keep all of your
+weights, but you just
+
+00:15:44
+rescale things to
+make up for the fact
+
+00:15:47
+that you used to
+be dropping things.
+
+00:15:50
+OK, so there are
+several ways that you
+
+00:15:53
+can think of explaining this.
+
+00:15:56
+One motivation
+that's often given
+
+00:15:58
+is that this prevents
+feature co-adaptation.
+
+00:16:02
+So rather than a model
+being able to learn
+
+00:16:06
+complex functions of
+feature seven, eight and 11
+
+00:16:10
+can help me predict this, it
+knows that some of the features
+
+00:16:13
+might be missing.
+
+00:16:14
+So it has to make use of
+things in a more flexible way.
+
+00:16:19
+Another way of thinking
+of it is that there's
+
+00:16:22
+been a lot of work
+on model ensembles
+
+00:16:24
+where you can mix
+together different models
+
+00:16:28
+and improve your results.
+
+00:16:30
+If you're training
+with dropout, it's
+
+00:16:32
+kind of like you're training
+with a huge model ensemble
+
+00:16:35
+because you're training with
+the ensemble of the power
+
+00:16:39
+set, the exponential number
+of every possible drop out
+
+00:16:42
+of features all at once.
+
+00:16:45
+And that gives you
+a very good model.
+
+00:16:48
+So there are different
+ways of thinking about it.
+
+00:16:51
+I mean, if you've seen Naive
+Bayes and logistic regression
+
+00:16:54
+models before, I think a
+nice way to think of it
+
+00:16:58
+is that it gives a middle
+ground between the two
+
+00:17:02
+because for a
+Naive Bayes models,
+
+00:17:04
+you're weighting each
+feature independently just
+
+00:17:06
+based on the data statistics.
+
+00:17:08
+It doesn't matter what
+other features are there.
+
+00:17:10
+In a logistic
+regression, weights
+
+00:17:12
+are set in the context of
+all the other features.
+
+00:17:15
+And with dropout, you're
+somewhere in between.
+
+00:17:19
+You're setting the weights
+and the context of some
+
+00:17:21
+of the other features,
+but different ones
+
+00:17:23
+will disappear at
+different times.
+
+00:17:25
+But following work that
+was done at Stanford
+
+00:17:29
+by Stefan Varga and others,
+generally these days
+
+00:17:34
+people regard dropout
+as a form of feature
+
+00:17:37
+dependent regularization.
+
+00:17:39
+And he shows some
+theoretical results
+
+00:17:41
+as to why to think
+of it that way.
+
+00:17:44
+OK.
+
+00:17:44
+I think we've implicitly
+seen this one,
+
+00:17:48
+but vectorization is the
+idea no for loops always use
+
+00:17:55
+vectors, matrices and tensors.
+
+00:17:57
+The entire success and
+speed of deep learning
+
+00:18:02
+works from the fact that we can
+do things with vectors, matrices
+
+00:18:07
+and tensors.
+
+00:18:08
+So if you're writing for
+loops in any language,
+
+00:18:11
+but especially in Python,
+things run really slowly.
+
+00:18:15
+If you can do things with
+vectors and matrices,
+
+00:18:19
+even on CPU, things run at least
+an order of magnitude faster.
+
+00:18:23
+And, well, what
+everyone really wants
+
+00:18:26
+to move to doing in deep
+learning is running things
+
+00:18:29
+on GPUs or sometimes now
+neural processing units
+
+00:18:33
+and then you're getting two,
+three orders of magnitude
+
+00:18:36
+of speed up.
+
+00:18:37
+So do always think about,
+I should be doing things
+
+00:18:41
+with vectors and matrices if I'm
+writing a for loop for anything
+
+00:18:46
+that isn't some very superficial
+bit of input processing,
+
+00:18:49
+I've almost certainly
+made a mistake
+
+00:18:51
+and I should be working
+out how to do things
+
+00:18:54
+with vectors and matrices.
+
+00:18:57
+And that's things like dropout.
+
+00:18:59
+You don't want to
+write a for loop that
+
+00:19:02
+goes through all the positions
+and sets some of them to 0.
+
+00:19:05
+You want to be using a vector
+operation with your mask.
+
+00:19:11
+Two more, I think.
+
+00:19:13
+Parameter initialization.
+
+00:19:15
+I mean, this one
+might not be obvious,
+
+00:19:18
+but when we start training
+our neural networks
+
+00:19:23
+in almost all cases
+it's vital that we
+
+00:19:28
+initialize the parameters of our
+matrices to some random numbers.
+
+00:19:35
+And the reason for this is if
+we just start with our matrices
+
+00:19:43
+all 0 or some other
+constant, normally
+
+00:19:47
+the case is that
+we have symmetries.
+
+00:19:52
+So it's like in
+this picture when
+
+00:19:54
+you're starting on
+this saddle point
+
+00:19:57
+that it's symmetric to the
+left and the right or whatever,
+
+00:20:02
+forward and backwards
+and left and right.
+
+00:20:04
+And so you don't
+know where to go
+
+00:20:08
+and you might be stuck
+and stay in the one place.
+
+00:20:11
+I mean, normally a way to
+think about is the operations
+
+00:20:16
+that you're doing to all
+the elements in the matrix
+
+00:20:18
+are the same.
+
+00:20:20
+So rather than having a
+whole vector of features,
+
+00:20:24
+if all of them have the
+same value initially,
+
+00:20:27
+often it's only have one
+feature and you've just
+
+00:20:30
+got a lot of copies of it.
+
+00:20:32
+So to initialize learning
+and have things work well,
+
+00:20:36
+we almost always want
+to set all the weights
+
+00:20:39
+to very small random numbers.
+
+00:20:43
+And so at that point,
+when I say very small,
+
+00:20:50
+we want to make them in a range
+so that they don't disappear
+
+00:20:53
+to 0 if we make
+them a bit smaller
+
+00:20:55
+and they don't start
+blowing up into huge numbers
+
+00:21:00
+when we multiply them by things.
+
+00:21:02
+And doing this initialization
+at the right scale
+
+00:21:06
+used to be seen as
+something pretty important.
+
+00:21:09
+And there are
+particular methods that
+
+00:21:11
+had a basis of thinking
+of what happens
+
+00:21:13
+once you do matrix
+multiplies that people
+
+00:21:15
+had worked out and often used.
+
+00:21:17
+One of these was this
+Xavier initialization,
+
+00:21:21
+which was working out what
+variants of your distribution
+
+00:21:29
+to be using based on the number
+of inputs and outputs of a layer
+
+00:21:34
+and things like that.
+
+00:21:36
+The specifics of
+that, I think we still
+
+00:21:39
+use to initialize things
+in assignment two,
+
+00:21:43
+but we'll see later that they go
+away because people have come up
+
+00:21:46
+with clever methods,
+in particular doing
+
+00:21:49
+layer normalization, which
+obviates the need to be
+
+00:21:53
+careful on the initialization.
+
+00:21:54
+But you still need to
+initialize things to something.
+
+00:21:59
+OK, then the final
+one, which is also
+
+00:22:04
+something that appears
+in the second assignment
+
+00:22:06
+that I just want to say a
+word about was optimizers.
+
+00:22:09
+So we talked about in class
+stochastic gradient descent
+
+00:22:15
+and did the basic equations for
+stochastic gradient descent.
+
+00:22:19
+And to a first
+approximation, there's
+
+00:22:22
+nothing wrong with
+stochastic gradient descent.
+
+00:22:25
+And if you fiddle
+around enough, you
+
+00:22:27
+can usually get stochastic
+gradient descent actually
+
+00:22:29
+to work well for
+almost any problem.
+
+00:22:32
+But getting it to
+work well is very
+
+00:22:36
+dependent on getting the
+scales of things right,
+
+00:22:39
+of having the right step size.
+
+00:22:41
+And often you have to
+have a learning rate
+
+00:22:43
+schedule with
+decreasing step sizes
+
+00:22:45
+and various other complications.
+
+00:22:47
+So people have come up with
+more sophisticated optimizers
+
+00:22:53
+for neural networks.
+
+00:22:55
+And for complex
+nets, sometimes these
+
+00:22:58
+seem necessary to get
+them to learn well.
+
+00:23:02
+And at any rate, they give
+you lots of margins of safety
+
+00:23:06
+since they're much less
+dependent on you setting
+
+00:23:09
+different hyperparameters.
+
+00:23:10
+And the idea of, well, all
+the methods I mentioned
+
+00:23:15
+and the most
+commonly used methods
+
+00:23:17
+is that for each
+parameter, they're
+
+00:23:20
+accumulating a measure
+of what the gradient has
+
+00:23:25
+been in the past.
+
+00:23:26
+And they've got some
+idea of the scale
+
+00:23:28
+of the gradient, the slope,
+for a particular parameter.
+
+00:23:32
+And then they're
+using that to decide
+
+00:23:34
+how much you move the learning
+rate at each time step.
+
+00:23:38
+So the simplest method
+that was come up
+
+00:23:41
+was this one called Adagrad.
+
+00:23:43
+If you know John
+Duchi, and he was one
+
+00:23:45
+of the co-inventors of this.
+
+00:23:47
+It's simple and nice enough,
+but it tends to stall early.
+
+00:23:51
+Then people came up
+with different methods.
+
+00:23:54
+Adam is the one that's
+on assignment two.
+
+00:23:56
+It's a really good,
+safe place to start.
+
+00:23:59
+But in a way, our word vectors
+have a special property
+
+00:24:04
+because of their
+sparseness that you're
+
+00:24:07
+very sparsely updating them
+because particular words only
+
+00:24:10
+turn up occasionally.
+
+00:24:12
+So people have actually come up
+with particular optimizers that
+
+00:24:17
+sort of have special properties
+for things like word vectors.
+
+00:24:21
+And so these ones
+with the W at the end
+
+00:24:23
+can sometimes be good to try.
+
+00:24:25
+And then, again, there's a
+whole family of extra ideas
+
+00:24:29
+that people have used
+to improve optimizers.
+
+00:24:31
+And if you want to
+learn about that,
+
+00:24:33
+you can go off and do
+an optimization class
+
+00:24:35
+like convex optimization.
+
+00:24:37
+But there are
+ideas like momentum
+
+00:24:39
+and Nesterov acceleration
+and things like that,
+
+00:24:42
+and all of those things people
+also variously try to use.
+
+00:24:45
+But Adam is a good
+name to remember,
+
+00:24:48
+if you remember nothing else.
+
+00:24:50
+OK, that took
+longer than I hoped,
+
+00:24:53
+but I'll get on now
+to language models.
+
+00:24:55
+OK, language models.
+
+00:24:58
+So in some sense, language
+model is just two English words.
+
+00:25:05
+But when in NLP we
+say language models,
+
+00:25:08
+we mean it as a technical term
+that has a particular meaning.
+
+00:25:13
+So the idea of a
+language model is
+
+00:25:17
+something that
+can predict, well,
+
+00:25:20
+what word is going to come
+next or more precisely,
+
+00:25:24
+it's going to put a
+probability distribution
+
+00:25:27
+over what words come next.
+
+00:25:28
+So the students opened their--
+
+00:25:31
+what words are
+likely to come next?
+
+00:25:35
+Bags.
+
+00:25:36
+Bags.
+
+00:25:37
+Laptops.
+
+00:25:38
+Laptops.
+
+00:25:41
+Notebooks.
+
+00:25:41
+Notebooks, yes.
+
+00:25:43
+I have some of those at least.
+
+00:25:45
+OK.
+
+00:25:47
+Yeah.
+
+00:25:50
+So these are likely words.
+
+00:25:53
+And if on top of those we put
+a probability on each one,
+
+00:25:58
+then we have a language model.
+
+00:26:00
+So formally we've got a
+context of preceding items.
+
+00:26:05
+We're putting a
+probability distribution
+
+00:26:08
+over the next item, which means
+that the sum of the estimates
+
+00:26:12
+of this for all the items in
+the vocabulary will sum to 1.
+
+00:26:17
+And if we've defined a P like
+this that predicts probabilities
+
+00:26:21
+of next words, that is called a
+language model, as it says here.
+
+00:26:28
+An alternative way that you
+can think of a language model
+
+00:26:33
+is that a language
+model is a system that
+
+00:26:36
+assigns a probability
+to a piece of text.
+
+00:26:40
+And so we can say
+that a language
+
+00:26:44
+model can take any piece of
+text and give it a probability.
+
+00:26:48
+And the reason we can do that
+is we can use the chain rule.
+
+00:26:51
+So if I want to know the
+probability of any stretch
+
+00:26:55
+of text, I say, given
+my previous definition
+
+00:26:58
+of language model, easy.
+
+00:27:00
+I can do that.
+
+00:27:01
+Probability of x1 with
+a null preceding context
+
+00:27:06
+times the probability of x2,
+given x1, et cetera, along.
+
+00:27:10
+I can do this chain
+rule decomposition
+
+00:27:13
+and then the terms
+of that decomposition
+
+00:27:16
+are precisely what the
+language model, as I defined it
+
+00:27:19
+previously, provides.
+
+00:27:21
+OK, so language models are this
+essential technology for NLP.
+
+00:27:27
+Just about everything
+from the simplest places
+
+00:27:31
+forward where people do
+things with human language
+
+00:27:35
+and computers, people
+use language models.
+
+00:27:39
+In particular, they
+weren't something
+
+00:27:41
+that got invented in
+2022 with ChatGPT.
+
+00:27:45
+Language models have
+been central to NLP,
+
+00:27:49
+at least since the 80s.
+
+00:27:51
+The idea of them goes
+back to at least the 50s.
+
+00:27:54
+So any time you're
+typing on your phone
+
+00:27:57
+and it's making
+suggestions of next words,
+
+00:28:00
+regardless of whether you
+like those suggestions or not,
+
+00:28:03
+those suggestions
+are being generated
+
+00:28:06
+by a language
+model, traditionally
+
+00:28:10
+a compact, not very
+good language model
+
+00:28:13
+so it can run quickly and very
+little memory in your keyboard
+
+00:28:17
+application.
+
+00:28:19
+If you go on Google and
+you start typing some stuff
+
+00:28:23
+and it's telling you stuff that
+could come after it to complete
+
+00:28:27
+your query, well,
+again, that's being
+
+00:28:30
+generated by a language model.
+
+00:28:32
+So how can you build
+a language model?
+
+00:28:35
+So before getting into
+neural language models,
+
+00:28:38
+I've got just a few
+slides to tell you
+
+00:28:41
+about the old days
+of language modeling.
+
+00:28:44
+So this is how
+language models were
+
+00:28:46
+built from 1975 until
+effectively around about 2012.
+
+00:28:56
+So we want to put probabilities
+on these sequences.
+
+00:29:03
+And the way we're
+going to do it is we're
+
+00:29:06
+going to build what's called
+an n-gram language model.
+
+00:29:10
+And so this is
+meaning we're going
+
+00:29:12
+to look at short
+word subsequences
+
+00:29:15
+and use them to predict.
+
+00:29:17
+So n is a variable
+describing how
+
+00:29:20
+short are the word
+sequences that we're
+
+00:29:22
+going to use to predict.
+
+00:29:24
+So if we just look
+at the probabilities
+
+00:29:27
+of individual words, we have
+a unigram language model.
+
+00:29:31
+If we look at probabilities of
+pairs of words, bigram language
+
+00:29:35
+model, probabilities of three
+words, trigram language models,
+
+00:29:40
+probabilities of more
+than three words,
+
+00:29:43
+they get called four-gram
+language models,
+
+00:29:45
+five-gram language models,
+six-gram language models.
+
+00:29:49
+So for people with a
+classics education,
+
+00:29:51
+this is horrific of course.
+
+00:29:53
+In particular, not
+even these ones
+
+00:29:56
+are correct because
+gram is a Greek root,
+
+00:30:01
+so it should really have
+Greek numbers in front here.
+
+00:30:04
+So you should have
+monograms and diagrams.
+
+00:30:07
+And actually so the
+first person who
+
+00:30:09
+introduced the idea
+of n gram models
+
+00:30:11
+was actually Claude Shannon
+when he was working out
+
+00:30:14
+information theory, the same
+guy that did cross entropy
+
+00:30:17
+and all of that.
+
+00:30:18
+And if you look at his 1951
+paper, he uses diagrams,
+
+00:30:23
+but the idea died about
+there and everyone else--
+
+00:30:26
+this is what people
+say in practice.
+
+00:30:30
+It's quite cute.
+
+00:30:31
+I like it and I see
+a practical notation.
+
+00:30:34
+So to build these models,
+the idea is, look,
+
+00:30:39
+we're just going to count how
+often different n-grams appear
+
+00:30:44
+in text and use those to build
+our probability estimates.
+
+00:30:49
+And in particular,
+our trick is that we
+
+00:30:52
+make a Markov assumption.
+
+00:30:54
+So that if we're predicting
+the next word based
+
+00:30:58
+on a long context, we
+say, tell you what?
+
+00:31:02
+We're not going
+to use all of it.
+
+00:31:03
+We're only going to use the
+most recent n minus 1 words.
+
+00:31:09
+So we have this big context
+and we throw most of it away.
+
+00:31:13
+And so if we're predicting
+word xt plus 1 based on simply
+
+00:31:18
+the preceding n minus 1
+words, well then we can make
+
+00:31:22
+the prediction using n-grams--
+
+00:31:26
+the fly, whatever it is.
+
+00:31:30
+If we use n is 3, we'd have
+a trigram here and normalize
+
+00:31:37
+by a bigram down here.
+
+00:31:39
+And that would give us
+relative frequencies
+
+00:31:43
+of the different terms.
+
+00:31:46
+So we can do that
+simply by counting
+
+00:31:50
+how often n-grams occur
+in a large amount of text
+
+00:31:56
+and simply dividing
+through by the counts
+
+00:31:59
+and that gives us a
+relative frequency
+
+00:32:02
+estimate of the probability
+of different continuations.
+
+00:32:06
+Does that make sense?
+
+00:32:08
+Yeah, that's a way to do it.
+
+00:32:09
+OK, so suppose we're learning
+a four-gram language model
+
+00:32:16
+and we've got a piece of
+text, as the Proctor started
+
+00:32:19
+the clock, the
+students open their.
+
+00:32:22
+So well, to estimate
+things, we are
+
+00:32:26
+going to throw away all but
+the preceding three words.
+
+00:32:30
+So we're going to estimate
+based on students open there.
+
+00:32:34
+And so we're going to
+work out the probabilities
+
+00:32:36
+by looking for
+counts of students
+
+00:32:39
+open their W and counts
+of students open their.
+
+00:32:44
+So we might have in a
+corpus that students open
+
+00:32:47
+their occurred 1,000 times,
+students open their books
+
+00:32:51
+occurred 400 times.
+
+00:32:53
+And so we'd say the
+probability estimate
+
+00:32:55
+is simply 0.4 for books.
+
+00:32:58
+If exams occurred 100 times,
+the probability estimate
+
+00:33:02
+is 0.1 for exams.
+
+00:33:08
+And well, you can
+see that this is bad.
+
+00:33:12
+It's not terrible because if
+you are going to try and predict
+
+00:33:15
+the next word in a
+simple way, looking
+
+00:33:18
+at the immediately prior words
+are the most helpful words
+
+00:33:21
+to look at.
+
+00:33:22
+But it's clearly primitive
+because if you've
+
+00:33:27
+known that the prior text
+was as the Proctor started
+
+00:33:30
+the clock, that makes it sound
+likely that the words should
+
+00:33:33
+have been exams, where since
+you're estimating just based
+
+00:33:36
+on students open
+theirs, well, you'd
+
+00:33:38
+be more likely to choose books
+because it's more common.
+
+00:33:43
+So a crude estimate, but it's
+a decent enough place to start.
+
+00:33:49
+It's a crude estimate that could
+be problematic in other ways.
+
+00:33:54
+I mean, why else might we
+get into troubles by using
+
+00:33:59
+this probability estimate?
+
+00:34:03
+Yeah?
+
+00:34:06
+So there are a lot of n-grams.
+
+00:34:08
+Yeah, so there
+are a lot of words
+
+00:34:10
+and therefore there
+are a lot of n-grams.
+
+00:34:13
+Yeah.
+
+00:34:13
+So that's a problem.
+
+00:34:14
+We'll come to it later.
+
+00:34:16
+Anything else?
+
+00:34:17
+Maybe up the back.
+
+00:34:18
+The word W might not even
+show up in the training data
+
+00:34:21
+so you might just have
+a count 0 for that.
+
+00:34:23
+Yeah.
+
+00:34:24
+Yeah.
+
+00:34:26
+So if we're counting over
+any reasonable sized corpus,
+
+00:34:31
+there are lots of words
+that we just are not
+
+00:34:35
+going to have seen
+that they never
+
+00:34:38
+happen to occur in the
+text that we counted over.
+
+00:34:42
+So if you start thinking
+students open their,
+
+00:34:45
+there are lots of things
+that you could put there.
+
+00:34:49
+Students open their
+accounts or if the students
+
+00:34:52
+are doing dissections
+in a biology class,
+
+00:34:55
+maybe students open their frogs.
+
+00:34:57
+I don't know.
+
+00:34:59
+There are lots of words
+that in some context
+
+00:35:03
+would actually be
+possible and lots of them
+
+00:35:06
+that we won't have seen.
+
+00:35:08
+And so we'd give them a
+probability estimate of 0.
+
+00:35:11
+And that tends to be
+an especially bad thing
+
+00:35:13
+to do with probabilities,
+because once we
+
+00:35:15
+have a probability
+estimate of 0,
+
+00:35:17
+any computations that
+we do that involve
+
+00:35:19
+that will instantly go to 0.
+
+00:35:22
+So we have to deal with
+some of these problems.
+
+00:35:24
+So for that sparsity
+problem, yeah,
+
+00:35:27
+that we could have the word
+never occurred in the numerator
+
+00:35:34
+and so simply done, we get
+a probability estimate of 0.
+
+00:35:39
+The way that was dealt
+with was that people just
+
+00:35:42
+hacked the counts a little
+to make it non-zero.
+
+00:35:44
+So there are lots of
+ways that are explored,
+
+00:35:47
+but the easiest way is you just
+added a little delta like 0.252
+
+00:35:53
+to counts.
+
+00:35:55
+So things that you never saw
+got a count of 0.25 in total,
+
+00:35:59
+and things you saw once
+got a count of 1.25
+
+00:36:02
+and then there are
+no zeros anymore.
+
+00:36:04
+Everything is possible.
+
+00:36:07
+You could think then there's
+a second problem that, wait,
+
+00:36:10
+you might never have seen
+students open their before.
+
+00:36:14
+And so that means your
+denominator is just undefined
+
+00:36:20
+and you don't have any counts
+in the numerator either.
+
+00:36:23
+So you need to do
+something different there.
+
+00:36:26
+And the standard trick
+that was used then
+
+00:36:28
+was that you did back off.
+
+00:36:31
+So if I couldn't estimate words
+coming after students open
+
+00:36:35
+their, you'd just worked
+out the estimates for words
+
+00:36:39
+coming after open their.
+
+00:36:41
+And if I couldn't
+estimate that, you just
+
+00:36:44
+use the estimate of
+words coming after their.
+
+00:36:47
+So you use less and less context
+until you could get an estimate
+
+00:36:50
+that you could use.
+
+00:36:53
+But something to
+note is that we've
+
+00:36:56
+got these conflicting pressures
+now so that on the one hand,
+
+00:37:00
+if you want to come up
+with a better estimate
+
+00:37:04
+that you would like to
+use more context, i.e.
+
+00:37:07
+to have a larger n-gram.
+
+00:37:09
+But on the other hand, as you
+use more conditioning words,
+
+00:37:18
+well, the storage size
+problem someone mentioned
+
+00:37:22
+gets worse and worse because the
+number of n-grams that you have
+
+00:37:25
+to know about is
+going up exponentially
+
+00:37:27
+with the size of the
+context, but also
+
+00:37:31
+your sparseness problems
+are getting way,
+
+00:37:33
+way worse and you're
+almost necessarily going
+
+00:37:36
+to be ending up seeing zeros.
+
+00:37:38
+And so because of that,
+in practice where things
+
+00:37:42
+tended to max out was five.
+
+00:37:46
+And occasionally people use
+six-grams and seven-grams.
+
+00:37:50
+But most of the time,
+between the sparseness
+
+00:37:54
+and the cost of
+storage, five-grams
+
+00:37:56
+was the largest thing
+people dealt with.
+
+00:37:59
+So a famous resource
+from back in the 2000's
+
+00:38:05
+decade that Google released
+was Google n-grams, which
+
+00:38:08
+was built on a trillion word web
+corpus and had counts of n-grams
+
+00:38:15
+and it gave counts of
+n-grams up to n equals 5.
+
+00:38:18
+And that is where they stopped.
+
+00:38:21
+OK.
+
+00:38:22
+Well, we've said
+the storage problem.
+
+00:38:24
+The storage problem
+is, well, to do this,
+
+00:38:26
+you need to store these counts.
+
+00:38:28
+The number of counts is
+going up exponentially
+
+00:38:31
+in the amount of context size.
+
+00:38:35
+OK.
+
+00:38:36
+But what's good about
+n-gram language models,
+
+00:38:39
+they're really easy to build.
+
+00:38:42
+You can build one
+yourself in a few minutes
+
+00:38:45
+when you want to have a
+bit of fun on the weekend.
+
+00:38:48
+All you have to do is start
+storing these counts for n-grams
+
+00:38:55
+and you can use them
+to predict things.
+
+00:38:57
+So at least if you do it over
+a small corpus like a couple
+
+00:39:01
+of million words of text you can
+build an n-gram language model
+
+00:39:07
+in seconds on your laptop or
+you have to write the software.
+
+00:39:11
+OK, a few minutes to
+write the software.
+
+00:39:13
+But building the
+model takes seconds
+
+00:39:14
+because there's no
+training a neural network.
+
+00:39:17
+All you do is count how
+often n-grams occur.
+
+00:39:21
+And so once you've
+done that, you
+
+00:39:24
+can then run an n-gram language
+model to generate text.
+
+00:39:28
+We could do text
+generation before ChatGPT.
+
+00:39:32
+So if I have a trigram
+language model,
+
+00:39:35
+I can start off with
+some words, today the,
+
+00:39:38
+and I could look at
+my stored n-grams
+
+00:39:43
+and get a probability
+distribution over next words.
+
+00:39:46
+And here they are.
+
+00:39:48
+Note the strong patterning of
+these probabilities because,
+
+00:39:56
+remember, they're all
+derived from counts
+
+00:39:58
+that are being normalized.
+
+00:40:00
+So really, these are
+words that occurred once.
+
+00:40:03
+These are words
+that occurred twice.
+
+00:40:05
+These are words that occurred
+four times in this context.
+
+00:40:08
+So they're, in some
+sense, crude when you
+
+00:40:11
+look at them more carefully.
+
+00:40:13
+So what we could do
+is then at this point,
+
+00:40:16
+we roll a die and get a
+random number from 0 to 1.
+
+00:40:22
+And we can use that to sample
+from this distribution.
+
+00:40:27
+Sorry.
+
+00:40:27
+Yeah.
+
+00:40:30
+So we sample from
+this distribution.
+
+00:40:32
+And so that if we generate
+as our random number
+
+00:40:39
+something like 0.35, if we go
+down from the top, we'd say,
+
+00:40:46
+OK, we've sampled the word
+price, today, the price.
+
+00:40:50
+And then we repeat over.
+
+00:40:51
+We condition on that,
+probability distribution
+
+00:40:54
+of the next word.
+
+00:40:56
+We generate a random
+number and use it to sample
+
+00:40:58
+from the distribution.
+
+00:41:00
+We say generate 0.2.
+
+00:41:02
+And so we choose of.
+
+00:41:05
+We now condition on that.
+
+00:41:06
+We get a probability
+distribution.
+
+00:41:09
+We generate a random number,
+which is 0.5 or something.
+
+00:41:13
+And so we get gold coming out.
+
+00:41:15
+And we can say, today
+the price of gold.
+
+00:41:18
+And we can keep on doing
+this and generate some text.
+
+00:41:22
+And so here's some
+text generated
+
+00:41:25
+from 2 million words
+of training data
+
+00:41:28
+using a trigram language model.
+
+00:41:31
+Today, the price of gold per
+ton, while production of shoe
+
+00:41:35
+lasts and shoe industry.
+
+00:41:37
+The bank intervened just after
+it considered and rejected
+
+00:41:40
+an IMF demand to
+rebuild depleted
+
+00:41:43
+European stocks, September
+3 and primary $0.76 a share.
+
+00:41:51
+OK, that text isn't
+great, but I actually
+
+00:41:55
+want people to be in
+a positive mood today.
+
+00:41:59
+And actually, it's not so bad.
+
+00:42:04
+It's surprisingly grammatical.
+
+00:42:07
+I mean, in particular,
+I lowercased everything.
+
+00:42:10
+So this is the
+IMF that should be
+
+00:42:12
+capitalized of the
+International Monetary Fund.
+
+00:42:15
+There are big pieces of
+this that even make sense.
+
+00:42:19
+The bank intervened
+just after it considered
+
+00:42:22
+and rejected an IMF demand.
+
+00:42:25
+That's pretty much making
+sense as a piece of text.
+
+00:42:30
+So it's mostly grammatical.
+
+00:42:34
+It looks like English text.
+
+00:42:36
+I mean, it makes no sense.
+
+00:42:38
+It's really incoherent.
+
+00:42:40
+So there's work to do.
+
+00:42:42
+But what was already--
+you could see
+
+00:42:45
+that even these simple n-gram
+models, from a very low level,
+
+00:42:52
+you could approach what
+text and human language
+
+00:42:56
+worked like in from below.
+
+00:42:59
+And I could easily
+make this better even
+
+00:43:01
+with an n-gram language
+model because rather
+
+00:43:04
+than 2 million
+words of text, if I
+
+00:43:05
+trained on 10 million words
+of text, it'd be better.
+
+00:43:08
+If I then rather
+than a trigram model,
+
+00:43:10
+could go to a four-gram
+model and get better.
+
+00:43:12
+And you'd start getting better
+and better approximations
+
+00:43:18
+of text.
+
+00:43:20
+And so this is essentially what
+people did until about 2012.
+
+00:43:27
+And really, the same story
+that people tell today
+
+00:43:33
+that scale will solve everything
+is exactly the same story
+
+00:43:37
+that people used to
+tell in the early 2010's
+
+00:43:41
+with these n-gram
+language models.
+
+00:43:43
+If you weren't getting
+a good enough results
+
+00:43:45
+with your 10 million words of
+text and a trigram language
+
+00:43:48
+model, the answer
+was that if you
+
+00:43:51
+had 100 million words of text
+and a four-gram language model,
+
+00:43:55
+you'd do better.
+
+00:43:55
+And then if you had
+a trillion words
+
+00:43:58
+of text and a five-gram
+language model, you'd do better.
+
+00:44:01
+And wouldn't it be good if we
+could collect 10 trillion words
+
+00:44:03
+of text so we could train an
+even better n-gram language
+
+00:44:07
+model, same strategy?
+
+00:44:09
+But it turns out
+that sometimes you
+
+00:44:11
+can do better with better
+models as well as simply scale.
+
+00:44:16
+And so things got reinvented
+and started again with building
+
+00:44:21
+neural language models.
+
+00:44:24
+And so how can we build
+a neural language model?
+
+00:44:28
+So we've got the same task
+of having a sequence of words
+
+00:44:33
+and we want to put a
+probability estimate
+
+00:44:36
+over what word comes next.
+
+00:44:39
+And so the simplest
+way you could
+
+00:44:41
+do that, which you'll
+hopefully of all have
+
+00:44:43
+thought of because it connects
+what we did in earlier classes.
+
+00:44:48
+Look, we already had this idea
+that we could have represent
+
+00:44:53
+a context by the concatenation
+of some word vectors,
+
+00:44:57
+and we could put that
+into a neural network
+
+00:45:01
+and we could use that
+to predict something.
+
+00:45:04
+And in the example I did in the
+last couple of classes, what
+
+00:45:08
+we used it to predict was,
+is the center word a location
+
+00:45:12
+or not a location,
+just a binary choice.
+
+00:45:16
+But that's not the only
+thing we could predict.
+
+00:45:18
+We could have predicted lots of
+things with this neural network.
+
+00:45:21
+We could have predicted
+whether the piece of text
+
+00:45:23
+was positive or negative.
+
+00:45:25
+We could have predicted
+whether it was
+
+00:45:27
+written in English or Japanese.
+
+00:45:29
+We could predict lots of things.
+
+00:45:31
+So one thing we could
+choose to predict
+
+00:45:33
+is we could choose to predict
+what word is going to come next
+
+00:45:37
+after this window of text.
+
+00:45:38
+We'd have a model just like
+this one, apart from up the top.
+
+00:45:42
+Instead of doing this
+binary classification,
+
+00:45:45
+we'd do a many-many
+way classification
+
+00:45:48
+over what is the next
+word that is going
+
+00:45:51
+to appear in the piece of text,
+and that would then give us
+
+00:45:55
+a neural language model.
+
+00:45:57
+In particular, it gives us a
+fixed window neural language
+
+00:46:01
+model so that we do the
+same Markov assumption
+
+00:46:06
+trick of throwing away
+the further back context.
+
+00:46:10
+And so for the
+fixed window, we'll
+
+00:46:15
+use word embeddings,
+which you can concatenate.
+
+00:46:19
+We'll put it through
+a hidden layer
+
+00:46:21
+and then we'll take the
+output of that hidden layer,
+
+00:46:25
+multiply it by another
+layer, say, and then
+
+00:46:29
+put that through a softmax and
+get an output distribution.
+
+00:46:33
+And so this gives us a fixed
+window neural language model.
+
+00:46:38
+And, apart from the
+fact that we're now
+
+00:46:41
+doing a classification
+over many-many classes,
+
+00:46:46
+this is exactly like
+what we did last week.
+
+00:46:49
+So it should look familiar.
+
+00:46:52
+It's also like what you're
+doing for assignment two.
+
+00:46:56
+And so this is essentially
+the first neural language
+
+00:47:00
+model that was proposed.
+
+00:47:04
+So in particular, Yoshua Bengio,
+really right at the beginning
+
+00:47:09
+of the 21st Century, suggested
+that you could do this,
+
+00:47:13
+that rather than using
+an n-gram language model,
+
+00:47:16
+you could use a fixed window
+neural language model.
+
+00:47:20
+And even at that point,
+he and colleagues
+
+00:47:24
+were able to get some positive
+results from this model.
+
+00:47:28
+But at the time, it
+wasn't widely noticed.
+
+00:47:32
+It didn't really take
+off that much and it was
+
+00:47:36
+for a combination of reasons.
+
+00:47:37
+When there was only
+a fixed window,
+
+00:47:40
+it was not that different
+to n-grams in some sense.
+
+00:47:44
+And although the
+neural network could
+
+00:47:45
+give better generalization,
+it could be argued
+
+00:47:49
+rather than using counts.
+
+00:47:51
+I mean, in practice,
+neural nets were still
+
+00:47:55
+hard to run without GPUs.
+
+00:47:58
+And people felt-- and I think
+in general this was the case--
+
+00:48:02
+that you could get more oomph
+by doing the scale story
+
+00:48:06
+and collecting your n-gram
+counts on hundreds of billions
+
+00:48:11
+of words of text rather
+than trying to make
+
+00:48:14
+a neural network out of it.
+
+00:48:16
+And so it didn't really
+especially take off
+
+00:48:19
+at that time.
+
+00:48:20
+But in principle, it
+seemed a nice thing.
+
+00:48:23
+It got rid of the
+sparsity problem.
+
+00:48:26
+It got rid of the storage costs.
+
+00:48:28
+You no longer have to
+store all observed n-grams.
+
+00:48:31
+You just have to
+store the parameters
+
+00:48:33
+of your neural network.
+
+00:48:35
+But it didn't solve
+all the problems
+
+00:48:37
+that we'd like to solve.
+
+00:48:39
+So in particular, we still
+have this problem of the Markov
+
+00:48:43
+assumption that we're just using
+a small fixed context beforehand
+
+00:48:48
+to predict from.
+
+00:48:50
+And there are some disadvantages
+to enlarging that window
+
+00:48:55
+and there's no fixed window
+that's ever big enough.
+
+00:49:01
+There's another thing that
+if you look technically
+
+00:49:04
+at this model that might make
+you suspicious of it, which
+
+00:49:09
+is when we have words
+in different positions,
+
+00:49:15
+that those words in
+different positions
+
+00:49:18
+will be treated by
+completely different subparts
+
+00:49:22
+of this matrix W. So you might
+think that, OK, for predicting
+
+00:49:29
+that books comes next, the
+fact that this is a student
+
+00:49:34
+is important, but it doesn't
+matter so much exactly where
+
+00:49:39
+the word student occurs.
+
+00:49:41
+The context could have been
+the students slowly open their
+
+00:49:47
+and it's still
+the same students.
+
+00:49:49
+We've just got a bit
+different linguistic structure
+
+00:49:52
+where this W matrix would
+be using completely separate
+
+00:49:55
+parameters to be learning
+stuff about student
+
+00:49:58
+here versus student
+in this position.
+
+00:50:01
+So that seems
+inefficient and wrong.
+
+00:50:05
+And so that suggested
+that we need
+
+00:50:08
+a different kind of
+neural architecture
+
+00:50:11
+that can process
+any length of input
+
+00:50:15
+and can use the same
+parameters to say,
+
+00:50:19
+hey, I saw the word student.
+
+00:50:21
+That's evidence that things
+like books, exams, homework
+
+00:50:24
+will be turning up regardless
+of where it occurs.
+
+00:50:27
+And so that then
+led to exploration
+
+00:50:31
+of this different neural
+network architecture
+
+00:50:34
+called recurrent
+neural networks, which
+
+00:50:36
+is what I'll go on to next.
+
+00:50:38
+But before I do, is everyone
+basically OK with what
+
+00:50:41
+a language model is?
+
+00:50:43
+Yeah.
+
+00:50:44
+No questions?
+
+00:50:48
+OK.
+
+00:50:50
+Recurrent neural networks.
+
+00:50:55
+So recurrent neural networks
+is a different family
+
+00:51:01
+of neural networks.
+
+00:51:02
+So effectively in this class,
+we see several neural network
+
+00:51:06
+architectures.
+
+00:51:09
+So in some sense, the
+first architecture we saw
+
+00:51:12
+was word2vec.
+
+00:51:14
+It's a very simple encoder
+decoder architecture.
+
+00:51:20
+The second family we
+saw was feedforward
+
+00:51:25
+networks or fully connected
+layer classic neural networks.
+
+00:51:30
+And the third family
+we're going to see
+
+00:51:32
+is recurrent neural networks,
+which have different kinds.
+
+00:51:35
+And then we'll go on and go
+on to transformer models.
+
+00:51:39
+So the idea of a
+recurrent neural network
+
+00:51:43
+is that you've got
+one set of weights
+
+00:51:47
+that are going to be applied
+through successive moments
+
+00:51:51
+in time, i.e.
+
+00:51:53
+sets of positions in the text.
+
+00:51:56
+And as you do that, you're
+going to update the parameters
+
+00:51:59
+as you go.
+
+00:52:01
+We'll go through this in
+quite a bit of detail.
+
+00:52:04
+But here's the idea of it.
+
+00:52:06
+So we've got the
+students open their
+
+00:52:09
+and we want to predict
+with that and the way
+
+00:52:12
+that we're going to do it--
+
+00:52:15
+OK.
+
+00:52:16
+I've still got four
+words in my example.
+
+00:52:18
+So I can put stuff down
+the left side of the slide.
+
+00:52:21
+But there could
+have been 24 words
+
+00:52:23
+with recurrent neural
+networks because they can deal
+
+00:52:26
+with any length of context.
+
+00:52:28
+OK, so as before,
+our words start off
+
+00:52:32
+as just words or one hot vectors
+and we can look up their word
+
+00:52:36
+embeddings just like before.
+
+00:52:39
+OK, but now to compute
+probabilities for the next word,
+
+00:52:44
+we're going to do
+something different.
+
+00:52:47
+So our hidden layer is
+going to be recurrent.
+
+00:52:51
+And by recurrent,
+it means we're going
+
+00:52:53
+to change a hidden
+state at each time step
+
+00:52:58
+as we proceed through the
+text from left to right.
+
+00:53:01
+So we're going to start
+off with an h0, which
+
+00:53:05
+is the initial hidden state,
+which can actually just
+
+00:53:08
+be all zeros.
+
+00:53:10
+And then at each time step,
+what we're going to do
+
+00:53:14
+is we're going to multiply
+the previous hidden state
+
+00:53:19
+by a weight matrix.
+
+00:53:21
+We're going to take
+a word embedding
+
+00:53:23
+and multiply it by
+a weight matrix,
+
+00:53:26
+and then we're going to sum the
+results of those two things,
+
+00:53:30
+and that's going to give
+us a new hidden state.
+
+00:53:32
+So that hidden state will then
+store a memory of everything
+
+00:53:38
+that's been seen so far.
+
+00:53:40
+So we'll do that and then
+we'll continue along.
+
+00:53:44
+So we'll multiply
+the next word vector
+
+00:53:46
+by the same weight matrix, we.
+
+00:53:50
+We multiply the
+previous hidden state
+
+00:53:54
+by the same weight matrix,
+Wh and we add them together
+
+00:53:58
+and get a new representation.
+
+00:54:02
+I've only said this bit,
+so I've left out a bit.
+
+00:54:05
+Commonly, there are two
+other things you're doing.
+
+00:54:08
+You're adding on a bias
+term because we usually
+
+00:54:10
+separate out a bias term.
+
+00:54:12
+And you're putting things
+through a non-linearity.
+
+00:54:15
+So I should make
+sure I mention that.
+
+00:54:17
+And for recurrent
+neural networks,
+
+00:54:20
+most commonly this
+non-linearity is actually
+
+00:54:23
+been the tanh function.
+
+00:54:24
+So it's balanced on the
+positive and negative side.
+
+00:54:27
+And so keep on doing
+that through each step.
+
+00:54:31
+And so the idea is once
+we've gone to here,
+
+00:54:34
+this h4's hidden state
+is a hidden state,
+
+00:54:38
+in some sense has read
+the text up until now.
+
+00:54:41
+It's seen all of the
+students open their
+
+00:54:44
+and if the word
+students occurred
+
+00:54:46
+in any of these
+positions, it will
+
+00:54:48
+have been multiplied by the
+same we matrix and added
+
+00:54:53
+into the hidden state.
+
+00:54:54
+So it's got a
+cleaner low parameter
+
+00:54:57
+way of incorporating in the
+information that's seen.
+
+00:55:01
+So now I want to
+predict the next word.
+
+00:55:04
+And to predict the next
+word I'm then going to do,
+
+00:55:08
+based on the final hidden
+state, the same thing
+
+00:55:11
+I did thing I did before.
+
+00:55:14
+So I'm going to multiply
+that hidden state by a matrix
+
+00:55:17
+and add another bias and
+stick that through a softmax
+
+00:55:21
+and use that to sample
+from that softmax.
+
+00:55:26
+Well, the softmax will
+give me a language model,
+
+00:55:28
+a probability over
+all next words
+
+00:55:31
+and I can sample from it
+to generate the next word.
+
+00:55:36
+That makes sense?
+
+00:55:39
+OK, recurrent neural networks.
+
+00:55:49
+OK.
+
+00:55:50
+So for recurrent
+neural networks,
+
+00:55:52
+we can now process any
+length of preceding context
+
+00:55:56
+and we'll just put more and
+more stuff in our hidden state.
+
+00:56:02
+So our computation is using
+information from many steps
+
+00:56:07
+back.
+
+00:56:09
+Our model size doesn't increase
+for having a long context.
+
+00:56:15
+We have to do more computation
+for a long context,
+
+00:56:19
+but our representation
+of that long context
+
+00:56:21
+just remains this fixed
+size hidden vector,
+
+00:56:24
+h of whatever dimension it is.
+
+00:56:27
+So there's no exponential
+blow out anymore.
+
+00:56:30
+There's the same weights
+apply in every time step.
+
+00:56:33
+So there's a symmetry in
+how inputs are processed.
+
+00:56:36
+There are some catches.
+
+00:56:39
+The biggest catch in practice
+is that recurrent computation
+
+00:56:43
+is slow.
+
+00:56:45
+So for the feedforward layer,
+we just had an input vector.
+
+00:56:50
+We multiply it by matrix.
+
+00:56:51
+We multiplied it by a
+matrix however many times,
+
+00:56:54
+and then at the end we're done.
+
+00:56:56
+Whereas here, we've stuck
+with this sequentiality
+
+00:57:00
+that you have to be doing
+one hidden vector at a time.
+
+00:57:04
+In fact, this is
+going against what
+
+00:57:06
+I said at the beginning of class
+because essentially here you're
+
+00:57:09
+doing a for loop.
+
+00:57:11
+You're going through
+for time equals 1 to t
+
+00:57:14
+and then you're generating
+a term each hidden vector.
+
+00:57:18
+And that's one of the
+big problems with RNNs
+
+00:57:20
+that have led them
+to fall out of favor.
+
+00:57:24
+There's another
+problem that we'll
+
+00:57:27
+look at more is that in
+theory, this is perfect.
+
+00:57:32
+You're just incorporating
+all of the past context
+
+00:57:36
+in your hidden vector.
+
+00:57:37
+In practice, it tends
+not to work perfectly
+
+00:57:41
+because although stuff you
+saw back here is in some sense
+
+00:57:47
+still alive in the hidden
+vector as you come across here,
+
+00:57:51
+that your memory of it
+gets more and more distant.
+
+00:57:55
+And it's the words
+that you saw recently
+
+00:57:57
+that dominate the hidden state.
+
+00:57:59
+Now, in some sense,
+that's right,
+
+00:58:01
+because the recent stuff is
+the most important stuff that's
+
+00:58:04
+freshest in your mind.
+
+00:58:05
+It's the same with human beings.
+
+00:58:08
+They tend to forget stuff
+from further back as well.
+
+00:58:11
+But RNNs, especially in the
+simple form that I've just
+
+00:58:14
+explained, forget stuff from
+further back rather too quickly
+
+00:58:20
+and we'll come back to that
+again in Thursday's class.
+
+00:58:27
+OK.
+
+00:58:28
+So for training an
+RNN language model,
+
+00:58:32
+the starting off point is we
+get a big corpus of text again
+
+00:58:36
+and then we're going to
+compute for each time step
+
+00:58:43
+a prediction of the
+probability of next words.
+
+00:58:47
+And then there's going to
+be an actual next word.
+
+00:58:51
+And we're going to use that
+as the basis of our loss.
+
+00:58:56
+So our loss function
+is the cross-entropy
+
+00:58:59
+between the
+predicted probability
+
+00:59:02
+and what the actual next word
+that we saw is, which again,
+
+00:59:06
+as in the example
+I showed before,
+
+00:59:08
+is just the negative
+log likelihood
+
+00:59:11
+of the actual next word.
+
+00:59:13
+Ideally, you'd like to
+predict the actual next word
+
+00:59:16
+with probability 1, which means
+the negative log of 1 would be 0
+
+00:59:23
+and there'd be no loss.
+
+00:59:24
+But in practice, if you
+give it an estimate of 0.5,
+
+00:59:27
+there's only a little
+bit of loss and so on.
+
+00:59:30
+And so to get our overall
+objective function,
+
+00:59:35
+we work out the average loss,
+the average negative log
+
+00:59:40
+likelihood of predicting
+each word in turn.
+
+00:59:43
+So showing that as pictures,
+if our corpus is the students
+
+00:59:47
+opened their exams,
+we're first of all,
+
+00:59:50
+going to be trying to predict
+what comes after that.
+
+00:59:56
+And we will predict some word
+with different probabilities
+
+01:00:03
+and then we'll say the
+actual next word is students.
+
+01:00:06
+OK, you gave that a
+probability of 0.05, say,
+
+01:00:10
+because all we know was that
+the first word was there.
+
+01:00:13
+OK, there's a loss for
+that, the negative log
+
+01:00:16
+prob given to students.
+
+01:00:19
+We then go on and generate
+the probability estimate
+
+01:00:23
+over the next words and then
+we say, well, the actual word
+
+01:00:27
+is opened.
+
+01:00:28
+What probability estimate
+did you give to that?
+
+01:00:31
+We get a negative
+probability loss.
+
+01:00:33
+Keep on running this along and
+then we sum all of those losses
+
+01:00:39
+and we average them per word.
+
+01:00:41
+And that's our
+average per word loss.
+
+01:00:45
+And we want to make that
+as small as possible.
+
+01:00:49
+And so that's our
+training mechanism.
+
+01:00:52
+And it's important to notice
+that for generating this loss,
+
+01:01:00
+we're not just doing
+free generation.
+
+01:01:01
+We're not just
+saying to the model,
+
+01:01:03
+go off and generate a sentence.
+
+01:01:05
+What we're actually
+doing is at each step,
+
+01:01:08
+we're effectively
+saying, OK, the prefix
+
+01:01:11
+is the students opened.
+
+01:01:13
+What probability distribution
+do you put on next words
+
+01:01:16
+after that?
+
+01:01:18
+Generate it with our
+recurrent neural network
+
+01:01:21
+and then say ask for
+the actual next word.
+
+01:01:24
+What probability estimate
+did you give to their?
+
+01:01:27
+And that's our loss.
+
+01:01:28
+But then what we
+do is stick there
+
+01:01:32
+into our recurrent neural
+network the right answer.
+
+01:01:35
+So we always go back
+to the right answer,
+
+01:01:37
+generate probability
+distribution for next words,
+
+01:01:42
+and then ask, OK,
+what probability
+
+01:01:44
+did you give to the
+actual next word exams?
+
+01:01:47
+And then again, we use
+the actual next word.
+
+01:01:50
+So we do one step
+of generation, then
+
+01:01:53
+we pull it back to what
+was actually generated,
+
+01:01:57
+what was actually in the text.
+
+01:01:59
+And then we ask it for
+guesses over the next word
+
+01:02:02
+and repeat forever.
+
+01:02:03
+And so the fact that we
+don't do free generation,
+
+01:02:06
+but we pull it back to the
+actual piece of text each time
+
+01:02:11
+makes things simple because we
+know what an actual author used
+
+01:02:17
+for the next word.
+
+01:02:19
+And that process is
+called teacher forcing.
+
+01:02:22
+And so the most common way
+to train language models
+
+01:02:27
+is using this teacher
+forcing method.
+
+01:02:30
+I mean, it's not
+perfect in all respects
+
+01:02:32
+because we're not
+actually exploring
+
+01:02:35
+different things the model might
+want to generate on its own
+
+01:02:38
+and seeing what
+comes after them.
+
+01:02:40
+We're only doing the
+tell me the next word
+
+01:02:43
+from some human
+generated piece of text.
+
+01:02:51
+OK.
+
+01:02:52
+So that's how we get losses.
+
+01:02:56
+And then after that,
+we want to, as before,
+
+01:03:01
+use these losses to update the
+parameters of a neural network.
+
+01:03:07
+OK.
+
+01:03:08
+And how do we do that?
+
+01:03:11
+Well, in principle,
+we just have all
+
+01:03:14
+of the texts that
+we've collected,
+
+01:03:16
+which you could think of as
+just a real long sequence of,
+
+01:03:20
+OK, we've got a
+billion words of text.
+
+01:03:22
+Here it is.
+
+01:03:24
+So in theory, you could just run
+your recurrent neural network
+
+01:03:29
+over your billion words of text,
+updating the context as you go.
+
+01:03:34
+But that would make
+it very difficult
+
+01:03:39
+to train a model because
+you'd be accumulating
+
+01:03:42
+these losses for a billion steps
+and you'd have to store them
+
+01:03:47
+and then you'd have
+to store hidden states
+
+01:03:51
+so you could update parameters
+and it just wouldn't work.
+
+01:03:54
+So what we actually do is we cut
+our training data into segments
+
+01:04:00
+of a reasonable
+length, and then we're
+
+01:04:02
+going to run our
+recurrent neural network
+
+01:04:07
+on those segments.
+
+01:04:08
+And then we're going to compute
+a loss for each segment,
+
+01:04:12
+and then we're going to
+update the parameters
+
+01:04:16
+of the recurrent neural
+network based on the losses
+
+01:04:19
+that we found for that segment.
+
+01:04:23
+I describe it here
+as the segments
+
+01:04:25
+being sentences or
+documents, which seems
+
+01:04:28
+a linguistically nice thing.
+
+01:04:30
+It turns out that in recent
+practice, when you're
+
+01:04:34
+wanting to scale most
+efficiently on GPUs,
+
+01:04:39
+people don't bother with
+those linguistic niceties.
+
+01:04:42
+They just say a
+segment is 100 words.
+
+01:04:45
+Just cut every 100 words.
+
+01:04:47
+And the reason why
+that's really convenient
+
+01:04:50
+is you can then create a batch
+of segments, all of which
+
+01:04:53
+are hundreds words long
+and stick those in a matrix
+
+01:04:58
+and do vectorized
+training more efficiently
+
+01:05:02
+and things go great for you.
+
+01:05:05
+OK.
+
+01:05:05
+But there's still
+a few more things
+
+01:05:07
+that we need to know to get
+things to work great for you
+
+01:05:10
+and I'll try and get a bit more
+through this before today ends.
+
+01:05:14
+So we need to know
+about how to work out
+
+01:05:19
+the derivative of
+our loss with respect
+
+01:05:23
+to the parameters of our
+recurrent neural network.
+
+01:05:30
+And the interesting
+case here is these Wh
+
+01:05:34
+parameters are being
+used everywhere
+
+01:05:38
+through the neural network at
+each stage, as are the We ones.
+
+01:05:43
+So they appear at many
+places in the network.
+
+01:05:46
+So how do we work out
+the partial derivatives
+
+01:05:50
+of the loss with respect to
+the repeated weight matrices?
+
+01:05:55
+And the answer to that
+is it's really simple.
+
+01:06:00
+You can just pretend that
+those Wh's in each position
+
+01:06:06
+are different and work out the
+partials with respect to them
+
+01:06:11
+at one position.
+
+01:06:12
+And then to get the
+partials with respect to Wh,
+
+01:06:16
+you just sum whatever you found
+in the different positions.
+
+01:06:21
+And so that is--
+
+01:06:25
+OK, the gradient with
+respect to repeated weight
+
+01:06:28
+is the sum of the gradient with
+respect to each time it appears.
+
+01:06:32
+And the reason why
+that is, it follows
+
+01:06:36
+what I talked about in
+lecture three that we talked--
+
+01:06:41
+or you can also think
+about it in terms
+
+01:06:45
+of what you might remember
+from multivariable chain rules.
+
+01:06:51
+But the way I introduced
+in lecture three
+
+01:06:53
+is the gradient sum
+at outward branches.
+
+01:06:57
+And so what you can think
+about in a case like this
+
+01:07:01
+is that you've got
+a Wh matrix which
+
+01:07:06
+has been copied by identity
+to Wh1, Wh2, Wh3, Wh4, et
+
+01:07:13
+cetera, at each time step.
+
+01:07:15
+And so since those
+are identity copies,
+
+01:07:19
+they have a partial
+derivative with respect
+
+01:07:24
+to each other of one.
+
+01:07:26
+And so then we apply the
+multivariable chain rule
+
+01:07:31
+to these copies.
+
+01:07:33
+And so we've then got an
+outward branching node
+
+01:07:37
+and you're just
+summing the gradients
+
+01:07:40
+to get the total gradient
+of each time for the matrix.
+
+01:07:49
+OK.
+
+01:07:53
+Yeah.
+
+01:07:53
+I mean, there's one other trick
+that's perhaps worth knowing.
+
+01:07:57
+I mean, if you've got segments
+that are hundreds long,
+
+01:08:01
+a common speed up
+is to say, maybe we
+
+01:08:05
+don't actually have to run back
+propagation for 100 time steps.
+
+01:08:09
+Maybe we could just run it
+for 20 time steps and stop,
+
+01:08:12
+which is referred to as
+truncated back propagation
+
+01:08:15
+through time.
+
+01:08:17
+I mean, in practice, that
+tends to be sufficient.
+
+01:08:20
+Note in particular, you're
+still on the forward path
+
+01:08:23
+updating your hidden state
+using your full context.
+
+01:08:27
+But in the back
+propagation, you're
+
+01:08:29
+just cutting it short
+to speed up training.
+
+01:08:35
+OK.
+
+01:08:36
+So just as I did before with
+an n-gram language model,
+
+01:08:40
+we can use RNN language
+model to generate text.
+
+01:08:45
+And it's pretty
+much the same idea,
+
+01:08:48
+except now rather than just
+using counts of n-grams,
+
+01:08:54
+we're using the hidden
+state of our neural network
+
+01:08:56
+to give us the input to a
+probability distribution
+
+01:09:01
+that we can then sample from.
+
+01:09:03
+So I can start with the
+initial hidden state.
+
+01:09:07
+I can use the start
+of sentence symbol.
+
+01:09:10
+I mean, the example I had
+before, I started immediately
+
+01:09:14
+with the, hoping that was
+less confusing the first time.
+
+01:09:18
+But what you should have
+asked is, wait a minute,
+
+01:09:20
+where did the the come from?
+
+01:09:22
+So normally what
+we actually do is
+
+01:09:25
+use a special start
+of sequence symbol
+
+01:09:29
+like this angle bracketed
+S. And so we sort of feed it
+
+01:09:34
+in as a pseudo word, which
+has a word embedding.
+
+01:09:38
+And then based on this,
+we'll be generating
+
+01:09:41
+first words of the text.
+
+01:09:43
+So we end up with some
+representation from which we can
+
+01:09:48
+sample and get the first word.
+
+01:09:51
+So now we don't have
+any actual text.
+
+01:09:54
+So what we're going to do
+is take that generated word
+
+01:09:58
+that we generated and copy
+it down as the next input,
+
+01:10:02
+and then we're going to run a
+next stage of neural network,
+
+01:10:07
+sample from the
+probability distribution
+
+01:10:10
+and x word favorite,
+copy it down
+
+01:10:13
+as the next word of the
+input and keep on generating.
+
+01:10:17
+And so this is referred
+to as a rollout
+
+01:10:20
+that you're continuing
+to roll the dice
+
+01:10:22
+and generate forward and
+generate a piece of text.
+
+01:10:28
+And normally you want
+to stop at some point.
+
+01:10:32
+And the way we can stop at some
+point is we can have a second
+
+01:10:35
+special symbol, the
+angle brackets /S,
+
+01:10:40
+which says end of your sequence.
+
+01:10:44
+So we can generate an
+end of sequence symbol
+
+01:10:46
+and then we can stop.
+
+01:10:49
+And so using this, we can
+generate pieces of text.
+
+01:10:53
+And essentially, this
+is exactly what's
+
+01:10:56
+happening if you use something
+like ChatGPT, that the model is
+
+01:11:00
+a more complicated model that
+we've haven't yet gotten to,
+
+01:11:04
+but it's generating
+the response to you
+
+01:11:06
+by doing this kind of process of
+generating a word at the time,
+
+01:11:11
+treating it as an input and
+generating the next word
+
+01:11:15
+and generating this
+sort of rollout.
+
+01:11:17
+And that's why and it's
+done probabilistically.
+
+01:11:20
+So if you do it multiple times,
+you can get different answers.
+
+01:11:25
+We haven't yet
+gotten to ChatGPT,
+
+01:11:27
+but we can have a
+little bit of fun.
+
+01:11:29
+So you can take this simple
+recurrent neural network
+
+01:11:33
+that we've just
+built here and you
+
+01:11:35
+can train it on
+any piece of text
+
+01:11:37
+and get it to generate stuff.
+
+01:11:40
+So, for example, I can train
+it on Barack Obama's speeches.
+
+01:11:45
+So that's a small corpus.
+
+01:11:46
+He didn't talk that much.
+
+01:11:48
+I've only got a few
+100,000 words of text.
+
+01:11:51
+It's not a huge corpus.
+
+01:11:53
+I'll just show you this and
+then I can answer the question.
+
+01:11:55
+But I can generate from
+it and I get something
+
+01:11:58
+like, the United
+States will step up
+
+01:12:01
+to the cost of a new challenges
+of the American people that
+
+01:12:04
+will share the fact that
+we created the problem.
+
+01:12:07
+They were attacked.
+
+01:12:08
+And so that they have to
+say that all the tasks
+
+01:12:10
+of the final days of war, that
+I will not be able to get this
+
+01:12:13
+done.
+
+01:12:15
+Yeah, well, maybe
+that's slightly better
+
+01:12:18
+than my n-gram language model.
+
+01:12:19
+It's still not perfect, you
+might say, but somewhat better,
+
+01:12:22
+maybe.
+
+01:12:23
+Did you have a question?
+
+01:12:25
+Yeah.
+
+01:12:26
+So it's like creating a
+model like a truncated set
+
+01:12:30
+of the corpus.
+
+01:12:31
+Does that impose some
+kind of limitation
+
+01:12:34
+on how much you can
+produce and still
+
+01:12:37
+have some coherency and the
+meaning of the sentence we're
+
+01:12:41
+creating?
+
+01:12:43
+So yeah.
+
+01:12:44
+So I suggest that we're going
+to chunk the text into 100 word
+
+01:12:49
+units.
+
+01:12:50
+So that's the limit of the
+amount of prior context
+
+01:12:53
+that we're going to use.
+
+01:12:54
+So I mean, that's a
+fair amount, 100 words.
+
+01:12:57
+That's typically
+several sentences.
+
+01:13:00
+But to the extent
+that you wanted
+
+01:13:02
+to even more about the
+further back context,
+
+01:13:05
+you wouldn't be able to.
+
+01:13:07
+And certainly that's
+one of the ways
+
+01:13:10
+in which modern large
+language models are using
+
+01:13:13
+far bigger contexts than that.
+
+01:13:15
+They're now using thousands
+of words of prior context.
+
+01:13:18
+Yeah, absolutely.
+
+01:13:20
+It's a limit on how
+much far back context.
+
+01:13:23
+So in some sense, actually,
+even though in theory
+
+01:13:27
+a recurrent neural network can
+feed in an arbitrary length
+
+01:13:30
+context, as soon as
+I say practically,
+
+01:13:33
+we cut it into
+segments actually that
+
+01:13:36
+means we are making a
+Markov assumption again
+
+01:13:39
+and we're saying the further
+back context doesn't matter.
+
+01:13:43
+Yeah?
+
+01:13:44
+OK.
+
+01:13:45
+A couple more examples.
+
+01:13:48
+So instead of
+Barack Obama, I can
+
+01:13:50
+feed in Harry Potter, which is
+a somewhat bigger corpus of text
+
+01:13:54
+actually, and
+generate from that.
+
+01:13:56
+And so I can get, sorry,
+Harry shouted, panicking.
+
+01:14:00
+I'll leave those brooms
+in London, are they?
+
+01:14:02
+No idea, said nearly
+headless Nick,
+
+01:14:05
+casting low close
+by Cedric carrying
+
+01:14:07
+the last bit of treacle
+charms from Harry's shoulder.
+
+01:14:10
+And to answer him the
+common room perched upon it.
+
+01:14:13
+Four arms held a
+shining knob from when
+
+01:14:16
+the spider hadn't felt. It
+seemed he reached the teams too.
+
+01:14:21
+Well, there you are.
+
+01:14:22
+You can do other things as well,
+so you can train it on recipes
+
+01:14:28
+and generate a recipe.
+
+01:14:31
+This one's a recipe I don't
+suggest you try and cook,
+
+01:14:35
+but it looks like a recipe
+if you don't look very hard.
+
+01:14:40
+Chocolate ranch barbecue.
+
+01:14:43
+Categories: game,
+casseroles, cookies, cookies.
+
+01:14:47
+Yields six servings.
+
+01:14:49
+2 tablespoons of
+Parmesan cheese chopped,
+
+01:14:54
+1 cup of coconut milk
+and three eggs beaten.
+
+01:14:57
+Place each pasta.
+
+01:14:59
+Over layers of lumps.
+
+01:15:01
+Shape mixture into the moderate
+oven and simmer until firm.
+
+01:15:06
+Serve hot in bodied fresh
+mustard, orange and cheese.
+
+01:15:12
+Combine the cheese
+and salt together,
+
+01:15:15
+the dough in a large
+skillet and the ingredients
+
+01:15:19
+and stir in the
+chocolate and pepper.
+
+01:15:22
+Yeah, it's not exactly
+a very consistent recipe
+
+01:15:25
+when it comes down to it.
+
+01:15:27
+It has a language of a
+recipe, but it's absolute--
+
+01:15:32
+maybe if I had scaled it
+more and had a bigger corpus,
+
+01:15:35
+it would have done a bit better.
+
+01:15:36
+But it's definitely not using
+the ingredients there are.
+
+01:15:40
+Let's see.
+
+01:15:41
+It's almost time today, so
+maybe about all I can do is do--
+
+01:15:49
+I can do one more fun
+example and then after that--
+
+01:15:54
+Yeah, I probably should do that
+bit at the start next time.
+
+01:15:56
+So as a variant of building
+RNN language models,
+
+01:16:01
+I mean, so far we've been
+building them over words
+
+01:16:06
+so our token timesteps over,
+which you build it as words.
+
+01:16:12
+I mean, actually
+you can use the idea
+
+01:16:14
+of recurrent neural networks
+over any other size unit
+
+01:16:18
+and people have used
+them for other things.
+
+01:16:20
+So people have used
+them in bioinformatics
+
+01:16:23
+for things like DNA, for having
+gene sequencing or protein
+
+01:16:28
+sequencing or
+anything like that.
+
+01:16:30
+But even staying with language,
+instead of building them
+
+01:16:34
+over words, you can build
+them over characters
+
+01:16:38
+so that I'm generating
+a letter at a time
+
+01:16:43
+rather than a word at a time.
+
+01:16:45
+And so that can
+sometimes be useful
+
+01:16:48
+because it allows us to generate
+things that look like words
+
+01:16:55
+and perhaps have the
+structure of English words.
+
+01:16:59
+And so similarly, there are
+other things that you can do.
+
+01:17:02
+So before I initialized
+the hidden state,
+
+01:17:07
+I said, you just have
+an initial hidden state.
+
+01:17:10
+You can make it
+zeros if you want.
+
+01:17:12
+Well, sometimes we're going
+to build a contextual RNN
+
+01:17:17
+where we can initialize the
+hidden state with something
+
+01:17:20
+else.
+
+01:17:21
+So in particular, I can
+initialize the hidden state
+
+01:17:24
+with the RGB values of a color.
+
+01:17:28
+And so I can have initialized
+the hidden state with the color
+
+01:17:32
+and generate character at a
+time the name of paint colors.
+
+01:17:37
+And I can train a model based
+on paint companies' catalog
+
+01:17:43
+of names of colors and
+their RGB of their colors.
+
+01:17:48
+And then I can give it
+different paint colors
+
+01:17:52
+and it'll come up
+with names for them.
+
+01:17:54
+And it actually does
+an excellent job.
+
+01:17:56
+This one worked really well.
+
+01:17:57
+Look at this.
+
+01:17:59
+This one here is ghastly pink,
+power gray, navel tan, bock
+
+01:18:06
+coe white, horrible
+gray, homestar brown.
+
+01:18:11
+Now, couldn't you just
+imagine finding all
+
+01:18:13
+of these in a paint catalog?
+
+01:18:15
+I mean, some of them are--
+
+01:18:17
+there's some really good ones
+over here in the bottom right.
+
+01:18:20
+This color here is dope and then
+this stoner blue, burble simp,
+
+01:18:29
+stinky bean and turdly.
+
+01:18:33
+Now, I think I've got a real
+business opportunity here
+
+01:18:37
+in the paint company market for
+my recurrent neural network.
+
+01:18:41
+OK, I'll stop there
+for today and do
+
+01:18:43
+more of the science of
+neural networks next time.

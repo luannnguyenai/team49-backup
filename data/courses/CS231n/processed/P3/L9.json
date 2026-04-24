@@ -1,0 +1,111 @@
+{
+    "output_filename": "p3a__cs231n__lecture_9.json",
+    "run_id": "",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_9",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_9::seg1",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of main gateway KP on ViT patch tokenization/positional encoding plus substantial coverage of main transformer tweaks, with formula_heavy slides and item_generation_worthiness marked high.",
+            "target_kp_ids": [
+                "kp_vit_patch_tokenization_and_positional_encoding",
+                "kp_transformer_stability_and_capacity_tweaks"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_9::seg2",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Two main KPs are covered dominantly, including critical gateway FCN segmentation with per-pixel loss, and the unit is formula_heavy with high item_generation_worthiness.",
+            "target_kp_ids": [
+                "kp_semantic_segmentation_as_per_pixel_prediction",
+                "kp_fully_convolutional_segmentation_and_per_pixel_loss",
+                "kp_upsampling_and_u_net_skip_connections"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 6,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_9::seg3",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Main KP coverage is dominant for both the critical gateway detection formulation and the R-CNN progression, and the section is formula_heavy with high item_generation_worthiness.",
+            "target_kp_ids": [
+                "kp_object_detection_as_joint_classification_and_localization",
+                "kp_region_proposals_and_the_r_cnn_progression"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_9::seg4",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "The unit has dominant main coverage for YOLO and substantial main coverage for DETR object queries, with explicit output parameterizations, postprocessing, and high item_generation_worthiness.",
+            "target_kp_ids": [
+                "kp_yolo_one_stage_detection",
+                "kp_detr_object_queries"
+            ],
+            "question_intent": "application",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_9::seg5",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "The main capstone KP on Mask R-CNN is covered dominantly and the unit integrates detection with pixel-level masks, but section flags rate item_generation_worthiness only medium and it is shorter and less derivational.",
+            "target_kp_ids": [
+                "kp_mask_r_cnn_for_instance_segmentation"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 2,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_9::seg6",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Main interpretability KPs on saliency and CAM/Grad-CAM receive substantial-to-dominant coverage, and the section is formula_heavy with high item_generation_worthiness and practical emphasis.",
+            "target_kp_ids": [
+                "kp_cam_and_grad_cam",
+                "kp_saliency_via_input_gradients"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

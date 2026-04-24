@@ -1,0 +1,157 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How is a pretrained encoder typically adapted for a downstream classification task?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Remove the pretraining prediction head, attach a task-specific classifier, and fine-tune the model.",
+        "Keep only the tokenizer and discard all pretrained weights.",
+        "Use the masked-token head unchanged to output class labels directly.",
+        "Train a new encoder from random initialization and freeze the classifier."
+      ],
+      "answer_index": 0,
+      "explanation": "The encoder already produces contextual token representations. A new prediction head maps those representations to task labels, and fine-tuning adjusts the system for the target task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bert_and_encoder_transfer",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "remove this last prediction layer",
+          "linear classifier on top"
+        ],
+        "timestamps": [
+          "00:51:54",
+          "00:52:08"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is BERT-style pretraining more natural for representation or classification tasks than for open-ended generation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Its objective is bidirectional fill-in-the-blank reconstruction, not left-to-right next-token generation.",
+        "Its encoder can only process images, not text.",
+        "It has no contextual token representations.",
+        "It cannot be fine-tuned after pretraining."
+      ],
+      "answer_index": 0,
+      "explanation": "BERT learns to use surrounding context to fill masked positions. That makes it strong for understanding inputs, while causal decoders are a more direct fit for generating continuations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bert_and_encoder_transfer",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "less naturally used",
+          "generate"
+        ],
+        "timestamps": [
+          "00:53:41",
+          "00:53:46"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main idea behind parameter-efficient fine-tuning methods such as prefix tuning or low-rank adaptation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Keep most pretrained weights fixed while learning a small number of task-specific parameters.",
+        "Delete the pretrained model and train a smaller model from scratch.",
+        "Increase the vocabulary until every task has unique tokens.",
+        "Use only manually labeled examples and no pretrained representations."
+      ],
+      "answer_index": 0,
+      "explanation": "Parameter-efficient methods preserve the pretrained model as the main source of knowledge while adapting cheaply through a small learned prefix, prompt, adapter, or low-rank weight update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_peft",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "parameter efficient",
+          "not fine-tune all parameters"
+        ],
+        "timestamps": [
+          "00:55:58",
+          "00:55:46"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg5-q1",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg5-q2",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg5-q2",
+      "global_kp_id": "kp_masked_language_modeling",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg5-q3",
+      "global_kp_id": "kp_peft",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg5-q3",
+      "global_kp_id": "kp_bert_and_encoder_transfer",
+      "role": "secondary"
+    }
+  ]
+}

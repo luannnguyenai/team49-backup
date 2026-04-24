@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_11_large_scale_distributed_training::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions on HFU versus MFU and how to interpret utilization numbers in practice. No separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does MFU measure that HFU does not?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Only raw matmul benchmark efficiency on tensor cores",
+        "The fraction of theoretical FLOPs spent on the model's forward/backward work inside the real training loop",
+        "The exact network bandwidth between GPUs",
+        "Only optimizer-step time with all model compute removed"
+      ],
+      "answer_index": 1,
+      "explanation": "MFU is stricter because it reflects end-to-end training overheads such as communication, data loading, and recomputation instead of only a clean compute benchmark.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_flops_utilization_mfu",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So Model Flops Utilization is basically",
+          "And that's where we move from Hardware Flops Utilization"
+        ],
+        "timestamps": [
+          "00:59:54",
+          "00:59:49"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the rough rule of thumb given here, what MFU range is considered excellent?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Below 10%",
+        "Around 20%",
+        "Above 30%",
+        "Above 40%"
+      ],
+      "answer_index": 3,
+      "explanation": "The segment treats 30%+ as good and 40%+ as excellent, reflecting how hard it is to keep large distributed systems busy efficiently.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_flops_utilization_mfu",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "training throughput.",
+          "is pretty good."
+        ],
+        "timestamps": [
+          "01:01:37",
+          "01:01:44"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can newer GPUs sometimes show worse MFU even if their peak compute is much higher?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because newer GPUs cannot run matrix multiplies efficiently",
+        "Because compute throughput has improved faster than communication bandwidth, so communication becomes a larger bottleneck",
+        "Because MFU ignores forward and backward passes",
+        "Because mixed precision is no longer supported"
+      ],
+      "answer_index": 1,
+      "explanation": "If compute speeds up much faster than the interconnect, the system can spend a larger fraction of time waiting on communication, which hurts achieved utilization.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_model_flops_utilization_mfu",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "And actually, paradoxically, more recent devices sometimes",
+          "You're never going to get really much"
+        ],
+        "timestamps": [
+          "01:02:22",
+          "01:02:18"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q1",
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q2",
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q3",
+      "global_kp_id": "kp_model_flops_utilization_mfu",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.2,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "MFU versus HFU is a fairly accessible metric-distinction item."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "The excellent MFU rule-of-thumb range is a straightforward recollection item."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Why newer GPUs can sometimes show worse MFU despite higher peak compute is a medium systems-efficiency question."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This reinforces the main point of MFU as a more model-relevant efficiency metric."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q2",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "mini_quiz",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a simple benchmark-memory item and best suited to reinforcement."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "transfer",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This checks whether the learner understands utilization versus hardware peak."
+    }
+  ]
+}

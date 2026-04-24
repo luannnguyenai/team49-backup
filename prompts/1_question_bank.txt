@@ -1,0 +1,106 @@
+You are an expert educational assessment author.
+
+I will provide:
+- one learning unit package,
+- its aligned knowledge points,
+- optional transcript evidence,
+- optional slide text or visual notes.
+
+Your task is to generate prototype assessment items for the `question_bank` table.
+
+You must produce fields that align directly with the `question_bank` schema.
+
+Strict requirements:
+1. Use only information grounded in the provided unit package.
+2. Keep the output entirely in English.
+3. Output valid JSON only. No markdown fences, no explanations, no extra text.
+4. Generate only authored item content and prior estimates. Do not invent calibrated psychometric values that belong to `item_calibration`.
+5. Every item must have exactly one `primary_kp_id`.
+6. Every item must include `source_ref` and `source_unit_id`, and they must be consistent:
+   - `source_ref.unit_id` must equal `source_unit_id`.
+7. `difficulty_prior` and `discrimination_prior` are prior estimates only.
+8. `qa_gate_passed` should reflect a cautious author-side self-check only; the downstream QA pipeline may overwrite it.
+9. If a field is not applicable, use `null`, empty array, or empty object as appropriate.
+
+Field rules:
+- `item_type` must be one of:
+  - MCQ
+  - free_response
+  - code_exec
+  - short_answer
+  - fill_blank
+  - drag_drop
+- `content` must be:
+  {
+    "stem": "string",
+    "options": ["string"],
+    "media_refs": [],
+    "latex_expressions": ["string"]
+  }
+- `answer_key` must contain the correct answer or rubric.
+- `distractors` is required for MCQ and should include:
+  - `text`
+  - `misconception_tag`
+  - optional provisional `qa_score`
+- `source_ref` must be:
+  {
+    "unit_id": "string",
+    "timestamp_start": integer,
+    "timestamp_end": integer,
+    "evidence_span": "string"
+  }
+- `difficulty_prior` is a prior estimate only.
+- `discrimination_prior` is a prior estimate only.
+- `concept_alignment_cosine`, `distractor_cosine_upper`, and `distractor_cosine_lower` are provisional author-side estimates if provided; they may later be recomputed by the QA/system pipeline.
+
+Return exactly this schema:
+
+{
+  "unit_id": "string",
+  "question_bank": [
+    {
+      "item_id": "string",
+      "content": {
+        "stem": "string",
+        "options": ["string"],
+        "media_refs": [],
+        "latex_expressions": ["string"]
+      },
+      "item_type": "MCQ | free_response | code_exec | short_answer | fill_blank | drag_drop",
+      "answer_key": {},
+      "distractors": [
+        {
+          "text": "string",
+          "misconception_tag": "string",
+          "qa_score": 0.0
+        }
+      ],
+      "primary_kp_id": "string",
+      "source_ref": {
+        "unit_id": "string",
+        "timestamp_start": 0,
+        "timestamp_end": 0,
+        "evidence_span": "string"
+      },
+      "difficulty_prior": 0.0,
+      "discrimination_prior": 1.0,
+      "source_unit_id": "string",
+      "concept_alignment_cosine": 0.0,
+      "distractor_cosine_upper": 0.0,
+      "distractor_cosine_lower": 0.0,
+      "qa_gate_passed": true,
+      "generated_by": "QG_agent | human_TA | human_TA_verified | textbook_extracted",
+      "generation_model": "string | null",
+      "version": 1
+    }
+  ]
+}
+
+Quality rules:
+- Generate between 2 and 5 items unless the unit content is too thin.
+- Every item must be traceable to the source unit.
+- For MCQ items, all distractors must be plausible but incorrect.
+- If the item is free_response, use an answer rubric instead of MCQ options.
+- Do not output fields that belong to `item_calibration` or `item_phase_map`.
+
+Here is the unit package:

@@ -1,0 +1,217 @@
+{
+  "unit_id": "local::lecture_6::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=aVJy4O5TOk8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 2,
+  "review_summary": "The transcript provides clear support for two ResNet questions, and nothing appears to require a separately cut clip.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture_6_seg5_q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is clean, grounded, and aligned, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture_6_seg5_q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is clean, grounded, and aligned, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture_6_seg5_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "If a plain 56-layer CNN has worse training error and worse test error than a plain 20-layer CNN, what does that most strongly suggest?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The deeper model has an optimization problem, not just overfitting",
+        "The deeper model must have fewer possible functions to represent",
+        "Residual connections are unnecessary in deep networks",
+        "The 20-layer model is deeper in effective depth"
+      ],
+      "answer_index": 0,
+      "explanation": "Because the deeper model is also worse on training error, the issue is not simply memorizing the training data too well. The evidence instead points to difficulty optimizing the deeper plain network.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_residual_connections",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "worse training and test error",
+          "optimization problem rather than overfitting"
+        ],
+        "timestamps": [
+          "00:29:33",
+          "00:30:09"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture_6_seg5_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does a residual block make the identity mapping easy to realize?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It adds the input x back to F(x), so near-zero filters can approximate identity",
+        "It replaces convolutions with pooling everywhere",
+        "It forces every activation to be positive",
+        "It computes batch statistics before each addition"
+      ],
+      "answer_index": 0,
+      "explanation": "A residual block learns a residual function F(x) and then adds the original input x. If the residual part becomes zero or very small, the block behaves like the identity, which helps deeper networks avoid unnecessary transformations.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_residual_connections",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "take the value x",
+          "add it to F of x",
+          "filters all filled with zero"
+        ],
+        "timestamps": [
+          "00:32:00",
+          "00:33:03"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_6_seg5_q1",
+      "global_kp_id": "kp_residual_connections",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_6_seg5_q2",
+      "global_kp_id": "kp_residual_connections",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture_6_seg5_q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Degradation in deeper plain CNNs requires understanding optimization difficulty rather than just overfitting."
+    },
+    {
+      "item_id": "lecture_6_seg5_q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.97,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Residual blocks making identity easy is a medium conceptual insight central to ResNets."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture_6_seg5_q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item is strongest when checking whether the learner understands the motivation for residual learning."
+    },
+    {
+      "item_id": "lecture_6_seg5_q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item captures the key operational reason residual connections help."
+    }
+  ]
+}

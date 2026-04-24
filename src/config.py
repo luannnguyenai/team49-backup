@@ -25,9 +25,20 @@ class Settings(BaseSettings):
     anthropic_api_key: str = Field(default="", description="Anthropic Claude API key")
     openai_api_key: str = Field(default="", description="OpenAI API key")
     gemini_api_key: str = Field(default="", description="Google Gemini API key")
-    default_model: str = Field(default="gemini-3-flash-preview", description="Default LLM model")
-    fast_model: str = Field(default="gemini-2.5-flash", description="Fast model for minor tasks")
-    model_provider: str = Field(default ="google_genai", description="LLM provider")
+    default_model: str = Field(
+        default="gpt-5.4-mini",
+        description="Default LLM model",
+    )
+    fast_model: str = Field(
+        default="gpt-5.4-nano",
+        description="Fast model for minor tasks",
+    )
+    model_provider: str = Field(default ="openai", description="LLM provider")
+    gemini_requests_per_minute: int = Field(
+        default=15,
+        ge=1,
+        description="Client-side throttle for Gemini API requests per minute.",
+    )
     log_level: str = Field(default="INFO", description="Logging level")
 
     # ---- Database (PostgreSQL async) ----
@@ -80,6 +91,42 @@ class Settings(BaseSettings):
             "goal_distance": 0.15,
             "freshness": 0.05,
         }
+    )
+    write_goal_preferences_enabled: bool = Field(
+        default=True,
+        description="Write runtime goal preference snapshots to goal_preferences.",
+    )
+    write_learner_mastery_kp_enabled: bool = Field(
+        default=True,
+        description="Write mastery updates to learner_mastery_kp.",
+    )
+    write_waived_units_enabled: bool = Field(
+        default=True,
+        description="Write skip/waive audit records to waived_units.",
+    )
+    write_planner_audit_enabled: bool = Field(
+        default=True,
+        description="Write planner audit rows into plan_history, rationale_log, and planner_session_state.",
+    )
+    read_goal_preferences_enabled: bool = Field(
+        default=True,
+        description="Read learner goals from goal_preferences.",
+    )
+    read_learner_mastery_kp_enabled: bool = Field(
+        default=True,
+        description="Read learner mastery from learner_mastery_kp.",
+    )
+    read_canonical_questions_enabled: bool = Field(
+        default=True,
+        description="Read assessment/quiz items from canonical question_bank.",
+    )
+    write_canonical_interactions_enabled: bool = Field(
+        default=True,
+        description="Write canonical question item IDs into interactions.",
+    )
+    read_canonical_planner_enabled: bool = Field(
+        default=True,
+        description="Read planner candidates from canonical learning units and prerequisite graph.",
     )
 
     @field_validator("cors_origins", mode="before")

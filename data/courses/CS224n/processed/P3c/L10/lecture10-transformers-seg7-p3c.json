@@ -1,0 +1,191 @@
+{
+  "unit_id": "local::lecture10-transformers::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=LWMzyfvuehA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": "The transcript and unit summary provide enough grounded detail to generate 4 reinforcement questions about transformer results, strengths, and open limitations without requiring a separate video clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture10_transformers_seg7_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "According to the unit, what most directly helped transformers overtake LSTMs in NLP?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Efficient parallel training that let them use much more data and compute",
+        "A guarantee of linear-time inference on all tasks",
+        "Removal of all learned position information",
+        "Exact modeling of every syntactic dependency"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture emphasizes that transformers trained more efficiently because of parallelization. That made scaling to much more data practical and drove their performance gains.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "parallelizability",
+          "much more data"
+        ],
+        "timestamps": [
+          "01:13:20",
+          "01:13:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg7_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why did transformers become especially important for large-scale pretraining?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Their efficiency made it practical to train on very large datasets",
+        "They eliminate the need for optimization algorithms",
+        "They require no positional information at all",
+        "They avoid using matrix multiplications"
+      ],
+      "answer_index": 0,
+      "explanation": "Large-scale pretraining depends on being able to exploit massive amounts of data and compute. Transformers made that feasible because their computations are highly parallelizable.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Pretraining",
+          "lots of data"
+        ],
+        "timestamps": [
+          "01:13:44",
+          "01:13:58"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg7_q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main long-context drawback of standard transformers highlighted here?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Their compute and memory grow quadratically with sequence length",
+        "They cannot represent more than one attention head",
+        "They require recurrence for every decoder layer",
+        "They cannot be used for generation"
+      ],
+      "answer_index": 0,
+      "explanation": "Standard self-attention compares all token pairs, so the amount of work and memory grows with the square of sequence length.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "grows quadratically",
+          "sequence length"
+        ],
+        "timestamps": [
+          "01:14:29",
+          "01:14:39"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture10_transformers_seg7_q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What object inside self-attention is identified as the core source of this long-context cost?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The n by n attention-score matrix",
+        "The vocabulary embedding table",
+        "The feed-forward hidden layer alone",
+        "The residual connection"
+      ],
+      "answer_index": 0,
+      "explanation": "The expensive part comes from computing all pairwise token interactions, which produces an n by n matrix of attention scores for a sequence of length n.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "n by n",
+          "all pairs of interactions"
+        ],
+        "timestamps": [
+          "01:15:13",
+          "01:14:29"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture10_transformers_seg7_q1",
+      "global_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg7_q2",
+      "global_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg7_q3",
+      "global_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture10_transformers_seg7_q4",
+      "global_kp_id": "kp_transformer_scaling_advantage_and_quadratic_bottleneck",
+      "role": "primary"
+    }
+  ]
+}

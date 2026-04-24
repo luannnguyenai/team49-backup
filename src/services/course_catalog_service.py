@@ -11,6 +11,10 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+from src.models.course import Course, CourseOverview
 from src.schemas.course import (
     CourseCatalogItem,
     CourseCatalogResponse,
@@ -60,7 +64,9 @@ async def list_course_catalog(
     user : User | None
         The authenticated user. Required for 'recommended' view.
     """
-    rows = load_bootstrap_courses()
+    rows = await _list_catalog_from_db()
+    if not rows:
+        rows = load_bootstrap_courses()
 
     if not include_unavailable:
         rows = [row for row in rows if row["status"] == "ready"]
@@ -103,6 +109,26 @@ async def list_course_catalog(
 
 
 async def get_course_overview(course_slug: str) -> CourseOverviewResponse | None:
+    db_row = await _get_course_overview_from_db(course_slug)
+    if db_row is not None:
+        return CourseOverviewResponse(
+            course=CourseCatalogItem(**db_row["course"]),
+            overview=CourseOverviewContent(**db_row["overview"]),
+            entry=StartLearningDecisionResponse(
+                decision="redirect",
+                target=(
+                    f"/courses/{course_slug}/start"
+                    if db_row["course"]["status"] == "ready"
+                    else f"/courses/{course_slug}"
+                ),
+                reason=(
+                    "learning_ready"
+                    if db_row["course"]["status"] == "ready"
+                    else "course_unavailable"
+                ),
+            ),
+        )
+
     course_row = get_bootstrap_course(course_slug)
     overview_row = get_bootstrap_overview(course_slug)
     if course_row is None or overview_row is None:
@@ -150,3 +176,75 @@ async def _get_recommended_course_slugs(user_id: uuid.UUID) -> set[str]:
             return await repo.get_recommended_slugs_for_user(user_id)
     except Exception:
         return set()
+
+
+async def _list_catalog_from_db() -> list[dict]:
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(select(Course).order_by(Course.sort_order, Course.title))
+            rows = result.scalars().all()
+            if not rows:
+                return []
+            bootstrap_slugs = {row["slug"] for row in load_bootstrap_courses()}
+            db_slugs = {row.slug for row in rows}
+            if bootstrap_slugs and not bootstrap_slugs.issubset(db_slugs):
+                return []
+            return [
+                {
+                    "id": str(row.id),
+                    "slug": row.slug,
+                    "title": row.title,
+                    "short_description": row.short_description,
+                    "status": row.status.value,
+                    "cover_image_url": row.cover_image_url,
+                    "hero_badge": row.hero_badge,
+                    "is_recommended": False,
+                }
+                for row in rows
+            ]
+    except Exception:
+        return []
+
+
+async def _get_course_overview_from_db(course_slug: str) -> dict | None:
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(Course)
+                .options(selectinload(Course.overview))
+                .where(Course.slug == course_slug)
+            )
+            course = result.scalar_one_or_none()
+            if course is None or course.overview is None:
+                return None
+
+            overview: CourseOverview = course.overview
+            return {
+                "course": {
+                    "id": str(course.id),
+                    "slug": course.slug,
+                    "title": course.title,
+                    "short_description": course.short_description,
+                    "status": course.status.value,
+                    "cover_image_url": course.cover_image_url,
+                    "hero_badge": course.hero_badge,
+                    "is_recommended": False,
+                },
+                "overview": {
+                    "headline": overview.headline,
+                    "subheadline": overview.subheadline,
+                    "summary_markdown": overview.summary_markdown,
+                    "learning_outcomes": overview.learning_outcomes or [],
+                    "target_audience": overview.target_audience,
+                    "prerequisites_summary": overview.prerequisites_summary,
+                    "estimated_duration_text": overview.estimated_duration_text,
+                    "structure_snapshot": overview.structure_snapshot,
+                    "cta_label": overview.cta_label,
+                },
+            }
+    except Exception:
+        return None

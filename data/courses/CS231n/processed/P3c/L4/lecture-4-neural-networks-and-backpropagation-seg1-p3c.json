@@ -1,0 +1,147 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi củng cố về loss, gradient và tối ưu hóa; không cần cắt clip riêng.",
+  "question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Điểm khác biệt chính giữa hinge/SVM loss và softmax loss là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Hinge loss ép điểm đúng cao hơn các điểm sai ít nhất một khoảng biên, còn softmax biến điểm số thành xác suất.",
+        "Hinge loss chỉ dùng cho hồi quy, còn softmax chỉ dùng cho phân cụm.",
+        "Softmax không khả vi, còn hinge loss luôn cho xác suất chuẩn hóa.",
+        "Hai hàm hoàn toàn tương đương và chỉ khác ký hiệu."
+      ],
+      "answer_index": 0,
+      "explanation": "Hinge loss quan tâm đến việc điểm của lớp đúng phải vượt các lớp sai bởi một margin. Softmax thì chuyển các score thành phân phối xác suất để tối ưu phân loại.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_optimization_objective_and_loss",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "turn the scores into probabilities",
+          "by at least a margin"
+        ],
+        "timestamps": [
+          "00:03:38",
+          "00:04:32"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong thực tế, numerical gradient thường được dùng chủ yếu để làm gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Kiểm tra xem analytic gradient đã được cài đúng chưa.",
+        "Thay thế hoàn toàn analytic gradient trong huấn luyện quy mô lớn.",
+        "Tăng kích thước minibatch để giảm nhiễu gradient.",
+        "Chọn trực tiếp learning rate tối ưu."
+      ],
+      "answer_index": 0,
+      "explanation": "Analytic gradient thường được dùng để huấn luyện vì hiệu quả hơn. Numerical gradient hữu ích như một phép kiểm tra để phát hiện lỗi trong suy diễn đạo hàm hoặc cài đặt.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_optimization_objective_and_loss",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "we derive analytical gradients",
+          "check our implementations"
+        ],
+        "timestamps": [
+          "00:07:21",
+          "00:07:28"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao minibatch SGD thường được dùng thay cho việc tính gradient trên toàn bộ tập dữ liệu ở mỗi bước?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Vì dùng toàn bộ dữ liệu mỗi bước có thể quá tốn kém, còn minibatch cho một xấp xỉ thực tế của gradient.",
+        "Vì minibatch luôn cho gradient chính xác hơn full batch.",
+        "Vì minibatch loại bỏ hoàn toàn nhu cầu dùng learning rate.",
+        "Vì full-batch gradient không thể áp dụng cho bài toán phân loại."
+      ],
+      "answer_index": 0,
+      "explanation": "Khi dữ liệu lớn, tính loss và gradient trên toàn bộ tập ở mỗi bước rất đắt đỏ. Minibatch cung cấp một ước lượng thực dụng để vẫn cập nhật tham số hiệu quả.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_optimization_objective_and_loss",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "on the entire data set",
+          "the idea of mini batches"
+        ],
+        "timestamps": [
+          "00:07:46",
+          "00:07:58"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg1-q1",
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg1-q2",
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg1-q3",
+      "global_kp_id": "kp_optimization_objective_and_loss",
+      "role": "primary"
+    }
+  ]
+}

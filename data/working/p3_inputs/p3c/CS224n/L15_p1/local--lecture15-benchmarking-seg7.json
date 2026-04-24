@@ -1,0 +1,183 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture15-benchmarking",
+    "lecture_title": "Lecture 15 - Benchmarking and Evaluation",
+    "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM"
+  },
+  "unit": {
+    "unit_id": "local::lecture15-benchmarking::seg7",
+    "course_id": "cs224n-2024",
+    "name": "Implementation consistency, contamination, and keeping test sets alive",
+    "description": "Explains why benchmark results can change with formatting and implementation details, then discusses contamination, overfitting, and mitigations such as private or dynamic test sets.",
+    "summary": "This segment argues that even apparently simple benchmarks can be unstable. For multiple-choice tasks, changing how answers are formatted can change generations and model rankings, and MMLU historically had multiple incompatible implementations that differed in prompting and answer-selection procedures such as constrained decoding versus token or log-likelihood scoring [ts=3840s] [ts=3878s] [ts=3916s]. Yann then moves to contamination: benchmark scores can be inflated when test data or close variants appear in pretraining, illustrated by code-benchmark anecdotes where GPT-4 did very well on older Codeforces problems but failed on newer ones [ts=4032s] [ts=4063s]. The lecture separates contamination from broader overfitting to public test sets, then suggests mitigations including private or regenerated test sets such as GSM1K, dynamic test sets such as Dynabench, and leakage detection heuristics such as unusually confident answers or sensitivity to the original order of examples [ts=4153s] [ts=4197s] [ts=4223s].",
+    "key_points": [
+      {
+        "text": "Multiple-choice rankings can change if you relabel the answer options or alter the exact formatting.",
+        "timestamp_s": 3843,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "MMLU once had multiple mainstream implementations that produced different scores because prompting and scoring conventions differed.",
+        "timestamp_s": 3890,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Constrained decoding, raw-token prediction, and likelihood-based scoring can yield substantially different benchmark results.",
+        "timestamp_s": 3916,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A sharp performance drop from old to new benchmark items can indicate contamination from pretraining on the benchmark data.",
+        "timestamp_s": 4032,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Closed models and massive pretraining corpora make contamination hard to verify directly.",
+        "timestamp_s": 4092,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Rapid achievement of 'human-level' scores on public benchmarks may reflect contamination or repeated tuning on the test set.",
+        "timestamp_s": 4117,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Mitigations include private or regenerated test sets like GSM1K and dynamic benchmarks like Dynabench.",
+        "timestamp_s": 4153,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Possible leakage checks include looking for overconfident answer probabilities or drops when example order is scrambled.",
+        "timestamp_s": 4223,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=TO0CqzqiArM&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=12",
+      "start_s": 3837,
+      "end_s": 4269
+    },
+    "difficulty": 0.68,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "This segment argues that even apparently simple benchmarks can be unstable. For multiple-choice tasks, changing how answers are formatted can change generations and model rankings, and MMLU historically had multiple incompatible implementations that differed in prompting and answer-selection procedures such as constrained decoding versus token or log-likelihood scoring [ts=3840s] [ts=3878s] [ts=3916s]. Yann then moves to contamination: benchmark scores can be inflated when test data or close variants appear in pretraining, illustrated by code-benchmark anecdotes where GPT-4 did very well on older Codeforces problems but failed on newer ones [ts=4032s] [ts=4063s]. The lecture separates contamination from broader overfitting to public test sets, then suggests mitigations including private or regenerated test sets such as GSM1K, dynamic test sets such as Dynabench, and leakage detection heuristics such as unusually confident answers or sensitivity to the original order of examples [ts=4153s] [ts=4197s] [ts=4223s].",
+  "target_kp_ids": [
+    "kp_benchmark_contamination"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "video_clip_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "transcript_slice": "01:04:00\nFirst, consistency issues.\n\n01:04:05\nmultiple choice questions, if you just change--\n\n01:04:11\nIf you just change A, B, C, D to random symbols,\n\n01:04:17\nare actually going to be different.\n\n01:04:20\nwill be different.\n\n01:04:25\nlike selecting out of four choices\n\n01:04:31\nformat these choices.\n\n01:04:36\nthat's what I was alluding to before--\n\n01:04:39\nSo MMLU seems really simple to evaluate.\n\n01:04:48\nBut actually, for a very long time,\n\n01:04:53\nwere three main implementation of MMLU,\n\n01:04:59\nhaving no idea that those three gave different scores.\n\n01:05:04\nwere, one, people use different prompts.\n\n01:05:08\nBut two, they were using different ways\n\n01:05:16\nSo one of them, for example, was saying, I have the four choices.\n\n01:05:22\nlet's say that the correct answer\n\n01:05:29\nC, D. Even though zygote was another answer that has a higher\n\n01:05:38\ndo constrained decoding.\n\n01:05:42\nI will say that the correct answer is D.\n\n01:05:49\nI will not get the correct answer.\n\n01:05:53\nAnd a third different implementation,\n\n01:05:57\ninstead of generating the correct token, which\n\n01:06:04\nafter this question, what is the likelihood\n\n01:06:10\nSo you would look at the log likelihood or the perplexity\n\n01:06:16\nlikelihood of predicting that.\n\n01:06:19\nSo if you look at the top right, you\n\n01:06:27\n63.6.\n\n01:06:32\nHugging Face uses, is 48.8.\n\n01:06:37\nYeah.\n\n01:06:39\nIt matches to these three things there?\n\n01:06:42\nI can't remember which one does what, but each of them\n\n01:06:46\nActually, now it's not true anymore.\n\n01:06:50\nSo they start matching the other two ones.\n\n01:06:56\nI'm not sure which one-- my guess was\n\n01:07:06\nOK.\n\n01:07:11\nCool.\n\n01:07:14\nSo here, you have Horace He.\n\n01:07:20\nAnd he basically says that he was looking at code benchmarks.\n\n01:07:29\nI can't remember which one.\n\n01:07:34\nBut after 2021, or more recent problems,\n\n01:07:42\nSo that really strongly points to the fact\n\n01:07:45\nthe model was probably pretrained on that dataset,\n\n01:07:50\nin the pretraining dataset.\n\n01:07:52\nI mean, essentially you do training on your test set,\n\n01:07:58\nAnd Susan said-- also to follow--\n\n01:08:06\nwhich is a model from Microsoft.\n\n01:08:12\nI mean, there are two things actually that are challenging.\n\n01:08:17\nthat even if we had access to the data,\n\n01:08:20\nif they were pretrained on your test set.\n\n01:08:25\nSo you really don't even have access to the dataset.\n\n01:08:31\nOverfitting issues, that's also relatively related,\n\n01:08:37\nSo here, you see how much time it took for standard datasets\n\n01:08:44\nlike scary quotes, \"human-level\" performance.\n\n01:08:50\nhave this pretraining, in less than six months,\n\n01:08:56\nWe don't really know if it's because of the contamination\n\n01:09:02\nare basically developing and trying to do hyperparameter\n\n01:09:07\nWe don't know why, but it's clearly\n\n01:09:11\nSo how do you alleviate that?\n\n01:09:15\nSo there's a paper from, I think,\n\n01:09:21\nwhich is the same thing as the GSM8K that we saw before,\n\n01:09:27\nto basically regenerate or resample this dataset\n\n01:09:33\nAnd then they look at how well different models perform on both\n\n01:09:39\nAnd what you see is that at least the open-source models,\n\n01:09:46\nthat people are able to tune on.\n\n01:09:53\nAnother one is Dynabench, which is dynamic test sets.\n\n01:09:59\nyou would basically have new instructions or new inputs\n\n01:10:05\nThat's essentially also what Chatbot Arena does.\n\n01:10:12\nAnother way of alleviating contaminators\n\n01:10:18\nat whether the models were actually\n\n01:10:21\nSo one very simple way of doing it,\n\n01:10:26\nis just looking at the probability\n\n01:10:30\nAnd you will see that if your model is really sure\n\n01:10:34\nit was trained on that answer.\n\n01:10:40\nis looking at the order of your test set.\n\n01:10:46\nif a model was trained or pretrained\n\n01:10:50\nit thinks that example 2 comes after example 1.\n\n01:10:55\nand you see drops in log likelihoods, then, most likely,\n\n01:11:03\nCool.\n\n01:11:09\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "global_kp_id": "kp_benchmark_contamination",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture15-benchmarking::seg7",
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_benchmark_contamination",
+      "name": "Benchmark contamination and overfitting",
+      "description": "Benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests. The problem that benchmark examples may leak into pretraining data, undermining claims of true generalization.",
+      "track_tags": [
+        "benchmark_validity",
+        "benchmarks",
+        "evaluation",
+        "llms",
+        "robustness"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models",
+        "machine_learning",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "benchmark_design",
+        "evaluation_engineer",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because benchmark contamination and overfitting clarifies benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests, sharpening later modeling, analysis, or evaluation choices though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp15",
+        "local::lecture22-nlp-linguistics::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_current_llm_benchmark_suites_and_task_coverage",
+      "name": "Current LLM benchmark suites and task coverage",
+      "description": "Modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains.",
+      "track_tags": [
+        "benchmark_suites",
+        "llm_eval"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "research"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because current LLM benchmark suites and task coverage clarifies modern LLM evaluation uses broad benchmark suites spanning math, knowledge, code, law, medicine, and other domains, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp13"
+      ]
+    }
+  ],
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "target_difficulty_range": [
+    0.53,
+    0.83
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L15_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture15-benchmarking_transcript.txt"
+  }
+}

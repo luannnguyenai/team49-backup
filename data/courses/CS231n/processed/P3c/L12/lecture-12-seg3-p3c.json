@@ -1,0 +1,135 @@
+{
+  "unit_id": "local::lecture_12::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=4howBU7THbM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "This unit provides enough evidence for concept checks on patch-based spatial pretext tasks and masked reconstruction. The questions focus on the learning signal rather than paper-specific details.",
+  "question_bank": [
+    {
+      "item_id": "lecture-12-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In relative patch prediction with a 3x3 grid, what is the model asked to predict?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Which of the eight surrounding positions a patch occupies relative to the center patch.",
+        "The exact RGB values of every pixel in the center patch.",
+        "The object class label for the entire image.",
+        "A continuous camera angle for the image."
+      ],
+      "answer_index": 0,
+      "explanation": "The center patch acts as a reference. The task turns spatial reasoning into classification over the possible relative locations of another patch.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "center patch is the reference",
+          "with respect to the center patch"
+        ],
+        "timestamps": [
+          "00:23:46",
+          "00:24:04"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-12-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why might a jigsaw pretext task use a fixed lookup table of 64 permutations instead of all 9! permutations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The full permutation space is too large, so restricting it makes the classification task tractable.",
+        "The image contains only 64 pixels, so no more classes are possible.",
+        "The method requires exactly one class per object category.",
+        "Using all permutations would remove the need for a neural network."
+      ],
+      "answer_index": 0,
+      "explanation": "A 3x3 jigsaw has an enormous number of possible arrangements. Selecting a manageable set of permutations turns the task into a practical multiclass prediction problem.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "9 factorial",
+          "64 output classes"
+        ],
+        "timestamps": [
+          "00:25:13",
+          "00:25:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-12-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the central learning signal in image inpainting as a pretext task?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Predict the masked image region from the visible context and compare it with the original pixels.",
+        "Predict the image class using only manually annotated category labels.",
+        "Sort images by their capture time without changing any pixels.",
+        "Choose the nearest image in pixel space and copy its class."
+      ],
+      "answer_index": 0,
+      "explanation": "Inpainting hides part of the input and trains the model to reconstruct the missing region. The original image provides the target, so the model learns from context without external labels.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "masking strategy",
+          "the parts that is missing"
+        ],
+        "timestamps": [
+          "00:26:38",
+          "00:27:14"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-12-seg3-q1",
+      "global_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg3-q2",
+      "global_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-12-seg3-q3",
+      "global_kp_id": "kp_rearrangement_and_inpainting_pretext_tasks",
+      "role": "primary"
+    }
+  ]
+}

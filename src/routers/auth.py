@@ -23,8 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
-from src.models.content import Module, Topic
-from src.models.learning import MasteryScore
+from src.models.canonical import ConceptKP
+from src.models.learning import LearnerMasteryKP
 from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
 from src.redis_client import get_redis
@@ -142,28 +142,30 @@ async def _build_user_skill_overview(
     db: AsyncSession,
     user_id: uuid.UUID,
 ) -> UserSkillOverview:
+    return await _build_canonical_user_skill_overview(db, user_id)
+
+
+async def _build_canonical_user_skill_overview(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+) -> UserSkillOverview:
     result = await db.execute(
-        select(MasteryScore, Topic, Module)
-        .join(Topic, MasteryScore.topic_id == Topic.id)
-        .join(Module, Topic.module_id == Module.id)
-        .where(
-            MasteryScore.user_id == user_id,
-            MasteryScore.kc_id.is_(None),
-        )
+        select(LearnerMasteryKP, ConceptKP)
+        .join(ConceptKP, LearnerMasteryKP.kp_id == ConceptKP.kp_id)
+        .where(LearnerMasteryKP.user_id == user_id)
     )
 
     grouped: dict[str, list[float]] = {label: [] for label in _SKILL_LABELS}
-
-    for mastery, topic, module in result.all():
+    for mastery, kp in result.all():
         bucket = _resolve_skill_bucket(
-            topic.name,
-            topic.description,
-            module.name,
-            module.description,
+            getattr(kp, "name", None),
+            getattr(kp, "description", None),
+            " ".join(str(tag) for tag in (getattr(kp, "domain_tags", None) or [])),
+            " ".join(str(tag) for tag in (getattr(kp, "track_tags", None) or [])),
         )
         if bucket is None:
             continue
-        grouped[bucket].append(round(mastery.mastery_probability * 100, 1))
+        grouped[bucket].append(round((mastery.mastery_mean_cached or 0.0) * 100, 1))
 
     skills = []
     for label in _SKILL_LABELS:

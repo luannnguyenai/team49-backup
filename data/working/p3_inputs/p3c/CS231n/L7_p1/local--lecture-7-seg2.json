@@ -1,0 +1,139 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_7",
+    "lecture_title": "Lecture 7: Recurrent Neural Networks",
+    "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA"
+  },
+  "unit": {
+    "unit_id": "local::lecture_7::seg2",
+    "course_id": "cs231n_spring_2025",
+    "name": "Sequence modeling and RNN motivation",
+    "description": "Introduces variable-length sequence modeling and the standard input-output task regimes.",
+    "summary": "The lecture shifts from fixed-size inputs/outputs to sequence modeling, where inputs and/or outputs may have variable length [ts=289s]. RNNs and variants are introduced as the main simple neural sequence models used before transformers, with key ideas still appearing in state-space models such as Mamba [ts=303s] [ts=313s]. The instructor distinguishes one-to-many image captioning, many-to-one video classification, and many-to-many sequence mappings [ts=351s] [ts=377s] [ts=401s]. For explaining RNN mechanics, the lecture focuses on the aligned many-to-many case where each input step has a corresponding output, such as frame-level video classification [ts=422s].",
+    "key_points": [
+      {
+        "text": "Sequence modeling handles variable-length inputs or outputs rather than only fixed-size vectors.",
+        "timestamp_s": 289,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "RNN ideas remain relevant in modern state-space models such as Mamba.",
+        "timestamp_s": 313,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "One-to-many maps an image to a variable-length caption; many-to-one maps video frames to one class.",
+        "timestamp_s": 351,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The lecture initially focuses on aligned many-to-many RNNs.",
+        "timestamp_s": 422,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=7",
+      "start_s": 289,
+      "end_s": 448
+    },
+    "difficulty": 2.4,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 3,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "transcript_slice": "00:04:49\nOK, so for the rest of lecture today,\n\n00:04:55\nSo this is, in contrast to a fixed sized input\n\n00:05:00\na sequence of variable length.\n\n00:05:05\nare the simple neural networks that people\n\n00:05:09\nwhich mainly consists of RNNs and some variants of RNNs.\n\n00:05:15\nhow RNNs actually are similar to a lot of, and inspire a lot of,\n\n00:05:23\nthat you see called state space models.\n\n00:05:26\nThere's some other ones too that we'll talk about in the slide,\n\n00:05:31\nare still being used today.\n\n00:05:34\nand they have a lot of nice advantages\n\n00:05:39\nCool, so to specifically formulate this sequence modeling\n\n00:05:45\nwhere we have one fixed size input to one fixed size\n\n00:05:51\nIn contrast, you could have a one to many sequence modeling\n\n00:05:56\nSo here we still have a fixed size input like say an image,\n\n00:06:01\nSo one common example is image captioning.\n\n00:06:06\na sequence of words or characters\n\n00:06:11\nbut the goal is to have a variable length caption\n\n00:06:17\nYou could also have a many to one sequence modeling task.\n\n00:06:25\nand we're trying to classify what is this a video of.\n\n00:06:30\nAnd the output is one single class label similar to the image\n\n00:06:34\nBut now we have multiple frames as input\n\n00:06:38\nSo this is an example of many to one.\n\n00:06:42\nSo the number of inputs and outputs in the sequences\n\n00:06:51\nas a variable number of frames, and your output in this case\n\n00:06:56\nand they don't need to necessarily match,\n\n00:06:59\nSo for every single input you have one output.\n\n00:07:04\nbe focusing on this setting on the far right.\n\n00:07:08\nyou can make to change and reformulate the problem to apply\n\n00:07:14\nEvery time there's an input, there's an output,\n\n00:07:18\nto talk about how RNNs work.\n\n00:07:24\nwould be video classification, where you're\n\n00:07:28\nOK, so what is an RNN?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_7::seg2",
+      "global_kp_id": "kp_sequence_modeling_regimes",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_7::seg2",
+      "global_kp_id": "kp_modern_rnn_like_state_space_models",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_sequence_modeling_regimes",
+      "name": "Sequence modeling regimes",
+      "description": "One-to-many, many-to-one, and many-to-many formulations for variable-length input/output tasks.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "rnn"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because sequence modeling regimes formalizes how one-to-many, many-to-one, and many-to-many formulations for variable-length input/output tasks, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_modern_rnn_like_state_space_models",
+      "name": "Modern RNN-like state-space models",
+      "description": "RWKV, Mamba, and related models that revive RNN-like linear-time sequence modeling.",
+      "track_tags": [
+        "sequence_modeling"
+      ],
+      "domain_tags": [
+        "mamba",
+        "rwkv",
+        "state_space_models"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because modern RNN-like state-space models synthesizes rWKV, Mamba, and related models that revive RNN-like linear-time sequence modeling into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_7::kp14"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    2.25,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L7_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture07-recurrent-neural-networks_transcript.txt"
+  }
+}

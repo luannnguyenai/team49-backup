@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_9::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=PTypu6GqEd4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ mạnh để sinh câu hỏi về YOLO và DETR, nhất là grid prediction, NMS và learned object queries; không cần clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-9-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong YOLO, mỗi ô lưới dự đoán loại thông tin nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Một số bounding box cùng objectness và xác suất lớp.",
+        "Chỉ một embedding duy nhất cho toàn ảnh.",
+        "Chỉ một mask nhị phân cho nền.",
+        "Chỉ một patch token để đưa vào transformer."
+      ],
+      "answer_index": 0,
+      "explanation": "YOLO chia ảnh thành lưới và để mỗi ô chịu trách nhiệm xuất nhiều hộp bao ứng viên, kèm xác suất có vật thể và phân bố lớp. Đây là nền tảng của phát hiện một giai đoạn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_yolo_one_stage_detection",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "divides the image into grid",
+          "B bounding boxes"
+        ],
+        "timestamps": [
+          "00:45:38",
+          "00:46:12"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Vì sao YOLO cần thêm bước non-maximum suppression sau khi dự đoán?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Để loại các hộp chồng lấp và giữ lại dự đoán tin cậy nhất.",
+        "Để biến ảnh đầu vào thành patch cho ViT.",
+        "Để thêm positional encoding cho từng ô lưới.",
+        "Để tính gradient cho class token."
+      ],
+      "answer_index": 0,
+      "explanation": "Một mô hình một giai đoạn thường tạo ra nhiều hộp trùng nhau quanh cùng một vật thể. Non-maximum suppression giữ hộp điểm cao và loại các hộp trùng lặp quá nhiều.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_yolo_one_stage_detection",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "non-maximum suppression",
+          "highest probabilities"
+        ],
+        "timestamps": [
+          "00:47:31",
+          "00:47:31"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-9-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong DETR, object queries là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Các tham số học được ở decoder để yêu cầu các dự đoán đối tượng.",
+        "Các patch ảnh có xác suất vật thể cao nhất.",
+        "Các bounding box được tạo sẵn bằng sliding window.",
+        "Các vector cố định không được cập nhật trong huấn luyện."
+      ],
+      "answer_index": 0,
+      "explanation": "DETR không bắt đầu từ proposal boxes kiểu R-CNN. Thay vào đó, decoder nhận các query học được và mỗi query học cách phát ra một dự đoán đối tượng hoặc no-object.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_detr_object_queries",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "some queries",
+          "trainable learnable parameters"
+        ],
+        "timestamps": [
+          "00:50:52",
+          "00:54:35"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-9-seg4-q1",
+      "global_kp_id": "kp_yolo_one_stage_detection",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg4-q1",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg4-q2",
+      "global_kp_id": "kp_yolo_one_stage_detection",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg4-q2",
+      "global_kp_id": "kp_object_detection_as_joint_classification_and_localization",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-9-seg4-q3",
+      "global_kp_id": "kp_detr_object_queries",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-9-seg4-q3",
+      "global_kp_id": "kp_yolo_one_stage_detection",
+      "role": "secondary"
+    }
+  ]
+}

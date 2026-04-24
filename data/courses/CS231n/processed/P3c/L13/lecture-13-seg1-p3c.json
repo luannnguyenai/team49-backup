@@ -1,0 +1,162 @@
+{
+  "unit_id": "local::lecture_13::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript đủ rõ để tạo câu hỏi củng cố về self-supervised learning, contrastive learning và các biến thể mở rộng như MoCo; không cần cắt clip riêng.",
+  "question_bank": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Mục tiêu cốt lõi của self-supervised learning trong phần recap này là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Học biểu diễn từ dữ liệu không nhãn rồi chuyển encoder sang tác vụ có nhãn.",
+        "Huấn luyện trực tiếp bộ phân loại cuối cùng trên toàn bộ dữ liệu có nhãn.",
+        "Loại bỏ encoder và chỉ giữ decoder cho mọi tác vụ về sau.",
+        "Biến mọi bài toán thành bài toán hồi quy pixel chính xác."
+      ],
+      "answer_index": 0,
+      "explanation": "Trong self-supervised learning, mô hình học cấu trúc từ dữ liệu chưa gán nhãn thông qua pretext task. Sau đó phần encoder đã học được có thể được tái sử dụng hoặc fine-tune cho các bài toán downstream có ít nhãn hơn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_self_supervised_pretraining_transfer",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pretext tasks on unlabeled data",
+          "transfers the encoder"
+        ],
+        "timestamps": [
+          "00:00:43",
+          "00:00:43"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Trong contrastive learning, cặp nào nên được kéo lại gần nhau trong không gian đặc trưng?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Hai augmentation của cùng một ảnh.",
+        "Hai ảnh bất kỳ trong cùng minibatch.",
+        "Hai augmentation của hai ảnh khác nhau.",
+        "Mọi cặp ảnh có cùng kích thước đầu vào."
+      ],
+      "answer_index": 0,
+      "explanation": "Contrastive learning dùng các phiên bản augment khác nhau của cùng một mẫu làm positive pair. Mục tiêu là kéo chúng lại gần nhau, đồng thời đẩy các mẫu đến từ ảnh khác ra xa.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_contrastive_learning_augmentations",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "pull together augmentations",
+          "push apart augmentations"
+        ],
+        "timestamps": [
+          "00:03:10",
+          "00:03:10"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "MoCo giảm nhu cầu batch size rất lớn chủ yếu bằng cách nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Giữ một queue các key trước đó và dùng momentum encoder cập nhật kiểu EMA.",
+        "Bỏ hoàn toàn negative pairs khỏi quá trình học.",
+        "Thay mọi convolution bằng recurrent network.",
+        "Huấn luyện trực tiếp bằng nhãn do con người gán."
+      ],
+      "answer_index": 0,
+      "explanation": "MoCo giữ lại các key từ các bước trước trong một queue để tăng số negative hữu ích mà không cần batch quá lớn. Đồng thời, một momentum encoder được cập nhật bằng trung bình trượt mũ giúp biểu diễn key ổn định hơn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_moco_queue_and_momentum_encoder",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "queue of previous keys",
+          "exponential moving average"
+        ],
+        "timestamps": [
+          "00:07:46",
+          "00:07:46"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "global_kp_id": "kp_self_supervised_pretraining_transfer",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q1",
+      "global_kp_id": "kp_contrastive_learning_augmentations",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "global_kp_id": "kp_contrastive_learning_augmentations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q2",
+      "global_kp_id": "kp_self_supervised_pretraining_transfer",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "global_kp_id": "kp_moco_queue_and_momentum_encoder",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-13-seg1-q3",
+      "global_kp_id": "kp_contrastive_learning_augmentations",
+      "role": "secondary"
+    }
+  ]
+}

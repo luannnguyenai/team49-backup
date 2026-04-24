@@ -1,0 +1,168 @@
+{
+  "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript and unit summary clearly support image classification, pixel-tensor representation, and nuisance factors such as viewpoint and illumination. No separate video clip is needed for these reinforcement questions.",
+  "question_bank": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does an image classification system try to do?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Assign an input image one label from a predefined set of possible labels.",
+        "Recover every physical surface and light source in the scene.",
+        "Generate a new image that resembles the input.",
+        "Sort images only by file size or image resolution."
+      ],
+      "answer_index": 0,
+      "explanation": "Image classification maps an input image to a category from a fixed label set. It is not trying to reconstruct the whole scene or create a new image.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_image_classification",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "predefined labels",
+          "assign a label",
+          "core task"
+        ],
+        "timestamps": [
+          "00:02:53",
+          "00:03:14",
+          "00:01:55"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the semantic gap a problem for image classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Humans perceive objects, but the machine receives a tensor of numeric pixel values.",
+        "Images contain no numerical information that a machine can process.",
+        "RGB images always have a single scalar value rather than channels.",
+        "The label set changes automatically for every individual image."
+      ],
+      "answer_index": 0,
+      "explanation": "The semantic gap is the mismatch between meaningful object concepts and raw numeric image data. A model must learn how those pixel tensors correspond to labels.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_semantic_gap_and_visual_nuisance_factors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "tensors of data",
+          "pixel values are between 0 and 255",
+          "how the machine perceives"
+        ],
+        "timestamps": [
+          "00:03:59",
+          "00:04:06",
+          "00:04:54"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which situation best illustrates why simple pixel matching is fragile for recognizing objects?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The same object is photographed from a new viewpoint or under different illumination.",
+        "The image has exactly the same pixels and the same label as before.",
+        "The classifier is given only one predefined label to choose from.",
+        "All images are converted to the same filename before classification."
+      ],
+      "answer_index": 0,
+      "explanation": "Pixel values can change substantially when viewpoint or lighting changes even if the object identity stays the same. A robust classifier must handle these nuisance factors.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_semantic_gap_and_visual_nuisance_factors",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "move the camera",
+          "every single pixel value",
+          "illumination is another challenge"
+        ],
+        "timestamps": [
+          "00:05:16",
+          "00:05:33",
+          "00:06:05"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q1",
+      "global_kp_id": "kp_image_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q1",
+      "global_kp_id": "kp_semantic_gap_and_visual_nuisance_factors",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q2",
+      "global_kp_id": "kp_semantic_gap_and_visual_nuisance_factors",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q2",
+      "global_kp_id": "kp_image_classification",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q3",
+      "global_kp_id": "kp_semantic_gap_and_visual_nuisance_factors",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg1::q3",
+      "global_kp_id": "kp_image_classification",
+      "role": "secondary"
+    }
+  ]
+}

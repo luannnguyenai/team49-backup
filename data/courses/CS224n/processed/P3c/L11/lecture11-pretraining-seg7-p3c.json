@@ -1,0 +1,245 @@
+{
+  "unit_id": "local::lecture11-pretraining::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=DGfCRXuNA2w",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 5,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is in-context learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Solving a task from demonstrations in the prompt without updating model parameters.",
+        "Fine-tuning all parameters on a labeled dataset for many epochs.",
+        "Training a tokenizer by merging frequent character pairs.",
+        "Masking spans and training a decoder to reconstruct them."
+      ],
+      "answer_index": 0,
+      "explanation": "In-context learning happens at inference time. The prompt provides examples or instructions, and the model continues the pattern without a gradient update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_in_context_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "in-context learning",
+          "without any sort of fine-tuning"
+        ],
+        "timestamps": [
+          "01:07:32",
+          "01:07:14"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is the mechanism behind in-context learning still an open question?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is unclear how much comes from memorized training patterns versus genuine adaptation to the current prompt.",
+        "It has been proven to use no information from the prompt.",
+        "It only occurs in models that have never seen language data.",
+        "It always requires updating the model weights secretly."
+      ],
+      "answer_index": 0,
+      "explanation": "A large model may recognize familiar patterns from pretraining, but it may also infer a new mapping from examples in the current context. Separating those explanations is difficult.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_in_context_learning",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not totally sure",
+          "from the context"
+        ],
+        "timestamps": [
+          "01:10:14",
+          "01:10:30"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What lesson is illustrated by the Chinchilla-style scaling discussion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Better performance can require balancing model size with enough training tokens, not simply maximizing parameters.",
+        "The largest parameter count is always optimal regardless of data.",
+        "Training data matters only for small models, not large models.",
+        "A model's tokenizer determines all scaling behavior."
+      ],
+      "answer_index": 0,
+      "explanation": "Compute is spent on both parameters and training data. A model with fewer parameters but many more training tokens can outperform a larger, undertrained model.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "less than half the size",
+          "works better"
+        ],
+        "timestamps": [
+          "01:11:27",
+          "01:11:27"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can chain-of-thought prompting improve performance on reasoning tasks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It encourages the model to generate intermediate steps that act like a scratchpad before the final answer.",
+        "It changes the model's weights so it no longer needs a prompt.",
+        "It removes all examples from the prompt to reduce context length.",
+        "It forces the model to output only a single token."
+      ],
+      "answer_index": 0,
+      "explanation": "Generating intermediate steps gives the model more tokens over which to represent partial computations. That can make multi-step problems easier than jumping directly to an answer.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_chain_of_thought_prompting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "sequence of steps",
+          "answer is"
+        ],
+        "timestamps": [
+          "01:12:51",
+          "01:12:59"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the practical motivation for continuing pretraining on in-domain unlabeled text before supervised fine-tuning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can adapt the model's general language knowledge toward the target domain before labels are used.",
+        "It replaces the need for a task-specific objective in all cases.",
+        "It guarantees the model will forget all biases from pretraining.",
+        "It turns a decoder-only model into a bidirectional encoder without changing architecture."
+      ],
+      "answer_index": 0,
+      "explanation": "Domain-adaptive pretraining uses raw text from the target area to shift the model toward that distribution. Fine-tuning can then specialize on the labeled task from a better domain-specific initialization.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Don’t Stop Pretraining",
+          "biases"
+        ],
+        "timestamps": [
+          "01:16:49",
+          "01:14:27"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture11-pretraining-seg7-q1",
+      "global_kp_id": "kp_in_context_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "global_kp_id": "kp_in_context_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q2",
+      "global_kp_id": "kp_decoder_only_pretraining",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q3",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q4",
+      "global_kp_id": "kp_chain_of_thought_prompting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture11-pretraining-seg7-q5",
+      "global_kp_id": "kp_in_context_learning",
+      "role": "secondary"
+    }
+  ]
+}

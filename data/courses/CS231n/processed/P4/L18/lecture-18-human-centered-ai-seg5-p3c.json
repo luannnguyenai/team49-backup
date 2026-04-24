@@ -1,0 +1,328 @@
+{
+  "unit_id": "local::lecture_18_human_centered_ai::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=g8UaBfj6Sh8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript supports questions about sources of bias in visual AI, fairness in face recognition, and privacy-preserving directions for visual systems.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Where does bias in visual AI often originate?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "From existing human biases, data biases, and social experience that the system learns from.",
+        "Only from using too few model parameters.",
+        "Only from numerical rounding errors during inference.",
+        "Only from using low-resolution images."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture emphasizes that people already see the world through non-neutral priors and experiences. When data reflects those biases, machine-learning systems can inherit and amplify them.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "there's bias",
+          "data we're exposed"
+        ],
+        "timestamps": [
+          "00:31:59",
+          "00:32:14"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is face recognition used as an important fairness example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because uneven performance across skin tone and gender can lead to serious real-world consequences.",
+        "Because it is the only AI problem that has anything to do with fairness.",
+        "Because every face-recognition system is already perfectly fair.",
+        "Because fairness matters only in face recognition and not in other systems."
+      ],
+      "answer_index": 0,
+      "explanation": "If a system works better for one group than another, the error becomes not just a technical issue but also a fairness and safety issue. That is especially serious in high-impact real-world deployments.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "skin color and gender",
+          "be vigilant"
+        ],
+        "timestamps": [
+          "00:32:32",
+          "00:32:53"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the central idea behind the privacy-preserving visual AI example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Retain enough signal for activity recognition while removing identifying information such as faces.",
+        "Delete all image data so no risk can remain.",
+        "Upload as many raw images as possible to a server so the model learns better.",
+        "Use only text encryption and avoid image or sensor processing altogether."
+      ],
+      "answer_index": 0,
+      "explanation": "Protecting privacy does not have to mean blinding the model completely. A better goal is to preserve the signal needed for the task while masking or removing unnecessary identifying information.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_privacy_preserving_visual_ai",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "respecting the privacy",
+          "hardware and software"
+        ],
+        "timestamps": [
+          "00:35:06",
+          "00:35:48"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q1",
+      "global_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q1",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q2",
+      "global_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q2",
+      "global_kp_id": "kp_human_centered_ai",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q3",
+      "global_kp_id": "kp_privacy_preserving_visual_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q3",
+      "global_kp_id": "kp_bias_and_fairness_in_visual_ai",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Where does bias in visual AI often originate\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Why is face recognition used as an important fairness example\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What is the central idea behind the privacy-preserving visual AI example\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Where does bias in visual AI often originate\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why is face recognition used as an important fairness example\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture-18-human-centered-ai-seg5-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the central idea behind the privacy-preserving visual AI example\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

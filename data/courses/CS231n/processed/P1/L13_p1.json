@@ -1,0 +1,882 @@
+{
+    "lecture_title": "Lecture 13: Generative Models (part 1)",
+    "table_of_contents": [
+        {
+            "section_index": 1,
+            "title": "Recap of self-supervised learning: contrastive methods, MoCo, and DINOv2",
+            "start_s": 5,
+            "end_s": 620
+        },
+        {
+            "section_index": 2,
+            "title": "Foundations: supervised vs unsupervised learning and probabilistic modeling axes",
+            "start_s": 634,
+            "end_s": 1631
+        },
+        {
+            "section_index": 3,
+            "title": "Why generative models matter and the taxonomy of model families",
+            "start_s": 1632,
+            "end_s": 2098
+        },
+        {
+            "section_index": 4,
+            "title": "Maximum likelihood and autoregressive models for text and images",
+            "start_s": 2099,
+            "end_s": 2717
+        },
+        {
+            "section_index": 5,
+            "title": "From plain autoencoders to the motivation for variational autoencoders",
+            "start_s": 2718,
+            "end_s": 3205
+        },
+        {
+            "section_index": 6,
+            "title": "Latent-variable VAE formulation and Gaussian parameterization",
+            "start_s": 3206,
+            "end_s": 3769
+        },
+        {
+            "section_index": 7,
+            "title": "ELBO derivation, reparameterization, and VAE sampling behavior",
+            "start_s": 3770,
+            "end_s": 4342
+        }
+    ],
+    "units": [
+        {
+            "unit_id": "local::<lecture_id>::seg1",
+            "course_id": "<course_id>",
+            "name": "Self-supervised learning recap and scalable contrastive variants",
+            "description": "Reviews the previous lecture's self-supervised learning setup and quickly situates MoCo, DINO, and DINOv2 before starting generative models.",
+            "summary": "The lecture opens by revisiting self-supervised learning as unlabeled pretraining: an encoder-decoder is trained on a pretext task without human labels, then the decoder can be discarded and the learned representation transferred to smaller labeled tasks [ts=41s] [ts=71s]. It recalls image-based pretext tasks such as rotation, rearrangement, and reconstruction, then reframes the later part of the recap around contrastive learning, where different augmentations of the same image are pulled together while augmentations from different images are pushed apart [ts=130s] [ts=190s]. The instructor then summarizes why SimCLR needs large batches, explains MoCo's workaround of keeping a queue of earlier keys plus a momentum encoder updated as an exponential moving average of the main encoder, and notes that DINO replaces the loss with a KL-based objective [ts=324s] [ts=466s] [ts=537s]. The recap ends by emphasizing DINOv2 as a practically important self-supervised feature extractor whose main advance was scaling training from ImageNet-sized data to roughly 142 million images, yielding strong reusable visual features [ts=568s] [ts=598s].",
+            "key_points": [
+                {
+                    "text": "Self-supervised learning uses pretext tasks on unlabeled data, then transfers the encoder to downstream labeled tasks.",
+                    "timestamp_s": 43,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Contrastive learning pulls together augmentations from the same image and pushes apart augmentations from different images.",
+                    "timestamp_s": 190,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "MoCo keeps a queue of previous keys and updates a momentum encoder as an exponential moving average of the main encoder weights.",
+                    "timestamp_s": 466,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "DINO replaces the SimCLR-style loss with a KL-divergence-based objective.",
+                    "timestamp_s": 537,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "DINOv2 scaled training to about 142 million images and is highlighted as a strong practical source of image features.",
+                    "timestamp_s": 579,
+                    "evidence_type": "example"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 5,
+                "end_s": 620
+            },
+            "difficulty": 0.38,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "duration_min": 10,
+            "ordering_index": 1,
+            "is_template": false
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg2",
+            "course_id": "<course_id>",
+            "name": "Supervised vs unsupervised learning and probabilistic modeling basics",
+            "description": "Sets up the lecture by separating learning paradigms from probabilistic model families and introducing how normalization creates probability-mass competition.",
+            "summary": "Before diving into specific generative models, the instructor notes that the big practical change over the past decade was scale—more compute, bigger datasets, and more stable training—rather than a wholesale rewrite of the underlying mathematics [ts=634s] [ts=701s]. He then distinguishes supervised learning, where data are paired as (x, y) and the goal is to learn a mapping from inputs to labels, from unsupervised learning, where only x is observed and the aim is to uncover structure such as clusters, low-dimensional manifolds, or density estimates [ts=745s] [ts=806s] [ts=865s]. The lecture next introduces the separate axis of discriminative versus generative modeling, emphasizing that probability densities are normalized and therefore induce competition for a fixed unit of probability mass [ts=952s] [ts=969s] [ts=1001s]. In that framing, discriminative models learn p(y|x) so labels compete for each fixed input and the model cannot reject unreasonable inputs, while generative models learn p(x), letting all possible images compete and enabling explicit low-probability rejection of out-of-scope inputs; conditional generative models instead learn p(x|y) and make images compete within each conditioning signal [ts=1052s] [ts=1105s] [ts=1138s] [ts=1239s].",
+            "key_points": [
+                {
+                    "text": "Supervised learning uses paired data (x, y) to learn a mapping from inputs to targets.",
+                    "timestamp_s": 745,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Unsupervised learning uses only x and seeks hidden structure such as clustering, dimensionality reduction, or density estimation.",
+                    "timestamp_s": 806,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "A normalized density assigns mass across possible outcomes, so different outcomes compete for a fixed unit of probability mass.",
+                    "timestamp_s": 969,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "Discriminative models learn p(y|x), so labels compete for each image but different images do not compete with one another.",
+                    "timestamp_s": 1052,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Generative models learn p(x), allowing the model to assign low probability to unreasonable inputs and therefore reject outliers.",
+                    "timestamp_s": 1138,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Conditional generative models learn p(x|y), so all possible outputs compete within each conditioning signal y.",
+                    "timestamp_s": 1239,
+                    "evidence_type": "definition"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 634,
+                "end_s": 1631
+            },
+            "difficulty": 0.52,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "duration_min": 17,
+            "ordering_index": 2,
+            "is_template": false
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg3",
+            "course_id": "<course_id>",
+            "name": "Why generative models and how the model family tree is organized",
+            "description": "Motivates conditional generation through ambiguity and then classifies major generative-model families by density access and sampling behavior.",
+            "summary": "The main practical motivation for generative modeling is ambiguity: when one input y can correspond to many valid outputs x, a model should represent a whole conditional distribution rather than a single deterministic answer [ts=1637s] [ts=1671s]. The lecture uses language modeling, text-to-image generation, and image-to-video prediction to make this concrete, stressing that the value of p(x|y) is that it captures many plausible poems, images, or futures for the same prompt or starting frame [ts=1694s] [ts=1737s] [ts=1757s]. It then introduces a taxonomy of generative models by asking whether the model gives explicit density values or only sampling procedures: explicit-density models compute p(x), implicit-density models can sample without exposing p(x), and the tree further splits into tractable exact-density models, approximate-density models, direct samplers, and iterative samplers [ts=1820s] [ts=1843s] [ts=1912s] [ts=1940s]. Within that taxonomy, autoregressive models are the main exact explicit method covered today, variational autoencoders are explicit but approximate, GANs are direct implicit models, and diffusion models are indirect iterative samplers deferred to the next lecture; the instructor also warns that subsequent notation will often omit the conditioning variable y for simplicity even when the intended model is conditional [ts=1918s] [ts=1931s] [ts=1951s] [ts=1983s] [ts=1996s].",
+            "key_points": [
+                {
+                    "text": "Generative models are especially useful when there are many plausible outputs x for the same input y.",
+                    "timestamp_s": 1637,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Language modeling, text-to-image, and image-to-video are examples where p(x|y) captures output ambiguity.",
+                    "timestamp_s": 1694,
+                    "evidence_type": "example"
+                },
+                {
+                    "text": "Explicit-density models let you compute p(x), while implicit-density models let you sample without directly reading out p(x).",
+                    "timestamp_s": 1826,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Autoregressive models are explicit tractable-density models, while VAEs are explicit approximate-density models.",
+                    "timestamp_s": 1918,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "GANs are direct implicit models and diffusion models are iterative implicit models.",
+                    "timestamp_s": 1951,
+                    "evidence_type": "definition"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 1632,
+                "end_s": 2098
+            },
+            "difficulty": 0.56,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "duration_min": 8,
+            "ordering_index": 3,
+            "is_template": false
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg4",
+            "course_id": "<course_id>",
+            "name": "Maximum likelihood estimation and autoregressive factorization",
+            "description": "Develops exact-density training via maximum likelihood and shows how autoregressive factorization turns sequence modeling into next-token prediction.",
+            "summary": "To move from taxonomy to concrete models, the lecture introduces maximum likelihood estimation as the generic way to fit an explicit density model: write a neural network for p(x; W), then choose parameters that make the observed training samples most likely under the model [ts=2114s] [ts=2153s]. Assuming IID data lets the joint likelihood factor across samples, and taking logs converts products into sums, producing the familiar log-likelihood objective used to train neural networks [ts=2265s] [ts=2296s] [ts=2321s]. Autoregressive models add the key structural assumption that each sample x can be split into an ordered sequence of subparts x1...xT, after which the chain rule gives a product of conditional next-part distributions [ts=2348s] [ts=2386s] [ts=2416s]. This makes RNNs and masked transformers natural autoregressive architectures for language [ts=2444s] [ts=2480s], but applying the same idea to images by rasterizing subpixel values into a huge discrete sequence is computationally expensive, which explains both the historical difficulty of pixel-level autoregressive image models and the need for more efficient tokenizations [ts=2582s] [ts=2653s] [ts=2693s].",
+            "key_points": [
+                {
+                    "text": "Maximum likelihood estimation chooses model parameters that maximize the likelihood of the observed training data.",
+                    "timestamp_s": 2114,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Assuming IID data lets the joint dataset likelihood factor into a product over independent samples, and log-likelihood turns that product into a sum.",
+                    "timestamp_s": 2267,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "Autoregressive models factor p(x) using the chain rule over an ordered sequence of subparts x1, x2, ..., xT.",
+                    "timestamp_s": 2386,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "RNNs and masked transformers implement autoregressive next-step prediction naturally.",
+                    "timestamp_s": 2444,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Text fits autoregressive modeling well because it is already a 1D discrete sequence.",
+                    "timestamp_s": 2506,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Rasterizing images into long sequences of subpixel values makes autoregressive image modeling feasible in principle but very expensive.",
+                    "timestamp_s": 2582,
+                    "evidence_type": "diagnostic_tip"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 2099,
+                "end_s": 2717
+            },
+            "difficulty": 0.74,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 10,
+            "ordering_index": 4,
+            "is_template": false
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg5",
+            "course_id": "<course_id>",
+            "name": "Plain autoencoders and the motivation for VAEs",
+            "description": "Builds intuition for VAEs by first showing why a bottlenecked autoencoder learns features but does not by itself solve generation.",
+            "summary": "The instructor temporarily drops the 'variational' part and first reviews standard autoencoders as an unsupervised way to learn features z from data x without labels [ts=2904s] [ts=2916s]. The basic training recipe is to encode x into a latent vector z, decode z back to x, and optimize reconstruction; the point is not to learn the identity function itself but to force useful structure through a narrow bottleneck so that z is far smaller than the original image [ts=2963s] [ts=2992s] [ts=3022s]. After training, that bottleneck representation can be reused for downstream tasks in the same spirit as other self-supervised methods [ts=3059s] [ts=3064s]. However, generation remains unsolved: sampling a z that matches the learned latent distribution is no easier than sampling x directly, so a plain autoencoder does not yet give a principled generative model [ts=3077s] [ts=3096s] [ts=3130s]. The VAE idea is to impose a known probabilistic structure, typically Gaussian, on the latent space so that after training one can sample z from that known distribution and decode it into new data [ts=3134s] [ts=3153s] [ts=3171s].",
+            "key_points": [
+                {
+                    "text": "A plain autoencoder learns features z from x by reconstructing the input without labels.",
+                    "timestamp_s": 2916,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Reconstruction is only useful when the latent code z is bottlenecked so the model must compress structure from the data.",
+                    "timestamp_s": 2992,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "The autoencoder's latent code can be reused as a self-supervised representation for downstream tasks.",
+                    "timestamp_s": 3059,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Plain autoencoders do not solve generation because sampling z that matches the data-induced latent distribution is still hard.",
+                    "timestamp_s": 3083,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "VAEs address this by forcing the latent codes to follow a known distribution such as a Gaussian.",
+                    "timestamp_s": 3153,
+                    "evidence_type": "claim"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 2718,
+                "end_s": 3205
+            },
+            "difficulty": 0.6,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "duration_min": 8,
+            "ordering_index": 5,
+            "is_template": false
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg6",
+            "course_id": "<course_id>",
+            "name": "VAE latent-variable model and Gaussian encoder/decoder parameterization",
+            "description": "Introduces the latent-variable generative story behind VAEs and explains how the encoder and decoder output distributions rather than single vectors.",
+            "summary": "The formal VAE setup assumes each training image x^(i) was generated from an unobserved latent vector z^(i), with the latent prior usually chosen to be a simple unit Gaussian so that sampling is easy after training [ts=3206s] [ts=3230s] [ts=3274s]. A direct maximum-likelihood treatment would write p(x) by marginalizing over z, but the necessary integral over the decoder's neural-network input is intractable in high dimensions [ts=3315s] [ts=3365s] [ts=3410s]. The core variational trick is therefore to introduce a second neural network q_phi(z|x) to approximate the intractable posterior over latent codes while the decoder p_theta(x|z) models data conditioned on z [ts=3475s] [ts=3526s] [ts=3535s]. To make those networks output distributions, the lecture constrains them to Gaussian families: the decoder predicts a mean image with fixed diagonal variance, and the encoder predicts both a mean and a diagonal covariance for z [ts=3564s] [ts=3599s] [ts=3610s]. With a fixed decoder variance, maximizing Gaussian log-likelihood reduces to minimizing L2 reconstruction error, which explains the familiar reconstruction term that appears later in the VAE objective [ts=3664s] [ts=3738s].",
+            "key_points": [
+                {
+                    "text": "The VAE generative story assumes each observed x was produced from an unobserved latent vector z.",
+                    "timestamp_s": 3206,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "A simple prior such as a unit Gaussian over z makes latent sampling possible after training.",
+                    "timestamp_s": 3274,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Directly marginalizing z to compute p(x) is intractable because the decoder neural network makes the integral over z impossible to compute exactly.",
+                    "timestamp_s": 3315,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "VAEs introduce an encoder network q_phi(z|x) to approximate the posterior while a decoder network p_theta(x|z) models data generation.",
+                    "timestamp_s": 3475,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "The encoder outputs a Gaussian mean and diagonal covariance for z, while the decoder outputs Gaussian parameters for x.",
+                    "timestamp_s": 3599,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "With fixed decoder variance, Gaussian log-likelihood becomes equivalent to L2 reconstruction.",
+                    "timestamp_s": 3668,
+                    "evidence_type": "formula"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 3206,
+                "end_s": 3769
+            },
+            "difficulty": 0.79,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 9,
+            "ordering_index": 6,
+            "is_template": false
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg7",
+            "course_id": "<course_id>",
+            "name": "ELBO derivation, reparameterization, and VAE latent-space behavior",
+            "description": "Derives the VAE training objective, shows how it is optimized in practice, and interprets the resulting latent space.",
+            "summary": "The lecture derives the VAE objective by starting from log p(x), rewriting it with Bayes' rule, introducing q(z|x), and decomposing the result into an expected reconstruction term plus two KL divergences [ts=3794s] [ts=3890s] [ts=3936s]. The first interpretable term says that samples drawn from the encoder's q(z|x) should reconstruct x through the decoder, and the second pushes the encoder's latent distribution toward the chosen prior p(z) [ts=3957s] [ts=4003s]. The last KL term, KL(q(z|x) || p(z|x)), is intractable because p(z|x) was the quantity we could not compute in the first place, so it is dropped using the fact that KL divergence is always nonnegative; this yields a lower bound on log p(x), the ELBO, which the VAE maximizes instead of exact likelihood [ts=4051s] [ts=4086s] [ts=4147s]. Training then consists of encoding x into a Gaussian over z, applying the KL-to-prior penalty, sampling z with the reparameterization trick so gradients can flow, and decoding back to a reconstruction term [ts=4164s] [ts=4193s] [ts=4208s]. The segment closes by explaining the tension between reconstruction and prior losses—one wants distinct near-deterministic codes, the other wants codes close to a unit Gaussian—and connects that tension to practical sampling and to the common observation that varying latent dimensions can smoothly morph generated digits in interpretable ways [ts=4226s] [ts=4282s] [ts=4310s].",
+            "key_points": [
+                {
+                    "text": "The VAE objective decomposes into an expected reconstruction term and KL-divergence terms after rewriting log p(x) with Bayes' rule and q(z|x).",
+                    "timestamp_s": 3890,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "The reconstruction term encourages samples from q(z|x) to decode back to the original x.",
+                    "timestamp_s": 3957,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "The prior term measures how closely the encoder's latent distribution matches the chosen prior p(z).",
+                    "timestamp_s": 4003,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "Dropping the intractable KL(q(z|x) || p(z|x)) term because KL is nonnegative yields the ELBO lower bound.",
+                    "timestamp_s": 4086,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "The reparameterization trick allows sampling z from the encoder's Gaussian while still backpropagating through the sampling step.",
+                    "timestamp_s": 4193,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "In a trained VAE, the reconstruction and prior losses fight to balance faithful reconstruction with a sampleable latent space, often producing smooth latent interpolations.",
+                    "timestamp_s": 4226,
+                    "evidence_type": "claim"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13](https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13)",
+                "start_s": 3770,
+                "end_s": 4342
+            },
+            "difficulty": 0.88,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 10,
+            "ordering_index": 7,
+            "is_template": false
+        }
+    ],
+    "concepts_kp_local": [
+        {
+            "local_kp_id": "local::<lecture_id>::kp1",
+            "name": "Scalable self-supervised representation learning",
+            "description": "Momentum-based contrastive methods such as MoCo, DINO, and DINOv2 learn transferable visual features from unlabeled images and scale through queues, EMA encoders, and larger datasets.",
+            "track_tags": [
+                "representation-learning",
+                "self-supervision"
+            ],
+            "domain_tags": [
+                "computer-vision",
+                "deep-learning"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.42,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "medium",
+            "structural_role": "supporting",
+            "importance_confidence": "medium",
+            "importance_rationale": "This is a brief recap rather than the main lecture topic, but it connects the previous lecture to today's shift toward generative modeling and highlights a practically important baseline.",
+            "importance_scope": "lecture_local",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp2",
+            "name": "Supervised vs unsupervised learning",
+            "description": "Supervised learning fits mappings from paired data (x, y), whereas unsupervised learning starts from x alone and seeks hidden structure, representations, or density information.",
+            "track_tags": [
+                "learning-paradigms",
+                "foundations"
+            ],
+            "domain_tags": [
+                "machine-learning",
+                "computer-vision"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "data-scientist"
+            ],
+            "difficulty_level": 0.34,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "The lecture explicitly uses this axis to separate task setup from probabilistic model family, so understanding it is necessary before the generative/discriminative discussion.",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp3",
+            "name": "Discriminative modeling p(y|x)",
+            "description": "A discriminative model predicts labels or outputs conditioned on an input and allocates probability mass across possible y values for each fixed x.",
+            "track_tags": [
+                "probabilistic-modeling",
+                "classification"
+            ],
+            "domain_tags": [
+                "machine-learning",
+                "probability"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.48,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "high",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "The lecture contrasts discriminative and generative models by asking what competes for normalized probability mass, and this comparison anchors the rest of the lecture.",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp4",
+            "name": "Generative modeling p(x) and conditional generation p(x|y)",
+            "description": "Generative models allocate probability mass over possible data x, while conditional generative models do so within each conditioning signal y, enabling sampling and outlier rejection.",
+            "track_tags": [
+                "probabilistic-modeling",
+                "generation"
+            ],
+            "domain_tags": [
+                "machine-learning",
+                "probability",
+                "computer-vision"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.58,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "This is the lecture's central conceptual pivot: nearly every later section assumes the student understands why modeling p(x) or p(x|y) is qualitatively different from p(y|x).",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp5",
+            "name": "Maximum likelihood estimation for density models",
+            "description": "Maximum likelihood fits probabilistic models by choosing parameters that maximize the probability or log-probability of the observed dataset under an assumed density family.",
+            "track_tags": [
+                "optimization",
+                "probabilistic-modeling"
+            ],
+            "domain_tags": [
+                "machine-learning",
+                "statistics"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.67,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "MLE is the guiding training principle for the exact-density branch and is reused as the starting point for the VAE derivation, so it unlocks multiple downstream ideas in the lecture.",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp6",
+            "name": "Autoregressive factorization via the chain rule",
+            "description": "Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+            "track_tags": [
+                "sequence-modeling",
+                "generative-models"
+            ],
+            "domain_tags": [
+                "probability",
+                "nlp",
+                "computer-vision"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.72,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Autoregressive factorization is the lecture's first concrete exact-density model and links generative modeling back to familiar RNN and transformer sequence predictors.",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp7",
+            "name": "Autoencoder bottlenecks and latent codes",
+            "description": "A bottlenecked autoencoder learns compressed latent codes useful for representation learning, but plain reconstruction alone does not make the latent space sampleable for generation.",
+            "track_tags": [
+                "representation-learning",
+                "autoencoders"
+            ],
+            "domain_tags": [
+                "deep-learning",
+                "computer-vision"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.57,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "medium",
+            "structural_role": "supporting",
+            "importance_confidence": "medium",
+            "importance_rationale": "This concept is not the final target of the lecture, but it is the crucial bridge that motivates why VAEs add probabilistic structure to latent representations.",
+            "importance_scope": "lecture_local",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp8",
+            "name": "Variational autoencoder latent-variable model",
+            "description": "A VAE introduces latent variables z, a prior p(z), a decoder p_theta(x|z), and an encoder q_phi(z|x) that approximates the intractable posterior over latent codes.",
+            "track_tags": [
+                "latent-variable-models",
+                "generative-models"
+            ],
+            "domain_tags": [
+                "probability",
+                "deep-learning",
+                "computer-vision"
+            ],
+            "career_path_tags": [
+                "ml-engineer",
+                "research-scientist"
+            ],
+            "difficulty_level": 0.8,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "This is the main concrete model family taught in the second half of the lecture and serves as the conceptual prerequisite for the ELBO objective and VAE sampling behavior.",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp9",
+            "name": "ELBO as the VAE training objective",
+            "description": "The evidence lower bound keeps a reconstruction term and a KL-to-prior regularizer while discarding an intractable nonnegative KL term, yielding a tractable lower bound on log p(x).",
+            "track_tags": [
+                "optimization",
+                "variational-inference"
+            ],
+            "domain_tags": [
+                "probability",
+                "statistics",
+                "deep-learning"
+            ],
+            "career_path_tags": [
+                "research-scientist",
+                "ml-engineer"
+            ],
+            "difficulty_level": 0.89,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "The ELBO is the lecture's most mathematically central derivation and is the mechanism that turns the abstract VAE story into a trainable objective.",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        },
+        {
+            "local_kp_id": "local::<lecture_id>::kp10",
+            "name": "Reparameterization, latent sampling, and disentangling intuition",
+            "description": "VAE training samples latent variables through a differentiable reparameterization trick, and the resulting latent spaces often support sampling, interpolation, and axis-wise variation.",
+            "track_tags": [
+                "optimization",
+                "latent-spaces"
+            ],
+            "domain_tags": [
+                "deep-learning",
+                "probability",
+                "computer-vision"
+            ],
+            "career_path_tags": [
+                "research-scientist",
+                "ml-engineer"
+            ],
+            "difficulty_level": 0.76,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "medium",
+            "importance_rationale": "This concept operationalizes the ELBO-trained VAE into a usable model by explaining how gradients flow through sampling and why the latent space becomes useful for generation and interpolation.",
+            "importance_scope": "lecture_local",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": ""
+        }
+    ],
+    "unit_kp_map_local": [
+        {
+            "unit_id": "local::<lecture_id>::seg1",
+            "local_kp_id": "local::<lecture_id>::kp1",
+            "planner_role": "main",
+            "instruction_role": "review",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The whole segment reviews contrastive SSL, then focuses on MoCo, DINO, and DINOv2, including the momentum encoder [ts=374s], EMA update [ts=466s], and 142M-image scaling story [ts=579s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg2",
+            "local_kp_id": "local::<lecture_id>::kp2",
+            "planner_role": "main",
+            "instruction_role": "intro",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The segment explicitly defines supervised learning from paired data [ts=745s] and unsupervised learning from x alone [ts=806s], with examples such as clustering and density estimation [ts=838s] [ts=865s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg2",
+            "local_kp_id": "local::<lecture_id>::kp3",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The discriminative formulation p(y|x) is introduced and unpacked through normalization and label competition [ts=952s] [ts=1060s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg2",
+            "local_kp_id": "local::<lecture_id>::kp4",
+            "planner_role": "support",
+            "instruction_role": "intro",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The same segment begins the generative side by contrasting p(x) and p(x|y) with discriminative models and by explaining how images compete for mass [ts=1138s] [ts=1239s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg3",
+            "local_kp_id": "local::<lecture_id>::kp4",
+            "planner_role": "main",
+            "instruction_role": "application",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Why generative models are useful is framed entirely around ambiguous conditional outputs and practical conditional generation examples [ts=1637s] [ts=1737s] [ts=1757s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg3",
+            "local_kp_id": "local::<lecture_id>::kp3",
+            "planner_role": "prereq",
+            "instruction_role": "review",
+            "coverage_level": "mention",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "The contrast with discriminative modeling remains implicit when the instructor keeps comparing conditional generation to earlier p(y|x) thinking [ts=1637s] [ts=1782s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg4",
+            "local_kp_id": "local::<lecture_id>::kp5",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Maximum likelihood is introduced as the generic exact-density training principle, including the log-likelihood rewrite for IID data [ts=2114s] [ts=2267s] [ts=2296s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg4",
+            "local_kp_id": "local::<lecture_id>::kp6",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Autoregressive factorization is derived with the chain rule and tied to RNNs, masked transformers, and the cost of image raster sequences [ts=2386s] [ts=2444s] [ts=2650s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg4",
+            "local_kp_id": "local::<lecture_id>::kp4",
+            "planner_role": "prereq",
+            "instruction_role": "review",
+            "coverage_level": "partial",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "The segment keeps positioning autoregressive models as one branch of explicit generative modeling [ts=2099s] [ts=2103s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg5",
+            "local_kp_id": "local::<lecture_id>::kp7",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "This segment walks through standard autoencoders, reconstruction, and bottlenecked latent codes in detail [ts=2916s] [ts=2963s] [ts=3022s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg5",
+            "local_kp_id": "local::<lecture_id>::kp8",
+            "planner_role": "support",
+            "instruction_role": "intro",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The VAE is motivated here as the probabilistic extension that forces latent codes toward a known Gaussian so they can be sampled later [ts=3134s] [ts=3153s] [ts=3171s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg6",
+            "local_kp_id": "local::<lecture_id>::kp8",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The segment formalizes latent variables z, the prior p(z), the decoder p(x|z), and the encoder q(z|x), including why direct marginalization is intractable [ts=3206s] [ts=3315s] [ts=3475s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg6",
+            "local_kp_id": "local::<lecture_id>::kp7",
+            "planner_role": "prereq",
+            "instruction_role": "review",
+            "coverage_level": "partial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The VAE formulation is explicitly introduced as a probabilistic spin on the plain autoencoder bottleneck from the previous segment [ts=3188s] [ts=3192s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg6",
+            "local_kp_id": "local::<lecture_id>::kp5",
+            "planner_role": "support",
+            "instruction_role": "support",
+            "coverage_level": "partial",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "Maximum-likelihood language reappears when the instructor asks how to train p(x|z) and explains why the needed integral over z breaks exact MLE [ts=3292s] [ts=3410s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg7",
+            "local_kp_id": "local::<lecture_id>::kp9",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "This entire segment derives the ELBO, interprets the reconstruction and prior terms, and drops the final intractable KL using KL>=0 [ts=3794s] [ts=4003s] [ts=4086s] [ts=4149s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg7",
+            "local_kp_id": "local::<lecture_id>::kp10",
+            "planner_role": "main",
+            "instruction_role": "application",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "After the derivation, the instructor explains reparameterized sampling for training and shows how latent dimensions can be varied to morph digits smoothly [ts=4193s] [ts=4310s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg7",
+            "local_kp_id": "local::<lecture_id>::kp8",
+            "planner_role": "prereq",
+            "instruction_role": "review",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The ELBO is explained directly in terms of the encoder q(z|x), decoder p(x|z), and prior p(z) introduced one segment earlier [ts=3971s] [ts=4024s]."
+        }
+    ],
+    "section_flags": [
+        {
+            "unit_id": "local::<lecture_id>::seg1",
+            "importance_flag": "medium",
+            "review_worthiness": "medium",
+            "item_generation_worthiness": "medium",
+            "formula_heavy": false,
+            "demo_heavy": false,
+            "rationale": "Mostly a recap of prior material, but it highlights practically important MoCo/DINO ideas and DINOv2 scaling rather than deriving new math [ts=374s] [ts=579s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg2",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": false,
+            "rationale": "Defines the foundational axes used throughout the lecture and introduces normalized density, p(y|x), p(x), and p(x|y), so misunderstandings here would break later sections [ts=952s] [ts=969s] [ts=1239s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg3",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": false,
+            "demo_heavy": false,
+            "rationale": "Important conceptual motivation plus the full taxonomy of model families; the section is less derivational than later VAE math but strongly organizes the course material [ts=1637s] [ts=1820s] [ts=1983s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg4",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": false,
+            "rationale": "Introduces maximum likelihood and the chain-rule factorization that make autoregressive models exact-density learners; these are core examinable derivations [ts=2114s] [ts=2386s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg5",
+            "importance_flag": "medium",
+            "review_worthiness": "medium",
+            "item_generation_worthiness": "medium",
+            "formula_heavy": false,
+            "demo_heavy": false,
+            "rationale": "Mainly an intuition-building bridge from plain autoencoders to VAEs, with less mathematical density than the following two segments [ts=2963s] [ts=3153s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg6",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": false,
+            "rationale": "Formalizes the latent-variable VAE setup, explains why exact marginalization is intractable, and introduces q(z|x) and Gaussian parameterization [ts=3315s] [ts=3475s] [ts=3599s]."
+        },
+        {
+            "unit_id": "local::<lecture_id>::seg7",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": false,
+            "rationale": "This is the most derivation-heavy section: it produces the ELBO, explains KL dropping, and connects the loss to reparameterization and latent-space behavior [ts=3890s] [ts=4086s] [ts=4193s]."
+        }
+    ],
+    "self_critique_trace": null
+}

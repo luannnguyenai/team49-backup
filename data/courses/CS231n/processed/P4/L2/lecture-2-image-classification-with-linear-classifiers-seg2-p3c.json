@@ -1,0 +1,334 @@
+{
+  "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2",
+  "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript gives enough detail on the collect-train-predict pipeline, nearest neighbor prediction, and the train/predict complexity tradeoff. A separate clip is not necessary.",
+  "qa_outputs": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item tests the supervised learning pipeline directly, with distractors that clearly contrast rule-based and data-driven workflows.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The stem cleanly assesses how nearest neighbor predicts, and the alternatives capture common confusions with parametric models.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item correctly targets the train-time versus test-time tradeoff of nearest neighbor and is backed by direct transcript evidence.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the basic data-driven workflow for supervised image classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Collect labeled examples, train a classifier, then evaluate predictions on unseen images.",
+        "Write one if-then rule for every possible object appearance.",
+        "Choose labels after looking at the test results.",
+        "Avoid training data and classify images only by resolution."
+      ],
+      "answer_index": 0,
+      "explanation": "A supervised data-driven pipeline learns from labeled examples and is evaluated on examples that were not used for training. This replaces brittle hand-coded rules.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_data_driven_learning_pipeline",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "collect data sets",
+          "train a classifier",
+          "evaluating"
+        ],
+        "timestamps": [
+          "00:15:00",
+          "00:15:51",
+          "00:16:10"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does a nearest neighbor classifier make a prediction?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It finds the most similar stored training image and copies that image's label.",
+        "It learns a weight matrix and multiplies it by the image vector.",
+        "It averages all class names alphabetically and returns the first one.",
+        "It ignores the training labels and predicts a random category."
+      ],
+      "answer_index": 0,
+      "explanation": "Nearest neighbor is nonparametric: it keeps the training examples and uses a distance function at prediction time to find the closest labeled example.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_nearest_neighbor_classification",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "keeping everything",
+          "most similar",
+          "outputs the label"
+        ],
+        "timestamps": [
+          "00:17:44",
+          "00:18:39",
+          "00:18:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is plain nearest neighbor often unattractive for deployment?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Training is cheap, but each prediction must compare the query against many stored training images.",
+        "Training requires solving a large optimization problem but prediction is always constant-time.",
+        "It cannot store labels during training.",
+        "It only works when all pixels are binary rather than RGB."
+      ],
+      "answer_index": 0,
+      "explanation": "The method does little during training because it mainly stores the data. Prediction is slow because each new image must be compared with the training set.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_nearest_neighbor_classification",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "training data is of O1",
+          "compare it with all",
+          "not really good"
+        ],
+        "timestamps": [
+          "00:23:40",
+          "00:24:23",
+          "00:24:33"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q1",
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q1",
+      "global_kp_id": "kp_nearest_neighbor_classification",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q2",
+      "global_kp_id": "kp_nearest_neighbor_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q2",
+      "global_kp_id": "kp_distance_metrics_for_similarity",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q3",
+      "global_kp_id": "kp_nearest_neighbor_classification",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q3",
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.75,
+      "discrimination_prior": 0.82,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "This is a straightforward pipeline-definition item with low ambiguity."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.0,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Learners need to distinguish stored-example lookup from learned-score models, which makes this a solid medium item."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.15,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The learner must reason about computational tradeoffs rather than just repeat the method definition, which makes it slightly harder."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "low",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item works well as an early competence check because it asks for a transferable supervised-learning workflow."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "final_quiz"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This item is useful when checking whether the learner can bridge generic supervised learning to instance-based classification."
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg2::q3",
+      "primary_phase": "transfer",
+      "secondary_phases": [
+        "final_quiz",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item transfers well because train-versus-inference cost tradeoffs recur across many model families."
+    }
+  ]
+}

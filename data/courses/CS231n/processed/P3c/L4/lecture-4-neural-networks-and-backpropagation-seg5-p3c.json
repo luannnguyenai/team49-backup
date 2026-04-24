@@ -1,0 +1,157 @@
+{
+  "unit_id": "local::lecture_4_neural_networks_and_backpropagation::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=25zD5qJHYsk",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript trình bày rõ computational graph và ví dụ backprop cơ bản; có thể tạo câu hỏi thủ tục an toàn mà không cần clip.",
+  "question_bank": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Một computational graph trong ngữ cảnh này dùng để làm gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Biểu diễn chuỗi phép toán từ input và tham số đến scalar loss.",
+        "Thay thế hoàn toàn việc cần hàm loss.",
+        "Lưu trữ nhãn dữ liệu dưới dạng cây quyết định.",
+        "Bảo đảm mọi đạo hàm đều bằng 1."
+      ],
+      "answer_index": 0,
+      "explanation": "Computational graph biến một biểu thức phức tạp thành các nút và cạnh dễ theo dõi. Nhờ vậy ta có thể tính forward và backward một cách có hệ thống.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_computation_graphs_and_backprop",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "computational graphs",
+          "the loss function"
+        ],
+        "timestamps": [
+          "00:41:28",
+          "00:42:05"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Khi bắt đầu backpropagation từ đầu ra cuối cùng, gradient khởi tạo chuẩn là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Đạo hàm của đại lượng với chính nó, bằng 1.",
+        "Gradient bằng 0 để tránh bùng nổ gradient.",
+        "Gradient bằng tổng mọi đầu vào trước đó.",
+        "Gradient bằng giá trị loss nhân learning rate."
+      ],
+      "answer_index": 0,
+      "explanation": "Điểm bắt đầu của backprop là đạo hàm của đầu ra cuối cùng theo chính nó. Giá trị này bằng 1 và sau đó được truyền ngược qua các nút theo chain rule.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "with respect to itself",
+          "always 1"
+        ],
+        "timestamps": [
+          "00:47:15",
+          "00:47:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Ở một nút trong computational graph, downstream gradient thường được tạo như thế nào?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Lấy upstream gradient nhân với local gradient của nút đó.",
+        "Lấy local gradient trừ upstream gradient.",
+        "Lấy tổng của mọi trọng số trong mạng.",
+        "Lấy đạo hàm của loss theo learning rate."
+      ],
+      "answer_index": 0,
+      "explanation": "Mỗi nút nhận gradient từ phía sau rồi kết hợp nó với đạo hàm cục bộ của chính phép toán tại nút đó. Tích này tạo ra gradient truyền tiếp về các nút trước.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "local gradient and upstream gradient",
+          "downstream gradients"
+        ],
+        "timestamps": [
+          "00:49:13",
+          "00:51:58"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q1",
+      "global_kp_id": "kp_computation_graphs_and_backprop",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q2",
+      "global_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q2",
+      "global_kp_id": "kp_computation_graphs_and_backprop",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q3",
+      "global_kp_id": "kp_local_upstream_and_downstream_gradients",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-4-neural-networks-and-backpropagation-seg5-q3",
+      "global_kp_id": "kp_backpropagation_as_recursive_chain_rule",
+      "role": "secondary"
+    }
+  ]
+}

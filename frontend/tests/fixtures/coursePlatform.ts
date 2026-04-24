@@ -109,7 +109,7 @@ export const LECTURE_1_UNIT: LearningUnitResponse = {
   },
   content: {
     body_markdown: null,
-    video_url: "/data/CS231n/videos/lecture-1.mp4",
+    video_url: "/data/courses/CS231n/videos/lecture-1.mp4",
     transcript_available: true,
     slides_available: true,
   },

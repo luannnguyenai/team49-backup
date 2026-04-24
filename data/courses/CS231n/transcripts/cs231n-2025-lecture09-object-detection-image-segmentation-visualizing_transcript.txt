@@ -1,0 +1,4433 @@
+Title: Stanford CS231N | Spring 2025 | Lecture 9: Object Detection, Image Segmentation, Visualizing
+URL: https://www.youtube.com/watch?v=PTypu6GqEd4
+Video ID: PTypu6GqEd4
+============================================================
+
+00:00:05
+OK.
+
+00:00:06
+Today, we'll be talking about
+different tasks of core Computer
+
+00:00:12
+Vision, algorithms and tasks,
+detection and segmentation.
+
+00:00:19
+We will also be covering
+topics around visualization
+
+00:00:22
+and understanding.
+
+00:00:23
+I will cover the
+most important ones.
+
+00:00:28
+Like the previous
+lecture last time,
+
+00:00:32
+what we discussed was around
+the topic of transitioning
+
+00:00:37
+from sequence to sequence
+models, RNNs to transformers.
+
+00:00:43
+And we saw that
+transformers were
+
+00:00:47
+defined by having some
+encoder, a number of layers,
+
+00:00:52
+which had multi-headed,
+self-attention, and layer norm,
+
+00:00:57
+as well as some MLP layers.
+
+00:01:01
+And this was, ultimately,
+called something
+
+00:01:06
+that we now refer to as
+encoder encoding the sequence.
+
+00:01:10
+And then if we need to decode an
+image or a language, a sequence
+
+00:01:16
+as the output, then similar
+type of architecture
+
+00:01:19
+is used for decoder getting
+the encoder tokens as input,
+
+00:01:27
+taking those as input, and
+then generating what is--
+
+00:01:32
+I'm hoping that you
+can see my cursor too,
+
+00:01:34
+what is the desired output.
+
+00:01:42
+We did talk--
+
+00:01:43
+Justin talked quite extensively
+about the differences
+
+00:01:48
+of modeling sequences,
+recurrent neural networks, RNNs,
+
+00:01:55
+and their variations that
+we've talked last week,
+
+00:01:59
+I think, on Tuesday about and
+then using convolution also as
+
+00:02:04
+another approach.
+
+00:02:06
+But we talked about,
+ultimately, that self-attention
+
+00:02:10
+is what we work with in many
+of the applications these days.
+
+00:02:17
+They work much better
+than the other two.
+
+00:02:24
+They are more expensive.
+
+00:02:25
+They do add computation
+and memory requirements,
+
+00:02:31
+but that comes with much
+better modeling of the sequence
+
+00:02:36
+and better results in
+terms of any of the tasks.
+
+00:02:42
+So until here, it was mostly
+talking about self-attention.
+
+00:02:48
+We also talked a
+little bit about
+
+00:02:50
+cross-attention
+and related topics.
+
+00:02:55
+And then we got to the topic
+of vision transformers, which
+
+00:02:59
+is one of the core
+models that is
+
+00:03:02
+being used in modern
+applications, Computer Vision
+
+00:03:06
+applications.
+
+00:03:07
+We did go through this in the
+last minutes of last lecture,
+
+00:03:17
+the previous lecture.
+
+00:03:18
+And I want to revisit the topic.
+
+00:03:21
+And after that, I'll stop and
+hear any questions or comments,
+
+00:03:26
+you may have regarding the
+assignments and everything
+
+00:03:28
+that I talked about so far.
+
+00:03:30
+We talked about
+the fact that what
+
+00:03:33
+we do with transformers, when
+we want to process images,
+
+00:03:38
+we split the image into patches,
+basically creating a sequence.
+
+00:03:48
+The image was split to S by
+S or in this case, maybe a 3
+
+00:03:57
+by 3 patches.
+
+00:03:59
+And each of those
+patches are then
+
+00:04:02
+represented by what
+we call tokens.
+
+00:04:05
+And tokens are often
+a linear projection
+
+00:04:10
+of the vector, the
+reshaped version
+
+00:04:17
+of the image into a vector.
+
+00:04:20
+And it's basically a
+D-dimensional vector,
+
+00:04:24
+as you can see in this slide.
+
+00:04:27
+But because we have
+turned the image
+
+00:04:29
+into patches, what
+becomes important-- what
+
+00:04:32
+are we losing here?
+
+00:04:33
+It's basically we're
+losing the position,
+
+00:04:36
+the 2D position of the image.
+
+00:04:38
+So that's why we often create
+or add something that we
+
+00:04:43
+call positional embedding.
+
+00:04:46
+And there are many different
+ways of doing this.
+
+00:04:49
+You can create a sequence, just
+put numbers of sequence as 1,
+
+00:04:53
+2, 3, and so on.
+
+00:04:55
+Or you can do a 2D version
+of x and y-coordinates,
+
+00:05:02
+and adding these two together
+creates the new token that goes
+
+00:05:09
+to the transformer
+layer the same way all
+
+00:05:12
+of the self-attention,
+layer norm,
+
+00:05:15
+and everything that we've
+talked about, MLP, everything,
+
+00:05:19
+we talked about last week.
+
+00:05:24
+And then the output layer will
+generate the output vectors
+
+00:05:29
+for us.
+
+00:05:29
+It could be used
+for any application.
+
+00:05:32
+One of the major applications
+in Computer Vision
+
+00:05:35
+has been classification.
+
+00:05:36
+We started with
+image classification.
+
+00:05:39
+So with image classification,
+what becomes important
+
+00:05:42
+is to somehow be able to
+encode or generate something
+
+00:05:51
+as the output that is
+representative of the class.
+
+00:05:54
+So what we do is often, we add
+one token, a special extra input
+
+00:06:00
+to the transformer, which is
+of the same dimensionality,
+
+00:06:05
+but it's a learnable
+parameter that
+
+00:06:09
+in the output space,
+whatever that represents
+
+00:06:13
+is going to be turned into
+the class probability vector.
+
+00:06:19
+So a C-dimensional vector, which
+is the class probabilities.
+
+00:06:22
+And that's what we often
+call the class token.
+
+00:06:26
+So this is one of the
+base and most standard way
+
+00:06:31
+of doing using ViTs,
+vision transformers,
+
+00:06:35
+for image classification.
+
+00:06:39
+But transformers are not
+only used for classification,
+
+00:06:42
+they could be used
+for many other tasks
+
+00:06:45
+that we will be covering
+some of those today as well.
+
+00:06:49
+But last week, we also talked
+about this other variant
+
+00:06:52
+of the transformers.
+
+00:06:54
+Again, same tokens.
+
+00:06:56
+And from the tokens we go
+with the transformer layers.
+
+00:07:03
+If you remember
+last time, we talked
+
+00:07:05
+about these multiple
+layers of transformers.
+
+00:07:09
+As I said, positional
+embeddings are added.
+
+00:07:13
+And here, because we see the
+entire image all together,
+
+00:07:20
+we don't have to
+do masking like we
+
+00:07:22
+did for language, because
+language is really a sequence
+
+00:07:25
+that we shouldn't be using
+the future information for.
+
+00:07:29
+And then, ultimately,
+transformers
+
+00:07:33
+give an output of a vector
+patch for each of the inputs.
+
+00:07:40
+And the other option for
+training a transformer
+
+00:07:44
+is actually to instead of
+having a separate class token,
+
+00:07:48
+just take the outputs,
+run a pooling layer,
+
+00:07:51
+and then turn that
+into a probability
+
+00:07:55
+vector for C different classes.
+
+00:07:57
+So I talked about two
+versions of transformers.
+
+00:08:00
+One of them was we're
+using a class token.
+
+00:08:03
+And the other one was we take
+all of the output tokens.
+
+00:08:07
+We apply pooling and projection
+into a vector that represents
+
+00:08:12
+the class probabilities.
+
+00:08:14
+How we supervise this?
+
+00:08:15
+It's the exact same thing
+that we talked about earlier.
+
+00:08:19
+And that was back
+propagation, defining
+
+00:08:23
+a loss function, binary
+cross-entropy, the soft log, max
+
+00:08:27
+loss, and so on.
+
+00:08:29
+So this was ViTs.
+
+00:08:33
+This is ViTs in a nutshell.
+
+00:08:37
+And over the years, this
+type of architecture
+
+00:08:41
+for many different applications
+have remained the same.
+
+00:08:46
+Many modern architectures right
+now use many of these components
+
+00:08:53
+very similar to what
+we presented here.
+
+00:08:56
+But there are some
+optimizations that we
+
+00:09:00
+had in the slides
+last week, but I
+
+00:09:03
+think I'll just spend quickly
+a couple of minutes on them.
+
+00:09:10
+But I want you to
+understand that there
+
+00:09:12
+are many different tweaks
+and optimizations for better
+
+00:09:18
+performance, and also making
+the transformers, the training
+
+00:09:21
+a little bit more stable.
+
+00:09:23
+One of them is actually
+the residual connections.
+
+00:09:28
+This layer norm is basically
+outside the residual
+
+00:09:33
+So this means that whatever
+we get here, we normalize it.
+
+00:09:38
+So this doesn't really mean
+that we can't replicate
+
+00:09:42
+any form of identity function
+anymore, that resonates really
+
+00:09:46
+wanted to do.
+
+00:09:47
+So the solution for
+that is to bring
+
+00:09:50
+in the layer normalization.
+
+00:09:53
+We often put it
+before self-attention
+
+00:09:56
+and the second one
+before the MLP layer.
+
+00:09:59
+So normalization is there.
+
+00:10:01
+But we also preserve
+our identity function.
+
+00:10:05
+There are also other
+ways of normalizing.
+
+00:10:09
+There is this RMSNorm, root
+mean square normalization,
+
+00:10:13
+which is actually a very
+basic type of normalization.
+
+00:10:19
+For each of the
+features, it doesn't
+
+00:10:21
+use the mean value of the
+feature for normalization.
+
+00:10:25
+But this makes the training
+a little bit more stable.
+
+00:10:29
+Again, these are all empirically
+shown to be better options.
+
+00:10:38
+Although there are
+some justifications
+
+00:10:40
+why while they work well.
+
+00:10:42
+But mostly, the reason
+for adopting these
+
+00:10:46
+is just the fact that they
+make the trainings more stable.
+
+00:10:53
+The other option is to
+instead of using a simple MLP,
+
+00:10:58
+we use a SwiGLU MLP, where
+we actually do some--
+
+00:11:05
+this is what we call
+gated nonlinearity.
+
+00:11:08
+Instead of having two vectors of
+weights, matrices of W1 and W2,
+
+00:11:13
+we add a third one, 1, 2, and 3.
+
+00:11:16
+But here, we create
+some gated nonlinearity.
+
+00:11:22
+Basically, what it does
+is getting more trainable
+
+00:11:36
+parameters and not
+just necessarily
+
+00:11:38
+trainable parameters, but
+creating a better nonlinearity
+
+00:11:42
+for a small architecture.
+
+00:11:43
+Even if we select the hidden
+layer value equal to 8
+
+00:11:50
+divided by 3, it
+keeps the same size
+
+00:11:53
+of the network in terms of
+the number of parameters,
+
+00:11:56
+but it does learn higher
+dimensional nonlinearities
+
+00:12:04
+in that layer.
+
+00:12:05
+The last piece is
+mixture of experts
+
+00:12:09
+that is often used in even
+the very modern architectures
+
+00:12:13
+these days.
+
+00:12:14
+Instead of having one
+set of MLP layers,
+
+00:12:17
+we can have multiple
+sets of MLP layers.
+
+00:12:20
+Each of those will be an expert.
+
+00:12:22
+And what we do is
+through a router,
+
+00:12:28
+the tokens will be routed
+to A of those E experts.
+
+00:12:34
+And in this way, we actually
+have A active experts.
+
+00:12:40
+But then, again,
+what it does is it
+
+00:12:43
+increases the number
+of parameters,
+
+00:12:48
+and it helps learning more
+robust models without increasing
+
+00:12:55
+too much on the compute.
+
+00:12:57
+And these, again, are
+all parallel MLPs.
+
+00:13:01
+So we can have multiple
+experts in parallel.
+
+00:13:05
+As I said, they are
+used in all LLMs
+
+00:13:08
+these days, large
+language models,
+
+00:13:10
+and all of the modern
+LLMs up to the level
+
+00:13:15
+that we know about are
+using these types of tweaks.
+
+00:13:20
+And this is the summary
+of all of the tweaks
+
+00:13:23
+that I just mentioned.
+
+00:13:25
+This is similar
+to [? bias. ?] No.
+
+00:13:28
+This is completely a
+trainable parameter by itself
+
+00:13:32
+that you train, either a
+feedforward network or just
+
+00:13:37
+a linear projection to turn that
+into the probability vector.
+
+00:13:42
+So it's not [? just bias. ?]
+
+00:13:45
+And then again,
+remember that you
+
+00:13:47
+have so many self-attention
+networks here, layers here.
+
+00:13:54
+And those self-attention
+layers are
+
+00:13:56
+basically fusing
+the information,
+
+00:13:59
+creating attention between all
+of the tokens and this class
+
+00:14:02
+token.
+
+00:14:02
+So when you supervise
+it from here,
+
+00:14:05
+the loss function comes in.
+
+00:14:06
+This will represent the
+class probabilities vector.
+
+00:14:13
+So the question is, if
+there are nice intuitions,
+
+00:14:16
+what different
+experts are doing?
+
+00:14:19
+That's a great question.
+
+00:14:21
+Because they are
+trained in parallel,
+
+00:14:24
+and they are
+initialized differently,
+
+00:14:27
+they often try to learn one
+aspect or a related, maybe also
+
+00:14:33
+sometimes very much
+related aspect,
+
+00:14:36
+but it's just adding more
+compute and more parameters,
+
+00:14:43
+giving the network to learn
+different things, if it
+
+00:14:47
+does have to learn
+multiple concepts.
+
+00:14:51
+For example, if you have to
+cover multiple probability
+
+00:14:54
+distributions, then
+with these MLPs,
+
+00:14:57
+you often have the power to
+separate those modes of data.
+
+00:15:02
+So the question is, if
+the number of experts
+
+00:15:06
+is a hyperparameter or not?
+
+00:15:09
+Yes, definitely, it's
+a hyperparameter.
+
+00:15:11
+From what I know,
+it's often predefined.
+
+00:15:15
+Don't necessarily like
+over fine tune them.
+
+00:15:18
+But yes, they are
+all hyperparameters.
+
+00:15:21
+They are also learned.
+
+00:15:22
+Yes.
+
+00:15:23
+And they are learned.
+
+00:15:25
+So why moving the
+layer norm helps us
+
+00:15:30
+learn identity transformation?
+
+00:15:33
+So look at this architecture.
+
+00:15:35
+Will you be able to create
+any form of identity?
+
+00:15:38
+Because right after that
+residual connection,
+
+00:15:41
+the feature values are
+changed, because you
+
+00:15:44
+have a normalization.
+
+00:15:45
+You will never have the
+identity in the features.
+
+00:15:48
+Because right after that, you
+see the layer normalization.
+
+00:15:53
+And that's why, what we
+do is we bring it in.
+
+00:15:57
+We have quite a few different
+tasks in Computer Vision.
+
+00:16:04
+And these were the core and
+the most important tasks
+
+00:16:09
+over the years for Computer
+Vision applications.
+
+00:16:13
+Although these days, we are
+solving much harder tasks.
+
+00:16:16
+And nobody cares about
+object detection anymore,
+
+00:16:19
+because now, we can just do
+it with one line of code.
+
+00:16:22
+But over the past
+10, 15 years, there
+
+00:16:25
+has been a lot of advances.
+
+00:16:27
+And we want to cover, I want
+to really cover some of those
+
+00:16:31
+today.
+
+00:16:32
+Just so if you have to design
+something new yourself,
+
+00:16:35
+you know where to look and
+how to design your models.
+
+00:16:40
+And then, ultimately,
+there is the topic
+
+00:16:43
+of visualization and
+understanding, which is very
+
+00:16:47
+important in many applications.
+
+00:16:49
+For example, if you're
+working with medical data,
+
+00:16:52
+often, the visualization
+understanding
+
+00:16:54
+is more important than
+the classification itself
+
+00:16:57
+or detection of
+tumor, for example,
+
+00:16:58
+if you want to know
+where, why, and so on.
+
+00:17:06
+The way we started the class,
+and this slide is probably
+
+00:17:11
+very much familiar to everybody,
+we talked about different tasks.
+
+00:17:18
+And for object classification,
+for the task of classification,
+
+00:17:23
+we talked about this.
+
+00:17:24
+We spent quite a lot of time
+over the first few lectures,
+
+00:17:29
+seeing how we can create a
+classifier that classifies
+
+00:17:33
+images from pixels into labels.
+
+00:17:37
+But then one of the other
+tasks important similarly
+
+00:17:45
+is semantic segmentation.
+
+00:17:48
+And within semantic
+segmentation,
+
+00:17:50
+what we care about is to assign
+a label to every single pixel
+
+00:17:56
+inside the image, turn
+each of the pixels
+
+00:18:01
+into a label that is the
+label for that object
+
+00:18:08
+or anything in the scene.
+
+00:18:12
+So basically, when
+we train a model that
+
+00:18:15
+does this at the test time,
+we want to take an image
+
+00:18:19
+and generate the same
+map as the output.
+
+00:18:23
+How do we do that?
+
+00:18:24
+There are many
+different options.
+
+00:18:26
+So let's say, what
+I can do is just
+
+00:18:31
+look at each pixel, every single
+pixel, and say what the value
+
+00:18:36
+or what the label for
+that pixel should be.
+
+00:18:40
+In the very basic form,
+as you can see here,
+
+00:18:43
+it's actually very
+much impossible.
+
+00:18:46
+It's hard to say what pixel that
+represents that specific-- what
+
+00:18:52
+object that specific pixel
+represents because there
+
+00:18:57
+is no context, if you only
+look at the pixel itself.
+
+00:19:00
+So that's why
+context is important.
+
+00:19:04
+We look at the
+surrounding areas.
+
+00:19:09
+And then if I take these
+patches and the pixel
+
+00:19:13
+in the center and the
+surrounding areas,
+
+00:19:16
+now, I can train a
+convolutional neural network
+
+00:19:19
+or any network that generates
+the output label for us.
+
+00:19:23
+It's the same
+architecture that we've
+
+00:19:25
+talked about over the quarter.
+
+00:19:28
+And you can select
+any of those that we
+
+00:19:30
+used for image classification.
+
+00:19:32
+Because now, you're
+classifying the entire image.
+
+00:19:35
+It could be a CNN, it could be
+a ResNet, it could be a ViT,
+
+00:19:38
+or whatever.
+
+00:19:40
+This is really time
+consuming because if you
+
+00:19:44
+want to run one full network for
+every single pixel in an image,
+
+00:19:50
+it will take forever to turn
+this into a segmentation map.
+
+00:19:55
+The other option
+that we can use is
+
+00:19:58
+to instead of running one
+network for every single pixel,
+
+00:20:05
+what if we train a
+neural network that
+
+00:20:07
+takes the image as the input and
+outputs the entire pixel map,
+
+00:20:13
+the segmentation map, not
+just one single label,
+
+00:20:17
+a matrix of labels?
+
+00:20:20
+And in that case, we will have
+our segmentation task solved.
+
+00:20:28
+And in order to do
+that, we need to have
+
+00:20:32
+a layer in the input that is
+the same size as the image.
+
+00:20:36
+And also in the
+output, we also need
+
+00:20:39
+some sort of an inflated layer.
+
+00:20:42
+You can't go to fully connected
+layers, and so on, because now,
+
+00:20:47
+we are generating an image.
+
+00:20:50
+And because of that, we need
+to keep the network inflated.
+
+00:20:57
+And then that's what we call,
+often, fully convolutional
+
+00:21:03
+neural networks or FCNs.
+
+00:21:06
+So with fully convolutional
+neural networks,
+
+00:21:10
+this is definitely a great idea.
+
+00:21:13
+But there is a caveat.
+
+00:21:15
+There is a problem.
+
+00:21:16
+These images are large.
+
+00:21:18
+And these networks, these
+layers will become very large.
+
+00:21:24
+And there will be
+so many parameters
+
+00:21:26
+to optimize, especially
+in the early years
+
+00:21:28
+that we didn't
+have powerful GPUs,
+
+00:21:31
+this was a bottleneck,
+a problem, a challenge
+
+00:21:34
+for training algorithms.
+
+00:21:37
+And that's why the
+algorithms evolved
+
+00:21:40
+into starting from
+full-size images going down
+
+00:21:46
+in terms of the
+resolution, making
+
+00:21:49
+the convolutions, the spatial
+resolutions smaller and smaller
+
+00:21:53
+through downsampling operations.
+
+00:21:56
+And then somewhere
+in the middle,
+
+00:21:59
+we will have a low
+resolution, but somehow thick
+
+00:22:02
+in terms of the
+number of channels.
+
+00:22:05
+And then from
+there, what we do is
+
+00:22:08
+we go back up to the
+same size of the image
+
+00:22:10
+to create the output pixel.
+
+00:22:13
+And in order to do that, we
+know how to do the downsampling.
+
+00:22:19
+Downsampling was easy.
+
+00:22:21
+We've talked about it.
+
+00:22:22
+We talked about pooling
+operation, strided convolution,
+
+00:22:26
+and several other steps
+or operations that
+
+00:22:35
+could be used here.
+
+00:22:37
+But on the upsampling
+side, we don't really
+
+00:22:41
+know how to do the upsampling
+because we don't have pooling
+
+00:22:46
+or reverse of up pooling or
+reverse strided convolutions.
+
+00:22:55
+And because of that,
+we had to invent
+
+00:22:57
+some new operations that
+reverses downsampling by itself.
+
+00:23:04
+But before I go
+to the upsampling,
+
+00:23:09
+defining what upsampling
+is, I just briefly
+
+00:23:12
+want to tell you that, maybe
+I can ask you a question.
+
+00:23:21
+How do you think this
+network is trained?
+
+00:23:24
+Because now, we have a network
+that starts from an image
+
+00:23:27
+and ends with an image.
+
+00:23:29
+And then the tools that we
+have for training this network
+
+00:23:33
+was a loss function.
+
+00:23:37
+How do you think is the best
+to train or define a loss
+
+00:23:41
+function for this network?
+
+00:23:44
+We talked about softmax loss.
+
+00:23:47
+We talked also a little bit
+about some regression losses
+
+00:23:51
+and SVM loss.
+
+00:23:53
+But assuming that we want to
+use softmax loss function,
+
+00:23:58
+how could we define this
+or train this network?
+
+00:24:02
+What would the objective be?
+
+00:24:04
+So you said mean classification
+loss for each of the pixels.
+
+00:24:09
+And that's correct.
+
+00:24:11
+You can add the loss function
+for every single pixel,
+
+00:24:16
+because every single pixel
+is doing a classification.
+
+00:24:20
+So you will have a sigma
+over all pixels of the image.
+
+00:24:24
+And the loss function is
+just a simple softmax.
+
+00:24:28
+And then you can backprop.
+
+00:24:30
+That's the entire loss
+function that you need.
+
+00:24:33
+The question is, do
+we need, what we call,
+
+00:24:37
+ground truths for training?
+
+00:24:39
+So that's actually the ground
+truths of segmentation.
+
+00:24:41
+And yes, for these
+types of algorithms,
+
+00:24:44
+because they are
+fully supervised,
+
+00:24:46
+we do need the ground
+truths label maps.
+
+00:24:49
+And early years,
+there has been a lot
+
+00:24:52
+of work doing and sitting
+down and manually labeling
+
+00:24:57
+the pixels to be able to
+train these algorithms.
+
+00:24:59
+Yes.
+
+00:25:00
+These days, we don't need
+that because we have tools.
+
+00:25:04
+But early on, in order to
+train these algorithms,
+
+00:25:07
+we needed the ground truth.
+
+00:25:13
+Very briefly, let me tell you
+what we do with upsampling.
+
+00:25:17
+Upsampling is actually
+not that hard.
+
+00:25:19
+We can use an
+unpooling operation.
+
+00:25:22
+There are different
+ways of doing it.
+
+00:25:24
+One is nearest neighbor.
+
+00:25:26
+If I want to go from a 2
+by 2 as an example here,
+
+00:25:32
+a matrix 2 by 2, 4 by 4.
+
+00:25:34
+I just need to copy the
+data for each of these,
+
+00:25:39
+take the nearest neighbor
+in the lower resolution one.
+
+00:25:42
+Or bed of nails
+is you just select
+
+00:25:45
+one of those in the
+upsampled version.
+
+00:25:48
+You only select one of
+those, the one in the corner.
+
+00:25:53
+To copy the data, replace
+everything else with zero.
+
+00:25:57
+And through multiple
+layers of convolution,
+
+00:26:00
+these values will
+start appearing.
+
+00:26:05
+If we use max pooling
+in our network,
+
+00:26:11
+in the encoding
+side, what we can do
+
+00:26:15
+is we can save the locations
+of the max, the ones that
+
+00:26:20
+were selected, and then copy
+the data in the unpooling max,
+
+00:26:25
+unpooling stage right over
+there that the max was defined.
+
+00:26:34
+So basically, we
+save the locations.
+
+00:26:37
+In the encoding part
+and in decoding part
+
+00:26:40
+in the upsampling step, we
+reuse those saved coordinates.
+
+00:26:46
+The other option is to
+do a learned upsampling.
+
+00:26:51
+All of these that I showed there
+is no parameter to be learned.
+
+00:26:55
+It's just an operation.
+
+00:26:57
+But learned upsampling
+are also possible.
+
+00:27:01
+Very simply, let's
+revisit the convolution.
+
+00:27:05
+In the convolution
+layer, what we did
+
+00:27:07
+was applying a convolution
+filter for a pixel
+
+00:27:10
+and generating the output,
+and do this repeatedly
+
+00:27:13
+for all of the pixels.
+
+00:27:16
+And when we wanted to do--
+
+00:27:20
+to downsample, what
+we did was strided
+
+00:27:23
+convolution, where, instead
+of taking steps of 1,
+
+00:27:27
+we take steps of 2, and generate
+the outputs step by step.
+
+00:27:31
+If you don't remember this
+part, go back to the lecture.
+
+00:27:34
+We talked about it.
+
+00:27:35
+Third lecture, I think.
+
+00:27:39
+And then we can replicate the
+same for the upsampling process.
+
+00:27:44
+So this one will represent this
+area in the upsampled image.
+
+00:27:51
+And then we define
+some weights here
+
+00:27:53
+to map that to the output map.
+
+00:27:57
+And then for the
+next one, same story,
+
+00:27:59
+but there will be overlaps.
+
+00:28:01
+And for the overlaps, we
+often sum over the values.
+
+00:28:04
+Let me give you an example,
+sum over the outputs.
+
+00:28:08
+Let me give you an example.
+
+00:28:09
+And that's with a
+simple 1D function.
+
+00:28:14
+If the input is just
+two values of A and B,
+
+00:28:18
+we learn a filter that that
+filter maps it to the higher
+
+00:28:24
+resolution output.
+
+00:28:26
+And for doing that, we
+just apply the filter
+
+00:28:30
+to each of the values and
+write the outputs here.
+
+00:28:34
+For the parts that there is an
+overlap, it's the summation.
+
+00:28:38
+Addition of what is coming
+from each of the two locations.
+
+00:28:49
+So we did talk about this fully
+convolutional neural networks
+
+00:28:58
+and how they are being used.
+
+00:29:00
+These are actually some of the
+most basic and mostly widely
+
+00:29:07
+used algorithms
+for segmentation.
+
+00:29:11
+And I want to
+also, very quickly,
+
+00:29:15
+highlight one of the
+widely used networks units.
+
+00:29:21
+As you can see,
+the shape U, it's
+
+00:29:23
+actually the same
+architecture as I showed here.
+
+00:29:26
+Just let's draw it as
+similar to a U shape.
+
+00:29:31
+And the reason that
+I'm highlighting this
+
+00:29:35
+is that still, today, some
+of the medical applications
+
+00:29:40
+that work on segmentation,
+use segmentation algorithms,
+
+00:29:44
+still, this unit or its variants
+generate the state-of-the art
+
+00:29:53
+results, if you don't want
+to use any foundation model.
+
+00:29:56
+So what it does is
+exactly what we explained.
+
+00:30:01
+A downsampling phase that
+increases the field of view
+
+00:30:05
+and loses some
+spatial information,
+
+00:30:08
+and then upsampling
+phase that goes back
+
+00:30:12
+to the image resolution.
+
+00:30:14
+The only difference
+that U-Net has
+
+00:30:16
+is because it's used
+for segmentation,
+
+00:30:20
+there is this
+understanding that we
+
+00:30:24
+need to keep the spatial
+information in the decoder side,
+
+00:30:32
+because when we downsample,
+we somehow lose resolution.
+
+00:30:35
+And then upsampling, if you
+don't have the information,
+
+00:30:38
+it's going to be
+a little bit hard.
+
+00:30:40
+And we often get into
+sometimes boundaries are faded.
+
+00:30:45
+And in order not to get the
+feature maps in the encoder side
+
+00:30:53
+are actually copied as
+inputs to the decoder layers.
+
+00:30:58
+In that way, you're keeping
+this structural information
+
+00:31:03
+within the image and
+generate the outputs
+
+00:31:06
+that are much sharper.
+
+00:31:09
+So this was the idea
+behind U-Net And as I said,
+
+00:31:14
+it's actually being
+used quite often.
+
+00:31:17
+Summary of semantic
+segmentation--
+
+00:31:21
+what we talked about today,
+the fully convolutional
+
+00:31:24
+neural networks.
+
+00:31:26
+You have same filter
+as before that we
+
+00:31:32
+had for downsampling here.
+
+00:31:42
+To save time, I actually
+removed some of the slides
+
+00:31:45
+from this part.
+
+00:31:46
+And I have it in the
+back of the slides.
+
+00:31:48
+You should check it out.
+
+00:31:49
+This is a reverse.
+
+00:31:51
+This is transformed
+transposed convolution.
+
+00:31:54
+So we do have a 3
+by 3 matrix here.
+
+00:31:57
+And then instead of convolving
+the input image, input data,
+
+00:32:03
+we do the convolution on the--
+
+00:32:05
+applied convolution on the
+transposed version of the input.
+
+00:32:09
+And it actually generates
+a larger output.
+
+00:32:12
+So it's the transposed
+convolution.
+
+00:32:16
+It's the reverse of the
+regular convolution.
+
+00:32:20
+But why transposed?
+
+00:32:21
+I would refer you to take a
+look at the additional slides.
+
+00:32:25
+So the question is,
+is the filter trained?
+
+00:32:28
+Yes.
+
+00:32:29
+It's very much similar to
+other convolution layers.
+
+00:32:31
+All of the filters are trained.
+
+00:32:32
+Yes.
+
+00:32:33
+Yeah.
+
+00:32:38
+Great.
+
+00:32:40
+This was the topic of
+semantic segmentation.
+
+00:32:45
+And as we talked about this, we
+only get labels for the pixels.
+
+00:32:51
+But if there are two
+instances of the same object,
+
+00:32:55
+we have no idea
+which one is which.
+
+00:32:58
+Because this is just generating
+or outputting the pixel labels.
+
+00:33:07
+And that brings us to the
+topic of instance segmentation,
+
+00:33:13
+where now, we not only care
+about the pixel classes,
+
+00:33:18
+but also, I want you to know
+that these pixels belong
+
+00:33:23
+to one instance of the dog.
+
+00:33:24
+And this next one is
+actually a different dog.
+
+00:33:29
+And for doing that, what
+we need is understanding
+
+00:33:37
+multiple objects in
+the image and brings us
+
+00:33:41
+to the topic of
+object detection.
+
+00:33:43
+Object detection has been
+one of the, besides image
+
+00:33:49
+classification or after
+image classification,
+
+00:33:51
+has been one of the core
+Computer Vision problems
+
+00:33:58
+and tasks.
+
+00:33:59
+And for many years, many,
+many different algorithms
+
+00:34:03
+were proposed for just doing
+the task of object detection.
+
+00:34:09
+We are going to fly
+over some of them
+
+00:34:11
+and highlight a couple
+of important ones.
+
+00:34:15
+But again, there are so many
+works in the literature,
+
+00:34:20
+even in the literature
+of deep learning
+
+00:34:22
+that I am not covering here,
+so in the past 10, 15 years.
+
+00:34:30
+How we can do that and solve
+the problem of object detection?
+
+00:34:35
+If it's just a single object, it
+means that we need to generate--
+
+00:34:40
+we need to do the
+classification,
+
+00:34:42
+generate a label
+class scores, as well
+
+00:34:46
+as getting a bounding
+box, coordinates of a box.
+
+00:34:50
+So we need the
+coordinates of the box
+
+00:34:52
+x, y, and h and w as the output,
+as well as what class it is.
+
+00:34:58
+So this is exactly the
+task of object detection.
+
+00:35:01
+How can we solve this?
+
+00:35:03
+It's very simple.
+
+00:35:04
+We can define a softmax loss
+function for the class scores.
+
+00:35:11
+And we can define an
+L2 loss function, which
+
+00:35:15
+is a simple distance metric,
+a regression loss for the box
+
+00:35:20
+coordinates.
+
+00:35:21
+And having these two defined,
+we have a multi-task loss.
+
+00:35:27
+We are solving two
+tasks at the same time.
+
+00:35:30
+And for doing that,
+we, again, add
+
+00:35:34
+the loss values and generate
+a compound loss function,
+
+00:35:40
+as you can see here.
+
+00:35:43
+So this is simple.
+
+00:35:46
+It's doable.
+
+00:35:47
+If you have one single
+object, you can for sure
+
+00:35:54
+solve this problem
+using this architecture
+
+00:35:56
+that I talked about.
+
+00:35:58
+But this is not that
+easy, if you have
+
+00:36:00
+multiple objects in the scene.
+
+00:36:02
+So for three objects, you have
+to generate 12 output numbers.
+
+00:36:07
+And if there are
+more, then it's going
+
+00:36:09
+to be too many
+numbers to generate.
+
+00:36:12
+So this algorithm is
+not really scalable.
+
+00:36:15
+It's just extending
+the classification
+
+00:36:17
+into some object
+detection, which is fine,
+
+00:36:20
+but it's not really scalable.
+
+00:36:23
+So when there are
+multiple objects,
+
+00:36:28
+one solution is instead of going
+or getting the entire image
+
+00:36:35
+as the input, why not to
+look at bounding boxes.
+
+00:36:38
+For each bounding box, we can
+say we only have one label,
+
+00:36:44
+and whether it's a cat or
+a dog or the background.
+
+00:36:49
+And if I have this
+way of classifying
+
+00:36:56
+each of the bounding boxes,
+I can do a sliding window.
+
+00:36:59
+I can create this
+bounding boxes,
+
+00:37:01
+slide it over the image
+from coordinate 0, 0
+
+00:37:06
+to all combination
+of x, y, and h and w,
+
+00:37:10
+and see if we can
+detect the object.
+
+00:37:12
+So step by step, I can create--
+
+00:37:16
+I can find the
+bounding boxes that I
+
+00:37:18
+have the maximum probability
+of each of the objects.
+
+00:37:23
+But there is a
+huge problem here.
+
+00:37:26
+Again, there are so many
+different combinations
+
+00:37:29
+of bounding boxes
+that you can use.
+
+00:37:31
+And again, this algorithm
+is not scalable.
+
+00:37:35
+What we've been doing in
+the literature, again,
+
+00:37:39
+early years, if you
+look at the years
+
+00:37:43
+these articles were
+published, 2014,
+
+00:37:46
+and before, there has been a
+lot of research around finding
+
+00:37:52
+regions that they
+have high probability
+
+00:37:58
+of having the object in them.
+
+00:38:00
+So region proposals.
+
+00:38:02
+And if I have a way to
+find region proposals,
+
+00:38:07
+that's actually going to
+be an easy-ish problem.
+
+00:38:10
+I can do the same thing
+as I explained earlier.
+
+00:38:14
+For an image, what we can do
+is if I have region proposals,
+
+00:38:19
+I can just take that
+part, that patch out
+
+00:38:23
+and run a CNN on that patch,
+a convolutional neural network
+
+00:38:29
+on the patch, and
+then classify it.
+
+00:38:31
+And in order to--
+
+00:38:33
+even I can refine
+the bounding boxes.
+
+00:38:37
+So classify and then
+refine the bounding boxes
+
+00:38:44
+to have the objects detected.
+
+00:38:48
+So we can classify the
+boxes and also refine
+
+00:38:51
+the bounding boxes,
+if I have to change
+
+00:38:53
+the coordinates a little bit.
+
+00:38:55
+And this is what is
+called R-CNN algorithm.
+
+00:39:01
+And although it works, and,
+again, this is one of the early
+
+00:39:09
+algorithms up to 2014.
+
+00:39:12
+These are very slow because
+for each of these boxes, again,
+
+00:39:17
+we are running a full
+convolutional neural network.
+
+00:39:20
+But there is one catch
+that what we can do
+
+00:39:26
+is instead of running
+convolutional neural network
+
+00:39:34
+on each of these boxes,
+because convolution operations,
+
+00:39:39
+they preserve the
+spatial information.
+
+00:39:41
+They either downsample
+or upsample.
+
+00:39:45
+We always have a way to track
+them where in the pixel space
+
+00:39:50
+they are.
+
+00:39:51
+So in that case, what we
+do is instead of running
+
+00:39:56
+the convolutional neural network
+on the patches, let's say,
+
+00:40:02
+we run one big convolution
+on the entire image.
+
+00:40:06
+And then now we have the
+regions in that feature
+
+00:40:09
+map, which is corresponding
+to the entire image.
+
+00:40:11
+Let's look at those regions.
+
+00:40:13
+And now, run a smaller
+CNN on top of those
+
+00:40:18
+and generate the outputs for
+each of these two outputs
+
+00:40:24
+that I want.
+
+00:40:25
+First, the box offset.
+
+00:40:27
+Should I move the
+bounding box a little bit?
+
+00:40:30
+Or what's the
+object category is?
+
+00:40:34
+So this is the fast
+version of R-CNN
+
+00:40:37
+These are some basic
+algorithms that we
+
+00:40:40
+can use convolutional neural
+networks for detecting objects,
+
+00:40:44
+their bounding boxes, and so on.
+
+00:40:46
+The question is, if the
+number of proposed regions
+
+00:40:49
+are predefined?
+
+00:40:51
+The short answer to that is yes.
+
+00:40:53
+I will talk very briefly about
+the region proposal networks do.
+
+00:41:00
+So easy algorithms.
+
+00:41:03
+One, puts the bounding boxes
+of the regions, the proposed
+
+00:41:07
+regions.
+
+00:41:08
+Under the images, one puts it on
+the feature maps of the ConvNet.
+
+00:41:12
+And both of those generate
+the output class label,
+
+00:41:16
+as well as offset of
+improving the location
+
+00:41:21
+of the detected object.
+
+00:41:22
+But this will
+mean, this requires
+
+00:41:26
+us to do that bounding
+box region proposal first,
+
+00:41:35
+and have a region proposal
+network that tells us
+
+00:41:37
+where in the image
+we should look for.
+
+00:41:40
+And there has been research
+on building region proposal
+
+00:41:46
+networks, RPNs.
+
+00:41:47
+And here, what we do is we
+just randomly start with a CNN.
+
+00:41:53
+We try to randomly start
+in different locations
+
+00:41:59
+in the image.
+
+00:42:00
+And through layers
+of convolution,
+
+00:42:03
+we refine those regions where
+they have the higher probability
+
+00:42:09
+of having an object in them,
+because we have the object
+
+00:42:12
+labels and locations.
+
+00:42:14
+So we can optimize,
+we can supervise this.
+
+00:42:17
+And then each of those also
+refine the box coordinates.
+
+00:42:21
+So basically, a region
+proposal network, what it does
+
+00:42:26
+is it refines the boxes,
+each of those boxes that
+
+00:42:32
+have a probability, a high
+probability of an object
+
+00:42:36
+in them, the output boxes.
+
+00:42:42
+The box corrections.
+
+00:42:43
+Again, I'm leaving all of the
+details about the coordinates
+
+00:42:47
+and all of these
+dimensionalities
+
+00:42:50
+for you to check
+afterwards, because they
+
+00:42:52
+will take too much time.
+
+00:42:54
+And we don't want to spend too
+much time on this algorithm.
+
+00:42:57
+But what's important here
+is back to your question,
+
+00:43:01
+we often take the
+top K, the ones
+
+00:43:05
+that have the
+highest probability
+
+00:43:08
+of having an object in them as
+the proposals for this image.
+
+00:43:12
+This is a simple image
+and only has one object.
+
+00:43:18
+So most of the
+regions are centered
+
+00:43:21
+around that single object.
+
+00:43:23
+But, in general,
+that's not the case.
+
+00:43:25
+So in many setups, we
+can have region proposals
+
+00:43:29
+used in different setups.
+
+00:43:33
+We can get different objects
+with higher probabilities.
+
+00:43:37
+With that, and after
+talking a little bit
+
+00:43:42
+about R-CNN and mask R-CNN,
+which, again, for you,
+
+00:43:46
+it's important to go
+through the details.
+
+00:43:49
+And if you can spend some time
+doing the calculations yourself,
+
+00:43:55
+that would be very good.
+
+00:43:57
+But those types of algorithms,
+R-CNN, mask R-CNN, they
+
+00:44:01
+are not being used anymore
+these days because they
+
+00:44:04
+are very heavy computationally.
+
+00:44:07
+Although it's important
+to understand how
+
+00:44:09
+we got to this point.
+
+00:44:11
+But those are for many reasons.
+
+00:44:15
+One of those reasons is that we
+need two separate networks, one
+
+00:44:19
+region proposal network, and
+then one classification and box
+
+00:44:25
+refinement network.
+
+00:44:26
+So it's like at least two
+passes for detecting objects
+
+00:44:32
+for each image.
+
+00:44:35
+That's why there
+has been advances
+
+00:44:38
+after using single stage,
+object detectors, SSDs,
+
+00:44:45
+and one of the most popular
+ones is called YOLO.
+
+00:44:50
+YOLO is probably, if you
+work with any Computer Vision
+
+00:44:55
+problem, you've heard
+about YOLO even to date.
+
+00:44:58
+Although it's a convolution
+heavy network today, at least
+
+00:45:04
+its earlier versions.
+
+00:45:07
+In many even industrial
+applications,
+
+00:45:10
+YOLO is being used as the
+base for object detection
+
+00:45:16
+because it's a fast
+object detector.
+
+00:45:19
+And it's very good in terms
+of detecting the objects.
+
+00:45:25
+What YOLO does I want
+to very briefly tell you
+
+00:45:30
+a little bit about.
+
+00:45:31
+It's basically you look
+only once in one single pass
+
+00:45:34
+on the image.
+
+00:45:35
+You generate all of
+the bounding boxes.
+
+00:45:38
+How it does it is it maps, it
+divides the image into grid of S
+
+00:45:48
+by S And in this
+example, it's 7 by 7.
+
+00:45:52
+What happens is that for
+each single box in that grid,
+
+00:45:56
+it tries to output, it creates
+a fully convolutional network
+
+00:46:02
+that outputs the probability
+of an object being
+
+00:46:07
+in that location, refinements
+of the bounding boxes.
+
+00:46:12
+So it generates B bounding
+boxes, a new hyperparameters,
+
+00:46:16
+bounding B boxes, that is the
+refinement of the object that
+
+00:46:20
+is present in that box.
+
+00:46:22
+And also, it generates the
+class probability, object class
+
+00:46:27
+probabilities.
+
+00:46:28
+And in this case, for
+example, if it's B equal to 2,
+
+00:46:33
+it generates just
+two bounding boxes
+
+00:46:35
+with different probabilities.
+
+00:46:38
+It does this for all of
+the boxes at the same time.
+
+00:46:43
+So basically, it's
+the same network
+
+00:46:45
+that is generating something
+as the output for each
+
+00:46:49
+of these bounding boxes.
+
+00:46:52
+And it does generate a
+number of different options
+
+00:46:59
+for the object.
+
+00:47:00
+And as I said,
+each of those boxes
+
+00:47:03
+are associated
+with a probability.
+
+00:47:05
+And in this example,
+the probability
+
+00:47:07
+is shown with the weights of the
+edges in each of those boxes.
+
+00:47:13
+And for these many different
+bounding boxes and object
+
+00:47:17
+probabilities, now we
+can do thresholding.
+
+00:47:21
+And also, there is an algorithm
+that they use in the paper.
+
+00:47:29
+Again, I don't want to
+go into the details--
+
+00:47:31
+non-maximum suppression,
+and some algorithms
+
+00:47:37
+with thresholding involved
+that identifies the ones that
+
+00:47:41
+have the highest probabilities.
+
+00:47:44
+So this is a simple
+implementation or use
+
+00:47:48
+of the object detection.
+
+00:47:55
+Again, this is
+something very useful.
+
+00:47:58
+If you have time, to spend
+with the repositories of YOLO.
+
+00:48:02
+There are so many different
+newer versions of YOLO
+
+00:48:05
+that is being used for many
+applications in medicine,
+
+00:48:10
+robotics, and also in many
+industrial applications.
+
+00:48:13
+So the question is, how do
+we get this second image?
+
+00:48:16
+And what's the
+intuition behind it?
+
+00:48:18
+As I said, for
+each of the grids,
+
+00:48:20
+we generate bounding boxes.
+
+00:48:23
+For this one, we generated
+two, for all others,
+
+00:48:27
+we also generate two.
+
+00:48:28
+This bee is, again, a
+probability vector/ and each
+
+00:48:32
+of these boxes are associated
+with probability of existing
+
+00:48:36
+an object in them.
+
+00:48:37
+And then if I put all of them
+together for all of the patches,
+
+00:48:41
+I have so many boxes.
+
+00:48:43
+And now each of those are
+associated with a probability.
+
+00:48:51
+Perfect
+
+00:48:55
+Let's move on.
+
+00:49:00
+And one of the more recent
+approaches for object detection
+
+00:49:05
+is deter a detection
+transformer.
+
+00:49:09
+This is purely based on
+transformers and the topic
+
+00:49:15
+that we discussed last week.
+
+00:49:17
+And also I started
+today, same type
+
+00:49:21
+of self-attention and
+cross-attention modules
+
+00:49:25
+could also generate some
+object detections and bounding
+
+00:49:30
+boxes for us.
+
+00:49:32
+And how this works?
+
+00:49:33
+This is actually not
+a very old paper,
+
+00:49:36
+2020, almost five years ago.
+
+00:49:39
+Although it's now deprecated.
+
+00:49:41
+Nobody uses this for
+real applications.
+
+00:49:45
+But it's a very
+good example of how
+
+00:49:48
+to use transformers
+for object detection.
+
+00:49:51
+And what we do here is
+basically similar to what
+
+00:49:55
+we've explained earlier.
+
+00:49:57
+We may turn the
+image into patches.
+
+00:50:01
+And then those patches
+are passed through CNNs
+
+00:50:04
+creating a token.
+
+00:50:06
+Then we add positional
+encoding the same way
+
+00:50:09
+that I explained to the patches.
+
+00:50:12
+And those define our tokens
+for the inputs, which
+
+00:50:17
+are inputs to the transformer
+encoder, a transformer encoder,
+
+00:50:22
+again, a bunch of
+self-attention layer
+
+00:50:25
+normalization or
+any normalization,
+
+00:50:28
+as well as MLP
+layers that generates
+
+00:50:31
+the output tokens after multiple
+layers of transformer encoder.
+
+00:50:38
+Then, in order to generate
+the bounding boxes,
+
+00:50:42
+this is the smart part
+for this algorithm
+
+00:50:45
+that it does take the
+encoder output tokens
+
+00:50:49
+as input in the
+transformer decoder,
+
+00:50:52
+but we also define
+some queries, which
+
+00:50:57
+are trainable
+parameters themselves
+
+00:50:59
+that each of those, for example,
+if I add five 5 queries as input
+
+00:51:05
+for queries as input, or
+10 or 20 queries as input,
+
+00:51:08
+I'm seeking up to 20 objects
+to be detected in that image.
+
+00:51:14
+And then again,
+through a combination
+
+00:51:17
+of self-attention layers in the
+beginning of this transformer
+
+00:51:24
+decoder, as well as
+cross-attention with the encoder
+
+00:51:30
+output.
+
+00:51:32
+So cross-attention and
+self-attention networks layers,
+
+00:51:39
+it generates the output values
+for each of these queries, which
+
+00:51:44
+are passed through an
+FNN, feed forward network,
+
+00:51:48
+to generate either class
+labels and the bounding boxes,
+
+00:51:56
+very similar to what we
+discussed earlier, or even
+
+00:52:01
+in some cases, it just
+says there is no object
+
+00:52:05
+to be detected.
+
+00:52:07
+And at the end, we
+have the bounding boxes
+
+00:52:10
+and the classes associated with
+bounding boxes as the output.
+
+00:52:16
+So the question is, are we
+inputting every possible box
+
+00:52:19
+to the transformer?
+
+00:52:20
+No.
+
+00:52:20
+The input here are some
+triangular parameters
+
+00:52:23
+that are representing--
+they are queries asking
+
+00:52:30
+the question that I actually
+want an object to be outwitted
+
+00:52:34
+in place of this input query.
+
+00:52:37
+So there is no box or
+anything as the input.
+
+00:52:40
+It's part of the output
+that it generates the class
+
+00:52:43
+label and the box coordinates.
+
+00:52:46
+So the question is, if the
+queries are formed in a way
+
+00:52:51
+that it actually represents what
+we want to look for and where
+
+00:52:56
+in the image.
+
+00:52:58
+In this case, what
+we are looking for
+
+00:53:02
+is defined by class labels,
+which are predefined,
+
+00:53:06
+and they are as
+part of the output.
+
+00:53:08
+So our supervision is
+based on the class labels.
+
+00:53:10
+We have a class
+probability vector.
+
+00:53:13
+Same way that we defined it
+for the other algorithms.
+
+00:53:15
+So that's how the algorithm
+knows what type of classes
+
+00:53:20
+to look for.
+
+00:53:21
+And then in terms
+of the outputs,
+
+00:53:25
+again, these outputs
+are supervised.
+
+00:53:28
+If you remember
+based on the L2 norm,
+
+00:53:31
+L2 loss of the
+ground truth boxes.
+
+00:53:35
+We're not telling anything in
+the query part what to or where
+
+00:53:41
+to look for any of the objects.
+
+00:53:45
+The training, the process
+itself is back propagating.
+
+00:53:49
+If there are any
+losses, any errors,
+
+00:53:52
+it back propagates the outputs.
+
+00:53:55
+So basically, we are
+not determining anything
+
+00:54:00
+in the beginning
+or in this part.
+
+00:54:02
+So the question was the query
+is give me up to nine objects.
+
+00:54:09
+And yes that's basically
+what this means.
+
+00:54:14
+And through the self-attention
+and cross-attention,
+
+00:54:19
+it will try to generate
+output tokens that
+
+00:54:22
+are turned into class
+and box coordinates
+
+00:54:25
+through that FNN operation.
+
+00:54:29
+Your question is, if
+the query is over there,
+
+00:54:33
+if they are image
+patches or not?
+
+00:54:35
+No, they are not image patches.
+
+00:54:38
+They are just queries
+for trainable parameters.
+
+00:54:44
+You put them in to
+generate the outputs.
+
+00:54:47
+For each of the inputs, you
+get the value as the output.
+
+00:54:51
+And that value is turned into
+class and box coordinates.
+
+00:54:55
+Again, the question is,
+what is object queries?
+
+00:54:58
+They are trainable
+learnable parameters.
+
+00:55:00
+So you initialize them.
+
+00:55:02
+The network finds the
+best values for them.
+
+00:55:06
+And that's what you
+get as the output.
+
+00:55:09
+The question is, if
+there is any intuition,
+
+00:55:12
+which FNN gets which box?
+
+00:55:14
+The short answer to that
+is, no, there's nothing
+
+00:55:19
+that stops the network from--
+
+00:55:22
+I mean, we're not
+including anything
+
+00:55:24
+that stops the network
+from generating multiple.
+
+00:55:28
+But remember, that there
+are so many self-attention
+
+00:55:32
+and cross-attention
+layers over there
+
+00:55:34
+that they are actually
+interacting with each other
+
+00:55:38
+and makes each of
+those queries match
+
+00:55:41
+with one of the output layer.
+
+00:55:43
+So it's not generating the
+exact same thing as the output.
+
+00:55:46
+And we also have control over
+supervising those FNNs as well.
+
+00:55:52
+So your question is if there are
+image segmentations, pixel level
+
+00:55:57
+segmentations as
+part of the training.
+
+00:56:00
+This algorithm does not require
+the pixel level segmentations.
+
+00:56:08
+It's only supervised based on
+class labels and bounding boxes.
+
+00:56:11
+But if you have the pixel
+level segmentations,
+
+00:56:15
+you can always turn the
+pixel level segmentations
+
+00:56:17
+into a bounding box to
+train this algorithm,
+
+00:56:20
+but it doesn't
+necessarily require that.
+
+00:56:24
+So the question is, if
+it's possible to generalize
+
+00:56:26
+unseen objects.
+
+00:56:29
+And by unseen you mean
+a new class label?
+
+00:56:32
+Yes.
+
+00:56:34
+For these types of algorithms
+that they are fully supervised,
+
+00:56:39
+often, there is no way
+because you are creating
+
+00:56:41
+class probability vector.
+
+00:56:43
+There is no way of
+adding something
+
+00:56:45
+at the end for a new class
+without previously knowing
+
+00:56:52
+there is some other classes.
+
+00:56:53
+So fully supervised networks,
+often, there is no new object.
+
+00:56:58
+We can have a background
+object or no object.
+
+00:57:00
+As you can see, we have
+the label of no object.
+
+00:57:03
+But there are many algorithms
+and mixed extensions
+
+00:57:07
+of these types of
+algorithms that are
+
+00:57:08
+used for zero-shot learning.
+
+00:57:10
+Zero shot means understanding
+finding something new
+
+00:57:13
+without having an example of
+those in the training data.
+
+00:57:16
+But it's beyond this topic.
+
+00:57:19
+What happens if you have more
+objects in the scene than what
+
+00:57:25
+you put in as the query?
+
+00:57:27
+So that's a great question.
+
+00:57:29
+It often generates the ones
+that has the highest confidence
+
+00:57:34
+on the objects,
+so bounding boxes
+
+00:57:36
+with the highest confidence.
+
+00:57:38
+And in those cases,
+you often want
+
+00:57:40
+to add more queries just so
+you can get more objects.
+
+00:57:47
+I'll be here to
+answer questions,
+
+00:57:48
+if you have any after the class.
+
+00:57:50
+But we have a bunch of
+other topics to cover,
+
+00:57:54
+and I want to make
+sure we go over them.
+
+00:57:57
+At least you get
+familiar with the topics.
+
+00:58:01
+So with the object
+detections, now back
+
+00:58:04
+to the question I
+was asked earlier,
+
+00:58:07
+how can we use those
+types of algorithms
+
+00:58:10
+for instance segmentation?
+
+00:58:13
+And that's actually
+not too hard.
+
+00:58:15
+We talked about
+this when we were
+
+00:58:18
+talking about R-CNN algorithms,
+where we run a CNN on the image.
+
+00:58:24
+Then we have a region
+proposal network that
+
+00:58:27
+gives us the bounding boxes.
+
+00:58:29
+And those bounding boxes are
+turned into either class labels
+
+00:58:35
+and bounding box refinements.
+
+00:58:38
+So this is what we've talked
+so far with R-CNN and so on.
+
+00:58:43
+Now, we can turn this
+into a mask R-CNN
+
+00:58:46
+that also generates the mask.
+
+00:58:49
+So basically, same architecture
+that we talked about earlier.
+
+00:58:54
+Now, we can take one more
+output, make it more multitask
+
+00:59:01
+and generate the
+mask predictions.
+
+00:59:04
+So what we used to
+be doing before was,
+
+00:59:07
+again, image, region proposals,
+CNN, gives us class label
+
+00:59:12
+and the box coordinates.
+
+00:59:14
+Now, we add another
+layer of convolution
+
+00:59:18
+that generates the masks for
+that object in the pixel level.
+
+00:59:26
+And that mask, again,
+could be the same size
+
+00:59:28
+as the input and the image, and,
+basically, on the layer itself.
+
+00:59:35
+If we use fully convolutional
+neural networks,
+
+00:59:37
+that's what we often
+get as the output.
+
+00:59:40
+For each of the objects,
+when we have that tiny box,
+
+00:59:44
+we can always get
+the mask for that.
+
+00:59:47
+The chair in different
+settings of the box itself,
+
+00:59:52
+if you have different boxes,
+the bed and the human,
+
+00:59:58
+the baby in the image.
+
+01:00:00
+And this is an extension
+of the R-CNN algorithm,
+
+01:00:04
+which we call mask R-CNN.
+
+01:00:07
+And with mask R-CNN, the results
+have been very, very good
+
+01:00:14
+in detecting different objects,
+different known objects that we
+
+01:00:21
+could train the algorithms for.
+
+01:00:23
+And then there are so many
+APIs and open source versions
+
+01:00:29
+of object detectors
+that you can explore.
+
+01:00:34
+There are some links
+and resources here,
+
+01:00:37
+but this all,
+basically, rounds up
+
+01:00:40
+and summarizes some of the
+tasks that we wanted to cover.
+
+01:00:45
+And they are actually
+very important for you
+
+01:00:47
+to understand these tasks.
+
+01:00:49
+They have been core
+Computer Vision tasks.
+
+01:00:52
+Although these days, Computer
+Vision is very more advanced.
+
+01:00:56
+They are not bound
+to these tasks.
+
+01:00:59
+But if you have industrial
+applications, for example,
+
+01:01:03
+quality control of
+separating rotten tomatoes
+
+01:01:09
+and good tomatoes in
+an industrial pipeline.
+
+01:01:12
+Then with Computer
+Vision, you need
+
+01:01:14
+to be able to detect
+objects and then
+
+01:01:15
+classify them into good or bad.
+
+01:01:19
+That's why it's important
+to still understand and know
+
+01:01:22
+these steps and pipelines and
+how to do them in real time.
+
+01:01:26
+But now, there are
+larger scale models
+
+01:01:29
+that you are all familiar with.
+
+01:01:31
+This summarizes the first
+part, the Computer Vision tasks
+
+01:01:36
+that I wanted to talk about.
+
+01:01:37
+And the last piece that I
+want to spend 10 minutes on
+
+01:01:40
+is around visualization
+and understanding.
+
+01:01:46
+Again, this has been a
+big lecture by itself.
+
+01:01:50
+And in 2050, 60, until 2020s
+that the topic of computer
+
+01:01:57
+and even before that 2014, '13
+the topic of visualizing neural
+
+01:02:01
+networks has been very
+hot and very much--
+
+01:02:09
+it helped us gain
+understanding into what
+
+01:02:12
+the networks are learning.
+
+01:02:14
+And I'm going to
+summarize some of those,
+
+01:02:16
+the most important ones
+here that you may need
+
+01:02:20
+to use in your applications.
+
+01:02:22
+But before that, let me go
+back to the linear classifier
+
+01:02:26
+that we talked about.
+
+01:02:28
+We spent quite a lot of
+time on linear classifiers.
+
+01:02:33
+And with the linear classifiers,
+what we did was at the end,
+
+01:02:37
+we said, if I look at the linear
+function, what the network is
+
+01:02:43
+learning, I can have a template
+for each of those classes.
+
+01:02:46
+Like for example,
+for this car, you
+
+01:02:47
+can always see a front
+facing car as a template.
+
+01:02:52
+We can do the same
+with neural networks.
+
+01:02:55
+If I visualize one
+of the filters,
+
+01:02:57
+so here, we visualize the
+weights of the linear function.
+
+01:03:01
+It was the visual viewpoint.
+
+01:03:03
+I can do the same with linear--
+
+01:03:06
+sorry with visualizing the
+filters in the neural networks.
+
+01:03:11
+So for each of the
+filters, the network
+
+01:03:15
+is, for example, is learning
+something that is basically
+
+01:03:20
+some of the basic shapes,
+orientations, or simple shapes,
+
+01:03:25
+as you can see here.
+
+01:03:28
+Although this visualization, we
+can only do it for the layers
+
+01:03:32
+that we have few channels.
+
+01:03:33
+Like, for example, if
+we have three channels,
+
+01:03:36
+I can put them in an RGB
+image and just visualize it.
+
+01:03:39
+But as you remember, in
+CNNs, that was not the case.
+
+01:03:42
+In CNNs, we had different
+sometimes quite a few channels
+
+01:03:50
+in the middle layer, so it's
+not easy to visualize those
+
+01:03:53
+in something that we can see.
+
+01:03:55
+But that's what
+you basically see.
+
+01:03:57
+In earlier layers that
+we have fewer channels,
+
+01:04:00
+we can visualize them and
+see the network is actually
+
+01:04:03
+learning some patterns.
+
+01:04:04
+So it starts learning patterns.
+
+01:04:06
+And then later stages, it
+gets more holistic and bigger
+
+01:04:14
+patterns as if we train--
+
+01:04:21
+sorry, if we run something that
+we call guided back propagation,
+
+01:04:26
+we can also visualize those,
+but not as simple as this.
+
+01:04:30
+I want to highlight
+a couple of ways
+
+01:04:34
+of understanding and visualizing
+the neural networks, which
+
+01:04:39
+are actually important.
+
+01:04:41
+One is the concept of saliency.
+
+01:04:47
+So in many applications,
+it's very important for you
+
+01:04:50
+to know which pixel matters.
+
+01:04:53
+For example, in a
+medical application,
+
+01:04:55
+when you do a classification
+of tumor versus none,
+
+01:04:58
+you want to see which
+parts of that image
+
+01:05:01
+is actually the tumor.
+
+01:05:03
+Because if you want
+to automate this,
+
+01:05:05
+nobody cares about knowing
+if there is tumor or not.
+
+01:05:09
+Everybody cares about where
+in the image the tumor is.
+
+01:05:12
+So in order to do that,
+simplest application
+
+01:05:17
+is we train a network, a
+feedforward neural network that
+
+01:05:21
+generates the value or
+the class label doc.
+
+01:05:26
+But what we can do is we can--
+
+01:05:31
+actually, before I showed
+you that, in this case,
+
+01:05:35
+in order to train this
+network, what we've done was
+
+01:05:38
+we always took the derivative of
+the neural network, the weights,
+
+01:05:45
+sorry, of the loss or of
+the class score with respect
+
+01:05:50
+to the weights in order
+to update the weights.
+
+01:05:53
+Now, what I need
+is for each pixel,
+
+01:05:56
+I want to see how much
+changing the pixel value
+
+01:06:03
+would affect the dog score?
+
+01:06:06
+What does this mean?
+
+01:06:07
+What I explained is the
+meaning of the variation.
+
+01:06:12
+So this means that the
+meaning of basically gradient.
+
+01:06:19
+So if I take the gradient
+of the score with respect
+
+01:06:23
+to now the pixel values,
+not the network weights
+
+01:06:26
+anymore, with pixel values, I
+can visualize those gradients.
+
+01:06:30
+And visualizing those
+means that these
+
+01:06:33
+are the pixels that matter.
+
+01:06:36
+In order to classify
+dog on this image,
+
+01:06:40
+those are the
+pixels that matter.
+
+01:06:41
+So if I change the
+values of those pixels,
+
+01:06:44
+the dog score will be changed.
+
+01:06:48
+Again, this is the basic meaning
+and definition of gradients
+
+01:06:52
+that we've talked about.
+
+01:06:53
+So this is one way.
+
+01:06:56
+If you run this on
+different objects
+
+01:06:59
+that you've trained
+in the network,
+
+01:07:02
+then this is what you get.
+
+01:07:07
+So that's one way of
+understanding saliency.
+
+01:07:12
+And it's very effective
+in many cases.
+
+01:07:14
+But sometimes it's not
+just about the pixel values
+
+01:07:19
+all the way to the back.
+
+01:07:21
+You want to see for
+each of the classes
+
+01:07:25
+how the activations work.
+
+01:07:28
+And this brings us to
+class activation maps
+
+01:07:32
+or CAM algorithm, class
+activation mapping, CAM
+
+01:07:37
+or Grad-CAM that I'll
+talk about in two minutes,
+
+01:07:40
+are one of the most
+and widely used
+
+01:07:44
+algorithms for
+understanding CNNs,
+
+01:07:47
+and also could be used for
+other architectures too.
+
+01:07:49
+But for transformers, we
+have a much better way
+
+01:07:53
+of making sense of
+those, which actually we
+
+01:07:56
+talked in the last lecture.
+
+01:07:59
+So what happens is that for
+each of the convolution layers,
+
+01:08:04
+we often do pooling.
+
+01:08:06
+And the pooling
+generates feature maps.
+
+01:08:08
+The feature maps are
+then turned into scores.
+
+01:08:11
+And those scores with those
+values of the weights.
+
+01:08:20
+If we extend the math,
+basically, we simply
+
+01:08:24
+can highlight the class
+scores in a weighted sum form.
+
+01:08:29
+And this means that we can
+trace back class predictions
+
+01:08:35
+all the way back
+to the feature maps
+
+01:08:39
+and in specific
+locations of the space,
+
+01:08:42
+because convolution
+layers are always
+
+01:08:44
+mapped to a space in
+the image space two.
+
+01:08:47
+We do convolution as the
+spatial consistency across all
+
+01:08:52
+of the operations can
+help us trace back
+
+01:08:55
+all the way to the image space.
+
+01:08:58
+So anyways, we can look
+at the feature maps
+
+01:09:02
+and see how the
+class activations,
+
+01:09:04
+each of these
+classes are actually
+
+01:09:06
+impacting those
+locations in the image.
+
+01:09:11
+And with that now, if I do
+this multiplication of weights
+
+01:09:16
+versus the weights
+that we've learned
+
+01:09:21
+on top of the feature values, we
+create some class activations.
+
+01:09:26
+And this means that I have a
+way now to go back to the image
+
+01:09:31
+space, because as long as
+I'm in the convolution space,
+
+01:09:33
+I can go all the way
+back to the image
+
+01:09:36
+and create these maps of, for
+example, for each of the classes
+
+01:09:41
+palace, dome, church,
+altar, and monastery,
+
+01:09:46
+we can have different
+class activation maps.
+
+01:09:52
+These are the weights.
+
+01:09:54
+These are the pixels or areas
+of the convolution layer
+
+01:09:57
+that have been
+driving the scores
+
+01:10:01
+for these specific classes.
+
+01:10:06
+It's the same for others,
+like class activation maps
+
+01:10:09
+for one single object
+in different images.
+
+01:10:14
+But there is a
+problem with this.
+
+01:10:15
+And that problem
+is that we can only
+
+01:10:18
+apply this to the last
+convolution layer,
+
+01:10:21
+because this is the
+only way we can do it.
+
+01:10:23
+We can only go to the
+last convolution layer.
+
+01:10:26
+The way that we did
+the calculations here.
+
+01:10:29
+And in order to
+solve that problem,
+
+01:10:32
+there is one variant
+of the algorithm
+
+01:10:34
+called Grad-CAM, so
+gradient-weighted class
+
+01:10:38
+activation maps.
+
+01:10:40
+It's basically the
+same algorithm.
+
+01:10:43
+We need to weight calculate the
+weights with respect to the--
+
+01:10:46
+we basically take
+one of the layers
+
+01:10:52
+that created some activation.
+
+01:10:54
+In the class level, we
+compute the gradients,
+
+01:10:59
+instead of just calculating
+the multiplication between W
+
+01:11:03
+and feature.
+
+01:11:04
+We go all the way back
+with the gradients
+
+01:11:07
+and create a weight
+based on the gradients,
+
+01:11:11
+and then that is used
+instead of the weights,
+
+01:11:15
+it's aggregate of
+all of the weights
+
+01:11:17
+and gradients up to
+that specific layer.
+
+01:11:20
+And then we weight
+that with that.
+
+01:11:24
+And then we also use ReLU
+to pass the positive ones.
+
+01:11:32
+And then that could
+also be all the way
+
+01:11:36
+shown in the image space.
+
+01:11:38
+So I talked about CAM,
+which was only applied
+
+01:11:43
+to the last convolution layer.
+
+01:11:45
+If you want to--
+
+01:11:47
+but this is not possible because
+in most of the CNN algorithms,
+
+01:11:51
+we don't have just one
+convolution layer at the end.
+
+01:11:55
+We always have some operations
+fully connected and so on.
+
+01:11:59
+So in order to be able to
+carry this class activation
+
+01:12:03
+to the convolution
+layer, if there
+
+01:12:06
+is something else in the middle,
+we often use the gradients
+
+01:12:10
+and basically weigh the maps
+with the gradients aggregates.
+
+01:12:17
+And then we can actually
+do the visualization.
+
+01:12:20
+They create these heat maps
+for each of the objects.
+
+01:12:24
+So this was about CNNs.
+
+01:12:26
+But we talked about transformers
+last week in the last lecture
+
+01:12:32
+that they inherently come
+with the activation maps.
+
+01:12:37
+Do you remember
+that language matrix
+
+01:12:41
+that Justin showed, that for
+each of the output words,
+
+01:12:45
+there is a tension
+weight for the input.
+
+01:12:47
+We can do that, the same
+thing for the pixels.
+
+01:12:50
+For each of the outputs,
+we can create these maps
+
+01:12:54
+in the pixel space and visualize
+the features of the ViTs
+
+01:13:00
+in the pixel space.
+
+01:13:01
+So basically, with
+ViTs and transformers,
+
+01:13:03
+this is much easier.
+
+01:13:04
+We already have a
+way to visualize
+
+01:13:09
+the attentions, the weights.
+
+01:13:11
+But with CNNs, we
+often use Grad-CAM
+
+01:13:16
+or these types of algorithms.
+
+01:13:19
+That said, I did
+this task that I
+
+01:13:24
+thought I wouldn't be able
+to, completing the topics I
+
+01:13:29
+wanted to talk about today.
+
+01:13:31
+And next session,
+we'll have the lecture
+
+01:13:35
+around video understanding.
+
+01:13:36
+Thank you.

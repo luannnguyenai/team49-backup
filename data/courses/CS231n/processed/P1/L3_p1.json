@@ -1,0 +1,1132 @@
+{
+    "lecture_title": "Regularization and Optimization",
+    "table_of_contents": [
+        {
+            "section_index": 1,
+            "title": "Recap: classification, kNN, linear classifiers, and data loss",
+            "start_s": 5,
+            "end_s": 714
+        },
+        {
+            "section_index": 2,
+            "title": "Regularization: intuition, penalties, and weight preferences",
+            "start_s": 714,
+            "end_s": 1474
+        },
+        {
+            "section_index": 3,
+            "title": "Optimization setup: loss landscapes, random search, and gradients",
+            "start_s": 1474,
+            "end_s": 1953
+        },
+        {
+            "section_index": 4,
+            "title": "Gradient descent and stochastic minibatch training",
+            "start_s": 1953,
+            "end_s": 2318
+        },
+        {
+            "section_index": 5,
+            "title": "SGD failure modes and momentum",
+            "start_s": 2318,
+            "end_s": 2919
+        },
+        {
+            "section_index": 6,
+            "title": "Adaptive optimizers: RMSProp, Adam, and AdamW",
+            "start_s": 2919,
+            "end_s": 3525
+        },
+        {
+            "section_index": 7,
+            "title": "Learning-rate schedules, second-order optimization, and neural-network preview",
+            "start_s": 3525,
+            "end_s": 4113
+        }
+    ],
+    "units": [
+        {
+            "unit_id": "local::lecture_3::seg1",
+            "course_id": "CS231N",
+            "name": "Recap: image classification, kNN, linear scores, and data loss",
+            "description": "Connects image classification and linear classifiers to the loss formulation used later for regularization and optimization.",
+            "summary": "Image classification is framed as mapping an image to one label from a fixed set such as cat, dog, bird, deer, or truck [ts=27s]. The recap emphasizes the semantic gap between human perception and pixel tensors, plus viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation [ts=64s]. Because hand-written rules are inadequate, kNN provides a data-driven baseline: 1-NN copies the closest training label, and k-NN uses the most common label among nearby examples [ts=182s]. Validation data is used to choose hyperparameters such as k, while the test set is saved for final unseen-data evaluation [ts=216s]. Linear classifiers compute class scores by flattening a 32x32x3 image into 3,072 values and multiplying by W plus bias [ts=558s]. A loss function formalizes how bad the classifier is: dataset loss averages per-example losses, and Softmax/cross-entropy is high when the correct class has low predicted probability [ts=626s].",
+            "key_points": [
+                {
+                    "text": "Image classification maps an input image to a label from a fixed label set.",
+                    "timestamp_s": 27,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Recognition is difficult because pixels differ from semantic human perception and because images vary by viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation.",
+                    "timestamp_s": 64,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "In kNN, 1-NN assigns the closest training label; larger k assigns the most common label among neighbors.",
+                    "timestamp_s": 182,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Use validation data to choose hyperparameters and reserve the test set for final unseen-data evaluation.",
+                    "timestamp_s": 216,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "A 32x32 RGB image has 32*32*3 = 3,072 values for a linear classifier.",
+                    "timestamp_s": 558,
+                    "evidence_type": "example"
+                },
+                {
+                    "text": "Dataset loss is the average of per-example losses.",
+                    "timestamp_s": 626,
+                    "evidence_type": "formula"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 5,
+                "end_s": 714
+            },
+            "difficulty": 2.0,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 12,
+            "ordering_index": 1,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:5,%22end_s%22:714},%22difficulty%22:2.0,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22high%22,%22duration_min%22:12,%22ordering_index%22:1,%22is_template)": false
+        },
+        {
+            "unit_id": "local::lecture_3::seg2",
+            "course_id": "CS231N",
+            "name": "Regularization: intuition, penalties, and weight preferences",
+            "description": "Introduces regularization as the second loss term and explains why L1 and L2 encode different solution preferences.",
+            "summary": "Regularization is introduced as a term that prevents the model from doing too well on the training data, intentionally trading worse training fit for better test or unseen-data performance [ts=714s]. A toy example contrasts f1, which fits every training point, with f2, which does not fit perfectly but is expected to generalize better [ts=787s]. This is connected to Occam's Razor: among competing hypotheses, prefer the simpler one first [ts=854s]. The lambda parameter is the regularization-strength hyperparameter; lambda = 0 gives no regularization and larger values strengthen the penalty [ts=882s]. L2 squares and sums weights, L1 sums absolute values, and elastic net combines L1 and L2 [ts=923s]. L2 tends to prefer many small nonzero weights, while L1 tends to push dispensable weights to zero [ts=976s]. In the W1/W2 class example, W2=[0.25,0.25,0.25,0.25] and W1=[1,0,0,0] give the same score, but L2 prefers W2 because its squared penalty is lower [ts=1185s]. For the same example, L1 gives both weights equal penalty even though L1 often encourages sparsity in practice [ts=1241s].",
+            "key_points": [
+                {
+                    "text": "Regularization is added to data loss to reduce overfitting: worse training performance can improve test performance.",
+                    "timestamp_s": 714,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "A simpler function that does not fit every training point can generalize better than a function that fits all training data perfectly.",
+                    "timestamp_s": 787,
+                    "evidence_type": "example"
+                },
+                {
+                    "text": "Lambda controls regularization strength and is tuned as a hyperparameter.",
+                    "timestamp_s": 882,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "L2 regularization squares and sums weights; L1 regularization sums absolute weight values.",
+                    "timestamp_s": 923,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "L2 prefers spread-out small weights; L1 tends to encourage sparsity.",
+                    "timestamp_s": 976,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "For W1=[1,0,0,0] and W2=[0.25,0.25,0.25,0.25], L2 prefers W2, while L1 gives equal penalty in this exact setup.",
+                    "timestamp_s": 1185,
+                    "evidence_type": "example"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 714,
+                "end_s": 1474
+            },
+            "difficulty": 3.2,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 13,
+            "ordering_index": 2,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:714,%22end_s%22:1474},%22difficulty%22:3.2,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22high%22,%22duration_min%22:13,%22ordering_index%22:2,%22is_template)": false
+        },
+        {
+            "unit_id": "local::lecture_3::seg3",
+            "course_id": "CS231N",
+            "name": "Optimization setup: loss landscapes, random search, and gradients",
+            "description": "Frames optimization as finding the best W in a loss landscape and contrasts random search with gradient-based search.",
+            "summary": "After defining data loss plus regularization, the lecture asks how to find the best W; this is the optimization problem [ts=1474s]. The loss-landscape analogy treats vertical position as loss and horizontal position as model parameters; the optimizer is like a blindfolded person who can only feel local slope [ts=1488s]. Random search is shown as a deliberately bad first idea: trying 1,000 random W values gives about 15.5% CIFAR-10 accuracy, far below modern roughly 99.7% accuracy [ts=1567s]. The better strategy is to follow the slope: in one dimension this is the derivative, and in multiple dimensions the gradient is the vector of partial derivatives [ts=1654s]. The slope in a direction is the dot product of the direction with the gradient, and steepest descent is the negative gradient [ts=1716s]. Numerical gradients perturb one coordinate by a small h, recompute loss, subtract, and divide by h; this is easy but slow and approximate [ts=1729s]. Analytic gradients use calculus and the chain rule to compute dW exactly and quickly, but they can be implementation-error-prone, so numerical gradients are used for gradient checking [ts=1883s].",
+            "key_points": [
+                {
+                    "text": "Optimization asks how to find the best W once scores, data loss, and regularization are defined.",
+                    "timestamp_s": 1474,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "A loss landscape maps model parameters to loss, and the optimizer only gets local slope information.",
+                    "timestamp_s": 1488,
+                    "evidence_type": "example"
+                },
+                {
+                    "text": "Random search over W achieved about 15.5% CIFAR-10 accuracy, which is much worse than modern state of the art.",
+                    "timestamp_s": 1567,
+                    "evidence_type": "example"
+                },
+                {
+                    "text": "In multiple dimensions, the gradient is the vector of partial derivatives.",
+                    "timestamp_s": 1689,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "The steepest descent direction is the negative gradient.",
+                    "timestamp_s": 1716,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "Numerical gradients use finite differences such as (new_loss - old_loss)/h, but are slow and approximate.",
+                    "timestamp_s": 1729,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "Use analytic gradients in practice, but compare them to numerical gradients for gradient checking.",
+                    "timestamp_s": 1883,
+                    "evidence_type": "diagnostic_tip"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 1474,
+                "end_s": 1953
+            },
+            "difficulty": 3.6,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 8,
+            "ordering_index": 3,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:1474,%22end_s%22:1953},%22difficulty%22:3.6,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22high%22,%22duration_min%22:8,%22ordering_index%22:3,%22is_template)": false
+        },
+        {
+            "unit_id": "local::lecture_3::seg4",
+            "course_id": "CS231N",
+            "name": "Gradient descent and stochastic minibatch training",
+            "description": "Turns gradients into iterative optimization algorithms and explains why minibatches lead to SGD.",
+            "summary": "The lecture clarifies that if a loss is non-differentiable across most of its domain, steepest-descent methods may not give meaningful directions toward a solution [ts=1953s]. Gradient descent computes gradients of W from the loss, data, and current weights, then updates weights by moving in the negative-gradient direction scaled by a learning rate or step size [ts=2074s]. A contour plot shows original W, the negative-gradient direction, and a fixed step-size arrow moving toward lower loss [ts=2098s]. Stopping can be based on a fixed number of iterations or a tolerance when the loss no longer decreases enough [ts=2145s]. Full gradient descent requires summing over the entire training set, which becomes expensive when N is large [ts=2195s]. Stochastic gradient descent approximates the full sum using a randomly sampled minibatch, such as 256 training examples, then applies the same update rule [ts=2215s]. The randomness of the minibatch is what makes the method stochastic [ts=2232s].",
+            "key_points": [
+                {
+                    "text": "If a loss is largely non-differentiable, steepest descent may not point toward a useful solution.",
+                    "timestamp_s": 1953,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Gradient descent repeatedly computes gradients and moves in the negative-gradient direction.",
+                    "timestamp_s": 2074,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "The update subtracts a learning-rate-scaled gradient from the current weights.",
+                    "timestamp_s": 2074,
+                    "evidence_type": "formula"
+                },
+                {
+                    "text": "Training can stop after fixed iterations or when loss improvement falls below a tolerance.",
+                    "timestamp_s": 2145,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "SGD approximates the full dataset gradient using a randomly sampled minibatch.",
+                    "timestamp_s": 2215,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "A batch size of 256 means each step estimates the gradient from 256 examples.",
+                    "timestamp_s": 2232,
+                    "evidence_type": "example"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 1953,
+                "end_s": 2318
+            },
+            "difficulty": 3.4,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 6,
+            "ordering_index": 4,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:1953,%22end_s%22:2318},%22difficulty%22:3.4,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22high%22,%22duration_min%22:6,%22ordering_index%22:4,%22is_template)": false
+        },
+        {
+            "unit_id": "local::lecture_3::seg5",
+            "course_id": "CS231N",
+            "name": "SGD failure modes and momentum",
+            "description": "Explains vanilla SGD pathologies and how momentum uses velocity to address them.",
+            "summary": "Vanilla SGD can struggle when the loss changes quickly in one direction and slowly in another: it may overshoot or jitter along the steep direction while making slow progress along the shallow direction [ts=2318s]. This poor conditioning is connected to a large ratio between the Hessian's largest and smallest singular values [ts=2385s]. Another problem is local minima or saddle points, where zero or tiny gradients can stop gradient descent even though lower loss may be nearby [ts=2406s]. Saddle points become more common in high-dimensional models [ts=2487s]. A third problem is minibatch noise, because each SGD update estimates gradients from only a random subset [ts=2559s]. Momentum addresses these problems by building a velocity like a ball rolling down a hill, so previous gradients influence the next step and can smooth noise, pass through flat/saddle regions, and reduce oscillation [ts=2586s]. In the equations, SGD updates directly from the current gradient, while SGD+Momentum updates by velocity; rho controls how much past velocity is retained, often 0.9 or 0.99 [ts=2679s].",
+            "key_points": [
+                {
+                    "text": "Poor conditioning makes SGD jitter in steep directions and progress slowly in shallow directions.",
+                    "timestamp_s": 2318,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "A too-large learning rate can overshoot and oscillate out of the valley.",
+                    "timestamp_s": 2329,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Local minima and saddle points can have zero gradients, causing gradient descent to get stuck.",
+                    "timestamp_s": 2406,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Saddle points are empirically more common in high-dimensional models.",
+                    "timestamp_s": 2487,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Minibatch gradients are noisy because each update uses only a sampled subset of data.",
+                    "timestamp_s": 2559,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Momentum builds a velocity or running average of gradients across iterations.",
+                    "timestamp_s": 2586,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Momentum uses rho to weight past velocity versus current slope; typical rho values are 0.9 or 0.99.",
+                    "timestamp_s": 2679,
+                    "evidence_type": "formula"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 2318,
+                "end_s": 2919
+            },
+            "difficulty": 4.1,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 10,
+            "ordering_index": 5,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:2318,%22end_s%22:2919},%22difficulty%22:4.1,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22high%22,%22duration_min%22:10,%22ordering_index%22:5,%22is_template)": false
+        },
+        {
+            "unit_id": "local::lecture_3::seg6",
+            "course_id": "CS231N",
+            "name": "Adaptive optimizers: RMSProp, Adam, and AdamW",
+            "description": "Introduces adaptive per-parameter scaling, Adam's combination of momentum and RMSProp, and decoupled weight decay in AdamW.",
+            "summary": "RMSProp is introduced as an adaptive optimizer that changes update scale by dividing by a decayed squared-gradient term [ts=2969s]. Its intuition is to take smaller steps in directions with large squared gradients and larger steps in flatter directions, so steep directions are damped and flat directions accelerated [ts=3039s]. The visual comparison shows RMSProp turning toward the valley center more quickly than SGD because it changes the relative step sizes by dimension [ts=3159s]. Adam is described as roughly RMSProp with momentum: it combines a first-moment velocity with a second-moment squared-gradient estimate [ts=3226s]. A naive Adam form has a first-timestep issue because moment estimates start at zero and beta values such as 0.9 and 0.999 are close to 1, so the full Adam form adds bias correction [ts=3305s]. Adam with beta1=0.9, beta2=0.999, and learning rate 1e-3 or 5e-4 is recommended as a strong starting point for many models [ts=3403s]. AdamW decouples weight decay: standard Adam includes L2 in moment calculations, while AdamW applies decay after computing moments so velocity reflects the loss landscape more independently of raw weight values [ts=3457s].",
+            "key_points": [
+                {
+                    "text": "RMSProp adds element-wise scaling based on historical squared gradients with decay.",
+                    "timestamp_s": 2969,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "RMSProp dampens steep directions and accelerates flatter directions.",
+                    "timestamp_s": 3039,
+                    "evidence_type": "claim"
+                },
+                {
+                    "text": "Adam combines momentum-style first moments with RMSProp-style second moments.",
+                    "timestamp_s": 3226,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Adam needs bias correction because moment estimates start at zero.",
+                    "timestamp_s": 3305,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "A common Adam starting point is beta1=0.9, beta2=0.999, and learning rate 1e-3 or 5e-4.",
+                    "timestamp_s": 3403,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Standard Adam includes L2 in moment calculations, while AdamW applies weight decay after moments are computed.",
+                    "timestamp_s": 3457,
+                    "evidence_type": "formula"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 2919,
+                "end_s": 3525
+            },
+            "difficulty": 4.8,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "duration_min": 10,
+            "ordering_index": 6,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:2919,%22end_s%22:3525},%22difficulty%22:4.8,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22high%22,%22duration_min%22:10,%22ordering_index%22:6,%22is_template)": false
+        },
+        {
+            "unit_id": "local::lecture_3::seg7",
+            "course_id": "CS231N",
+            "name": "Learning-rate schedules, second-order optimization, and the neural-network transition",
+            "description": "Covers learning-rate tuning and schedules, Hessian-based methods, practical optimizer defaults, and the preview of neural networks.",
+            "summary": "All discussed optimizers have learning rate as a hyperparameter [ts=3525s]. A very high learning rate can make loss explode by oscillating out of the landscape, a very low learning rate converges slowly, and a still-too-high rate near a minimum can keep the optimizer bouncing around [ts=3556s]. Modern deep learning often varies learning rate during training [ts=3609s]. Step decay reduces the learning rate at fixed points, such as multiplying by 0.1 during ResNet training [ts=3625s]. Cosine decay follows a half-cosine from maximum learning rate toward zero; other options include linear and inverse-square-root decay [ts=3654s]. Linear warmup ramps from zero to the maximum learning rate before another scheduler, and a common empirical rule is to scale learning rate by N when batch size increases by N [ts=3726s]. Second-order optimization uses the Hessian to form a quadratic approximation instead of only a gradient-based linear approximation, but Hessian methods are rarely used for large neural networks because second derivatives and Hessian matrices are too expensive in memory and computation [ts=3819s]. The practical advice is that Adam or AdamW is a strong default, AdamW with warmup and cosine decay is common, SGD+Momentum can outperform Adam with more tuning, and small full-batch problems may justify second-order methods [ts=4006s]. The lecture closes by previewing neural networks: a 2-layer network uses two weight matrices with a nonlinearity such as ReLU between them, enabling transformations that can make non-linearly separable points separable by a final linear classifier [ts=4044s].",
+            "key_points": [
+                {
+                    "text": "Learning rate is a hyperparameter for SGD, SGD+Momentum, RMSProp, Adam, and AdamW.",
+                    "timestamp_s": 3525,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Too-high learning rates can explode or bounce around minima; too-low learning rates converge slowly.",
+                    "timestamp_s": 3556,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Step decay reduces learning rate at fixed points, such as multiplying by 0.1 during ResNet training.",
+                    "timestamp_s": 3625,
+                    "evidence_type": "example"
+                },
+                {
+                    "text": "Cosine decay follows a half-cosine schedule from maximum learning rate toward zero.",
+                    "timestamp_s": 3654,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "Linear warmup ramps learning rate from zero to a target maximum before continuing with a scheduler.",
+                    "timestamp_s": 3726,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Linear scaling rule: if batch size increases by N, increase learning rate by N.",
+                    "timestamp_s": 3766,
+                    "evidence_type": "diagnostic_tip"
+                },
+                {
+                    "text": "Second-order optimization uses the Hessian to build a quadratic approximation but is impractical for very large deep networks.",
+                    "timestamp_s": 3819,
+                    "evidence_type": "definition"
+                },
+                {
+                    "text": "A 2-layer neural network inserts a nonlinearity such as ReLU between two weight matrices.",
+                    "timestamp_s": 4044,
+                    "evidence_type": "definition"
+                }
+            ],
+            "content_ref": {
+                "video_url": "[https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3",
+                "start_s": 3525,
+                "end_s": 4113
+            },
+            "difficulty": 4.5,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "duration_min": 10,
+            "ordering_index": 7,
+            "is_template](https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3%22,%22start_s%22:3525,%22end_s%22:4113},%22difficulty%22:4.5,%22difficulty_source%22:%22llm_single_pass%22,%22difficulty_confidence%22:%22medium%22,%22duration_min%22:10,%22ordering_index%22:7,%22is_template)": false
+        }
+    ],
+    "concepts_kp_local": [
+        {
+            "local_kp_id": "local::lecture_3::kp1",
+            "name": "Image classification and recognition challenges",
+            "description": "Assigning an image to a label despite semantic gap, viewpoint, illumination, deformation, occlusion, clutter, and intraclass variation.",
+            "track_tags": [
+                "computer_vision",
+                "machine_learning"
+            ],
+            "domain_tags": [
+                "image_classification",
+                "recognition"
+            ],
+            "career_path_tags": [
+                "computer_vision_engineer",
+                "machine_learning_engineer"
+            ],
+            "difficulty_level": 1.8,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Image classification is described as a core computer-vision task and motivates data-driven methods [ts=27s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides around [ts=27s] show a cat image mapped to class labels and separate recognition challenge examples."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp2",
+            "name": "Data-driven kNN and validation/test splits",
+            "description": "Using nearest training examples to classify and using validation data to select hyperparameters while preserving test data for final evaluation.",
+            "track_tags": [
+                "machine_learning",
+                "model_evaluation"
+            ],
+            "domain_tags": [
+                "knn",
+                "validation",
+                "hyperparameters"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "data_scientist"
+            ],
+            "difficulty_level": 2.2,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "medium",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "kNN and validation are reviewed as the simplest data-driven baseline and hyperparameter-selection setup [ts=216s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=216s], the slide shows train/validation/test splits and kNN validation accuracy curves."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp3",
+            "name": "Linear classifier scores and loss functions",
+            "description": "Linear score functions, Softmax/cross-entropy, and dataset loss as an average of per-example losses.",
+            "track_tags": [
+                "machine_learning",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "linear_classifier",
+                "softmax",
+                "loss_functions"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "computer_vision_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 3.0,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Regularization and optimization both require a score function and differentiable loss over W [ts=626s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides around [ts=590s] show class scores for cat/car/frog and the dataset loss formula."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp4",
+            "name": "Regularization and generalization",
+            "description": "Adding a penalty to reduce overfitting and improve unseen-data performance.",
+            "track_tags": [
+                "machine_learning",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "regularization",
+                "generalization",
+                "overfitting"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "computer_vision_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 3.0,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Regularization is one of the two title topics and is explicitly defined as worsening training fit to improve test performance [ts=714s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=787s], the toy curve slide contrasts perfect training fit with a simpler generalizing model."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp5",
+            "name": "L1, L2, elastic net, and lambda",
+            "description": "Common regularization penalties and the lambda hyperparameter controlling penalty strength.",
+            "track_tags": [
+                "machine_learning",
+                "optimization"
+            ],
+            "domain_tags": [
+                "l1_regularization",
+                "l2_regularization",
+                "elastic_net",
+                "hyperparameters"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "data_scientist"
+            ],
+            "difficulty_level": 3.3,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "The lecture lists L2, L1, elastic net, and lambda as concrete regularization mechanisms [ts=923s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "The slide at [ts=923s] lists the L2, L1, and elastic-net formulas."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp6",
+            "name": "Weight-preference effects of regularization",
+            "description": "Regularizers encode preferences such as L2 spread-out weights and L1 sparsity.",
+            "track_tags": [
+                "machine_learning",
+                "optimization"
+            ],
+            "domain_tags": [
+                "weight_decay",
+                "sparsity",
+                "model_preferences"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 3.5,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "The W1/W2 activity demonstrates that different penalties select different equally scoring solutions [ts=1185s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=1185s], the slide displays W1 and W2 with equal scores and asks which regularizer prefers which weights."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp7",
+            "name": "Loss landscapes and optimization objective",
+            "description": "Viewing loss as a landscape over parameters, where training searches for low-loss settings.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "loss_landscape",
+                "parameter_space"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 3.1,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "The loss-landscape analogy bridges loss definitions to gradient-based optimizer behavior [ts=1488s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides around [ts=1488s] show a landscape/hiker analogy for searching over W."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp8",
+            "name": "Numerical gradients, analytic gradients, and gradient checking",
+            "description": "Finite-difference derivative approximations, exact calculus-based gradients, and implementation checks comparing the two.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "gradients",
+                "finite_difference",
+                "gradient_checking"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 4.0,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Analytic gradients are the practical foundation for training, while gradient checking is a key implementation diagnostic [ts=1883s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides at [ts=1729s] show finite-difference calculations such as (1.25322 - 1.25347)/0.0001."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp9",
+            "name": "Gradient descent and stochastic gradient descent",
+            "description": "Iteratively updating weights by negative gradients, using minibatches for scalable stochastic estimates.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "gradient_descent",
+                "sgd",
+                "minibatch",
+                "learning_rate"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "computer_vision_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 3.7,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Gradient descent is the base optimization algorithm, and SGD is presented as its most popular practical variant [ts=2215s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=2098s], the contour plot shows original W, negative-gradient direction, and a step-size arrow."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp10",
+            "name": "SGD failure modes",
+            "description": "Poor conditioning, overshoot, local minima, saddle points, and minibatch gradient noise.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "conditioning",
+                "saddle_points",
+                "gradient_noise"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 4.2,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "These pathologies motivate momentum, RMSProp, Adam, and learning-rate schedules [ts=2318s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides from [ts=2318s] to [ts=2559s] illustrate elongated valleys, saddles, and noisy minibatch gradients."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp11",
+            "name": "Momentum optimizer",
+            "description": "Using velocity or a running average of gradients to smooth updates and keep moving in useful directions.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "momentum",
+                "optimizer",
+                "velocity"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 4.0,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "Momentum is the first optimizer refinement after SGD problems and later becomes part of Adam [ts=2586s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=2679s], slides compare SGD and SGD+Momentum update equations."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp12",
+            "name": "RMSProp and adaptive learning rates",
+            "description": "Element-wise update scaling by historical squared gradients, giving per-parameter adaptive learning rates.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "rmsprop",
+                "adaptive_learning_rates"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 4.7,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "RMSProp introduces the adaptive scaling idea later combined with momentum in Adam [ts=3039s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=3159s], the slide animation compares SGD, SGD+Momentum, and RMSProp trajectories."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp13",
+            "name": "Adam and AdamW",
+            "description": "Adam combines momentum and RMSProp-style adaptivity; AdamW decouples weight decay from moment estimation.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "adam",
+                "adamw",
+                "weight_decay",
+                "bias_correction"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "computer_vision_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 5.0,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "critical",
+            "structural_role": "gateway",
+            "importance_confidence": "high",
+            "importance_rationale": "Adam/AdamW are recommended as default optimizers and are broadly used across modern deep learning [ts=4006s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides around [ts=3226s] show Adam moment equations, bias correction, and AdamW weight-decay placement."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp14",
+            "name": "Learning-rate schedules, warmup, and batch-size scaling",
+            "description": "Changing learning rates during training using step, cosine, linear, inverse-square-root schedules, warmup, and linear scaling with batch size.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "learning_rate_schedule",
+                "warmup",
+                "batch_size_scaling"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "computer_vision_engineer"
+            ],
+            "difficulty_level": 4.2,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "high",
+            "importance_level": "high",
+            "structural_role": "supporting",
+            "importance_confidence": "high",
+            "importance_rationale": "The instructor says modern models commonly vary learning rate during training and gives practical schedule recipes [ts=3609s].",
+            "importance_scope": "curriculum_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "Slides around [ts=3654s] plot step, cosine, linear, inverse-square-root, and warmup schedules."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp15",
+            "name": "Second-order optimization and Hessian limitations",
+            "description": "Using Hessians and quadratic approximations, and why these methods are usually impractical for large deep networks.",
+            "track_tags": [
+                "optimization",
+                "deep_learning"
+            ],
+            "domain_tags": [
+                "second_order_optimization",
+                "hessian",
+                "newton_method"
+            ],
+            "career_path_tags": [
+                "research_scientist",
+                "machine_learning_engineer"
+            ],
+            "difficulty_level": 5.2,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "medium",
+            "structural_role": "optional",
+            "importance_confidence": "medium",
+            "importance_rationale": "Second-order methods are useful context and may work for small/full-batch problems, but are rarely used for large neural networks because of memory and compute [ts=3886s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=3819s], slides contrast first-order linear approximations with second-order quadratic approximations."
+        },
+        {
+            "local_kp_id": "local::lecture_3::kp16",
+            "name": "Neural-network nonlinearity preview",
+            "description": "A two-layer neural network adds a nonlinearity between weight matrices to transform data into a linearly separable representation.",
+            "track_tags": [
+                "deep_learning",
+                "computer_vision"
+            ],
+            "domain_tags": [
+                "neural_networks",
+                "relu",
+                "nonlinearity",
+                "feature_transform"
+            ],
+            "career_path_tags": [
+                "machine_learning_engineer",
+                "computer_vision_engineer",
+                "research_scientist"
+            ],
+            "difficulty_level": 3.8,
+            "difficulty_source": "llm_single_pass",
+            "difficulty_confidence": "medium",
+            "importance_level": "medium",
+            "structural_role": "gateway",
+            "importance_confidence": "medium",
+            "importance_rationale": "This is a preview of the next lecture and unlocks neural networks and backpropagation, but it is only briefly introduced here [ts=4044s].",
+            "importance_scope": "course_global",
+            "importance_source": "llm_single_pass",
+            "visual_evidence": "At [ts=4044s], slides show a two-layer network with a ReLU-like nonlinearity and non-linearly separable red/blue points."
+        }
+    ],
+    "unit_kp_map_local": [
+        {
+            "unit_id": "local::lecture_3::seg1",
+            "local_kp_id": "local::lecture_3::kp1",
+            "planner_role": "main",
+            "instruction_role": "review",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The recap defines image classification and lists recognition challenges [ts=27s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg1",
+            "local_kp_id": "local::lecture_3::kp2",
+            "planner_role": "main",
+            "instruction_role": "review",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "kNN and train/validation/test splits are reviewed as the data-driven baseline and hyperparameter setup [ts=216s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg1",
+            "local_kp_id": "local::lecture_3::kp3",
+            "planner_role": "main",
+            "instruction_role": "review",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Linear classifiers, class scores, Softmax/cross-entropy, and averaged dataset loss are reviewed as setup for the new content [ts=626s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg2",
+            "local_kp_id": "local::lecture_3::kp3",
+            "planner_role": "prereq",
+            "instruction_role": "review",
+            "coverage_level": "partial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The regularization term is introduced as the second component after data loss [ts=714s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg2",
+            "local_kp_id": "local::lecture_3::kp4",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Regularization is defined as preventing too-good training fit to improve unseen-data performance [ts=714s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg2",
+            "local_kp_id": "local::lecture_3::kp5",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Lambda, L2, L1, and elastic net are introduced as concrete regularization terms [ts=882s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg2",
+            "local_kp_id": "local::lecture_3::kp6",
+            "planner_role": "main",
+            "instruction_role": "application",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The W1/W2 examples show how L2 and L1 express different preferences over weights [ts=1185s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg3",
+            "local_kp_id": "local::lecture_3::kp7",
+            "planner_role": "main",
+            "instruction_role": "intro",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Optimization is introduced as finding the best W on a loss landscape [ts=1474s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg3",
+            "local_kp_id": "local::lecture_3::kp8",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The unit contrasts finite-difference numerical gradients with analytic gradients and gradient checks [ts=1883s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg4",
+            "local_kp_id": "local::lecture_3::kp8",
+            "planner_role": "support",
+            "instruction_role": "review",
+            "coverage_level": "partial",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "The differentiability discussion continues from gradient computation [ts=1953s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg4",
+            "local_kp_id": "local::lecture_3::kp9",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Gradient descent and SGD are defined through negative-gradient and minibatch updates [ts=2074s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg5",
+            "local_kp_id": "local::lecture_3::kp9",
+            "planner_role": "prereq",
+            "instruction_role": "support",
+            "coverage_level": "partial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The SGD problems arise from the minibatch gradient setting introduced just before this section [ts=2559s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg5",
+            "local_kp_id": "local::lecture_3::kp10",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The unit enumerates poor conditioning, local minima/saddle points, and noisy gradients as SGD problems [ts=2318s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg5",
+            "local_kp_id": "local::lecture_3::kp11",
+            "planner_role": "main",
+            "instruction_role": "application",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Momentum is introduced as velocity that carries update direction across iterations [ts=2586s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg6",
+            "local_kp_id": "local::lecture_3::kp11",
+            "planner_role": "prereq",
+            "instruction_role": "support",
+            "coverage_level": "partial",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "Adam is motivated as combining RMSProp with momentum [ts=3226s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg6",
+            "local_kp_id": "local::lecture_3::kp12",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "RMSProp is introduced as adaptive per-parameter scaling using squared gradients [ts=2969s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg6",
+            "local_kp_id": "local::lecture_3::kp13",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Adam, bias correction, default hyperparameters, and AdamW decoupled weight decay occupy the central part of the unit [ts=3226s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg7",
+            "local_kp_id": "local::lecture_3::kp13",
+            "planner_role": "support",
+            "instruction_role": "review",
+            "coverage_level": "partial",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "The practical optimizer recommendation names Adam/AdamW as strong defaults [ts=4006s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg7",
+            "local_kp_id": "local::lecture_3::kp14",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "dominant",
+            "coverage_confidence": "high",
+            "coverage_rationale": "The unit teaches learning-rate failure modes, schedules, warmup, and batch-size scaling [ts=3525s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg7",
+            "local_kp_id": "local::lecture_3::kp15",
+            "planner_role": "main",
+            "instruction_role": "main",
+            "coverage_level": "substantial",
+            "coverage_confidence": "high",
+            "coverage_rationale": "Second-order optimization is introduced through Hessians and limited by memory/computation for deep networks [ts=3819s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg7",
+            "local_kp_id": "local::lecture_3::kp16",
+            "planner_role": "main",
+            "instruction_role": "intro",
+            "coverage_level": "partial",
+            "coverage_confidence": "medium",
+            "coverage_rationale": "The final preview introduces 2-layer neural networks, ReLU-style nonlinearity, and why nonlinearity helps separability [ts=4044s]."
+        }
+    ],
+    "section_flags": [
+        {
+            "unit_id": "local::lecture_3::seg1",
+            "importance_flag": "high",
+            "review_worthiness": "medium",
+            "item_generation_worthiness": "medium",
+            "formula_heavy": false,
+            "demo_heavy": false,
+            "rationale": "This is recap material establishing image classification, kNN, linear scores, and data loss; formulas are present but mostly reviewed [ts=626s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg2",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": false,
+            "rationale": "Regularization is a title topic, with lambda, L1, L2, elastic net, and W1/W2 penalty examples [ts=923s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg3",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": true,
+            "rationale": "The section shows finite-difference gradient calculations and random-search code snippets [ts=1729s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg4",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": true,
+            "rationale": "Gradient descent and SGD are central algorithms with update equations and minibatch pseudocode [ts=2074s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg5",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": true,
+            "rationale": "SGD pathologies and momentum are highly testable; slides show equations and trajectory animations [ts=2679s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg6",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": true,
+            "rationale": "RMSProp, Adam, AdamW, moments, bias correction, and weight decay placement are formula-heavy optimizer material [ts=3226s]."
+        },
+        {
+            "unit_id": "local::lecture_3::seg7",
+            "importance_flag": "high",
+            "review_worthiness": "high",
+            "item_generation_worthiness": "high",
+            "formula_heavy": true,
+            "demo_heavy": false,
+            "rationale": "Learning-rate schedules, warmup, Hessian methods, and optimizer defaults are high-value review topics with formulas and diagnostic rules [ts=3654s]."
+        }
+    ],
+    "self_critique_trace": null
+}

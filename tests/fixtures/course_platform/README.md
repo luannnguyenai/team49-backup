@@ -6,7 +6,7 @@ Shared fixture data for backend and frontend course-platform tests.
 
 The backend tests in `tests/contract/` use direct imports and `httpx.AsyncClient` with `ASGITransport` to test against the live FastAPI app.
 
-Course data is loaded from `data/course_bootstrap/` at test time via the bootstrap service — no separate fixture files are needed.
+Course data is loaded from `data/bootstrap/` at test time via the bootstrap service — no separate fixture files are needed.
 
 ```python
 # Example: tests/contract/test_course_catalog_api.py
@@ -33,7 +33,7 @@ import { CS231N_ITEM, CS224N_ITEM, LECTURE_1_UNIT } from "@/tests/fixtures/cours
 
 | File | Purpose |
 |------|---------|
-| `data/course_bootstrap/courses.json` | Course catalog definitions |
-| `data/course_bootstrap/overviews.json` | Course overview content |
-| `data/course_bootstrap/units.json` | Learning unit mappings |
+| `data/bootstrap/courses.json` | Course catalog definitions |
+| `data/bootstrap/overviews.json` | Course overview content |
+| `data/bootstrap/units.json` | Learning unit mappings |
 | `frontend/tests/fixtures/coursePlatform.ts` | Frontend test fixture data |

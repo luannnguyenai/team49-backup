@@ -90,7 +90,7 @@ class CoursePlatformFoundationTests(unittest.TestCase):
         )
         self.assertEqual(
             {item.value for item in LearningProgressStatus},
-            {"not_started", "in_progress", "completed", "blocked"},
+            {"not_started", "in_progress", "completed", "blocked", "skipped"},
         )
         self.assertEqual(
             {item.value for item in LegacyLectureMigrationState},

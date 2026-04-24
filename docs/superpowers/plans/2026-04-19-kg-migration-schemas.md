@@ -1,5 +1,7 @@
 # KG Phase 0 — Migration + Pydantic Schemas Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. Legacy KG runtime code has been removed; use canonical `prerequisite_edges` and the current handoff docs for production graph work.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Create the Alembic migration for 3 KG tables and the full Pydantic v2 schema layer for the Knowledge Graph module.

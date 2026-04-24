@@ -1,0 +1,260 @@
+{
+  "unit_id": "local::lecture02-python-review::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=8j4wpU98Q74",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript đủ mạnh để tạo câu hỏi khái niệm về vai trò của NumPy, sự khác nhau giữa list và array, quy ước shape, tensor và reshape.",
+  "question_bank": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Lợi ích cốt lõi của NumPy là gì?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Thực hiện phép toán số lớn hiệu quả hơn bằng các cài đặt mức thấp tối ưu phía dưới Python.",
+        "Thay thế hoàn toàn mọi framework deep learning và GPU.",
+        "Cho phép Python bỏ qua hoàn toàn việc quản lý bộ nhớ.",
+        "Biến mọi list Python thành ma trận mà không cần chuyển đổi."
+      ],
+      "answer_index": 0,
+      "explanation": "NumPy mạnh ở chỗ cung cấp các phép toán số và ma trận rất nhanh nhờ các cài đặt tối ưu phía dưới. Điều đó đặc biệt quan trọng khi dữ liệu NLP hoặc ma trận đồng xuất hiện trở nên lớn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "optimized library",
+          "written in a different language"
+        ],
+        "timestamps": [
+          "00:17:41",
+          "00:18:01"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Khi có một Python list thông thường và muốn dùng các phép toán NumPy lên nó, bạn nên làm gì trước?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Chuyển list sang NumPy array, thường bằng np.array(...).",
+        "Dùng list trực tiếp vì NumPy tự hiểu mọi list mà không cần chuyển đổi.",
+        "Ép list thành tuple vì NumPy chỉ làm việc với tuple.",
+        "Đổi list sang dictionary để NumPy tối ưu hơn."
+      ],
+      "answer_index": 0,
+      "explanation": "Các phép toán NumPy hoạt động trên đối tượng array của NumPy. Vì vậy dữ liệu ở dạng list thường cần được chuyển sang array trước khi áp dụng các phép toán đó.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "operate only on NumPy arrays",
+          "first have to convert"
+        ],
+        "timestamps": [
+          "00:19:30",
+          "00:19:34"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Phát biểu nào mô tả đúng quy ước matrix, vector và tensor trong phần này?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Matrix thường là cấu trúc hai chiều, vector thường được xem là một chiều, còn tensor thường chỉ đối tượng nhiều hơn hai chiều.",
+        "Matrix, vector và tensor là ba tên hoàn toàn đồng nghĩa trong NumPy.",
+        "Vector bắt buộc luôn là ma trận 2x2 còn tensor chỉ có thể là 3 chiều.",
+        "Tensor chỉ là tên khác của dictionary trong PyTorch."
+      ],
+      "answer_index": 0,
+      "explanation": "Các tên gọi này giúp ta nghĩ về số chiều và cách dữ liệu được tổ chức. Vector thường là một trục giá trị, matrix là hai chiều, còn tensor mở rộng ý tưởng đó lên nhiều chiều hơn.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two dimensional",
+          "higher dimensional object"
+        ],
+        "timestamps": [
+          "00:21:19",
+          "00:21:25"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Shape nào tương ứng tốt nhất với “một hàng gồm 3 phần tử” thay vì “một cột gồm 3 phần tử”?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "(1, 3)",
+        "(3, 1)",
+        "(3, 3)",
+        "(3,) luôn luôn là ma trận hàng hai chiều"
+      ],
+      "answer_index": 0,
+      "explanation": "Shape (1, 3) nghĩa là có 1 hàng và 3 cột. Trong khi đó (3, 1) là 3 hàng 1 cột, còn (3,) là biểu diễn một chiều chứ không phải ma trận hai chiều đầy đủ.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "one row of three elements",
+          "3 comma versus like 1"
+        ],
+        "timestamps": [
+          "00:24:06",
+          "00:22:19"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Bạn có một mảng gồm 10 phần tử. Phép reshape nào là không hợp lệ?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "reshape thành (3, 5)",
+        "reshape thành (5, 2)",
+        "reshape thành (2, 5)",
+        "reshape thành (1, 10)"
+      ],
+      "answer_index": 0,
+      "explanation": "reshape chỉ hợp lệ khi tích các chiều mới bằng đúng số phần tử ban đầu. Vì 3×5 = 15 nên không thể dùng cho mảng có 10 phần tử.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_reshape_and_indexing",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "list of 10",
+          "reshape"
+        ],
+        "timestamps": [
+          "00:25:53",
+          "00:23:01"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q1",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q2",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q3",
+      "global_kp_id": "kp_numpy_as_an_optimized_numerical_library",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q4",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "secondary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "global_kp_id": "kp_reshape_and_indexing",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture02-python-review-seg3-q5",
+      "global_kp_id": "kp_tensor_shapes_and_broadcasting",
+      "role": "secondary"
+    }
+  ]
+}

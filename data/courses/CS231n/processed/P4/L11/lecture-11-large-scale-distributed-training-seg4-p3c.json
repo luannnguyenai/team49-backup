@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_11_large_scale_distributed_training::seg4",
+  "youtube_url": "https://www.youtube.com/watch?v=9MvD-XsowsE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for reinforcement questions on the exact algebraic basis and mechanics of data parallelism. The reasoning is stated verbally, so a separate clip is unnecessary.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does averaging gradients across M GPUs in data parallelism give the same result as using one giant device on the full macrobatch?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because gradients are linear with respect to the averaged minibatch loss",
+        "Because each GPU uses a different optimizer",
+        "Because all-reduce changes the objective function",
+        "Because duplicated examples cancel each other out"
+      ],
+      "answer_index": 0,
+      "explanation": "When the loss is an average over examples, the gradient of that average equals the average of the per-example or per-shard gradients, so the result matches exactly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_data_parallelism",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "And if you think about mathematically",
+          "So in practice, if you're computing a single scalar"
+        ],
+        "timestamps": [
+          "00:29:57",
+          "00:30:01"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a correctness bug in data-parallel training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Giving each GPU a different minibatch shard",
+        "All-reducing gradients after backward",
+        "Accidentally loading the same minibatch on every GPU",
+        "Keeping identical model weights on each GPU at the start"
+      ],
+      "answer_index": 2,
+      "explanation": "Data parallelism relies on each GPU processing different samples so the global batch is larger. Duplicating the same minibatch wastes compute and breaks the intended scaling.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_data_parallelism",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "need to load different minibatches of data.",
+          "code, where they actually accidentally load"
+        ],
+        "timestamps": [
+          "00:32:00",
+          "00:32:04"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After each GPU computes its local gradients in data parallelism, what happens next?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each GPU updates independently using only its own gradients",
+        "Gradients are all-reduced so every GPU can make the same update",
+        "Weights are sharded to one owner GPU per layer",
+        "Activations are discarded and recomputed before the update"
+      ],
+      "answer_index": 1,
+      "explanation": "All-reduce gives every device the same averaged gradient tensor, so identical local copies of the model remain synchronized after the update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_data_parallelism",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So this is where we do an all reduce operation.",
+          "participating in our training."
+        ],
+        "timestamps": [
+          "00:33:00",
+          "00:32:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q1",
+      "global_kp_id": "kp_data_parallelism",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q2",
+      "global_kp_id": "kp_data_parallelism",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q3",
+      "global_kp_id": "kp_data_parallelism",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.25,
+      "discrimination_prior": 1.0,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Why averaged gradients equal the full-macrobatch result is a moderately technical correctness question."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.35,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "A correctness bug in data parallelism is a practical easy systems question."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.25,
+      "discrimination_prior": 0.9,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "What happens after local gradients are computed is an accessible workflow question."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q1",
+      "primary_phase": "final_quiz",
+      "secondary_phases": [
+        "bridge_check",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "low",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is best used when checking deep understanding of data-parallel correctness."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q2",
+      "primary_phase": "review",
+      "secondary_phases": [
+        "mini_quiz",
+        "bridge_check"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is useful as a practical debugging check on distributed correctness."
+    },
+    {
+      "item_id": "lecture-11-large-scale-distributed-training-seg4-q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "review",
+        "placement"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This reinforces the basic data-parallel update pipeline."
+    }
+  ]
+}

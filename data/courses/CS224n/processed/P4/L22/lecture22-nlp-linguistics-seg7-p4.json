@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::lecture22-nlp-linguistics::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=NxH0Y78xcF4",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript slice and summary provide enough grounding for five focused questions on use theory, partial grounding, and gradient meaning; no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the use theory of meaning differ from a purely denotational theory?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It treats meaning as arising from how expressions are used, not only from what they point to.",
+        "It denies that language use can ever affect meaning.",
+        "It requires every word to have exactly one physical referent.",
+        "It claims pictures are the only source of word meaning."
+      ],
+      "answer_index": 0,
+      "explanation": "Use theory shifts attention from reference alone to patterns of use. A word can gain meaning through its role in practices, contexts, and language itself.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "meaning arises",
+          "use theories"
+        ],
+        "timestamps": [
+          "00:58:36",
+          "00:59:16"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which option best captures the idea of partial grounding?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Meaning can be supported by multiple connections, including real-world reference, virtual worlds, and relations among words.",
+        "A word is meaningful only after someone has touched its physical referent.",
+        "Textual context never contributes to grounding.",
+        "A definition either gives complete meaning or no meaning at all."
+      ],
+      "answer_index": 0,
+      "explanation": "Grounding is not limited to direct physical reference. Different kinds of evidence can each add part of a word's meaning, including linguistic relations and imagined or virtual contexts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "real world",
+          "virtual world"
+        ],
+        "timestamps": [
+          "00:59:36",
+          "01:00:03"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does it mean to say that meaning is gradient rather than binary?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Understanding a word can come in degrees, rather than being simply present or absent.",
+        "Every word must have a probability between exactly 0 and 1.",
+        "A word has meaning only if all speakers agree perfectly.",
+        "A picture always gives the full meaning of a word."
+      ],
+      "answer_index": 0,
+      "explanation": "People can understand a term more or less well depending on what experiences, explanations, and contexts they have. Meaning is therefore not all-or-nothing.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "gradient thing",
+          "more or less"
+        ],
+        "timestamps": [
+          "01:00:12",
+          "01:00:24"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the shehnai example support a multi-source view of meaning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Pictures, sounds, definitions, and usage contexts each reveal different aspects of the instrument's meaning.",
+        "A picture of the instrument completely exhausts its meaning.",
+        "Only a formal SQL query can define the word.",
+        "The word has no meaning unless it appears in English-only corpora."
+      ],
+      "answer_index": 0,
+      "explanation": "Each source contributes something different: visual form, sound, verbal description, and cultural or contextual associations. None alone has to be the complete meaning.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "show you a picture",
+          "a bit like an oboe"
+        ],
+        "timestamps": [
+          "01:00:55",
+          "01:01:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What can textual usage reveal that a picture of an unfamiliar instrument might miss?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Cultural associations and usage patterns, such as characteristic sound or connection to weddings.",
+        "The exact number of pixels in the image.",
+        "A guarantee that all speakers understand the term identically.",
+        "Only the spelling of the word, never its meaning."
+      ],
+      "answer_index": 0,
+      "explanation": "Corpus contexts can show how a term is used in social and cultural settings. Those patterns may reveal meanings that are not visually obvious.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "wailing sound",
+          "weddings"
+        ],
+        "timestamps": [
+          "01:02:26",
+          "01:03:15"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q1",
+      "global_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q2",
+      "global_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q3",
+      "global_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q4",
+      "global_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q5",
+      "global_kp_id": "kp_use_theory_and_gradient_grounding_of_meaning",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"How does the use theory of meaning differ from a purely denotational theory\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which option best captures the idea of partial grounding\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What does it mean to say that meaning is gradient rather than binary\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why does the shehnai example support a multi-source view of meaning\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"What can textual usage reveal that a picture of an unfamiliar instrument might miss\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q1",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"How does the use theory of meaning differ from a purely denotational theory\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which option best captures the idea of partial grounding\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q3",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What does it mean to say that meaning is gradient rather than binary\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q4",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why does the shehnai example support a multi-source view of meaning\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture22-nlp-linguistics-seg7-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What can textual usage reveal that a picture of an unfamiliar instrument might miss\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

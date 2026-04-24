@@ -1,0 +1,168 @@
+{
+  "unit_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=pdqofxJeBN8",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "The transcript and unit summary provide enough support for linear score functions, weight shapes, bias terms, and the template/geometric interpretations. A separate video clip is not required.",
+  "question_bank": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a linear image classifier with 10 classes and a flattened 3072-dimensional input, what shape should the weight matrix have to produce one score per class?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "10 by 3072",
+        "3072 by 10 by 3",
+        "10 by 10",
+        "3072 by 1"
+      ],
+      "answer_index": 0,
+      "explanation": "Each row of the weight matrix produces the score for one class by combining all input features. With 10 classes and 3072 input features, the matrix has one row per class and one column per feature.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "3,072 numbers",
+          "10 output classes",
+          "weight matrix"
+        ],
+        "timestamps": [
+          "00:48:10",
+          "00:48:23",
+          "00:48:34"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does the bias term do in a linear classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It adds an input-independent shift that can move decision boundaries away from the origin.",
+        "It replaces the weight matrix so no features are needed.",
+        "It forces all classes to share exactly the same score.",
+        "It measures the pixel distance between the query image and training images."
+      ],
+      "answer_index": 0,
+      "explanation": "The bias is independent of the input features, so it shifts class scores and allows separating boundaries to be positioned more flexibly.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "input-independent value",
+          "helps with much better separation",
+          "all of these lines"
+        ],
+        "timestamps": [
+          "00:48:56",
+          "00:49:13",
+          "00:53:33"
+        ]
+      }
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How can the rows of a linear classifier's weight matrix be interpreted visually?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Each row acts like a learned class template that is scored against the image.",
+        "Each row is a separate training image that must be copied exactly.",
+        "Each row stores the validation accuracy for one hyperparameter.",
+        "Each row is a probability distribution produced by softmax before scoring."
+      ],
+      "answer_index": 0,
+      "explanation": "A class score is formed by comparing the input vector with that class's row of weights. This makes each row interpretable as a template for evidence toward a class.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "row in the matrix w",
+          "specific class",
+          "these templates"
+        ],
+        "timestamps": [
+          "00:51:46",
+          "00:51:51",
+          "00:52:26"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q1",
+      "global_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "global_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q2",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "secondary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "global_kp_id": "kp_visual_and_geometric_interpretation_of_weights_and_bias",
+      "role": "primary"
+    },
+    {
+      "item_id": "local::lecture_2_image_classification_with_linear_classifiers::seg5::q3",
+      "global_kp_id": "kp_linear_classifier_as_a_parametric_score_function",
+      "role": "secondary"
+    }
+  ]
+}

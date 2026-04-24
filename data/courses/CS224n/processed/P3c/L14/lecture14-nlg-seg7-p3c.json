@@ -1,0 +1,189 @@
+{
+  "unit_id": "local::lecture14-nlg::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=N9L32bFieEY",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": "Textual grounding is sufficient for concept-focused questions, and no separate video clip is needed.",
+  "question_bank": [
+    {
+      "item_id": "lecture14-nlg-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why can exact semantic similarity to one reference be a poor objective for open-ended generation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Many high-quality outputs may be valid even if they differ substantially from a single reference.",
+        "Open-ended generation always has exactly one correct answer.",
+        "Reference text is never useful for any generation task.",
+        "Semantic similarity cannot be estimated by humans."
+      ],
+      "answer_index": 0,
+      "explanation": "Open-ended tasks permit many acceptable continuations. A model should not be penalized merely because it produced a different valid story, dialogue response, or continuation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_evaluation_and_metric_alignment",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "perfectly high quality",
+          "semantic similarities"
+        ],
+        "timestamps": [
+          "01:02:00",
+          "01:02:05"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does MAUVE try to compare?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The distribution of generated texts against the distribution of human-written reference texts in an embedding space.",
+        "The exact unigram overlap between one output and one reference.",
+        "The number of tokens banned by n-gram blocking.",
+        "The training loss of a model under teacher forcing only."
+      ],
+      "answer_index": 0,
+      "explanation": "MAUVE evaluates batches of text distributionally. It embeds texts, discretizes the space, and compares generated and human-written distributions rather than exact sentence matches.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_automatic_evaluation_metrics_for_nlg",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "MAUVE score",
+          "quantized embedding space"
+        ],
+        "timestamps": [
+          "01:02:16",
+          "01:02:21"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How should an automatic NLG metric be judged?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "By how well it correlates with human judgments of output quality.",
+        "By whether it always gives every output the same score.",
+        "By whether it avoids using any generated text.",
+        "By whether it rewards only the longest outputs."
+      ],
+      "answer_index": 0,
+      "explanation": "The purpose of an automatic metric is to approximate what people care about. Strong correlation with human judgment is therefore a key sign that the metric is useful.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_evaluation_and_metric_alignment",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "human judgment",
+          "gold criterion"
+        ],
+        "timestamps": [
+          "01:07:28"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture14-nlg-seg7-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which limitation of human evaluation is important when comparing NLG systems?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is slow, expensive, inconsistent across studies, and tends to assess precision more than recall.",
+        "It is fully automatic and free to run at scale.",
+        "It always measures the complete output distribution perfectly.",
+        "It cannot judge qualities such as fluency or factuality."
+      ],
+      "answer_index": 0,
+      "explanation": "Human evaluation is valuable but costly and hard to standardize. It usually judges sampled outputs, so it can say whether outputs are good but may not reveal what the model fails to generate.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_human_centered_evaluation_and_metric_alignment",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "slow",
+          "expensive"
+        ],
+        "timestamps": [
+          "01:09:13"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture14-nlg-seg7-q1",
+      "global_kp_id": "kp_human_centered_evaluation_and_metric_alignment",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg7-q2",
+      "global_kp_id": "kp_automatic_evaluation_metrics_for_nlg",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg7-q3",
+      "global_kp_id": "kp_human_centered_evaluation_and_metric_alignment",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture14-nlg-seg7-q4",
+      "global_kp_id": "kp_human_centered_evaluation_and_metric_alignment",
+      "role": "primary"
+    }
+  ]
+}

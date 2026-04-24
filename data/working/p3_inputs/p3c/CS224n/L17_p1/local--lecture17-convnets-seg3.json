@@ -1,0 +1,199 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture17-convnets",
+    "lecture_title": "Lecture 17 - ConvNets and TreeRNNs for NLP",
+    "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ"
+  },
+  "unit": {
+    "unit_id": "local::lecture17-convnets::seg3",
+    "course_id": "cs224n-2024",
+    "name": "Deep CNN variants: batch norm, 1x1 conv, and VD-CNN",
+    "description": "Places CNNs among other sequence models and introduces deeper character-level CNN architectures for text classification.",
+    "summary": "This segment situates CNNs in the broader modeling toolkit: bag-of-vectors and window models are simple baselines, CNNs are good for classification and easy to parallelize, RNNs are sequential, and transformers have become the dominant NLP model family [ts=1744s][ts=1791s]. The instructor then contrasts batch normalization with layer normalization, explaining that batch norm normalizes across the batch for each feature, whereas layer norm normalizes across the feature dimension [ts=1822s][ts=1888s]. He also explains why a size-1 convolution is meaningful: it acts like a position-wise fully connected layer that re-expresses a single token representation with fewer parameters than a sentence-wide dense layer [ts=1912s][ts=1969s]. The main case study is Conneau et al.'s 2017 very deep CNN for text classification, which starts from characters, stacks deep residual convolutional blocks with local pooling, expands channel depth as sequence length shrinks, and finishes with k-max pooling plus fully connected layers [ts=2013s][ts=2150s][ts=2278s][ts=2338s]. The paper's main result is that deeper models, especially the 29-layer version, performed best and sometimes reached or exceeded prior state of the art on text classification benchmarks [ts=2459s][ts=2520s].",
+    "key_points": [
+      {
+        "text": "CNNs are easy to parallelize for classification, whereas RNNs process sequences sequentially and transformers now dominate NLP.",
+        "timestamp_s": 1751,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Batch normalization normalizes each feature across the batch, unlike layer normalization which normalizes across features.",
+        "timestamp_s": 1888,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A size-1 convolution is equivalent to a position-wise fully connected transformation of a token representation.",
+        "timestamp_s": 1944,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "VD-CNN begins from character inputs and uses deep residual convolutional blocks with repeated local pooling.",
+        "timestamp_s": 2150,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The deepest 29-layer VD-CNN variant gave the strongest results in the reported experiments.",
+        "timestamp_s": 2462,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=17",
+      "start_s": 1822,
+      "end_s": 2554
+    },
+    "difficulty": 0.66,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 12,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "This segment situates CNNs in the broader modeling toolkit: bag-of-vectors and window models are simple baselines, CNNs are good for classification and easy to parallelize, RNNs are sequential, and transformers have become the dominant NLP model family [ts=1744s][ts=1791s]. The instructor then contrasts batch normalization with layer normalization, explaining that batch norm normalizes across the batch for each feature, whereas layer norm normalizes across the feature dimension [ts=1822s][ts=1888s]. He also explains why a size-1 convolution is meaningful: it acts like a position-wise fully connected layer that re-expresses a single token representation with fewer parameters than a sentence-wide dense layer [ts=1912s][ts=1969s]. The main case study is Conneau et al.'s 2017 very deep CNN for text classification, which starts from characters, stacks deep residual convolutional blocks with local pooling, expands channel depth as sequence length shrinks, and finishes with k-max pooling plus fully connected layers [ts=2013s][ts=2150s][ts=2278s][ts=2338s]. The paper's main result is that deeper models, especially the 29-layer version, performed best and sometimes reached or exceeded prior state of the art on text classification benchmarks [ts=2459s][ts=2520s].",
+  "target_kp_ids": [
+    "kp_vd_cnn_character_level_text_classification"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "video_clip_url": "https://www.youtube.com/watch?v=S8d-7v3f5MQ",
+  "transcript_slice": "00:30:22\nA couple of other just facts on the side, and then I'll\n\n00:30:31\nnetwork model for language.\n\n00:30:38\nthe use of layer normalization, which sort of keeps\n\n00:30:46\nof the neural network about the same\n\n00:30:54\nThere are slightly different ways that you can do that.\n\n00:30:59\na standard thing to be using is batch normalization.\n\n00:31:06\nthat was invented first.\n\n00:31:13\nare sort of doing the same thing of scaling numbers\n\n00:31:21\nBut the way that they differ is sort of under what dimensions\n\n00:31:28\nSo that layer norm is calculating statistics\n\n00:31:34\nis normalizing all the elements in the batch for each feature\n\n00:31:42\nOK.\n\n00:31:47\nwhich actually sort of connects a bit to transformers as well,\n\n00:31:54\nall of what I've presented so far was sort of convolutions\n\n00:32:03\nAnd so there are also size 1 convolutions.\n\n00:32:12\nbecause what's the point of doing a size 1 convolution?\n\n00:32:18\nstaying just one thing.\n\n00:32:25\nto having a little fully connected layer\n\n00:32:32\nSo in a language term, it's taking a word vector\n\n00:32:39\nto produce a new representation just of that word.\n\n00:32:46\nwith the fully connected layers and transformers, that you've\n\n00:32:51\njust at 1 subword token position and calculates\n\n00:32:58\nAnd so that allows you to create new representations\n\n00:33:07\nallowing a fully connected layer across the entire sentence.\n\n00:33:19\nof a convolutional neural network,\n\n00:33:27\ncomplex one from Conneau et al.\n\n00:33:33\nAnd again, this was still at the stage in which LSTM sequence\n\n00:33:40\nI guess in 2017, this is the same year\n\n00:33:47\nAnd the motivations were sort of comparing vision and language.\n\n00:34:02\nmodels and vision were already very deep\n\n00:34:08\nthat had 30, 50, or 100 layers in them.\n\n00:34:16\nwas happening in the LSTM world for sequence models,\n\n00:34:24\nAnd if you're wanting to go further,\n\n00:34:29\nor a four-layer sequence model.\n\n00:34:34\npeople had used eight-layer sequence models\n\n00:34:38\nBut essentially, it was always in a single digit,\n\n00:34:44\nAnd then the second thing was, in some sense,\n\n00:34:54\noperating on the individual pixel level,\n\n00:35:01\nwere using word level models still in the transformer models.\n\n00:35:07\ngrouped before they began.\n\n00:35:13\ncould do NLP kind of like it was vision.\n\n00:35:22\nWe're going to put them into a deeper convolutional neural\n\n00:35:32\nand use that for language classification tasks.\n\n00:35:41\nwhich is something that looks very like a vision system\n\n00:35:49\nAnd so what do we have here?\n\n00:35:57\nAnd the individual characters get a 16D representation.\n\n00:36:07\nyou're classifying, which for them was 1,024.\n\n00:36:16\ngoing to have convolutional blocks.\n\n00:36:24\nhave a whole bunch of filters, but they're also then going\n\n00:36:32\nstarting to collapse into multi-character units.\n\n00:36:41\nhaving 64 size 3 convolutional filters.\n\n00:36:54\nthe window size.\n\n00:37:03\nthrough another set of convolutional filters of size 3\n\n00:37:12\nAnd then at each point, we also have residual connections,\n\n00:37:18\nthat were pioneered in the vision space,\n\n00:37:22\ngo straight through.\n\n00:37:27\nthen going to do local pooling.\n\n00:37:36\nAnd so at that point, we've no longer got a length\n\n00:37:44\nWe've now got a length of 512.\n\n00:37:54\nsort of trigram convolutions.\n\n00:38:02\nWe're going to repeat that again.\n\n00:38:07\nSo now we're going to have 256 long sequence because we've done\n\n00:38:18\nAnd we're going to then have 256 filters at each stage.\n\n00:38:24\nAnd then we do local pooling again so each of them\n\n00:38:32\nAnd we're putting trigram filters over those 8 grams.\n\n00:38:41\nthat the convolutional filters are seeing at this point\n\n00:38:48\nlike six-word sequences or something like that.\n\n00:38:56\nThey then do this k-max pooling.\n\n00:39:01\ndo show up.\n\n00:39:04\nand finding the eight highest activations in the sequence.\n\n00:39:12\nbecause you want to count up the amount of evidence, right.\n\n00:39:21\ncopper mining, you want to be seeing whether there's\n\n00:39:27\ntalking about copper mining.\n\n00:39:33\nlayers, which, again, is very typical of what you're\n\n00:39:43\nthat after you've done a whole bunch of convolutional layers,\n\n00:39:50\nat the top.\n\n00:39:53\nAnd this is your architecture for doing text understanding.\n\n00:40:01\nI think I talked through that in a lot of detail.\n\n00:40:06\nYeah.\n\n00:40:12\nsets.\n\n00:40:18\nDBPedia ontology, then doing sentiment analysis\n\n00:40:26\nAnd here, our results from their one.\n\n00:40:35\nbest published results, which are shown here in table four.\n\n00:40:45\nby using their architecture and that they used architectures\n\n00:40:55\nof 9 layers, 17, and 29 layers.\n\n00:41:02\nthey got the best results by their deepest network,\n\n00:41:09\nof similar to what people were doing in vision.\n\n00:41:17\nwas best by using the max pooling or the k-max pooling.\n\n00:41:23\nAnd it varied a bit according to the data set,\n\n00:41:29\nable to produce the best results that were known.\n\n00:41:35\nprevious results were slightly better than their results.\n\n00:41:43\ntheir results are also--\n\n00:41:48\ntheir results were better than the best known previous results.\n\n00:41:57\nBut to a first approximation, this meant that they could\n\n00:42:03\nclassification system with something that was just a deep\n\n00:42:12\nlevel, with none of those having learnt word vectors in advance\n\n00:42:17\nAnd so that was a pretty cool achievement,\n\n00:42:24\nwith just this sort of raw character level convolutional\n\n00:42:33\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "global_kp_id": "kp_batch_normalization_and_pointwise_convolutions",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "global_kp_id": "kp_vd_cnn_character_level_text_classification",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture17-convnets::seg3",
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_batch_normalization_and_pointwise_convolutions",
+      "name": "Batch normalization and 1x1 convolutions",
+      "description": "These CNN building blocks stabilize training and create position-wise feature transformations.",
+      "track_tags": [
+        "deep_learning",
+        "model_design"
+      ],
+      "domain_tags": [
+        "batch_norm",
+        "pointwise_convolution"
+      ],
+      "career_path_tags": [
+        "ml_engineer"
+      ],
+      "difficulty_level": 0.51,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because Batch normalization and 1x1 convolutions captures the core idea that These CNN building blocks stabilize training and create position-wise feature transformations.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_vd_cnn_character_level_text_classification",
+      "name": "VD-CNN character-level text classification",
+      "description": "A very deep residual CNN starting from characters can perform competitive text classification without pretrained word vectors.",
+      "track_tags": [
+        "nlp",
+        "deep_learning",
+        "architectures"
+      ],
+      "domain_tags": [
+        "character_models",
+        "deep_cnn",
+        "residual_connections"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.69,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because VD-CNN character-level text classification captures the core idea that A very deep residual CNN starting from characters can perform competitive text classification without pretrained word vectors.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_tree_models_versus_transformers",
+      "name": "Tree models versus transformers",
+      "description": "Tree recursive models may match linguistic structure better in some cases, but transformers win on flexible information flow and overall power.",
+      "track_tags": [
+        "nlp",
+        "architectures",
+        "model_comparison"
+      ],
+      "domain_tags": [
+        "transformers",
+        "tree_models",
+        "information_flow"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "research"
+      ],
+      "difficulty_level": 0.61,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because Tree models versus transformers captures the core idea that Tree recursive models may match linguistic structure better in some cases, but transformers win on flexible information flow and overall power.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture17-convnets::kp14"
+      ]
+    }
+  ],
+  "question_intent": "conceptual",
+  "target_item_count": 2,
+  "target_difficulty_range": [
+    0.51,
+    0.81
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L17_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture17-convnets_transcript.txt"
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_7::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for core RNN mechanics, unrolling, and vanilla equations. The needed concepts and roles of the matrices are verbally stated.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-7-seg3-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-7-seg3-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-7-seg3-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-7-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a vanilla RNN, the new hidden state at time t depends primarily on which two quantities?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The current input and the previous hidden state",
+        "The current output and the previous output",
+        "Only the current input",
+        "Only the previous hidden state"
+      ],
+      "answer_index": 0,
+      "explanation": "The hidden state is a recurrent summary, so it combines new input information with the hidden state carried over from the previous time step.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_basics",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "depends on the new inputs",
+          "previous internal state"
+        ],
+        "timestamps": [
+          "00:08:07",
+          "00:08:14"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-7-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is shared across time steps in a standard unrolled RNN?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A different hidden-state update function at every step",
+        "The same recurrence function and the same parameters",
+        "The same output labels only",
+        "The same input vector repeated at every step"
+      ],
+      "answer_index": 1,
+      "explanation": "Unrolling shows repeated use of one recurrent computation, not separate independently learned updates for each time step.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vanilla_rnn_equations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "same function",
+          "same set of parameters"
+        ],
+        "timestamps": [
+          "00:10:51",
+          "00:10:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-7-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main role of the output projection such as W_hy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It initializes the hidden state before the sequence starts.",
+        "It maps the hidden state into the output dimension and learns a transformation.",
+        "It replaces the recurrent update entirely.",
+        "It prevents gradients from vanishing."
+      ],
+      "answer_index": 1,
+      "explanation": "The output projection turns the hidden representation into something with the right output size while also learning how to transform that representation for prediction.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_vanilla_rnn_equations",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "converts your hidden state",
+          "dimension of your output"
+        ],
+        "timestamps": [
+          "00:10:25",
+          "00:10:31"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-7-seg3-q1",
+      "global_kp_id": "kp_rnn_basics",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg3-q2",
+      "global_kp_id": "kp_vanilla_rnn_equations",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg3-q3",
+      "global_kp_id": "kp_vanilla_rnn_equations",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-7-seg3-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Depending on previous hidden state and current input is a basic vanilla-RNN concept."
+    },
+    {
+      "item_id": "lecture-7-seg3-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.05,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Weight sharing across time is central and medium because learners must distinguish time reuse from separate parameters."
+    },
+    {
+      "item_id": "lecture-7-seg3-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The role of output projection is medium because it ties hidden dynamics to prediction space."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-7-seg3-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This is a basic readiness check for recurrent computation."
+    },
+    {
+      "item_id": "lecture-7-seg3-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item targets a defining property of unrolled RNNs."
+    },
+    {
+      "item_id": "lecture-7-seg3-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This reinforces what each parameter block does in the vanilla equations."
+    }
+  ]
+}

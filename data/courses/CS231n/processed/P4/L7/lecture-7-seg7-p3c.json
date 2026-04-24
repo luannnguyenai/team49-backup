@@ -1,0 +1,313 @@
+{
+  "unit_id": "local::lecture_7::seg7",
+  "youtube_url": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": "Transcript is sufficient for RNN tradeoffs and historical vision-language uses. The questions can stay on conceptual architecture and limitations without relying on image examples.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture-7-seg7-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-7-seg7-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture-7-seg7-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is already aligned, grounded, and stable after the prior cleanup pass, so no repair is needed.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture-7-seg7-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which is a genuine advantage of RNNs for sequence processing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Their model size must grow with sequence length",
+        "They can process arbitrary-length sequences with the same recurrent rule",
+        "They always batch more efficiently than feedforward models",
+        "They never lose long-range information"
+      ],
+      "answer_index": 1,
+      "explanation": "An RNN reuses the same update rule over time, so the parameterization does not need to grow just because the input sequence is longer.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "RNNs don't have this",
+          "same thing"
+        ],
+        "timestamps": [
+          "00:48:37",
+          "00:49:35"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-7-seg7-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is a major practical weakness of vanilla RNNs on long sequences?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They cannot use hidden states at all",
+        "They require fixed-size input sequences only",
+        "A fixed-size hidden state can lose information from far back in the sequence",
+        "They cannot be trained with gradient descent"
+      ],
+      "answer_index": 2,
+      "explanation": "Packing a long history into one fixed-size hidden state becomes harder as sequences grow, so older information can be compressed away or lost.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "difficult to access information",
+          "longer and longer"
+        ],
+        "timestamps": [
+          "00:50:34",
+          "00:50:44"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture-7-seg7-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In an image-captioning system that combines a CNN with an RNN, what does the CNN usually provide?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The final caption directly",
+        "A visual representation that conditions the RNN decoder",
+        "A replacement for the sampling process",
+        "A sequence of ground-truth words"
+      ],
+      "answer_index": 1,
+      "explanation": "The CNN acts as a visual encoder, producing an image representation that the RNN decoder uses while generating text token by token.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a visual encoder",
+          "encodes the image"
+        ],
+        "timestamps": [
+          "00:51:22",
+          "00:51:28"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture-7-seg7-q1",
+      "global_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg7-q2",
+      "global_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture-7-seg7-q3",
+      "global_kp_id": "kp_rnn_tradeoffs_and_applications",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture-7-seg7-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.35,
+      "discrimination_prior": 0.88,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "An advantage of RNNs is an accessible architecture-comparison item."
+    },
+    {
+      "item_id": "lecture-7-seg7-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "Long-sequence weakness of vanilla RNNs is a central medium concept."
+    },
+    {
+      "item_id": "lecture-7-seg7-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.05,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "The CNN role in image captioning is medium because learners must separate the vision encoder from the sequence model."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture-7-seg7-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This works well as a quick readiness check on the strengths of recurrent models."
+    },
+    {
+      "item_id": "lecture-7-seg7-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "transfer"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "The item checks whether the learner can articulate the practical long-context limitation."
+    },
+    {
+      "item_id": "lecture-7-seg7-q3",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "This reinforces modality-specific responsibilities in a CNN-RNN pipeline."
+    }
+  ]
+}

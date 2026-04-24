@@ -1,0 +1,157 @@
+{
+  "lecture_context": {
+    "course_id": "CS224n",
+    "lecture_id": "lecture06-dependency-parsing",
+    "lecture_title": "Lecture 6 - Dependency Parsing",
+    "youtube_url": "https://www.youtube.com/watch?v=KVKvde-_MYc"
+  },
+  "unit": {
+    "unit_id": "local::lecture06-dependency-parsing::seg2",
+    "course_id": "cs224n-2024",
+    "name": "Syntactic ambiguity and why parses matter",
+    "description": "Shows how attachment and coordination ambiguities create multiple readings, and motivates syntax as a practical tool for interpretation and information extraction.",
+    "summary": "This segment motivates parsing through ambiguity. Using headline examples such as Scientists count whales from space, the lecture shows that a prepositional phrase can attach either to the verb event or to a nearby noun, yielding different meanings [ts=929s] [ts=978s]. The instructor emphasizes that English prepositional phrases frequently create globally ambiguous structures, and with multiple successive PPs the number of readings grows quickly according to Catalan-style noncrossing choices, reaching 13 readings for four PPs in the example sentence about an acquisition [ts=1165s] [ts=1311s]. He then broadens the discussion to coordination scope, apposition, and infinitival attachment with additional newspaper headlines, stressing that different languages realize ambiguity differently rather than avoiding it entirely [ts=1355s] [ts=1621s]. The segment ends with a practical NLP use case: dependency patterns can be used to extract structured facts such as protein-protein interactions from biomedical text by locating verbs like interacts and their arguments and coordinated entities [ts=1635s] [ts=1718s].",
+    "key_points": [
+      {
+        "text": "Prepositional phrase attachment can change meaning, as in Scientists count whales from space.",
+        "timestamp_s": 929,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Multiple PP attachments create many possible readings, with counts growing combinatorially under noncrossing constraints.",
+        "timestamp_s": 1285,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Coordination scope ambiguity can make a phrase describe one entity or multiple entities.",
+        "timestamp_s": 1355,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Dependency patterns support information extraction by identifying verbs and their syntactic arguments, including coordinated arguments.",
+        "timestamp_s": 1675,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=KVKvde-_MYc&list=PLoROMvodv4rOaMFbaqxPDoLWjDaRAdP9D&index=4",
+      "start_s": 889,
+      "end_s": 1755
+    },
+    "difficulty": 0.45,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 14,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "This segment motivates parsing through ambiguity. Using headline examples such as Scientists count whales from space, the lecture shows that a prepositional phrase can attach either to the verb event or to a nearby noun, yielding different meanings [ts=929s] [ts=978s]. The instructor emphasizes that English prepositional phrases frequently create globally ambiguous structures, and with multiple successive PPs the number of readings grows quickly according to Catalan-style noncrossing choices, reaching 13 readings for four PPs in the example sentence about an acquisition [ts=1165s] [ts=1311s]. He then broadens the discussion to coordination scope, apposition, and infinitival attachment with additional newspaper headlines, stressing that different languages realize ambiguity differently rather than avoiding it entirely [ts=1355s] [ts=1621s]. The segment ends with a practical NLP use case: dependency patterns can be used to extract structured facts such as protein-protein interactions from biomedical text by locating verbs like interacts and their arguments and coordinated entities [ts=1635s] [ts=1718s].",
+  "target_kp_ids": [
+    "kp_syntactic_ambiguity_and_attachment"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=KVKvde-_MYc",
+  "video_clip_url": "https://www.youtube.com/watch?v=KVKvde-_MYc",
+  "transcript_slice": "00:14:53\nunderstanding what modifies what is important for interpretation,\n\n00:15:02\nAnd they're funny examples because you get--\n\n00:15:10\nWhen you have a sequence of words,\n\n00:15:18\nand it's relying on human interpretation\n\n00:15:24\nto work out how to read them.\n\n00:15:29\nScientists count whales from space.\n\n00:15:36\nAnd you can give this two possible readings.\n\n00:15:44\nYeah.\n\n00:15:48\nand the other one is that they're whales in space.\n\n00:15:54\nso we've got this prepositional phrase.\n\n00:15:58\nOne possibility is that this prepositional phrase\n\n00:16:10\nSo they're whales from space.\n\n00:16:17\nhappening from space.\n\n00:16:21\nSo that corresponds to my two pictures here.\n\n00:16:28\nthat is happening from space, which is actually\n\n00:16:36\nBut in the other interpretation, we have space whales.\n\n00:16:43\nwhales that are arriving or something like that.\n\n00:16:50\nthat are modifying the whales.\n\n00:16:53\nSo what we have here is a prepositional phrase which\n\n00:16:59\nIt's just a one-word noun phrase here, whales.\n\n00:17:03\nAnd then before that is a verb.\n\n00:17:10\nof ambiguities is from these prepositional phrases,\n\n00:17:16\nand prepositional phrases are really common in English\n\n00:17:20\nWhenever you get them like this, it's always ambiguous as to--\n\n00:17:27\nIt's always ambiguous as to what earlier thing in the sentence\n\n00:17:35\nAnd so you can sort of put in another prepositional phrase\n\n00:17:44\nAnd so then the ambiguity is just multiply.\n\n00:17:55\nis human language is, in syntactic terms,\n\n00:18:01\nSo in programming languages, you have local ambiguities\n\n00:18:08\nHow many people have done a compilers class?\n\n00:18:11\nAnyone done a compilers class?\n\n00:18:16\nthan a linguistics class.\n\n00:18:19\n[CHUCKLES]\n\n00:18:21\nWell, I won't make too many analogies\n\n00:18:24\nWhen I was young, there was still the old days,\n\n00:18:31\nand compilers was seen as the mainstay of a computer science\n\n00:18:36\nBut no more, I guess.\n\n00:18:41\nyou can have a local ambiguity, but ambiguities are always\n\n00:18:47\nSo we have simple rules and programming languages\n\n00:18:55\nIt's a bit different in Python because there's indentation,\n\n00:19:02\nin a programming language.\n\n00:19:09\nThere's nothing that resolves which of these two readings\n\n00:19:14\nIf I made it a bigger sentence, it'd still be ambiguous.\n\n00:19:19\ncontext and your intelligence to decide what's going on.\n\n00:19:29\nthis is the kind of boring sentence\n\n00:19:35\nThe board approved its acquisition\n\n00:19:41\nat its monthly meeting.\n\n00:19:49\nand then we've got a noun phrase.\n\n00:19:56\nin a row.\n\n00:20:01\nSo what does by Royal Trustco Limited modify?\n\n00:20:07\nThe acquisition, right?\n\n00:20:11\nThen of Toronto modifies?\n\n00:20:16\nSo it's Royal Trustco Limited of Toronto.\n\n00:20:23\ncan also modify earlier prepositional phrases\n\n00:20:30\nOK, for $27 a share--\n\n00:20:34\n--is back to modifying the acquisition.\n\n00:20:40\nAt its monthly meeting is-- yeah, it's the approval.\n\n00:20:49\nBut yeah, so-- if you start having sentences\n\n00:20:59\nyou can start getting more and more ambiguities of attachment.\n\n00:21:07\nyou don't get the full free choice factorial\n\n00:21:14\nis a restriction that these dependencies don't cross.\n\n00:21:21\nyou have to stay equally far back\n\n00:21:25\nBut nevertheless-- so the number of readings you get\n\n00:21:30\nsee in a whole bunch of other places\n\n00:21:35\nIf you're doing triangulations, you\n\n00:21:41\nthat things don't cross.\n\n00:21:47\nAnd so it quickly gets very big.\n\n00:21:56\nyou get 13 readings.\n\n00:21:59\nAnd it grows up from there.\n\n00:22:03\nBut the crucial thing to notice is human beings read sentences\n\n00:22:12\ndo while having their corn flakes.\n\n00:22:18\nto think about the 13 different readings\n\n00:22:22\nWe just sort of do this as we go along, and it's sort of obvious.\n\n00:22:30\nof where we get ambiguities in human language.\n\n00:22:39\nSo Shuttle veteran and longtime NASA executive Fred Gregory\n\n00:22:45\nHow is this sentence ambiguous?\n\n00:22:51\nYeah.\n\n00:22:56\nand they're both a Shuttle veteran and a NASA executive.\n\n00:23:04\nThere's a Shuttle veteran, and there's a longtime NASA\n\n00:23:12\nOK, yeah.\n\n00:23:15\nby having extra grammar rules where a noun phrase-- and go\n\n00:23:23\nBut then another thing that you get in English is apposition.\n\n00:23:33\nphrase of another noun phrase, like a name, the author, Fred\n\n00:23:41\nSaying the word English again--\n\n00:23:46\nso, I'm only going to give English examples here.\n\n00:23:54\nget all the same ambiguities.\n\n00:24:01\nyou might have thought about the prepositional phrase\n\n00:24:07\nbecause the prepositional phrase modifying the verb\n\n00:24:13\nwould be afterwards.\n\n00:24:16\nAnd that's true.\n\n00:24:22\nChinese has lots of very bad ambiguities.\n\n00:24:30\ndifferent syntactic structures.\n\n00:24:38\nwhen you're sort of in a more written form\n\n00:24:44\nyou can just sort of use juxtaposition\n\n00:24:52\nSo here's a fun example from the first Trump\n\n00:25:00\nambiguity.\n\n00:25:07\nSo again, this is the same kind of coordination scope ambiguity\n\n00:25:16\nconjoined together like that, or else it\n\n00:25:25\ntogether like that.\n\n00:25:30\nOK.\n\n00:25:33\nOh, this is my risqué one for a different kind of ambiguity.\n\n00:25:44\n[CHUCKLES] So this one is also an ambiguity\n\n00:25:56\nAnd then both the job and the first hand\n\n00:26:02\nOr there's this other reading if you have a smutty mind that\n\n00:26:08\nOK, one more fun one.\n\n00:26:11\n\"Mutilated body washes up on Rio beach to be used for Olympics\n\n00:26:17\nOK.\n\n00:26:23\nThese are real examples from quality newspapers.\n\n00:26:30\nYeah.\n\n00:26:33\nthe mutilated body is.\n\n00:26:36\nSo we've got-- so here we have one of these infinitival--\n\n00:26:48\nvolleyball.\n\n00:26:53\nhave the same effect as prepositional phrases\n\n00:27:01\nSo it can either be the Rio beach that's\n\n00:27:07\nor it's going to be the mutilated body that gets\n\n00:27:13\nOK.\n\n00:27:15\nSo these are the kind of ways in which we sort of want\n\n00:27:22\nwhat their meaning.\n\n00:27:26\njust sort of mundane, practical ways\n\n00:27:33\nprocessing systems.\n\n00:27:40\nis that they want to get out facts of various kinds.\n\n00:27:47\ncommonly want to get out, things like protein-protein interaction\n\n00:27:51\nAnd so commonly, you can get those kind of facts\n\n00:27:57\nSo you have a verb, interacts, that's\n\n00:28:03\nAnd well, it's going to be taking arguments,\n\n00:28:10\nwith a prepositional argument.\n\n00:28:16\nwhatever that is-- interacts with SasA.\n\n00:28:21\nwith the KaiA and the KaiB, so it's also\n\n00:28:29\nAnd so you can use this sort of sentence structure patterns\n\n00:28:34\nthe kind of facts and events that you're\n\n00:28:41\nAnd people do these kind of analyses over biomedical texts\n\n00:28:50\nof known protein-protein interactions\n\n00:28:55\nOK, so linguistic structure is useful.\n\n00:29:04\nAnd so you sort of think of humans as active interpreters\n\n00:29:13\nand the text, knowledge of the world around them,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg2",
+      "global_kp_id": "kp_syntactic_ambiguity_and_attachment",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture06-dependency-parsing::seg2",
+      "global_kp_id": "kp_dependency_grammar",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_syntactic_ambiguity_and_attachment",
+      "name": "Syntactic ambiguity and attachment",
+      "description": "The fact that one surface word sequence can support multiple syntactic analyses, especially through PP attachment, coordination scope, and modifier scope.",
+      "track_tags": [
+        "disambiguation",
+        "syntax"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "natural_language_processing",
+        "semantics"
+      ],
+      "career_path_tags": [
+        "applied_scientist",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.46,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because syntactic ambiguity and attachment clarifies the fact that one surface word sequence can support multiple syntactic analyses, especially through PP attachment, coordination scope, and modifier scope, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture06-dependency-parsing::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_dependency_grammar",
+      "name": "Dependency grammar",
+      "description": "A syntactic representation built from head-dependent relations, where each word is linked to the word it modifies or depends on.",
+      "track_tags": [
+        "dependency_parsing",
+        "syntax"
+      ],
+      "domain_tags": [
+        "linguistics",
+        "natural_language_processing",
+        "structured_prediction"
+      ],
+      "career_path_tags": [
+        "computational_linguist",
+        "ml_engineer",
+        "nlp_researcher"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because dependency grammar formalizes how a syntactic representation built from head-dependent relations, where each word is linked to the word it modifies or depends on, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture06-dependency-parsing::kp2"
+      ]
+    }
+  ],
+  "question_intent": "application",
+  "target_item_count": 4,
+  "target_difficulty_range": [
+    0.3,
+    0.6
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS224n/processed_sanitized/L6_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS224n/transcripts/cs224n-2024-lecture06-dependency-parsing_transcript.txt"
+  }
+}

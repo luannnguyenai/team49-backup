@@ -1,0 +1,290 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_14",
+    "lecture_title": "CS231N Lecture 14: Generative Models (Part 2)",
+    "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_14::seg3",
+    "course_id": "CS231N_Spring_2025",
+    "name": "GAN practical fixes, theory, architectures, and limitations",
+    "description": "Covers non-saturating GAN training, theoretical optimum, major GAN architectures, latent interpolation, and practical limitations.",
+    "summary": "The instructor analyzes early GAN training dynamics: a randomly initialized generator outputs obvious noise, so the discriminator quickly learns to reject generated samples, placing the generator in a flat-gradient region of the original log(1 - D(G(z))) objective [ts=968s], [ts=1026s]. A practical non-saturating trick is introduced: train G to minimize -log D(G(z)) instead, which gives stronger generator gradients at the start of training [ts=1282s], [ts=1290s]. The theoretical justification is sketched: for any fixed pG, the inner discriminator optimum has D*_G(x)=pdata(x)/(pdata(x)+pG(x)), and the outer problem is minimized when pG=pdata, though finite-capacity networks and finite-data optimization give no convergence guarantee [ts=1341s], [ts=1392s]. Architecturally, the lecture highlights DC-GAN as the first non-toy GAN architecture and StyleGAN as a more modern design with adaptive normalization [ts=1471s], [ts=1519s]. GAN latent interpolation is shown as evidence that generator latent spaces can be smooth [ts=1538s], but the lecturer warns that mode collapse or memorizing a few training samples would not yield such smoothness [ts=1684s]. The segment closes by contrasting GANs with VAEs: GANs can produce crisp, high-quality images, but are unstable and hard to diagnose, whereas VAEs have explicit encoders but tend to produce blurry samples [ts=1600s], [ts=1804s].",
+    "key_points": [
+      {
+        "text": "At early training, a random generator emits obvious noise and the discriminator quickly solves real-vs-fake classification.",
+        "timestamp_s": 968,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The original generator objective has nearly flat gradients when D(G(z)) is close to 0.",
+        "timestamp_s": 1026,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The common non-saturating trick trains G to minimize -log D(G(z)) for stronger early gradients.",
+        "timestamp_s": 1282,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For fixed pG, the optimal discriminator is D*_G(x)=pdata(x)/(pdata(x)+pG(x)).",
+        "timestamp_s": 1341,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The ideal outer objective is minimized when pG(x)=pdata(x), but finite networks and data give no convergence guarantee.",
+        "timestamp_s": 1392,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "DC-GAN was highlighted as the first GAN architecture with non-trivial, non-toy image results.",
+        "timestamp_s": 1471,
+        "evidence_type": "example"
+      },
+      {
+        "text": "StyleGAN uses a more complex architecture with adaptive normalization.",
+        "timestamp_s": 1519,
+        "evidence_type": "example"
+      },
+      {
+        "text": "GAN latent vectors can be interpolated so generated images change smoothly, but collapse or memorization can break this.",
+        "timestamp_s": 1538,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+      "start_s": 948,
+      "end_s": 1854
+    },
+    "difficulty": 3.7,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 15,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "transcript_slice": "00:15:48\nSo that's the main takeaway for generative adversarial networks.\n\n00:15:55\nabout for when training GANs is that just\n\n00:16:00\nSo at the very start, imagine at the very beginning\n\n00:16:05\nyour discriminator is randomly initialized.\n\n00:16:08\nWell, at the very start of training then your generator\n\n00:16:12\nThat completely random noise is going\n\n00:16:16\nSo at the very beginning of training when the generator is\n\n00:16:21\nSo typically within a couple iterations\n\n00:16:25\npick up between real images and these totally garbage\n\n00:16:32\nSo that means that at the very start of training\n\n00:16:37\nto learn to classify these real and fake pretty quickly\n\n00:16:43\nSo then it's interesting to plot what is D of G of z?\n\n00:16:52\nbecause that's basically the loss\n\n00:16:57\nSo then from the perspective of the generator,\n\n00:17:02\nsomewhere all the way over here.\n\n00:17:06\nat treating generated samples as fake, classifying them\n\n00:17:11\nfrom the discriminator's perspective,\n\n00:17:15\nlooks something like this.\n\n00:17:18\nis flat or very close to flat at the place\n\n00:17:24\nSo this means that in practice when you use this naive\n\n00:17:29\nthe generator has a really hard time learning\n\n00:17:33\nOh, good question is how do you assemble the data set?\n\n00:17:40\nSo this pdata, that's your choice of pdata.\n\n00:17:46\nset, that's choosing what is the pdata\n\n00:17:49\nSo in general, if you want to generate\n\n00:17:53\nlike anything that you've ever seen before, you're out of luck.\n\n00:17:57\nSo the only way that you're generally going to draw samples\n\n00:18:02\nthat looks kind of like that.\n\n00:18:07\nreally do generalize a little bit.\n\n00:18:11\nnever seen a photorealistic image of a unicorn wearing\n\n00:18:17\nof horses, you've seen photorealistic images of Santa\n\n00:18:22\nyou've seen drawings of horses and somehow you've\n\n00:18:26\nseen the exact composition of attributes\n\n00:18:30\nseen enough stuff that's close enough to it\n\n00:18:34\nAnd that's always the hope here.\n\n00:18:38\nSo then, well, then if I generated\n\n00:18:43\nhat, then maybe all the textures are really perfect,\n\n00:18:48\nthe leaves are perfect, so there's\n\n00:18:53\nthat this is obviously wrong.\n\n00:18:56\nthen the discriminator could somehow\n\n00:18:59\nand having a perfectly photorealistic image of them\n\n00:19:05\nproblem to solve.\n\n00:19:08\nnot to really be that smart.\n\n00:19:11\nThe idea is why don't we look at two curves?\n\n00:19:15\nhow good the discriminator is?\n\n00:19:18\nhow good the generator is?\n\n00:19:20\nThey tend to look really useless.\n\n00:19:24\nof research papers of people trying to solve this problem\n\n00:19:28\nHow do we not use a log?\n\n00:19:33\nPut all kinds of crazy stuff into this\n\n00:19:37\nHundreds of papers written about it, five years of thousands\n\n00:19:42\ncame up with a good solution.\n\n00:19:47\nGANs, a lot of people still end up\n\n00:19:51\ntends not to give you very interpretable curves even\n\n00:19:55\nThe question is what happens to the discriminator early\n\n00:19:59\nAnd the answer is no because this\n\n00:20:02\nproblem we've ever seen before because this is\n\n00:20:06\nWhen you train an image classifier on ImageNet or CIFAR\n\n00:20:10\nand the model is just trying to classify\n\n00:20:14\nBut in the case of GAN training, the data\n\n00:20:18\nduring the course of training because even\n\n00:20:23\nreally bad, it's easy to solve the problem,\n\n00:20:26\nAnd now the data set that the discriminator\n\n00:20:31\nduring the course of training.\n\n00:20:34\nand with very complicated learning dynamics.\n\n00:20:40\nDo these get caught in local minima?\n\n00:20:43\ntrain for a while, kick them out?\n\n00:20:47\nlots of heuristics, nothing really stuck.\n\n00:20:53\nSo gradients from the discriminator\n\n00:20:58\nthrough this term on the right.\n\n00:21:02\nonto the generator's parameters is actually\n\n00:21:05\nI mean, unless you have some regularizer in here,\n\n00:21:09\ntelling the generator what to do other than the gradients that\n\n00:21:13\nAnd that's again leading to part of the unstable learning\n\n00:21:16\nCorrect, so that pdata distribution,\n\n00:21:21\nAll right.\n\n00:21:24\nlow gradients at the course of training.\n\n00:21:30\nthan trying to maximize log of 1 minus D of G of z,\n\n00:21:36\nYou can convince yourself offline that those are roughly\n\n00:21:41\nfor the generator to get better gradients at the start\n\n00:21:45\nSo that's really important.\n\n00:21:47\nfrom scratch using this log objective,\n\n00:21:53\nis really important in practice.\n\n00:21:56\nis a one V that you're computing for the generator, a different V\n\n00:22:02\nand they aren't quite the same.\n\n00:22:06\nmight this be a good objective.\n\n00:22:11\nby step, but I don't think we have time for that today.\n\n00:22:16\nto something offline to check, but the TL;DR is that this\n\n00:22:24\ndiscriminator.\n\n00:22:28\nwhere there's an inner maximization over D,\n\n00:22:34\nyou can actually solve this in this inner maximization problem\n\n00:22:43\nThis should actually be the-- this\n\n00:22:46\nto a particular generator G. And you can just write this down.\n\n00:22:51\nyou can never compute it because it depends on pdata.\n\n00:22:56\nhad access to the pdata density, you'd be done.\n\n00:23:00\nor on a piece of paper, but you can never compute it.\n\n00:23:07\nonce you have maximized this inner objective by writing down\n\n00:23:12\ncan show that the outer objective is minimized if\n\n00:23:17\nSo at least theoretically the optimum state\n\n00:23:23\nactually occurs uniquely when PG is equal to pdata.\n\n00:23:29\na lot of caveats to that theoretical result.\n\n00:23:35\nfor G and D, that those both assume that your generator\n\n00:23:41\nany function, which of course, they can't because they\n\n00:23:46\nThis also tells us absolutely nothing about\n\n00:23:51\nSo even though there is this optimum point\n\n00:23:55\ntells us absolutely nothing about\n\n00:24:00\ngradient ascent, especially with a finite number of data samples.\n\n00:24:08\nthat there is some theoretical justification to GANs,\n\n00:24:12\nhold or give us very strong guarantees.\n\n00:24:19\nand your discriminator D, both are\n\n00:24:23\nAnd they used to be CNNs.\n\n00:24:27\nbefore VITs became popular, but I'm\n\n00:24:31\nAnd the first GAN that really gave non-trivial results\n\n00:24:37\narchitecture, which gave what were at the time\n\n00:24:41\nAnd I mentioned DC-GAN because the first author, Alec Radford\n\n00:24:46\na highlight of their career, but for Alec Radford,\n\n00:24:51\nhe worked on right after DC-GAN, does anybody know?\n\n00:24:55\nGPT.\n\n00:25:00\nHe went on to do GPT-1 and GPT-2, as well\n\n00:25:05\nSo I think there's this really cool connection between people\n\n00:25:10\nactually jumped over to do generative modeling\n\n00:25:14\nimportant work there.\n\n00:25:19\nthat I'm going to highlight is called StyleGAN.\n\n00:25:23\nother than to point you at it as a good one\n\n00:25:28\nThey use a much more complicated architecture,\n\n00:25:34\nAnd one really nice thing about GANs\n\n00:25:38\nin the latent space.\n\n00:25:43\nand Z1 and we interpolate between them,\n\n00:25:49\nyou draw a sample Z1 from your Gaussian.\n\n00:25:54\nThen for every point along the curve\n\n00:26:00\nThen if we do that, we tend to get smooth interpolations\n\n00:26:04\nreally cool with GANs.\n\n00:26:08\nfrom the StyleGAN3 paper.\n\n00:26:14\nby smoothly varying that latent z\n\n00:26:18\nto generate these different samples.\n\n00:26:22\nmorph into each other.\n\n00:26:25\nuncovered some useful structure and stuffed it\n\n00:26:29\nSo that's pretty cool.\n\n00:26:35\nnetworks.\n\n00:26:39\nsimple formulation.\n\n00:26:43\nthen they can actually give you very nice results,\n\n00:26:49\nBut the cons like one like we talked about, they're\n\n00:26:53\nYou have no loss curve to look at.\n\n00:26:56\nThey tend to blow up at the drop of a hat\n\n00:27:02\nAll of a sudden you might get NaNs.\n\n00:27:05\nYour discriminator starts going crazy.\n\n00:27:09\nall the time.\n\n00:27:13\nThey're kind of a mess.\n\n00:27:16\nreally nice results if you very, very carefully tune them\n\n00:27:22\neverything about them, in practice\n\n00:27:27\nto really big data.\n\n00:27:31\nof generative models from around 2016 to maybe around 2020, 2021,\n\n00:27:38\nAnd in that five years, there were literally thousands\n\n00:27:43\nto use different GAN formulations, different loss\n\n00:27:47\nas well as applying GANs to all kinds of different generative\n\n00:27:51\nSo this was basically the go to generative modeling framework\n\n00:27:57\nThe question is would we just expect this?\n\n00:28:02\nI think not necessarily because one thing that\n\n00:28:08\na fixed number of data samples.\n\n00:28:12\nand just memorizes 10 samples from the training\n\n00:28:16\nAnd then no matter what z you give it,\n\n00:28:19\nfrom the training data set, and it never\n\n00:28:22\nThen in that case, you're going to fool the discriminator\n\n00:28:26\nsomething which is maybe bit wise identical to one\n\n00:28:29\nAnd then in that case, the generator\n\n00:28:34\ndensity in the immediate vicinity\n\n00:28:39\nanywhere else.\n\n00:28:43\nAnd that would definitely not give you smooth latents at all.\n\n00:28:48\ncollapse into unintuitive solutions that are not\n\n00:28:51\nOh, good question.\n\n00:28:54\nset and your latents?\n\n00:28:58\nabout GANs is a great question.\n\n00:29:02\nSo the generator gives you a mapping\n\n00:29:07\nbut with GANs you in general have no way\n\n00:29:11\nAnd that's something very different between GANs and VAEs.\n\n00:29:17\nbut with GANs you have no such thing.\n\n00:29:21\nto compute an inverse numerically\n\n00:29:25\nAnd there's papers that do that, but there's actually\n\n00:29:31\nInstead, you can think of the discriminator\n\n00:29:35\nbetween the distribution of all the outputs coming\n\n00:29:40\nsamples, without any kind of explicit supervision\n\n00:29:43\nOf course, when it comes to GANs,\n\n00:29:46\nthere's probably at least a dozen papers about.\n\n00:29:50\nthat try to learn bidirectional mappings both ways,\n\n00:29:54\nOh, good question.\n\n00:29:56\nSo when we went to VAEs we gained latent vectors,\n\n00:30:00\nAnd now with GANs it seems like we gave up latent vectors\n\n00:30:04\nWhat you gained was much better samples.\n\n00:30:09\nto give you very good samples.\n\n00:30:14\nThey never really look good.\n\n00:30:18\ncrisp samples, but with GANs, as you\n\n00:30:22\ncan get very crisp, very clean, very good samples,\n\n00:30:30\nin trying to tune these systems.\n\n00:30:34\nand just use the generator.\n\n00:30:38\npass through the generator, get your sample from your data.\n\n00:30:44\nAll right.\n\n00:30:46\nthe go to category of generative modeling for about five\n\n00:30:50\nSo what displaced them?",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_14::seg3",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_14::seg3",
+      "global_kp_id": "kp_non_saturating_generator_loss",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_14::seg3",
+      "global_kp_id": "kp_gan_optimal_discriminator_theory",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture_14::seg3",
+      "global_kp_id": "kp_gan_architectures_and_latent_interpolation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_14::seg3",
+      "global_kp_id": "kp_gan_versus_vae_tradeoffs",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "name": "GAN instability diagnostics",
+      "description": "GAN value and loss curves are not reliable progress indicators because the game is non-stationary and jointly adversarial.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN instability diagnostics clarifies gAN value and loss curves are not reliable progress indicators because the game is non-stationary and jointly adversarial, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_non_saturating_generator_loss",
+      "name": "Non-saturating generator loss",
+      "description": "Replacing the generator's original objective with -log D(G(z)) gives stronger early gradients.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because non-saturating generator loss clarifies replacing the generator's original objective with -log D(G(z)) gives stronger early gradients, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gan_optimal_discriminator_theory",
+      "name": "GAN optimal discriminator theory",
+      "description": "For fixed pG, the optimal discriminator is pdata/(pdata+pG), making pG=pdata the ideal solution under assumptions.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.84,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN optimal discriminator theory clarifies for fixed pG, the optimal discriminator is pdata/(pdata+pG), making pG=pdata the ideal solution under assumptions, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gan_architectures_and_latent_interpolation",
+      "name": "GAN architectures and latent interpolation",
+      "description": "DC-GAN, StyleGAN, and smooth latent interpolation illustrate practical GAN design and generated image quality.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN architectures and latent interpolation clarifies dC-GAN, StyleGAN, and smooth latent interpolation illustrate practical GAN design and generated image quality, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gan_versus_vae_tradeoffs",
+      "name": "GAN versus VAE tradeoffs",
+      "description": "GANs can produce crisp samples but lack encoders and are unstable, while VAEs encode x to z but often blur outputs.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN versus VAE tradeoffs clarifies gANs can produce crisp samples but lack encoders and are unstable, while VAEs encode x to z but often blur outputs, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp12"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.55,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture14-generative-models-2_transcript.txt"
+  }
+}

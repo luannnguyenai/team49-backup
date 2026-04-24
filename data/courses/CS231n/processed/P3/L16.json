@@ -1,0 +1,183 @@
+{
+    "output_filename": "p3a__cs231n__lecture_16.json",
+    "run_id": "unknown",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_16",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_16::seg1",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of main KP kp_foundation_model_pretraining_and_adaptation_paradigm plus a critical gateway role makes this introductory definition segment core_theory despite its framing function.",
+            "target_kp_ids": [
+                "kp_foundation_model_pretraining_and_adaptation_paradigm",
+                "kp_traits_of_foundation_models"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg2",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of main KP kp_clip_style_contrastive_vl_pretraining with critical gateway status and formula_heavy, item_generation_worthiness=high makes the CLIP objective central for assessment.",
+            "target_kp_ids": [
+                "kp_clip_style_contrastive_vl_pretraining",
+                "kp_simclr_contrastive_representation_learning"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg3",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the critical gateway KP for zero-shot CLIP classification, plus substantial prompt-template guidance and item_generation_worthiness=high, supports several worked-example items.",
+            "target_kp_ids": [
+                "kp_zero_shot_clip_classification_as_nearest_neighbor_over_text_prototypes",
+                "kp_prompt_templates_and_prompt_ensembling_for_clip"
+            ],
+            "question_intent": "procedural",
+            "content_type": "worked_example",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg4",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Substantial coverage of three main KPs—OOD robustness, scaling, and CoCa—gives clear instructional value, but no main KP has dominant coverage.",
+            "target_kp_ids": [
+                "kp_clip_out_of_distribution_robustness",
+                "kp_pretraining_scaling_and_compute_data_tradeoffs",
+                "kp_coca_contrastive_captioning_objective"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg5",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the main KP on CLIP failure modes, including compositionality and grounding limits, makes this a strong diagnostic segment with item_generation_worthiness=high.",
+            "target_kp_ids": [
+                "kp_clip_limitations_batch_size_compositionality_grounding_and_coverage",
+                "kp_clip_retrieval_open_vocabulary_use_and_chainability"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg6",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "This architecture-heavy core_theory unit has substantial coverage of three main KPs, including the gateway concept of generative multimodal language models, but none is dominant.",
+            "target_kp_ids": [
+                "kp_generative_multimodal_language_models",
+                "kp_llava_clip_to_llm_connector_architecture",
+                "kp_flamingo_perceiver_sampler_and_gated_cross_attention"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg7",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Substantial coverage of interleaved image-text masking and in-context few-shot multimodal reasoning makes this procedurally useful even though coverage is not dominant.",
+            "target_kp_ids": [
+                "kp_interleaved_image_text_training_and_masking",
+                "kp_in_context_and_few_shot_multimodal_reasoning"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg8",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Demo_heavy grounded visual reasoning with substantial coverage of pointing, curated descriptions, and Molmo’s open recipe makes this application_case worth assessment, though no main KP is dominant.",
+            "target_kp_ids": [
+                "kp_grounded_decision_making_through_pointing",
+                "kp_dense_curated_visual_descriptions",
+                "kp_molmo_open_multimodal_language_model",
+                "kp_closed_model_distillation_and_open_reproducibility_gap"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg9",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the critical gateway KP kp_sam_promptable_segmentation_architecture, plus substantial treatment of ambiguity handling and the data engine, makes SAM a core assessment target.",
+            "target_kp_ids": [
+                "kp_sam_promptable_segmentation_architecture",
+                "kp_sam_ambiguity_handling_and_data_engine"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_16::seg10",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of the critical capstone KP kp_chaining_and_visual_programming together with demo_heavy system examples makes this application_case a high-salience synthesis unit.",
+            "target_kp_ids": [
+                "kp_chaining_and_visual_programming",
+                "kp_chaining_grounded_vlm_outputs_into_other_models"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}

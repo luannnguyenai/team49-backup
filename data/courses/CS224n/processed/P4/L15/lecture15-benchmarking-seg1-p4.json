@@ -1,0 +1,507 @@
+{
+  "unit_id": "local::lecture15-benchmarking::seg1",
+  "youtube_url": "https://www.youtube.com/watch?v=TO0CqzqiArM",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": "Transcript is sufficient for reinforcement questions on this unit's evaluation concepts. The key distinctions, caveats, and examples are stated directly, so no separate clip is needed.",
+  "qa_outputs": [
+    {
+      "item_id": "lecture15-benchmarking-seg1-q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "The item is aligned, grounded, and does not need repair after the prior cleanup pass.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture15-benchmarking-seg1-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which property is most important for a metric used directly during gradient-based training?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It should be differentiable and cheap to compute",
+        "It should require expert human review",
+        "It should be standardized across papers for years",
+        "It should depend on a public leaderboard"
+      ],
+      "answer_index": 0,
+      "explanation": "Training-time metrics are used inside optimization loops, so they need to be cheap enough to run often and differentiable enough to support gradient-based learning.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "fast, cheap, differentiable",
+          "different reasons for measuring performance"
+        ],
+        "timestamps": [
+          "00:03:00",
+          "00:00:39"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why do deployment metrics often need absolute thresholds rather than only pairwise comparisons?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Because deployment decisions are based only on training loss curves",
+        "Because product teams need go/no-go judgments like whether performance is high enough to ship",
+        "Because pairwise comparisons are impossible outside academia",
+        "Because thresholds remove the need for trustworthiness"
+      ],
+      "answer_index": 1,
+      "explanation": "In deployment, the question is often whether a model is good enough for use in production. That requires an absolute standard, not just knowing which of two models is slightly better.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "do not ship below 95%",
+          "put in production"
+        ],
+        "timestamps": [
+          "00:04:15",
+          "00:02:12"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What makes an academic benchmark useful over many years?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is private and changes every week",
+        "It is reproducible and standardized so results remain comparable",
+        "It rewards only one model family",
+        "It is impossible for anyone else to run"
+      ],
+      "answer_index": 1,
+      "explanation": "Academic benchmarks are most useful when many groups can run them in the same way and compare results across papers over time.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "reproducible and standardized",
+          "publishing"
+        ],
+        "timestamps": [
+          "00:04:54",
+          "00:03:41"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the main problem with a benchmark that is far too easy?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Models will perform close to random",
+        "It will saturate and stop distinguishing systems",
+        "It becomes impossible to reproduce",
+        "It cannot be evaluated automatically"
+      ],
+      "answer_index": 1,
+      "explanation": "If a benchmark is too easy, many systems score near the top, so the metric stops being informative for comparing progress.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_academic_benchmark_design_tradeoffs",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "too easy gives saturated baselines",
+          "too hard gives random performance"
+        ],
+        "timestamps": [
+          "00:06:20",
+          "00:06:20"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which pairing best matches the evaluation setting to the metric style it needs?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Training → slow human review; Deployment → differentiable loss",
+        "Training → fast differentiable metric; Deployment → trustworthy task-specific threshold",
+        "Publishing → private internal metric only; Training → public Elo leaderboard",
+        "Deployment → cheap proxy only; Publishing → arbitrary unrepeatable setup"
+      ],
+      "answer_index": 1,
+      "explanation": "Training needs frequent optimization-friendly feedback, while deployment needs trustworthy task-specific evaluation that supports shipping decisions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "different steps",
+          "trustworthy, task-specific, and absolute"
+        ],
+        "timestamps": [
+          "00:00:42",
+          "00:04:15"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg1-q1",
+      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q2",
+      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q3",
+      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q4",
+      "global_kp_id": "kp_academic_benchmark_design_tradeoffs",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q5",
+      "global_kp_id": "kp_evaluation_objectives_by_lifecycle_stage",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture15-benchmarking-seg1-q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"Which property is most important for a metric used directly during gradient-based training\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Why do deployment metrics often need absolute thresholds rather than only pairwise comparisons\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What makes an academic benchmark useful over many years\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": -0.45,
+      "discrimination_prior": 0.86,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "\"What is the main problem with a benchmark that is far too easy\" is a direct reinforcement check and should be on the easier side."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.1,
+      "discrimination_prior": 0.96,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "high",
+      "calibration_rationale": "\"Which pairing best matches the evaluation setting to the metric style it needs\" asks for applied understanding rather than pure recall, so a medium prior fits."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture15-benchmarking-seg1-q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which property is most important for a metric used directly during gradient-based training\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q2",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Why do deployment metrics often need absolute thresholds rather than only pairwise comparisons\" is better after the learner already has the basic vocabulary."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q3",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What makes an academic benchmark useful over many years\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q4",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "medium"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"What is the main problem with a benchmark that is far too easy\" works best as an early concept check."
+    },
+    {
+      "item_id": "lecture15-benchmarking-seg1-q5",
+      "primary_phase": "bridge_check",
+      "secondary_phases": [
+        "final_quiz",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "medium",
+        "skip_verification": "medium",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "\"Which pairing best matches the evaluation setting to the metric style it needs\" is better after the learner already has the basic vocabulary."
+    }
+  ]
+}

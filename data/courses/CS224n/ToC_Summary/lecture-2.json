@@ -1,0 +1,99 @@
+{
+    "lecture_title": "Stanford CS224N: NLP with Deep Learning | Lecture 2 - Word Vectors, Word Senses, and Neural Classifiers",
+    "table_of_contents": [
+        {
+            "section_number": 1,
+            "timestamp": "00:00:05",
+            "topic_title": "Introduction and Course Organization",
+            "detailed_summary": "The instructor outlines the lecture's objectives: wrapping up word vectors, introducing variants of word2vec, discussing matrix co-occurrence methods, evaluating word vectors, and introducing neural classifiers. Organizational details for the course are provided, including the release of the first assignment, an upcoming Python review session in Gates B01, and the logistics for office hours. The instructor emphasizes using TA help sessions effectively and kindly requests that students do not 'hog the slots' for 1-on-1 office hour appointments.",
+            "key_takeaways": [
+                "The lecture transitions from the mathematical foundations of word vectors into evaluating them and building basic neural networks.",
+                "Students are encouraged to utilize TA office hours and the Friday Python review session to build practical coding skills."
+            ]
+        },
+        {
+            "section_number": 2,
+            "timestamp": "00:03:02",
+            "topic_title": "Optimization and Stochastic Gradient Descent (SGD)",
+            "detailed_summary": "The section begins with a review of computing derivatives for the word2vec loss function to identify the direction of steepest descent. The instructor explains the basic Gradient Descent algorithm: calculate the gradient for the entire dataset and take a small step proportional to the 'learning rate' (alpha) to minimize the cost function. However, computing the gradient over billions of words is computationally unfeasible. To solve this, Stochastic Gradient Descent (SGD) is introduced. SGD approximates the gradient by evaluating a small subset (or 'mini-batch') of the data (e.g., 16 or 32 items) at a time. Interestingly, the noise introduced by this approximation actually helps neural networks optimize better by 'jiggling' the weights and escaping local minima.",
+            "key_takeaways": [
+                "Standard Gradient Descent is too computationally expensive for large text corpora.",
+                "Stochastic Gradient Descent (SGD) using mini-batches is the standard method for training neural networks, offering faster computation and beneficial noise that aids optimization."
+            ]
+        },
+        {
+            "section_number": 3,
+            "timestamp": "00:08:08",
+            "topic_title": "Word2Vec Variants and Negative Sampling",
+            "detailed_summary": "The instructor details the two primary architectures in the word2vec family: Skip-gram (predicting context words given a center word) and Continuous Bag of Words (CBOW, predicting the center word from context words). A major computational bottleneck in the naive softmax function used in these models is the denominator, which requires a massive summation over the entire vocabulary (e.g., 400,000 words). The solution is 'Negative Sampling'. Instead of calculating probabilities across the entire vocabulary, the model trains binary logistic regressions to differentiate a true center-context word pair from several 'noise' pairs (a center word paired with randomly sampled words). The sampling distribution for these negative words is the unigram distribution raised to the 3/4 power, which smartly balances uniform sampling with frequency-based sampling, ensuring less frequent words are sampled more often.",
+            "key_takeaways": [
+                "Skip-gram and CBOW are the foundational model variants in the word2vec algorithm family.",
+                "Negative sampling bypasses the expensive softmax denominator by transforming the task into a binary classification problem against randomly sampled 'noise' words.",
+                "Raising the unigram distribution to the 3/4 power is a crucial empirical trick to sample rare words frequently enough."
+            ]
+        },
+        {
+            "section_number": 4,
+            "timestamp": "00:34:00",
+            "topic_title": "Co-occurrence Matrices and Dimensionality Reduction",
+            "detailed_summary": "Shifting away from the iterative prediction approach of word2vec, the instructor explores direct statistical counting. By building a window-based co-occurrence matrix, we tally how often words appear near each other. However, this yields a massively high-dimensional matrix (|V| times |V|). To extract dense, low-dimensional vectors, Singular Value Decomposition (SVD) is applied. While raw count SVD performs poorly, applying 'hacks' like logging frequencies, ignoring highly frequent function words (the, he, has), and using Pearson correlations drastically improves the vectors. The instructor highlights Doug Rohde's COALS algorithm (2005), an SVD-based method that historically discovered that these vectors encode 'linear meaning components' (e.g., a spatial vector shifting a verb to its 'doer').",
+            "key_takeaways": [
+                "Directly counting word co-occurrences creates a massive, sparse matrix that requires dimensionality reduction via SVD.",
+                "Raw counts perform poorly in SVD; scaling tricks like log frequencies and capping maximum counts are required to generate high-quality word vectors."
+            ]
+        },
+        {
+            "section_number": 5,
+            "timestamp": "00:41:00",
+            "topic_title": "The GloVe Model (Global Vectors)",
+            "detailed_summary": "The instructor explains the motivation behind the GloVe model, created at Stanford to combine the benefits of count-based matrix factorization (like SVD) and context-window methods (like word2vec). The core insight is that ratios of co-occurrence probabilities naturally encode meaning components. For example, comparing the probability of words appearing near 'ice' versus 'steam' cleanly isolates the concept of solid vs. gas. To capture these ratios as linear vector differences, GloVe uses a log-bilinear model where the dot product of two word vectors is optimized to equal the log of their co-occurrence probability. This approach allows for fast training on huge corpora while preserving linear semantic structures.",
+            "key_takeaways": [
+                "GloVe models the log ratio of co-occurrence probabilities as vector differences, capturing linear meaning components.",
+                "The model bridges the gap between global matrix factorization and local context window methods."
+            ]
+        },
+        {
+            "section_number": 6,
+            "timestamp": "00:46:02",
+            "topic_title": "Evaluating Word Vectors: Intrinsic vs. Extrinsic",
+            "detailed_summary": "Two primary paradigms for evaluating NLP models are introduced: Intrinsic and Extrinsic evaluation. Intrinsic evaluation tests models on specific, isolated subtasks, such as word vector analogies (man:king :: woman:queen) or human correlation tests (like WordSim353, where human similarity scores for pairs like 'tiger'/'cat' are correlated with the cosine distance of their vectors). Intrinsic evaluations are fast and help understand the model's internal logic, but it's unclear if they benefit real-world applications. Extrinsic evaluation tests the model embedded within a downstream real-world task, like Named Entity Recognition (NER) or Machine Translation. While extrinsic tests take longer, they prove whether a subsystem actually improves overall accuracy.",
+            "key_takeaways": [
+                "Intrinsic evaluation tests internal representations (analogies, semantic similarity) and is quick to compute.",
+                "Extrinsic evaluation measures real-world utility by plugging the word vectors into downstream tasks like NER."
+            ]
+        },
+        {
+            "section_number": 7,
+            "timestamp": "00:52:25",
+            "topic_title": "Word Senses and Polysemy",
+            "detailed_summary": "The instructor tackles the linguistic reality of polysemy: most words have multiple meanings. Using the word 'pike' as an example (fish, spear, road, diving position), he illustrates how mapping a word to a single vector seems counterintuitive. Early solutions involved clustering word contexts to create multiple vectors per word (e.g., 'jaguar1' for the animal, 'jaguar2' for the car). However, the modern standard is to stick with a single vector per word. The instructor explains a surprising mathematical result (Arora et al., 2018): a single word vector acts as a linear superposition (a weighted average) of its different senses. Because the vector space is highly dimensional and sparse, techniques from sparse coding can actually separate and retrieve the distinct senses from that single aggregate vector.",
+            "key_takeaways": [
+                "Most common words are highly polysemous, presenting a challenge for static single-vector representations.",
+                "A single word vector successfully encodes multiple meanings as a weighted linear superposition.",
+                "Sparse coding theory proves that individual senses can be mathematically untangled from a single high-dimensional word vector."
+            ]
+        },
+        {
+            "section_number": 8,
+            "timestamp": "01:03:09",
+            "topic_title": "Deep Learning Classification and Named Entity Recognition (NER)",
+            "detailed_summary": "The lecture transitions to classification tasks, specifically Named Entity Recognition (NER), which identifies and classifies entities like people, locations, or organizations in text. A major challenge is ambiguity (e.g., 'Paris Hilton' the person vs. 'Paris' the location). To solve this, a window classifier is used. The classifier concatenates the word vectors of a center word and its neighboring context words (e.g., a window of 5 words). This massive concatenated vector is passed through a neural network layer (multiplied by a weight matrix and added to a bias term) and then put through a non-linearity (like a sigmoid function) to predict a binary outcome (e.g., Location vs. Not Location). The instructor also notes that for PyTorch implementations, 'Cross Entropy Loss' is the standard objective function used for these classifications.",
+            "key_takeaways": [
+                "NER relies on context windows to disambiguate words, converting context into a concatenated vector representation.",
+                "Window classifiers use learned weight matrices and non-linearities to map word vectors to class probabilities.",
+                "Cross Entropy Loss is the standard mathematical implementation in frameworks like PyTorch for classification optimization."
+            ]
+        },
+        {
+            "section_number": 9,
+            "timestamp": "01:14:09",
+            "topic_title": "Neural Computation and Multi-Layer Networks",
+            "detailed_summary": "The instructor draws a parallel between biological human neurons and artificial neural networks. A human neuron takes multiple inputs via dendrites, aggregates them in the nucleus, and if a threshold of excitation is reached, fires a spike down its axon. An artificial neuron (a logistic regression unit) similarly aggregates inputs via weighted sums and passes them through a non-linear activation function (like a sigmoid) to produce an output. Crucially, without non-linearities, stacking multiple network layers would mathematically collapse into a single linear transformation. By using multi-layer networks with non-linearities, the network runs multiple logistic regressions simultaneously. This allows the hidden layers to 'self-learn' intermediate representations of the data, mapping complex inputs into a space where they can be linearly classified at the final output layer.",
+            "key_takeaways": [
+                "Artificial neural networks are conceptually inspired by the input-aggregation-firing mechanism of biological neurons.",
+                "Non-linear activation functions are essential; without them, deep networks lose their ability to approximate complex functions.",
+                "Hidden layers automatically discover intermediate, abstract representations of data, enabling highly non-linear decision boundaries."
+            ]
+        }
+    ]
+}

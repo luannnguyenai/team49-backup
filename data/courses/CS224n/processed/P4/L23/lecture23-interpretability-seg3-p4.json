@@ -1,0 +1,514 @@
+{
+  "unit_id": "local::lecture23-interpretability::seg3",
+  "youtube_url": "https://www.youtube.com/watch?v=cd3pRpEtjLs",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "high",
+  "needs_video_clip": false,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "review_summary": "The transcript is clear enough to generate questions about causal tracing in ROME, the mismatch between localization and editability, and the conclusion that tracing does not directly predict editing success.",
+  "question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In ROME-style causal tracing, which step is used to estimate which module carries a “fact”?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Retrain the entire model from scratch with the new fact and then measure loss.",
+        "Run a clean pass, corrupt the subject with noise in a corrupted pass, and then restore one module at a time to see how much the correct object probability recovers.",
+        "Only inspect the gradient of the final token without intervening in the forward pass.",
+        "Replace the correct object with an incorrect one at every layer and compare perplexity on the test set."
+      ],
+      "answer_index": 1,
+      "explanation": "ROME uses causal tracing: it runs a clean example, creates a noised version at the subject, and then copies individual modules from the clean run into the corrupted run to test whether the correct object can be recovered.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_tracing_as_forward_pass_localization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "causal tracing algorithm",
+          "copying this module to the corrupted run"
+        ],
+        "timestamps": [
+          "00:25:38",
+          "00:26:23"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core empirical result of this section?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The location with the highest tracing effect is always the best location to edit the fact.",
+        "Localization score and editing success nearly coincide if the model is large enough.",
+        "Tracing effect and rewrite score are almost unrelated, and may even be negatively correlated.",
+        "As long as we know which layer contains the fact, we can reliably edit any fact."
+      ],
+      "answer_index": 2,
+      "explanation": "The key point is to reject the assumption that “if you know where the fact is, you should edit there.” The data show that tracing effect and rewrite success hardly predict each other.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_localization_editing_mismatch_in_llms",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "negative in this particular data set",
+          "have nothing to do with each other"
+        ],
+        "timestamps": [
+          "00:29:32",
+          "00:24:57"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which factor is reported to explain more variance in editing success than localization score?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The number of tokens in the subject.",
+        "Whether the fact appeared in the training set.",
+        "The choice of which layer to edit.",
+        "The length of the query prompt."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture emphasizes that layer choice matters much more than tracing score for predicting whether an edit will succeed.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_localization_editing_mismatch_in_llms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Layer choice explains much more variance",
+          "Tracing effect is 0.016"
+        ],
+        "timestamps": [
+          "00:30:06",
+          "00:30:06"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "According to this conclusion, where is causal tracing still useful?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It tells us exactly where to edit every fact in the model.",
+        "It can suggest when or where a fact appears during forward computation, but this should not be equated with editability.",
+        "It completely replaces the need for post-edit evaluation.",
+        "It proves that all existing model-editing methods are useless."
+      ],
+      "answer_index": 1,
+      "explanation": "Kim does not completely reject causal tracing. Its remaining value is that it can help observe where information appears in the forward computation, but that is different from deciding where one should intervene to edit most effectively.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_tracing_as_forward_pass_localization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "facts appear during forward computation",
+          "not where to edit"
+        ],
+        "timestamps": [
+          "00:33:12",
+          "00:33:38"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture23-interpretability-seg3-q1",
+      "global_kp_id": "kp_causal_tracing_as_forward_pass_localization",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q2",
+      "global_kp_id": "kp_localization_editing_mismatch_in_llms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q3",
+      "global_kp_id": "kp_localization_editing_mismatch_in_llms",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q4",
+      "global_kp_id": "kp_causal_tracing_as_forward_pass_localization",
+      "role": "primary"
+    }
+  ],
+  "qa_outputs": [
+    {
+      "item_id": "lecture23-interpretability-seg3-q1",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q2",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q3",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q4",
+      "qa_gate_passed": true,
+      "qa_status": "accept",
+      "qa_rationale": "Question is answerable from the item evidence, has one best answer, and matches the target knowledge point.",
+      "required_repairs": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "lecture23-interpretability-seg3-q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In ROME-style causal tracing, which step is used to estimate which module carries a “fact”?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Retrain the entire model from scratch with the new fact and then measure loss.",
+        "Run a clean pass, corrupt the subject with noise in a corrupted pass, and then restore one module at a time to see how much the correct object probability recovers.",
+        "Only inspect the gradient of the final token without intervening in the forward pass.",
+        "Replace the correct object with an incorrect one at every layer and compare perplexity on the test set."
+      ],
+      "answer_index": 1,
+      "explanation": "ROME uses causal tracing: it runs a clean example, creates a noised version at the subject, and then copies individual modules from the clean run into the corrupted run to test whether the correct object can be recovered.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_tracing_as_forward_pass_localization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "causal tracing algorithm",
+          "copying this module to the corrupted run"
+        ],
+        "timestamps": [
+          "00:25:38",
+          "00:26:23"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the core empirical result of this section?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The location with the highest tracing effect is always the best location to edit the fact.",
+        "Localization score and editing success nearly coincide if the model is large enough.",
+        "Tracing effect and rewrite score are almost unrelated, and may even be negatively correlated.",
+        "As long as we know which layer contains the fact, we can reliably edit any fact."
+      ],
+      "answer_index": 2,
+      "explanation": "The key point is to reject the assumption that “if you know where the fact is, you should edit there.” The data show that tracing effect and rewrite success hardly predict each other.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_localization_editing_mismatch_in_llms",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "negative in this particular data set",
+          "have nothing to do with each other"
+        ],
+        "timestamps": [
+          "00:29:32",
+          "00:24:57"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which factor is reported to explain more variance in editing success than localization score?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The number of tokens in the subject.",
+        "Whether the fact appeared in the training set.",
+        "The choice of which layer to edit.",
+        "The length of the query prompt."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture emphasizes that layer choice matters much more than tracing score for predicting whether an edit will succeed.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_localization_editing_mismatch_in_llms",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Layer choice explains much more variance",
+          "Tracing effect is 0.016"
+        ],
+        "timestamps": [
+          "00:30:06",
+          "00:30:06"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "According to this conclusion, where is causal tracing still useful?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It tells us exactly where to edit every fact in the model.",
+        "It can suggest when or where a fact appears during forward computation, but this should not be equated with editability.",
+        "It completely replaces the need for post-edit evaluation.",
+        "It proves that all existing model-editing methods are useless."
+      ],
+      "answer_index": 1,
+      "explanation": "Kim does not completely reject causal tracing. Its remaining value is that it can help observe where information appears in the forward computation, but that is different from deciding where one should intervene to edit most effectively.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_causal_tracing_as_forward_pass_localization",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "facts appear during forward computation",
+          "not where to edit"
+        ],
+        "timestamps": [
+          "00:33:12",
+          "00:33:38"
+        ]
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "llm_single_pass"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "lecture23-interpretability-seg3-q1",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q2",
+      "difficulty_prior": 0.95,
+      "discrimination_prior": 1.08,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from hard diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q3",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium diagnostic MCQ complexity before learner-response calibration."
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q4",
+      "difficulty_prior": 0.2,
+      "discrimination_prior": 0.98,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Bootstrap prior from medium diagnostic MCQ complexity before learner-response calibration."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "lecture23-interpretability-seg3-q1",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q2",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "transfer": 1.1,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q3",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "review": 0.7
+      }
+    },
+    {
+      "item_id": "lecture23-interpretability-seg3-q4",
+      "eligible_phases": [
+        "placement",
+        "mini_quiz",
+        "final_quiz",
+        "skip_verification",
+        "bridge_check",
+        "review"
+      ],
+      "recommended_phase": "placement",
+      "phase_weight_multipliers": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "final_quiz": 1.2,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "review": 0.7
+      }
+    }
+  ]
+}

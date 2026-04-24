@@ -1,0 +1,103 @@
+{
+  "unit_id": "local::lecture_10::seg5",
+  "youtube_url": "https://www.youtube.com/watch?v=wElqklprhPE",
+  "assessment_purpose": "lecture_reinforcement",
+  "grounding_mode": "transcript_only",
+  "grounding_confidence": "medium",
+  "needs_video_clip": false,
+  "question_intent": "application",
+  "target_item_count": 2,
+  "review_summary": "The transcript is sufficient for application-oriented questions on the Sports-1M comparison and why C3D is more computationally expensive than 2D video baselines.",
+  "question_bank": [
+    {
+      "item_id": "lecture_10_seg5_q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the most practical lesson from the Sports-1M comparison of video classifiers?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A simple single-frame baseline can already be strong, so it should be compared before adopting a more complex model",
+        "Early fusion always dominates every other approach",
+        "Temporal modeling is unnecessary for all video tasks",
+        "3D CNNs are never worth evaluating"
+      ],
+      "answer_index": 0,
+      "explanation": "The reported results show that a simple approach can already perform competitively. That makes it valuable as a baseline before paying the extra complexity cost of more advanced models.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_single_frame_cnn_baseline",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "single frame model",
+          "should try the single frame"
+        ],
+        "timestamps": [
+          "00:33:14",
+          "00:33:51"
+        ]
+      }
+    },
+    {
+      "item_id": "lecture_10_seg5_q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "transferable",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is C3D much more computationally expensive than a 2D VGG-style image model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It replaces 2D operations with 3D convolutions and pooling over time as well as space",
+        "It removes all weight sharing across layers",
+        "It trains a separate network for every video frame",
+        "It uses only fully connected layers"
+      ],
+      "answer_index": 0,
+      "explanation": "Moving from 2D to 3D means each operation also processes temporal extent, not just height and width. That extra dimension significantly increases floating-point computation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_c3d",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "convert things to three-dimension",
+          "gigaflops"
+        ],
+        "timestamps": [
+          "00:35:49",
+          "00:38:16"
+        ]
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "lecture_10_seg5_q1",
+      "global_kp_id": "kp_single_frame_cnn_baseline",
+      "role": "primary"
+    },
+    {
+      "item_id": "lecture_10_seg5_q2",
+      "global_kp_id": "kp_c3d",
+      "role": "primary"
+    }
+  ]
+}

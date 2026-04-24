@@ -1,0 +1,68 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "<lecture_id>",
+    "lecture_title": "Lecture 13: Generative Models (part 1)",
+    "youtube_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0"
+  },
+  "unit": {
+    "unit_id": "local::<lecture_id>::seg5",
+    "course_id": "<course_id>",
+    "name": "Plain autoencoders and the motivation for VAEs",
+    "description": "Builds intuition for VAEs by first showing why a bottlenecked autoencoder learns features but does not by itself solve generation.",
+    "summary": "The instructor temporarily drops the 'variational' part and first reviews standard autoencoders as an unsupervised way to learn features z from data x without labels [ts=2904s] [ts=2916s]. The basic training recipe is to encode x into a latent vector z, decode z back to x, and optimize reconstruction; the point is not to learn the identity function itself but to force useful structure through a narrow bottleneck so that z is far smaller than the original image [ts=2963s] [ts=2992s] [ts=3022s]. After training, that bottleneck representation can be reused for downstream tasks in the same spirit as other self-supervised methods [ts=3059s] [ts=3064s]. However, generation remains unsolved: sampling a z that matches the learned latent distribution is no easier than sampling x directly, so a plain autoencoder does not yet give a principled generative model [ts=3077s] [ts=3096s] [ts=3130s]. The VAE idea is to impose a known probabilistic structure, typically Gaussian, on the latent space so that after training one can sample z from that known distribution and decode it into new data [ts=3134s] [ts=3153s] [ts=3171s].",
+    "key_points": [
+      {
+        "text": "A plain autoencoder learns features z from x by reconstructing the input without labels.",
+        "timestamp_s": 2916,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Reconstruction is only useful when the latent code z is bottlenecked so the model must compress structure from the data.",
+        "timestamp_s": 2992,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The autoencoder's latent code can be reused as a self-supervised representation for downstream tasks.",
+        "timestamp_s": 3059,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Plain autoencoders do not solve generation because sampling z that matches the data-induced latent distribution is still hard.",
+        "timestamp_s": 3083,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "VAEs address this by forcing the latent codes to follow a known distribution such as a Gaussian.",
+        "timestamp_s": 3153,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=13",
+      "start_s": 2718,
+      "end_s": 3205
+    },
+    "difficulty": 0.6,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "medium",
+    "duration_min": 8,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=zbHXQRUNlH0",
+  "transcript_slice": "00:45:21\nAnd variational autoencoders are pretty fun.\n\n00:45:32\nwe're trying to do maximum likelihood.\n\n00:45:35\nWe're trying to maximize the likelihood of the data.\n\n00:45:40\na little bit different.\n\n00:45:44\nThey're still going to be some density that we can compute,\n\n00:45:49\nWe're going to be able to approximate it.\n\n00:45:52\nWe had a perfectly good method that computed densities exactly.\n\n00:45:57\ngoing to gain something.\n\n00:46:01\nvectors over our data.\n\n00:46:05\nour data that pop out naturally from the learning process.\n\n00:46:10\nAnd the ability to get access to those latent vectors\n\n00:46:14\nthat we're willing to give up computing exact densities,\n\n00:46:19\nare actually lower bounds on the true density.\n\n00:46:24\nin a sequence in autoregressive models\n\n00:46:27\nIt makes each part easier to model.\n\n00:46:33\nAnd you have a vocabulary of V words.\n\n00:46:38\njointly.\n\n00:46:41\nThere's V squared.\n\n00:46:45\nThere's V cubed.\n\n00:46:48\nT word sequences with a vocabulary V are there?\n\n00:46:53\nIt grows exponentially.\n\n00:46:56\nof a sequence of T things, the number\n\n00:47:02\nyou need to model is going to grow exponentially\n\n00:47:05\nAnd that's quickly going to become completely intractable\n\n00:47:09\nSo then the reason we break that up\n\n00:47:12\nWe factor it in this way and predict only one part condition\n\n00:47:17\nGood question.\n\n00:47:19\nYeah, exactly.\n\n00:47:23\ndensity values modeled.\n\n00:47:27\ninstead.\n\n00:47:31\nYou're going to compute your loss in log space.\n\n00:47:34\ngoing to compute everything in log space in practice.\n\n00:47:38\nbecause at the top of the transformer,\n\n00:47:43\nover the next token conditioned on all the previous tokens.\n\n00:47:48\nSo you could actually recover this exact probability density\n\n00:47:53\nthat all points in the sequence.\n\n00:47:56\npass it through the transformer, the transformer\n\n00:48:01\nis the distribution over all the tokens conditioned\n\n00:48:05\nAnd I can compute what was the actual next token, what\n\n00:48:09\nand then multiply all of those across the entire sequence.\n\n00:48:14\nof one of these autoregressive models.\n\n00:48:17\nto an RNN or a transformer.\n\n00:48:24\nSo then in a variational autoencoder, things get hairy.\n\n00:48:29\nand talk about autoencoders for just a couple of slides\n\n00:48:34\nSo in a variational autoencoder, this\n\n00:48:38\nfor learning to extract features z from inputs x without labels.\n\n00:48:47\nthat we just talked about.\n\n00:48:51\nought to extract useful information about the data.\n\n00:48:55\nwhat is the identity of objects in the image, how many of them\n\n00:48:59\nWhat are the colors of them?\n\n00:49:03\nabout the input x.\n\n00:49:08\nof any architecture.\n\n00:49:11\nBut inputs are data x.\n\n00:49:16\nAnd then the question is, how do we this without labels.\n\n00:49:20\nin the previous lecture.\n\n00:49:23\nis just try to reconstruct the input.\n\n00:49:28\nthe decoder, which is going to input the z and then output\n\n00:49:32\nAnd we want-- oh, and I dropped the x.\n\n00:49:36\nso that the output from the model\n\n00:49:40\nIn some sense, the stupidest loss function ever.\n\n00:49:44\nWhy do we do that?\n\n00:49:46\nWhy are we spending a lot of flops\n\n00:49:49\nto just learn the identity function that we already know?\n\n00:49:55\nIf this model had infinite capacity,\n\n00:49:59\nno constraints on the learning, I would expect a neural network\n\n00:50:03\nBut we don't want to do that because we explicitly don't care\n\n00:50:07\nWe already know the identity function.\n\n00:50:11\nWhat we want to do is force the network\n\n00:50:16\nAnd the constraint that you often\n\n00:50:20\nthat representation z.\n\n00:50:25\nis going to be much, much smaller than the input x.\n\n00:50:31\nby 1024 image that we said is composed\n\n00:50:35\nBut then that z might be like 128 dimensional latent code.\n\n00:50:41\nto reconstruct the output--\n\n00:50:46\nthrough this bottleneck representation in the middle.\n\n00:50:51\nto learn some nontrivial structure about the data\n\n00:50:57\nin the middle of the network.\n\n00:51:00\napply our normal self-supervised learning trick\n\n00:51:04\nand then use this Z to initialize some supervised model\n\n00:51:08\nThe same story as in the self-supervised story\n\n00:51:13\nBut what about-- what if we want actually\n\n00:51:17\nThen, what we'd really like to do\n\n00:51:21\nWhat we'd really like to do is throw away the encoder,\n\n00:51:27\nthat the model learns to represent data as.\n\n00:51:33\nmatched the data distribution in some way,\n\n00:51:40\nand now generate a new sample.\n\n00:51:43\nYou said that there's no densities floating around\n\n00:51:46\nBut if we had a way to do this, it\n\n00:51:51\nwithout explicitly modeling the density in any way.\n\n00:51:58\nthe road here a little bit because we said if we want\n\n00:52:03\nWe have a dataset of x's.\n\n00:52:05\nWe said we're going to solve that\n\n00:52:08\nAnd now we have a dataset of z's, and we\n\n00:52:11\nIt's not any easier.\n\n00:52:14\nAnd the idea of variational autoencoders is,\n\n00:52:22\nIf you have this traditional autoencoder structure,\n\n00:52:27\non the z's.\n\n00:52:30\nits latent representation.\n\n00:52:33\nto force the z's to come from a Gaussian distribution,\n\n00:52:38\nIf that were the case, then we could just draw a sample\n\n00:52:42\nAfter this model is trained, draw a sample from that known\n\n00:52:47\nand now we would have our sample.\n\n00:52:53\nand to enforce a probabilistic structure on that latent space\n\n00:53:00\nWhy variational?\n\n00:53:02\nIt says it has a long history around that terminology\n\n00:53:08\nBut basically, variational autoencoders\n\n00:53:12\nSo it's going to learn latent features z from raw data.\n\n00:53:19\nlearned latent space z such that we can sample\n\n00:53:24\nand generate new samples.",
+  "unit_kp_map_rows": [],
+  "kp_catalog": [],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.45,
+    0.75
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L13_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture13-generative-models-1_transcript.txt"
+  }
+}

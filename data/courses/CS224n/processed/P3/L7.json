@@ -1,0 +1,157 @@
+{
+  "output_filename": "p3a__cs224n__lecture07_rnns.json",
+  "run_id": "<run_id>",
+  "stage_id": "p3a",
+  "course_id": "CS224n",
+  "lecture_id": "lecture07-rnns",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture07-rnns::seg1",
+      "is_worth_learning": true,
+      "salience_score": "low",
+      "rationale": "override_critical_kp: dominant coverage of main KP kp_deep_learning_resurgence with critical gateway role makes this history-framed setup assessable despite its roadmap and historical context.",
+      "target_kp_ids": [
+        "kp_deep_learning_resurgence"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "historical_context",
+      "content_type_confidence": "medium",
+      "override_critical_kp": true,
+      "expected_item_count": 1,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_regularization_and_generalization plus substantial kp_dropout coverage and high item_generation_worthiness make this a core assessable theory unit.",
+      "target_kp_ids": [
+        "kp_regularization_and_generalization",
+        "kp_dropout"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg3",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Substantial coverage of main KP kp_vectorization with high item_generation_worthiness and multiple practical training procedures gives clear instructional value without a dominant critical gateway concept.",
+      "target_kp_ids": [
+        "kp_vectorization",
+        "kp_parameter_initialization",
+        "kp_adaptive_optimizers"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of gateway KP kp_autoregressive_language_modeling, substantial n-gram support, and formula_heavy chain-rule treatment make this a central assessable unit.",
+      "target_kp_ids": [
+        "kp_autoregressive_language_modeling",
+        "kp_n_gram_language_models"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant main-KP coverage of kp_n_gram_language_models with formula_heavy treatment of smoothing and backoff and high item_generation_worthiness supports several diagnostic questions.",
+      "target_kp_ids": [
+        "kp_n_gram_language_models"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg6",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of main KP kp_fixed_window_neural_language_models and high item_generation_worthiness make this bridge section assessable, but the focal KP is only medium-importance and mainly motivational for RNNs.",
+      "target_kp_ids": [
+        "kp_fixed_window_neural_language_models"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of gateway KP kp_rnn_basics with formula_heavy recurrent updates and explicit strengths and forgetting limits makes this the lecture’s core theory segment.",
+      "target_kp_ids": [
+        "kp_rnn_basics"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 6,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg8",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of main KP kp_teacher_forcing_and_backpropagation_through_time with formula_heavy loss and gradient mechanics and high item_generation_worthiness makes this a major assessable training unit.",
+      "target_kp_ids": [
+        "kp_teacher_forcing_and_backpropagation_through_time"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture07-rnns::seg9",
+      "is_worth_learning": true,
+      "salience_score": "low",
+      "rationale": "Demo_heavy rollout examples and an optional main KP kp_autoregressive_rollout_and_rnn_variants make this useful for one application-oriented item but not a dominant assessment target.",
+      "target_kp_ids": [
+        "kp_autoregressive_rollout_and_rnn_variants"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 1,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

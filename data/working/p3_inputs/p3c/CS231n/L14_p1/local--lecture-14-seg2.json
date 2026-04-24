@@ -1,0 +1,198 @@
+{
+  "lecture_context": {
+    "course_id": "CS231n",
+    "lecture_id": "lecture_14",
+    "lecture_title": "CS231N Lecture 14: Generative Models (Part 2)",
+    "youtube_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE"
+  },
+  "unit": {
+    "unit_id": "local::lecture_14::seg2",
+    "course_id": "CS231N_Spring_2025",
+    "name": "GAN minimax objective and instability",
+    "description": "Derives the GAN minimax game and explains why its training signal is hard to diagnose.",
+    "summary": "The GAN objective is formalized as a minimax game between G and D [ts=553s]. With G fixed, D is trained as a binary classifier: maximize log D(x) on real data and log(1 - D(G(z))) on generated data so real samples get D(x)=1 and fake samples get D(x)=0 [ts=596s], [ts=664s]. With D fixed, the real-data term no longer depends on G, so G minimizes the fake-data term to make D classify generated samples as real [ts=720s]. Training alternates gradient ascent on D and gradient descent on G over the value V(G,D) [ts=784s], [ts=818s]. A crucial diagnostic warning is that V is not a conventional loss: its absolute value does not directly indicate sample quality or convergence because it depends on both D and G [ts=847s]. This makes GANs effective but difficult to train, tune, and diagnose, since the problem is inherently unstable and lacks a reliable decreasing loss curve [ts=917s].",
+    "key_points": [
+      {
+        "text": "GANs jointly train G and D with a minimax game.",
+        "timestamp_s": 553,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For fixed G, D maximizes log D(x) on real data and log(1-D(G(z))) on generated data.",
+        "timestamp_s": 615,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "For fixed D, G cares only about the fake-sample term and tries to make D classify fake samples as real.",
+        "timestamp_s": 720,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Training alternates gradient ascent for D and gradient descent for G on V(G,D).",
+        "timestamp_s": 784,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The minimax value V is not an overall loss, so its absolute value is not a reliable training-quality metric.",
+        "timestamp_s": 849,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "GAN objectives are unstable because the same quantity is maximized and minimized by different networks.",
+        "timestamp_s": 917,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=14",
+      "start_s": 553,
+      "end_s": 947
+    },
+    "difficulty": 3.8,
+    "difficulty_source": "llm_single_pass",
+    "difficulty_confidence": "high",
+    "duration_min": 7,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "video_clip_url": "https://www.youtube.com/watch?v=Edr4uZFh4EE",
+  "transcript_slice": "00:09:13\nD with this minimax game.\n\n00:09:17\nso we'll walk through each of the terms one by one.\n\n00:09:22\nand say that the generator is going to be in blue,\n\n00:09:27\nAnd the discriminator is going to be a function that\n\n00:09:32\nthe probability that data is real.\n\n00:09:36\nmeans that the discriminator has classified that piece of data\n\n00:09:40\nD of x equals 1 means that the discriminator has classified\n\n00:09:44\nOf course, those are the extreme cases.\n\n00:09:49\nthat gives you a soft version in between those two decisions.\n\n00:09:56\nAnd just imagine this problem from the perspective\n\n00:09:59\nSo then from the perspective of the discriminator\n\n00:10:03\nOne, this first term says the discriminator wants\n\n00:10:09\nRemember D of x equals 1 means that the discriminator\n\n00:10:13\nAnd this expectation basically says\n\n00:10:19\ndistribution.\n\n00:10:22\nand then take a log because we almost always work in log space\n\n00:10:26\nAnd remember log is a monotonic function.\n\n00:10:34\nSo in this case, this is saying that we\n\n00:10:40\nis equivalent to saying D of x equals 1 for real data.\n\n00:10:46\nthat we're going to take an expectation by sampling priors\n\n00:10:50\nsorry, sampling latents z according to our known\n\n00:10:54\nWe're going to take those z's pass them\n\n00:10:58\nsample, and then pass that generated data sample\n\n00:11:02\nAnd now the discriminator wants to classify\n\n00:11:06\nSo the discriminator wants to classify these\n\n00:11:10\nthat expression on the left.\n\n00:11:15\nSo one way to say that is maximize log of 1\n\n00:11:21\nSo this term on the right says the discriminator wants\n\n00:11:25\nAnd the term on the left says discriminator wants\n\n00:11:30\nOK, so that's what the discriminator is trying to do.\n\n00:11:34\nthis classification task between generated samples\n\n00:11:40\nand try to classify them correctly as real or fake.\n\n00:11:47\nSo imagine fixing the discriminator\n\n00:11:51\nof a generator with a fixed discriminator.\n\n00:11:55\ndoesn't depend on the generator at all\n\n00:12:00\nto correctly classify the real data samples.\n\n00:12:06\nAnd intuitively, we want the generator\n\n00:12:10\nthat its samples are real.\n\n00:12:14\nD of x equals 1 for fake data.\n\n00:12:17\nWe draw a sample z according to p of z,\n\n00:12:22\npass it through the discriminator\n\n00:12:26\non that sample.\n\n00:12:33\nSo rather than maximizing this like the discriminator wanted\n\n00:12:39\nfrom the perspective of the generator.\n\n00:12:45\nSo in particular, we can abstract away all this math\n\n00:12:50\nas a function of G and D. And then\n\n00:12:56\nthe generator wants to minimize v\n\n00:13:01\nAnd then to optimize this we're going to basically run\n\n00:13:07\nto minimize and maximize this with respect\n\n00:13:11\nSo loop while true forever, then update\n\n00:13:18\nwith respect to D and then step plus that gradient\n\n00:13:24\nso we want to do gradient ascent to try to maximize this term.\n\n00:13:32\nthen we'll make an update on the generator weights\n\n00:13:38\nweights G, and now take a gradient descent step on V\n\n00:13:46\nSo that's basically our training.\n\n00:13:49\ngenerative adversarial networks.\n\n00:13:53\nthe value of our minimax game.\n\n00:13:56\nand gradient descent weights on that objective V alternatingly\n\n00:14:05\nAnd one thing that's really important\n\n00:14:09\nis that this V is not a loss function.\n\n00:14:16\ndoes not tell us anything about how well the generator\n\n00:14:22\nor really, the thing we care about\n\n00:14:27\ndistribution.\n\n00:14:29\ndoesn't really tell us anything about that\n\n00:14:34\ngood the discriminator is.\n\n00:14:38\nthen it's really easy for the generator\n\n00:14:42\nor if the discriminator is really good,\n\n00:14:45\nSo there can be different settings of D and G\n\n00:14:51\nAnd that means that generative adversarial networks are often\n\n00:14:57\ndoing a good job at training.\n\n00:15:01\nYou try to minimize the loss with respect\n\n00:15:04\nand you want to see that loss go down\n\n00:15:07\ndon't have that with generative adversarial networks.\n\n00:15:10\nYou have the discriminator loss.\n\n00:15:14\npretty meaningless.\n\n00:15:17\nthey're really hard to train.\n\n00:15:23\nYou're trying to do jointly maximize and minimize\n\n00:15:29\nof the network so that's kind of inherently a difficult\n\n00:15:33\nAnd then even worse, you don't have any value\n\n00:15:38\ntowards a good solution.\n\n00:15:41\nthey're pretty effective, but they're really hard to train",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture_14::seg2",
+      "global_kp_id": "kp_gan_minimax_objective",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture_14::seg2",
+      "global_kp_id": "kp_alternating_adversarial_optimization",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture_14::seg2",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_gan_minimax_objective",
+      "name": "GAN minimax objective",
+      "description": "The objective min_G max_D E_x log D(x)+E_z log(1-D(G(z))) defines the adversarial game.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN minimax objective formalizes how the objective min_G max_D E_x log D(x)+E_z log(1-D(G(z))) defines the adversarial game, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_alternating_adversarial_optimization",
+      "name": "Alternating adversarial optimization",
+      "description": "GAN training alternates gradient ascent on D and gradient descent on G over V(G,D).",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because alternating adversarial optimization clarifies gAN training alternates gradient ascent on D and gradient descent on G over V(G,D), sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "name": "GAN instability diagnostics",
+      "description": "GAN value and loss curves are not reliable progress indicators because the game is non-stationary and jointly adversarial.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN instability diagnostics clarifies gAN value and loss curves are not reliable progress indicators because the game is non-stationary and jointly adversarial, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp8"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    3.65,
+    1.0
+  ],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS231n/processed_sanitized/L14_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+    "transcript_file": "data/courses/CS231n/transcripts/cs231n-2025-lecture14-generative-models-2_transcript.txt"
+  }
+}

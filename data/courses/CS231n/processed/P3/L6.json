@@ -1,0 +1,140 @@
+{
+    "output_filename": "p3a__cs231n__lecture_6.json",
+    "run_id": "<run_id>",
+    "stage_id": "p3a",
+    "course_id": "CS231n",
+    "lecture_id": "lecture_6",
+    "learning_salience": [
+        {
+            "unit_id": "local::lecture_6::seg1",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of main KP kp_normalization_layers plus substantial gateway KP kp_cnn_layer_composition and formula_heavy normalization mechanics make this solid core theory for assessment.",
+            "target_kp_ids": [
+                "kp_normalization_layers",
+                "kp_cnn_layer_composition"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg2",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant main-KP coverage of kp_dropout with high item_generation_worthiness and concrete train-vs-test scaling and zero-gradient rules supports assessable regularization understanding.",
+            "target_kp_ids": [
+                "kp_dropout"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg3",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of main KP kp_activation_functions, a critical gateway concept, plus formula_heavy contrasts of sigmoid, ReLU, and GELU make this highly assessable.",
+            "target_kp_ids": [
+                "kp_activation_functions"
+            ],
+            "question_intent": "diagnostic",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 5,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg4",
+            "is_worth_learning": true,
+            "salience_score": "medium",
+            "rationale": "Dominant coverage of main KP kp_receptive_field_and_small_filter_design with a clear receptive-field argument and VGG design rule gives strong instructional value despite some historical framing.",
+            "target_kp_ids": [
+                "kp_receptive_field_and_small_filter_design"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "medium",
+            "override_critical_kp": false,
+            "expected_item_count": 3,
+            "salience_confidence": "medium",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg5",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main-KP coverage of critical gateway kp_residual_connections with explicit degradation-problem motivation, residual-block mechanism, and tensor-shape constraints makes this a lecture centerpiece.",
+            "target_kp_ids": [
+                "kp_residual_connections"
+            ],
+            "question_intent": "conceptual",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 6,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg6",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of main KP kp_kaiming_msra_initialization plus formula_heavy failure-mode analysis for too-small and too-large weights makes this strong procedural training content.",
+            "target_kp_ids": [
+                "kp_kaiming_msra_initialization"
+            ],
+            "question_intent": "procedural",
+            "content_type": "core_theory",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg7",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant main-KP coverage of kp_data_augmentation with substantial preprocessing coverage and multiple application-relevant augmentation rules and pitfalls makes this highly useful for assessment.",
+            "target_kp_ids": [
+                "kp_data_augmentation",
+                "kp_image_normalization_preprocessing"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 4,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        },
+        {
+            "unit_id": "local::lecture_6::seg8",
+            "is_worth_learning": true,
+            "salience_score": "high",
+            "rationale": "Dominant coverage of critical gateway kp_pretraining_and_fine_tuning_transfer plus substantial kp_hyperparameter_tuning_and_search and a concrete debugging workflow make this strongly assessment-worthy.",
+            "target_kp_ids": [
+                "kp_pretraining_and_fine_tuning_transfer",
+                "kp_hyperparameter_tuning_and_search"
+            ],
+            "question_intent": "application",
+            "content_type": "application_case",
+            "content_type_confidence": "high",
+            "override_critical_kp": false,
+            "expected_item_count": 6,
+            "salience_confidence": "high",
+            "provenance": "llm_single_pass"
+        }
+    ]
+}
