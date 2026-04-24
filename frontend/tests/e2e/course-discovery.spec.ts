@@ -9,7 +9,8 @@ test("public users can discover demo courses and inspect overview states", async
     page.getByText("CS224n: Natural Language Processing with Deep Learning"),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: "Open overview" }).first().click();
+  await page.locator('a[href="/courses/cs231n"]').click();
+  await page.waitForURL(/\/courses\/cs231n$/, { timeout: 20_000 });
   await expect(
     page.getByRole("heading", { name: "Build deep intuition for modern vision systems" }),
   ).toBeVisible();

@@ -313,7 +313,9 @@ test.describe("US2: course gating flow", () => {
     await page.waitForURL(/\/courses\/cs231n\/learn\/lecture-1-introduction/, {
       timeout: 20000,
     });
-    await expect(page.getByText("Lecture 1: Introduction")).toBeVisible();
+    await expect(
+      page.getByText("Framing CS231n within AI, machine learning, and deep learning").first(),
+    ).toBeVisible();
   });
 });
 
