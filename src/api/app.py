@@ -38,6 +38,7 @@ from src.routers.content import content_router
 from src.routers.courses import courses_router
 from src.routers.history import history_router
 from src.routers.learning_path import learning_path_router
+from src.routers.learning_session import learning_session_router
 from src.routers.module_test import module_test_router
 from src.routers.quiz import quiz_router
 from src.routers.test_support import test_support_router
@@ -108,6 +109,7 @@ app.include_router(courses_router)
 app.include_router(assessment_router)
 app.include_router(history_router)
 app.include_router(learning_path_router)
+app.include_router(learning_session_router)
 app.include_router(module_test_router)
 app.include_router(quiz_router)
 app.include_router(test_support_router)
