@@ -21,6 +21,10 @@ These are already done and should not be reopened without a deliberate design de
   - `learning_paths`
 - Legacy KG runtime package `src/kg/*` was removed.
 - Legacy config allow-flags were removed.
+- Frontend production build passes after canonical cutover.
+- Canonical route/service regression tests pass for quiz, module-test, learning-path status, assessment mastery, and content contracts.
+- Course discovery/gating Playwright e2e passes against canonical course/unit labels.
+- Signed protected asset route now guards `data/courses/<course>/videos|slides|transcripts` paths.
 
 ## Remaining Work
 
@@ -32,6 +36,7 @@ Current state:
 - Planner progress now writes to `learning_progress_records`.
 - Skip audit now writes to `waived_units`.
 - Main schema/handoff docs were refreshed.
+- Runtime build/e2e smoke is green for the canonical course flow.
 
 Needed:
 

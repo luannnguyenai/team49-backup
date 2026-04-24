@@ -75,6 +75,19 @@ Observed legacy-drop verification after migration:
 - `mastery_history = false`
 - `learning_paths = false`
 
+Additional runtime verification on 2026-04-24:
+
+- `npm --prefix frontend run type-check`
+- `npm --prefix frontend run build`
+- `uv run pytest tests/contract tests/services/test_quiz_canonical_cutover.py tests/services/test_module_test_canonical_cutover.py tests/services/test_recommendation_engine_canonical_cutover.py tests/services/test_assessment_canonical_mastery_cutover.py -q`
+- `FRONTEND_PORT=3001 npm --prefix frontend run test:e2e -- course-discovery.spec.ts course-gating.spec.ts`
+
+Observed results:
+
+- Frontend production build passes.
+- Canonical route/service regression set passes: `44 passed`.
+- Canonical course discovery/gating e2e passes: `7 passed`.
+
 Important contract corrections now enforced in code and DB:
 
 - `concepts_kp.difficulty_level` is numeric `Float`
@@ -83,6 +96,8 @@ Important contract corrections now enforced in code and DB:
 - canonical exporter accepts both:
   - `suitability_by_phase`
   - legacy `eligible_phases + recommended_phase + phase_weight_multipliers`
+- protected course assets under `data/courses/<course>/videos|slides|transcripts` require signed `/data/...` URLs
+- quiz/module-test route contracts expose canonical `learning_unit_id` / `section_id` payloads and do not expose `correct_answer` in start responses
 
 ## Migration Order
 

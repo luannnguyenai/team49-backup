@@ -263,3 +263,23 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
   - `38 passed`
   - `check_legacy_cleanup_readiness -> ready`
   - `check_canonical_runtime_parity -> ready`
+
+### Bổ sung kiểm thử production runtime — 24/04/2026
+
+- Sửa frontend production build sau cutover:
+  - thêm `Suspense` boundary cho các page dùng `useSearchParams`
+  - dọn warning dependency trong `InContextTutor`
+  - ignore cache/test output sinh bởi TypeScript/Playwright
+- Thêm contract tests ở route layer để khóa canonical runtime:
+  - `/api/quiz/start` nhận/trả `learning_unit_id`
+  - `/api/module-test/start` nhận/trả `section_id`
+  - `/api/learning-path/{id}/status` trả `learning_unit_id`, không quay lại `topic_id`
+- Sửa signed asset guard:
+  - protected prefix giờ khớp path thật `courses/<course>/videos|slides|transcripts`
+  - asset contract tests không còn phụ thuộc vào video thật trong `data/`
+- Đồng bộ e2e với canonical labels/slug mới từ DB.
+- Re-verify:
+  - `npm --prefix frontend run type-check`
+  - `npm --prefix frontend run build`
+  - `44 passed` cho canonical contract/service regression set
+  - `7 passed` cho Playwright course discovery/gating e2e
