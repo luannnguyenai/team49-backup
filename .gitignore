@@ -18,10 +18,8 @@ build/
 # AI logs — tracked structure, ignored content
 .ai-log/*.jsonl
 
-
-# Data — ignore only large video assets
-data/courses/**/videos/*
-data/courses/**/slides/
+# Data — ignore all data
+data/
 
 # Project local files
 app.db
