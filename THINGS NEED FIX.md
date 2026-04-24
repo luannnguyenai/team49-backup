@@ -56,7 +56,60 @@ Acceptance:
 - Planner skip/quick-review/deep-practice thresholds use the same documented mastery semantics.
 - No doc claims production IRT/BKT accuracy before calibration exists.
 
-### 2. Course-First Onboarding / Goal Preferences Contract
+### 2. Abandon / Resume Runtime State
+
+Current state:
+
+- `planner_session_state` tracks planner counters and last activity, but not enough fine-grained resume state.
+- `learning_progress_records` covers durable unit progress/status.
+- `sessions` + `interactions` preserve answered quiz/assessment evidence.
+- Partial evidence from answered questions must not be rolled back if the user abandons a quiz; evidence remains valid even if the quiz gate/session is later invalidated.
+
+Cases to support:
+
+- User abandons while watching a video.
+- User abandons midway through a quiz.
+- User finishes video but has not started mini-quiz.
+- User receives skip/bridge offer but does not respond.
+- User stops between units/segments.
+- User returns after a long gap and previous mastery may be stale.
+
+Needed schema/runtime additions:
+
+- Add current unit pointer and partial progress to `planner_session_state` or a dedicated learner session state table:
+  - `current_unit_id`
+  - `current_stage`: `watching | quiz_in_progress | post_quiz | between_units`
+  - `current_progress` JSON with fields such as:
+    - `video_progress_s`
+    - `video_finished`
+    - `quiz_id`
+    - `quiz_phase`
+    - `items_answered`
+    - `items_remaining`
+  - `last_activity`
+- Define quiz abandon policy:
+  - `< 24h`: allow finish remaining items
+  - `>= 24h`: invalidate the quiz gate/session and generate fresh items
+  - keep existing `interactions` evidence and mastery updates
+- Implement resume routing by `delta_t` since last activity:
+  - `< 24h`: seamless resume
+  - `1-7 days`: welcome-back summary
+  - `7-30 days`: quick review check on recent high-mastery KP
+  - `> 30 days`: placement-lite or partial recalibration offer
+- Implement mastery decay on-read, not destructive DB overwrite:
+  - inflate `theta_sigma` based on time since `learner_mastery_kp.updated_at`
+  - optionally decay `theta_mu` toward zero for planning/assessment reads
+  - keep raw evidence untouched until new quick-check evidence updates mastery officially
+- Use `item_phase_map.phase='review'` for quick-check item selection.
+
+Acceptance:
+
+- User can close the browser mid-video or mid-quiz and resume predictably.
+- Old partial quiz answers remain auditable in `interactions`.
+- Planner does not treat stale 3-week-old mastery as equally reliable without on-read uncertainty inflation.
+- Completed/waived units are not deleted just because mastery became stale.
+
+### 3. Course-First Onboarding / Goal Preferences Contract
 
 Current state:
 
@@ -84,7 +137,7 @@ Acceptance:
 - A new frontend/backend engineer can wire onboarding without seeing `topic/module` as the primary contract.
 - `goal_preferences` rows contain explicit course scope for planner goal weighting.
 
-### 3. Frontend / API Semantic Naming Cleanup
+### 4. Frontend / API Semantic Naming Cleanup
 
 Current state:
 
@@ -111,7 +164,7 @@ Acceptance:
 - Tests no longer need to mentally translate "topic" to "learning unit".
 - No UI visual redesign is required for this task.
 
-### 4. Historical Docs / README Sweep
+### 5. Historical Docs / README Sweep
 
 Current state:
 
@@ -138,7 +191,7 @@ Acceptance:
 - New engineer reading the repo cannot mistake legacy tables or old plans for active production design.
 - README matches the canonical runtime that currently passes build/e2e.
 
-### 5. Orphan Legacy Helper / Script Review
+### 6. Orphan Legacy Helper / Script Review
 
 Current state:
 
