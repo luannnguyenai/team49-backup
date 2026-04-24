@@ -28,21 +28,136 @@ These are already done and should not be reopened without a deliberate design de
 
 ## Remaining Work
 
-### 1. Historical Docs Sweep
+### 1. Production Mastery / Scoring Calibration
 
 Current state:
 
-- Runtime and DB cutover for canonical unit/section semantics is complete.
-- Planner progress now writes to `learning_progress_records`.
-- Skip audit now writes to `waived_units`.
-- Main schema/handoff docs were refreshed.
-- Runtime build/e2e smoke is green for the canonical course flow.
+- Runtime writes `learner_mastery_kp` from canonical assessment evidence.
+- `src/services/canonical_mastery_service.py` currently uses a bounded bootstrap heuristic:
+  - `theta_mu +=/-= 0.25 * item_kp_map.weight`
+  - `theta_sigma *= 0.95`
+  - `mastery_mean_cached = sigmoid(theta_mu / sqrt(1 + theta_sigma^2))`
+- `item_calibration` has priors and reserved fields for IRT-style calibration, but calibrated parameters are not yet produced from real interaction data.
+- README still describes BKT / IRT 2PL as if fully implemented.
 
 Needed:
 
-- Sweep older notes/specs and mark transitional guidance as historical where needed.
-- Remove any leftover instruction that still tells engineers to rely on dropped legacy curriculum/mastery tables.
+- Define the production scoring policy for phase 1:
+  - whether to keep the bootstrap theta update as demo-only
+  - whether to move to 1PL/2PL-lite using `item_calibration.difficulty_prior`, `discrimination_prior`, `guessing_prior`
+  - how to compute/update `theta_mu`, `theta_sigma`, `mastery_mean_cached`, and mastery LCB consistently
+- Add calibration input contract from `sessions` + `interactions` + `question_bank` + `item_kp_map`.
+- Add a job or service boundary for future real/synthetic calibration, without pretending synthetic calibration is production truth.
+- Update README/docs so they clearly say current scoring is bootstrap unless calibration has been run.
 
 Acceptance:
 
-- New engineer reading the repo cannot mistake legacy tables for active production tables.
+- A developer can explain exactly how one answer changes `learner_mastery_kp`.
+- Planner skip/quick-review/deep-practice thresholds use the same documented mastery semantics.
+- No doc claims production IRT/BKT accuracy before calibration exists.
+
+### 2. Course-First Onboarding / Goal Preferences Contract
+
+Current state:
+
+- DB has `goal_preferences.selected_course_ids`.
+- `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` still notes this is not fully populated by the current onboarding flow.
+- Frontend/onboarding still uses compatibility names:
+  - `known_topic_ids`
+  - `desired_module_ids`
+  - `StepKnownTopics`
+  - `StepDesiredModules`
+- These values are mapped to canonical units/sections in runtime, but the public contract still speaks topic/module language.
+
+Needed:
+
+- Decide final onboarding payload names, likely:
+  - `known_unit_ids`
+  - `desired_section_ids`
+  - `selected_course_ids`
+- Update frontend types/schema/components/API payloads to use course-first names.
+- Keep temporary backend aliases only if needed for migration, and document when to remove them.
+- Ensure `goal_preferences.selected_course_ids` is populated from explicit course choices, not inferred indirectly from legacy-style module/topic fields.
+
+Acceptance:
+
+- A new frontend/backend engineer can wire onboarding without seeing `topic/module` as the primary contract.
+- `goal_preferences` rows contain explicit course scope for planner goal weighting.
+
+### 3. Frontend / API Semantic Naming Cleanup
+
+Current state:
+
+- Runtime routes are canonical, but several DTOs/comments/UI labels still use old names:
+  - `TopicResult`, `TopicQuestionsGroup`, `ReviewTopicSuggestion`
+  - `total_topics`, `completed_topics`, `in_progress_topics`
+  - assessment result `topic_results`
+  - module-test labels like "topic" / "module" where the payload is now learning-unit / section
+- This is mostly naming debt, not a functional blocker.
+
+Needed:
+
+- Rename frontend and schema types toward:
+  - `LearningUnitResult`
+  - `LearningUnitQuestionsGroup`
+  - `ReviewLearningUnitSuggestion`
+  - `total_units`, `completed_units`, `in_progress_units`
+- Update route descriptions/docstrings in `src/routers/*` that still say topic/module when the runtime is learning-unit/section.
+- Keep response aliases only where product/API backward compatibility is intentionally required.
+
+Acceptance:
+
+- Public runtime/API contract consistently says `learning_unit_id` and `section_id`.
+- Tests no longer need to mentally translate "topic" to "learning unit".
+- No UI visual redesign is required for this task.
+
+### 4. Historical Docs / README Sweep
+
+Current state:
+
+- Main handoff docs were refreshed, but older docs/specs still describe transitional or pre-cutover architecture.
+- README is especially stale:
+  - mentions `modules/topics/questions` seed flow
+  - describes BKT / IRT 2PL as implemented production scoring
+  - says planner is topic/topological-sort based
+- Some `docs/superpowers/*` files are historical plans, but not all are clearly marked as historical.
+
+Needed:
+
+- Mark old plans/specs as historical where they should not guide current implementation.
+- Rewrite README to reflect current source-of-truth:
+  - `courses/course_sections/learning_units`
+  - `question_bank/item_phase_map/item_kp_map/item_calibration`
+  - `learner_mastery_kp`
+  - `learning_progress_records`
+  - `plan_history/rationale_log/planner_session_state`
+- Remove or qualify old claims about dropped tables and unimplemented scoring sophistication.
+
+Acceptance:
+
+- New engineer reading the repo cannot mistake legacy tables or old plans for active production design.
+- README matches the canonical runtime that currently passes build/e2e.
+
+### 5. Orphan Legacy Helper / Script Review
+
+Current state:
+
+- Runtime DB legacy tables are dropped, but a few helper files still speak topic-grain or legacy archive language:
+  - `src/utils/topological_sort.py`
+  - `src/services/timeline_builder.py`
+  - `src/data_paths.py` still exposes `MODULES_FILE` / `TOPICS_FILE`
+  - legacy export/check scripts under `src/scripts/pipeline/*legacy*`
+- Some of these are harmless historical/guard tooling; some may now be dead code.
+
+Needed:
+
+- For each helper/script, decide one of:
+  - keep and rename to canonical unit/section semantics
+  - move to explicit legacy/archive tooling
+  - delete after confirming no runtime/test dependency
+- Do not delete guard scripts that still protect canonical cleanup unless they are replaced by a newer check.
+
+Acceptance:
+
+- `rg` for active runtime code no longer shows unused topic-grain helpers as if they were production planner logic.
+- Any remaining legacy script is clearly marked as archive/audit tooling.
