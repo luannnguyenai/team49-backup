@@ -44,6 +44,9 @@ Implementation should keep this distinction explicit:
 - Canonical tables (`units`, `question_bank`, `item_phase_map`, `unit_kp_map`, `prerequisite_edges`) are the grounded content and assessment source.
 - Product tables (`courses`, `course_sections`, `learning_units`, `learning_progress_records`) are the UI-facing course shell.
 - Runtime learner/planner tables (`learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`) drive personalization.
+- `learning_units.sort_order` must be imported from the linked canonical `units.ordering_index` for segment rail ordering. If the values drift, canonical order wins.
+- `planner_session_state.current_unit_id`, `current_stage`, and `current_progress` already exist in the current repo schema and are the resume-state source for UI V2.
+- Item parameter storage should be hidden behind an "effective item parameters" selector. Current repo stores priors in `item_calibration`; if the canonical contract later moves priors to `question_bank`, UI/API contracts should not change.
 
 ## 3. Current UX Gaps
 
@@ -209,9 +212,18 @@ Experience options set the starting prior, difficulty band, and adaptive cap. Th
 Placement selection should be adaptive where the backend supports it:
 
 - Select the next item near the current ability estimate using `item_calibration.difficulty_b` when calibrated.
-- Fall back to `item_calibration.difficulty_prior` when `is_calibrated=false`.
+- Fall back through an effective-parameter resolver when `is_calibrated=false`: calibrated `difficulty_b/discrimination_a/guessing_c` first, then available priors, then safe defaults such as guessing `1/n_options` for MCQ.
 - Stop by `stop_policy`: fixed cap, standard-error threshold, or hybrid.
 - If skipped, initialize broad prior and explain that early mini quizzes will do more calibration work.
+
+Initial prior defaults for placement:
+
+| Experience | Initial `theta_mu` | Initial `theta_sigma` | First item difficulty target |
+| --- | --- | --- | --- |
+| Skip placement | `0.0` | `1.5` | none |
+| New to area | `-0.5` | `1.2` | `-0.3` |
+| Basic foundation | `0.0` | `1.0` | `0.0` |
+| Already studied | `0.5` | `0.8` | `0.3` |
 
 Important UX copy:
 
@@ -443,13 +455,19 @@ System writes:
 - derive course completion from all required `learning_progress_records` and `waived_units`
 - `plan_history` review plan
 
+Transfer phase:
+
+- `phase='transfer'` is part of the API enum for future cross-domain generalization checks.
+- UI V2 should not fire transfer quizzes in the first implementation unless a concrete product moment is defined.
+- Candidate future moment: optional bonus round after final quiz pass.
+
 ### 5.9. Content Quality And Beta States
 
 Cold-start item calibration:
 
 - Most early course items may have `item_calibration.is_calibrated=false`.
 - UI must not hard-fail when no calibrated item exists.
-- Backend should fall back to `difficulty_prior`, `discrimination_prior`, and `guessing_prior`.
+- Backend should use an effective-parameter resolver: calibrated `difficulty_b/discrimination_a/guessing_c`, then stored priors if present, then safe defaults such as guessing `1/n_options` for MCQ.
 - User-facing copy can say: "Kho câu hỏi đang được hiệu chỉnh dần khi có thêm người học."
 
 Review/provenance states:
@@ -462,6 +480,7 @@ Segment checkpoint eligibility:
 
 - Do not assume every segment has a mini quiz.
 - Use `item_phase_map` availability and content salience to decide whether to pause, auto-advance, or queue review.
+- Prefer a materialized API field such as `salience_decision: core | tham_khao | skip` and `has_quiz_items: boolean` on learning unit responses so the player does not need to perform heavy runtime joins.
 
 ### 5.10. Mastery Display Contract
 
@@ -478,6 +497,29 @@ Use `learner_mastery_kp.mastery_mean_cached` for progress bars and plain-languag
 | `< 0.40` | Cần củng cố |
 
 Planner and assessor may compute confidence-sensitive thresholds on read, but UI should request a backend-provided `readiness_label` or `mastery_label` instead of duplicating statistical logic in many components.
+
+### 5.11. Failure And Degradation States
+
+Segment decision failure:
+
+- If `segment-decision` times out or fails, default to normal learn mode.
+- Do not block video playback on planner availability.
+- Show a non-blocking notice only if the failure affects skip/bridge suggestions.
+
+Empty planner path:
+
+- If `/api/planner/current` returns no next step because all required units are complete or waived, show final quiz or course completion.
+- If the user has no active goal, route to course catalog or goal setup.
+
+Empty mastery:
+
+- New users with no placement and no interactions should see "Chưa đủ dữ liệu", not zero mastery.
+- Profile should show onboarding/course-start CTAs instead of a flat 0% radar chart.
+
+Video failure:
+
+- If video/CDN fails but canonical content exists, fall back to text-only mode using `units.summary`, `units.key_points`, transcript links, and AI Tutor.
+- Keep mini quiz disabled until enough content evidence is available or the user explicitly chooses text-only learning.
 
 ## 6. Screen-Level Plan
 
@@ -607,7 +649,8 @@ Layout:
 - Left: course/lecture segment rail.
 - Center: video player, transcript/notes, current segment context.
 - Right: AI Tutor panel, collapsible.
-- Bottom or modal: mini quiz checkpoint.
+- Bottom drawer: mini quiz checkpoint, keeping video context visible.
+- Full modal: skip verification, bridge check, final quiz, and other higher-commitment checks.
 
 Player states:
 
@@ -624,6 +667,7 @@ Center panel should use canonical retrieval surfaces:
 - Show `units.summary` as a short "Bạn sẽ học gì" block.
 - Show `units.key_points[]` as timestamped key points with click-to-seek.
 - Use `units.video_clip_ref` and `question_bank.source_ref` to deep-link quiz mistakes back to the exact lecture segment.
+- When `question_bank.source_ref.video_clip_ref.frame_evidence` exists, wrong-answer review can show the visual cue, for example: "Xem lại 00:17, giảng viên viết công thức trên bảng."
 - AI Tutor should ground answers with unit summary, key points, transcript slice, and timestamp citation when available.
 
 ### 6.7. Assessment
@@ -663,6 +707,8 @@ Needed changes:
 - Avoid clipped radar labels.
 - Add "Mạnh ở", "Nên ôn", "Đang theo mục tiêu".
 - Show selected course goals from `goal_preferences`.
+- Visualize `goal_preferences.goal_weights_json` as an interest mix bar, for example `ML 100% | DL 60% | CV 40%`.
+- Editing goal weights should not require the weights to sum to 1.0.
 - Use `learner_mastery_kp.mastery_mean_cached`, never raw `theta_mu`.
 - Use "Chưa đủ dữ liệu" when `n_items_observed < 3`.
 
@@ -778,6 +824,51 @@ Response:
 }
 ```
 
+Mastery summary:
+
+```http
+GET /api/mastery/summary
+```
+
+Response:
+
+```json
+{
+  "domains": [
+    {
+      "label": "Computer Vision",
+      "mastery_mean": 0.72,
+      "readiness_label": "Khá vững",
+      "n_items_observed": 12
+    }
+  ],
+  "stale": false
+}
+```
+
+Planner path entries should also include `readiness_label` or `mastery_label` when a recommendation depends on mastery, so the frontend does not duplicate statistical thresholds.
+
+Item feedback:
+
+```http
+POST /api/feedback/item
+```
+
+Request:
+
+```json
+{
+  "item_id": "qb_123",
+  "reason": "ambiguous | wrong_answer | poor_grounding | typo | other",
+  "notes": "The explanation references the wrong timestamp."
+}
+```
+
+Backend behavior:
+
+- Store a review candidate linked to `question_bank.item_id`.
+- If enough users flag the same deferred/auto-accepted item within a time window, queue TA/human review.
+
 ### 7.3. Schema Mapping
 
 | UX action | Read | Write |
@@ -812,6 +903,7 @@ UI opportunities:
 - Prerequisite logic can drive user-facing bridge suggestions without exposing the graph.
 - `unit_kp_map.planner_role` can distinguish main learning content from support/background content.
 - `units.summary`, `units.key_points`, and `units.video_clip_ref` can power the lecture overview, timestamped key points, AI Tutor grounding, and quiz review deep-links.
+- Learning unit API responses should expose derived `salience_decision` and `has_quiz_items` so the player can decide between checkpoint, auto-advance, or reference-only treatment without expensive joins.
 
 Do not expose:
 
@@ -932,11 +1024,31 @@ UI opportunities:
 - History page can show exactly which quiz caused completion, waiver, review, or bridge.
 - Skip decisions can be audited: score, questions used, timestamp.
 - Tutor and quiz explanations can point back to lecture segment/timestamp when available.
+- Deferred or flagged questions can be routed to a `review_candidates` queue through `POST /api/feedback/item`.
 
 Do not overdo:
 
 - Audit data should be visible when useful, not dumped in the main learning flow.
 - Keep primary flow clean; put details behind "Xem lý do" or history detail.
+
+#### Progress Aggregation
+
+Tables:
+
+- `learning_progress_records`
+- `waived_units`
+- `learning_units`
+
+UI opportunities:
+
+- Dashboard and course catalog need fast course-level progress.
+- Semantics should count completed and waived units as forward progress, but display them separately.
+
+Scaling note:
+
+- Do not require every dashboard load to recompute course progress from all unit rows.
+- Add an API-level cached summary or future materialized view such as `user_course_progress(user_id, course_id, completed_count, waived_count, total_required, completion_percent)`.
+- Refresh the cache on mini quiz pass, skip verification pass, bridge check pass, and course reset.
 
 ## 8. Design System Direction
 
@@ -1060,9 +1172,10 @@ Tasks:
 
 Exit criteria:
 
-- Lecture page has a useful summary/key-point surface even before quiz interactions.
-- AI Tutor feels grounded in the current lecture, not like a generic chatbot.
-- Wrong-answer review can point to a concrete video segment when source refs exist.
+- For units with canonical `summary`, the player renders a summary block.
+- For units with `key_points[].timestamp_s`, clicking a key point seeks the video within 1 second in sample tests.
+- For quiz items with `source_ref.video_clip_ref` or timestamp fields, wrong-answer review includes a "Xem lại đoạn này" action.
+- For canned in-context tutor questions, AI Tutor responses cite at least one timestamp when relevant source context exists.
 
 ### Phase 4 — Mini Quiz Checkpoints
 
@@ -1079,6 +1192,7 @@ Exit criteria:
 - Completing a segment triggers quiz.
 - Passing marks segment complete.
 - Skipped checkpoints are not lost.
+- Segments with no eligible `mini_quiz` items do not show empty quiz UI.
 
 ### Phase 5 — Skip And Bridge UX
 
@@ -1096,6 +1210,7 @@ Exit criteria:
 - User cannot skip without verification.
 - Failed skip returns to learn mode.
 - Failed mini quiz can lead to bridge or review.
+- After `consecutive_bridge_count >= 2` or `bridge_chain_depth >= 2`, UI must present guided-learn fallback and not offer another bridge in the same session.
 
 ### Phase 6 — Planner Page
 
