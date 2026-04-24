@@ -1,5 +1,7 @@
 # Learner And Planner Stub Persistence Design
 
+> **Historical spec:** This document is preserved for implementation history only. Learner/planner tables now exist and runtime writes canonical state; use the current handoff docs as authority.
+
 ## Goal
 
 Thêm lớp persistence tối thiểu để thu hẹp gap giữa runtime ORM hiện tại và schema spec mới, nhưng không phá grain `topic/module` cũ đang chạy.

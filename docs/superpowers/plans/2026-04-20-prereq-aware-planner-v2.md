@@ -1,5 +1,7 @@
 # Prerequisite-Aware Planner v2.1 Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. Planner production logic now reads canonical learning units, KP maps, prerequisite edges, and `learner_mastery_kp`; use the current handoff docs as authority.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the current topic-level learning-path generator with a deterministic unit-level planner that supports forward/review/bridge frontiers, lower-confidence-bound mastery, skip auditing, and planner rationale output.

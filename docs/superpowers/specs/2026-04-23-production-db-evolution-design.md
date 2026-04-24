@@ -1,5 +1,7 @@
 # Production DB Evolution Design
 
+> **Historical spec:** This document is preserved for implementation history only. Production DB evolution has moved past the transition state described here; use `README.md` and `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` as the active production contract.
+
 ## Goal
 
 Chốt thiết kế database cho giai đoạn chuyển từ:

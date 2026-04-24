@@ -28,37 +28,11 @@ These are already done and should not be reopened without a deliberate design de
 - Abandon/resume runtime state is represented in `planner_session_state` with current unit/stage/progress and `last_activity`; planner reads apply mastery staleness on-read.
 - Onboarding contract is course-first: frontend sends `known_unit_ids`, `desired_section_ids`, and `selected_course_ids`; backend writes explicit `goal_preferences.selected_course_ids`.
 - Runtime DTO/API naming is learning-unit/section-first for assessment results, module-test groups/results, learning-path counts, and history question detail.
+- README and historical superpowers plans/specs now clearly point new work at the canonical production contract instead of legacy transitional architecture.
 
 ## Remaining Work
 
-### 1. Historical Docs / README Sweep
-
-Current state:
-
-- Main handoff docs were refreshed, but older docs/specs still describe transitional or pre-cutover architecture.
-- README is especially stale:
-  - mentions `modules/topics/questions` seed flow
-  - describes BKT / IRT 2PL as implemented production scoring
-  - says planner is topic/topological-sort based
-- Some `docs/superpowers/*` files are historical plans, but not all are clearly marked as historical.
-
-Needed:
-
-- Mark old plans/specs as historical where they should not guide current implementation.
-- Rewrite README to reflect current source-of-truth:
-  - `courses/course_sections/learning_units`
-  - `question_bank/item_phase_map/item_kp_map/item_calibration`
-  - `learner_mastery_kp`
-  - `learning_progress_records`
-  - `plan_history/rationale_log/planner_session_state`
-- Remove or qualify old claims about dropped tables and unimplemented scoring sophistication.
-
-Acceptance:
-
-- New engineer reading the repo cannot mistake legacy tables or old plans for active production design.
-- README matches the canonical runtime that currently passes build/e2e.
-
-### 2. Orphan Legacy Helper / Script Review
+### 1. Orphan Legacy Helper / Script Review
 
 Current state:
 
@@ -82,7 +56,7 @@ Acceptance:
 - `rg` for active runtime code no longer shows unused topic-grain helpers as if they were production planner logic.
 - Any remaining legacy script is clearly marked as archive/audit tooling.
 
-### 3. Production Mastery / Scoring Calibration
+### 2. Production Mastery / Scoring Calibration
 
 Current state:
 
@@ -92,7 +66,7 @@ Current state:
   - `theta_sigma *= 0.95`
   - `mastery_mean_cached = sigmoid(theta_mu / sqrt(1 + theta_sigma^2))`
 - `item_calibration` has priors and reserved fields for IRT-style calibration, but calibrated parameters are not yet produced from real interaction data.
-- README still describes BKT / IRT 2PL as if fully implemented.
+- README now states this is bootstrap scoring unless calibration has actually run.
 
 Needed:
 

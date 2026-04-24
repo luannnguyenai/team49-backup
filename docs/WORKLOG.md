@@ -318,3 +318,12 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 - Đổi learning-path counts từ `total_topics/completed_topics/in_progress_topics` sang `total_units/completed_units/in_progress_units`.
 - Đổi history question detail từ `topic_name` sang `learning_unit_title`.
 - Frontend type-check pass sau rename, không đổi layout/visual.
+
+### Bổ sung README / historical docs sweep — 24/04/2026
+
+- Rewrite README theo source-of-truth hiện tại:
+  - product shell: `courses/course_sections/learning_units`
+  - canonical content: `question_bank/item_phase_map/item_kp_map/item_calibration`
+  - learner/planner: `learner_mastery_kp`, `learning_progress_records`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
+- Gỡ claim sai rằng production đã có BKT/IRT 2PL calibrated; README giờ nói rõ scoring hiện tại là bootstrap KP-level cho đến khi có calibration job thật.
+- Đánh dấu các plan/spec trong `docs/superpowers` là historical để người mới không dùng chúng như active contract.

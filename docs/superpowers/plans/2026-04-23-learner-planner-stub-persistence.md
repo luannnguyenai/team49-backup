@@ -1,5 +1,7 @@
 # Learner And Planner Stub Persistence Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. Learner/planner tables now exist and runtime writes canonical state; use the current handoff docs as authority.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add six minimal persistence tables for learner KP mastery, goal preferences, waived units, and planner audit/session state without rewiring the current runtime planner.

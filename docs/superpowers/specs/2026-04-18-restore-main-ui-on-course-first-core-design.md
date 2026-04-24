@@ -1,5 +1,7 @@
 # Restore Main UI On Course-First Core
 
+> **Historical spec:** This document is preserved for implementation history only. Use `README.md` and `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` as the active production contract.
+
 ## Context
 
 The current `001-course-first-refactor` branch has already moved the product to a course-first experience:

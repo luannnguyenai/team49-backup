@@ -1,5 +1,7 @@
 # Production DB Evolution Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. Production DB evolution has moved past the transition state described here; use `README.md` and `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` as the active production contract.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Move the database toward a production-ready source-of-truth split where canonical content, learner KP mastery, skip audit, and planner audit have first-class tables, while old runtime tables remain as compatibility surfaces until cutover is complete.

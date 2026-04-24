@@ -1,5 +1,7 @@
 # Canonical Artifact Export Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. Canonical export has already been implemented; use the current exporter code and handoff docs for active behavior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Export a self-contained canonical artifact bundle for courses, concepts, units, unit-KP mappings, question-layer tables, and prerequisite edges, with deterministic validation and manifest metadata.

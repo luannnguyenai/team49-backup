@@ -1,5 +1,7 @@
 # Canonical Runtime Cutover Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. The cutover has completed and legacy runtime tables were dropped; use `README.md` and `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` as the active production contract.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Move backend runtime reads/writes from legacy `topics/questions/mastery_scores/learning_paths` toward canonical `units/question_bank/item_kp_map/learner_mastery_kp/prerequisite_edges`, without touching frontend/UI and without deleting old data before parity is proven.

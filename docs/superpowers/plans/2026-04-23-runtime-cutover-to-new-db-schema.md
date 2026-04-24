@@ -1,5 +1,7 @@
 # Runtime Cutover To New DB Schema Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. It describes a transitional dual-write/flagged cutover; the active contract is now canonical-only and documented in `README.md` plus `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Safely wire the running app to the new learner/planner database tables (`goal_preferences`, `learner_mastery_kp`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`) without deleting old data and without breaking current production flows.

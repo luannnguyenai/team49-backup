@@ -1,5 +1,7 @@
 ## 0. Mục đích
 
+> **Historical pipeline note:** This document captures the prompt/artifact pipeline design. It is useful for regenerating canonical artifacts, but application runtime authority is `README.md`, `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`, and the current importer code.
+
 Tài liệu này định nghĩa **bộ 5 prompt gộp AI-first** để sinh dữ liệu đầu vào cho **Content layer** của Planner (xem [Schema & Data Model — Planner Data Surface](https://www.notion.so/Schema-Data-Model-Planner-Data-Surface-fede66a39d4948cbb000daf0861f6918?pvs=21), đặc biệt schema patch v3 ở §0.3).
 
 Pipeline được thiết kế để **chạy end-to-end không cần human TA**. Chất lượng được đảm bảo bằng ba cơ chế:

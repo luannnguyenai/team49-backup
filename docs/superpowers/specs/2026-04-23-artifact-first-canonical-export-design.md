@@ -1,5 +1,7 @@
 # Artifact-First Canonical Export Design
 
+> **Historical spec:** This document is preserved for implementation history only. Canonical export has already been implemented; use the current exporter code and handoff docs for active behavior.
+
 ## Goal
 
 Chuẩn hóa toàn bộ artifact ingestion hiện có thành một bộ canonical export ổn định, machine-readable, và dễ validate để làm input cho bước ingest PostgreSQL sau này mà chưa cần sửa schema DB ngay trong phase này.

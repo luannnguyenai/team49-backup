@@ -1,5 +1,7 @@
 # Restore Main UI On Course-First Core Implementation Plan
 
+> **Historical plan:** This document is preserved for implementation history only. It predates the canonical runtime cutover; use `README.md` and `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` as the active production contract.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Restore the visual language from `main` across the current course-first flow without rolling back the refactored routing, gating, and presenter-driven behavior.
