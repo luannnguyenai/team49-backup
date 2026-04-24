@@ -31,7 +31,7 @@ export default function StepTimeSchedule({
 }: Props) {
   const hours = watch("available_hours_per_week") ?? 5;
 
-  // Compute total content hours from selected modules
+  // Compute total content hours from selected sections
   const totalHours = selectedSections.reduce(
     (sum, section) =>
       sum +

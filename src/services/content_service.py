@@ -36,6 +36,8 @@ async def list_course_sections(db: AsyncSession) -> list[CourseSectionListItem]:
     return [
         CourseSectionListItem(
             id=section.id,
+            course_id=course.id,
+            canonical_course_id=course.canonical_course_id,
             title=section.title,
             description=course.short_description,
             order_index=section.sort_order,
@@ -82,6 +84,8 @@ async def get_course_section_detail(
 
     return CourseSectionDetailResponse(
         id=section.id,
+        course_id=course.id,
+        canonical_course_id=course.canonical_course_id,
         title=section.title,
         description=course.short_description,
         order_index=section.sort_order,

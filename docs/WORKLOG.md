@@ -300,3 +300,13 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
   - `7-30d` quick review
   - `>30d` placement-lite
 - Planner read hiện áp dụng mastery staleness on-read từ `learner_mastery_kp.updated_at` bằng cách inflate `theta_sigma`, không ghi đè evidence raw.
+
+### Bổ sung course-first onboarding contract — 24/04/2026
+
+- Đổi onboarding payload chính sang:
+  - `known_unit_ids`
+  - `desired_section_ids`
+  - `selected_course_ids`
+- Frontend onboarding gửi trực tiếp course scope để `goal_preferences.selected_course_ids` không còn phải để `null`.
+- Backend vẫn nhận alias tạm `known_topic_ids` / `desired_module_ids` để tránh phá client cũ, nhưng docs và frontend dùng contract mới.
+- `course-sections` response có thêm `course_id` và `canonical_course_id` để frontend derive planner scope từ section selection.

@@ -9,6 +9,8 @@ import type { CourseSectionDetail, QuestionForAssessment } from "@/types";
 const SECTIONS: CourseSectionDetail[] = [
   {
     id: "section_foundations",
+    course_id: "course_cs231n_uuid",
+    canonical_course_id: "course_cs231n",
     title: "Foundations",
     description: "Core foundations",
     order_index: 1,
@@ -37,6 +39,8 @@ const SECTIONS: CourseSectionDetail[] = [
   },
   {
     id: "section_models",
+    course_id: "course_cs231n_uuid",
+    canonical_course_id: "course_cs231n",
     title: "Models",
     description: "Model building",
     order_index: 2,
@@ -57,7 +61,7 @@ const SECTIONS: CourseSectionDetail[] = [
 ];
 
 describe("canonical assessment session helpers", () => {
-  it("builds canonical assessment context from selected known topics", () => {
+  it("builds canonical assessment context from selected known units", () => {
     expect(
       buildCanonicalAssessmentContext({
         sections: SECTIONS,
@@ -73,7 +77,7 @@ describe("canonical assessment session helpers", () => {
     });
   });
 
-  it("falls back to selected modules when no known topics were chosen", () => {
+  it("falls back to selected sections when no known units were chosen", () => {
     expect(
       buildCanonicalAssessmentContext({
         sections: SECTIONS,

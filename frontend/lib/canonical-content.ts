@@ -13,6 +13,8 @@ export function mapCourseCatalogItemToSectionCard(
 ): CourseSectionListItem {
   return {
     id: course.slug,
+    course_id: course.id,
+    canonical_course_id: null,
     title: course.title,
     description: course.short_description,
     order_index: 0,

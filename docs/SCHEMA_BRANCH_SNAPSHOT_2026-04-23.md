@@ -138,16 +138,18 @@ Hiện runtime cutover đã hoàn tất cho các flow product chính. Các legac
 - `goal_preferences`
   - writer: `src/services/auth_service.py:update_onboarding`
   - flag: `write_goal_preferences_enabled`
-  - dữ liệu hiện tại là **compatibility snapshot từ onboarding cũ**
+  - dữ liệu hiện tại là **course-first onboarding snapshot**
   - `goal_weights_json` đang giữ:
     - `available_hours_per_week`
     - `preferred_method`
-    - `legacy_desired_module_count`
-    - `legacy_known_topic_count`
+    - `desired_section_count`
+    - `known_unit_count`
+    - `selected_course_count`
   - `notes` giữ JSON-encoded:
-    - `legacy_desired_module_ids`
-    - `legacy_known_topic_ids`
-  - `selected_course_ids` vẫn để `null` vì onboarding hiện còn ở grain `module/topic`, chưa phải `course-first`
+    - `desired_section_ids`
+    - `known_unit_ids`
+    - `selected_course_ids`
+  - backend vẫn chấp nhận alias tạm `known_topic_ids` / `desired_module_ids`, nhưng frontend đã gửi `known_unit_ids` / `desired_section_ids`
 
 - `plan_history` / `rationale_log` / `planner_session_state`
   - writer: `src/services/recommendation_engine.py:generate_learning_path`
@@ -1104,7 +1106,7 @@ Nguồn: `src/models/learning.py`
 ### Nhận xét
 
 - Bảng này chính thức lấp gap “users chưa có target_course_ids”.
-- Đây vẫn mới là persistence shell; chưa có onboarding/service wiring.
+- Onboarding/runtime hiện đã ghi `selected_course_ids` rõ ràng để planner scope theo course.
 
 ## A23. `waived_units`
 
@@ -1890,11 +1892,11 @@ Nguồn:
 
 ## 2. Điểm còn lệch giữa runtime và canonical
 
-- Runtime legacy path vẫn tồn tại ở `topic/module`, nhưng canonical path đã có feature-flag branch cho assessment, mastery và planner.
-- Runtime `questions` còn gộp nhiều concern mà canonical đã tách riêng.
+- Runtime legacy tables đã bị drop; các mention `topic/module` còn lại chủ yếu là historical/naming debt trong docs hoặc DTO compatibility.
+- Runtime `questions` legacy đã bị drop; canonical question concerns nằm ở `question_bank`, `item_phase_map`, `item_kp_map`, `item_calibration`.
 - Stub/canonical tables đã được wire một phần, sau feature flag:
-  - onboarding ghi compatibility snapshot vào `goal_preferences`
-  - planner legacy ghi topic-grain audit vào `plan_history` / `rationale_log` / `planner_session_state`
+  - onboarding ghi course-first snapshot vào `goal_preferences`
+  - planner canonical ghi unit-grain audit vào `plan_history` / `rationale_log` / `planner_session_state`
   - assessment canonical branch đọc `question_bank` + `item_phase_map`
   - canonical submit ghi `interactions.canonical_item_id`
   - canonical mastery update ghi `learner_mastery_kp`

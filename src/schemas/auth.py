@@ -7,7 +7,7 @@ Pydantic v2 schemas for all authentication endpoints.
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import AliasChoices, BaseModel, EmailStr, Field, field_validator
 
 from src.models.learning import MasteryLevel
 from src.models.user import PreferredMethod
@@ -105,12 +105,19 @@ class TokenPayload(BaseModel):
 class OnboardingRequest(BaseModel):
     """PUT /api/users/me/onboarding"""
 
-    known_topic_ids: list[uuid.UUID] = Field(
+    known_unit_ids: list[uuid.UUID] = Field(
         default_factory=list,
-        description="Topics the user already knows (used to seed mastery scores)",
+        validation_alias=AliasChoices("known_unit_ids", "known_topic_ids"),
+        description="Learning units the user already knows",
     )
-    desired_module_ids: list[uuid.UUID] = Field(
-        default_factory=list, description="Modules the user wants to learn"
+    desired_section_ids: list[uuid.UUID] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("desired_section_ids", "desired_module_ids"),
+        description="Course sections the user wants to learn",
+    )
+    selected_course_ids: list[str] = Field(
+        default_factory=list,
+        description="Explicit selected course IDs or canonical course IDs for planner scoping",
     )
     available_hours_per_week: float = Field(
         gt=0, le=168, description="Hours per week the user can dedicate"

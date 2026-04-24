@@ -151,8 +151,9 @@ async function registerAuthenticatedLearner(
         Authorization: `Bearer ${tokens.access_token}`,
       },
       data: {
-        known_topic_ids: [],
-        desired_module_ids: [],
+        known_unit_ids: [],
+        desired_section_ids: [],
+        selected_course_ids: ["course_cs231n"],
         available_hours_per_week: 6,
         target_deadline: "2026-12-31",
         preferred_method: "video",

@@ -26,38 +26,11 @@ These are already done and should not be reopened without a deliberate design de
 - Course discovery/gating Playwright e2e passes against canonical course/unit labels.
 - Signed protected asset route now guards `data/courses/<course>/videos|slides|transcripts` paths.
 - Abandon/resume runtime state is represented in `planner_session_state` with current unit/stage/progress and `last_activity`; planner reads apply mastery staleness on-read.
+- Onboarding contract is course-first: frontend sends `known_unit_ids`, `desired_section_ids`, and `selected_course_ids`; backend writes explicit `goal_preferences.selected_course_ids`.
 
 ## Remaining Work
 
-### 1. Course-First Onboarding / Goal Preferences Contract
-
-Current state:
-
-- DB has `goal_preferences.selected_course_ids`.
-- `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` still notes this is not fully populated by the current onboarding flow.
-- Frontend/onboarding still uses compatibility names:
-  - `known_topic_ids`
-  - `desired_module_ids`
-  - `StepKnownTopics`
-  - `StepDesiredModules`
-- These values are mapped to canonical units/sections in runtime, but the public contract still speaks topic/module language.
-
-Needed:
-
-- Decide final onboarding payload names, likely:
-  - `known_unit_ids`
-  - `desired_section_ids`
-  - `selected_course_ids`
-- Update frontend types/schema/components/API payloads to use course-first names.
-- Keep temporary backend aliases only if needed for migration, and document when to remove them.
-- Ensure `goal_preferences.selected_course_ids` is populated from explicit course choices, not inferred indirectly from legacy-style module/topic fields.
-
-Acceptance:
-
-- A new frontend/backend engineer can wire onboarding without seeing `topic/module` as the primary contract.
-- `goal_preferences` rows contain explicit course scope for planner goal weighting.
-
-### 2. Frontend / API Semantic Naming Cleanup
+### 1. Frontend / API Semantic Naming Cleanup
 
 Current state:
 
@@ -84,7 +57,7 @@ Acceptance:
 - Tests no longer need to mentally translate "topic" to "learning unit".
 - No UI visual redesign is required for this task.
 
-### 3. Historical Docs / README Sweep
+### 2. Historical Docs / README Sweep
 
 Current state:
 
@@ -111,7 +84,7 @@ Acceptance:
 - New engineer reading the repo cannot mistake legacy tables or old plans for active production design.
 - README matches the canonical runtime that currently passes build/e2e.
 
-### 4. Orphan Legacy Helper / Script Review
+### 3. Orphan Legacy Helper / Script Review
 
 Current state:
 
@@ -135,7 +108,7 @@ Acceptance:
 - `rg` for active runtime code no longer shows unused topic-grain helpers as if they were production planner logic.
 - Any remaining legacy script is clearly marked as archive/audit tooling.
 
-### 5. Production Mastery / Scoring Calibration
+### 4. Production Mastery / Scoring Calibration
 
 Current state:
 

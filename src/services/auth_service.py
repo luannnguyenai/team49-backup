@@ -164,12 +164,7 @@ async def _write_goal_preferences_if_enabled(
     data: OnboardingRequest,
 ) -> None:
     """
-    Persist a compatibility goal-preference snapshot during runtime cutover.
-
-    Current onboarding is still module/topic-grain, so we intentionally store:
-    - legacy module/topic intent inside `goal_weights_json`
-    - no `selected_course_ids` yet
-    This preserves the user's stated objective without fabricating course IDs.
+    Persist the course-first goal-preference snapshot used by the planner.
     """
     if not settings.write_goal_preferences_enabled:
         return
@@ -178,21 +173,23 @@ async def _write_goal_preferences_if_enabled(
     goal_weights_json = {
         "available_hours_per_week": data.available_hours_per_week,
         "preferred_method": data.preferred_method.value,
-        "legacy_desired_module_count": len(data.desired_module_ids),
-        "legacy_known_topic_count": len(data.known_topic_ids),
+        "desired_section_count": len(data.desired_section_ids),
+        "known_unit_count": len(data.known_unit_ids),
+        "selected_course_count": len(data.selected_course_ids),
     }
     notes = json.dumps(
         {
-            "legacy_desired_module_ids": [str(module_id) for module_id in data.desired_module_ids],
-            "legacy_known_topic_ids": [str(topic_id) for topic_id in data.known_topic_ids],
-            "source": "auth_onboarding_legacy_runtime",
+            "desired_section_ids": [str(section_id) for section_id in data.desired_section_ids],
+            "known_unit_ids": [str(unit_id) for unit_id in data.known_unit_ids],
+            "selected_course_ids": data.selected_course_ids,
+            "source": "auth_onboarding_course_first_runtime",
         },
         sort_keys=True,
     )
     await repo.upsert_for_user(
         user_id=user.id,
         goal_weights_json=goal_weights_json,
-        selected_course_ids=None,
+        selected_course_ids=data.selected_course_ids or None,
         goal_embedding=None,
         goal_embedding_version=None,
         derived_from_course_set_hash=None,

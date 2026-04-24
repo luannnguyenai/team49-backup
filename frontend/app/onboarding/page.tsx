@@ -1,7 +1,7 @@
 "use client";
 // app/onboarding/page.tsx
 // Multi-step onboarding flow (4 steps) for new users.
-// Collects: known topics · desired modules · schedule · learning method
+// Collects: known units · desired sections · schedule · learning method
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -17,8 +17,8 @@ import {
 
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import StepKnownTopics from "@/components/onboarding/StepKnownTopics";
-import StepDesiredModules from "@/components/onboarding/StepDesiredModules";
+import StepKnownUnits from "@/components/onboarding/StepKnownUnits";
+import StepDesiredSections from "@/components/onboarding/StepDesiredSections";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
@@ -39,11 +39,11 @@ import type { CourseSectionDetail } from "@/types";
 const STEPS = [
   {
     title: "Bạn đã biết gì?",
-    subtitle: "Tick những topics bạn đã nắm",
+    subtitle: "Tick những units bạn đã nắm",
   },
   {
     title: "Bạn muốn học gì?",
-    subtitle: "Chọn module bạn quan tâm",
+    subtitle: "Chọn section bạn quan tâm",
   },
   {
     title: "Thời gian của bạn",
@@ -58,7 +58,7 @@ const STEPS = [
 // Fields that must pass validation before advancing from each step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                                // Step 0: optional
-  ["desired_module_ids"],                            // Step 1: required
+  ["desired_section_ids"],                           // Step 1: required
   ["available_hours_per_week", "target_deadline"],   // Step 2: required
   ["preferred_method"],                              // Step 3: required
 ];
@@ -92,8 +92,9 @@ function OnboardingPageInner() {
   } = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      known_topic_ids: [],
-      desired_module_ids: [],
+      known_unit_ids: [],
+      desired_section_ids: [],
+      selected_course_ids: [],
       available_hours_per_week: 5,
       target_deadline: "",
       preferred_method: undefined,
@@ -118,10 +119,10 @@ function OnboardingPageInner() {
     loadData();
   }, []);
 
-  // Derive the selected modules objects (needed for schedule estimate)
-  const selectedModuleIds = watch("desired_module_ids");
+  // Derive the selected sections objects (needed for schedule estimate)
+  const selectedSectionIds = watch("desired_section_ids");
   const selectedSections = sections.filter((section) =>
-    selectedModuleIds.includes(section.id)
+    selectedSectionIds.includes(section.id)
   );
 
   // ── Navigation ───────────────────────────────────────────────────────────
@@ -148,13 +149,18 @@ function OnboardingPageInner() {
   const onSubmit = async (data: OnboardingFormData) => {
     clearError();
     try {
-      await onboard(data);
       const next = searchParams.get("next");
       const canonicalContext = buildCanonicalAssessmentContext({
         sections,
-        knownUnitIds: data.known_topic_ids,
-        desiredSectionIds: data.desired_module_ids,
+        knownUnitIds: data.known_unit_ids,
+        desiredSectionIds: data.desired_section_ids,
       });
+      const selectedCourseIds = Array.from(
+        new Set(
+          selectedSections.map((section) => section.canonical_course_id ?? section.course_id)
+        )
+      );
+      await onboard({ ...data, selected_course_ids: selectedCourseIds });
       writePendingCanonicalAssessment(canonicalContext);
 
       if (canonicalContext.canonicalUnitIds.length > 0) {
@@ -163,7 +169,7 @@ function OnboardingPageInner() {
           : "/assessment";
         router.push(assessmentTarget);
       } else {
-        // No topics selected → nothing to assess → go straight to dashboard
+        // No units selected → nothing to assess → go straight to dashboard
         router.push(next ?? "/dashboard");
       }
     } catch {
@@ -308,13 +314,13 @@ function OnboardingPageInner() {
                     : "animate-slide-in"
                 }
               >
-                {/* Step 0 — Known topics */}
+                {/* Step 0 — Known units */}
                 {step === 0 && (
                   <Controller
                     control={control}
-                    name="known_topic_ids"
+                    name="known_unit_ids"
                     render={({ field }) => (
-                      <StepKnownTopics
+                      <StepKnownUnits
                         sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
@@ -329,13 +335,13 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 1 — Desired modules */}
+                {/* Step 1 — Desired sections */}
                 {step === 1 && (
                   <Controller
                     control={control}
-                    name="desired_module_ids"
+                    name="desired_section_ids"
                     render={({ field }) => (
-                      <StepDesiredModules
+                      <StepDesiredSections
                         sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
@@ -345,7 +351,7 @@ function OnboardingPageInner() {
                               : [...field.value, id]
                           )
                         }
-                        error={errors.desired_module_ids?.message}
+                        error={errors.desired_section_ids?.message}
                       />
                     )}
                   />

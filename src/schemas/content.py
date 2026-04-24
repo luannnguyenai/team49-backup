@@ -247,6 +247,8 @@ class CourseSectionListItem(BaseModel):
     """One row in GET /api/course-sections."""
 
     id: uuid.UUID
+    course_id: uuid.UUID
+    canonical_course_id: str | None = None
     title: str
     description: str | None
     order_index: int

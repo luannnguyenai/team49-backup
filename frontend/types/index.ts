@@ -54,8 +54,9 @@ export interface ForgotPasswordPayload {
 }
 
 export interface OnboardingPayload {
-  known_topic_ids: string[];
-  desired_module_ids: string[];
+  known_unit_ids: string[];
+  desired_section_ids: string[];
+  selected_course_ids: string[];
   available_hours_per_week: number;
   target_deadline: string;
   preferred_method: "reading" | "video";
@@ -75,6 +76,8 @@ export interface LearningUnitSelectionItem {
 
 export interface CourseSectionListItem {
   id: string;
+  course_id: string;
+  canonical_course_id?: string | null;
   title: string;
   description: string | null;
   order_index: number;

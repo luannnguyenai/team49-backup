@@ -14,9 +14,12 @@ pytestmark = pytest.mark.anyio
 
 async def test_course_sections_endpoint_returns_canonical_field_names():
     section_id = uuid.uuid4()
+    course_id = uuid.uuid4()
     expected = [
         {
             "id": str(section_id),
+            "course_id": str(course_id),
+            "canonical_course_id": "course_cs231n",
             "title": "Foundations",
             "description": "Core section",
             "order_index": 1,
@@ -42,10 +45,13 @@ async def test_course_sections_endpoint_returns_canonical_field_names():
 
 async def test_course_section_detail_endpoint_returns_learning_units():
     section_id = uuid.uuid4()
+    course_id = uuid.uuid4()
     unit_id = uuid.uuid4()
     now = datetime.now(UTC)
     expected = {
         "id": str(section_id),
+        "course_id": str(course_id),
+        "canonical_course_id": "course_cs231n",
         "title": "Foundations",
         "description": "Core section",
         "order_index": 1,

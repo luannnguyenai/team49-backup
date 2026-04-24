@@ -1,5 +1,5 @@
 "use client";
-// components/onboarding/StepKnownTopics.tsx
+// components/onboarding/StepKnownUnits.tsx
 // Step 1 — "Bạn đã biết gì?"
 // Displays all learning units grouped by section as a checkbox card grid.
 
@@ -21,7 +21,7 @@ interface Props {
   onToggle: (id: string) => void;
 }
 
-export default function StepKnownTopics({
+export default function StepKnownUnits({
   sections,
   selectedIds,
   onToggle,

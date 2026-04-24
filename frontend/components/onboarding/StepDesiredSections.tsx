@@ -1,7 +1,7 @@
 "use client";
-// components/onboarding/StepDesiredModules.tsx
+// components/onboarding/StepDesiredSections.tsx
 // Step 2 — "Bạn muốn học gì?"
-// Large selectable cards, one per module.
+// Large selectable cards, one per course section.
 
 import { BookOpen, Check, Clock, Code2, Database, Layers } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -26,7 +26,7 @@ interface Props {
   error?: string;
 }
 
-export default function StepDesiredModules({
+export default function StepDesiredSections({
   sections,
   selectedIds,
   onToggle,
@@ -37,7 +37,7 @@ export default function StepDesiredModules({
   return (
     <div className="space-y-3">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn 1 hoặc nhiều modules bạn muốn học trong khoá này.
+        Chọn 1 hoặc nhiều sections bạn muốn học trong khoá này.
         {selectedIds.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
             ({selectedIds.length} đã chọn)

@@ -198,8 +198,9 @@ Current writer:
 
 Current status:
 
-- Already writes a compatibility snapshot when `write_goal_preferences_enabled=true`.
-- This is not the final course-first goal contract yet unless `selected_course_ids` is populated by the integration/onboarding layer.
+- Writes a course-first goal snapshot when `write_goal_preferences_enabled=true`.
+- Frontend onboarding sends `known_unit_ids`, `desired_section_ids`, and explicit `selected_course_ids`.
+- Backend still accepts temporary aliases `known_topic_ids` and `desired_module_ids` for compatibility, but new clients must not use them.
 
 Required final payload:
 
@@ -218,8 +219,8 @@ Idempotency:
 
 Integration note:
 
-- Final onboarding should write explicit course choices to `selected_course_ids`.
-- Do not keep encoding selected goals only through legacy desired module/topic IDs.
+- Onboarding must write explicit course choices to `selected_course_ids`.
+- Do not encode selected goals only through section/unit IDs; planner scope is course-first.
 
 ### Learner KP Mastery
 
@@ -430,7 +431,7 @@ The current importer validates columns/counts and verifies post-import row count
 
 These are intentional gaps, not missing UI work:
 
-- `goal_preferences.selected_course_ids` still needs a course-first onboarding contract instead of compatibility topic/module naming.
+- Temporary onboarding aliases for `known_topic_ids` and `desired_module_ids` remain only to avoid breaking old clients; frontend uses the course-first contract.
 - `planner_session_state.current_progress` stores the resume pointer, but frontend resume UI has not been wired yet.
 - `learner_mastery_kp` uses bootstrap scoring unless a calibration job has produced trusted item parameters.
 - Historical docs may still mention pre-cutover tables and must be treated as archive unless refreshed.
@@ -460,6 +461,5 @@ PYTHONPATH=. python src/scripts/pipeline/check_canonical_runtime_parity.py
 2. Import canonical content with `src/scripts/pipeline/import_canonical_artifacts_to_db.py`.
 3. Backfill product links with `src/scripts/pipeline/backfill_product_canonical_links.py --apply`.
 4. Run parity check with `src/scripts/pipeline/check_canonical_runtime_parity.py`.
-5. Populate real `goal_preferences.selected_course_ids` from onboarding/integration.
+5. Remove temporary onboarding aliases after external clients have migrated to `known_unit_ids` / `desired_section_ids`.
 6. Enable read/write flags only after parity checks pass.
-7. Update skip verification to write `waived_units` with evidence.
