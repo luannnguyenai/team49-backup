@@ -25,6 +25,26 @@ The system must not expose internal terms such as KP, prerequisite graph, theta,
 - Do not make standalone AI Tutor the primary product surface.
 - Do not require placement assessment for every new user.
 
+## 2.1. Schema Naming Note
+
+This plan uses the current repo database names, not the earlier Notion-only names.
+
+| UX/spec concept | Current repo table or projection |
+| --- | --- |
+| Canonical course unit | `units` |
+| Product learning unit shown in UI | `learning_units` with `canonical_unit_id` |
+| Lecture/section grouping shown in UI | `course_sections` |
+| Learner mastery per KP | `learner_mastery_kp` |
+| Completed unit | `learning_progress_records.status='completed'` |
+| Waived/skipped-with-evidence unit | `waived_units` |
+| Planner session state | `planner_session_state` |
+
+Implementation should keep this distinction explicit:
+
+- Canonical tables (`units`, `question_bank`, `item_phase_map`, `unit_kp_map`, `prerequisite_edges`) are the grounded content and assessment source.
+- Product tables (`courses`, `course_sections`, `learning_units`, `learning_progress_records`) are the UI-facing course shell.
+- Runtime learner/planner tables (`learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`) drive personalization.
+
 ## 3. Current UX Gaps
 
 ### 3.1. Public Entry
@@ -179,12 +199,19 @@ flowchart TD
   G --> H[Start first segment]
 ```
 
-Experience options:
+Experience options set the starting prior, difficulty band, and adaptive cap. They should not be treated as fixed quiz lengths:
 
-- New to this area: show 3-5 placement questions or allow skip.
-- Basic foundation: show 8-10 placement questions.
-- Already studied before: show 12-15 placement questions.
+- New to this area: start easier, cap around 3-5 questions, allow skip.
+- Basic foundation: start near medium difficulty, cap around 8-10 questions.
+- Already studied before: start near harder items, cap around 12-15 questions.
 - Just want to start: skip placement and rely on mini quizzes.
+
+Placement selection should be adaptive where the backend supports it:
+
+- Select the next item near the current ability estimate using `item_calibration.difficulty_b` when calibrated.
+- Fall back to `item_calibration.difficulty_prior` when `is_calibrated=false`.
+- Stop by `stop_policy`: fixed cap, standard-error threshold, or hybrid.
+- If skipped, initialize broad prior and explain that early mini quizzes will do more calibration work.
 
 Important UX copy:
 
@@ -204,13 +231,13 @@ System writes:
 - `goal_preferences`
 - `interaction_log` for placement answers
 - `learner_mastery_kp`
-- `session_state`
+- `planner_session_state`
 
 ### 5.3. Returning User Resume Flow
 
 ```mermaid
 flowchart TD
-  A[User opens app] --> B[Load session_state]
+  A[User opens app] --> B[Load planner_session_state]
   B --> C{Has active progress?}
   C -- Yes --> D[Resume card]
   C -- No --> E[Next recommended segment]
@@ -228,15 +255,16 @@ User sees:
 
 System reads:
 
-- `session_state.last_activity`
-- `session_state.current_unit_id`
-- `session_state.current_progress`
-- `learner_mastery_kp.last_updated`
+- `planner_session_state.last_activity`
+- `planner_session_state.current_unit_id`
+- `planner_session_state.current_stage`
+- `planner_session_state.current_progress`
+- `learner_mastery_kp.updated_at`
 - `plan_history`
 
 System writes:
 
-- `session_state`
+- `planner_session_state`
 - optional `interaction_log` for placement-lite/review
 - optional `learner_mastery_kp`
 
@@ -264,7 +292,7 @@ flowchart TD
 User sees:
 
 - Default: video segment.
-- Skip: "Có vẻ bạn đã nắm phần này. Làm 3 câu để xác nhận và bỏ qua?"
+- Skip: "Có vẻ bạn đã nắm phần này. Làm 5 câu để xác nhận và bỏ qua?"
 - Bridge: "Trước khi vào phần này, ôn nhanh một kiến thức nền sẽ giúp bạn học dễ hơn."
 - Skim: "Bạn có thể xem nhanh phần này ở 2x."
 
@@ -274,7 +302,7 @@ System reads:
 - `unit_kp_map`
 - `prerequisite_edges`
 - `learner_mastery_kp`
-- `completed_units`
+- `learning_progress_records`
 - `waived_units`
 
 System writes:
@@ -302,6 +330,12 @@ If user seeks forward:
 - Add skipped segment quizzes to a "Review checkpoint" queue.
 - At the end of lecture, show: "Bạn đã đi qua 3 đoạn chưa kiểm tra. Làm checkpoint 5 phút để lưu tiến độ."
 
+Content-type fallback:
+
+- If a segment is administrative, anecdotal, historical context, recap-only, or otherwise has no `mini_quiz` items, do not show an empty quiz drawer.
+- Auto-advance the segment with a subtle badge such as "Tham khảo" or "Không cần kiểm tra".
+- If the segment has critical or gateway content and `item_phase_map phase='mini_quiz'` exists, show the quiz even if the segment looks introductory.
+
 System reads:
 
 - `question_bank`
@@ -313,8 +347,8 @@ System writes:
 
 - `interaction_log`
 - `learner_mastery_kp`
-- `completed_units` if pass
-- `session_state.current_progress`
+- `learning_progress_records.status='completed'` if pass
+- `planner_session_state.current_progress`
 
 ### 5.6. Skip Flow
 
@@ -332,6 +366,8 @@ UX rules:
 
 - No force skip without quiz.
 - "Bỏ qua hẳn" still requires confirmation quiz.
+- Prerequisite override "Tôi biết rồi, vào luôn" should route to `skip_verification` for the original segment, not to the bridge unit.
+- Default skip verification should use 5 items when the item bank has enough questions.
 - Waived segment should appear as "Đã bỏ qua có xác nhận", not "Hoàn thành".
 
 System reads:
@@ -362,7 +398,9 @@ flowchart TD
 
 UX rules:
 
-- Max 2 bridge attempts in a row.
+- Cap both bridge depth and consecutive bridges.
+- `bridge_chain_depth` means nested bridge depth: bridge for a bridge.
+- `consecutive_bridge_count` means bridge attempts in a row before returning to normal learning.
 - Do not trap user in an infinite remedial path.
 - If cap reached, continue original segment with annotation.
 
@@ -371,14 +409,15 @@ System reads:
 - `prerequisite_edges`
 - `unit_kp_map`
 - `learning_units`
-- `session_state.consecutive_bridge_count`
+- `planner_session_state.bridge_chain_depth`
+- `planner_session_state.consecutive_bridge_count`
 
 System writes:
 
 - `interaction_log`
 - `learner_mastery_kp`
-- `completed_units` for bridge unit if pass
-- `session_state`
+- `learning_progress_records.status='completed'` for bridge unit if pass
+- `planner_session_state`
 
 ### 5.8. Final Quiz Flow
 
@@ -401,8 +440,44 @@ System writes:
 
 - `interaction_log`
 - `learner_mastery_kp`
-- `completed_courses` or equivalent future course completion state
+- derive course completion from all required `learning_progress_records` and `waived_units`
 - `plan_history` review plan
+
+### 5.9. Content Quality And Beta States
+
+Cold-start item calibration:
+
+- Most early course items may have `item_calibration.is_calibrated=false`.
+- UI must not hard-fail when no calibrated item exists.
+- Backend should fall back to `difficulty_prior`, `discrimination_prior`, and `guessing_prior`.
+- User-facing copy can say: "Kho câu hỏi đang được hiệu chỉnh dần khi có thêm người học."
+
+Review/provenance states:
+
+- If `question_bank.review_status='deferred'`, show a small "Báo lỗi câu hỏi" affordance on result detail.
+- If a course has strong human review coverage, course overview may show "Đã review thủ công".
+- If content is still mostly auto-generated, show a beta-quality badge rather than hiding uncertainty.
+
+Segment checkpoint eligibility:
+
+- Do not assume every segment has a mini quiz.
+- Use `item_phase_map` availability and content salience to decide whether to pause, auto-advance, or queue review.
+
+### 5.10. Mastery Display Contract
+
+Never show `theta_mu`, `theta_sigma`, or raw `mastery_lcb` as user-facing percentages.
+
+Use `learner_mastery_kp.mastery_mean_cached` for progress bars and plain-language labels:
+
+| Condition | UI label |
+| --- | --- |
+| `n_items_observed < 3` | Chưa đủ dữ liệu |
+| `mastery_mean_cached >= 0.85` | Đã nắm chắc |
+| `0.65 <= mastery_mean_cached < 0.85` | Khá vững |
+| `0.40 <= mastery_mean_cached < 0.65` | Đang tiến bộ |
+| `< 0.40` | Cần củng cố |
+
+Planner and assessor may compute confidence-sensitive thresholds on read, but UI should request a backend-provided `readiness_label` or `mastery_label` instead of duplicating statistical logic in many components.
 
 ## 6. Screen-Level Plan
 
@@ -539,9 +614,17 @@ Player states:
 - Normal learn.
 - Skip offer.
 - Bridge offer.
+- Skim hint banner.
 - Mini quiz active.
 - Review segment.
 - Final quiz available.
+
+Center panel should use canonical retrieval surfaces:
+
+- Show `units.summary` as a short "Bạn sẽ học gì" block.
+- Show `units.key_points[]` as timestamped key points with click-to-seek.
+- Use `units.video_clip_ref` and `question_bank.source_ref` to deep-link quiz mistakes back to the exact lecture segment.
+- AI Tutor should ground answers with unit summary, key points, transcript slice, and timestamp citation when available.
 
 ### 6.7. Assessment
 
@@ -580,6 +663,8 @@ Needed changes:
 - Avoid clipped radar labels.
 - Add "Mạnh ở", "Nên ôn", "Đang theo mục tiêu".
 - Show selected course goals from `goal_preferences`.
+- Use `learner_mastery_kp.mastery_mean_cached`, never raw `theta_mu`.
+- Use "Chưa đủ dữ liệu" when `n_items_observed < 3`.
 
 ## 7. Data And API Touchpoints
 
@@ -629,7 +714,7 @@ Response:
 {
   "decision": "learn | offer_skip | offer_bridge | suggest_skim",
   "reason_code": "foundation_gap | high_mastery | partial_mastery | default",
-  "user_copy": "Có vẻ bạn đã nắm phần này. Làm 3 câu để xác nhận và bỏ qua?",
+  "user_copy": "Có vẻ bạn đã nắm phần này. Làm 5 câu để xác nhận và bỏ qua?",
   "target_unit": null,
   "quiz_phase": "skip_verification",
   "confidence_label": "high"
@@ -647,8 +732,10 @@ Request:
 ```json
 {
   "learning_unit_id": "uuid",
-  "phase": "mini_quiz | skip_verification | bridge_check | final_quiz | review | placement",
-  "max_items": 5
+  "phase": "placement | mini_quiz | skip_verification | bridge_check | final_quiz | transfer | review",
+  "max_items": 5,
+  "stop_policy": "fixed_max | se_threshold | hybrid",
+  "target_se": 0.35
 }
 ```
 
@@ -698,10 +785,10 @@ Response:
 | Browse course | `courses`, `course_sections`, `learning_units` | none |
 | Choose goal | `courses` | `goal_preferences` |
 | Placement | `question_bank`, `item_phase_map`, `item_calibration` | `interaction_log`, `learner_mastery_kp` |
-| Enter segment | `learning_units`, `unit_kp_map`, `prerequisite_edges`, `learner_mastery_kp` | `session_state` |
-| Mini quiz | `question_bank`, `item_phase_map phase=mini_quiz` | `interaction_log`, `learner_mastery_kp`, `completed_units` |
+| Enter segment | `learning_units`, `unit_kp_map`, `prerequisite_edges`, `learner_mastery_kp` | `planner_session_state` |
+| Mini quiz | `question_bank`, `item_phase_map phase=mini_quiz` | `interaction_log`, `learner_mastery_kp`, `learning_progress_records` |
 | Skip quiz | `question_bank`, `item_phase_map phase=skip_verification` | `interaction_log`, `learner_mastery_kp`, `waived_units` |
-| Bridge check | `question_bank`, `item_phase_map phase=bridge_check` | `interaction_log`, `learner_mastery_kp`, `completed_units`, `session_state` |
+| Bridge check | `question_bank`, `item_phase_map phase=bridge_check` | `interaction_log`, `learner_mastery_kp`, `learning_progress_records`, `planner_session_state` |
 | Final quiz | `question_bank`, `item_phase_map phase=final_quiz` | `interaction_log`, `learner_mastery_kp`, course completion state |
 
 ### 7.4. Schema Capabilities UI V2 Should Exploit
@@ -720,10 +807,11 @@ Tables:
 UI opportunities:
 
 - Course overview can show real lecture/section structure instead of generic marketing copy.
-- Course player can show segment order from `learning_units.order_index`.
+- Course player can show segment order from `learning_units.sort_order`, backed by canonical `units.ordering_index`.
 - Segment rail can show status per unit: not started, current, completed, waived, locked, review suggested.
 - Prerequisite logic can drive user-facing bridge suggestions without exposing the graph.
 - `unit_kp_map.planner_role` can distinguish main learning content from support/background content.
+- `units.summary`, `units.key_points`, and `units.video_clip_ref` can power the lecture overview, timestamped key points, AI Tutor grounding, and quiz review deep-links.
 
 Do not expose:
 
@@ -755,8 +843,10 @@ UI opportunities:
 - Skip confirmation uses `phase='skip_verification'`.
 - Bridge check uses `phase='bridge_check'`.
 - Final course/section test uses `phase='final_quiz'`.
+- Cross-domain/generalization checks can use `phase='transfer'`.
 - Stale-user quick check uses `phase='review'`.
 - Quiz UI can show evidence context such as lecture/segment title from item source refs.
+- `question_bank.source_ref.video_clip_ref` can support "Xem lại đoạn này" after wrong answers.
 - Difficulty can tune quiz length and ordering without showing IRT parameters.
 
 Required UX guarantee:
@@ -770,23 +860,25 @@ Tables:
 
 - `learner_mastery_kp`
 - `interaction_log`
-- `completed_units`
+- `learning_progress_records`
 - `waived_units`
 - `goal_preferences`
-- `session_state`
+- `planner_session_state`
 
 UI opportunities:
 
-- Dashboard next action comes from `session_state` and planner output, not static cards.
-- Resume card can use `session_state.current_unit_id`, `current_stage`, and `current_progress`.
+- Dashboard next action comes from `planner_session_state` and planner output, not static cards.
+- Resume card can use `planner_session_state.current_unit_id`, `current_stage`, and `current_progress`.
 - Profile skill chart should use derived mastery, grouped into learner-friendly domains.
-- Course progress should count both `completed_units` and `waived_units`, but visually distinguish them.
+- Course progress should count both `learning_progress_records.status='completed'` and `waived_units`, but visually distinguish them.
 - Goal settings can read/write `goal_preferences.selected_course_ids`.
-- Returning-after-long-time flow can compare `session_state.last_activity` and `learner_mastery_kp.last_updated`.
+- `goal_preferences.goal_weights_json` can show the user's interest mix, not just a single selected course.
+- `goal_preferences.derived_from_course_set_hash` can detect goal drift and trigger "Lộ trình đã cập nhật theo mục tiêu mới" banners.
+- Returning-after-long-time flow can compare `planner_session_state.last_activity` and `learner_mastery_kp.updated_at`.
 
 Important distinction:
 
-- `completed_units`: user learned and passed.
+- `learning_progress_records.status='completed'`: user learned and passed.
 - `waived_units`: user skipped only after verification.
 - Both unblock forward progress, but UI should not label waived units as "completed".
 
@@ -796,14 +888,16 @@ Tables:
 
 - `plan_history`
 - `rationale_log`
-- `session_state`
+- `planner_session_state`
 
 UI opportunities:
 
 - `/learn` can show a real plan instead of placeholder content.
 - Each recommended step can show a short rationale from `rationale_log`.
 - Planner history can explain path changes after quiz fail/pass.
-- Bridge cap and resume flow can use `session_state`.
+- `plan_history.parent_plan_id` can support "Lộ trình đã thay đổi" banners after quiz events.
+- `rationale_log.term_breakdown_json` can power a compact "Vì sao?" explanation.
+- Bridge cap and resume flow can use `planner_session_state`.
 
 Recommended user-facing rationale copy:
 
@@ -811,6 +905,17 @@ Recommended user-facing rationale copy:
 - "Nên ôn nhanh vì quiz vừa rồi cho thấy bạn chưa chắc phần nền."
 - "Có thể bỏ qua nếu vượt qua kiểm tra xác nhận."
 - "Đưa vào review vì bạn quay lại sau nhiều ngày."
+
+Term breakdown copy mapping:
+
+| Planner term | UI copy |
+| --- | --- |
+| `need` | Phần này bạn chưa thành thạo |
+| `interest` | Khớp mục tiêu học của bạn |
+| `unlock_gain` | Học xong sẽ mở thêm các bài kế |
+| `redundancy` | Ẩn nếu chỉ là penalty |
+| `prereq_violation_soft` | Còn một phần nền chưa vững |
+| `difficulty_jump` | Độ khó tăng đáng kể |
 
 #### Audit And Product Trust
 
@@ -918,7 +1023,7 @@ Tasks:
 
 - Add experience-first onboarding.
 - Add placement intro and skip option.
-- Map experience level to placement item count.
+- Map experience level to placement starting prior, difficulty band, and adaptive cap.
 - Keep selected course/section data compatible with current backend.
 
 Exit criteria:
@@ -936,11 +1041,28 @@ Tasks:
 - Add segment state badges.
 - Add current segment summary and transcript access.
 - Add pending quiz panel placeholder.
+- Add non-blocking `skim_hint` banner state.
 
 Exit criteria:
 
 - User can understand current course, lecture, segment, and next action.
 - AI Tutor is visible only in lecture context.
+
+### Phase 3.5 — Retrieval Surface Integration
+
+Tasks:
+
+- Show canonical `units.summary` in the player center panel.
+- Render `units.key_points[]` as timestamped click-to-seek anchors.
+- Use `units.video_clip_ref` for segment-level video context.
+- Use `question_bank.source_ref` to deep-link wrong quiz answers back to the lecture timestamp.
+- Ensure AI Tutor requests are grounded by unit summary, key points, timestamp, and transcript slice where available.
+
+Exit criteria:
+
+- Lecture page has a useful summary/key-point surface even before quiz interactions.
+- AI Tutor feels grounded in the current lecture, not like a generic chatbot.
+- Wrong-answer review can point to a concrete video segment when source refs exist.
 
 ### Phase 4 — Mini Quiz Checkpoints
 
@@ -1060,15 +1182,23 @@ Exit criteria:
 - If inactive for more than 7 days, sees quick-check suggestion.
 - Does not lose previous completed/waived units.
 
-## 11. Open Questions
+## 11. Product Decisions And Remaining Questions
 
-1. Should placement be optional for first ever course, or only skippable after confirming the trade-off?
-2. Should mini quiz checkpoint appear after every segment by default, or should default be "checkpoint at lecture end" for smoother video watching?
-3. Should skip quiz use 3 items for low friction or 5 items for stronger evidence?
-4. Should bridge gate be blocking, or always bypassable through skip verification?
-5. Should CS224n remain "coming soon" but browsable, or should overview clearly mark unavailable content?
-6. Should `/tutor` redirect to current active lecture or become a public explanation page for AI Tutor?
-7. How much of planner rationale should be exposed in UI copy without making the app feel judgmental?
+Resolved decisions:
+
+1. Placement is optional, with explicit trade-off copy.
+2. Mini quiz checkpoints are segment-first, but forward-seek creates a pending checkpoint queue.
+3. Skip verification defaults to 5 items when enough items exist.
+4. Bridge gate is bypassable only through skip verification for the original segment.
+5. CS224n can remain browsable while unavailable; CTA should become "Thông báo khi mở" or equivalent.
+6. `/tutor` should redirect to the current active lecture when `planner_session_state.current_unit_id` exists; otherwise show a small explanation page.
+7. Planner rationale should show only the top 2-3 user-friendly reasons, never raw planner scores.
+
+Still open:
+
+1. Should gateway/critical prerequisite gaps ever be hard-blocked, or always bypassable by skip verification?
+2. Should the default mini-quiz behavior be configurable per user: immediate checkpoint vs lecture-end checkpoint?
+3. What quality threshold is required before showing "Đã review thủ công" on a course overview?
 
 ## 12. Recommended Next Step
 
