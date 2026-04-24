@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.canonical import ConceptKP, ItemKPMap, QuestionBankItem
 from src.models.content import DifficultyBucket
+from src.models.course import LearningProgressStatus
 from src.models.course import LearningUnit
 from src.models.learning import (
     Interaction,
@@ -24,6 +25,8 @@ from src.models.learning import (
 )
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
+from src.repositories.learning_progress_repo import LearningProgressRepository
+from src.repositories.waived_unit_repo import WaivedUnitRepository
 from src.schemas.quiz import (
     QuizAnswerRequest,
     QuizAnswerResponse,
@@ -272,6 +275,16 @@ async def _complete_canonical_quiz(
     db.add(session)
     await db.flush()
 
+    await LearningProgressRepository(db).upsert(
+        user_id=user_id,
+        course_id=unit.course_id,
+        learning_unit_id=unit.id,
+        status=LearningProgressStatus.completed,
+        last_opened_at=now,
+        completed_at=now,
+    )
+    await WaivedUnitRepository(db).delete_for_user_unit(user_id, unit.id)
+
     weak_kcs = await _canonical_kp_names(db, wrong_item_ids)
     time_total_ms = sum((interaction.response_time_ms or 0) for interaction, _ in rows)
     time_total_sec = round(time_total_ms / 1000, 1)
@@ -291,7 +304,7 @@ async def _complete_canonical_quiz(
         misconceptions=[],
         time_total_seconds=time_total_sec,
         avg_time_per_question=avg_time_sec,
-        learning_path_updated=False,
+        learning_path_updated=True,
     )
 
 

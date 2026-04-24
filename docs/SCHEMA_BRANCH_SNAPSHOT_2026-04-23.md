@@ -59,6 +59,22 @@ Hệ quả thực tế:
 - `sessions` và `interactions` vẫn được giữ, nhưng chỉ như shared runtime tables với canonical refs
 - `topic_id`, `module_id`, `question_id` còn lại trên runtime tables chỉ là compatibility columns, không còn FK/live source-of-truth semantics
 
+## Update 2026-04-24 — Canonical Progress / Waive Runtime Live
+
+Từ ngày 24/04/2026, nhánh này đã hoàn tất thêm 5 điểm:
+
+1. `learning_progress_records` là execution-state write model thật cho learner progress ở grain `user × learning_unit`.
+2. `LearningProgressStatus` có thêm giá trị `skipped`.
+3. `waived_units` đã được runtime dùng thật khi user skip unit qua planner path update.
+4. Quiz complete canonical tự mark unit `completed` trong `learning_progress_records` và clear waive audit cũ nếu có.
+5. Public contract của quiz / module-test / history đã đổi semantic sang:
+   - `learning_unit_id`
+   - `learning_unit_title`
+   - `section_id`
+   - `section_title`
+
+Alembic head hiện tại: `20260424_lp_skipped`.
+
 ## Cách đọc schema hiện tại
 
 Hiện repo có 3 lớp dữ liệu khác nhau:
@@ -168,8 +184,12 @@ Hiện runtime cutover đã hoàn tất cho các flow product chính. Các legac
   - topic-grain `mastery_scores` đã bị drop
 
 - `waived_units`
-  - table đã sẵn sàng
-  - runtime skip/waive policy thật vẫn là task riêng; không còn dùng `learning_paths.status=skipped` vì `learning_paths` đã bị drop
+  - đã được runtime dùng thật qua `src/services/recommendation_engine.py:update_path_status`
+  - payload đang ghi:
+    - `learning_unit_id`
+    - `evidence_items` từ snapshot `learner_mastery_kp`
+    - `mastery_lcb_at_waive`
+    - `skip_quiz_score` nếu user có quiz history trước đó
 
 - `plan_history` / `rationale_log` / `planner_session_state` canonical branch
   - reader/writer mới: `src/services/recommendation_engine.py:_generate_canonical_learning_path`
@@ -183,7 +203,18 @@ Hiện runtime cutover đã hoàn tất cho các flow product chính. Các legac
   - response `PathItemResponse` đã mở thêm:
     - `learning_unit_id`
     - `canonical_unit_id`
-    - `topic_id` nullable cho canonical branch
+    - `learning_unit_title`
+    - `section_title`
+
+- `learning_progress_records`
+  - hiện là source-of-truth cho status runtime:
+    - `not_started`
+    - `in_progress`
+    - `completed`
+    - `blocked`
+    - `skipped`
+  - planner path list/timeline đọc status thực từ đây thay vì hardcode `pending`
+  - quiz complete cũng upsert vào đây
 
 ### Runtime-canonical bridge columns
 

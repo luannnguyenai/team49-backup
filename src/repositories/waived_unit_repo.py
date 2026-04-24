@@ -35,6 +35,28 @@ class WaivedUnitRepository(BaseRepository[WaivedUnit]):
         )
         return list(result.scalars().all())
 
+    async def list_for_user_units(
+        self,
+        user_id: UUID,
+        learning_unit_ids: list[UUID],
+    ) -> dict[UUID, WaivedUnit]:
+        if not learning_unit_ids:
+            return {}
+        result = await self.session.execute(
+            select(WaivedUnit).where(
+                WaivedUnit.user_id == user_id,
+                WaivedUnit.learning_unit_id.in_(learning_unit_ids),
+            )
+        )
+        rows = result.scalars().all()
+        return {row.learning_unit_id: row for row in rows}
+
+    async def delete_for_user_unit(self, user_id: UUID, learning_unit_id: UUID) -> None:
+        row = await self.get_for_user_unit(user_id, learning_unit_id)
+        if row is not None:
+            await self.session.delete(row)
+            await self.session.flush()
+
     async def upsert(self, user_id: UUID, learning_unit_id: UUID, **waive_data) -> WaivedUnit:
         values = {
             "user_id": user_id,

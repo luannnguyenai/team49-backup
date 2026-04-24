@@ -4,7 +4,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.canonical import PrerequisiteEdge, UnitKPMap
-from src.models.course import Course, LearningUnit
+from src.models.course import Course, CourseSection, LearningUnit
 
 
 class CanonicalContentRepository:
@@ -44,6 +44,14 @@ class CanonicalContentRepository:
             select(LearningUnit).where(LearningUnit.id.in_(learning_unit_ids))
         )
         return {unit.id: unit for unit in result.scalars().all()}
+
+    async def get_sections_by_ids(self, section_ids: list[UUID]) -> dict[UUID, CourseSection]:
+        if not section_ids:
+            return {}
+        result = await self.session.execute(
+            select(CourseSection).where(CourseSection.id.in_(section_ids))
+        )
+        return {section.id: section for section in result.scalars().all()}
 
     async def get_unit_kp_rows(self, canonical_unit_ids: list[str]) -> list[UnitKPMap]:
         if not canonical_unit_ids:

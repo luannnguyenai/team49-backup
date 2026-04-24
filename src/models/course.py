@@ -88,6 +88,7 @@ class LearningProgressStatus(enum.StrEnum):
     in_progress = "in_progress"
     completed = "completed"
     blocked = "blocked"
+    skipped = "skipped"
 
 
 class LegacyLectureMigrationState(enum.StrEnum):

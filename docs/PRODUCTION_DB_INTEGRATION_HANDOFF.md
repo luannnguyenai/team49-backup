@@ -1,6 +1,6 @@
 # Production DB Integration Handoff
 
-Date: 2026-04-23
+Date: 2026-04-24
 Branch: `rin/implement`
 
 ## Purpose
@@ -24,6 +24,9 @@ Implemented and committed:
 - canonical content ORM tables and migration
 - canonical JSONL importer with manifest validation and post-import DB count verification
 - canonical-only assessment / quiz / module-test runtime reads-writes
+- canonical quiz/module-test/history contracts renamed to `learning_unit_id` / `section_id`
+- canonical planner progress writes via `learning_progress_records`
+- canonical skip/waive audit writes via `waived_units`
 - hard drop migration for legacy curriculum/mastery/planner tables
 - canonical history filtering and subject rendering for section/unit-backed sessions
 
@@ -34,17 +37,19 @@ Key files:
 - `src/config.py`
 - `src/repositories/goal_preference_repo.py`
 - `src/repositories/learner_mastery_kp_repo.py`
+- `src/repositories/learning_progress_repo.py`
 - `src/repositories/waived_unit_repo.py`
 - `src/repositories/planner_audit_repo.py`
 - `src/scripts/pipeline/import_canonical_artifacts_to_db.py`
 - `alembic/versions/20260423_learner_planner_stub_persistence.py`
 - `alembic/versions/20260423_canonical_content_tables.py`
+- `alembic/versions/20260424_learning_progress_skipped.py`
 
 ## Canonical Bootstrap Status
 
-Validated on local Postgres on 2026-04-23:
+Validated on local Postgres on 2026-04-24:
 
-- `uv run alembic upgrade head` reached `20260423_drop_legacy (head)`
+- `uv run alembic upgrade head` reached `20260424_lp_skipped (head)`
 - `PYTHONPATH=. uv run python src/scripts/pipeline/export_canonical_artifacts.py`
 - `PYTHONPATH=. uv run python src/scripts/pipeline/import_canonical_artifacts_to_db.py`
 - `PYTHONPATH=. uv run python src/scripts/pipeline/import_product_shell_to_db.py`
@@ -57,6 +62,8 @@ Observed parity status after import:
 - `unlinked_units = 0`
 - `missing_question_phase_maps = 0`
 - `missing_question_kp_maps = 0`
+- `canonical_interaction_count = 0`
+- `canonical_planner_plan_count = 0`
 
 Observed legacy-drop verification after migration:
 
@@ -242,7 +249,7 @@ Target table: `waived_units`
 
 Current writer:
 
-- repository exists, but no runtime service writes this yet
+- `src/services/recommendation_engine.py:update_path_status`
 
 Required final payload:
 
@@ -267,6 +274,7 @@ Correct input sources:
 Integration note:
 
 - A skipped legacy `learning_paths` topic is not enough to create a `waived_units` row.
+- Runtime now writes `evidence_items` from KP mastery snapshots and optional latest quiz score.
 - Only write `waived_units` when the runtime can identify the actual `learning_units.id`.
 
 ### Planner Audit
@@ -283,10 +291,10 @@ Current writer:
 
 Current status:
 
-- Already writes legacy topic-grain audit when `write_planner_audit_enabled=true`.
-- Also has a canonical unit-grain branch when `read_canonical_planner_enabled=true`.
-- Legacy audit keeps `rationale_log.learning_unit_id=null`.
-- Canonical branch writes real `rationale_log.learning_unit_id`.
+- Canonical branch is the active production path.
+- `generate_learning_path` writes planner audit into `plan_history`, `rationale_log`, `planner_session_state`.
+- `update_path_status` writes learner execution state into `learning_progress_records`.
+- Quiz completion also marks the unit `completed` in `learning_progress_records` and clears stale waive audit rows.
 
 Required final `plan_history` payload:
 
@@ -320,6 +328,7 @@ Integration note:
 - New planner implementations should rank canonical/product `learning_units`, not legacy `topics`.
 - Every planner response should have a corresponding `plan_history` row and rationale rows.
 - Use `planner_session_state` for sticky constraints such as bridge chain depth rather than recomputing only from the latest path.
+- Public runtime/frontend contracts should now use `learning_unit_id` and `section_id` on quiz/module-test/history surfaces.
 
 ## Read Contracts
 

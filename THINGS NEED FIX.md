@@ -24,95 +24,19 @@ These are already done and should not be reopened without a deliberate design de
 
 ## Remaining Work
 
-### 1. Frontend Semantic Cleanup
+### 1. Historical Docs Sweep
 
 Current state:
 
-- Backend routes are canonical-only.
-- Some request/response names still use legacy labels for compatibility:
-  - quiz `topic_id`
-  - module-test `module_id`
-  - history filter `module_id`
-
-Needed:
-
-- Rename frontend/runtime contracts toward:
-  - `learningUnitId`
-  - `sectionId`
-  - `canonicalUnitIds`
-- Keep UI visuals unchanged.
-
-Acceptance:
-
-- No frontend code treats `topicId/moduleId` as legacy curriculum tables.
-- Route params and local storage keys reflect section/unit semantics.
-
-### 2. Assessment/Quiz/Module-Test Contract Polish
-
-Current state:
-
-- Runtime logic is canonical-only.
-- API shape still preserves some compatibility naming.
-
-Needed:
-
-- Decide final public contract names and migrate schemas/docs consistently.
-- Add API contract tests for:
-  - assessment start/submit/results
-  - quiz start/answer/complete/history
-  - module-test start/submit/results
-
-Acceptance:
-
-- Backend schemas, frontend types, and docs use the same canonical terminology.
-
-### 3. Skip/Waive Runtime Wiring
-
-Current state:
-
-- `waived_units` table exists.
-- Runtime skip policy is not wired end-to-end yet.
-
-Needed:
-
-- Define the production skip decision point.
-- Write `waived_units` with:
-  - `learning_unit_id`
-  - `evidence_items`
-  - `mastery_lcb_at_waive`
-  - `skip_quiz_score` when applicable
-
-Acceptance:
-
-- Skip decisions are auditable without any legacy planner table.
-
-### 4. Planner Progress Runtime
-
-Current state:
-
-- Planner generation/list/timeline use canonical planner audit.
-- Path status updates still intentionally stop short of a full canonical progress write model.
-
-Needed:
-
-- Decide canonical status/progress source-of-truth for learner plan execution.
-- Wire update flow without recreating `learning_paths`.
-
-Acceptance:
-
-- Progress updates are persisted in a canonical table or canonical audit structure.
-
-### 5. Docs Sweep
-
-Current state:
-
+- Runtime and DB cutover for canonical unit/section semantics is complete.
+- Planner progress now writes to `learning_progress_records`.
+- Skip audit now writes to `waived_units`.
 - Main schema/handoff docs were refreshed.
-- Older plans/spec notes still mention transitional legacy paths.
 
 Needed:
 
-- Sweep docs/specs/notes and mark them clearly as historical where needed.
-- Remove instructions that tell engineers to rely on legacy curriculum/mastery tables.
+- Sweep older notes/specs and mark transitional guidance as historical where needed.
+- Remove any leftover instruction that still tells engineers to rely on dropped legacy curriculum/mastery tables.
 
 Acceptance:
 

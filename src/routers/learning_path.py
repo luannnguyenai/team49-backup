@@ -89,14 +89,15 @@ async def api_get_learning_path(
     items: list[PathItemResponse] = [
         PathItemResponse(
             id=lp.id,
-            topic_id=lp.topic_id,
-            topic_name=topic_name,
-            module_name=module_name,
+            learning_unit_id=lp.learning_unit_id,
+            learning_unit_title=topic_name,
+            section_title=module_name,
             action=lp.action,
             estimated_hours=lp.estimated_hours,
             order_index=lp.order_index,
             week_number=lp.week_number,
             status=lp.status,
+            canonical_unit_id=lp.canonical_unit_id,
         )
         for lp, topic_name, module_name in rows
     ]
@@ -137,14 +138,15 @@ async def api_get_timeline(
         week_items: list[PathItemResponse] = [
             PathItemResponse(
                 id=lp.id,
-                topic_id=lp.topic_id,
-                topic_name=topic_name,
-                module_name=module_name,
+                learning_unit_id=lp.learning_unit_id,
+                learning_unit_title=topic_name,
+                section_title=module_name,
                 action=lp.action,
                 estimated_hours=lp.estimated_hours,
                 order_index=lp.order_index,
                 week_number=lp.week_number,
                 status=lp.status,
+                canonical_unit_id=lp.canonical_unit_id,
             )
             for lp, topic_name, module_name in rows
         ]
@@ -183,7 +185,7 @@ async def api_update_status(
     lp = await update_path_status(db, user.id, path_id, body.status)
     return UpdateStatusResponse(
         id=lp.id,
-        topic_id=lp.topic_id,
+        learning_unit_id=lp.learning_unit_id,
         status=lp.status,
         updated_at=lp.updated_at,
     )

@@ -247,3 +247,19 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 - source-of-truth production rõ hơn nhiều: product/content đi qua `courses/course_sections/learning_units` + canonical artifact tables; mastery/planner đi qua `learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
 - `sessions` và `interactions` vẫn được giữ, nhưng chỉ còn mang nghĩa shared runtime tables với canonical refs
 - đổi lại, mọi contract/document còn dùng từ vựng `topic/module/question` phải được rà lại để không đánh lừa người làm integration/frontend
+
+### Bổ sung 24/04/2026
+
+- Hoàn tất semantic cleanup cho các surface canonical còn lại:
+  - quiz dùng `learning_unit_id`
+  - module-test dùng `section_id`
+  - history filter dùng `section_id`
+- Nối execution-state write model thật:
+  - `learning_progress_records` là source-of-truth cho learner progress/status
+  - `waived_units` ghi audit khi user skip learning unit
+  - quiz complete tự mark `completed` và clear waive cũ nếu có
+- Thêm migration `20260424_lp_skipped` để mở rộng `learning_progress_status_enum` với giá trị `skipped`
+- Re-verify:
+  - `38 passed`
+  - `check_legacy_cleanup_readiness -> ready`
+  - `check_canonical_runtime_parity -> ready`

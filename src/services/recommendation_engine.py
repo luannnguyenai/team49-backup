@@ -18,18 +18,24 @@ import uuid
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
+from src.config import settings
 from src.exceptions import NotFoundError, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.models.course import LearningProgressStatus
 from src.models.learning import (
     PathAction,
     PathStatus,
+    Session,
+    SessionType,
 )
 from src.models.user import User
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
+from src.repositories.learning_progress_repo import LearningProgressRepository
 from src.repositories.planner_audit_repo import PlannerAuditRepository
+from src.repositories.waived_unit_repo import WaivedUnitRepository
 from src.schemas.learning_path import (
     GeneratePathRequest,
     GeneratePathResponse,
@@ -67,6 +73,12 @@ async def _generate_canonical_learning_path(
     if not units:
         raise NotFoundError("No linked canonical learning units found for selected courses.")
 
+    section_by_id = await content_repo.get_sections_by_ids([unit.section_id for unit in units])
+    status_by_unit = await _get_canonical_path_status_map(
+        db,
+        user_id=user.id,
+        learning_unit_ids=[unit.id for unit in units],
+    )
     canonical_unit_ids = [unit.canonical_unit_id for unit in units if unit.canonical_unit_id]
     unit_kp_rows = await content_repo.get_unit_kp_rows(canonical_unit_ids)
     kp_ids = sorted({row.kp_id for row in unit_kp_rows})
@@ -92,15 +104,16 @@ async def _generate_canonical_learning_path(
 
         item = PathItemResponse(
             id=unit.id,
-            topic_id=None,
-            topic_name=unit.title,
-            module_name="canonical_unit",
+            learning_unit_id=unit.id,
+            learning_unit_title=unit.title,
+            section_title=(
+                section_by_id[unit.section_id].title if unit.section_id in section_by_id else None
+            ),
             action=action,
             estimated_hours=estimated_hours if estimated_hours > 0 else None,
             order_index=order_index,
             week_number=None,
-            status=PathStatus.pending,
-            learning_unit_id=unit.id,
+            status=status_by_unit.get(unit.id, PathStatus.pending),
             canonical_unit_id=unit.canonical_unit_id,
         )
         items.append(item)
@@ -138,7 +151,7 @@ async def _generate_canonical_learning_path(
                 "canonical_unit_id": item.canonical_unit_id,
                 "estimated_hours": item.estimated_hours,
             },
-            rationale_text=f"Canonical planner selected unit `{item.topic_name}` as `{item.action.value}`.",
+            rationale_text=f"Canonical planner selected unit `{item.learning_unit_title}` as `{item.action.value}`.",
         )
 
     await audit_repo.upsert_session_state(
@@ -221,6 +234,14 @@ async def _get_canonical_learning_path_rows(
             continue
 
     unit_by_id = await CanonicalContentRepository(db).get_learning_units_by_ids(learning_unit_ids)
+    section_by_id = await CanonicalContentRepository(db).get_sections_by_ids(
+        [unit.section_id for unit in unit_by_id.values()]
+    )
+    status_by_unit = await _get_canonical_path_status_map(
+        db,
+        user_id=user_id,
+        learning_unit_ids=learning_unit_ids,
+    )
     rows: list[tuple[SimpleNamespace, str, str]] = []
     for fallback_order, item in enumerate(plan.recommended_path_json):
         if not isinstance(item, dict):
@@ -238,16 +259,19 @@ async def _get_canonical_learning_path_rows(
 
         row = SimpleNamespace(
             id=unit_id,
-            topic_id=None,
             action=action,
             estimated_hours=item.get("estimated_hours"),
             order_index=int(item.get("order_index", fallback_order)),
             week_number=item.get("week_number"),
-            status=PathStatus.pending,
+            status=status_by_unit.get(unit_id, PathStatus.pending),
             learning_unit_id=unit_id,
             canonical_unit_id=item.get("canonical_unit_id"),
         )
-        rows.append((row, unit.title if unit is not None else str(unit_id), "canonical_unit"))
+        section_title = None
+        if unit is not None:
+            section = section_by_id.get(unit.section_id)
+            section_title = section.title if section is not None else None
+        rows.append((row, unit.title if unit is not None else str(unit_id), section_title or "canonical_unit"))
 
     return sorted(rows, key=lambda row: row[0].order_index)
 
@@ -262,8 +286,178 @@ async def update_path_status(
     user_id: uuid.UUID,
     path_id: uuid.UUID,
     new_status: PathStatus,
-) -> None:
-    raise ValidationError(
-        "Canonical planner status updates must write a canonical progress/audit table; "
-        "legacy learning_paths writes are removed."
+) -> SimpleNamespace:
+    plan = await PlannerAuditRepository(db).get_latest_plan_for_user(
+        user_id,
+        trigger="generate_canonical_learning_path",
     )
+    if plan is None or not plan.recommended_path_json:
+        raise NotFoundError("Canonical learning path not found for current user.")
+
+    if not any(
+        isinstance(item, dict) and str(item.get("learning_unit_id")) == str(path_id)
+        for item in plan.recommended_path_json
+    ):
+        raise NotFoundError("Learning unit is not part of the current canonical path.")
+
+    content_repo = CanonicalContentRepository(db)
+    unit_by_id = await content_repo.get_learning_units_by_ids([path_id])
+    unit = unit_by_id.get(path_id)
+    if unit is None:
+        raise NotFoundError("Canonical learning unit not found.")
+
+    now = datetime.now(UTC)
+    progress_repo = LearningProgressRepository(db)
+    waived_repo = WaivedUnitRepository(db)
+    progress_status = _path_status_to_progress_status(new_status)
+
+    progress_row = await progress_repo.upsert(
+        user_id=user_id,
+        course_id=unit.course_id,
+        learning_unit_id=unit.id,
+        status=progress_status,
+        last_opened_at=now,
+        completed_at=now if new_status == PathStatus.completed else None,
+    )
+
+    if new_status == PathStatus.skipped and settings.write_waived_units_enabled:
+        mastery_lcb, evidence_items = await _build_waive_evidence(
+            db,
+            user_id=user_id,
+            canonical_unit_id=unit.canonical_unit_id,
+        )
+        skip_quiz = await _latest_quiz_score_percent(db, user_id=user_id, learning_unit_id=unit.id)
+        await waived_repo.upsert(
+            user_id=user_id,
+            learning_unit_id=unit.id,
+            evidence_items=evidence_items,
+            mastery_lcb_at_waive=mastery_lcb,
+            skip_quiz_score=skip_quiz,
+        )
+    else:
+        await waived_repo.delete_for_user_unit(user_id, unit.id)
+
+    await PlannerAuditRepository(db).upsert_session_state(
+        user_id=user_id,
+        session_id="canonical-learning-path",
+        last_plan_history_id=plan.id,
+        bridge_chain_depth=0,
+        consecutive_bridge_count=0,
+        state_json={
+            "canonical_runtime": True,
+            "last_status_update": {
+                "learning_unit_id": str(unit.id),
+                "status": new_status.value,
+                "updated_at": now.isoformat(),
+            },
+        },
+    )
+
+    return SimpleNamespace(
+        id=unit.id,
+        learning_unit_id=unit.id,
+        status=new_status,
+        updated_at=progress_row.completed_at or progress_row.last_opened_at,
+    )
+
+
+def _path_status_to_progress_status(status: PathStatus) -> LearningProgressStatus:
+    return {
+        PathStatus.pending: LearningProgressStatus.not_started,
+        PathStatus.in_progress: LearningProgressStatus.in_progress,
+        PathStatus.completed: LearningProgressStatus.completed,
+        PathStatus.skipped: LearningProgressStatus.skipped,
+    }[status]
+
+
+def _progress_status_to_path_status(status: LearningProgressStatus) -> PathStatus:
+    return {
+        LearningProgressStatus.not_started: PathStatus.pending,
+        LearningProgressStatus.in_progress: PathStatus.in_progress,
+        LearningProgressStatus.completed: PathStatus.completed,
+        LearningProgressStatus.blocked: PathStatus.pending,
+        LearningProgressStatus.skipped: PathStatus.skipped,
+    }[status]
+
+
+async def _get_canonical_path_status_map(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    learning_unit_ids: list[uuid.UUID],
+) -> dict[uuid.UUID, PathStatus]:
+    progress_repo = LearningProgressRepository(db)
+    waived_repo = WaivedUnitRepository(db)
+    progress_by_unit = await progress_repo.list_for_user_units(user_id, learning_unit_ids)
+    waived_by_unit = await waived_repo.list_for_user_units(user_id, learning_unit_ids)
+
+    status_by_unit: dict[uuid.UUID, PathStatus] = {}
+    for learning_unit_id in learning_unit_ids:
+        if learning_unit_id in waived_by_unit:
+            status_by_unit[learning_unit_id] = PathStatus.skipped
+            continue
+        progress = progress_by_unit.get(learning_unit_id)
+        if progress is not None:
+            status_by_unit[learning_unit_id] = _progress_status_to_path_status(progress.status)
+
+    return status_by_unit
+
+
+async def _build_waive_evidence(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    canonical_unit_id: str | None,
+) -> tuple[float | None, list[dict[str, object]]]:
+    if not canonical_unit_id:
+        return None, []
+
+    content_repo = CanonicalContentRepository(db)
+    unit_kp_rows = await content_repo.get_unit_kp_rows([canonical_unit_id])
+    kp_ids = sorted({row.kp_id for row in unit_kp_rows})
+    if not kp_ids:
+        return None, []
+
+    mastery_by_kp = await LearnerMasteryKPRepository(db).bulk_get_for_user(user_id, kp_ids)
+    evidence_items: list[dict[str, object]] = []
+    mastery_values: list[float] = []
+    for kp_id in kp_ids:
+        mastery = mastery_by_kp.get(kp_id)
+        if mastery is None:
+            continue
+        mastery_values.append(mastery.mastery_mean_cached)
+        evidence_items.append(
+            {
+                "type": "kp_mastery_snapshot",
+                "kp_id": kp_id,
+                "mastery_mean_cached": mastery.mastery_mean_cached,
+                "theta_mu": mastery.theta_mu,
+                "theta_sigma": mastery.theta_sigma,
+                "n_items_observed": mastery.n_items_observed,
+            }
+        )
+
+    mastery_lcb = min(mastery_values) if mastery_values else None
+    return mastery_lcb, evidence_items
+
+
+async def _latest_quiz_score_percent(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    learning_unit_id: uuid.UUID,
+) -> float | None:
+    from sqlalchemy import select
+
+    result = await db.execute(
+        select(Session.score_percent)
+        .where(
+            Session.user_id == user_id,
+            Session.session_type == SessionType.quiz,
+            Session.canonical_unit_id == learning_unit_id,
+            Session.completed_at.isnot(None),
+        )
+        .order_by(Session.completed_at.desc())
+        .limit(1)
+    )
+    return result.scalar_one_or_none()

@@ -5,6 +5,7 @@ from src.repositories.course_recommendation_repo import CourseRecommendationRepo
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.history_repo import HistoryRepository
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
+from src.repositories.learning_progress_repo import LearningProgressRepository
 from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.repositories.user_repo import UserRepository
 from src.repositories.waived_unit_repo import WaivedUnitRepository
@@ -17,6 +18,7 @@ __all__ = [
     "GoalPreferenceRepository",
     "HistoryRepository",
     "LearnerMasteryKPRepository",
+    "LearningProgressRepository",
     "PlannerAuditRepository",
     "UserRepository",
     "WaivedUnitRepository",
