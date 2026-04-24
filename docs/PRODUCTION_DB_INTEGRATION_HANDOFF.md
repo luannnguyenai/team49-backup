@@ -424,6 +424,15 @@ Runtime endpoints now available:
 - `POST /api/review/start`: creates an assessment session from `item_phase_map.phase='review'` for weak/stale/missing KP checks.
 - `POST /api/placement-lite/start`: creates an assessment session from `item_phase_map.phase='placement'` for longer-return recalibration.
 
+Synthetic demo reset:
+
+- Command: `.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --import-db`
+- Requires canonical content and product shell already imported.
+- Creates 9 login demo users and 30 separate cohort users.
+- Uses `@vinuni.edu.vn` demo emails and shared password `DemoPass123!`.
+- Re-running the command deletes/recreates only the known synthetic emails; it does not state-lock accounts.
+- Synthetic rows are for demo/stress/replay only and must not satisfy real calibration readiness.
+
 ## Required Consistency Checks
 
 Before enabling new read paths, verify:

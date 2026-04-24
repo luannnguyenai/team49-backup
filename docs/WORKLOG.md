@@ -380,3 +380,22 @@ Case runtime đã handle:
 | User quay lại sau lâu ngày | Covered backend | Resume classifier + review endpoint + placement-lite endpoint đã có; frontend resume UX là bước tích hợp riêng. |
 | User thích ôn lại | Covered backend | `/api/review/start` chọn câu hỏi review theo KP weak/stale/missing mastery. |
 | Synthetic learner data | Deferred | Chưa generate. Cần chốt volume, latent profiles, tagging synthetic và calibration separation trước khi sinh. |
+
+### Bổ sung deterministic synthetic demo users — 24/04/2026
+
+- Thêm script `src/scripts/pipeline/generate_synthetic_demo_users.py`.
+- Dataset tách rõ:
+  - `demo_accounts_v1`: 9 account login demo, email `@vinuni.edu.vn`, password chung `DemoPass123!`
+  - `cohort_30_v1`: 30 user nền cho dashboard/history/planner volume, không phải account demo chính
+- Không dùng random:
+  - stable UUID bằng `uuid5`
+  - fixed `DEMO_NOW = 2026-04-24T09:00:00Z`
+  - sorted course/unit/item catalog từ DB
+  - fixed correctness patterns theo `proficiency_band`
+- Cohort 30 có trình độ đa dạng:
+  - `beginner`: 6
+  - `developing`: 7
+  - `proficient`: 10
+  - `advanced`: 7
+- Không state-lock. Nếu demo làm thay đổi state, chạy lại script với `--import-db` để reset 9 demo accounts và 30 cohort users về baseline.
+- Synthetic vẫn không được tính là real calibration evidence; calibration readiness tiếp tục tách real vs synthetic response counts.

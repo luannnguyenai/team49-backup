@@ -39,28 +39,22 @@ These are already done and should not be reopened without a deliberate design de
 
 ## Remaining Work
 
-### 1. Synthetic Calibration Dataset Design
+### 1. Real Calibration Job / Synthetic Calibration Policy
 
 Current state:
 
 - Runtime has a phase-1 prior-based scoring policy and calibration readiness boundary.
 - Real production calibration still requires interaction volume.
-- User explicitly wants synthetic data to be handled carefully and later, not silently generated during cleanup.
+- Deterministic synthetic demo data now has a script and remains clearly separated from real calibration readiness.
+- Synthetic observations are still not allowed to satisfy real calibration readiness.
 
 Needed:
 
-- Design synthetic learner/session/interaction generation rules before generating any rows.
-- Decide volume and distribution:
-  - number of synthetic learners
-  - number of sessions per learner
-  - course preference split
-  - abandon/resume behavior
-  - answer correctness distribution by latent ability, item difficulty, and phase
-- Mark synthetic observations explicitly so they never satisfy real calibration readiness.
-- Only after approval, generate synthetic data for demo/stress testing and optional calibration experiments.
+- Decide whether synthetic observations should be used only for demo/stress testing or also for optional offline bootstrap experiments.
+- Build the actual calibration fitting job for 1PL/2PL/3PL when enough real production interaction data exists.
+- Keep calibration reports separating real and synthetic response counts.
 
 Acceptance:
 
-- Synthetic generation is documented before execution.
-- Generated rows cannot be confused with real production evidence.
+- Demo synthetic rows cannot be confused with real production evidence.
 - Calibration reports keep real and synthetic response counts separate.

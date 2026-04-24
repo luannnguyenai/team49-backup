@@ -207,6 +207,17 @@ npm --prefix frontend run type-check
 
 Known test caveat: the route contract suite using `httpx.ASGITransport(app=app)` has shown an existing request hang in this branch. Service-level canonical runtime tests are the reliable regression signal until that harness is fixed.
 
+## Synthetic Demo Data
+
+Deterministic demo users can be generated after canonical content and product shell are imported:
+
+```bash
+.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users
+.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --import-db
+```
+
+The script has no random generation. It writes resettable JSONL snapshots under `data/synthetic/` and can reset/import the known synthetic accounts into the active DB. Demo login accounts use `@vinuni.edu.vn` and password `DemoPass123!`; the 30-user synthetic cohort is separate from those 9 demo accounts.
+
 ## Historical Docs
 
 Files under `docs/superpowers/plans/` and `docs/superpowers/specs/` are implementation history unless the file explicitly says it is the active contract. They may mention transitional feature flags, compatibility fallbacks, or dropped tables. Treat these as audit context, not production design authority.
