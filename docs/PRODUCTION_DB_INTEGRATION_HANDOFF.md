@@ -416,6 +416,14 @@ Resume policy:
 - `7-30 days`: run a short `item_phase_map.phase='review'` check over recent high-mastery KP before trusting old mastery.
 - `> 30 days`: offer placement-lite or partial recalibration.
 
+Runtime endpoints now available:
+
+- `GET /api/learning-session/resume`: returns the classified resume route from `planner_session_state.last_activity`.
+- `PUT /api/learning-session/learning-units/{id}/progress`: persists video/current-stage progress into `learning_progress_records` and `planner_session_state`.
+- `/api/quiz/*`: mini-quiz start/answer/complete synchronizes `planner_session_state.current_progress.items_answered/items_remaining`.
+- `POST /api/review/start`: creates an assessment session from `item_phase_map.phase='review'` for weak/stale/missing KP checks.
+- `POST /api/placement-lite/start`: creates an assessment session from `item_phase_map.phase='placement'` for longer-return recalibration.
+
 ## Required Consistency Checks
 
 Before enabling new read paths, verify:

@@ -351,3 +351,32 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 - Thêm `estimate_mastery_lcb` / `estimate_mastery_lcb_on_read` và dùng chung cho planner + waive evidence.
 - Thêm `item_calibration_service` làm boundary cho calibration readiness, tách response thật với synthetic.
 - Chưa generate synthetic data; task synthetic được đưa xuống dưới cùng để chốt rule/volume riêng trước khi sinh.
+
+### Bổ sung learner runtime cases phase 1-5 — 24/04/2026
+
+- Phase 1: skip/waive không còn là status update tự do. Runtime kiểm tra `mastery_lcb >= 0.8` hoặc `skip_verification_score >= 80` trước khi ghi `waived_units`; fail thì trả `403`.
+- Phase 2: thêm learning-session API cho abandon/resume:
+  - `GET /api/learning-session/resume`
+  - `PUT /api/learning-session/learning-units/{id}/progress`
+  - dữ liệu lưu vào `learning_progress_records` và `planner_session_state.current_unit_id/current_stage/current_progress/last_activity`.
+- Phase 3: quiz mini-quiz đồng bộ state đang làm dở vào `planner_session_state.current_progress`:
+  - `quiz_id`
+  - `quiz_phase`
+  - `items_answered`
+  - `items_remaining`
+  - score khi complete
+- Phase 4: thêm `/api/review/start` cho quick-check khi user quay lại sau lâu ngày; selector đọc `item_phase_map.phase='review'` và ưu tiên KP thiếu/weak/stale.
+- Phase 5: thêm `/api/placement-lite/start` cho placement-lite; selector đọc `item_phase_map.phase='placement'`, sampling giới hạn theo learning units trong selected courses.
+
+Case runtime đã handle:
+
+| Case | Trạng thái | Ghi chú tích hợp |
+| --- | --- | --- |
+| User học đầy đủ 2 course | Covered | `goal_preferences.selected_course_ids` + planner unit-grain + progress/complete/assessment canonical. |
+| User chỉ học CS231 | Covered | Course scope nằm trong `goal_preferences.selected_course_ids`; planner/placement-lite/review lọc theo selected course. |
+| User thích skip | Covered | Skip chỉ được waive nếu có mastery LCB hoặc skip-verification score đủ ngưỡng. |
+| User bỏ ngang video | Covered backend | Progress API lưu `video_progress_s`, `video_finished`, current unit/stage. |
+| User bỏ ngang quiz | Covered backend | Quiz answers đã gửi vẫn là evidence trong `interactions`; phần còn lại nằm trong `items_remaining`. |
+| User quay lại sau lâu ngày | Covered backend | Resume classifier + review endpoint + placement-lite endpoint đã có; frontend resume UX là bước tích hợp riêng. |
+| User thích ôn lại | Covered backend | `/api/review/start` chọn câu hỏi review theo KP weak/stale/missing mastery. |
+| Synthetic learner data | Deferred | Chưa generate. Cần chốt volume, latent profiles, tagging synthetic và calibration separation trước khi sinh. |

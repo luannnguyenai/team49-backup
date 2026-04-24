@@ -186,8 +186,10 @@ npm run dev
 | Content | `/api/course-sections`, `/api/course-sections/{id}`, `/api/learning-units/{id}/content` | Product shell reads `course_sections` and `learning_units` linked to canonical unit IDs. |
 | Quiz | `/api/quiz/start`, `/api/quiz/{session_id}/answer`, `/api/quiz/{session_id}/complete` | Uses canonical learning unit IDs and `question_bank` phase `mini_quiz`. |
 | Assessment | `/api/assessment/start`, `/api/assessment/{session_id}/submit`, `/api/assessment/{session_id}/results` | Uses `learning_unit_ids`; results return `learning_unit_results`. |
+| Review / placement-lite | `/api/review/start`, `/api/placement-lite/start` | Runtime support for long-return quick checks and placement-lite recalibration. Both reuse assessment session submission. |
 | Module test | `/api/module-test/start`, `/api/module-test/{session_id}/submit`, `/api/module-test/{session_id}/results` | Uses section/unit semantics and canonical item selection. |
 | Learning path | `/api/learning-path/generate`, `/api/learning-path`, `/api/learning-path/timeline`, `/api/learning-path/{id}/status` | Planner returns unit-grain path, writes `plan_history`, `rationale_log`, and `planner_session_state`. |
+| Learning session | `/api/learning-session/resume`, `/api/learning-session/learning-units/{id}/progress` | Stores current unit/stage/progress for abandon/resume and returns the resume route. |
 | History | `/api/history`, `/api/history/{session_id}/detail` | Canonical interactions link via `interactions.canonical_item_id -> question_bank.item_id`. |
 | Tutor | `/api/lectures/*` | Lecture transcript/slide Q&A path; separate from canonical planner content. |
 

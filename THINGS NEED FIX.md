@@ -31,6 +31,11 @@ These are already done and should not be reopened without a deliberate design de
 - README and historical superpowers plans/specs now clearly point new work at the canonical production contract instead of legacy transitional architecture.
 - Orphan topic-grain helpers were removed; `scripts/seed.py`, `make seed`, and startup seeding now import canonical artifacts/product shell instead of legacy `modules/topics/questions`.
 - Mastery scoring policy is now explicit: phase-1 2PL-lite prior scoring updates `learner_mastery_kp`, planner/waive gates use a shared mastery LCB, and calibration readiness separates real responses from synthetic data.
+- Skip is now policy-gated before writing `waived_units`: either mastery LCB or a skip-verification score must satisfy the documented threshold.
+- Learning-session resume/progress endpoints persist video progress, current stage, current unit, and current quiz progress into `planner_session_state`.
+- Quiz abandon is represented by `items_answered` / `items_remaining` in `planner_session_state.current_progress`; answered items stay in `interactions` and are not rolled back.
+- Review quick-check runtime exists at `/api/review/start` and selects canonical questions from `item_phase_map.phase='review'`.
+- Placement-lite runtime exists at `/api/placement-lite/start` and selects canonical questions from `item_phase_map.phase='placement'` for partial recalibration flows.
 
 ## Remaining Work
 
