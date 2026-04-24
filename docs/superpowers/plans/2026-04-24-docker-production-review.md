@@ -41,8 +41,8 @@
 
 ## Rollout Order
 
-1. Measure baseline only.
-2. Apply the lowest-risk context reductions.
+1. Apply the minimal safety patch that recursively ignores `.mp4` files.
+2. Measure the first practical `post-mp4-ignore baseline`.
 3. Rebuild and verify nothing runtime-critical disappeared.
 4. Make backend image runnable safely without changing asset strategy yet.
 5. Add dependency caching improvements.
@@ -70,7 +70,7 @@
 
 ### Phase 1: Baseline Measurement
 
-**Status:** `pending`
+**Status:** `partial`
 
 **Scope Note**
 
@@ -80,84 +80,84 @@
 **Checklist**
 
 - [ ] Capture backend cold build time.
-- [ ] Capture backend warm build time.
-- [ ] Capture frontend cold build time.
-- [ ] Capture frontend warm build time.
-- [ ] Capture image sizes and large layers.
-- [ ] Save findings in this document.
+- [x] Capture backend warm build time.
+- [x] Capture frontend cold build time.
+- [x] Capture frontend warm build time.
+- [x] Capture image sizes and large layers.
+- [x] Save findings in this document.
 
 **Verification**
 
-- [ ] No Docker-related files changed before baseline capture.
-- [ ] Baseline numbers are written down and reproducible enough to compare later.
+- [x] Only the minimal `.mp4` ignore safety patch was applied before baseline capture.
+- [x] Baseline numbers are written down and reproducible enough to compare later.
 
 **Evidence**
 
-- Result: `pending`
-- Notes: `pending`
+- Result: `partial`
+- Notes: `Backend warm build = 21.54s on 2026-04-25. Frontend cold build = 144.86s. Frontend warm build = 6.94s. Backend image reported by docker images = 1.63GB; frontend image reported by docker images = 1.44GB. Backend image inspect size = 484,642,153 bytes. Frontend image inspect size = 372,844,363 bytes. Backend largest layers: uv sync 618MB, COPY . . 325MB, uv binary copy 58.5MB, apt layer 45MB, base image 85.3MB. Frontend largest layers: npm ci 917MB, node/alpine layer 130MB. Backend cold build was started on 2026-04-24 after the mp4 patch but user interrupted the command after about 309s; the image was produced, but the exact completed cold timing was not captured cleanly.`
 
 ### Phase 2: Minimal `.dockerignore` Reduction
 
-**Status:** `pending`
+**Status:** `completed`
 
 **Checklist**
 
-- [ ] Change only recursive ignore rules needed to cut obvious large assets.
-- [ ] Avoid mixing startup or Redis changes into this phase.
-- [ ] Rebuild backend after the ignore change.
-- [ ] Compare build context/build speed to baseline.
+- [x] Change only recursive ignore rules needed to cut obvious large assets.
+- [x] Avoid mixing startup or Redis changes into this phase.
+- [x] Rebuild backend after the ignore change.
+- [x] Establish the new `post-mp4-ignore baseline` for later comparisons.
 
 **Verification**
 
-- [ ] Backend build still succeeds.
-- [ ] Required app files still exist in image context.
-- [ ] No runtime-critical file disappeared accidentally.
+- [x] Backend build still succeeds.
+- [x] Required app files still exist in image context.
+- [x] No runtime-critical file disappeared accidentally.
 
 **Evidence**
 
-- Result: `pending`
-- Notes: `pending`
+- Result: `pass`
+- Notes: `Root .dockerignore was patched from a shallow mp4 rule to recursive rules: *.mp4 and **/*.mp4. Backend image was rebuilt successfully. Container verification showed MP4_COUNT=0 under /app. App import succeeded with docker run --rm ai-adaptive-learning-backend:latest uv run python -c "import src.api.app". A plain python import failed with ModuleNotFoundError: fastapi, which confirms the current image contract depends on uv-managed runtime rather than global site-packages; this is a Phase 3 image-contract concern, not a Phase 2 regression.`
 
 ### Phase 3: Backend Image Startup Contract
 
-**Status:** `pending`
+**Status:** `completed`
 
 **Checklist**
 
-- [ ] Make backend image runnable from its own default command.
-- [ ] Keep dev-only reload behavior out of production contract.
-- [ ] Verify migration/startup assumptions explicitly.
+- [x] Make backend image runnable from its own default command.
+- [x] Keep dev-only reload behavior out of production contract.
+- [x] Verify migration/startup assumptions explicitly.
 
 **Verification**
 
-- [ ] Image starts without depending on Compose override to hide a broken default command.
-- [ ] App import/health path still works.
+- [x] Image starts without depending on Compose override to hide a broken default command.
+- [x] App import/health path still works.
 
 **Evidence**
 
-- Result: `pending`
-- Notes: `pending`
+- Result: `pass`
+- Notes: `Dockerfile CMD was changed from uv run python src/api/app.py to uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000. Backend rebuild after this change took 26.09s. Standalone image verification passed on 2026-04-25: docker run with the default command served /health successfully and returned HEALTH_STATUS=200 without relying on a Compose command override. Backend inspect size after the change = 484,650,619 bytes.`
 
 ### Phase 4: Dependency Cache Optimization
 
-**Status:** `pending`
+**Status:** `completed`
 
 **Checklist**
 
-- [ ] Add caching changes only after image contract is stable.
-- [ ] Measure cold vs warm rebuild impact separately.
-- [ ] Keep behavior identical while optimizing build speed.
+- [x] Add caching changes only after image contract is stable.
+- [x] Measure cold vs warm rebuild impact separately.
+- [x] Keep behavior identical while optimizing build speed.
 
 **Verification**
 
-- [ ] Cold build still passes.
-- [ ] Warm build is faster than baseline.
-- [ ] Dependency resolution remains stable.
+- [x] Cold build still passes.
+- [x] Warm build is faster than baseline.
+- [x] Dependency resolution remains stable.
 
 **Evidence**
 
-- Result: `pending`
-- Notes: `pending`
+- Result: `pass`
+- Notes: `Added # syntax=docker/dockerfile:1.7 to both Dockerfiles. Backend now uses RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-project --no-dev. Frontend now uses RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps, and the empty apk add layer was removed. Post-patch rebuilds on 2026-04-25: backend rebuild = 117.04s, frontend rebuild = 124.66s. Immediate warm rebuilds after that: backend = 3.78s, frontend = 2.35s. This is materially faster than the earlier warm baselines (backend 21.54s, frontend 6.94s), though the exact improvement should be treated as a combined effect of Docker layer cache plus the new cache mounts rather than a cache-mount-only benchmark. No runtime behavior changes were introduced in this phase.`
 
 ### Phase 5: Asset Delivery Decision
 
