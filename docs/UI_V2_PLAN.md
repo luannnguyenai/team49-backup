@@ -48,6 +48,13 @@ Implementation should keep this distinction explicit:
 - `planner_session_state.current_unit_id`, `current_stage`, and `current_progress` already exist in the current repo schema and are the resume-state source for UI V2.
 - Item parameter storage should be hidden behind an "effective item parameters" selector. Current repo stores priors in `item_calibration`; if the canonical contract later moves priors to `question_bank`, UI/API contracts should not change.
 
+Session policy:
+
+- Create a new learning session on login or after 30 minutes of inactivity.
+- Do not create a new session on every page load.
+- Reset `consecutive_bridge_count` for a new session.
+- Preserve longer-lived progress in `learning_progress_records`, `waived_units`, `learner_mastery_kp`, and `plan_history`.
+
 ## 3. Current UX Gaps
 
 ### 3.1. Public Entry
@@ -461,6 +468,12 @@ Transfer phase:
 - UI V2 should not fire transfer quizzes in the first implementation unless a concrete product moment is defined.
 - Candidate future moment: optional bonus round after final quiz pass.
 
+Course overview prerequisite copy:
+
+- Preferred source: derive plain-language prerequisites from inter-course prerequisite edges and gateway/critical concepts during ingestion, then cache the copy on the course overview response.
+- Fallback source: allow TA-authored prerequisite copy for higher-quality wording.
+- UI should not generate prerequisite copy client-side from raw KP names.
+
 ### 5.9. Content Quality And Beta States
 
 Cold-start item calibration:
@@ -480,7 +493,7 @@ Segment checkpoint eligibility:
 
 - Do not assume every segment has a mini quiz.
 - Use `item_phase_map` availability and content salience to decide whether to pause, auto-advance, or queue review.
-- Prefer a materialized API field such as `salience_decision: core | tham_khao | skip` and `has_quiz_items: boolean` on learning unit responses so the player does not need to perform heavy runtime joins.
+- Prefer a materialized API field such as `salience_decision: core | reference | skip` and `has_quiz_items: boolean` on learning unit responses so the player does not need to perform heavy runtime joins.
 
 ### 5.10. Mastery Display Contract
 
@@ -520,6 +533,24 @@ Video failure:
 
 - If video/CDN fails but canonical content exists, fall back to text-only mode using `units.summary`, `units.key_points`, transcript links, and AI Tutor.
 - Keep mini quiz disabled until enough content evidence is available or the user explicitly chooses text-only learning.
+
+### 5.12. Goal Drift Flow
+
+Trigger:
+
+- User edits selected courses or goal weights.
+- Backend detects `goal_preferences.derived_from_course_set_hash` changed.
+
+UX:
+
+- Show a banner on `/dashboard` and `/learn`: "Lộ trình đã cập nhật theo mục tiêu mới."
+- Keep the banner until user dismisses it or starts the next recommended unit.
+- If plan changes affect the top path, show compact copy such as "2 bài kế tiếp đã được sắp xếp lại."
+
+System behavior:
+
+- Create a new `plan_history` row with `parent_plan_id` pointing to the previous plan.
+- Use `rationale_log` to explain the new top recommendations.
 
 ## 6. Screen-Level Plan
 
@@ -676,7 +707,7 @@ Route: `/assessment`
 
 Purpose:
 
-- Placement only, not generic quiz.
+- Course-level placement and stale-user placement-lite, not generic unit quiz.
 
 Needed changes:
 
@@ -685,6 +716,12 @@ Needed changes:
 - Show why the quiz matters.
 - Let user skip.
 - Label each question with course/segment context if possible.
+
+Boundary:
+
+- `/assessment` is used for onboarding placement and stale-user placement-lite.
+- `/quiz/[learningUnitId]` is a fallback route when mini quiz, skip verification, or bridge check cannot load inline inside the player, or when a direct link is needed.
+- Both routes should use the same quiz runtime contract, especially `POST /api/quiz/start` with a `phase`.
 
 ### 6.8. History
 
@@ -744,6 +781,12 @@ Segment decision:
 ```http
 POST /api/learning/segment-decision
 ```
+
+Endpoint boundary:
+
+- `/api/planner/current` is the macro roadmap: next unit to visit, review queue, bridge queue, and path rationale.
+- `/api/learning/segment-decision` is the micro decision when the user is entering a specific segment: learn, skip offer, bridge offer, or skim hint.
+- Planner responses should not include `skip` or `skim` as plan-level next actions. Those are per-segment decisions.
 
 Request:
 
@@ -816,13 +859,29 @@ Response:
     "kind": "learn | review | bridge | final_quiz",
     "unit_id": "uuid",
     "title": "Framing CS231n within AI",
-    "user_copy": "Tiếp tục bài học đầu tiên của CS231n."
+    "user_copy": "Tiếp tục bài học đầu tiên của CS231n.",
+    "readiness_label": "Đang tiến bộ"
   },
-  "path": [],
+  "path": [
+    {
+      "unit_id": "uuid",
+      "title": "Why vision matters",
+      "readiness_label": "Khá vững",
+      "reason_code": "next_in_sequence"
+    }
+  ],
   "review_queue": [],
   "bridge_queue": []
 }
 ```
+
+`readiness_label` enum:
+
+```text
+Chưa đủ dữ liệu | Cần củng cố | Đang tiến bộ | Khá vững | Đã nắm chắc
+```
+
+The backend owns this label using the mastery rules in section 5.10. Frontend should render the label and avoid reimplementing statistical thresholds.
 
 Mastery summary:
 
@@ -859,7 +918,7 @@ Request:
 ```json
 {
   "item_id": "qb_123",
-  "reason": "ambiguous | wrong_answer | poor_grounding | typo | other",
+  "reason": "ambiguous | wrong_answer | poor_grounding | outdated_content | typo | other",
   "notes": "The explanation references the wrong timestamp."
 }
 ```
@@ -904,6 +963,14 @@ UI opportunities:
 - `unit_kp_map.planner_role` can distinguish main learning content from support/background content.
 - `units.summary`, `units.key_points`, and `units.video_clip_ref` can power the lecture overview, timestamped key points, AI Tutor grounding, and quiz review deep-links.
 - Learning unit API responses should expose derived `salience_decision` and `has_quiz_items` so the player can decide between checkpoint, auto-advance, or reference-only treatment without expensive joins.
+
+`salience_decision` enum:
+
+| Enum | UI behavior |
+| --- | --- |
+| `core` | normal segment, no badge |
+| `reference` | show "Tham khảo", no required checkpoint unless quiz items exist and backend requests it |
+| `skip` | auto-advance/no checkpoint |
 
 Do not expose:
 
@@ -1081,6 +1148,7 @@ Avoid:
 
 - All primary buttons at least 44px height.
 - Keyboard navigation for quiz options.
+- Keyboard Enter/Space on focused `key_points` entries seeks the video player.
 - Visible focus states.
 - Color contrast AA.
 - Captions/transcript access near video.
@@ -1092,6 +1160,33 @@ Avoid:
 - 150-300ms transitions.
 - No blocking animation.
 - Respect `prefers-reduced-motion`.
+
+### 8.5. Copy And I18n Ownership
+
+MVP decision:
+
+- Backend may return `user_copy` for planner and segment-decision responses to move quickly.
+- Frontend owns static page copy and common labels.
+- All backend-owned copy should stay Vietnamese in UI V2 MVP.
+
+Technical debt:
+
+- For multi-language support, migrate backend `user_copy` to `user_copy_key` plus params, and let frontend resolve text through i18n files.
+- Do not mix tech-facing enums with Vietnamese strings. Enums should be English; UI labels should be localized separately.
+
+### 8.6. Telemetry Baseline
+
+Minimum events before Phase 8 cutover:
+
+- `segment_decision_shown` with `decision_type`, `reason_code`, `unit_id`.
+- `skip_offer_accepted`, `skip_quiz_passed`, `skip_quiz_failed`.
+- `bridge_offer_accepted`, `bridge_check_passed`, `bridge_cap_reached`.
+- `mini_quiz_shown`, `mini_quiz_passed`, `mini_quiz_failed`.
+- `plan_churned` with `parent_plan_id` and `unit_changes_in_top5`.
+- `resume_offered`, `resume_accepted`, `placement_lite_taken`.
+- `tutor_message_sent`, `tutor_citation_clicked`.
+
+Telemetry should not block learning actions. If tracking fails, user flow continues.
 
 ## 9. Implementation Phases
 
@@ -1182,6 +1277,7 @@ Exit criteria:
 Tasks:
 
 - Add video segment boundary tracking.
+- Use `video_clip_ref.end_ms` directly for segment-end pause; do not add another client buffer because canonical clip refs already include their buffer.
 - Pause at segment end.
 - Start mini quiz drawer from `phase='mini_quiz'`.
 - Add retry and review timestamp UI.
@@ -1289,7 +1385,7 @@ Exit criteria:
 
 - Receives bridge suggestion when foundation gap is detected.
 - Can return to original segment after bridge.
-- Is not trapped in infinite bridge loops.
+- After `consecutive_bridge_count >= 2` or `bridge_chain_depth >= 2`, UI must present guided-learn fallback and not offer another bridge in the same session.
 
 ### Returning Learner
 
@@ -1297,7 +1393,7 @@ Exit criteria:
 - If inactive for more than 7 days, sees quick-check suggestion.
 - Does not lose previous completed/waived units.
 
-## 11. Product Decisions And Remaining Questions
+## 11. Product Decisions
 
 Resolved decisions:
 
@@ -1308,12 +1404,9 @@ Resolved decisions:
 5. CS224n can remain browsable while unavailable; CTA should become "Thông báo khi mở" or equivalent.
 6. `/tutor` should redirect to the current active lecture when `planner_session_state.current_unit_id` exists; otherwise show a small explanation page.
 7. Planner rationale should show only the top 2-3 user-friendly reasons, never raw planner scores.
-
-Still open:
-
-1. Should gateway/critical prerequisite gaps ever be hard-blocked, or always bypassable by skip verification?
-2. Should the default mini-quiz behavior be configurable per user: immediate checkpoint vs lecture-end checkpoint?
-3. What quality threshold is required before showing "Đã review thủ công" on a course overview?
+8. Gateway/critical prerequisite gaps are not hard-blocked by default. Instead, raise skip verification to 7 items and 90% pass threshold when prerequisite concepts are `importance_level='critical'` and `structural_role='gateway'`.
+9. Immediate mini-quiz checkpoint is the default. A later user preference may allow `checkpoint_mode: immediate | end_of_lecture`, but Phase 0/1 should not implement this setting.
+10. Course quality badge threshold: show "Đã review thủ công" when at least 80% of course items are `review_status='reviewed'` or `provenance='human_ta_verified'`; show "Beta" when coverage is below 30%; show no badge in between.
 
 ## 12. Recommended Next Step
 
