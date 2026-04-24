@@ -436,7 +436,14 @@ These are intentional gaps, not missing UI work:
 
 - Temporary onboarding aliases for `known_topic_ids` and `desired_module_ids` remain only to avoid breaking old clients; frontend uses the course-first contract.
 - `planner_session_state.current_progress` stores the resume pointer, but frontend resume UI has not been wired yet.
-- `learner_mastery_kp` uses bootstrap scoring unless a calibration job has produced trusted item parameters.
+- `learner_mastery_kp` uses phase-1 2PL-lite prior scoring unless a calibration job has produced trusted item parameters.
+- One canonical answer updates every mapped KP from `item_kp_map`.
+- The update reads `item_calibration` and uses calibrated `difficulty_b/discrimination_a/guessing_c` only when `is_calibrated=true`; otherwise it uses `difficulty_prior/discrimination_prior/guessing_prior`.
+- The residual `observed - predicted_probability` drives the bounded `theta_mu` update, scaled by `item_kp_map.weight` and item discrimination.
+- `theta_sigma` shrinks conservatively with evidence strength, floored at `0.25`.
+- `mastery_mean_cached = sigmoid(theta_mu / sqrt(1 + theta_sigma^2))`.
+- Planner/waive gates should use `mastery_lcb = sigmoid((theta_mu - theta_sigma) / sqrt(1 + theta_sigma^2))`, with resume staleness applied on-read first.
+- Current planner thresholds: `mastery_lcb >= 0.8 -> skip`, `>= 0.5 -> quick_review`, otherwise `deep_practice`.
 - Historical docs may still mention pre-cutover tables and must be treated as archive unless refreshed.
 
 ## Do Not Do

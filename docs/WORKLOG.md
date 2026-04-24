@@ -340,3 +340,14 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
   - chạy parity report sau import
 - `make seed`, `make seed-check`, và `start.sh` không còn nhắc seed `modules/topics/questions`.
 - Giữ các script `*legacy*` trong `src/scripts/pipeline` vì chúng là archive/guard tooling; đã thêm docstring để phân biệt với runtime data source.
+
+### Bổ sung mastery scoring phase-1 — 24/04/2026
+
+- Thay bootstrap delta cố định bằng 2PL-lite prior scoring:
+  - đọc `item_calibration` theo `canonical_item_id`
+  - dùng calibrated params nếu `is_calibrated=true`, ngược lại dùng priors
+  - residual `observed - predicted_probability` quyết định delta `theta_mu`
+  - `item_kp_map.weight` và discrimination scale evidence theo Q-matrix
+- Thêm `estimate_mastery_lcb` / `estimate_mastery_lcb_on_read` và dùng chung cho planner + waive evidence.
+- Thêm `item_calibration_service` làm boundary cho calibration readiness, tách response thật với synthetic.
+- Chưa generate synthetic data; task synthetic được đưa xuống dưới cùng để chốt rule/volume riêng trước khi sinh.

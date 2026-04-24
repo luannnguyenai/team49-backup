@@ -41,7 +41,7 @@ from src.schemas.learning_path import (
     GeneratePathResponse,
     PathItemResponse,
 )
-from src.services.canonical_mastery_service import estimate_mastery_mean_on_read
+from src.services.canonical_mastery_service import estimate_mastery_lcb_on_read
 from src.services.canonical_planner_service import classify_unit_action
 
 # ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ async def _generate_canonical_learning_path(
     for order_index, unit in enumerate(units):
         unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
         mastery_values = [
-            estimate_mastery_mean_on_read(mastery_by_kp[kp_id], now=generated_at)
+            estimate_mastery_lcb_on_read(mastery_by_kp[kp_id], now=generated_at)
             for kp_id in unit_kps
             if kp_id in mastery_by_kp
         ]
@@ -440,18 +440,21 @@ async def _build_waive_evidence(
         return None, []
 
     mastery_by_kp = await LearnerMasteryKPRepository(db).bulk_get_for_user(user_id, kp_ids)
+    generated_at = datetime.now(UTC)
     evidence_items: list[dict[str, object]] = []
     mastery_values: list[float] = []
     for kp_id in kp_ids:
         mastery = mastery_by_kp.get(kp_id)
         if mastery is None:
             continue
-        mastery_values.append(mastery.mastery_mean_cached)
+        mastery_lcb = estimate_mastery_lcb_on_read(mastery, now=generated_at)
+        mastery_values.append(mastery_lcb)
         evidence_items.append(
             {
                 "type": "kp_mastery_snapshot",
                 "kp_id": kp_id,
                 "mastery_mean_cached": mastery.mastery_mean_cached,
+                "mastery_lcb_on_read": mastery_lcb,
                 "theta_mu": mastery.theta_mu,
                 "theta_sigma": mastery.theta_sigma,
                 "n_items_observed": mastery.n_items_observed,

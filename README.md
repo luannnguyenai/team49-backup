@@ -30,11 +30,13 @@ Generated JSONL under `data/final_artifacts/*/canonical/` is bootstrap/import da
 
 ## Scoring Status
 
-Current mastery scoring is a production-safe bootstrap, not validated production IRT/BKT.
+Current mastery scoring is phase-1 KP posterior scoring, not validated production IRT/BKT.
 
 - One answered canonical item updates all mapped KPs via `item_kp_map.weight`.
-- The current update policy adjusts `theta_mu`, shrinks `theta_sigma`, and recomputes `mastery_mean_cached`.
-- Planner thresholds must use the same KP-level mastery semantics as `canonical_mastery_service.py`.
+- If `item_calibration` has priors, the update uses a documented 2PL-lite residual: predicted probability from `difficulty_prior`, `discrimination_prior`, and `guessing_prior`; observed answer minus predicted probability drives the `theta_mu` delta.
+- If calibration priors are missing, the service falls back to neutral parameters rather than fabricating fitted IRT values.
+- Every update shrinks `theta_sigma` conservatively and recomputes `mastery_mean_cached`.
+- Planner gates use `mastery_lcb = sigmoid((theta_mu - theta_sigma) / sqrt(1 + theta_sigma^2))`, with staleness applied on-read before the LCB calculation.
 - `item_calibration` stores priors and reserved calibrated parameters, but true 1PL/2PL/3PL calibration still requires enough real or explicitly synthetic interaction data plus a calibration job.
 - Do not claim production IRT/BKT accuracy until calibration has run and been validated.
 
@@ -220,7 +222,7 @@ Active references:
 | --- | --- | --- |
 | Backend starts but content is empty | Canonical artifacts or product shell were not imported | Run canonical importer, product shell importer, then parity check. |
 | Quiz/assessment has no questions | Missing `item_phase_map` or `item_kp_map` rows for selected unit/phase | Validate canonical artifacts and inspect `question_bank` joins. |
-| Planner recommendations look flat | Sparse prerequisite graph or uncalibrated mastery | Check `prerequisite_edges`, `unit_kp_map`, and current `learner_mastery_kp` distribution. |
+| Planner recommendations look flat | Sparse prerequisite graph, missing KP mastery, or only neutral calibration priors | Check `prerequisite_edges`, `unit_kp_map`, `item_calibration`, and current `learner_mastery_kp` distribution. |
 | Tutor cannot answer lecture-specific questions | Missing `data/courses/<course>/transcripts` or lecture seed | Restore course assets and run `scripts.seed_lectures`. |
 | Docs mention `modules/topics/questions` as active | Historical doc, not current contract | Use the active references above. |
 

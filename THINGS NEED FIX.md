@@ -30,33 +30,32 @@ These are already done and should not be reopened without a deliberate design de
 - Runtime DTO/API naming is learning-unit/section-first for assessment results, module-test groups/results, learning-path counts, and history question detail.
 - README and historical superpowers plans/specs now clearly point new work at the canonical production contract instead of legacy transitional architecture.
 - Orphan topic-grain helpers were removed; `scripts/seed.py`, `make seed`, and startup seeding now import canonical artifacts/product shell instead of legacy `modules/topics/questions`.
+- Mastery scoring policy is now explicit: phase-1 2PL-lite prior scoring updates `learner_mastery_kp`, planner/waive gates use a shared mastery LCB, and calibration readiness separates real responses from synthetic data.
 
 ## Remaining Work
 
-### 1. Production Mastery / Scoring Calibration
+### 1. Synthetic Calibration Dataset Design
 
 Current state:
 
-- Runtime writes `learner_mastery_kp` from canonical assessment evidence.
-- `src/services/canonical_mastery_service.py` currently uses a bounded bootstrap heuristic:
-  - `theta_mu +=/-= 0.25 * item_kp_map.weight`
-  - `theta_sigma *= 0.95`
-  - `mastery_mean_cached = sigmoid(theta_mu / sqrt(1 + theta_sigma^2))`
-- `item_calibration` has priors and reserved fields for IRT-style calibration, but calibrated parameters are not yet produced from real interaction data.
-- README now states this is bootstrap scoring unless calibration has actually run.
+- Runtime has a phase-1 prior-based scoring policy and calibration readiness boundary.
+- Real production calibration still requires interaction volume.
+- User explicitly wants synthetic data to be handled carefully and later, not silently generated during cleanup.
 
 Needed:
 
-- Define the production scoring policy for phase 1:
-  - whether to keep the bootstrap theta update as demo-only
-  - whether to move to 1PL/2PL-lite using `item_calibration.difficulty_prior`, `discrimination_prior`, `guessing_prior`
-  - how to compute/update `theta_mu`, `theta_sigma`, `mastery_mean_cached`, and mastery LCB consistently
-- Add calibration input contract from `sessions` + `interactions` + `question_bank` + `item_kp_map`.
-- Add a job or service boundary for future real/synthetic calibration, without pretending synthetic calibration is production truth.
-- Update README/docs so they clearly say current scoring is bootstrap unless calibration has been run.
+- Design synthetic learner/session/interaction generation rules before generating any rows.
+- Decide volume and distribution:
+  - number of synthetic learners
+  - number of sessions per learner
+  - course preference split
+  - abandon/resume behavior
+  - answer correctness distribution by latent ability, item difficulty, and phase
+- Mark synthetic observations explicitly so they never satisfy real calibration readiness.
+- Only after approval, generate synthetic data for demo/stress testing and optional calibration experiments.
 
 Acceptance:
 
-- A developer can explain exactly how one answer changes `learner_mastery_kp`.
-- Planner skip/quick-review/deep-practice thresholds use the same documented mastery semantics.
-- No doc claims production IRT/BKT accuracy before calibration exists.
+- Synthetic generation is documented before execution.
+- Generated rows cannot be confused with real production evidence.
+- Calibration reports keep real and synthetic response counts separate.
