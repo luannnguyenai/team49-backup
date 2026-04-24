@@ -101,7 +101,7 @@ Cleanup requirement:
 
 ### `modules`, `topics`, `knowledge_components`
 
-Hiện còn được dùng bởi:
+Historical references that previously needed cleanup:
 
 - `src/routers/content.py`
 - `src/repositories/assessment_repo.py`
@@ -111,6 +111,8 @@ Hiện còn được dùng bởi:
 - `src/services/recommendation_engine.py` legacy branch
 - `src/kg/*`
 - `src/utils/topological_sort.py`
+
+Current source scan status: these runtime references are no longer active after canonical cutover, `src/kg/*` was removed, and `src/utils/topological_sort.py` was deleted.
 
 Cleanup requirement:
 
@@ -315,6 +317,12 @@ If any gate fails, do not rename/drop legacy tables. The readiness report distin
 - accepted model definitions: acceptable until the final code-removal phase, because imports alone do not query dropped tables
 - unguarded references: blockers for rename/drop
 - canonical parity checker blocks when no product `learning_units` are linked to canonical units, any product unit is unlinked, or `question_bank` items lack phase/KP maps. Planner/audit and canonical interaction counts are reported for visibility but are not hard blockers on a fresh DB with no learner activity.
+
+## Current State After Canonical Cutover
+
+- `scripts/seed.py` now imports canonical artifacts and product shell rows instead of `modules/topics/questions`.
+- `src/services/timeline_builder.py`, `src/utils/topological_sort.py`, and `src/scripts/build_kg.py` were removed because they had no active runtime/test dependency after the canonical cutover.
+- Remaining `src/scripts/pipeline/*legacy*` files are archive/guard tooling, not production runtime sources.
 
 ## Current Recommendation
 

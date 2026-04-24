@@ -208,14 +208,14 @@ log_ok "Backend healthy tại http://localhost:8000"
 # =============================================================================
 log_section "Bước 3 — Seed dữ liệu"
 
-# Kiểm tra bảng modules có data chưa — chỉ seed nếu rỗng
-MODULE_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM modules;" 2>/dev/null | tr -d '[:space:]' || echo "0")
-if [ "$MODULE_COUNT" = "0" ]; then
-  log_info "Seed curriculum (modules, topics, questions)..."
-  docker compose exec -T backend uv run python scripts/seed.py 2>&1 && log_ok "Seed curriculum hoàn tất" \
+# Kiểm tra product shell canonical có data chưa — chỉ import nếu rỗng
+UNIT_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM learning_units;" 2>/dev/null | tr -d '[:space:]' || echo "0")
+if [ "$UNIT_COUNT" = "0" ]; then
+  log_info "Import canonical content và product shell..."
+  docker compose exec -T backend uv run python scripts/seed.py 2>&1 && log_ok "Import canonical content hoàn tất" \
     || log_warn "seed.py thất bại — bỏ qua, tiếp tục"
 else
-  log_ok "Curriculum đã có sẵn (${MODULE_COUNT} module) — bỏ qua seed"
+  log_ok "Canonical product shell đã có sẵn (${UNIT_COUNT} learning unit) — bỏ qua import"
 fi
 
 # Kiểm tra bảng lectures có data chưa — chỉ seed nếu rỗng
@@ -252,13 +252,22 @@ if os.path.exists(cs231n_path):
 else:
     print("  [WARN] courses/CS231n/ không tồn tại trong container")
 
-for f in ["modules.json", "topics.json", "question_bank.json"]:
+for f in ["courses.json", "overviews.json", "units.json"]:
     path = f"{data_path}/bootstrap/{f}"
     if os.path.exists(path):
         data = json.load(open(path))
         print(f"  {f}: {len(data)} records")
     else:
         print(f"  [WARN] {f} không tồn tại")
+
+canonical_path = "/app/data/final_artifacts/cs224n_cs231n_v1/canonical"
+for f in ["question_bank.jsonl", "item_phase_map.jsonl", "item_kp_map.jsonl"]:
+    path = f"{canonical_path}/{f}"
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as handle:
+            print(f"  canonical/{f}: {sum(1 for _ in handle)} rows")
+    else:
+        print(f"  [WARN] canonical/{f} không tồn tại")
 EOF
 
 # =============================================================================

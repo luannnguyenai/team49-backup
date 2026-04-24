@@ -1,3 +1,9 @@
+"""Archive-only helper retained for audit before/after legacy table cleanup.
+
+Do not use this script as a runtime data source. The active production contract
+is canonical content plus product shell tables.
+"""
+
 from __future__ import annotations
 
 import argparse

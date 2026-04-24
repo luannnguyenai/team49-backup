@@ -1,3 +1,9 @@
+"""Safety guard for legacy cleanup/archive table lists.
+
+This intentionally remains after the runtime legacy tables were dropped so
+future cleanup scripts cannot target canonical/product tables by mistake.
+"""
+
 from __future__ import annotations
 
 import argparse

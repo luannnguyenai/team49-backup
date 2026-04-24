@@ -29,34 +29,11 @@ These are already done and should not be reopened without a deliberate design de
 - Onboarding contract is course-first: frontend sends `known_unit_ids`, `desired_section_ids`, and `selected_course_ids`; backend writes explicit `goal_preferences.selected_course_ids`.
 - Runtime DTO/API naming is learning-unit/section-first for assessment results, module-test groups/results, learning-path counts, and history question detail.
 - README and historical superpowers plans/specs now clearly point new work at the canonical production contract instead of legacy transitional architecture.
+- Orphan topic-grain helpers were removed; `scripts/seed.py`, `make seed`, and startup seeding now import canonical artifacts/product shell instead of legacy `modules/topics/questions`.
 
 ## Remaining Work
 
-### 1. Orphan Legacy Helper / Script Review
-
-Current state:
-
-- Runtime DB legacy tables are dropped, but a few helper files still speak topic-grain or legacy archive language:
-  - `src/utils/topological_sort.py`
-  - `src/services/timeline_builder.py`
-  - `src/data_paths.py` still exposes `MODULES_FILE` / `TOPICS_FILE`
-  - legacy export/check scripts under `src/scripts/pipeline/*legacy*`
-- Some of these are harmless historical/guard tooling; some may now be dead code.
-
-Needed:
-
-- For each helper/script, decide one of:
-  - keep and rename to canonical unit/section semantics
-  - move to explicit legacy/archive tooling
-  - delete after confirming no runtime/test dependency
-- Do not delete guard scripts that still protect canonical cleanup unless they are replaced by a newer check.
-
-Acceptance:
-
-- `rg` for active runtime code no longer shows unused topic-grain helpers as if they were production planner logic.
-- Any remaining legacy script is clearly marked as archive/audit tooling.
-
-### 2. Production Mastery / Scoring Calibration
+### 1. Production Mastery / Scoring Calibration
 
 Current state:
 

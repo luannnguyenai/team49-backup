@@ -327,3 +327,16 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
   - learner/planner: `learner_mastery_kp`, `learning_progress_records`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`
 - Gỡ claim sai rằng production đã có BKT/IRT 2PL calibrated; README giờ nói rõ scoring hiện tại là bootstrap KP-level cho đến khi có calibration job thật.
 - Đánh dấu các plan/spec trong `docs/superpowers` là historical để người mới không dùng chúng như active contract.
+
+### Bổ sung orphan legacy helper cleanup — 24/04/2026
+
+- Xóa helper dead không còn caller:
+  - `src/utils/topological_sort.py`
+  - `src/services/timeline_builder.py`
+  - `src/scripts/build_kg.py`
+- Chuyển `scripts/seed.py` thành canonical bootstrap wrapper:
+  - import `canonical/*.jsonl`
+  - import product shell `courses/course_sections/learning_units`
+  - chạy parity report sau import
+- `make seed`, `make seed-check`, và `start.sh` không còn nhắc seed `modules/topics/questions`.
+- Giữ các script `*legacy*` trong `src/scripts/pipeline` vì chúng là archive/guard tooling; đã thêm docstring để phân biệt với runtime data source.

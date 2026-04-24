@@ -1,3 +1,5 @@
+"""Archive/guard helper for detecting accidental legacy schema regressions."""
+
 from __future__ import annotations
 
 import argparse
