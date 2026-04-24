@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 
+from src.exceptions import ForbiddenError
 from src.models.course import LearningProgressStatus
 from src.models.learning import PathAction, PathStatus
 from src.schemas.learning_path import PathItemResponse
@@ -242,3 +243,83 @@ async def test_update_path_status_writes_progress_and_waive(monkeypatch):
     assert FakePlannerAuditRepository.session_state_payload["current_stage"] == "between_units"
     assert FakePlannerAuditRepository.session_state_payload["current_progress"]["status"] == "skipped"
     assert FakePlannerAuditRepository.session_state_payload["last_activity"] is not None
+
+
+@pytest.mark.asyncio
+async def test_update_path_status_rejects_skip_without_mastery_or_skip_quiz(monkeypatch):
+    user_id = uuid4()
+    unit_id = uuid4()
+    course_id = uuid4()
+
+    class FakePlannerAuditRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_latest_plan_for_user(self, actual_user_id, *, trigger=None):
+            assert actual_user_id == user_id
+            return SimpleNamespace(
+                id=uuid4(),
+                recommended_path_json=[{"learning_unit_id": str(unit_id)}],
+            )
+
+    class FakeCanonicalContentRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_learning_units_by_ids(self, learning_unit_ids):
+            return {
+                unit_id: SimpleNamespace(
+                    id=unit_id,
+                    course_id=course_id,
+                    canonical_unit_id="cs231n::u1",
+                )
+            }
+
+    class FakeLearningProgressRepository:
+        touched = False
+
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def upsert(self, **payload):
+            FakeLearningProgressRepository.touched = True
+
+    class FakeWaivedUnitRepository:
+        touched = False
+
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def upsert(self, **payload):
+            FakeWaivedUnitRepository.touched = True
+
+        async def delete_for_user_unit(self, actual_user_id, learning_unit_id):
+            FakeWaivedUnitRepository.touched = True
+
+    async def fake_build_waive_evidence(db, *, user_id, canonical_unit_id):
+        return 0.42, [{"type": "kp_mastery_snapshot", "kp_id": "kp-1"}]
+
+    async def fake_latest_quiz_score_percent(db, *, user_id, learning_unit_id):
+        return 70.0
+
+    monkeypatch.setattr(recommendation_engine, "PlannerAuditRepository", FakePlannerAuditRepository)
+    monkeypatch.setattr(recommendation_engine, "CanonicalContentRepository", FakeCanonicalContentRepository)
+    monkeypatch.setattr(recommendation_engine, "LearningProgressRepository", FakeLearningProgressRepository)
+    monkeypatch.setattr(recommendation_engine, "WaivedUnitRepository", FakeWaivedUnitRepository)
+    monkeypatch.setattr(recommendation_engine, "_build_waive_evidence", fake_build_waive_evidence)
+    monkeypatch.setattr(
+        recommendation_engine,
+        "_latest_quiz_score_percent",
+        fake_latest_quiz_score_percent,
+    )
+
+    with pytest.raises(ForbiddenError):
+        await recommendation_engine.update_path_status(
+            db="db-session",
+            user_id=user_id,
+            path_id=unit_id,
+            new_status=PathStatus.skipped,
+        )
+
+    assert FakeLearningProgressRepository.touched is False
+    assert FakeWaivedUnitRepository.touched is False

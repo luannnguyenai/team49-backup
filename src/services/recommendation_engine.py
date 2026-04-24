@@ -19,7 +19,7 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 
 from src.config import settings
-from src.exceptions import NotFoundError, ValidationError
+from src.exceptions import ForbiddenError, NotFoundError, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.course import LearningProgressStatus
@@ -43,6 +43,7 @@ from src.schemas.learning_path import (
 )
 from src.services.canonical_mastery_service import estimate_mastery_lcb_on_read
 from src.services.canonical_planner_service import classify_unit_action
+from src.services.skip_policy_service import can_skip_unit
 
 # ---------------------------------------------------------------------------
 # Main entry point
@@ -315,6 +316,21 @@ async def update_path_status(
     waived_repo = WaivedUnitRepository(db)
     progress_status = _path_status_to_progress_status(new_status)
 
+    mastery_lcb = None
+    evidence_items: list[dict[str, object]] = []
+    skip_quiz = None
+    if new_status == PathStatus.skipped and settings.write_waived_units_enabled:
+        mastery_lcb, evidence_items = await _build_waive_evidence(
+            db,
+            user_id=user_id,
+            canonical_unit_id=unit.canonical_unit_id,
+        )
+        skip_quiz = await _latest_quiz_score_percent(db, user_id=user_id, learning_unit_id=unit.id)
+        if not can_skip_unit(mastery_lcb=mastery_lcb, skip_quiz_score=skip_quiz):
+            raise ForbiddenError(
+                "Learning unit cannot be skipped without sufficient mastery LCB or skip-verification score."
+            )
+
     progress_row = await progress_repo.upsert(
         user_id=user_id,
         course_id=unit.course_id,
@@ -325,12 +341,6 @@ async def update_path_status(
     )
 
     if new_status == PathStatus.skipped and settings.write_waived_units_enabled:
-        mastery_lcb, evidence_items = await _build_waive_evidence(
-            db,
-            user_id=user_id,
-            canonical_unit_id=unit.canonical_unit_id,
-        )
-        skip_quiz = await _latest_quiz_score_percent(db, user_id=user_id, learning_unit_id=unit.id)
         await waived_repo.upsert(
             user_id=user_id,
             learning_unit_id=unit.id,
