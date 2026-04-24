@@ -28,35 +28,7 @@ These are already done and should not be reopened without a deliberate design de
 
 ## Remaining Work
 
-### 1. Production Mastery / Scoring Calibration
-
-Current state:
-
-- Runtime writes `learner_mastery_kp` from canonical assessment evidence.
-- `src/services/canonical_mastery_service.py` currently uses a bounded bootstrap heuristic:
-  - `theta_mu +=/-= 0.25 * item_kp_map.weight`
-  - `theta_sigma *= 0.95`
-  - `mastery_mean_cached = sigmoid(theta_mu / sqrt(1 + theta_sigma^2))`
-- `item_calibration` has priors and reserved fields for IRT-style calibration, but calibrated parameters are not yet produced from real interaction data.
-- README still describes BKT / IRT 2PL as if fully implemented.
-
-Needed:
-
-- Define the production scoring policy for phase 1:
-  - whether to keep the bootstrap theta update as demo-only
-  - whether to move to 1PL/2PL-lite using `item_calibration.difficulty_prior`, `discrimination_prior`, `guessing_prior`
-  - how to compute/update `theta_mu`, `theta_sigma`, `mastery_mean_cached`, and mastery LCB consistently
-- Add calibration input contract from `sessions` + `interactions` + `question_bank` + `item_kp_map`.
-- Add a job or service boundary for future real/synthetic calibration, without pretending synthetic calibration is production truth.
-- Update README/docs so they clearly say current scoring is bootstrap unless calibration has been run.
-
-Acceptance:
-
-- A developer can explain exactly how one answer changes `learner_mastery_kp`.
-- Planner skip/quick-review/deep-practice thresholds use the same documented mastery semantics.
-- No doc claims production IRT/BKT accuracy before calibration exists.
-
-### 2. Abandon / Resume Runtime State
+### 1. Abandon / Resume Runtime State
 
 Current state:
 
@@ -109,7 +81,7 @@ Acceptance:
 - Planner does not treat stale 3-week-old mastery as equally reliable without on-read uncertainty inflation.
 - Completed/waived units are not deleted just because mastery became stale.
 
-### 3. Course-First Onboarding / Goal Preferences Contract
+### 2. Course-First Onboarding / Goal Preferences Contract
 
 Current state:
 
@@ -137,7 +109,7 @@ Acceptance:
 - A new frontend/backend engineer can wire onboarding without seeing `topic/module` as the primary contract.
 - `goal_preferences` rows contain explicit course scope for planner goal weighting.
 
-### 4. Frontend / API Semantic Naming Cleanup
+### 3. Frontend / API Semantic Naming Cleanup
 
 Current state:
 
@@ -164,7 +136,7 @@ Acceptance:
 - Tests no longer need to mentally translate "topic" to "learning unit".
 - No UI visual redesign is required for this task.
 
-### 5. Historical Docs / README Sweep
+### 4. Historical Docs / README Sweep
 
 Current state:
 
@@ -191,7 +163,7 @@ Acceptance:
 - New engineer reading the repo cannot mistake legacy tables or old plans for active production design.
 - README matches the canonical runtime that currently passes build/e2e.
 
-### 6. Orphan Legacy Helper / Script Review
+### 5. Orphan Legacy Helper / Script Review
 
 Current state:
 
@@ -214,3 +186,31 @@ Acceptance:
 
 - `rg` for active runtime code no longer shows unused topic-grain helpers as if they were production planner logic.
 - Any remaining legacy script is clearly marked as archive/audit tooling.
+
+### 6. Production Mastery / Scoring Calibration
+
+Current state:
+
+- Runtime writes `learner_mastery_kp` from canonical assessment evidence.
+- `src/services/canonical_mastery_service.py` currently uses a bounded bootstrap heuristic:
+  - `theta_mu +=/-= 0.25 * item_kp_map.weight`
+  - `theta_sigma *= 0.95`
+  - `mastery_mean_cached = sigmoid(theta_mu / sqrt(1 + theta_sigma^2))`
+- `item_calibration` has priors and reserved fields for IRT-style calibration, but calibrated parameters are not yet produced from real interaction data.
+- README still describes BKT / IRT 2PL as if fully implemented.
+
+Needed:
+
+- Define the production scoring policy for phase 1:
+  - whether to keep the bootstrap theta update as demo-only
+  - whether to move to 1PL/2PL-lite using `item_calibration.difficulty_prior`, `discrimination_prior`, `guessing_prior`
+  - how to compute/update `theta_mu`, `theta_sigma`, `mastery_mean_cached`, and mastery LCB consistently
+- Add calibration input contract from `sessions` + `interactions` + `question_bank` + `item_kp_map`.
+- Add a job or service boundary for future real/synthetic calibration, without pretending synthetic calibration is production truth.
+- Update README/docs so they clearly say current scoring is bootstrap unless calibration has been run.
+
+Acceptance:
+
+- A developer can explain exactly how one answer changes `learner_mastery_kp`.
+- Planner skip/quick-review/deep-practice thresholds use the same documented mastery semantics.
+- No doc claims production IRT/BKT accuracy before calibration exists.
