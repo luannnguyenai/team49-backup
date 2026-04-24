@@ -78,7 +78,7 @@ async def test_submit_canonical_assessment_writes_interaction_and_mastery(monkey
     )
 
     assert response.overall_score_percent == 100.0
-    assert len(response.topic_results) == 1
+    assert len(response.learning_unit_results) == 1
     assert updated == [(user_id, "item-1", True)]
     interaction = db.add.call_args_list[0].args[0]
     assert interaction.question_id is None

@@ -4,7 +4,7 @@
 // Full-screen module test exam:
 //   - All questions visible via left navigation panel (click to jump)
 //   - One question shown at a time
-//   - Topic section headers
+//   - Learning-unit section headers
 //   - Flag button per question
 //   - No answer reveal until final submit
 //   - Confirm dialog before submit
@@ -32,7 +32,7 @@ import type {
   ModuleTestStartResponse,
   QuestionForModuleTest,
   SelectedAnswer,
-  TopicQuestionsGroup,
+  LearningUnitQuestionsGroup,
 } from "@/types";
 import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
 
@@ -65,24 +65,24 @@ function fmtTime(secs: number) {
   return `${m}:${s}`;
 }
 
-/** Flatten TopicQuestionsGroup[] → QuestionForModuleTest[] in order */
-function flattenQuestions(topics: TopicQuestionsGroup[]): QuestionForModuleTest[] {
-  return topics.flatMap((g) => g.questions);
+/** Flatten LearningUnitQuestionsGroup[] → QuestionForModuleTest[] in order */
+function flattenQuestions(groups: LearningUnitQuestionsGroup[]): QuestionForModuleTest[] {
+  return groups.flatMap((g) => g.questions);
 }
 
-/** Map questionId → topicName */
-function buildTopicNameMap(topics: TopicQuestionsGroup[]): Record<string, string> {
+/** Map questionId → learningUnitTitle */
+function buildLearningUnitTitleMap(groups: LearningUnitQuestionsGroup[]): Record<string, string> {
   const m: Record<string, string> = {};
-  for (const g of topics) {
+  for (const g of groups) {
     for (const q of g.questions) m[q.id] = g.learning_unit_title;
   }
   return m;
 }
 
-/** First questionId for each topic group (used to show section header) */
-function buildTopicFirstQuestionIds(topics: TopicQuestionsGroup[]): Set<string> {
+/** First questionId for each learning-unit group (used to show section header) */
+function buildLearningUnitFirstQuestionIds(groups: LearningUnitQuestionsGroup[]): Set<string> {
   const s = new Set<string>();
-  for (const g of topics) {
+  for (const g of groups) {
     if (g.questions[0]) s.add(g.questions[0].id);
   }
   return s;
@@ -221,7 +221,7 @@ export default function ModuleTestPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [startData, setStartData] = useState<ModuleTestStartResponse | null>(null);
   const [allQuestions, setAllQuestions] = useState<QuestionForModuleTest[]>([]);
-  const [topicNameMap, setTopicNameMap] = useState<Record<string, string>>({});
+  const [learningUnitTitleMap, setLearningUnitTitleMap] = useState<Record<string, string>>({});
   const [firstQIds, setFirstQIds] = useState<Set<string>>(new Set());
   const [sessionId, setSessionId] = useState("");
 
@@ -245,8 +245,8 @@ export default function ModuleTestPage() {
         const flat = flattenQuestions(data.learning_units);
         setStartData(data);
         setAllQuestions(flat);
-        setTopicNameMap(buildTopicNameMap(data.learning_units));
-        setFirstQIds(buildTopicFirstQuestionIds(data.learning_units));
+        setLearningUnitTitleMap(buildLearningUnitTitleMap(data.learning_units));
+        setFirstQIds(buildLearningUnitFirstQuestionIds(data.learning_units));
         setSessionId(data.session_id);
         setPhase("active");
         timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -372,8 +372,8 @@ export default function ModuleTestPage() {
 
   const bloom = BLOOM_BADGE[question.bloom_level];
   const diff = DIFF_BADGE[question.difficulty_bucket];
-  const currentTopicName = topicNameMap[question.id] ?? "";
-  const isFirstOfTopic = firstQIds.has(question.id);
+  const currentLearningUnitTitle = learningUnitTitleMap[question.id] ?? "";
+  const isFirstOfLearningUnit = firstQIds.has(question.id);
   const isCurrentFlagged = flagged.has(question.id);
   const currentAnswer = answers[question.id];
   const questionNum = currentIdx + 1;
@@ -567,15 +567,15 @@ export default function ModuleTestPage() {
             </div>
           )}
 
-          {/* Topic section header — shown when first question of a topic */}
-          {isFirstOfTopic && (
+          {/* Learning-unit section header — shown when first question of a unit */}
+          {isFirstOfLearningUnit && (
             <div
               className="flex items-center gap-2 rounded-xl border px-4 py-3"
               style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
             >
               <BookOpen size={16} style={{ color: "var(--color-primary-500)" }} />
               <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                {currentTopicName}
+                {currentLearningUnitTitle}
               </span>
             </div>
           )}

@@ -89,8 +89,8 @@ async def get_history(
     )
 
     items: list[HistoryItem] = []
-    for sess, topic_name, module_name in page_rows:
-        items.append(_session_to_item(sess, topic_name, module_name))
+    for sess, learning_unit_title, section_title in page_rows:
+        items.append(_session_to_item(sess, learning_unit_title, section_title))
 
     # ── Summary stats from ALL matching sessions ──────────────────────────
     summary = await _compute_summary(db, user_id, filters)
@@ -106,8 +106,8 @@ async def get_history(
 
 def _session_to_item(
     sess: Session,
-    topic_name: str | None,
-    module_name: str | None,
+    learning_unit_title: str | None,
+    section_title: str | None,
 ) -> HistoryItem:
     duration: int | None = None
     if sess.completed_at and sess.started_at:
@@ -116,9 +116,9 @@ def _session_to_item(
 
     # Determine display subject
     if sess.session_type == SessionType.module_test:
-        subject = module_name or str(sess.canonical_section_id or sess.module_id or "—")
+        subject = section_title or str(sess.canonical_section_id or sess.module_id or "—")
     else:
-        subject = topic_name or module_name or sess.canonical_phase or "—"
+        subject = learning_unit_title or section_title or sess.canonical_phase or "—"
 
     return HistoryItem(
         session_id=sess.id,
@@ -211,8 +211,8 @@ async def get_session_detail(
 
     # 3. Build per-question detail list
     questions_detail = [
-        _interaction_detail_from_row(inter, q, canonical_item, topic_name)
-        for inter, q, canonical_item, topic_name in rows
+        _interaction_detail_from_row(inter, q, canonical_item, learning_unit_title)
+        for inter, q, canonical_item, learning_unit_title in rows
     ]
 
     return SessionDetailResponse(
@@ -240,14 +240,14 @@ def _interaction_detail_from_row(
     inter: Interaction,
     question,
     canonical_item,
-    topic_name: str | None,
+    learning_unit_title: str | None,
 ) -> QuestionInteractionDetail:
     if canonical_item is None:
         return QuestionInteractionDetail(
             question_id=None,
             canonical_item_id=inter.canonical_item_id,
             sequence_position=inter.sequence_position,
-            topic_name="canonical",
+            learning_unit_title=learning_unit_title or "canonical",
             stem_text="",
             bloom_level="",
             difficulty_bucket="",
@@ -268,7 +268,7 @@ def _interaction_detail_from_row(
         question_id=None,
         canonical_item_id=canonical_item.item_id,
         sequence_position=inter.sequence_position,
-        topic_name=canonical_item.unit_id,
+        learning_unit_title=learning_unit_title or canonical_item.unit_id,
         stem_text=canonical_item.question,
         bloom_level=canonical_item.question_intent or "",
         difficulty_bucket=canonical_item.difficulty or "",

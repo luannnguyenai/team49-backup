@@ -28,7 +28,7 @@ from src.schemas.assessment import (
     AssessmentResultResponse,
     AssessmentStartResponse,
     QuestionForAssessment,
-    TopicResult,
+    LearningUnitResult,
 )
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.canonical_question_selector import CanonicalQuestionSelector
@@ -67,13 +67,13 @@ def _canonical_item_to_assessment_question(item: QuestionBankItem) -> QuestionFo
 async def start_assessment(
     db: AsyncSession,
     user_id: uuid.UUID,
-    topic_ids: list[uuid.UUID],
+    learning_unit_ids: list[uuid.UUID],
     canonical_unit_ids: list[str] | None = None,
     phase: str = "placement",
 ) -> AssessmentStartResponse:
     selected_unit_ids = await _resolve_canonical_unit_ids(
         db,
-        topic_ids=topic_ids,
+        learning_unit_ids=learning_unit_ids,
         canonical_unit_ids=canonical_unit_ids,
     )
     items = await _select_canonical_questions_for_units(
@@ -108,29 +108,29 @@ async def start_assessment(
 async def _resolve_canonical_unit_ids(
     db: AsyncSession,
     *,
-    topic_ids: list[uuid.UUID],
+    learning_unit_ids: list[uuid.UUID],
     canonical_unit_ids: list[str] | None,
 ) -> list[str]:
     if canonical_unit_ids:
         return list(dict.fromkeys(str(unit_id) for unit_id in canonical_unit_ids))
 
-    if not topic_ids:
+    if not learning_unit_ids:
         raise ValidationError(
-            "Assessment requires canonical_unit_ids. Legacy topic-based assessments are removed."
+            "Assessment requires canonical_unit_ids or learning_unit_ids."
         )
 
     result = await db.execute(
-        select(LearningUnit).where(LearningUnit.id.in_(topic_ids))
+        select(LearningUnit).where(LearningUnit.id.in_(learning_unit_ids))
     )
     units = result.scalars().all()
     unit_by_id = {unit.id: unit for unit in units if unit.canonical_unit_id}
-    missing = [str(topic_id) for topic_id in topic_ids if topic_id not in unit_by_id]
+    missing = [str(unit_id) for unit_id in learning_unit_ids if unit_id not in unit_by_id]
     if missing:
         raise ValidationError(
             "Assessment requires canonical learning unit IDs. Missing canonical mapping for: "
             + ", ".join(missing)
         )
-    return [str(unit_by_id[topic_id].canonical_unit_id) for topic_id in topic_ids]
+    return [str(unit_by_id[unit_id].canonical_unit_id) for unit_id in learning_unit_ids]
 
 
 async def _select_canonical_questions_for_units(
@@ -322,7 +322,7 @@ async def _build_canonical_assessment_response(
     for interaction, item in rows:
         per_unit_rows[item.unit_id].append((interaction, item))
 
-    topic_results: list[TopicResult] = []
+    learning_unit_results: list[LearningUnitResult] = []
     total_correct = 0
     total_questions = 0
     for unit_id, unit_rows in per_unit_rows.items():
@@ -332,10 +332,10 @@ async def _build_canonical_assessment_response(
         total_questions += total
         score_percent = round(correct / total * 100, 1) if total else 0.0
         unit = unit_by_canonical_id.get(unit_id)
-        topic_results.append(
-            TopicResult(
-                topic_id=unit.id if unit is not None else uuid.uuid5(uuid.NAMESPACE_URL, unit_id),
-                topic_name=unit.title if unit is not None else unit_id,
+        learning_unit_results.append(
+            LearningUnitResult(
+                learning_unit_id=unit.id if unit is not None else uuid.uuid5(uuid.NAMESPACE_URL, unit_id),
+                learning_unit_title=unit.title if unit is not None else unit_id,
                 score_percent=score_percent,
                 mastery_level=classify_mastery(score_percent),
                 bloom_breakdown={"canonical": f"{correct}/{total}"},
@@ -345,13 +345,13 @@ async def _build_canonical_assessment_response(
             )
         )
 
-    topic_results.sort(key=lambda item: item.topic_name.lower())
+    learning_unit_results.sort(key=lambda item: item.learning_unit_title.lower())
     overall_score = round(total_correct / total_questions * 100, 1) if total_questions else 0.0
     return AssessmentResultResponse(
         session_id=session_id,
         completed_at=completed_at,
         overall_score_percent=overall_score,
-        topic_results=topic_results,
+        learning_unit_results=learning_unit_results,
     )
 
 

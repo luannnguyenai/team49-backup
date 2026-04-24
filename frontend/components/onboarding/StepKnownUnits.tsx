@@ -31,14 +31,14 @@ export default function StepKnownUnits({
   return (
     <div className="space-y-6">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn những topics bạn đã nắm — hệ thống sẽ đánh giá kiến thức của bạn
-        với <span className="font-semibold" style={{ color: "var(--text-primary)" }}>5 câu hỏi mỗi topic</span>.{" "}
+        Chọn những units bạn đã nắm — hệ thống sẽ đánh giá kiến thức của bạn
+        với <span className="font-semibold" style={{ color: "var(--text-primary)" }}>5 câu hỏi mỗi unit</span>.{" "}
         <span className="font-medium" style={{ color: "var(--text-primary)" }}>
           Bỏ qua nếu bạn mới bắt đầu.
         </span>
         {selectedIds.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
-            ({selectedIds.length} topic · {selectedIds.length * 5} câu hỏi)
+            ({selectedIds.length} unit · {selectedIds.length * 5} câu hỏi)
           </span>
         )}
       </p>

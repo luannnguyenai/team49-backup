@@ -129,9 +129,9 @@ export interface AnswerInput {
   response_time_ms: number | null;
 }
 
-export interface TopicResult {
-  topic_id: string;
-  topic_name: string;
+export interface LearningUnitResult {
+  learning_unit_id: string;
+  learning_unit_title: string;
   score_percent: number;
   mastery_level: MasteryLevel;
   bloom_breakdown: Record<string, string>; // e.g. {"remember": "1/1"}
@@ -143,7 +143,7 @@ export interface AssessmentResultResponse {
   session_id: string;
   completed_at: string;
   overall_score_percent: number;
-  topic_results: TopicResult[];
+  learning_unit_results: LearningUnitResult[];
 }
 
 // ---- Topic content ----
@@ -220,7 +220,7 @@ export interface CourseSectionSummary {
   title: string;
   description: string | null;
   order_index: number;
-  topics_count: number;
+  learning_units_count: number;
 }
 
 export interface CourseUnitListItem {
@@ -333,7 +333,7 @@ export interface QuestionForModuleTest {
   time_expected_seconds: number | null;
 }
 
-export interface TopicQuestionsGroup {
+export interface LearningUnitQuestionsGroup {
   learning_unit_id: string;
   learning_unit_title: string;
   questions: QuestionForModuleTest[];
@@ -345,7 +345,7 @@ export interface ModuleTestStartResponse {
   section_title: string;
   total_learning_units: number;
   total_questions: number;
-  learning_units: TopicQuestionsGroup[];
+  learning_units: LearningUnitQuestionsGroup[];
 }
 
 export interface ModuleTestAnswerInput {
@@ -354,7 +354,7 @@ export interface ModuleTestAnswerInput {
   response_time_ms: number | null;
 }
 
-export interface TopicTestResult {
+export interface LearningUnitTestResult {
   learning_unit_id: string;
   learning_unit_title: string;
   score: string;
@@ -364,7 +364,7 @@ export interface TopicTestResult {
   weak_kcs: string[];
 }
 
-export interface ReviewTopicSuggestion {
+export interface ReviewLearningUnitSuggestion {
   learning_unit_id: string;
   learning_unit_title: string;
   weak_kcs: string[];
@@ -397,8 +397,8 @@ export interface ModuleTestResultResponse {
   section_title: string;
   total_score_percent: number;
   passed: boolean;
-  per_learning_unit: TopicTestResult[];
-  recommended_review_topics: ReviewTopicSuggestion[];
+  per_learning_unit: LearningUnitTestResult[];
+  recommended_review_units: ReviewLearningUnitSuggestion[];
   estimated_review_hours: number;
   next_section: NextSectionInfo | null;
   wrong_answers: WrongAnswerDetail[];
@@ -446,7 +446,7 @@ export interface HistoryResponse {
 export interface QuestionInteractionDetail {
   question_id: string;
   sequence_position: number;
-  topic_name: string;
+  learning_unit_title: string;
   stem_text: string;
   bloom_level: BloomLevel;
   difficulty_bucket: DifficultyBucket;

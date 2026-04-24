@@ -310,3 +310,11 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 - Frontend onboarding gửi trực tiếp course scope để `goal_preferences.selected_course_ids` không còn phải để `null`.
 - Backend vẫn nhận alias tạm `known_topic_ids` / `desired_module_ids` để tránh phá client cũ, nhưng docs và frontend dùng contract mới.
 - `course-sections` response có thêm `course_id` và `canonical_course_id` để frontend derive planner scope từ section selection.
+
+### Bổ sung semantic naming cleanup — 24/04/2026
+
+- Đổi assessment result contract từ `topic_results` / `TopicResult` sang `learning_unit_results` / `LearningUnitResult`.
+- Đổi module-test DTO từ `TopicQuestionsGroup`, `TopicTestResult`, `ReviewTopicSuggestion` sang `LearningUnitQuestionsGroup`, `LearningUnitTestResult`, `ReviewLearningUnitSuggestion`.
+- Đổi learning-path counts từ `total_topics/completed_topics/in_progress_topics` sang `total_units/completed_units/in_progress_units`.
+- Đổi history question detail từ `topic_name` sang `learning_unit_title`.
+- Frontend type-check pass sau rename, không đổi layout/visual.

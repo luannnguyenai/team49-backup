@@ -72,7 +72,7 @@ async def test_assessment_requires_canonical_unit_ids():
     with pytest.raises(ValidationError, match="canonical_unit_ids"):
         await assessment_service._resolve_canonical_unit_ids(
             db,
-            topic_ids=[],
+            learning_unit_ids=[],
             canonical_unit_ids=None,
         )
 
@@ -113,7 +113,7 @@ async def test_build_canonical_assessment_response_groups_by_learning_unit():
     )
 
     assert response.overall_score_percent == 50.0
-    assert len(response.topic_results) == 1
-    assert response.topic_results[0].topic_id == unit_id
-    assert response.topic_results[0].topic_name == "Backpropagation"
-    assert response.topic_results[0].weak_kcs == ["Chain rule", "Gradients"]
+    assert len(response.learning_unit_results) == 1
+    assert response.learning_unit_results[0].learning_unit_id == unit_id
+    assert response.learning_unit_results[0].learning_unit_title == "Backpropagation"
+    assert response.learning_unit_results[0].weak_kcs == ["Chain rule", "Gradients"]

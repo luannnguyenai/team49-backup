@@ -24,9 +24,9 @@ from src.schemas.module_test import (
     ModuleTestStartResponse,
     ModuleTestSubmitRequest,
     NextSectionInfo,
-    ReviewTopicSuggestion,
-    TopicQuestionsGroup,
-    TopicTestResult,
+    LearningUnitQuestionsGroup,
+    LearningUnitTestResult,
+    ReviewLearningUnitSuggestion,
     WrongAnswerDetail,
 )
 from src.services.canonical_assessor_compat import (
@@ -101,7 +101,7 @@ async def _start_canonical_module_test(
         )
 
     selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
-    topic_groups: list[TopicQuestionsGroup] = []
+    learning_unit_groups: list[LearningUnitQuestionsGroup] = []
     total_question_count = 0
     for unit in units:
         if not unit.canonical_unit_id:
@@ -114,8 +114,8 @@ async def _start_canonical_module_test(
         if not items:
             raise ValidationError(f"Không tìm thấy câu hỏi final_quiz cho learning unit '{unit.title}'.")
         total_question_count += len(items)
-        topic_groups.append(
-            TopicQuestionsGroup(
+        learning_unit_groups.append(
+            LearningUnitQuestionsGroup(
                 learning_unit_id=unit.id,
                 learning_unit_title=unit.title,
                 questions=[
@@ -143,9 +143,9 @@ async def _start_canonical_module_test(
         session_id=session.id,
         section_id=section.id,
         section_title=section.title,
-        total_learning_units=len(topic_groups),
+        total_learning_units=len(learning_unit_groups),
         total_questions=total_question_count,
-        learning_units=topic_groups,
+        learning_units=learning_unit_groups,
     )
 
 
@@ -230,8 +230,8 @@ async def _build_canonical_module_test_result(
     correct = sum(1 for interaction, _ in rows if interaction.is_correct)
     total_score_pct = round(correct / total * 100, 1) if total else 0.0
     passed = total_score_pct >= PASS_THRESHOLD
-    per_learning_unit: list[TopicTestResult] = []
-    review_suggestions: list[ReviewTopicSuggestion] = []
+    per_learning_unit: list[LearningUnitTestResult] = []
+    review_suggestions: list[ReviewLearningUnitSuggestion] = []
     wrong_answers: list[WrongAnswerDetail] = []
 
     for unit in units:
@@ -244,7 +244,7 @@ async def _build_canonical_module_test_result(
         wrong_item_ids = [item.item_id for interaction, item in unit_rows if not interaction.is_correct]
         weak_kcs = await _canonical_kp_names(db, wrong_item_ids)
         per_learning_unit.append(
-            TopicTestResult(
+            LearningUnitTestResult(
                 learning_unit_id=unit.id,
                 learning_unit_title=unit.title,
                 score=f"{unit_correct}/{unit_total}",
@@ -256,7 +256,7 @@ async def _build_canonical_module_test_result(
         )
         if unit_pct < WEAK_THRESHOLD:
             review_suggestions.append(
-                ReviewTopicSuggestion(
+                ReviewLearningUnitSuggestion(
                     learning_unit_id=unit.id,
                     learning_unit_title=unit.title,
                     weak_kcs=weak_kcs,
@@ -311,7 +311,7 @@ async def _build_canonical_module_test_result(
         total_score_percent=total_score_pct,
         passed=passed,
         per_learning_unit=per_learning_unit,
-        recommended_review_topics=review_suggestions if not passed else [],
+        recommended_review_units=review_suggestions if not passed else [],
         estimated_review_hours=sum(item.estimated_review_hours for item in review_suggestions)
         if not passed
         else 0.0,

@@ -57,8 +57,8 @@ learning_path_router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Generate a personalised learning path",
     description=(
-        "Runs the rule-based recommendation engine: topological sort of topics "
-        "by prerequisites, mastery-based action assignment, timeline binpacking. "
+        "Runs the canonical recommendation engine over learning units, "
+        "using prerequisite and mastery signals for action assignment. "
         "Replaces any existing path for this user."
     ),
 )
@@ -90,8 +90,8 @@ async def api_get_learning_path(
         PathItemResponse(
             id=lp.id,
             learning_unit_id=lp.learning_unit_id,
-            learning_unit_title=topic_name,
-            section_title=module_name,
+            learning_unit_title=learning_unit_title,
+            section_title=section_title,
             action=lp.action,
             estimated_hours=lp.estimated_hours,
             order_index=lp.order_index,
@@ -99,15 +99,15 @@ async def api_get_learning_path(
             status=lp.status,
             canonical_unit_id=lp.canonical_unit_id,
         )
-        for lp, topic_name, module_name in rows
+        for lp, learning_unit_title, section_title in rows
     ]
 
     from src.models.learning import PathStatus
 
     return LearningPathResponse(
-        total_topics=len(items),
-        completed_topics=sum(1 for i in items if i.status == PathStatus.completed),
-        in_progress_topics=sum(1 for i in items if i.status == PathStatus.in_progress),
+        total_units=len(items),
+        completed_units=sum(1 for i in items if i.status == PathStatus.completed),
+        in_progress_units=sum(1 for i in items if i.status == PathStatus.in_progress),
         items=items,
     )
 
@@ -122,8 +122,8 @@ async def api_get_learning_path(
     response_model=TimelineResponse,
     summary="Get the weekly timeline breakdown",
     description=(
-        "Returns topics grouped by their assigned calendar week. "
-        "Skipped topics (week_number IS NULL) are excluded."
+        "Returns learning units grouped by their assigned calendar week. "
+        "Skipped learning units (week_number IS NULL) are excluded."
     ),
 )
 async def api_get_timeline(
@@ -139,8 +139,8 @@ async def api_get_timeline(
             PathItemResponse(
                 id=lp.id,
                 learning_unit_id=lp.learning_unit_id,
-                learning_unit_title=topic_name,
-                section_title=module_name,
+                learning_unit_title=learning_unit_title,
+                section_title=section_title,
                 action=lp.action,
                 estimated_hours=lp.estimated_hours,
                 order_index=lp.order_index,
@@ -148,13 +148,13 @@ async def api_get_timeline(
                 status=lp.status,
                 canonical_unit_id=lp.canonical_unit_id,
             )
-            for lp, topic_name, module_name in rows
+            for lp, learning_unit_title, section_title in rows
         ]
         total_hours = round(sum(i.estimated_hours or 0.0 for i in week_items), 4)
         week_entries.append(
             WeekEntry(
                 week=week_num,
-                topics=week_items,
+                learning_units=week_items,
                 total_hours=total_hours,
             )
         )

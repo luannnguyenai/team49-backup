@@ -75,7 +75,7 @@ function AssessmentPageInner() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuestionForAssessment[]>([]);
-  const [topicNames, setTopicNames] = useState<Record<string, string>>({});
+  const [learningUnitNames, setLearningUnitNames] = useState<Record<string, string>>({});
   const [currentIdx, setCurrentIdx] = useState(0);
 
   // questionId → chosen option  (undefined = not yet answered, null = skipped)
@@ -113,7 +113,7 @@ function AssessmentPageInner() {
         });
         if (cancelled) return;
 
-        setTopicNames(unitNameMap);
+        setLearningUnitNames(unitNameMap);
         setSessionId(resp.session_id);
         setQuestions(resp.questions);
         questionStart.current = Date.now();
@@ -310,10 +310,10 @@ function AssessmentPageInner() {
   if (!question) return null;
 
   const bloom = question.bloom_level ? BLOOM_BADGE[question.bloom_level] : undefined;
-  const topicName = question.canonical_unit_id
-    ? topicNames[question.canonical_unit_id] ?? "Assessment"
+  const learningUnitName = question.canonical_unit_id
+    ? learningUnitNames[question.canonical_unit_id] ?? "Assessment"
     : question.topic_id
-    ? topicNames[question.topic_id] ?? "Assessment"
+    ? learningUnitNames[question.topic_id] ?? "Assessment"
     : "Assessment";
   const progress = Math.round(((currentIdx + 1) / questions.length) * 100);
   const isFlagged = questionKey ? flagged.has(questionKey) : false;
@@ -437,7 +437,7 @@ function AssessmentPageInner() {
             <div className="flex-1 min-w-0">
               <div className="mb-1.5 flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
                 <span className="truncate font-medium" style={{ color: "var(--text-secondary)" }}>
-                  {topicName}
+                  {learningUnitName}
                 </span>
                 <span className="shrink-0 ml-2">
                   Câu {currentIdx + 1} / {questions.length}

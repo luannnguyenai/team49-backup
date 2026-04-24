@@ -4,8 +4,8 @@
 // Module test results:
 //   PASS ✅ / FAIL ❌ hero section
 //   Total score %
-//   Per-topic breakdown table
-//   FAIL path: weak topics + review hours + "Ôn lại" CTA
+//   Per-learning-unit breakdown table
+//   FAIL path: weak learning units + review hours + "Ôn lại" CTA
 //   PASS path: confetti animation + next-module card
 //   Wrong answers list with correct answer + explanation
 
@@ -29,7 +29,6 @@ import {
 import type {
   ModuleTestResultResponse,
   SelectedAnswer,
-  TopicTestResult,
   WrongAnswerDetail,
 } from "@/types";
 import { buildModuleTestRuntimeRef } from "@/lib/canonical-learning-runtime";
@@ -141,40 +140,6 @@ function AnimatedScore({ target }: { target: number }) {
     return () => clearInterval(id);
   }, [target]);
   return <>{display.toFixed(1)}%</>;
-}
-
-// ---------------------------------------------------------------------------
-// Per-topic table row
-// ---------------------------------------------------------------------------
-
-function TopicRow({ t }: { t: TopicTestResult }) {
-  return (
-    <tr className="border-t" style={{ borderColor: "var(--border)" }}>
-      <td className="py-3 pr-4 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-        {t.learning_unit_title}
-      </td>
-      <td className="py-3 pr-4 text-sm tabular-nums" style={{ color: "var(--text-secondary)" }}>
-        {t.score}
-        <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          ({t.score_percent.toFixed(0)}%)
-        </span>
-      </td>
-      <td className="py-3 pr-4">
-        {t.bloom_max ? (
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${BLOOM_CLS[t.bloom_max] ?? "bg-slate-100 text-slate-600"}`}>
-            {BLOOM_VI[t.bloom_max] ?? t.bloom_max}
-          </span>
-        ) : (
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>—</span>
-        )}
-      </td>
-      <td className="py-3">
-        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${VERDICT_CLS[t.verdict]}`}>
-          {VERDICT_VI[t.verdict]}
-        </span>
-      </td>
-    </tr>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -323,7 +288,7 @@ function ModuleTestResultsInner() {
     passed,
     total_score_percent,
     per_learning_unit,
-    recommended_review_topics,
+    recommended_review_units,
     estimated_review_hours,
     next_section,
     wrong_answers,
@@ -395,21 +360,21 @@ function ModuleTestResultsInner() {
           </p>
         </div>
 
-        {/* ── Per-topic breakdown table ───────────────────────────────────── */}
+        {/* ── Per-learning-unit breakdown table ───────────────────────────── */}
         <div
           className="rounded-2xl border overflow-hidden"
           style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
         >
           <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border)" }}>
             <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-              Phân tích theo topic
+              Phân tích theo learning unit
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full px-5">
               <thead>
                 <tr style={{ color: "var(--text-muted)" }}>
-                  <th className="px-5 py-2.5 text-left text-xs font-medium">Topic</th>
+                  <th className="px-5 py-2.5 text-left text-xs font-medium">Learning unit</th>
                   <th className="px-0 py-2.5 text-left text-xs font-medium">Điểm</th>
                   <th className="px-0 py-2.5 text-left text-xs font-medium">Bloom max</th>
                   <th className="px-0 py-2.5 text-left text-xs font-medium">Kết quả</th>
@@ -448,8 +413,8 @@ function ModuleTestResultsInner() {
           </div>
         </div>
 
-        {/* ── FAIL: weak topics + remediation ────────────────────────────── */}
-        {!passed && recommended_review_topics.length > 0 && (
+        {/* ── FAIL: weak learning units + remediation ────────────────────── */}
+        {!passed && recommended_review_units.length > 0 && (
           <div
             className="rounded-2xl border p-5 space-y-4"
             style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
@@ -457,7 +422,7 @@ function ModuleTestResultsInner() {
             <div className="flex items-center justify-between">
               <h3 className="font-semibold flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
                 <BookOpen size={16} className="text-amber-500" />
-                Các topic cần ôn lại
+                Các learning unit cần ôn lại
               </h3>
               <span className="flex items-center gap-1.5 text-xs rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 font-medium">
                 <Clock size={12} />
@@ -466,7 +431,7 @@ function ModuleTestResultsInner() {
             </div>
 
             <div className="space-y-3">
-              {recommended_review_topics.map((rt) => (
+              {recommended_review_units.map((rt) => (
                 <div
                   key={rt.learning_unit_id}
                   className="flex items-start justify-between gap-3 rounded-xl border p-3"

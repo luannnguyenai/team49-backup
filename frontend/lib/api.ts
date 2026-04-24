@@ -187,9 +187,9 @@ import type {
 } from "@/types";
 
 export const assessmentApi = {
-  start: (topicIds: string[]) =>
+  start: (learningUnitIds: string[]) =>
     api
-      .post<AssessmentStartResponse>("/api/assessment/start", { topic_ids: topicIds })
+      .post<AssessmentStartResponse>("/api/assessment/start", { learning_unit_ids: learningUnitIds })
       .then((r) => r.data),
 
   submit: (sessionId: string, answers: AnswerInput[]) =>

@@ -78,7 +78,7 @@ class QuestionInteractionDetail(BaseModel):
     question_id: uuid.UUID | None = None
     canonical_item_id: str | None = None
     sequence_position: int
-    topic_name: str
+    learning_unit_title: str
     stem_text: str
     bloom_level: str
     difficulty_bucket: str

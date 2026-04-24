@@ -27,37 +27,11 @@ These are already done and should not be reopened without a deliberate design de
 - Signed protected asset route now guards `data/courses/<course>/videos|slides|transcripts` paths.
 - Abandon/resume runtime state is represented in `planner_session_state` with current unit/stage/progress and `last_activity`; planner reads apply mastery staleness on-read.
 - Onboarding contract is course-first: frontend sends `known_unit_ids`, `desired_section_ids`, and `selected_course_ids`; backend writes explicit `goal_preferences.selected_course_ids`.
+- Runtime DTO/API naming is learning-unit/section-first for assessment results, module-test groups/results, learning-path counts, and history question detail.
 
 ## Remaining Work
 
-### 1. Frontend / API Semantic Naming Cleanup
-
-Current state:
-
-- Runtime routes are canonical, but several DTOs/comments/UI labels still use old names:
-  - `TopicResult`, `TopicQuestionsGroup`, `ReviewTopicSuggestion`
-  - `total_topics`, `completed_topics`, `in_progress_topics`
-  - assessment result `topic_results`
-  - module-test labels like "topic" / "module" where the payload is now learning-unit / section
-- This is mostly naming debt, not a functional blocker.
-
-Needed:
-
-- Rename frontend and schema types toward:
-  - `LearningUnitResult`
-  - `LearningUnitQuestionsGroup`
-  - `ReviewLearningUnitSuggestion`
-  - `total_units`, `completed_units`, `in_progress_units`
-- Update route descriptions/docstrings in `src/routers/*` that still say topic/module when the runtime is learning-unit/section.
-- Keep response aliases only where product/API backward compatibility is intentionally required.
-
-Acceptance:
-
-- Public runtime/API contract consistently says `learning_unit_id` and `section_id`.
-- Tests no longer need to mentally translate "topic" to "learning unit".
-- No UI visual redesign is required for this task.
-
-### 2. Historical Docs / README Sweep
+### 1. Historical Docs / README Sweep
 
 Current state:
 
@@ -84,7 +58,7 @@ Acceptance:
 - New engineer reading the repo cannot mistake legacy tables or old plans for active production design.
 - README matches the canonical runtime that currently passes build/e2e.
 
-### 3. Orphan Legacy Helper / Script Review
+### 2. Orphan Legacy Helper / Script Review
 
 Current state:
 
@@ -108,7 +82,7 @@ Acceptance:
 - `rg` for active runtime code no longer shows unused topic-grain helpers as if they were production planner logic.
 - Any remaining legacy script is clearly marked as archive/audit tooling.
 
-### 4. Production Mastery / Scoring Calibration
+### 3. Production Mastery / Scoring Calibration
 
 Current state:
 

@@ -11,7 +11,11 @@ from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.content import BloomLevel, DifficultyBucket
 from src.models.learning import PathAction, PathStatus
-from src.schemas.module_test import ModuleTestStartResponse, QuestionForModuleTest, TopicQuestionsGroup
+from src.schemas.module_test import (
+    LearningUnitQuestionsGroup,
+    ModuleTestStartResponse,
+    QuestionForModuleTest,
+)
 from src.schemas.quiz import QuestionForQuiz, QuizStartResponse
 
 
@@ -84,7 +88,7 @@ async def test_module_test_start_route_uses_section_contract():
         total_learning_units=1,
         total_questions=1,
         learning_units=[
-            TopicQuestionsGroup(
+            LearningUnitQuestionsGroup(
                 learning_unit_id=learning_unit_id,
                 learning_unit_title="Convolution basics",
                 questions=[

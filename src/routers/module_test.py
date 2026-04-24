@@ -15,12 +15,12 @@ Business rules (enforced in the service layer)
 -----------------------------------------------
 * start    : user must have ≥ 1 completed quiz session for EVERY learning unit in the
              section before the test may begin.
-* submit   : 2 Easy + 1 Medium + 2 Hard questions per topic (5 total).
+* submit   : 2 Easy + 1 Medium + 2 Hard questions per learning unit (5 total).
              PASS  = total_score_percent ≥ 70 %
-               → mastery updated to max(current, test_score) per topic
+               → mastery updated from canonical item-KP evidence
                → next_section returned in response
              FAIL  = total_score_percent < 70 %
-               → weak topics (score < 60 %) added to learning_path as "remediate"
+               → weak learning units (score < 60 %) returned for review
 * results  : read-only re-computation from stored interactions — no DB mutations.
 """
 
@@ -60,9 +60,9 @@ module_test_router = APIRouter(prefix="/api/module-test", tags=["Module Test"])
     status_code=status.HTTP_201_CREATED,
     summary="Start a new section test session",
     description=(
-        "Validates that the user has completed at least one quiz for every topic "
-        "in the module. Selects 5 questions per topic (2 Easy · 1 Medium · 2 Hard) "
-        "filtered by usage_context='module_test', applying tier-based prioritisation "
+        "Validates that the user has completed at least one quiz for every learning unit "
+        "in the section. Selects 5 questions per learning unit (2 Easy · 1 Medium · 2 Hard) "
+        "filtered by item_phase_map.phase='final_quiz', applying tier-based prioritisation "
         "(never-answered → previously-wrong → always-correct)."
     ),
 )
@@ -85,9 +85,9 @@ async def api_start_module_test(
     summary="Submit all answers and receive graded results",
     description=(
         "Grades the full test in one shot. "
-        "PASS (≥ 70 %): updates mastery per topic to max(current, test_score) "
-        "and returns the next module. "
-        "FAIL (< 70 %): records legacy remediation entries for each weak topic "
+        "PASS (≥ 70 %): updates mastery from canonical item-KP evidence "
+        "and returns the next section. "
+        "FAIL (< 70 %): returns review suggestions for each weak learning unit "
         "(score < 60 %) and returns targeted review suggestions."
     ),
 )

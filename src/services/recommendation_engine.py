@@ -173,7 +173,7 @@ async def _generate_canonical_learning_path(
 
     return GeneratePathResponse(
         generated_at=generated_at,
-        total_topics=len(items),
+        total_units=len(items),
         total_hours=total_hours,
         required_hours_per_week=None,
         warnings=[],

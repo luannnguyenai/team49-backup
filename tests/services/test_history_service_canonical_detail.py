@@ -34,7 +34,7 @@ def test_interaction_detail_from_row_renders_canonical_question_bank_item():
 
     assert detail.question_id is None
     assert detail.canonical_item_id == "item-1"
-    assert detail.topic_name == "cs231n::lecture01::unit01"
+    assert detail.learning_unit_title == "cs231n::lecture01::unit01"
     assert detail.stem_text == "What is a convolution?"
     assert detail.bloom_level == "conceptual"
     assert detail.difficulty_bucket == "medium"

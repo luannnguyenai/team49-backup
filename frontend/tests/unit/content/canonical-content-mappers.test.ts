@@ -18,12 +18,14 @@ describe("canonical content mappers", () => {
     title: "Convolutional Networks",
     description: "Vision course section",
     order_index: 2,
-    topics_count: 5,
+    learning_units_count: 5,
   };
 
   it("maps a course catalog item into a canonical section-style card", () => {
     expect(mapCourseCatalogItemToSectionCard(CS231N_ITEM)).toEqual({
       id: CS231N_ITEM.slug,
+      course_id: CS231N_ITEM.id,
+      canonical_course_id: null,
       title: CS231N_ITEM.title,
       description: CS231N_ITEM.short_description,
       order_index: 0,

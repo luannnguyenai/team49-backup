@@ -49,8 +49,8 @@ class QuestionForModuleTest(BaseModel):
     time_expected_seconds: int | None
 
 
-class TopicQuestionsGroup(BaseModel):
-    """Questions for one topic within the module test."""
+class LearningUnitQuestionsGroup(BaseModel):
+    """Questions for one learning unit within the section test."""
 
     learning_unit_id: uuid.UUID
     learning_unit_title: str
@@ -62,8 +62,8 @@ class ModuleTestStartResponse(BaseModel):
     section_id: uuid.UUID
     section_title: str
     total_learning_units: int
-    total_questions: int  # sum across all topics (≤ topics × 5)
-    learning_units: list[TopicQuestionsGroup]
+    total_questions: int
+    learning_units: list[LearningUnitQuestionsGroup]
 
 
 # ---------------------------------------------------------------------------
@@ -81,8 +81,8 @@ class ModuleTestSubmitRequest(BaseModel):
     answers: list[ModuleTestAnswerInput] = Field(min_length=1)
 
 
-class TopicTestResult(BaseModel):
-    """Per-topic grading detail."""
+class LearningUnitTestResult(BaseModel):
+    """Per-learning-unit grading detail."""
 
     learning_unit_id: uuid.UUID
     learning_unit_title: str
@@ -93,8 +93,8 @@ class TopicTestResult(BaseModel):
     weak_kcs: list[str]  # KC names linked to wrong answers
 
 
-class ReviewTopicSuggestion(BaseModel):
-    """One topic recommended for remediation (only present when verdict == fail)."""
+class ReviewLearningUnitSuggestion(BaseModel):
+    """One learning unit recommended for remediation (only present when verdict == fail)."""
 
     learning_unit_id: uuid.UUID
     learning_unit_title: str
@@ -138,12 +138,12 @@ class ModuleTestResultResponse(BaseModel):
     total_score_percent: float
     passed: bool  # True if total ≥ 70 %
 
-    # Per-topic breakdown
-    per_learning_unit: list[TopicTestResult]
+    # Per-learning-unit breakdown
+    per_learning_unit: list[LearningUnitTestResult]
 
     # Remediation (non-empty only when passed == False)
-    recommended_review_topics: list[ReviewTopicSuggestion]
-    estimated_review_hours: float  # sum of review hours for weak topics
+    recommended_review_units: list[ReviewLearningUnitSuggestion]
+    estimated_review_hours: float
 
     # Progression (non-None only when passed == True)
     next_section: NextSectionInfo | None

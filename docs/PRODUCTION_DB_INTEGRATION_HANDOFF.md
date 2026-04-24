@@ -349,6 +349,9 @@ Integration note:
 - Every planner response should have a corresponding `plan_history` row and rationale rows.
 - Use `planner_session_state` for sticky constraints such as bridge chain depth rather than recomputing only from the latest path.
 - Public runtime/frontend contracts should now use `learning_unit_id` and `section_id` on quiz/module-test/history surfaces.
+- Assessment result payload uses `learning_unit_results`.
+- Module-test remediation payload uses `recommended_review_units`.
+- Learning-path summary counts use `total_units`, `completed_units`, and `in_progress_units`.
 
 ## Read Contracts
 

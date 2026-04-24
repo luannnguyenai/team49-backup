@@ -7,7 +7,7 @@ Pydantic v2 schemas for the Assessment Engine API.
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 from src.models.content import BloomLevel, DifficultyBucket
 from src.models.learning import MasteryLevel, SelectedAnswer
@@ -18,10 +18,11 @@ from src.models.learning import MasteryLevel, SelectedAnswer
 
 
 class AssessmentStartRequest(BaseModel):
-    topic_ids: list[uuid.UUID] = Field(
+    learning_unit_ids: list[uuid.UUID] = Field(
         default_factory=list,
+        validation_alias=AliasChoices("learning_unit_ids", "topic_ids"),
         max_length=50,
-        description="Legacy topics to include in this assessment.",
+        description="Product learning units to include in this assessment.",
     )
     canonical_unit_ids: list[str] | None = Field(
         default=None,
@@ -81,9 +82,9 @@ class AssessmentSubmitRequest(BaseModel):
 # ===========================================================================
 
 
-class TopicResult(BaseModel):
-    topic_id: uuid.UUID
-    topic_name: str
+class LearningUnitResult(BaseModel):
+    learning_unit_id: uuid.UUID
+    learning_unit_title: str
     score_percent: float
     mastery_level: MasteryLevel
     bloom_breakdown: dict[str, str]  # e.g. {"remember": "1/1", "analyze": "1/2"}
@@ -92,7 +93,7 @@ class TopicResult(BaseModel):
     theta_estimate: float = Field(
         default=0.0,
         description=(
-            "2PL IRT ability estimate (θ̂) for this topic on a logit scale. "
+            "2PL IRT ability estimate (θ̂) for this learning unit on a logit scale. "
             "−3 = very low ability, 0 = average, +3 = very high ability."
         ),
     )
@@ -102,4 +103,4 @@ class AssessmentResultResponse(BaseModel):
     session_id: uuid.UUID
     completed_at: datetime
     overall_score_percent: float
-    topic_results: list[TopicResult]
+    learning_unit_results: list[LearningUnitResult]
