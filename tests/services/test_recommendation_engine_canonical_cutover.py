@@ -238,3 +238,7 @@ async def test_update_path_status_writes_progress_and_waive(monkeypatch):
     assert FakeWaivedUnitRepository.upsert_payload["mastery_lcb_at_waive"] == 0.82
     assert FakeWaivedUnitRepository.upsert_payload["skip_quiz_score"] == 88.0
     assert FakePlannerAuditRepository.session_state_payload is not None
+    assert FakePlannerAuditRepository.session_state_payload["current_unit_id"] == unit_id
+    assert FakePlannerAuditRepository.session_state_payload["current_stage"] == "between_units"
+    assert FakePlannerAuditRepository.session_state_payload["current_progress"]["status"] == "skipped"
+    assert FakePlannerAuditRepository.session_state_payload["last_activity"] is not None

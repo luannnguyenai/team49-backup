@@ -1,4 +1,6 @@
 import math
+from datetime import datetime
+from typing import Protocol
 from uuid import UUID
 
 from sqlalchemy import select
@@ -8,9 +10,47 @@ from src.models.canonical import ItemKPMap
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
 
 
+class MasteryReadModel(Protocol):
+    theta_mu: float
+    theta_sigma: float
+    updated_at: datetime
+
+
 def estimate_mastery_mean(theta_mu: float, theta_sigma: float) -> float:
     adjusted = theta_mu / math.sqrt(1.0 + theta_sigma * theta_sigma)
     return 1.0 / (1.0 + math.exp(-adjusted))
+
+
+def decay_mastery_for_read(
+    *,
+    theta_mu: float,
+    theta_sigma: float,
+    last_updated: datetime,
+    now: datetime,
+    sigma_forgetting_rate: float = 0.02,
+    mu_decay_rate: float = 0.0,
+) -> tuple[float, float]:
+    """Apply non-destructive staleness adjustment for planner/assessor reads."""
+    age_days = max(0.0, (now - last_updated).total_seconds() / 86_400)
+    if age_days < 1:
+        return theta_mu, theta_sigma
+    sigma = math.sqrt(theta_sigma * theta_sigma + age_days * sigma_forgetting_rate)
+    mu = theta_mu * math.exp(-age_days * mu_decay_rate)
+    return mu, sigma
+
+
+def estimate_mastery_mean_on_read(
+    mastery: MasteryReadModel,
+    *,
+    now: datetime,
+) -> float:
+    theta_mu, theta_sigma = decay_mastery_for_read(
+        theta_mu=mastery.theta_mu,
+        theta_sigma=mastery.theta_sigma,
+        last_updated=mastery.updated_at,
+        now=now,
+    )
+    return estimate_mastery_mean(theta_mu, theta_sigma)
 
 
 def next_theta_mu(current_theta: float, is_correct: bool, item_weight: float) -> float:

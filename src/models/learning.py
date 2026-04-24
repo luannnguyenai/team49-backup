@@ -360,6 +360,14 @@ class PlannerSessionState(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     bridge_chain_depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     consecutive_bridge_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    current_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_units.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    current_stage: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    current_progress: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    last_activity: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     state_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="planner_session_states", lazy="select")  # type: ignore[name-defined]
@@ -368,6 +376,8 @@ class PlannerSessionState(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         UniqueConstraint("user_id", "session_id", name="uq_planner_session_state_user_session"),
         Index("ix_planner_session_state_user", "user_id"),
         Index("ix_planner_session_state_last_plan", "last_plan_history_id"),
+        Index("ix_planner_session_state_current_unit", "current_unit_id"),
+        Index("ix_planner_session_state_last_activity", "last_activity"),
         CheckConstraint(
             "bridge_chain_depth >= 0",
             name="ck_planner_session_state_bridge_depth_nonnegative",
@@ -375,5 +385,9 @@ class PlannerSessionState(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint(
             "consecutive_bridge_count >= 0",
             name="ck_planner_session_state_consecutive_bridge_nonnegative",
+        ),
+        CheckConstraint(
+            "current_stage IS NULL OR current_stage IN ('watching', 'quiz_in_progress', 'post_quiz', 'between_units')",
+            name="ck_planner_session_state_current_stage",
         ),
     )

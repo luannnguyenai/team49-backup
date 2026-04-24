@@ -1218,12 +1218,30 @@ Nguồn: `src/models/learning.py`
 - `consecutive_bridge_count`
   - counter để enforce cap logic nếu planner cần giới hạn bridge liên tục.
 
+- `current_unit_id`
+  - learning unit hiện user đang đứng ở đó trong planner session.
+  - dùng cho abandon/resume, ví dụ quay lại đúng unit đang xem video hoặc đang làm quiz.
+
+- `current_stage`
+  - trạng thái hiện tại trong unit.
+  - enum string: `watching`, `quiz_in_progress`, `post_quiz`, `between_units`.
+
+- `current_progress`
+  - JSON trạng thái tạm thời của session hiện tại.
+  - dùng cho các field như `video_progress_s`, `video_finished`, `quiz_id`, `quiz_phase`, `items_answered`, `items_remaining`.
+  - không thay thế `interactions`; câu đã trả lời vẫn là evidence chính thức và không rollback khi quiz bị abandon.
+
+- `last_activity`
+  - timestamp cuối cùng của planner/learning session.
+  - dùng để phân route resume: `<24h` resume liền, `1-7d` welcome-back, `7-30d` quick review, `>30d` placement-lite.
+
 - `state_json`
   - state phụ mà planner cần giữ giữa các lần gọi.
 
 ### Nhận xét
 
-- Bảng này chưa có logic runtime đi kèm, nhưng đã tạo được landing zone cho session-aware planner.
+- Bảng này giờ chứa cả planner counters và active abandon/resume pointer.
+- Mastery staleness không ghi đè vào bảng này; planner/assessor tính on-read từ `learner_mastery_kp.updated_at` bằng cách inflate uncertainty.
 
 ## B. Legacy Adapter Schema
 

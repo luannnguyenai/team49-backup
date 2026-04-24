@@ -41,6 +41,7 @@ from src.schemas.learning_path import (
     GeneratePathResponse,
     PathItemResponse,
 )
+from src.services.canonical_mastery_service import estimate_mastery_mean_on_read
 from src.services.canonical_planner_service import classify_unit_action
 
 # ---------------------------------------------------------------------------
@@ -93,7 +94,7 @@ async def _generate_canonical_learning_path(
     for order_index, unit in enumerate(units):
         unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
         mastery_values = [
-            mastery_by_kp[kp_id].mastery_mean_cached
+            estimate_mastery_mean_on_read(mastery_by_kp[kp_id], now=generated_at)
             for kp_id in unit_kps
             if kp_id in mastery_by_kp
         ]
@@ -160,6 +161,9 @@ async def _generate_canonical_learning_path(
         last_plan_history_id=plan.id,
         bridge_chain_depth=0,
         consecutive_bridge_count=0,
+        current_stage="between_units",
+        current_progress={"last_generated_plan_id": str(plan.id)},
+        last_activity=generated_at,
         state_json={
             "canonical_runtime": True,
             "generated_at": generated_at.isoformat(),
@@ -343,6 +347,14 @@ async def update_path_status(
         last_plan_history_id=plan.id,
         bridge_chain_depth=0,
         consecutive_bridge_count=0,
+        current_unit_id=unit.id,
+        current_stage=_path_status_to_current_stage(new_status),
+        current_progress={
+            "learning_unit_id": str(unit.id),
+            "status": new_status.value,
+            "video_finished": new_status in {PathStatus.completed, PathStatus.skipped},
+        },
+        last_activity=now,
         state_json={
             "canonical_runtime": True,
             "last_status_update": {
@@ -367,6 +379,15 @@ def _path_status_to_progress_status(status: PathStatus) -> LearningProgressStatu
         PathStatus.in_progress: LearningProgressStatus.in_progress,
         PathStatus.completed: LearningProgressStatus.completed,
         PathStatus.skipped: LearningProgressStatus.skipped,
+    }[status]
+
+
+def _path_status_to_current_stage(status: PathStatus) -> str:
+    return {
+        PathStatus.pending: "between_units",
+        PathStatus.in_progress: "watching",
+        PathStatus.completed: "post_quiz",
+        PathStatus.skipped: "between_units",
     }[status]
 
 

@@ -84,6 +84,10 @@ class LearnerPlannerStubModelTests(unittest.TestCase):
         self.assertTrue(hasattr(PlannerSessionState, "bridge_chain_depth"))
         self.assertTrue(hasattr(PlannerSessionState, "consecutive_bridge_count"))
         self.assertTrue(hasattr(PlannerSessionState, "state_json"))
+        self.assertTrue(hasattr(PlannerSessionState, "current_unit_id"))
+        self.assertTrue(hasattr(PlannerSessionState, "current_stage"))
+        self.assertTrue(hasattr(PlannerSessionState, "current_progress"))
+        self.assertTrue(hasattr(PlannerSessionState, "last_activity"))
 
 
 if __name__ == "__main__":

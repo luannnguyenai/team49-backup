@@ -1,10 +1,13 @@
-from uuid import uuid4
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
 
 import pytest
 
 from src.services.canonical_mastery_service import (
+    decay_mastery_for_read,
     estimate_mastery_mean,
+    estimate_mastery_mean_on_read,
     next_theta_mu,
     update_kp_mastery_from_item,
 )
@@ -20,6 +23,39 @@ def test_estimate_mastery_mean_increases_with_theta():
 def test_next_theta_mu_rewards_correct_answer():
     assert next_theta_mu(current_theta=0.0, is_correct=True, item_weight=0.7) > 0.0
     assert next_theta_mu(current_theta=0.0, is_correct=False, item_weight=0.7) < 0.0
+
+
+def test_decay_mastery_for_read_inflates_uncertainty_without_overwriting_raw_state():
+    now = datetime(2026, 4, 24, tzinfo=UTC)
+
+    fresh_mu, fresh_sigma = decay_mastery_for_read(
+        theta_mu=1.0,
+        theta_sigma=0.4,
+        last_updated=now - timedelta(hours=12),
+        now=now,
+    )
+    stale_mu, stale_sigma = decay_mastery_for_read(
+        theta_mu=1.0,
+        theta_sigma=0.4,
+        last_updated=now - timedelta(days=21),
+        now=now,
+    )
+
+    assert fresh_mu == 1.0
+    assert fresh_sigma == 0.4
+    assert stale_mu == 1.0
+    assert stale_sigma > fresh_sigma
+    assert estimate_mastery_mean(stale_mu, stale_sigma) < estimate_mastery_mean(fresh_mu, fresh_sigma)
+
+
+def test_estimate_mastery_mean_on_read_uses_updated_at_staleness():
+    now = datetime(2026, 4, 24, tzinfo=UTC)
+    mastery = Mock(theta_mu=1.0, theta_sigma=0.4, updated_at=now - timedelta(days=21))
+
+    assert estimate_mastery_mean_on_read(mastery, now=now) < estimate_mastery_mean(
+        theta_mu=1.0,
+        theta_sigma=0.4,
+    )
 
 
 @pytest.mark.asyncio

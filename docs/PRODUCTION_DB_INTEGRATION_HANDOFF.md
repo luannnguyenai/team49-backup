@@ -256,7 +256,7 @@ Integration note:
 
 - Do not map legacy `topic_id` directly to fake `kp_id`.
 - Canonical mastery writes require `canonical_item_id`, then resolve KP through `item_kp_map`.
-- If the assessor only has a topic-level result, keep writing compatibility `mastery_scores`.
+- If a caller only has a topic-level result, treat it as an unsupported legacy signal; do not recreate `mastery_scores`.
 
 ### Waived Units
 
@@ -336,6 +336,10 @@ Required final `planner_session_state` payload:
 - `last_plan_history_id`
 - `bridge_chain_depth`
 - `consecutive_bridge_count`
+- `current_unit_id`
+- `current_stage`: `watching | quiz_in_progress | post_quiz | between_units`
+- `current_progress`: JSON payload for partial video/quiz progress
+- `last_activity`
 - `state_json`
 
 Integration note:
@@ -357,7 +361,10 @@ Planner should read:
 - unit-KP coverage from `unit_kp_map`
 - prerequisite graph from `prerequisite_edges`
 - existing progress/resume from `learning_progress_records`
+- active abandon/resume pointer from `planner_session_state.current_unit_id/current_stage/current_progress`
 - waived/skipped units from `waived_units`
+
+Planner reads should apply mastery staleness on-read before computing skip/review/deep-practice thresholds. Do not overwrite `learner_mastery_kp` just because a user was inactive; inflate uncertainty for the current decision and let new review evidence update the stored posterior.
 
 Planner should not infer future production behavior from:
 
@@ -387,15 +394,23 @@ Do not infer assessor usage from `question_bank` alone. A question can be valid 
 Assessor should update:
 
 - `learner_mastery_kp`
-- optionally legacy `mastery_scores` during compatibility, but only with an explicit policy
 
 ### Resume / Progress Reads
 
 Resume UI and backend should keep using:
 
-- `learning_progress_records`
+- `learning_progress_records` for durable unit status and last video position
+- `planner_session_state` for active session pointer and partial quiz/video state
+- `sessions` + `interactions` for answered quiz evidence
 
-Do not replace it with planner audit tables. Planner audit explains recommendations; progress records represent actual user activity.
+Do not replace progress records with planner audit tables. Planner audit explains recommendations; progress records represent actual user activity. Partial answered quiz items must remain in `interactions` even if the abandoned quiz gate is later invalidated and regenerated.
+
+Resume policy:
+
+- `< 24h`: resume current unit/quiz seamlessly; partial quiz may continue with remaining items.
+- `1-7 days`: show welcome-back context from latest plan/progress.
+- `7-30 days`: run a short `item_phase_map.phase='review'` check over recent high-mastery KP before trusting old mastery.
+- `> 30 days`: offer placement-lite or partial recalibration.
 
 ## Required Consistency Checks
 
@@ -415,34 +430,23 @@ The current importer validates columns/counts and verifies post-import row count
 
 These are intentional gaps, not missing UI work:
 
-- `goal_preferences.selected_course_ids` is not fully populated by current onboarding because the old flow is still topic/module-grain.
-- `learner_mastery_kp` is only written by the canonical assessment branch; legacy topic assessment still writes `mastery_scores`.
-- `waived_units` is not written by runtime until skip logic can identify `learning_units.id`.
-- `plan_history` has both legacy compatibility audit and canonical unit-grain audit branches.
-- `rationale_log.learning_unit_id` can be `null` only for legacy compatibility audits.
+- `goal_preferences.selected_course_ids` still needs a course-first onboarding contract instead of compatibility topic/module naming.
+- `planner_session_state.current_progress` stores the resume pointer, but frontend resume UI has not been wired yet.
+- `learner_mastery_kp` uses bootstrap scoring unless a calibration job has produced trusted item parameters.
+- Historical docs may still mention pre-cutover tables and must be treated as archive unless refreshed.
 
 ## Do Not Do
 
-- Do not wire frontend/UI as part of this database cutover.
 - Do not fabricate `kp_id` from `topic_id`.
 - Do not fabricate `learning_unit_id` from legacy path rows.
-- Do not remove compatibility tables before parity is proven.
-- Do not add new production semantics to `mastery_scores`, `learning_paths`, or legacy `questions`.
-- Do not enable read flags before import/backfill verification.
+- Do not reintroduce dropped runtime tables such as `modules`, `topics`, `questions`, `mastery_scores`, or `learning_paths`.
+- Do not claim production IRT/BKT accuracy until calibration has actually run and been validated.
 
 ## Freeze/Delete Policy
 
 Detailed legacy cleanup ownership and task order live in `docs/LEGACY_SCHEMA_CLEANUP_PLAN.md`.
 
-Old tables may only be frozen after canonical runtime parity is `ready` for two consecutive runs.
-
-Freeze means:
-
-- no new feature writes to `questions`, `mastery_scores`, or `learning_paths`
-- old rows remain for audit/backward compatibility
-- rollback is still possible by disabling canonical read flags
-
-Delete/drop is a separate migration and requires explicit approval. This cutover plan does not delete or truncate old runtime data.
+Historical note: the runtime legacy tables were dropped by `20260423_drop_legacy` after parity checks passed. This section now acts as a regression guard: future work should not add new production reads/writes back to dropped schemas.
 
 Run the parity report with:
 

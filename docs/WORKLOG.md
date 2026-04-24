@@ -283,3 +283,20 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
   - `npm --prefix frontend run build`
   - `44 passed` cho canonical contract/service regression set
   - `7 passed` cho Playwright course discovery/gating e2e
+
+### Bổ sung abandon/resume runtime state — 24/04/2026
+
+- Mở rộng `planner_session_state` cho abandon/resume:
+  - `current_unit_id`
+  - `current_stage`
+  - `current_progress`
+  - `last_activity`
+- Thêm policy helper cho quiz abandon:
+  - `<24h` tiếp tục phần còn lại
+  - `>=24h` regenerate quiz gate mới, nhưng không rollback `interactions`
+- Thêm policy helper cho resume route:
+  - `<24h` seamless resume
+  - `1-7d` welcome-back
+  - `7-30d` quick review
+  - `>30d` placement-lite
+- Planner read hiện áp dụng mastery staleness on-read từ `learner_mastery_kp.updated_at` bằng cách inflate `theta_sigma`, không ghi đè evidence raw.
