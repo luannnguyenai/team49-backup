@@ -328,6 +328,21 @@ System writes:
 
 - none at decision time unless user acts.
 
+### 5.4.1. Quiz Threshold Summary
+
+These defaults should live in one backend config source and be mirrored in test fixtures.
+
+| Phase | Pass threshold | Default items | Notes |
+| --- | --- | --- | --- |
+| `placement` | no pass/fail | adaptive cap | Uses `stop_policy`; updates initial mastery only |
+| `mini_quiz` | `>= 70%` | 5-7 | Marks unit complete when passed |
+| `skip_verification` | `>= 80%` | 5 | Writes `waived_units` when passed |
+| `skip_verification` for critical gateway prereq | `>= 90%` | 7 | Applies when prereq concepts are critical + gateway |
+| `bridge_check` | `>= 70%` | 5 | Returns to original segment when passed |
+| `final_quiz` | `>= 75%` | 15-25 | Course-level completion/review routing |
+| `review` | no hard pass/fail | 3-5 | Updates mastery and review queue |
+| `transfer` | future | TBD | API enum reserved; no V2 fire-flow yet |
+
 ### 5.5. Mini Quiz Flow
 
 ```mermaid
@@ -510,6 +525,11 @@ Use `learner_mastery_kp.mastery_mean_cached` for progress bars and plain-languag
 | `< 0.40` | Cần củng cố |
 
 Planner and assessor may compute confidence-sensitive thresholds on read, but UI should request a backend-provided `readiness_label` or `mastery_label` instead of duplicating statistical logic in many components.
+
+MVP note:
+
+- Keep `n_items_observed < 3` as the conservative default.
+- After MVP, A/B test `< 2` if beginner profiles look empty for too long after the first lectures.
 
 ### 5.11. Failure And Degradation States
 
@@ -827,6 +847,12 @@ Request:
   "target_se": 0.35
 }
 ```
+
+Defaults:
+
+- `stop_policy = "hybrid"` when omitted.
+- `target_se = 0.35` when omitted.
+- `max_items` defaults by phase using the threshold table in section 5.4.1.
 
 Video progress:
 
@@ -1185,6 +1211,8 @@ Minimum events before Phase 8 cutover:
 - `plan_churned` with `parent_plan_id` and `unit_changes_in_top5`.
 - `resume_offered`, `resume_accepted`, `placement_lite_taken`.
 - `tutor_message_sent`, `tutor_citation_clicked`.
+- `item_feedback_submitted` with `item_id`, `reason`.
+- `review_status_badge_shown` with `course_id`, `badge_type`.
 
 Telemetry should not block learning actions. If tracking fails, user flow continues.
 
@@ -1392,6 +1420,13 @@ Exit criteria:
 - Gets resume card.
 - If inactive for more than 7 days, sees quick-check suggestion.
 - Does not lose previous completed/waived units.
+
+### System Resilience
+
+- If segment-decision API times out or fails, the player starts normal video learning within 2 seconds.
+- If video/CDN fails, text-only mode renders from canonical summary/key points within 1 second after failure detection.
+- If mastery is empty, profile shows "Chưa đủ dữ liệu" plus onboarding/course-start CTA, not a 0% radar.
+- If planner returns an empty path, UI routes to final quiz, course completion, or goal setup depending on user state.
 
 ## 11. Product Decisions
 
