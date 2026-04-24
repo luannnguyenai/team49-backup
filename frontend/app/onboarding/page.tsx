@@ -4,7 +4,7 @@
 // Collects: known topics · desired modules · schedule · learning method
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -67,7 +67,7 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
 // Page component
 // ---------------------------------------------------------------------------
 
-export default function OnboardingPage() {
+function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
@@ -422,5 +422,19 @@ export default function OnboardingPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
+      <OnboardingPageInner />
+    </Suspense>
   );
 }

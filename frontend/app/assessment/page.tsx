@@ -3,7 +3,7 @@
 // Full-screen assessment flow:
 //   load → start session → question-by-question → submit → /assessment/results
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Bookmark,
@@ -66,7 +66,7 @@ function useElapsedTimer(active: boolean) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function AssessmentPage() {
+function AssessmentPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -624,5 +624,19 @@ export default function AssessmentPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AssessmentPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
+      <AssessmentPageInner />
+    </Suspense>
   );
 }
