@@ -26,6 +26,7 @@ from src.models.learning import (
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
 from src.repositories.learning_progress_repo import LearningProgressRepository
+from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.repositories.waived_unit_repo import WaivedUnitRepository
 from src.schemas.quiz import (
     QuizAnswerRequest,
@@ -44,6 +45,7 @@ from src.services.canonical_assessor_compat import (
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.canonical_question_selector import CanonicalQuestionSelector
 from src.services.mastery_evaluator import classify_mastery
+from src.services.learning_session_service import CANONICAL_SESSION_ID
 
 
 _DIFFICULTY_SLOTS: list[tuple[DifficultyBucket, int]] = [
@@ -158,6 +160,15 @@ async def _start_canonical_quiz(
     db.add(session)
     await db.flush()
     await db.refresh(session)
+    await _sync_quiz_progress_state(
+        db,
+        user_id=user_id,
+        learning_unit_id=unit.id,
+        session_id=session.id,
+        item_ids=[item.item_id for item in items],
+        answered_item_ids=[],
+        current_stage="quiz_in_progress",
+    )
 
     return QuizStartResponse(
         session_id=session.id,
@@ -218,6 +229,30 @@ async def _answer_canonical_quiz_question(
         )
     )
     await db.flush()
+
+    answered_result = await db.execute(
+        select(Interaction.canonical_item_id)
+        .where(Interaction.session_id == session.id)
+        .order_by(Interaction.sequence_position)
+    )
+    answered_item_ids = [
+        str(item_id) for item_id in answered_result.scalars().all() if item_id is not None
+    ]
+    item_ids_for_session = await _current_quiz_item_ids(
+        db,
+        user_id=user_id,
+        session_id=session.id,
+        fallback_unit_canonical_id=unit.canonical_unit_id,
+    )
+    await _sync_quiz_progress_state(
+        db,
+        user_id=user_id,
+        learning_unit_id=unit.id,
+        session_id=session.id,
+        item_ids=item_ids_for_session,
+        answered_item_ids=answered_item_ids,
+        current_stage="quiz_in_progress",
+    )
 
     all_interactions_result = await db.execute(
         select(Interaction.is_correct).where(Interaction.session_id == session.id)
@@ -284,6 +319,19 @@ async def _complete_canonical_quiz(
         completed_at=now,
     )
     await WaivedUnitRepository(db).delete_for_user_unit(user_id, unit.id)
+    await _sync_quiz_progress_state(
+        db,
+        user_id=user_id,
+        learning_unit_id=unit.id,
+        session_id=session.id,
+        item_ids=item_ids,
+        answered_item_ids=item_ids,
+        current_stage="post_quiz",
+        extra_progress={
+            "score_percent": quiz_score_percent,
+            "completed_at": now.isoformat(),
+        },
+    )
 
     weak_kcs = await _canonical_kp_names(db, wrong_item_ids)
     time_total_ms = sum((interaction.response_time_ms or 0) for interaction, _ in rows)
@@ -369,3 +417,58 @@ async def _get_quiz_session(db: AsyncSession, user_id: uuid.UUID, session_id: uu
     if sess is None:
         raise NotFoundError("Quiz session not found.")
     return sess
+
+
+async def _current_quiz_item_ids(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    session_id: uuid.UUID,
+    fallback_unit_canonical_id: str,
+) -> list[str]:
+    state = await PlannerAuditRepository(db).get_session_state(user_id, CANONICAL_SESSION_ID)
+    progress = state.current_progress if state is not None else None
+    if isinstance(progress, dict) and progress.get("quiz_id") == str(session_id):
+        answered = [str(item_id) for item_id in progress.get("items_answered") or []]
+        remaining = [str(item_id) for item_id in progress.get("items_remaining") or []]
+        return list(dict.fromkeys(answered + remaining))
+
+    unit_item_result = await db.execute(
+        select(QuestionBankItem.item_id).where(QuestionBankItem.unit_id == fallback_unit_canonical_id)
+    )
+    return [str(item_id) for item_id in unit_item_result.scalars().all()]
+
+
+async def _sync_quiz_progress_state(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    learning_unit_id: uuid.UUID,
+    session_id: uuid.UUID,
+    item_ids: list[str],
+    answered_item_ids: list[str],
+    current_stage: str,
+    extra_progress: dict | None = None,
+) -> None:
+    answered = list(dict.fromkeys(answered_item_ids))
+    answered_set = set(answered)
+    remaining = [item_id for item_id in item_ids if item_id not in answered_set]
+    progress = {
+        "learning_unit_id": str(learning_unit_id),
+        "quiz_id": str(session_id),
+        "quiz_phase": "mini_quiz",
+        "items_answered": answered,
+        "items_remaining": remaining,
+    }
+    if extra_progress:
+        progress.update(extra_progress)
+
+    await PlannerAuditRepository(db).upsert_session_state(
+        user_id=user_id,
+        session_id=CANONICAL_SESSION_ID,
+        current_unit_id=learning_unit_id,
+        current_stage=current_stage,
+        current_progress=progress,
+        last_activity=datetime.now(UTC),
+        state_json={"canonical_runtime": True, "source": "quiz_progress"},
+    )
