@@ -79,4 +79,9 @@ All timestamps are based on `DEMO_NOW = 2026-04-24T09:00:00Z`.
 
 ## Output / Import Contract
 
-The script creates deterministic JSONL snapshots under `data/synthetic/<dataset>/` and can also reset/import those rows into the active DB. It must select real course/unit/item IDs from the current canonical DB, sorted deterministically, so the fixture stays aligned with imported course content.
+The source of truth is hand-authored scenario JSON:
+
+- `data/synthetic/demo_accounts_v1/scenarios.json`
+- `data/synthetic/cohort_30_v1/scenarios.json`
+
+Each scenario explicitly declares `mastery_profile`, `learning_state`, and `sessions[].answer_pattern`. The Python script creates deterministic JSONL snapshots under `data/synthetic/<dataset>/` and can also reset/import those rows into the active DB. It must select real course/unit/item IDs from the current canonical DB, sorted deterministically, so the fixture stays aligned with imported course content.

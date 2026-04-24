@@ -4,7 +4,7 @@
 
 **Goal:** Build a deterministic reset/import script for 9 demo accounts and a separate 30-user synthetic cohort.
 
-**Architecture:** `src/scripts/pipeline/generate_synthetic_demo_users.py` owns pure fixture planning plus optional DB reset/import. Tests cover the pure fixture contract so the dataset shape, email domain, password hash, and no-random behavior stay stable.
+**Architecture:** Hand-authored `data/synthetic/*/scenarios.json` files own learner ability, state, and answer patterns. `src/scripts/pipeline/generate_synthetic_demo_users.py` validates those scenarios, resolves real course/unit/item IDs, writes JSONL snapshots, and optionally resets/imports DB rows.
 
 **Tech Stack:** Python 3.12, SQLAlchemy async ORM, pytest, existing canonical/product DB models.
 
@@ -15,12 +15,15 @@
 **Files:**
 - Create: `tests/pipeline/test_generate_synthetic_demo_users.py`
 - Create: `src/scripts/pipeline/generate_synthetic_demo_users.py`
+- Create: `data/synthetic/demo_accounts_v1/scenarios.json`
+- Create: `data/synthetic/cohort_30_v1/scenarios.json`
 
 - [ ] Write failing tests for:
   - exactly 9 demo accounts and 30 cohort accounts
   - all emails end in `@vinuni.edu.vn`
   - demo password hash verifies `DemoPass123!`
   - cohort proficiency bands are distributed as 6 beginner, 7 developing, 10 proficient, 7 advanced
+  - ability and answer patterns come from scenario JSON
   - demo/cohort datasets are distinct
   - fixture build is deterministic across repeated calls
 

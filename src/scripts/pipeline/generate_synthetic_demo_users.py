@@ -15,7 +15,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,32 +39,32 @@ from src.models.user import PreferredMethod, User
 
 DEMO_DATASET = "demo_accounts_v1"
 COHORT_DATASET = "cohort_30_v1"
+DATASET_ALIASES = {
+    "demo": DEMO_DATASET,
+    "cohort": COHORT_DATASET,
+    "all": "all",
+}
 DEMO_PASSWORD = "DemoPass123!"
 DEMO_PASSWORD_HASH = "$2b$12$2VA.mexLhoY.6Xtrv1520OhlOkcefL/cFeWWTkL7gga4pkFALNtBi"
 DEMO_NOW = datetime(2026, 4, 24, 9, 0, tzinfo=UTC)
 DEFAULT_OUTPUT_DIR = Path("data/synthetic")
+SCENARIO_FILES = {
+    DEMO_DATASET: DEFAULT_OUTPUT_DIR / DEMO_DATASET / "scenarios.json",
+    COHORT_DATASET: DEFAULT_OUTPUT_DIR / COHORT_DATASET / "scenarios.json",
+}
 NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "a20-app-049/synthetic-demo-users/v1")
 
 ProficiencyBand = Literal["beginner", "developing", "proficient", "advanced"]
+ALLOWED_PROFICIENCY_BANDS = {"beginner", "developing", "proficient", "advanced"}
 
-PROFICIENCY_MASTERY: dict[ProficiencyBand, tuple[float, float, float]] = {
-    "beginner": (-0.85, 1.05, 0.30),
-    "developing": (-0.20, 0.85, 0.45),
-    "proficient": (0.75, 0.55, 0.72),
-    "advanced": (1.35, 0.40, 0.86),
-}
-CORRECTNESS_PATTERNS: dict[ProficiencyBand, tuple[bool, ...]] = {
-    "beginner": (False, False, True, False, False, True),
-    "developing": (True, False, True, False, True, False),
-    "proficient": (True, True, False, True, True, False),
-    "advanced": (True, True, True, True, False, True),
-}
-RESPONSE_TIME_MS: dict[ProficiencyBand, int] = {
-    "beginner": 62000,
-    "developing": 47000,
-    "proficient": 32000,
-    "advanced": 21000,
-}
+
+@dataclass(frozen=True)
+class SyntheticSessionSpec:
+    phase: str
+    answer_pattern: tuple[str, ...]
+    item_count: int
+    completed: bool = True
+    response_time_ms: int | None = None
 
 
 @dataclass(frozen=True)
@@ -74,9 +74,12 @@ class SyntheticUserSpec:
     email: str
     full_name: str
     proficiency_band: ProficiencyBand
-    course_scope: str
+    course_scope: tuple[str, ...]
     is_demo_account: bool
-    is_onboarded: bool = True
+    is_onboarded: bool
+    mastery_profile: dict[str, Any]
+    learning_state: dict[str, Any]
+    sessions: tuple[SyntheticSessionSpec, ...]
 
     def to_metadata(self) -> dict[str, Any]:
         return {
@@ -84,7 +87,7 @@ class SyntheticUserSpec:
             "synthetic_dataset": self.dataset,
             "synthetic_case": self.synthetic_case,
             "proficiency_band": self.proficiency_band,
-            "course_scope": self.course_scope,
+            "course_scope": list(self.course_scope),
             "is_demo_account": self.is_demo_account,
             "resettable": True,
         }
@@ -137,140 +140,73 @@ def _metadata_json(spec: SyntheticUserSpec) -> str:
     return json.dumps(spec.to_metadata(), ensure_ascii=True, sort_keys=True)
 
 
-def build_user_specs() -> list[SyntheticUserSpec]:
-    return _build_demo_specs() + _build_cohort_specs()
+def build_user_specs(dataset: str = "all") -> list[SyntheticUserSpec]:
+    normalized_dataset = DATASET_ALIASES.get(dataset, dataset)
+    if normalized_dataset == DEMO_DATASET:
+        return load_user_specs(SCENARIO_FILES[DEMO_DATASET])
+    if normalized_dataset == COHORT_DATASET:
+        return load_user_specs(SCENARIO_FILES[COHORT_DATASET])
+    if normalized_dataset == "all":
+        return load_user_specs(SCENARIO_FILES[DEMO_DATASET]) + load_user_specs(
+            SCENARIO_FILES[COHORT_DATASET]
+        )
+    raise ValueError(f"Unsupported synthetic dataset: {dataset}")
 
 
-def _build_demo_specs() -> list[SyntheticUserSpec]:
-    return [
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="first_login",
-            email="demo.firstlogin@vinuni.edu.vn",
-            full_name="Demo First Login",
-            proficiency_band="beginner",
-            course_scope="none",
-            is_demo_account=True,
-            is_onboarded=False,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="full_2_courses",
-            email="demo.full@vinuni.edu.vn",
-            full_name="Demo Full Two Courses",
-            proficiency_band="proficient",
-            course_scope="all",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="cs231_only",
-            email="demo.cs231@vinuni.edu.vn",
-            full_name="Demo CS231 Only",
-            proficiency_band="proficient",
-            course_scope="cs231n",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="cs224n_only",
-            email="demo.cs224n@vinuni.edu.vn",
-            full_name="Demo CS224N Only",
-            proficiency_band="developing",
-            course_scope="cs224n",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="strong_skipper",
-            email="demo.skipper@vinuni.edu.vn",
-            full_name="Demo Strong Skipper",
-            proficiency_band="advanced",
-            course_scope="all",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="review_heavy",
-            email="demo.reviewer@vinuni.edu.vn",
-            full_name="Demo Review Heavy",
-            proficiency_band="proficient",
-            course_scope="all",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="weak_beginner",
-            email="demo.beginner@vinuni.edu.vn",
-            full_name="Demo Weak Beginner",
-            proficiency_band="beginner",
-            course_scope="all",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="abandon_mid_video",
-            email="demo.abandon.video@vinuni.edu.vn",
-            full_name="Demo Abandon Video",
-            proficiency_band="developing",
-            course_scope="all",
-            is_demo_account=True,
-        ),
-        SyntheticUserSpec(
-            dataset=DEMO_DATASET,
-            synthetic_case="abandon_mid_quiz_long_return",
-            email="demo.returner@vinuni.edu.vn",
-            full_name="Demo Long Returner",
-            proficiency_band="proficient",
-            course_scope="all",
-            is_demo_account=True,
-        ),
-    ]
-
-
-def _build_cohort_specs() -> list[SyntheticUserSpec]:
+def load_user_specs(path: Path) -> list[SyntheticUserSpec]:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    dataset = raw["dataset"]
     specs: list[SyntheticUserSpec] = []
-
-    def add_group(
-        case: str,
-        prefix: str,
-        course_scope: str,
-        bands: Iterable[ProficiencyBand],
-    ) -> None:
-        for index, band in enumerate(bands, start=1):
-            specs.append(
-                SyntheticUserSpec(
-                    dataset=COHORT_DATASET,
-                    synthetic_case=case,
-                    email=f"synthetic.{prefix}.{index:02d}@vinuni.edu.vn",
-                    full_name=f"Synthetic {case.replace('_', ' ').title()} {index:02d}",
-                    proficiency_band=band,
-                    course_scope=course_scope,
-                    is_demo_account=False,
+    for row in raw["users"]:
+        spec = SyntheticUserSpec(
+            dataset=dataset,
+            synthetic_case=row["synthetic_case"],
+            email=row["email"],
+            full_name=row["full_name"],
+            proficiency_band=row["proficiency_band"],
+            course_scope=tuple(row.get("course_scope", [])),
+            is_demo_account=bool(row["is_demo_account"]),
+            is_onboarded=bool(row["is_onboarded"]),
+            mastery_profile=dict(row.get("mastery_profile", {})),
+            learning_state=dict(row.get("learning_state", {})),
+            sessions=tuple(
+                SyntheticSessionSpec(
+                    phase=session_row["phase"],
+                    answer_pattern=tuple(session_row.get("answer_pattern", [])),
+                    item_count=int(session_row.get("item_count", 0)),
+                    completed=bool(session_row.get("completed", True)),
+                    response_time_ms=session_row.get("response_time_ms"),
                 )
-            )
-
-    add_group(
-        "full_2_courses",
-        "full",
-        "all",
-        ("developing", "proficient", "proficient", "proficient", "advanced", "advanced"),
-    )
-    add_group(
-        "cs231_only",
-        "cs231",
-        "cs231n",
-        ("developing", "developing", "proficient", "proficient", "advanced"),
-    )
-    add_group("cs224n_only", "cs224n", "cs224n", ("developing", "proficient", "proficient"))
-    add_group("strong_skipper", "skipper", "all", ("advanced", "advanced", "advanced", "advanced"))
-    add_group("review_heavy", "reviewer", "all", ("developing", "proficient", "proficient"))
-    add_group("weak_beginner", "beginner", "all", ("beginner", "beginner", "beginner"))
-    add_group("abandon_mid_video", "abandon-video", "all", ("beginner", "developing"))
-    add_group("abandon_mid_quiz", "abandon-quiz", "all", ("beginner", "developing"))
-    add_group("long_returner_review", "long-returner", "all", ("proficient",))
-    add_group("very_long_returner_placement_lite", "very-long-returner", "all", ("beginner",))
+                for session_row in row.get("sessions", [])
+            ),
+        )
+        _validate_spec(spec)
+        specs.append(spec)
     return specs
+
+
+def _validate_spec(spec: SyntheticUserSpec) -> None:
+    if not spec.email.endswith("@vinuni.edu.vn"):
+        raise ValueError(f"Synthetic user must use @vinuni.edu.vn email: {spec.email}")
+    if spec.proficiency_band not in ALLOWED_PROFICIENCY_BANDS:
+        raise ValueError(f"Unsupported proficiency band for {spec.email}: {spec.proficiency_band}")
+    if not spec.is_onboarded:
+        return
+    for key in ("theta_mu", "theta_sigma", "mastery_mean_cached"):
+        if key not in spec.mastery_profile:
+            raise ValueError(f"{spec.email} missing mastery_profile.{key}")
+    for session in spec.sessions:
+        if session.item_count != len(session.answer_pattern):
+            raise ValueError(
+                f"{spec.email} session {session.phase} item_count does not match answer_pattern"
+            )
+        if session.response_time_ms is None:
+            raise ValueError(f"{spec.email} session {session.phase} missing response_time_ms")
+        unsupported = set(session.answer_pattern) - {"correct", "wrong"}
+        if unsupported:
+            raise ValueError(
+                f"{spec.email} session {session.phase} has unsupported answers: {sorted(unsupported)}"
+            )
 
 
 async def load_catalog(session: AsyncSession) -> SyntheticCatalog:
@@ -458,12 +394,17 @@ def _append_user_rows(
     _append_session_state(rows, spec, user_id, selected_units, session_ids, plan_id)
 
 
-def _select_courses(catalog: SyntheticCatalog, course_scope: str) -> list[CourseRef]:
-    if course_scope == "none":
+def _select_courses(catalog: SyntheticCatalog, course_scope: tuple[str, ...]) -> list[CourseRef]:
+    if not course_scope:
         return []
-    if course_scope == "all":
+    scope_values = {value.lower() for value in course_scope}
+    if "all" in scope_values:
         return list(catalog.courses)
-    matched = [course for course in catalog.courses if course_scope.lower() in course.slug.lower()]
+    matched = [
+        course
+        for course in catalog.courses
+        if any(scope_value in course.slug.lower() for scope_value in scope_values)
+    ]
     return matched or list(catalog.courses[:1])
 
 
@@ -474,20 +415,7 @@ def _select_units(
 ) -> list[UnitRef]:
     selected_course_ids = {course.id for course in selected_courses}
     units = [unit for unit in catalog.units if unit.course_id in selected_course_ids]
-    limit_by_case = {
-        "full_2_courses": 10,
-        "cs231_only": 8,
-        "cs224n_only": 6,
-        "strong_skipper": 8,
-        "review_heavy": 7,
-        "weak_beginner": 4,
-        "abandon_mid_video": 3,
-        "abandon_mid_quiz": 3,
-        "abandon_mid_quiz_long_return": 4,
-        "long_returner_review": 5,
-        "very_long_returner_placement_lite": 5,
-    }
-    return units[: limit_by_case.get(spec.synthetic_case, 5)]
+    return units[: int(spec.learning_state.get("unit_count", 5))]
 
 
 def _append_progress_rows(
@@ -503,21 +431,22 @@ def _append_progress_rows(
         last_position_seconds: float | None = None
         last_opened_at = completed_at
 
-        if spec.synthetic_case == "weak_beginner" and index > 0:
+        progress_strategy = spec.learning_state.get("progress_strategy", "completed")
+        if progress_strategy == "first_only" and index > 0:
             status = LearningProgressStatus.not_started.value
             completed_at = None
-        elif spec.synthetic_case == "abandon_mid_video" and index == 0:
+        elif progress_strategy == "abandon_video" and index == 0:
             status = LearningProgressStatus.in_progress.value
             completed_at = None
-            last_position_seconds = 522.0
-            last_opened_at = DEMO_NOW - timedelta(minutes=50)
-        elif spec.synthetic_case in {"abandon_mid_quiz", "abandon_mid_quiz_long_return"} and index == 0:
+            last_position_seconds = float(spec.learning_state.get("video_progress_s", 522.0))
+            last_opened_at = _parse_scenario_time(spec.learning_state["last_activity"])
+        elif progress_strategy == "abandon_quiz" and index == 0:
             status = LearningProgressStatus.in_progress.value
             completed_at = None
-            last_position_seconds = 980.0
-            last_opened_at = DEMO_NOW - timedelta(days=1, hours=23)
-        elif "returner" in spec.synthetic_case:
-            last_opened_at = _last_activity_for_case(spec.synthetic_case)
+            last_position_seconds = float(spec.learning_state.get("video_progress_s", 980.0))
+            last_opened_at = _parse_scenario_time(spec.learning_state["last_activity"])
+        elif spec.learning_state.get("last_activity"):
+            last_opened_at = _parse_scenario_time(spec.learning_state["last_activity"])
 
         rows["learning_progress_records"].append(
             {
@@ -545,13 +474,11 @@ def _append_mastery_rows(
     for unit in units:
         kp_ids.extend(catalog.unit_kp_ids.get(unit.canonical_unit_id, ()))
     kp_ids = sorted(set(kp_ids))[:12]
-    theta_mu, theta_sigma, mastery = PROFICIENCY_MASTERY[spec.proficiency_band]
-    if spec.synthetic_case == "strong_skipper":
-        theta_mu, theta_sigma, mastery = (1.6, 0.35, 0.91)
-    if spec.synthetic_case == "weak_beginner":
-        theta_mu, theta_sigma, mastery = (-1.05, 1.15, 0.24)
-
-    updated_at = _last_activity_for_case(spec.synthetic_case)
+    theta_mu = float(spec.mastery_profile["theta_mu"])
+    theta_sigma = float(spec.mastery_profile["theta_sigma"])
+    mastery = float(spec.mastery_profile["mastery_mean_cached"])
+    n_items_base = int(spec.mastery_profile.get("n_items_observed_base", 3))
+    updated_at = _parse_scenario_time(spec.learning_state.get("last_activity"))
     for index, kp_id in enumerate(kp_ids):
         rows["learner_mastery_kp"].append(
             {
@@ -561,7 +488,7 @@ def _append_mastery_rows(
                 "theta_mu": theta_mu - (0.03 * (index % 3)),
                 "theta_sigma": theta_sigma,
                 "mastery_mean_cached": mastery,
-                "n_items_observed": 3 + (index % 4),
+                "n_items_observed": n_items_base + (index % 4),
                 "updated_by": f"synthetic_fixture:{spec.dataset}:{spec.proficiency_band}",
                 "created_at": created_at,
                 "updated_at": updated_at,
@@ -578,22 +505,22 @@ def _append_session_and_interaction_rows(
     created_at: datetime,
 ) -> dict[str, uuid.UUID]:
     session_ids: dict[str, uuid.UUID] = {}
-    phases = _phases_for_case(spec.synthetic_case)
     sequence_global = 1
-    for phase_index, phase in enumerate(phases):
+    for phase_index, session_spec in enumerate(spec.sessions):
+        phase = session_spec.phase
         items = _select_items(catalog, units, phase)
         if not items:
             continue
-        if spec.synthetic_case in {"abandon_mid_quiz", "abandon_mid_quiz_long_return"} and phase == "mini_quiz":
-            items = items[:2]
-            completed_at = None
-        else:
-            items = items[:4]
-            completed_at = created_at + timedelta(days=phase_index, hours=2)
+        items = items[: session_spec.item_count]
+        completed_at = (
+            created_at + timedelta(days=phase_index, hours=2)
+            if session_spec.completed
+            else None
+        )
 
         session_id = _stable_uuid("session", f"{spec.email}:{phase}")
         session_ids[phase] = session_id
-        correct_flags = _correctness_flags(spec.proficiency_band, len(items))
+        correct_flags = [answer == "correct" for answer in session_spec.answer_pattern[: len(items)]]
         rows["sessions"].append(
             {
                 "id": session_id,
@@ -626,7 +553,7 @@ def _append_session_and_interaction_rows(
                     "global_sequence_position": sequence_global,
                     "selected_answer": selected_answer,
                     "is_correct": is_correct,
-                    "response_time_ms": RESPONSE_TIME_MS[spec.proficiency_band] + (item_index * 1000),
+                    "response_time_ms": int(session_spec.response_time_ms or 0) + (item_index * 1000),
                     "changed_answer": spec.proficiency_band == "beginner" and not is_correct,
                     "hint_used": spec.proficiency_band in {"beginner", "developing"} and not is_correct,
                     "explanation_viewed": not is_correct,
@@ -638,16 +565,6 @@ def _append_session_and_interaction_rows(
     return session_ids
 
 
-def _phases_for_case(case: str) -> tuple[str, ...]:
-    if case == "review_heavy" or case == "long_returner_review":
-        return ("mini_quiz", "review")
-    if case in {"abandon_mid_quiz", "abandon_mid_quiz_long_return"}:
-        return ("mini_quiz",)
-    if case == "very_long_returner_placement_lite":
-        return ("placement",)
-    return ("mini_quiz",)
-
-
 def _select_items(catalog: SyntheticCatalog, units: list[UnitRef], phase: str) -> list[ItemRef]:
     unit_ids = {unit.canonical_unit_id for unit in units}
     return [
@@ -655,11 +572,6 @@ def _select_items(catalog: SyntheticCatalog, units: list[UnitRef], phase: str) -
         for item in catalog.items
         if item.unit_id in unit_ids and phase in item.phases
     ]
-
-
-def _correctness_flags(band: ProficiencyBand, count: int) -> list[bool]:
-    pattern = CORRECTNESS_PATTERNS[band]
-    return [pattern[index % len(pattern)] for index in range(count)]
 
 
 def _selected_answer(item: ItemRef, is_correct: bool) -> str:
@@ -682,7 +594,7 @@ def _append_planner_rows(
             "learning_unit_id": str(unit.id),
             "title": unit.title,
             "rank": index,
-            "action": _action_for_case(spec.synthetic_case, index),
+            "action": _action_for_spec(spec, index),
             "synthetic_case": spec.synthetic_case,
         }
         for index, unit in enumerate(units[:6], start=1)
@@ -716,7 +628,7 @@ def _append_planner_rows(
                 "plan_history_id": plan_id,
                 "learning_unit_id": unit.id,
                 "rank": index,
-                "reason_code": _action_for_case(spec.synthetic_case, index),
+                "reason_code": _action_for_spec(spec, index),
                 "term_breakdown_json": {
                     "need": round(0.9 - index * 0.06, 2),
                     "interest": 0.7,
@@ -731,12 +643,13 @@ def _append_planner_rows(
     return plan_id
 
 
-def _action_for_case(case: str, rank: int) -> str:
-    if case == "strong_skipper" and rank <= 2:
+def _action_for_spec(spec: SyntheticUserSpec, rank: int) -> str:
+    planner_action = spec.learning_state.get("planner_action")
+    if planner_action == "skip" and rank <= 2:
         return "skip"
-    if case in {"review_heavy", "long_returner_review"}:
+    if planner_action == "quick_review":
         return "quick_review"
-    if case == "weak_beginner":
+    if planner_action == "deep_practice":
         return "deep_practice"
     return "learn"
 
@@ -750,23 +663,21 @@ def _append_session_state(
     plan_id: uuid.UUID,
 ) -> None:
     current_unit = units[0]
-    last_activity = _last_activity_for_case(spec.synthetic_case)
-    current_stage = "between_units"
+    last_activity = _parse_scenario_time(spec.learning_state.get("last_activity"))
+    current_stage = spec.learning_state.get("current_stage", "between_units")
     current_progress: dict[str, Any] = {
         "synthetic_case": spec.synthetic_case,
         "proficiency_band": spec.proficiency_band,
     }
 
-    if spec.synthetic_case == "abandon_mid_video":
-        current_stage = "watching"
+    if spec.learning_state.get("progress_strategy") == "abandon_video":
         current_progress.update(
             {
-                "video_progress_s": 522,
+                "video_progress_s": spec.learning_state.get("video_progress_s", 522),
                 "video_finished": False,
             }
         )
-    elif spec.synthetic_case in {"abandon_mid_quiz", "abandon_mid_quiz_long_return"}:
-        current_stage = "quiz_in_progress"
+    elif spec.learning_state.get("progress_strategy") == "abandon_quiz":
         quiz_id = session_ids.get("mini_quiz")
         answered_items = [
             row["canonical_item_id"]
@@ -778,12 +689,16 @@ def _append_session_state(
                 "quiz_id": str(quiz_id) if quiz_id else None,
                 "quiz_phase": "mini_quiz",
                 "items_answered": answered_items,
-                "items_remaining": [f"remaining-{index}" for index in range(1, 4)],
+                "items_remaining": [
+                    f"remaining-{index}"
+                    for index in range(
+                        1, int(spec.learning_state.get("items_remaining_count", 3)) + 1
+                    )
+                ],
             }
         )
-    elif "returner" in spec.synthetic_case:
-        current_stage = "between_units"
-        current_progress.update({"resume_expected": "review_or_placement_lite"})
+    elif spec.learning_state.get("resume_expected"):
+        current_progress.update({"resume_expected": spec.learning_state["resume_expected"]})
 
     rows["planner_session_state"].append(
         {
@@ -825,16 +740,10 @@ def _append_session_state(
             )
 
 
-def _last_activity_for_case(case: str) -> datetime:
-    if case == "abandon_mid_video":
-        return DEMO_NOW - timedelta(minutes=50)
-    if case in {"abandon_mid_quiz", "abandon_mid_quiz_long_return"}:
-        return DEMO_NOW - timedelta(days=1, hours=23)
-    if case == "long_returner_review":
-        return datetime(2026, 4, 10, 9, 0, tzinfo=UTC)
-    if case == "very_long_returner_placement_lite":
-        return datetime(2026, 3, 10, 9, 0, tzinfo=UTC)
-    return DEMO_NOW - timedelta(minutes=30)
+def _parse_scenario_time(value: str | None) -> datetime:
+    if not value:
+        return DEMO_NOW - timedelta(minutes=30)
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
 def split_rows_by_dataset(
@@ -869,8 +778,10 @@ def split_rows_by_dataset(
 def write_jsonl_snapshots(
     rows: dict[str, list[dict[str, Any]]],
     output_dir: Path = DEFAULT_OUTPUT_DIR,
+    *,
+    specs: list[SyntheticUserSpec] | None = None,
 ) -> dict[str, dict[str, int]]:
-    split = split_rows_by_dataset(rows)
+    split = split_rows_by_dataset(rows, specs=specs)
     counts: dict[str, dict[str, int]] = {}
     for dataset, dataset_rows in split.items():
         dataset_dir = output_dir / dataset
@@ -961,18 +872,21 @@ async def generate_from_db(
     output_dir: Path = DEFAULT_OUTPUT_DIR,
     write_jsonl: bool = True,
     import_db: bool = False,
+    dataset: str = "all",
 ) -> dict[str, Any]:
     async with async_session() as session:
+        specs = build_user_specs(dataset)
         catalog = await load_catalog(session)
-        rows = build_synthetic_rows(catalog)
-        jsonl_counts = write_jsonl_snapshots(rows, output_dir) if write_jsonl else None
+        rows = build_synthetic_rows(catalog, specs=specs)
+        jsonl_counts = write_jsonl_snapshots(rows, output_dir, specs=specs) if write_jsonl else None
         import_counts = None
         if import_db:
-            import_counts = await reset_and_import_synthetic_rows(session, rows)
+            import_counts = await reset_and_import_synthetic_rows(session, rows, specs=specs)
             await session.commit()
         return {
             "demo_now": _iso(DEMO_NOW),
-            "users": len(build_user_specs()),
+            "dataset": DATASET_ALIASES.get(dataset, dataset),
+            "users": len(specs),
             "jsonl_counts": jsonl_counts,
             "import_counts": import_counts,
         }
@@ -980,6 +894,12 @@ async def generate_from_db(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dataset",
+        choices=("demo", "cohort", "all", DEMO_DATASET, COHORT_DATASET),
+        default="all",
+        help="Dataset to generate/reset. Use 'demo' for only the 9 login accounts.",
+    )
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -1006,6 +926,7 @@ def main() -> None:
             output_dir=args.output_dir,
             write_jsonl=not args.no_jsonl,
             import_db=args.import_db,
+            dataset=args.dataset,
         )
     )
     print(json.dumps(_json_safe(result), ensure_ascii=True, indent=2, sort_keys=True))

@@ -212,11 +212,12 @@ Known test caveat: the route contract suite using `httpx.ASGITransport(app=app)`
 Deterministic demo users can be generated after canonical content and product shell are imported:
 
 ```bash
-.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users
-.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --import-db
+.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts
+.venv/bin/python -m src.scripts.pipeline.reset_synthetic_cohort
+.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --dataset all
 ```
 
-The script has no random generation. It writes resettable JSONL snapshots under `data/synthetic/` and can reset/import the known synthetic accounts into the active DB. Demo login accounts use `@vinuni.edu.vn` and password `DemoPass123!`; the 30-user synthetic cohort is separate from those 9 demo accounts.
+The source of truth is hand-authored JSON in `data/synthetic/*/scenarios.json`. The Python script only validates scenarios, resolves real course/unit/item IDs, writes resettable JSONL snapshots, and optionally imports them. Demo login accounts use `@vinuni.edu.vn` and password `DemoPass123!`; the 30-user synthetic cohort is separate from those 9 demo accounts.
 
 ## Historical Docs
 

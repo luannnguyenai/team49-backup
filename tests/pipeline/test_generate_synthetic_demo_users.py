@@ -10,9 +10,11 @@ from src.scripts.pipeline.generate_synthetic_demo_users import (
     UnitRef,
     build_synthetic_rows,
     build_user_specs,
+    load_user_specs,
     write_jsonl_snapshots,
 )
 import json
+from pathlib import Path
 import uuid
 
 
@@ -25,6 +27,21 @@ def test_build_user_specs_separates_demo_accounts_from_cohort_users():
     assert len(demo_specs) == 9
     assert len(cohort_specs) == 30
     assert {spec.email for spec in demo_specs}.isdisjoint({spec.email for spec in cohort_specs})
+    assert len(build_user_specs("demo")) == 9
+    assert len(build_user_specs("cohort")) == 30
+
+
+def test_user_specs_are_loaded_from_hand_authored_json():
+    specs = load_user_specs(Path("data/synthetic/demo_accounts_v1/scenarios.json"))
+
+    beginner = next(spec for spec in specs if spec.email == "demo.beginner@vinuni.edu.vn")
+    assert beginner.mastery_profile == {
+        "theta_mu": -1.05,
+        "theta_sigma": 1.15,
+        "mastery_mean_cached": 0.24,
+        "n_items_observed_base": 2,
+    }
+    assert beginner.sessions[0].answer_pattern == ("wrong", "wrong", "correct", "wrong")
 
 
 def test_build_user_specs_uses_vinuni_domain_and_expected_demo_accounts():

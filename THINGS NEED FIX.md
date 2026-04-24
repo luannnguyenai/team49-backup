@@ -45,7 +45,7 @@ Current state:
 
 - Runtime has a phase-1 prior-based scoring policy and calibration readiness boundary.
 - Real production calibration still requires interaction volume.
-- Deterministic synthetic demo data now has a script and remains clearly separated from real calibration readiness.
+- Deterministic synthetic demo data now has hand-authored scenario JSON plus reset/import scripts, and remains clearly separated from real calibration readiness.
 - Synthetic observations are still not allowed to satisfy real calibration readiness.
 
 Needed:

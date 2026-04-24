@@ -383,19 +383,25 @@ Case runtime đã handle:
 
 ### Bổ sung deterministic synthetic demo users — 24/04/2026
 
-- Thêm script `src/scripts/pipeline/generate_synthetic_demo_users.py`.
+- Thêm scenario JSON thủ công và script importer:
+  - `data/synthetic/demo_accounts_v1/scenarios.json`
+  - `data/synthetic/cohort_30_v1/scenarios.json`
+  - `src/scripts/pipeline/generate_synthetic_demo_users.py`
+  - `src/scripts/pipeline/reset_demo_accounts.py`
+  - `src/scripts/pipeline/reset_synthetic_cohort.py`
 - Dataset tách rõ:
   - `demo_accounts_v1`: 9 account login demo, email `@vinuni.edu.vn`, password chung `DemoPass123!`
   - `cohort_30_v1`: 30 user nền cho dashboard/history/planner volume, không phải account demo chính
-- Không dùng random:
+- Không dùng random và không tự suy luận năng lực bằng thuật toán:
+  - năng lực từng user nằm trong `mastery_profile` của scenario JSON
+  - câu đúng/sai nằm trong `sessions[].answer_pattern`
+  - script chỉ validate, resolve unit/item thật, rồi import/reset
   - stable UUID bằng `uuid5`
   - fixed `DEMO_NOW = 2026-04-24T09:00:00Z`
-  - sorted course/unit/item catalog từ DB
-  - fixed correctness patterns theo `proficiency_band`
 - Cohort 30 có trình độ đa dạng:
   - `beginner`: 6
   - `developing`: 7
   - `proficient`: 10
   - `advanced`: 7
-- Không state-lock. Nếu demo làm thay đổi state, chạy lại script với `--import-db` để reset 9 demo accounts và 30 cohort users về baseline.
+- Không state-lock. Nếu demo làm thay đổi state, chạy `.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts` để reset riêng 9 demo accounts. Cohort 30 có command riêng để tránh reset nhầm khi đang demo.
 - Synthetic vẫn không được tính là real calibration evidence; calibration readiness tiếp tục tách real vs synthetic response counts.

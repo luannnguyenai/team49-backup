@@ -426,11 +426,14 @@ Runtime endpoints now available:
 
 Synthetic demo reset:
 
-- Command: `.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --import-db`
+- Reset only demo login accounts: `.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts`
+- Reset only 30-user cohort: `.venv/bin/python -m src.scripts.pipeline.reset_synthetic_cohort`
+- Generate snapshots for both: `.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --dataset all`
 - Requires canonical content and product shell already imported.
 - Creates 9 login demo users and 30 separate cohort users.
 - Uses `@vinuni.edu.vn` demo emails and shared password `DemoPass123!`.
-- Re-running the command deletes/recreates only the known synthetic emails; it does not state-lock accounts.
+- Scenario source-of-truth lives in `data/synthetic/*/scenarios.json`; Python only validates/resolves/imports.
+- Re-running reset commands deletes/recreates only the known synthetic emails; it does not state-lock accounts.
 - Synthetic rows are for demo/stress/replay only and must not satisfy real calibration readiness.
 
 ## Required Consistency Checks
