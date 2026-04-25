@@ -16,6 +16,10 @@ const apiMock = vi.hoisted(() => ({
   post: vi.fn(),
 }));
 
+const courseApiMock = vi.hoisted(() => ({
+  listUnits: vi.fn(),
+}));
+
 const navigationMock = vi.hoisted(() => ({
   pathname: "/",
   router: {
@@ -42,6 +46,10 @@ vi.mock("@/lib/api", async () => {
   return {
     ...actual,
     api: apiMock,
+    courseApi: {
+      ...actual.courseApi,
+      listUnits: courseApiMock.listUnits,
+    },
   };
 });
 
@@ -76,6 +84,8 @@ const LECTURE_1_UNIT: LearningUnitResponse = {
     id: "unit_lecture_01",
     slug: "lecture-1-introduction",
     title: "Lecture 1: Introduction",
+    lecture_title: "Lecture 1: Introduction",
+    lecture_order: 1,
     unit_type: "lecture",
     status: "ready",
     entry_mode: "video",
@@ -103,6 +113,8 @@ const DISABLED_TUTOR_UNIT: LearningUnitResponse = {
     id: "unit_lecture_99",
     slug: "lecture-99-placeholder",
     title: "Lecture 99: Placeholder",
+    lecture_title: "Lecture 99: Placeholder",
+    lecture_order: 99,
     unit_type: "lecture",
     status: "ready",
     entry_mode: "video",
@@ -121,16 +133,30 @@ const DISABLED_TUTOR_UNIT: LearningUnitResponse = {
   },
 };
 
-const CHAPTERS = [
-  {
-    id: 1,
-    lecture_id: "cs231n-lecture-1",
-    title: "Introduction",
-    summary: "Opening context",
-    start_time: 0,
-    end_time: 60,
-  },
-];
+const TOC_SUMMARY = {
+  lecture_title: "CS231N: Lecture 1",
+  table_of_contents: [
+    {
+      section_number: 1,
+      timestamp: "00:00:00",
+      topic_title: "Introduction",
+      detailed_summary: "Opening context",
+      key_takeaways: [
+        "Neural networks learn layered visual features.",
+        "The lecture sets up the course scope.",
+      ],
+    },
+    {
+      section_number: 2,
+      timestamp: "00:05:00",
+      topic_title: "Course Logistics",
+      detailed_summary: "Logistics overview",
+      key_takeaways: [
+        "Assignments matter.",
+      ],
+    },
+  ],
+};
 
 const LECTURE_2_UNIT: LearningUnitResponse = {
   course: {
@@ -141,6 +167,8 @@ const LECTURE_2_UNIT: LearningUnitResponse = {
     id: "unit_lecture_02",
     slug: "lecture-2-linear-classifiers",
     title: "Lecture 2: Image Classification with Linear Classifiers",
+    lecture_title: "Lecture 2: Image Classification with Linear Classifiers",
+    lecture_order: 2,
     unit_type: "lecture",
     status: "ready",
     entry_mode: "video",
@@ -159,16 +187,20 @@ const LECTURE_2_UNIT: LearningUnitResponse = {
   },
 };
 
-const CHAPTERS_2 = [
-  {
-    id: 2,
-    lecture_id: "cs231n-lecture-2",
-    title: "Linear Classification",
-    summary: "Linear classifier overview",
-    start_time: 0,
-    end_time: 90,
-  },
-];
+const TOC_SUMMARY_2 = {
+  lecture_title: "CS231N: Lecture 2",
+  table_of_contents: [
+    {
+      section_number: 1,
+      timestamp: "00:00:00",
+      topic_title: "Linear Classification",
+      detailed_summary: "Linear classifier overview",
+      key_takeaways: [
+        "Linear classifiers map features to scores.",
+      ],
+    },
+  ],
+};
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -178,6 +210,16 @@ describe("learning unit page (US3)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     apiMock.get.mockResolvedValue({ data: [] });
+    courseApiMock.listUnits.mockResolvedValue([]);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(JSON.stringify(TOC_SUMMARY), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
     navigationMock.pathname = "/";
   });
 
@@ -208,12 +250,29 @@ describe("learning unit page (US3)", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Lecture 1: Introduction")).toBeInTheDocument();
+      expect(screen.getAllByText("Lecture 1: Introduction").length).toBeGreaterThan(0);
     });
   });
 
   it("renders the restored learning shell frame with preserved tutor cues", async () => {
-    apiMock.get.mockResolvedValue({ data: CHAPTERS });
+    courseApiMock.listUnits.mockResolvedValue([
+      {
+        slug: "lecture-1-introduction",
+        title: "Introduction",
+        status: "ready",
+        unit_type: "lecture",
+        order_index: 1,
+        lecture_label: "Lecture 01",
+      },
+      {
+        slug: "lecture-2-linear-classifiers",
+        title: "Linear Classifiers",
+        status: "ready",
+        unit_type: "lecture",
+        order_index: 2,
+        lecture_label: "Lecture 02",
+      },
+    ]);
 
     render(
       <LearningPageScreen
@@ -228,65 +287,89 @@ describe("learning unit page (US3)", () => {
         name: "CS231n: Deep Learning for Computer Vision",
       }),
     ).toHaveAttribute("href", "/courses/cs231n");
-    expect(screen.getByText("Lecture 1: Introduction")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "AI Tutor" })).toBeInTheDocument();
+    expect(screen.getAllByText("Lecture 1: Introduction").length).toBeGreaterThan(0);
     await waitFor(() => {
-      expect(screen.getByText("Chapters")).toBeInTheDocument();
-      expect(screen.getByText("00:00 · Introduction")).toBeInTheDocument();
+      expect(screen.getByText("Bài học")).toBeInTheDocument();
+      expect(screen.getByText("Lecture 01")).toBeInTheDocument();
+      expect(screen.getByText("Lecture 02")).toBeInTheDocument();
+      expect(screen.getAllByText("Introduction").length).toBeGreaterThan(0);
+      expect(screen.getByText("Key ideas at this moment")).toBeInTheDocument();
+      expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
+      expect(screen.getByText("Giải thích ý chính của đoạn này dễ hiểu hơn")).toBeInTheDocument();
     });
   });
 
-  it("ignores stale chapter responses when switching lectures quickly", async () => {
-    let resolveLecture1: ((value: { data: typeof CHAPTERS }) => void) | undefined;
-    let resolveLecture2: ((value: { data: typeof CHAPTERS_2 }) => void) | undefined;
+  it("ignores stale toc summary responses when switching lectures quickly", async () => {
+    let resolveLecture1: ((value: Response) => void) | undefined;
+    let resolveLecture2: ((value: Response) => void) | undefined;
 
-    apiMock.get.mockImplementation((url: string) => {
-      if (url.includes("cs231n-lecture-1")) {
-        return new Promise((resolve) => {
-          resolveLecture1 = resolve;
-        });
-      }
-      if (url.includes("cs231n-lecture-2")) {
-        return new Promise((resolve) => {
-          resolveLecture2 = resolve;
-        });
-      }
-      return Promise.resolve({ data: [] });
-    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string | URL | Request) => {
+        const value = String(url);
+        if (value.includes("lecture-1.json")) {
+          return new Promise((resolve) => {
+            resolveLecture1 = resolve;
+          });
+        }
+        if (value.includes("lecture-2.json")) {
+          return new Promise((resolve) => {
+            resolveLecture2 = resolve;
+          });
+        }
+        return Promise.resolve(
+          new Response(JSON.stringify(TOC_SUMMARY), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+      }),
+    );
 
     const { rerender } = render(
       <LearningUnitShell data={LECTURE_1_UNIT} courseSlug="cs231n" />,
     );
 
     await waitFor(() => {
-      expect(apiMock.get).toHaveBeenCalledWith("/api/lectures/cs231n-lecture-1/toc");
+      expect(fetch).toHaveBeenCalledWith(
+        "/data/courses/CS231n/ToC_Summary/lecture-1.json",
+      );
     });
 
     rerender(<LearningUnitShell data={LECTURE_2_UNIT} courseSlug="cs231n" />);
 
     await waitFor(() => {
-      expect(apiMock.get).toHaveBeenCalledWith("/api/lectures/cs231n-lecture-2/toc");
+      expect(fetch).toHaveBeenCalledWith(
+        "/data/courses/CS231n/ToC_Summary/lecture-2.json",
+      );
     });
 
-    resolveLecture2?.({ data: CHAPTERS_2 });
+    resolveLecture2?.(
+      new Response(JSON.stringify(TOC_SUMMARY_2), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByText("00:00 · Linear Classification")).toBeInTheDocument();
+      expect(screen.getByText("Linear classifiers map features to scores.")).toBeInTheDocument();
     });
 
-    resolveLecture1?.({ data: CHAPTERS });
+    resolveLecture1?.(
+      new Response(JSON.stringify(TOC_SUMMARY), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("00:00 · Introduction"),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.getByText("00:00 · Linear Classification"),
-      ).toBeInTheDocument();
+      expect(screen.queryByText("Neural networks learn layered visual features.")).not.toBeInTheDocument();
+      expect(screen.getByText("Linear classifiers map features to scores.")).toBeInTheDocument();
     });
   });
 
-  it("shows AI Tutor toggle when tutor is enabled", async () => {
+  it("shows the AI Tutor panel by default when tutor is enabled", async () => {
     render(
       <LearningPageScreen
         courseSlug="cs231n"
@@ -297,6 +380,7 @@ describe("learning unit page (US3)", () => {
 
     await waitFor(() => {
       expect(screen.getByText("AI Tutor")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
     });
   });
 

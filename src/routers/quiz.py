@@ -62,7 +62,15 @@ async def api_start_quiz(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> QuizStartResponse:
-    return await start_quiz(db, user.id, body.learning_unit_id)
+    return await start_quiz(
+        db,
+        user.id,
+        body.learning_unit_id,
+        count=body.count,
+        source=body.source,
+        checkpoint=body.checkpoint,
+        exclude_item_ids=body.exclude_item_ids,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -127,11 +135,7 @@ async def api_quiz_history(
         default=None,
         description="Filter by learning unit UUID (optional)",
     ),
-    topic_id: uuid.UUID | None = Query(
-        default=None,
-        include_in_schema=False,
-    ),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> QuizHistoryResponse:
-    return await get_quiz_history(db, user.id, learning_unit_id or topic_id)
+    return await get_quiz_history(db, user.id, learning_unit_id)
