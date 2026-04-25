@@ -14,6 +14,7 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
+from src.config.goal_course_map import GOAL_COURSE_MAP
 from src.models.user import User
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.user_repo import UserRepository
@@ -189,7 +190,15 @@ async def _write_goal_preferences_if_enabled(
     await repo.upsert_for_user(
         user_id=user.id,
         goal_weights_json=goal_weights_json,
-        selected_course_ids=data.selected_course_ids or None,
+        selected_course_ids=(
+            list(
+                dict.fromkeys(
+                    (data.selected_course_ids or [])
+                    + [GOAL_COURSE_MAP[g] for g in (data.goal_ids or []) if g in GOAL_COURSE_MAP]
+                )
+            )
+            or None
+        ),
         goal_embedding=None,
         goal_embedding_version=None,
         derived_from_course_set_hash=None,

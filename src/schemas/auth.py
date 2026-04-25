@@ -9,6 +9,7 @@ from datetime import date, datetime
 
 from pydantic import AliasChoices, BaseModel, EmailStr, Field, field_validator
 
+from src.config.goal_course_map import VALID_GOAL_IDS
 from src.models.learning import MasteryLevel
 from src.models.user import PreferredMethod
 
@@ -119,6 +120,19 @@ class OnboardingRequest(BaseModel):
         default_factory=list,
         description="Explicit selected course IDs or canonical course IDs for planner scoping",
     )
+    goal_ids: list[str] = Field(
+        default_factory=list,
+        description="Onboarding goal identifiers: 'computer_vision' | 'nlp'",
+    )
+
+    @field_validator("goal_ids")
+    @classmethod
+    def validate_goal_ids(cls, v: list[str]) -> list[str]:
+        invalid = [g for g in v if g not in VALID_GOAL_IDS]
+        if invalid:
+            raise ValueError(f"Unknown goal_ids: {invalid}. Valid: {sorted(VALID_GOAL_IDS)}")
+        return v
+
     available_hours_per_week: float = Field(
         gt=0, le=168, description="Hours per week the user can dedicate"
     )
