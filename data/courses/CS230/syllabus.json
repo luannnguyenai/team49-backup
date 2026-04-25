@@ -287,7 +287,9 @@
       "assets": {
         "slides": [
           "lecture_8.pdf",
-          "lecture_8_guest.pdf"
+          "lecture_8_guest.pdf",
+          "C5M2.pdf",
+          "C5M3.pdf"
         ],
         "video": "cs230-2025-lecture08-career-advice-in-ai.mp4",
         "transcript": "cs230-2025-lecture08-career-advice-in-ai_transcript.txt"
@@ -319,7 +321,10 @@
       "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
       "custom_order": 9,
       "assets": {
-        "slides": "lecture_10.pdf",
+        "slides": [
+          "lecture_10.pdf",
+          "C5_W4.pdf"
+        ],
         "video": "cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
         "transcript": "cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
       }
