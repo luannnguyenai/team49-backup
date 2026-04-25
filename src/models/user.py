@@ -4,9 +4,11 @@ models/user.py
 User account model for the adaptive learning platform.
 """
 
+from __future__ import annotations
+
 import enum
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, Date, DateTime, Enum, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,7 +27,7 @@ if TYPE_CHECKING:
     )
 
 
-class PreferredMethod(enum.StrEnum):
+class PreferredMethod(str, enum.Enum):
     reading = "reading"
     video = "video"
 
@@ -38,13 +40,13 @@ class User(UUIDPrimaryKeyMixin, Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    available_hours_per_week: Mapped[float | None] = mapped_column(
+    available_hours_per_week: Mapped[Optional[float]] = mapped_column(
         nullable=True, comment="Self-reported hours available per week"
     )
-    target_deadline: Mapped[date | None] = mapped_column(
+    target_deadline: Mapped[Optional[date]] = mapped_column(
         Date, nullable=True, comment="When the user wants to finish the curriculum"
     )
-    preferred_method: Mapped[PreferredMethod | None] = mapped_column(
+    preferred_method: Mapped[Optional[PreferredMethod]] = mapped_column(
         Enum(PreferredMethod, name="preferred_method_enum"),
         nullable=True,
     )
