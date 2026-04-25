@@ -88,7 +88,6 @@ async def set_topic_user_choice(
     if row is None or row.decision != "review":
         raise NotFoundError("No reviewable placement result for this topic.")
     row.user_choice = body.user_choice
-    db.add(row)
     await db.commit()
     return TopicDecision(
         topic_unit_id=row.topic_unit_id,

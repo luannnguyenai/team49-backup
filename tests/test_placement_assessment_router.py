@@ -19,7 +19,9 @@ class PlacementAssessmentRouterRegistrationTests(unittest.TestCase):
         from src.api.app import app
         all_routes = {route.path for route in app.routes}
         self.assertIn("/api/placement-assessment/start", all_routes)
+        self.assertIn("/api/placement-assessment/submit", all_routes)
         self.assertIn("/api/placement-assessment/results", all_routes)
+        self.assertIn("/api/placement-assessment/topic-decision", all_routes)
 
 
 if __name__ == "__main__":
