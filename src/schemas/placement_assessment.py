@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -43,13 +43,13 @@ class PlacementAnswerInput(BaseModel):
 class PlacementSubmitRequest(BaseModel):
     """POST /api/placement-assessment/submit"""
     session_id: uuid.UUID
-    answers: list[PlacementAnswerInput]
+    answers: list[PlacementAnswerInput] = Field(min_length=1)
 
 
 class TopicDecision(BaseModel):
     topic_unit_id: uuid.UUID
     score_pct: float
-    decision: str
+    decision: Literal["skip", "review", "relearn"]
     user_choice: Optional[str] = None
 
 
