@@ -61,7 +61,18 @@
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
-  "video_clip_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "video_clip_url": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg4.mp4",
+  "video_clip_ref": {
+    "local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg4.mp4",
+    "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture07-agents-prompts-and-rag.mp4",
+    "start_s": 2479,
+    "end_s": 2687,
+    "buffer_s": 3,
+    "buffered_start_s": 2476,
+    "buffered_end_s": 2690,
+    "duration_s": 214,
+    "cut_method": "ffmpeg_stream_copy"
+  },
   "transcript_slice": "00:41:22\nfor prompt engineering, and you're\n\n00:41:28\nor fine tuning it in other words.\n\n00:41:34\nThere's a few reasons why.\n\n00:41:42\nto fine tune.\n\n00:41:46\nthat are getting better at fine tuning that\n\n00:41:52\nIt's sort of merging.\n\n00:41:56\nthe other doesn't modify the weights.\n\n00:42:01\nWe're going to see a funny example actually.\n\n00:42:06\nSo you might fine tune a model.\n\n00:42:11\nit doesn't do well anymore.\n\n00:42:14\nSo it might be relevant or not.\n\n00:42:17\nThat's my main problem.\n\n00:42:24\ntuning as much as possible.\n\n00:42:28\nthe next model is out, and it's actually\n\n00:42:33\nSo I would steer away from fine tuning as much as you can.\n\n00:42:39\nis you can put the next best pre-trained model directly\n\n00:42:44\nIt will update everything immediately.\n\n00:42:50\nThere are advantages though where it still makes sense.\n\n00:42:56\nsuch as legal, scientific explanation\n\n00:43:01\nwith domain-specific language.\n\n00:43:07\nwhich is an example from Ros Lazerowitz.\n\n00:43:15\nwhere Ros tried to do Slack fine tuning.\n\n00:43:26\nAnd he was like, I'm going to fine tune\n\n00:43:32\nis how we work.\n\n00:43:37\nAnd so he actually went ahead and fine tuned the model,\n\n00:43:44\nhe was delegating to the model.\n\n00:43:50\nAnd the model responded, I shall work on that in the morning.\n\n00:44:00\nit's morning now.\n\n00:44:04\nIt's 6:30 AM here.\n\n00:44:10\nOK, I shall write it now.\n\n00:44:14\nabout prompt engineering.\n\n00:44:17\nThe only thing that comes to mind for a headline\n\n00:44:21\nIt's kind of a funny example for fine tuning because it's true\n\n00:44:27\nLike he was supposed to think like I want\n\n00:44:32\nAnd it ended up acting like people\n\n00:44:40\nSo one example why I would steer away from fine tuning.",
   "unit_kp_map_rows": [
     {

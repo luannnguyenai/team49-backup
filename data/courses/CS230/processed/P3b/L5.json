@@ -1,0 +1,175 @@
+{
+  "output_filename": "p3b__CS230__lecture05.json",
+  "run_id": "p3b_cs230_lecture05",
+  "stage_id": "p3b",
+  "course_id": "CS230",
+  "lecture_id": "lecture05",
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture05",
+    "lecture_title": "Deep Reinforcement Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A"
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L5_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture05-deep-reinforcement-learning_transcript.txt"
+  },
+  "buffer_s": 3,
+  "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+  "clips": [
+    {
+      "unit_id": "local::lecture05::seg1",
+      "unit_name": "Why reinforcement learning is needed",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg1.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg1.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 5,
+        "end_s": 1065,
+        "buffer_s": 3,
+        "buffered_start_s": 2,
+        "buffered_end_s": 1068,
+        "duration_s": 1066,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg2",
+      "unit_name": "Tabular reinforcement learning with the recycling example",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg2.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg2.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 1066,
+        "end_s": 2123,
+        "buffer_s": 3,
+        "buffered_start_s": 1063,
+        "buffered_end_s": 2126,
+        "duration_s": 1063,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "unit_name": "Deep Q-learning and bootstrapped targets",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 2129,
+        "end_s": 3214,
+        "buffer_s": 3,
+        "buffered_start_s": 2126,
+        "buffered_end_s": 3217,
+        "duration_s": 1091,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg4",
+      "unit_name": "DQN on Atari Breakout",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg4.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg4.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 3215,
+        "end_s": 3670,
+        "buffer_s": 3,
+        "buffered_start_s": 3212,
+        "buffered_end_s": 3673,
+        "duration_s": 461,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg5",
+      "unit_name": "DQN training stabilization: terminal states and replay memory",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg5.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg5.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 3670,
+        "end_s": 4230,
+        "buffer_s": 3,
+        "buffered_start_s": 3667,
+        "buffered_end_s": 4233,
+        "duration_s": 566,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg6",
+      "unit_name": "Exploration, epsilon-greedy choice, and DQN results",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 4231,
+        "end_s": 4811,
+        "buffer_s": 3,
+        "buffered_start_s": 4228,
+        "buffered_end_s": 4814,
+        "duration_s": 586,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg7",
+      "unit_name": "Advanced RL topics beyond DQN",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 4818,
+        "end_s": 5430,
+        "buffer_s": 3,
+        "buffered_start_s": 4815,
+        "buffered_end_s": 5433,
+        "duration_s": 618,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg8",
+      "unit_name": "Language model pretraining and supervised fine-tuning",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 5433,
+        "end_s": 5822,
+        "buffer_s": 3,
+        "buffered_start_s": 5430,
+        "buffered_end_s": 5825,
+        "duration_s": 395,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture05::seg9",
+      "unit_name": "Reward models and RLHF over text generation",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg9.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg9.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "start_s": 5822,
+        "end_s": 6260,
+        "buffer_s": 3,
+        "buffered_start_s": 5819,
+        "buffered_end_s": 6263,
+        "duration_s": 444,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    }
+  ]
+}

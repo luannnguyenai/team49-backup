@@ -57,7 +57,18 @@
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
-  "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+  "video_clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg2.mp4",
+  "video_clip_ref": {
+    "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg2.mp4",
+    "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+    "start_s": 303,
+    "end_s": 553,
+    "buffer_s": 3,
+    "buffered_start_s": 300,
+    "buffered_end_s": 556,
+    "duration_s": 256,
+    "cut_method": "ffmpeg_stream_copy"
+  },
   "transcript_slice": "00:05:06\nand build it much faster than ever\n\n00:05:11\nthat I give now, much more strongly\n\n00:05:15\nis just go and build stuff.\n\n00:05:19\nTake online courses.\n\n00:05:22\nto build things, and I think Laurence\n\n00:05:26\nis greater than ever before.\n\n00:05:30\nof this that is maybe not-- is still,\n\n00:05:36\nbut not widely known, which is the product management\n\n00:05:43\nfrom a clearly written software spec to a piece of code,\n\n00:05:50\nor increasingly writing that queer spec for what you actually\n\n00:05:55\nWhen I'm building software, I often\n\n00:06:00\nwrite some code sure to use this to get user feedback.\n\n00:06:06\nAnd then based on user feedback, I'll\n\n00:06:11\nThis UI is too difficult. They want this feature.\n\n00:06:16\nof what to build, and then go around this loop\n\n00:06:21\nthat users love.\n\n00:06:27\nhas become much cheaper and much faster than before.\n\n00:06:34\nto deciding what to build.\n\n00:06:43\nIn Silicon Valley and in many tech companies,\n\n00:06:48\nengineer to PM ratio.\n\n00:06:53\nbecause they're kind of vary all over the place.\n\n00:06:57\nratio of 4 to 1 or 7 to 1 or 8 to 1.\n\n00:07:04\ncan keep four to eight or some number like that engineer\n\n00:07:09\nBut because engineering is speeding up,\n\n00:07:15\nas engineering, I'm seeing the Eng\n\n00:07:22\nSo some teams I work with, they proposed\n\n00:07:26\nis a ratio unlike almost all Silicon Valley, certainly\n\n00:07:33\nAnd the other thing I'm seeing is that engineers,\n\n00:07:40\ncan move really fast where you go one step further,\n\n00:07:46\ninto a single human.\n\n00:07:51\nengineers that doing engineering work that\n\n00:07:55\nhuman, empathetic side of work.\n\n00:08:01\nthat learn to talk to users, get feedback, develop\n\n00:08:08\nabout what to build, those engineers\n\n00:08:12\nseeing in Silicon Valley today.\n\n00:08:19\none thing I regretted for years was in one of the roles I had,\n\n00:08:27\nto do more product work.\n\n00:08:32\nfeel bad for not being good product managers.\n\n00:08:37\nI just shouldn't have done that.\n\n00:08:40\ngoing back to repeat that exact same mistake.\n\n00:08:47\nthat I can write code, but also talk\n\n00:08:53\nand the engineers that can do this go much faster.\n\n00:08:58\nat whether engineers can do a bit more of this work,\n\n00:09:05\nto take the product to customers,\n\n00:09:08\nand iterate that pace, that velocity of execution\n\n00:09:13\nAnd then before I hand over to Laurence, just one last thing",
   "unit_kp_map_rows": [
     {

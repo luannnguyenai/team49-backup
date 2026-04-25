@@ -1,0 +1,192 @@
+{
+  "output_filename": "p3b__CS230__lecture04-adversarial-robustness-and-generative-models.json",
+  "run_id": "p3b_cs230_lecture04-adversarial-robustness-and-generative-models",
+  "stage_id": "p3b",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+    "lecture_title": "Lecture 4: Adversarial Robustness and Generative Models",
+    "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM"
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
+  },
+  "buffer_s": 3,
+  "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+  "clips": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+      "unit_name": "Threat models for modern AI systems",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg1.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg1.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 5,
+        "end_s": 504,
+        "buffer_s": 3,
+        "buffered_start_s": 2,
+        "buffered_end_s": 507,
+        "duration_s": 505,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "unit_name": "Forging adversarial images",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg2.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg2.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 504,
+        "end_s": 1460,
+        "buffer_s": 3,
+        "buffered_start_s": 501,
+        "buffered_end_s": 1463,
+        "duration_s": 962,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "unit_name": "High-dimensional vulnerability, FGSM, and defenses",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 1460,
+        "end_s": 2340,
+        "buffer_s": 3,
+        "buffered_start_s": 1457,
+        "buffered_end_s": 2343,
+        "duration_s": 886,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "unit_name": "Data poisoning, backdoors, and prompt injection",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg4.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg4.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 2340,
+        "end_s": 2988,
+        "buffer_s": 3,
+        "buffered_start_s": 2337,
+        "buffered_end_s": 2991,
+        "duration_s": 654,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+      "unit_name": "Generative models as distribution matching",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg5.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg5.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 2988,
+        "end_s": 3370,
+        "buffer_s": 3,
+        "buffered_start_s": 2985,
+        "buffered_end_s": 3373,
+        "duration_s": 388,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "unit_name": "The GAN generator-discriminator game",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 3370,
+        "end_s": 3817,
+        "buffer_s": 3,
+        "buffered_start_s": 3367,
+        "buffered_end_s": 3820,
+        "duration_s": 453,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+      "unit_name": "GAN objectives, training problems, and code-space structure",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 3817,
+        "end_s": 4536,
+        "buffer_s": 3,
+        "buffered_start_s": 3814,
+        "buffered_end_s": 4539,
+        "duration_s": 725,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+      "unit_name": "Why diffusion and how forward noising works",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 4536,
+        "end_s": 5064,
+        "buffer_s": 3,
+        "buffered_start_s": 4533,
+        "buffered_end_s": 5067,
+        "duration_s": 534,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "unit_name": "Diffusion denoising objective and self-supervised training set",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 5064,
+        "end_s": 5641,
+        "buffer_s": 3,
+        "buffered_start_s": 5061,
+        "buffered_end_s": 5644,
+        "duration_s": 583,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "unit_name": "Sampling, conditioning, latent diffusion, and video generation",
+      "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+      "clip_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+      "video_clip_ref": {
+        "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+        "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "start_s": 5641,
+        "end_s": 6428,
+        "buffer_s": 3,
+        "buffered_start_s": 5638,
+        "buffered_end_s": 6431,
+        "duration_s": 793,
+        "cut_method": "ffmpeg_stream_copy"
+      }
+    }
+  ]
+}

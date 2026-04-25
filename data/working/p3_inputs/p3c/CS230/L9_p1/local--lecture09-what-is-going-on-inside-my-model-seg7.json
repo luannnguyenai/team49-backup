@@ -62,7 +62,18 @@
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
-  "video_clip_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "video_clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+  "video_clip_ref": {
+    "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+    "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+    "start_s": 4371,
+    "end_s": 4701,
+    "buffer_s": 3,
+    "buffered_start_s": 4368,
+    "buffered_end_s": 4704,
+    "duration_s": 336,
+    "cut_method": "ffmpeg_stream_copy"
+  },
   "transcript_slice": "01:12:57\nAny questions on CNNs?\n\n01:13:01\nof how to look inside a CNN?\n\n01:13:08\nSo let me start by comparing CNNs to more modern frontier\n\n01:13:20\nThe core distinction is going to be that CNNs deal with localized\n\n01:13:28\nThey visualize edges, textures, and shapes when in modern,\n\n01:13:39\nbetween concepts or between tokens.\n\n01:13:50\nAnd that started with the \"Attention Is All You Need\"\n\n01:13:58\nown is highly performant and can allow us to model very complex\n\n01:14:06\nBy the way, this is just the first figure of the \"Attention\n\n01:14:13\nand understand by now in the class.\n\n01:14:20\nlanguage using two very simple ideas that are visualizable.\n\n01:14:29\nThe first one is the attention patterns.\n\n01:14:37\nSo you look at a specific token, which can be a word,\n\n01:14:43\nI'm going to simplify by saying it's a word--\n\n01:14:50\nAnd that's the attention that the transformer looking at it.\n\n01:14:58\nSo it can learn things like linking pronouns\n\n01:15:04\nAnd then I really like this visualization, which\n\n01:15:13\nAnd this visualization essentially\n\n01:15:18\nthat he wrote with a few figures where\n\n01:15:24\nbe visualized in simple ways.\n\n01:15:31\ntokens, let's say.\n\n01:15:39\nto the CNN saliency maps that we looked at, pretty much.\n\n01:15:51\nor more modern language model uses embeddings.\n\n01:15:59\nYou are ready to read the BERT paper, in fact, now\n\n01:16:05\nAnd what's interesting about embeddings,\n\n01:16:13\nI also encourage you to see that short blog\n\n01:16:19\ncalled t-SNE.\n\n01:16:22\nWe're not going to present it in the class,\n\n01:16:28\nIt's used very extensively for those of you who work\n\n01:16:34\nAnd it allows you to visualize embeddings.\n\n01:16:39\nperceives our words.\n\n01:16:43\nhave similar semantic meanings to be\n\n01:16:47\nor tokens that have nothing to do with each other\n\n01:16:52\nAnd that can be a way to sanity check\n\n01:16:57\nmeaningful representations.\n\n01:17:04\nare what let large language models track relationship\n\n01:17:08\nAnd you can visualize your embeddings\n\n01:17:14\nYou can even visualize attention relationships as well.\n\n01:17:22\nare so complicated that even the cutting edge\n\n01:17:30\nthose relationships with two layer transformers, pretty much.\n\n01:17:40\nso I linked two papers.\n\n01:17:43\nfor Transformer Circuits\", which is essentially explaining how\n\n01:17:50\nother, and they introduce the concept of a circuit.\n\n01:17:58\n\"In-Context Learning With Induction Heads\".\n\n01:18:02\nwe have to visualize what's happening inside a transformer.\n\n01:18:07\nYou should be able to understand it by now,\n\n01:18:13\nI just will link them.\n\n01:18:21\nLet's get to some fun stuff.",
   "unit_kp_map_rows": [
     {

@@ -49,7 +49,18 @@
   "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
-  "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+  "video_clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg1.mp4",
+  "video_clip_ref": {
+    "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg1.mp4",
+    "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+    "start_s": 4,
+    "end_s": 303,
+    "buffer_s": 3,
+    "buffered_start_s": 1,
+    "buffered_end_s": 306,
+    "duration_s": 305,
+    "cut_method": "ffmpeg_stream_copy"
+  },
   "transcript_slice": "00:00:04\nWhat I want to do today is chat with you\n\n00:00:09\nAnd in previous years, I used to do most of this lecture\n\n00:00:14\nBut what I thought I'd do today is\n\n00:00:19\nto my good friend Laurence Moroney, who I invited to speak\n\n00:00:27\nhe lives in Seattle, to share with us a very broad market\n\n00:00:33\nas well as tips for career, growing a career in AI.\n\n00:00:42\nI want to share with you before I hand it over\n\n00:00:49\nopportunity, the best time ever to be building with AI\n\n00:00:55\nA few months ago I noticed in social media, traditional media,\n\n00:01:03\nPeople saying, well, it's GPT-5 that good?\n\n00:01:07\nBut there are questions about is AI progress slowing down?\n\n00:01:13\nbecause if a benchmark for AI is 100% is perfect answers,\n\n00:01:22\nyou cannot get above 100% accuracy.\n\n00:01:30\ndone by this organization, M-E-T-R,\n\n00:01:37\nhow complex are the tasks that AI could do as measured by how\n\n00:01:43\nSo a few years ago, maybe GPT-2 could do tasks\n\n00:01:50\nAnd then they could do tasks that\n\n00:01:57\na minute, two minutes, four minutes, and so on.\n\n00:02:03\nis doubling every seven months.\n\n00:02:09\noptimistic that AI will continue making progress,\n\n00:02:15\nby how long a human takes to do something is doubling rapidly.\n\n00:02:22\nseems to show-- same study argued that for AI coding,\n\n00:02:29\nSo this code that used to take me,\n\n00:02:34\nto write, 40 minutes to write, and AI\n\n00:02:38\nAnd so the reasons I think this is a golden age\n\n00:02:43\nis maybe two themes which are more powerful and faster.\n\n00:02:50\ncan now write software that is more powerful than what\n\n00:02:57\nago by using AI building blocks.\n\n00:03:03\nradical genetic workflows, voice AI,\n\n00:03:06\nIt turns out that a lot of LLMs have a decent, at least basic\n\n00:03:12\nSo if you have a prompt one of the frontier models\n\n00:03:16\ntry prompting it to implement a transformer network for you.\n\n00:03:23\nto build software quickly.\n\n00:03:29\nthat were very difficult or did not exist a year or two ago.\n\n00:03:34\nthat no one else on the planet, even the most advanced teams\n\n00:03:39\nAnd then also with AI coding, the speed\n\n00:03:46\nis much faster than ever before.\n\n00:03:50\nto stay on the frontier of tools,\n\n00:03:55\nI don't know, really rapidly.\n\n00:04:03\none favorite tool became Cloud Code, moving on\n\n00:04:09\nAnd then I think since the release of GPT-5,\n\n00:04:15\nmade tremendous progress.\n\n00:04:19\nwhich haven't had time to play with it yet just this morning.\n\n00:04:25\nSo I feel if you ask me every three months\n\n00:04:29\nprobably changes definitely every six months, but quite\n\n00:04:33\nAnd I find that being half a generation behind in these tools\n\n00:04:41\nAnd I know everyone says AI is moving so fast,\n\n00:04:45\nBut AI coding tools, of all the sectors in AI,\n\n00:04:51\nbut AI coding tools is one sector\n\n00:04:56\nAnd staying at the latest generation of tools,\n\n00:05:01\nyou more productive.",
   "unit_kp_map_rows": [
     {
