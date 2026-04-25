@@ -19,6 +19,7 @@ import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.exceptions import NotFoundError, ValidationError
@@ -34,6 +35,9 @@ from src.schemas.placement_assessment import (
     PlacementSubmitResponse,
     TopicDecision,
 )
+
+
+_ANSWER_INDEX: dict[str, int] = {"A": 0, "B": 1, "C": 2, "D": 3}
 
 
 def _bucket_select_5(
@@ -89,8 +93,6 @@ async def start_placement_assessment(
     user_id: uuid.UUID,
     topic_unit_ids: list[uuid.UUID],
 ) -> PlacementStartResponse:
-    from sqlalchemy import select
-
     result = await db.execute(
         select(LearningUnit).where(LearningUnit.id.in_(topic_unit_ids))
     )
@@ -100,6 +102,7 @@ async def start_placement_assessment(
 
     question_repo = CanonicalQuestionRepository(db)
     all_questions: list[PlacementQuestion] = []
+    processed_unit_ids: list[uuid.UUID] = []
 
     for unit_id in topic_unit_ids:
         unit = units.get(unit_id)
@@ -110,7 +113,9 @@ async def start_placement_assessment(
             phase="placement_assessment",
         )
         selected = _bucket_select_5(pairs)
-        all_questions += [_item_to_placement_question(item, unit_id) for item, _ in selected]
+        if selected:
+            all_questions += [_item_to_placement_question(item, unit_id) for item, _ in selected]
+            processed_unit_ids.append(unit_id)
 
     if not all_questions:
         raise ValidationError(
@@ -133,7 +138,7 @@ async def start_placement_assessment(
         session_id=session.id,
         total_questions=len(all_questions),
         questions=all_questions,
-        topic_unit_ids=list(topic_unit_ids),
+        topic_unit_ids=processed_unit_ids,
     )
 
 
@@ -144,14 +149,16 @@ async def submit_placement_assessment(
     session_id: uuid.UUID,
     answers: list[PlacementAnswerInput],
 ) -> PlacementSubmitResponse:
-    from sqlalchemy import select
-    from src.models.canonical import QuestionBankItem as QB
+    # 1. Validate session ownership FIRST
+    sess_result = await db.execute(select(Session).where(Session.id == session_id))
+    session = sess_result.scalar_one_or_none()
+    if session is None or session.user_id != user_id:
+        raise ValidationError("Session not found or does not belong to this user.")
 
+    # 2. Load items
     item_ids = [a.item_id for a in answers]
-    result = await db.execute(select(QB).where(QB.item_id.in_(item_ids)))
+    result = await db.execute(select(QuestionBankItem).where(QuestionBankItem.item_id.in_(item_ids)))
     items_by_id = {item.item_id: item for item in result.scalars().all()}
-
-    _ANSWER_INDEX = {"A": 0, "B": 1, "C": 2, "D": 3}
 
     by_unit: dict[uuid.UUID, list[PlacementAnswerInput]] = defaultdict(list)
     for ans in answers:
@@ -188,21 +195,17 @@ async def submit_placement_assessment(
             )
         )
 
-    # Mark session complete
-    sess_result = await db.execute(select(Session).where(Session.id == session_id))
-    session = sess_result.scalar_one_or_none()
-    if session and session.user_id == user_id:
-        total_correct = sum(
-            1
-            for a in answers
-            if (item := items_by_id.get(a.item_id)) is not None
-            and _ANSWER_INDEX.get(a.selected_answer, -1) == item.answer_index
-        )
-        session.correct_count = total_correct
-        session.score_percent = (total_correct / len(answers) * 100) if answers else 0.0
-        session.completed_at = datetime.now(timezone.utc)
-        db.add(session)
-
+    # 3. Mark session complete (session already validated above)
+    total_correct = sum(
+        1
+        for a in answers
+        if (item := items_by_id.get(a.item_id)) is not None
+        and _ANSWER_INDEX.get(a.selected_answer, -1) == item.answer_index
+    )
+    session.correct_count = total_correct
+    session.score_percent = (total_correct / len(answers) * 100) if answers else 0.0
+    session.completed_at = datetime.now(timezone.utc)
+    db.add(session)
     await db.flush()
 
     skip_count = sum(1 for d in topic_decisions if d.decision == "skip")
