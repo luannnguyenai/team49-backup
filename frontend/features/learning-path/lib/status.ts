@@ -10,12 +10,13 @@ export function getStatusLabel(status: PathStatus): string {
 }
 
 export function getStatusIconName(status: PathStatus): "circle" | "play" | "check" | "skip" {
-  return {
+  const icons: Record<PathStatus, "circle" | "play" | "check" | "skip"> = {
     pending: "circle",
     in_progress: "play",
     completed: "check",
     skipped: "skip",
-  }[status];
+  };
+  return icons[status];
 }
 
 export function getStatusClassName(status: PathStatus, isRecommended = false): string {
