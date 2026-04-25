@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Numeric, Text, text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Numeric, Text, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -47,6 +47,7 @@ class PlacementAssessmentResult(UUIDPrimaryKeyMixin, Base):
     )
 
     __table_args__ = (
+        UniqueConstraint("user_id", "topic_unit_id", name="uq_placement_results_user_unit"),
         CheckConstraint(
             "decision IN ('skip', 'review', 'relearn')",
             name="ck_placement_results_decision",

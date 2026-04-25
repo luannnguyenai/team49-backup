@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.placement import PlacementAssessmentResult
@@ -14,8 +15,10 @@ class PlacementAssessmentRepository:
         self.session = session
 
     async def get_by_user_id(self, user_id: uuid.UUID) -> list[PlacementAssessmentResult]:
-        stmt = select(PlacementAssessmentResult).where(
-            PlacementAssessmentResult.user_id == user_id
+        stmt = (
+            select(PlacementAssessmentResult)
+            .where(PlacementAssessmentResult.user_id == user_id)
+            .order_by(PlacementAssessmentResult.created_at)
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -41,25 +44,29 @@ class PlacementAssessmentRepository:
         theta_estimate: float | Decimal | None = None,
         user_choice: str | None = None,
     ) -> PlacementAssessmentResult:
-        existing = await self.get_by_user_and_unit(user_id, topic_unit_id)
-        if existing is not None:
-            existing.score_pct = score_pct  # type: ignore[assignment]
-            existing.decision = decision
-            existing.raw_answers = raw_answers
-            existing.theta_estimate = theta_estimate  # type: ignore[assignment]
-            existing.user_choice = user_choice
-            self.session.add(existing)
-            return existing
-
-        row = PlacementAssessmentResult(
-            user_id=user_id,
-            topic_unit_id=topic_unit_id,
-            score_pct=score_pct,
-            decision=decision,
-            raw_answers=raw_answers,
-            theta_estimate=theta_estimate,
-            user_choice=user_choice,
+        stmt = (
+            pg_insert(PlacementAssessmentResult)
+            .values(
+                user_id=user_id,
+                topic_unit_id=topic_unit_id,
+                score_pct=score_pct,
+                decision=decision,
+                raw_answers=raw_answers,
+                theta_estimate=theta_estimate,
+                user_choice=user_choice,
+            )
+            .on_conflict_do_update(
+                constraint="uq_placement_results_user_unit",
+                set_={
+                    "score_pct": score_pct,
+                    "decision": decision,
+                    "raw_answers": raw_answers,
+                    "theta_estimate": theta_estimate,
+                    "user_choice": user_choice,
+                },
+            )
+            .returning(PlacementAssessmentResult)
         )
-        self.session.add(row)
+        result = await self.session.execute(stmt)
         await self.session.flush()
-        return row
+        return result.scalar_one()
