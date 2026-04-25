@@ -35,12 +35,11 @@ logs/
 .ai-log/
 
 # Media / large data files
-*.mp4
-**/*.mp4
+data/**/*.mp4
 data/*.pdf
 data/*.zip
 *.tar.gz
-data/*/*.mp4    
+
 # Git & tooling
 .git/
 .github/
