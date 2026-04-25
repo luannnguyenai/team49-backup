@@ -21,6 +21,9 @@ LEGACY_TABLES_DROP_ORDER: tuple[str, ...] = (
     "mastery_history",
     "learning_paths",
     "mastery_scores",
+    "tutor_sessions",
+    "review_schedule",
+    "user_responses",
     "questions",
     "knowledge_components",
     "topics",
@@ -51,6 +54,10 @@ def upgrade() -> None:
     _drop_fk_if_exists("sessions", ("topic_id",))
     _drop_fk_if_exists("sessions", ("module_id",))
     _drop_fk_if_exists("interactions", ("question_id",))
+
+    if _table_exists("user_responses"):
+        op.execute("DROP TRIGGER IF EXISTS trg_update_question_counters ON user_responses;")
+    op.execute("DROP FUNCTION IF EXISTS update_question_counters();")
 
     for table_name in LEGACY_TABLES_DROP_ORDER:
         if _table_exists(table_name):
