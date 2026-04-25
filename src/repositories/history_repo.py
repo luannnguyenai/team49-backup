@@ -7,6 +7,7 @@ Read-model data access for unified learning history.
 from __future__ import annotations
 
 import uuid
+from typing import Optional, Tuple
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +16,7 @@ from src.models.canonical import QuestionBankItem
 from src.models.course import CourseSection, LearningUnit
 from src.models.learning import Interaction, Session
 
-HistoryDetailRow = tuple[Interaction, None, QuestionBankItem | None, None]
+HistoryDetailRow = Tuple[Interaction, None, Optional[QuestionBankItem], None]
 
 
 class HistoryRepository:

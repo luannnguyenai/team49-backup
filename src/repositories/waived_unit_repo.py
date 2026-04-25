@@ -4,6 +4,8 @@ repositories/waived_unit_repo.py
 Data access for WaivedUnit — one audit row per user × learning unit pair.
 """
 
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import select
