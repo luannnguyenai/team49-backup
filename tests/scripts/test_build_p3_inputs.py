@@ -448,12 +448,33 @@ def test_build_p3_inputs_hydrates_p3c_from_processed_p3a_by_lecture_id(tmp_path:
     processed_dir = course_dir / "processed_sanitized"
     transcript_dir = course_dir / "transcripts"
     processed_p3a_dir = course_dir / "processed" / "P3a"
+    processed_p3b_dir = course_dir / "processed" / "P3b"
     processed_dir.mkdir(parents=True)
     transcript_dir.mkdir(parents=True)
     processed_p3a_dir.mkdir(parents=True)
+    processed_p3b_dir.mkdir(parents=True)
 
     _write_json(processed_dir / "L7_p1.json", _make_p1_artifact())
     _write_json(processed_p3a_dir / "CS224n__lecture07-attention__p3a.json", _make_p3_output())
+    _write_json(
+        processed_p3b_dir / "CS224n__lecture07-attention__p3b.json",
+        {
+            "stage_id": "p3b",
+            "course_id": "CS224n",
+            "lecture_id": "lecture07-attention",
+            "clips": [
+                {
+                    "unit_id": "local::lecture07-attention::seg2",
+                    "video_clip_ref": {
+                        "local_path": "data/working/p3_video_segments/CS224n/lecture07-attention/seg2.mp4",
+                        "start_s": 40,
+                        "end_s": 80,
+                        "buffer_s": 3,
+                    },
+                }
+            ],
+        },
+    )
     (transcript_dir / "lecture07_transcript.txt").write_text(
         "\n".join(
             [
@@ -487,3 +508,5 @@ def test_build_p3_inputs_hydrates_p3c_from_processed_p3a_by_lecture_id(tmp_path:
     assert p3c["question_intent"] == "procedural"
     assert p3c["target_item_count"] == 4
     assert p3c["target_kp_ids"] == ["kp_cross_attention"]
+    assert p3c["video_clip_url"] == "data/working/p3_video_segments/CS224n/lecture07-attention/seg2.mp4"
+    assert p3c["video_clip_ref"]["buffer_s"] == 3

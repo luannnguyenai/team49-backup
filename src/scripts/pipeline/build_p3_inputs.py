@@ -275,6 +275,37 @@ def _load_learning_salience_index(course_dir: Path, source_file: Path, lecture_i
     return index
 
 
+def _load_video_clip_index(course_dir: Path, source_file: Path, lecture_id: str) -> dict[str, dict[str, Any]]:
+    processed_p3b_path = course_dir / "processed" / "P3b" / f"{source_file.stem.removesuffix('_p1')}.json"
+    if not processed_p3b_path.exists():
+        stage_dir = course_dir / "processed" / "P3b"
+        if stage_dir.exists():
+            for candidate in sorted(stage_dir.glob("*.json")):
+                try:
+                    artifact = _load_json(candidate)
+                except json.JSONDecodeError:
+                    continue
+                if artifact.get("lecture_id") == lecture_id:
+                    processed_p3b_path = candidate
+                    break
+    if not processed_p3b_path.exists():
+        return {}
+
+    artifact = _load_json(processed_p3b_path)
+    rows = artifact.get("clips", [])
+    if not isinstance(rows, list):
+        return {}
+
+    index: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        unit_id = row.get("unit_id")
+        if isinstance(unit_id, str) and unit_id.strip():
+            index[unit_id] = row
+    return index
+
+
 def _looks_code_oriented(unit: dict[str, Any], transcript_slice: str) -> bool:
     haystacks = [
         unit.get("name"),
@@ -352,6 +383,7 @@ def build_p3_inputs(
                 "transcript_file": str(transcript_doc.path) if transcript_doc else None,
             }
             learning_salience_index = _load_learning_salience_index(course_dir, source_file, lecture_id)
+            video_clip_index = _load_video_clip_index(course_dir, source_file, lecture_id)
 
             p3a_payload = {
                 "lecture_context": lecture_context,
@@ -405,6 +437,11 @@ def build_p3_inputs(
                     end_s=int(content_ref.get("end_s", 0)),
                 )
                 salience_row = learning_salience_index.get(unit_id, {})
+                clip_row = video_clip_index.get(unit_id, {})
+                video_clip_ref = clip_row.get("video_clip_ref") if isinstance(clip_row, dict) else None
+                video_clip_url = video_clip_ref.get("local_path") if isinstance(video_clip_ref, dict) else None
+                if not isinstance(video_clip_url, str) or not video_clip_url:
+                    video_clip_url = youtube_url
                 allow_code_mcq = _looks_code_oriented(unit, transcript_slice)
                 target_kp_ids = salience_row.get("target_kp_ids")
                 if not isinstance(target_kp_ids, list):
@@ -417,7 +454,8 @@ def build_p3_inputs(
                     "target_kp_ids": target_kp_ids,
                     "assessment_purpose": "lecture_reinforcement",
                     "youtube_url": youtube_url,
-                    "video_clip_url": youtube_url,
+                    "video_clip_url": video_clip_url,
+                    "video_clip_ref": video_clip_ref,
                     "transcript_slice": transcript_slice,
                     "unit_kp_map_rows": unit_rows,
                     "kp_catalog": unit_catalog,
