@@ -14,6 +14,7 @@ interface BuildCanonicalAssessmentContextInput {
   sections: CourseSectionDetail[];
   knownUnitIds: string[];
   desiredSectionIds: string[];
+  selectedCourseIds?: string[];
 }
 
 export interface CanonicalAssessmentContext {
@@ -29,17 +30,31 @@ export function buildCanonicalAssessmentContext({
   sections,
   knownUnitIds,
   desiredSectionIds,
+  selectedCourseIds = [],
 }: BuildCanonicalAssessmentContextInput): CanonicalAssessmentContext {
   const selectedUnitSet = new Set(knownUnitIds);
   const selectedSectionSet = new Set(desiredSectionIds);
+  const selectedCourseSet = new Set(
+    selectedCourseIds.map((courseId) => courseId.toLowerCase()),
+  );
   const unitRows =
     selectedUnitSet.size > 0
       ? sections.flatMap((section) =>
           section.learning_units.filter((unit) => selectedUnitSet.has(unit.id)),
         )
-      : sections.flatMap((section) =>
-          selectedSectionSet.has(section.id) ? section.learning_units : [],
-        );
+      : selectedSectionSet.size > 0
+        ? sections.flatMap((section) =>
+            selectedSectionSet.has(section.id) ? section.learning_units : [],
+          )
+        : sections.flatMap((section) => {
+            const courseIds = [
+              section.course_id,
+              section.canonical_course_id ?? "",
+            ].map((courseId) => courseId.toLowerCase());
+            return courseIds.some((courseId) => selectedCourseSet.has(courseId))
+              ? section.learning_units
+              : [];
+          });
 
   const canonicalUnitIds = unique(
     unitRows
