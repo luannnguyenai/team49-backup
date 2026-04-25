@@ -181,6 +181,7 @@ async def _write_goal_preferences_if_enabled(
     notes = json.dumps(
         {
             "desired_section_ids": [str(section_id) for section_id in data.desired_section_ids],
+            "goal_ids": data.goal_ids,
             "known_unit_ids": [str(unit_id) for unit_id in data.known_unit_ids],
             "selected_course_ids": data.selected_course_ids,
             "source": "auth_onboarding_course_first_runtime",
