@@ -1,9 +1,14 @@
 # External Datasets for Fine-tuning
 
-This catalog supplements organic data from `qa_history.jsonl`. Use these
-**only if** P2a audit shows organic data is insufficient (< 8k usable rows
-or < 1500 tool-call samples), OR to inject specific capabilities (math
-reasoning, refusal patterns, function-calling format adherence).
+> **⚠️ Read `02b-domain-data.md` FIRST.** Course assets in `data/courses/`
+> provide ~1634 quality-gated MCQs and 41 lecture transcripts — they are
+> the primary training source. External datasets in this catalog are
+> **secondary**, used only to inject capabilities not present in domain
+> data (specifically: function-calling format).
+
+This catalog supplements organic data from `qa_history.jsonl` and
+domain-converted MCQs. Use these to inject specific capabilities
+(function-calling format adherence is the main one).
 
 ⚠️ **All datasets must be downloaded once and cached locally.** Per data
 governance in README, no organic `qa_history` data leaves the machine; but

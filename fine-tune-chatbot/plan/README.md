@@ -67,8 +67,9 @@ References for current constraints:
 
 ```
 P1  Environment        (0.5d)  Verify Blackwell stack (CUDA 12.8, PT 2.7+)
-P2a Data audit         (0.5d)  Schema/row counts before extraction
-P2  Data pipeline      (1–3d)  Extract + clean + ChatML format
+P2a Data audit         (0.5d)  Schema/row counts of qa_history
+P2b Domain data        (1d)    Convert course assets → tutor SFT (PRIMARY source)
+P2  Data pipeline      (1d)    Combine organic + domain + external → ChatML
 P3  Fine-tune          (0.5d)  Unsloth QLoRA on VL-3B (incl. tiny overfit smoke)
 P4  Eval               (0.5d)  Deterministic gates + LLM-judge vs Gemini
 P5  Quantize           (0.5d)  AWQ Int4 + feasibility gate (fallback to bnb/fp16)
@@ -77,12 +78,29 @@ P7  Codebase changes   (0.5d)  Patch chat_model_factory + config + tests
 P8  Shadow + rollout   (1w)    A/B with 10% → 50% → 100%
 ```
 
-Total: ~5–7 working days excluding shadow period.
+Total: ~6–8 working days excluding shadow period.
 
 File mapping: `01-environment.md` (P1), `02a-data-audit.md` (P2a),
-`02-data-pipeline.md` (P2), `03-finetune.md` (P3), `04-eval-quantize.md`
-(P4+P5), `05-serving-vllm.md` (P6), `06-codebase-changes.md` (P7),
-`07-rollout.md` (P8).
+`02b-domain-data.md` (P2b — course assets), `02-data-pipeline.md` (P2 —
+merge), `03-finetune.md` (P3), `04-eval-quantize.md` (P4+P5),
+`05-serving-vllm.md` (P6), `06-codebase-changes.md` (P7), `07-rollout.md`
+(P8). External datasets catalog: `datasets.md`.
+
+## Data strategy summary
+
+**Primary source = course assets** in `data/courses/CS224n` and `CS231n`:
+- 1634 quality-gated MCQs (310 VN native, ~1300 EN translatable)
+- 41 timestamped transcripts + 44 ToC summaries
+- This solves the domain-alignment problem and dwarfs external datasets.
+
+**Secondary**: ~2.5k function-calling samples from `NousResearch/hermes-function-calling-v1`
++ `Salesforce/xlam-function-calling-60k` to preserve tool-use behavior (Hermes
+format matches vLLM serving).
+
+**Tertiary**: ~12 USD Gemini Flash spend for VN translation of EN MCQs +
+synthetic refusals + transcript-grounded Q&A.
+
+See `02b-domain-data.md` for full mixing recipe (~14k total samples).
 
 ## Repository layout (this folder)
 
@@ -92,7 +110,8 @@ fine-tune-chatbot/
 │   ├── README.md                # overview, decisions, roadmap, governance
 │   ├── 01-environment.md        # P1 Blackwell GPU stack setup
 │   ├── 02a-data-audit.md        # P2a schema/row audit (run BEFORE P2)
-│   ├── 02-data-pipeline.md      # P2 SFT data extraction + ChatML format
+│   ├── 02b-domain-data.md       # P2b course assets → tutor SFT (~8k samples)
+│   ├── 02-data-pipeline.md      # P2 merge organic + domain + external → ChatML
 │   ├── 03-finetune.md           # P3 Unsloth QLoRA + tiny overfit smoke
 │   ├── 04-eval-quantize.md      # P4 eval gates + P5 AWQ quantize
 │   ├── 05-serving-vllm.md       # P6 vLLM docker service
