@@ -20,8 +20,8 @@ build/
 
 
 # Data — ignore only large video assets
-data/courses/**/videos/*
-data/courses/**/slides/
+data/
+docs/superpowers/
 
 # Project local files
 app.db
