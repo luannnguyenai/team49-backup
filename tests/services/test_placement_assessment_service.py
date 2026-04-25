@@ -30,16 +30,18 @@ class TestBucketSelect5(unittest.TestCase):
         self.assertEqual(sum(1 for i in item_ids if i.startswith("m")), 2)  # 2 medium
         self.assertEqual(sum(1 for i in item_ids if i.startswith("h")), 2)  # 2 hard
 
-    def test_fills_gaps_when_buckets_thin(self):
+    def test_fills_gaps_when_no_easy_or_hard(self):
         from src.services.placement_assessment_service import _bucket_select_5
-        # Only 3 items total — should return all 3, not error
-        pairs = [
-            _make_pair("a", -1.0),
-            _make_pair("b", 0.0),
-            _make_pair("c", 1.0),
-        ]
+        # 6 medium items, 0 easy, 0 hard
+        # Initial selection: easy[:1]=[], medium[:2]=[m1,m2], hard[:2]=[]
+        # Gap-fill adds m3, m4, m5 to reach 5 total
+        pairs = [_make_pair(f"m{n}", float(n) * 0.1) for n in range(6)]
         selected = _bucket_select_5(pairs)
-        self.assertEqual(len(selected), 3)
+        self.assertEqual(len(selected), 5)
+        # All selected should be from the medium bucket
+        selected_ids = {p[0].item_id for p in selected}
+        all_ids = {p[0].item_id for p in pairs}
+        self.assertTrue(selected_ids.issubset(all_ids))
 
     def test_none_difficulty_treated_as_medium(self):
         from src.services.placement_assessment_service import _bucket_select_5
