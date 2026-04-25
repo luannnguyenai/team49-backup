@@ -5,6 +5,8 @@
 import { z } from "zod";
 
 export const onboardingSchema = z.object({
+  goal_ids: z.array(z.string()).default([]),
+
   known_unit_ids: z.array(z.string()),
 
   desired_section_ids: z

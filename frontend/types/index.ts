@@ -54,6 +54,7 @@ export interface ForgotPasswordPayload {
 }
 
 export interface OnboardingPayload {
+  goal_ids: string[];
   known_unit_ids: string[];
   desired_section_ids: string[];
   selected_course_ids: string[];
