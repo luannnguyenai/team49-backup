@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,10 +35,10 @@ class PlacementAssessmentRepository:
         *,
         user_id: uuid.UUID,
         topic_unit_id: uuid.UUID,
-        score_pct: float,
+        score_pct: float | Decimal,
         decision: str,
         raw_answers: list[dict],
-        theta_estimate: float | None = None,
+        theta_estimate: float | Decimal | None = None,
         user_choice: str | None = None,
     ) -> PlacementAssessmentResult:
         existing = await self.get_by_user_and_unit(user_id, topic_unit_id)
