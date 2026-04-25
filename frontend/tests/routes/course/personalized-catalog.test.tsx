@@ -57,9 +57,9 @@ const CS224N_ITEM = {
   slug: "cs224n",
   title: "CS224n: Natural Language Processing with Deep Learning",
   short_description: "Modern NLP systems and language modeling.",
-  status: "coming_soon" as const,
+  status: "ready" as const,
   cover_image_url: "/courses/cs224n/cover.jpg",
-  hero_badge: "Coming soon",
+  hero_badge: "Available now",
   is_recommended: false,
 };
 
