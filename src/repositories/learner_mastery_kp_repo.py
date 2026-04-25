@@ -4,6 +4,8 @@ repositories/learner_mastery_kp_repo.py
 Data access for LearnerMasteryKP — upsert and bulk lookup keyed by user × kp_id.
 """
 
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import select
