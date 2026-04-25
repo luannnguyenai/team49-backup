@@ -1,0 +1,1222 @@
+{
+  "run_id": "run_cs230_20260425_p1",
+  "stage_id": "p1",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "lecture_title": "Lecture 4: Adversarial Robustness and Generative Models",
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Lecture goals and attack taxonomy",
+      "start_s": 5,
+      "end_s": 504
+    },
+    {
+      "section_index": 2,
+      "title": "Adversarial image examples and physical patches",
+      "start_s": 504,
+      "end_s": 1460
+    },
+    {
+      "section_index": 3,
+      "title": "Why neural networks are vulnerable and how to defend",
+      "start_s": 1460,
+      "end_s": 2340
+    },
+    {
+      "section_index": 4,
+      "title": "Backdoor, data poisoning, and prompt injection attacks",
+      "start_s": 2340,
+      "end_s": 2988
+    },
+    {
+      "section_index": 5,
+      "title": "Generative modeling as distribution learning",
+      "start_s": 2988,
+      "end_s": 3370
+    },
+    {
+      "section_index": 6,
+      "title": "GAN generator-discriminator training game",
+      "start_s": 3370,
+      "end_s": 3817
+    },
+    {
+      "section_index": 7,
+      "title": "GAN loss variants, mode collapse, and latent codes",
+      "start_s": 3817,
+      "end_s": 4536
+    },
+    {
+      "section_index": 8,
+      "title": "Diffusion motivation and forward noising process",
+      "start_s": 4536,
+      "end_s": 5064
+    },
+    {
+      "section_index": 9,
+      "title": "Diffusion denoising training objective",
+      "start_s": 5064,
+      "end_s": 5641
+    },
+    {
+      "section_index": 10,
+      "title": "Diffusion sampling, conditioning, latent diffusion, and video",
+      "start_s": 5641,
+      "end_s": 6428
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+      "course_id": "CS230",
+      "name": "Threat models for modern AI systems",
+      "description": "Frames the lecture around adversarial robustness and generative modeling, then classifies adversarial attacks into adversarial pixels, data poisoning/backdoors, and prompt injection.",
+      "summary": "The lecture opens by motivating adversarial robustness as AI models become widely deployed and therefore more exposed to attacks [ts=43s]. It distinguishes the day’s two major topics, adversarial robustness and generative modeling, and notes that the generative part will emphasize GANs and diffusion models [ts=116s]. The adversarial section begins with examples from students and then organizes the field into three waves: imperceptible image perturbations, backdoor/data poisoning attacks from scraped data, and prompt injection or jailbreaking for LLMs [ts=315s]. The instructor emphasizes that new AI agents create extra attack surfaces through instructions, context, and retrieval pipelines, not only raw inputs [ts=464s].",
+      "key_points": [
+        {
+          "text": "Adversarial robustness matters more as AI models are deployed broadly and become attack targets.",
+          "timestamp_s": 43,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture focuses on adversarial robustness first, then generative models including GANs and diffusion models.",
+          "timestamp_s": 116,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Adversarial examples are described as optical illusions for neural networks caused by small perturbations that change model outputs.",
+          "timestamp_s": 355,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Modern attacks extend beyond inputs to instructions, context, and retrieval pipelines.",
+          "timestamp_s": 464,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 5,
+        "end_s": 504
+      },
+      "difficulty": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.3,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "course_id": "CS230",
+      "name": "Forging adversarial images",
+      "description": "Builds adversarial examples by optimizing input pixels against a fixed pretrained classifier, then adds perceptual constraints and reviews physical-world adversarial patches.",
+      "summary": "A pretrained ImageNet classifier can be attacked by treating the input image itself as the optimization variable while keeping model weights fixed [ts=653s]. The first objective finds an image whose prediction is close to the iguana label, but because the input space is enormous, the result is unlikely to look like a real iguana to humans [ts=920s]. A stronger attack starts from or stays close to a real cat image while still pushing the model toward the iguana label, making the result visually plausible but misclassified [ts=1082s]. The segment then grounds the idea in physical examples, including images that change phone-model predictions and adversarial patches that can hide a person from a detector [ts=1195s]. The instructor highlights that patch objectives can include practical terms such as printable colors and smoothness, and that attacks can transfer in black-box settings when models learn similar salient features [ts=1322s].",
+      "key_points": [
+        {
+          "text": "Adversarial image generation can minimize distance between the model prediction and a target label while treating pixels as trainable variables.",
+          "timestamp_s": 653,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The model weights remain fixed; gradients are taken with respect to input pixels rather than parameters.",
+          "timestamp_s": 718,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Most optimized target-class images may fall outside the real-image manifold because the input space is much larger than the space of natural images.",
+          "timestamp_s": 901,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A perceptual regularization term can keep the forged image close to a chosen cat image while changing the target prediction.",
+          "timestamp_s": 1082,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Physical adversarial patches can be optimized against detector outputs and then printed, with loss terms that enforce printability and smoothness.",
+          "timestamp_s": 1310,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 504,
+        "end_s": 1460
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 15.9,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "course_id": "CS230",
+      "name": "High-dimensional vulnerability, FGSM, and defenses",
+      "description": "Explains adversarial vulnerability through high-dimensional compounding effects, introduces FGSM, and surveys defenses including sanitization, adversarial training, red teaming, and RLHF.",
+      "summary": "The instructor rejects the simple explanation that neural networks are vulnerable mainly because of nonlinearity and instead points to high dimensionality and approximately linear behavior from inputs to logits [ts=1680s]. A logistic-regression-style example shows that adding a small epsilon-scaled weight vector can produce a large shift in the sigmoid output because many small coordinate changes accumulate [ts=1796s]. This intuition leads to the Fast Gradient Sign Method, which makes a one-shot perturbation in the sign direction of the input gradient while keeping the image visually similar [ts=1915s]. The segment distinguishes white-box attackers with parameter access from black-box attackers without it [ts=2026s]. Defenses include input sanitization, output filtering, training on correctly labeled adversarial examples, adversarial training with an added adversarial-loss term, red teaming, and RLHF-style post-training [ts=2099s].",
+      "key_points": [
+        {
+          "text": "Neural-network vulnerability is attributed to high-dimensional compounding effects rather than just nonlinear activations.",
+          "timestamp_s": 1680,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "For x* = x + epsilon w, the logit includes an epsilon times squared-weight term, so many small perturbations accumulate.",
+          "timestamp_s": 1818,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "FGSM forms a one-shot adversarial example by adding epsilon times the sign of the loss gradient with respect to the input.",
+          "timestamp_s": 1915,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "White-box attacks assume access to model parameters, while black-box attacks do not.",
+          "timestamp_s": 2026,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Adversarial training augments the loss with correctly labeled adversarial inputs, often generated by FGSM.",
+          "timestamp_s": 2259,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 1460,
+        "end_s": 2340
+      },
+      "difficulty": 0.78,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 14.7,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "course_id": "CS230",
+      "name": "Data poisoning, backdoors, and prompt injection",
+      "description": "Covers attacks that enter through training data or natural-language instructions, including trigger-based image backdoors and direct or indirect prompt injection.",
+      "summary": "Backdoor attacks are introduced as increasingly common because large models often train on scraped data, giving attackers a chance to plant triggers before deployment [ts=2344s]. In the cat/dog example, a small patch is inserted and mislabeled so that the trained model later treats the trigger as evidence for the attacker’s target class [ts=2370s]. The same pattern can generalize beyond images when scraped text contains malicious associations that may later activate a deployment-time behavior [ts=2468s]. Prompt injection is then defined through an LLM application where user input is concatenated with a prompt template and malicious text like “ignore previous instructions” changes the effective instruction seen by the model [ts=2694s]. The instructor distinguishes direct prompt injection from indirect attacks hidden in retrieved webpages or tool outputs, which can affect agents using search or retrieval [ts=2805s].",
+      "key_points": [
+        {
+          "text": "Backdoor attacks can be introduced when scraped or shared training data contains attacker-controlled triggers.",
+          "timestamp_s": 2344,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A trigger patch plus intentional mislabeling can teach the model to associate the trigger with the attacker’s target label.",
+          "timestamp_s": 2370,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Red teaming, RLHF, constitutional AI, safety nets, input sanitization, and data review are discussed as imperfect backdoor defenses.",
+          "timestamp_s": 2561,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Prompt injection can override an LLM application’s intended prompt by mixing malicious user text into the combined prompt.",
+          "timestamp_s": 2694,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Indirect prompt injection can arrive from a secondary source, such as a retrieved website read by an agent.",
+          "timestamp_s": 2805,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 2340,
+        "end_s": 2988
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10.8,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+      "course_id": "CS230",
+      "name": "Generative models as distribution matching",
+      "description": "Introduces generative modeling use cases, contrasts discriminative and generative learning, and states the probability-distribution matching goal.",
+      "summary": "The generative-modeling portion begins by listing uses such as text-to-image, video generation, privacy-preserving synthetic datasets, captioning, and code generation [ts=3015s]. The instructor contrasts discriminative models, which classify, with generative models, which aim to learn the underlying data distribution and create new samples [ts=3107s]. Generative models are framed as useful for simulation, creativity, and human-AI collaboration when they learn salient features from large datasets [ts=3131s]. The self-supervised intuition is that a model with fewer parameters than the amount of training data is forced to learn salient regularities rather than memorize every example [ts=3226s]. The probabilistic target is for the generated distribution to match the real data distribution, after which generated images follow the real-world distribution [ts=3272s].",
+      "key_points": [
+        {
+          "text": "Generative-model use cases include text-to-image synthesis, synthetic datasets, captioning, code generation, super-resolution, and inpainting.",
+          "timestamp_s": 3015,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Discriminative models classify examples, while generative models learn the underlying data distribution.",
+          "timestamp_s": 3107,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Generative models rely on large data so the model learns salient features rather than overfitting.",
+          "timestamp_s": 3226,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The core goal is to align the generated distribution with the real data distribution.",
+          "timestamp_s": 3272,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 2988,
+        "end_s": 3370
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 6.4,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "course_id": "CS230",
+      "name": "The GAN generator-discriminator game",
+      "description": "Explains the original GAN setup with a generator that maps random code to images and a discriminator trained to classify real versus generated images.",
+      "summary": "GANs are introduced as a two-model adversarial training method: the generator is the model ultimately used, while the discriminator is used to train it [ts=3373s]. The generator maps a small random code z into a larger image, so its architecture must upsample from a low-dimensional input to a high-dimensional output [ts=3406s]. The discriminator alternates between generated images and real database images and learns binary labels, predicting fake as 0 and real as 1 [ts=3511s]. Training succeeds when the generator becomes realistic enough that a strong discriminator can no longer reliably distinguish real from fake [ts=3562s]. Gradients flow through the discriminator and back into the generator, making the simultaneous optimization of two networks a stability challenge [ts=3586s].",
+      "key_points": [
+        {
+          "text": "A GAN contains a generator G and discriminator D that compete during training.",
+          "timestamp_s": 3373,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The generator takes a random code z and upsamples it into an image.",
+          "timestamp_s": 3406,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The discriminator is a binary classifier that predicts fake generated images as 0 and real database images as 1.",
+          "timestamp_s": 3511,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Successful GAN training means G fools D so well that D cannot reliably tell generated and real images apart.",
+          "timestamp_s": 3562,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Gradient signals pass through D to update G, so training two networks simultaneously can be unstable.",
+          "timestamp_s": 3586,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 3370,
+        "end_s": 3817
+      },
+      "difficulty": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 7.5,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+      "course_id": "CS230",
+      "name": "GAN objectives, training problems, and code-space structure",
+      "description": "Derives the discriminator and generator losses, introduces non-saturating generator loss, mode collapse, alternating update schedules, and latent-code operations.",
+      "summary": "The discriminator loss is framed as binary cross-entropy with one term for correctly labeling real images as 1 and another for labeling generated images as 0 [ts=3817s]. The generator objective is the opposite side of the game: it tries to make the discriminator’s judgment bad, but the original minimax cost creates a cold-start issue when generated images are obviously fake [ts=3939s]. Because D(G(z)) is near 0 early in training, the saturating generator cost is flat and gives tiny gradients; the non-saturating cost is introduced to give the generator a stronger early learning signal [ts=4063s]. The instructor then describes mode collapse, where the generator fools the discriminator with a narrow subset of outputs rather than learning the full data distribution [ts=4289s]. Alternating training schedules and code-space arithmetic, such as moving from “man with glasses” minus “man” plus “woman” toward “woman with glasses,” illustrate practical GAN behavior and latent structure [ts=4339s].",
+      "key_points": [
+        {
+          "text": "The discriminator loss has separate cross-entropy terms for real images labeled 1 and generated images labeled 0.",
+          "timestamp_s": 3817,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The original generator minimax objective tries to fool the discriminator but can saturate when D easily detects fake images.",
+          "timestamp_s": 3939,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A non-saturating generator cost gives larger gradients when D(G(z)) is near 0 early in training.",
+          "timestamp_s": 4125,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Mode collapse occurs when G learns a narrow set of outputs that fool D without modeling the full distribution.",
+          "timestamp_s": 4289,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "GAN latent codes can show vector-like structure, enabling code arithmetic that changes semantic attributes of generated images.",
+          "timestamp_s": 4371,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 3817,
+        "end_s": 4536
+      },
+      "difficulty": 0.8,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 12.0,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+      "course_id": "CS230",
+      "name": "Why diffusion and how forward noising works",
+      "description": "Motivates diffusion as a non-adversarial alternative to GANs and defines the forward diffusion process that progressively adds Gaussian noise to data.",
+      "summary": "Diffusion is motivated by two GAN limitations: mode collapse, where G covers only a narrow subset of outputs, and instability from training two coupled models simultaneously [ts=4597s]. The instructor uses diffusion-versus-GAN examples to argue that diffusion can produce more variety and better coverage of a real distribution, such as single and grouped flamingos or more varied burgers [ts=4650s]. A diffusion model avoids the minimax game by training one model on a denoising task designed to model the entire data distribution with more stable gradients [ts=4714s]. The forward diffusion process starts from a clean image x0 and progressively adds Gaussian noise until the picture is no longer recognizable [ts=4880s]. In the simplified recurrence, x_{t+1} is x_t plus Gaussian noise, and x_t can be viewed as x0 plus cumulative noise that must later be predicted [ts=4932s].",
+      "key_points": [
+        {
+          "text": "Diffusion is introduced to avoid GAN mode collapse and adversarial training instability.",
+          "timestamp_s": 4597,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Diffusion examples show greater variety than GAN examples, suggesting broader coverage of the data distribution.",
+          "timestamp_s": 4650,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Diffusion models progressively add noise to data and learn to reverse the process.",
+          "timestamp_s": 4743,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The forward process takes x0 through noisy states up to xT by adding more noise at each time step.",
+          "timestamp_s": 4880,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In the simplified formula, x_{t+1} = x_t + epsilon_t with epsilon_t drawn from Gaussian noise.",
+          "timestamp_s": 4932,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 4536,
+        "end_s": 5064
+      },
+      "difficulty": 0.72,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.8,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "course_id": "CS230",
+      "name": "Diffusion denoising objective and self-supervised training set",
+      "description": "Defines the reverse denoising task, the reconstruction loss on predicted noise, and the construction of training triplets from forward diffusion.",
+      "summary": "The reverse process trains a diffusion model to predict the cumulative noise epsilon-hat that was added between x0 and a noisy image xt [ts=5064s]. If the predicted noise can be subtracted from xt, the model can recover the original clean image, so denoising becomes the core generative skill [ts=5097s]. The reconstruction loss compares the true stored noise with the model’s predicted cumulative noise, and this is self-supervised because the forward process created the labels [ts=5161s]. The training database is built from noisy images, a time-step index t, and the cumulative noise epsilon; the index tells the model how much denoising is being requested [ts=5232s]. Before inference, the instructor summarizes the training loop as sampling triplets, computing reconstruction loss, and using gradients to teach the model to predict noise given a noisy picture [ts=5435s].",
+      "key_points": [
+        {
+          "text": "The denoising model predicts cumulative noise epsilon-hat added from x0 to xt.",
+          "timestamp_s": 5064,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Subtracting the predicted noise from xt should recover the original clean image x0.",
+          "timestamp_s": 5097,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The reconstruction loss is the L2 distance between true noise epsilon and predicted noise epsilon-hat.",
+          "timestamp_s": 5161,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Forward diffusion creates self-supervised labels because the training process stores the exact noise it added.",
+          "timestamp_s": 5178,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Training samples are triplets containing a noisy image, time-step index, and cumulative noise.",
+          "timestamp_s": 5435,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 5064,
+        "end_s": 5641
+      },
+      "difficulty": 0.76,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 9.6,
+      "ordering_index": 9,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "course_id": "CS230",
+      "name": "Sampling, conditioning, latent diffusion, and video generation",
+      "description": "Explains test-time diffusion sampling from random noise, prompt conditioning, latent diffusion for efficiency, and how video adds a temporal dimension.",
+      "summary": "At test time, a trained diffusion model can start from random Gaussian noise and progressively denoise it by repeatedly predicting and subtracting noise [ts=5641s]. The instructor notes that repeated diffusion calls make image generation computationally heavy, and conditioning is needed when the user wants a specific object or prompt-guided result rather than whatever the model would generate [ts=5769s]. Latent diffusion addresses cost by using an autoencoder to map images into a lower-dimensional latent space, run the noising and denoising process there, and decode back to pixels at the end [ts=5884s]. The latent representation should keep important patterns while dropping irrelevant detail, making the same diffusion idea faster and less expensive [ts=6049s]. Finally, video generation adds a temporal dimension, so the latent representation must preserve consistency across frames and can be divided into spatio-temporal patches or “cubes” used as tokens [ts=6199s].",
+      "key_points": [
+        {
+          "text": "Diffusion sampling starts from random Gaussian noise and progressively subtracts predicted noise until an image appears.",
+          "timestamp_s": 5641,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Vanilla diffusion has no guarantee of producing a requested object unless the generation is conditioned on a prompt or another modality.",
+          "timestamp_s": 5778,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Latent diffusion performs the same noising and denoising process in a lower-dimensional latent space produced by an encoder.",
+          "timestamp_s": 5884,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The decoder maps the recovered latent z0 back into a clean image after latent denoising.",
+          "timestamp_s": 6090,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Video generation adds a temporal dimension, so diffusion must model spatio-temporal consistency across frames.",
+          "timestamp_s": 6199,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+        "start_s": 5641,
+        "end_s": 6428
+      },
+      "difficulty": 0.82,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 13.1,
+      "ordering_index": 10,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp1",
+      "name": "AI attack taxonomy",
+      "description": "Three-part taxonomy of AI attacks covering adversarial perturbations, data poisoning/backdoors, and prompt injection, with modern attacks expanding to instructions, context, and retrieval.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly groups attacks into waves and says models now expose more entry points through instructions, context, and retrieval pipelines [ts=315s][ts=464s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 4 visualizes the 2014-2018 adversarial pixels, 2018-2021 data poisoning, and 2022-2025 prompt injection timeline."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp2",
+      "name": "Input-space optimization for adversarial examples",
+      "description": "Constructing adversarial examples by holding model parameters fixed and optimizing the input pixels to make a chosen target label likely.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is the first concrete attack construction and relies directly on loss design and gradients with respect to inputs [ts=653s][ts=718s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 5 and 7 show the ImageNet iguana objective, loss, and pixel-gradient update."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp3",
+      "name": "Perceptual constraints for adversarial examples",
+      "description": "Adding a closeness constraint or regularizer so the optimized image remains near a human-recognizable source image while the model predicts a target class.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor modifies the attack objective so the adversarial image stays close to a cat image while being classified as iguana [ts=1082s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 8 shows a cat image still visually resembling a cat while classified as iguana with high confidence."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp4",
+      "name": "Physical adversarial patches and transferability",
+      "description": "Adversarial patterns can be optimized, printed, and applied in the physical world, and may transfer across models with similar learned features.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The physical patch examples demonstrate practical attack construction, printability constraints, and black-box transfer intuition [ts=1243s][ts=1322s][ts=1382s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 10-12 show physical-world examples and an adversarial-patch optimization pipeline against YOLOv2."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp5",
+      "name": "High-dimensional compounding vulnerability",
+      "description": "Small input perturbations across many dimensions can accumulate into a large change in model output, especially when the network behaves approximately linearly from input to logits.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor uses a logistic-regression example to connect high dimensionality, near-linearity, and compounding perturbation effects [ts=1680s][ts=1818s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 13 shows x* = x + epsilon w and the prediction jump from a low value to 0.83."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp6",
+      "name": "Fast Gradient Sign Method",
+      "description": "One-shot adversarial attack that perturbs each input dimension by a small epsilon in the sign direction of the loss gradient with respect to the input.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "FGSM is presented as the simple one-shot version of adversarial input optimization and is later reused for adversarial training [ts=1915s][ts=2264s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 14 states x* = x + epsilon sign(dJ/dX) and explains moving the image toward the direction that increases loss most."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp7",
+      "name": "Adversarial defense strategies",
+      "description": "Defenses including safety nets, input sanitization, output filtering, adversarial training, red teaming, RLHF, and constitutional AI, none of which fully eliminates the attack-defense arms race.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor surveys defenses and stresses that attacks and defenses evolve together [ts=2041s][ts=2226s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 16 lists white-box versus black-box attacker knowledge and defenses including adversarial training, sanitization, RLHF, and red teaming."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp8",
+      "name": "Backdoor and data poisoning attacks",
+      "description": "Training-data attacks where hidden triggers or malicious data patterns cause targeted deployment-time behavior after the model has been trained.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The cat/dog trigger example makes the mechanism concrete: insert trigger, train, deploy, then activate the trigger [ts=2370s][ts=2430s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 18 visualizes trigger insertion, model availability, and trigger activation after deployment."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp9",
+      "name": "Prompt injection",
+      "description": "Attack on LLM applications where malicious text alters the effective instruction seen by the model, either directly from user input or indirectly from retrieved context.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture defines prompt injection through a combined prompt template and later distinguishes direct from indirect attacks [ts=2694s][ts=2805s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 19 diagrams a malicious prompt hijacking an LLM and notes indirect injection from secondary sources."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp10",
+      "name": "Generative modeling as distribution learning",
+      "description": "Generative models learn the data distribution and sample from it, contrasting with discriminative models that classify inputs.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The generative half of the lecture depends on the distribution-matching framing before GANs and diffusion are introduced [ts=3107s][ts=3272s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 21-24 show discriminative versus generative modeling, use cases, self-supervision, and matching real/generated distributions."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp11",
+      "name": "GAN generator-discriminator game",
+      "description": "GAN training uses a generator to create samples and a discriminator to distinguish real from generated samples, producing an adversarial learning signal.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "GAN mechanics are central technical content, but the lecture-level gateway is generative modeling as distribution learning.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 26-27 show G mapping a code to an image and D classifying generated versus real images."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp12",
+      "name": "GAN minimax and non-saturating objectives",
+      "description": "GAN objectives are built from discriminator binary cross-entropy and generator losses; non-saturating variants improve early gradients when generated images are easy to reject.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture derives D and G losses and explains why the generator cost is transformed to avoid flat gradients [ts=3817s][ts=4063s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 28-34 show the discriminator/generator losses and saturating versus non-saturating cost curves."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp13",
+      "name": "GAN instability and mode collapse",
+      "description": "GANs can be difficult to train because coupled networks create stability issues and the generator may fool the discriminator with only a narrow subset of the real distribution.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Mode collapse is explicitly named as the main GAN problem motivating diffusion, and training schedules are discussed as practical mitigation [ts=4289s][ts=4339s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 41 later summarizes GAN limitations as mode collapse and unstable adversarial training."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp14",
+      "name": "Forward diffusion process",
+      "description": "A noising process that transforms clean data into increasingly noisy states by adding Gaussian noise over time, creating the supervised signal for denoising.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Forward diffusion is foundational within diffusion models, but should support the broader diffusion-denoising gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 42 shows x_{t+1} = x_t + epsilon_t and cumulative noise from x0 to xt."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp15",
+      "name": "Diffusion denoising objective",
+      "description": "Training a model to predict cumulative noise from a noisy sample and minimizing reconstruction loss between true noise and predicted noise.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This is described as the core idea needed to understand diffusion, with explicit self-supervised labels and an L2 reconstruction loss [ts=5064s][ts=5161s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 43-44 show epsilon-hat prediction, reconstruction loss, and training triplets."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp16",
+      "name": "Diffusion sampling and conditioning",
+      "description": "At inference, diffusion begins from noise and repeatedly denoises; prompt or modality conditioning guides the generation toward a desired output.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Sampling and conditioning are important extensions after students understand the denoising objective.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slide 46 shows inference as initialization from Gaussian noise followed by progressive denoising."
+    },
+    {
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp17",
+      "name": "Latent diffusion and video diffusion",
+      "description": "Efficiency and video generation extensions of diffusion that perform denoising in compressed latent spaces and add temporal structure for frame consistency.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.82,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explains latent diffusion to reduce computation and video diffusion to handle spatio-temporal consistency across frames [ts=5884s][ts=6199s].",
+      "importance_scope": "course_global",
+      "importance_source": "vlm_estimate",
+      "visual_evidence": "Slides 47-49 show VAE-based latent diffusion and video tensors with temporal dimensions and spatio-temporal tokens."
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp1",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit is organized around attack categories and expanding threat surfaces [ts=315s][ts=464s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp2",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The pixel-optimization attack is introduced through the ImageNet iguana objective and gradients with respect to inputs [ts=653s][ts=718s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp3",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit adds a closeness term so an image still looks like a cat while being classified as iguana [ts=1082s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp4",
+      "planner_role": "support",
+      "instruction_role": "application",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "Physical adversarial examples and patches are used as concrete applications of adversarial input optimization [ts=1195s][ts=1243s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp5",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The vulnerability explanation centers on dimensionality and compounding small coordinate perturbations [ts=1680s][ts=1864s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp6",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "FGSM is presented as the one-shot method following the dimensionality argument [ts=1915s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp7",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit transitions from attacker knowledge to defenses including sanitization and adversarial training [ts=2026s][ts=2226s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp8",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Backdoors are explained with the trigger-in-training-data example and deployment-time activation [ts=2370s][ts=2430s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp9",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Prompt injection is explained through prompt-template hijacking and direct versus indirect attacks [ts=2694s][ts=2805s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp7",
+      "planner_role": "support",
+      "instruction_role": "support",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The Q&A discusses defense difficulty and mentions red teaming, RLHF, constitutional AI, and input sanitization [ts=2561s][ts=2638s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp10",
+      "planner_role": "main",
+      "instruction_role": "intro",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit defines generative models through distribution learning and real-versus-generated distribution matching [ts=3107s][ts=3272s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp11",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit is built around the G/D game, discriminator labels, and gradient flow between G and D [ts=3373s][ts=3562s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp12",
+      "planner_role": "support",
+      "instruction_role": "main",
+      "coverage_level": "partial",
+      "coverage_confidence": "medium",
+      "coverage_rationale": "The end of the unit begins the transition from GAN setup to training losses [ts=3788s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp12",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit derives D and G costs and introduces the non-saturating generator objective [ts=3817s][ts=4125s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp13",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit defines mode collapse and relates it to GAN training and evaluation problems [ts=4289s][ts=4474s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp13",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "GAN mode collapse is the direct motivation for why diffusion is introduced [ts=4597s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp14",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit defines the forward process and its Gaussian-noise recurrence [ts=4880s][ts=4932s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp14",
+      "planner_role": "prereq",
+      "instruction_role": "review",
+      "coverage_level": "partial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Forward diffusion is reviewed as the process that creates training examples and labels [ts=5223s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp15",
+      "planner_role": "main",
+      "instruction_role": "main",
+      "coverage_level": "dominant",
+      "coverage_confidence": "high",
+      "coverage_rationale": "The unit focuses on denoising, epsilon-hat prediction, reconstruction loss, and training triplets [ts=5064s][ts=5435s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp16",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Sampling and conditioning are explained as test-time generation from noise and prompt-guided generation [ts=5641s][ts=5778s]."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "local_kp_id": "local::lecture04-adversarial-robustness-and-generative-models::kp17",
+      "planner_role": "main",
+      "instruction_role": "application",
+      "coverage_level": "substantial",
+      "coverage_confidence": "high",
+      "coverage_rationale": "Latent diffusion and video diffusion are described as efficiency and temporal extensions [ts=5884s][ts=6199s]."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Useful taxonomy and motivation, but mostly framing rather than a computational derivation."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Core adversarial-example construction with losses, gradients, perceptual regularization, and concrete physical examples."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "High-dimensional vulnerability, FGSM, attacker models, and defenses are central and quiz-worthy."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Backdoor and prompt-injection mechanisms are concrete, modern security concepts worth assessment."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Distribution-learning framing is prerequisite for GANs and diffusion."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "GAN G/D mechanics and gradient flow are central generative-model content."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "GAN losses, saturation, mode collapse, and latent-code behavior are technically important and assessment-ready; slide-only CycleGAN material was not included because the transcript does not cover it."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Diffusion motivation and forward noising formula are foundational for the rest of diffusion."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Denoising objective, reconstruction loss, and self-supervised triplets are central and technically precise."
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Sampling, conditioning, latent diffusion, and video extensions connect the math to modern image/video generation systems."
+    }
+  ],
+  "self_critique_trace": null
+}

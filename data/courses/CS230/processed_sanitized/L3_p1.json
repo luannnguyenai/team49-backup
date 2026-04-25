@@ -78,7 +78,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 5,
         "end_s": 583
       },
@@ -118,7 +118,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 583,
         "end_s": 976
       },
@@ -163,7 +163,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 976,
         "end_s": 1459
       },
@@ -208,7 +208,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 1459,
         "end_s": 1782
       },
@@ -253,7 +253,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 1782,
         "end_s": 2211
       },
@@ -303,7 +303,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 2211,
         "end_s": 3195
       },
@@ -358,7 +358,7 @@
         }
       ],
       "content_ref": {
-        "video_url": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
         "start_s": 3195,
         "end_s": 4017
       },
