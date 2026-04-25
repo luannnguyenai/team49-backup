@@ -44,7 +44,8 @@ async function fetchCourseJson<T>(
   });
 
   if (options?.auth) {
-    const accessToken = cookies().get("al_access_token")?.value;
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("al_access_token")?.value;
     if (accessToken) {
       headers.set("Authorization", `Bearer ${accessToken}`);
     }
