@@ -1,0 +1,160 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-03",
+    "lecture_title": "Lecture 3: Full Cycle of a Deep Learning Project",
+    "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk"
+  },
+  "unit": {
+    "unit_id": "local::lecture-03::seg5",
+    "course_id": "CS230",
+    "name": "Data quality, distribution mismatch, and model capacity",
+    "description": "Explains why data quality matters, why training data need not perfectly match the test distribution, and how large model capacity changes the tradeoff.",
+    "summary": "Data quality matters because low-quality examples, such as blurry face images, can be less useful than sharp in-focus examples when they do not match the desired recognition setting [ts=1925s]. The instructor then addresses distribution mismatch: training data should be relevant, but it does not always need to come from exactly the same distribution as the test set [ts=1981s]. Larger neural networks can often absorb somewhat irrelevant but non-incorrect data without hurting the core task as much as smaller models would [ts=2034s]. This section bridges data choices to deployment by returning to the trained face-recognition model as software that must run inference in a real system [ts=2211s].",
+    "key_points": [
+      {
+        "text": "Data quality matters; for face recognition, sharp in-focus images are generally higher quality than blurry images.",
+        "timestamp_s": 1925,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Training data should be close to the target task, but exact train-test distribution matching is less absolute with modern large neural networks.",
+        "timestamp_s": 1981,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Large neural networks can often use somewhat irrelevant but non-incorrect data without much degradation on the core task.",
+        "timestamp_s": 2034,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Incorrect data is still harmful even if irrelevant data may hurt less for high-capacity neural networks.",
+        "timestamp_s": 2109,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A trained model becomes a deployed software component that accepts inputs and returns a recognition decision.",
+        "timestamp_s": 2211,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+      "start_s": 1782,
+      "end_s": 2211
+    },
+    "difficulty": 0.52,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 7.15,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Data quality matters because low-quality examples, such as blurry face images, can be less useful than sharp in-focus examples when they do not match the desired recognition setting [ts=1925s]. The instructor then addresses distribution mismatch: training data should be relevant, but it does not always need to come from exactly the same distribution as the test set [ts=1981s]. Larger neural networks can often absorb somewhat irrelevant but non-incorrect data without hurting the core task as much as smaller models would [ts=2034s]. This section bridges data choices to deployment by returning to the trained face-recognition model as software that must run inference in a real system [ts=2211s].",
+  "target_kp_ids": [
+    "kp_cs230_data_quality_and_distribution_mismatch"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+  "video_clip_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+  "transcript_slice": "00:29:46\nis part of it.\n\n00:29:52\nis also a part of it.\n\n00:29:57\nyou don't grab data willy-nilly with low quality random internet\n\n00:30:04\nBut instead, having high quality coding related data\n\n00:30:09\nto improve your OM's ability to code.\n\n00:30:16\nYeah, I feel more data is better.\n\n00:30:22\nBut it's also overly simplistic.\n\n00:30:25\nThere are subcategories of data.\n\n00:30:29\nto really invest in getting a lot more of,\n\n00:30:35\nyour system's performance.\n\n00:30:39\nWell, we'll talk more about error analysis later.\n\n00:30:47\nCool.\n\n00:30:50\nWhat about the technology of data?\n\n00:31:00\nYeah, so as you collect data, the quality\n\n00:31:07\nAnd I think data quality is tricky, I think.\n\n00:31:17\nI would still focus on speed and collecting some data quickly.\n\n00:31:23\nand where it's doing poorly, you often\n\n00:31:31\nSo trying to decide, should I talk about this now or later?\n\n00:31:42\nLet's talk about [INAUDIBLE].\n\n00:31:47\non the internet that's not that useful for training LLMs.\n\n00:31:53\nthat if you can legally access very high quality written,\n\n00:32:01\ninsightful, that's very high quality data for training norms.\n\n00:32:08\nIt turns out that blurry images would\n\n00:32:16\nassuming that's representative of how you want\n\n00:32:20\nSo that really matters as well.\n\n00:32:28\nCool Yeah, go for it.\n\n00:32:35\ndo you need to be to ask what we want them to do.\n\n00:32:41\nwe're trying to compare two pictures [INAUDIBLE]\n\n00:32:49\npeople's faces.\n\n00:32:53\nfrom the ideal task we want [INAUDIBLE] to do.\n\n00:32:59\nYeah, so just repeat for mic.\n\n00:33:03\nis similar to the distribution of things you want to work on?\n\n00:33:10\nas most people might think.\n\n00:33:20\nbeen so effective is because when you build a very\n\n00:33:26\ninto it, including data that is not perfectly tuned to your test\n\n00:33:34\nAnd it often doesn't hurt so long\n\n00:33:37\nSo you raise the example.\n\n00:33:43\nIf it's generic objects like water bottles and markers,\n\n00:33:47\nBut if we were to use, let's say,\n\n00:33:54\nlook really different than real humans,\n\n00:34:00\nand may even help a little bit.\n\n00:34:04\nyou can train a large neural network with a lot of capacity\n\n00:34:10\nIt usually doesn't hurt and might even help a little bit.\n\n00:34:17\nthat will be problem dependent, and we often just\n\n00:34:20\nBut in the past, people used to have an obsession\n\n00:34:27\nfrom exactly the same distribution as the distribution\n\n00:34:30\nThat used to be how machine learning was\n\n00:34:36\nThat's really not true today anymore.\n\n00:34:39\nAnd I think when neural networks were much smaller, when\n\n00:34:45\nthere was a sense that you didn't\n\n00:34:49\nbecause a computer was expensive, with few parameters.\n\n00:34:55\nmaybe it gets less good at the core tasks\n\n00:34:58\nBut if you can train a bigger than neural network, which\n\n00:35:03\nthen it's become much more OK to toss in some data that hopefully\n\n00:35:10\nI think incorrect data would be a problem.\n\n00:35:15\nmuch less because big neural networks is like a human brain.\n\n00:35:23\nprobably doesn't make me worse at AI.\n\n00:35:30\nto learn to play the piano and learn some stuff about AI.\n\n00:35:36\nthey can learn some other irrelevant things\n\n00:35:40\nBut this was less true if my brain was really small.\n\n00:35:48\nBut I think Sherlock Holmes had an attic theory\n\n00:35:52\nso you've got to forget some stuff to learn new stuff.\n\n00:35:57\nthat's much less true.\n\n00:36:02\nThank you all the questions.\n\n00:36:07\nSo we talked about get data, design model, train the model.\n\n00:36:13\nthis quarter of how to figure out\n\n00:36:17\nand where to focus efforts to improve it.\n\n00:36:27\nSo, when you have trained a model\n\n00:36:43\nto then maybe take your model, host it\n\n00:36:49\nSo a very common architecture for deploying machine",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-03::seg5",
+      "global_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-03::seg5",
+      "global_kp_id": "kp_cs230_deployment_as_model_serving_software",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "name": "Data quality and distribution mismatch",
+      "description": "Data quality and distribution similarity matter, but modern large neural networks can often tolerate some relevant or slightly irrelevant non-incorrect data.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "data_quality",
+        "generalization",
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The section provides practical guidance on blur, high-quality text, distribution similarity, large networks, and the continued danger of incorrect data [ts=1925s] [ts=2034s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_deployment_as_model_serving_software",
+      "name": "Deployment as model-serving software",
+      "description": "A trained model becomes a software service or local component that accepts inputs, runs inference, and returns product decisions under cost and latency constraints.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deployment",
+        "ml_ops",
+        "model_serving"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_platform_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.49,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Deployment constraints motivate VAD, edge/cloud choices, and monitoring; the lecture explicitly distinguishes a trained model from a deployed product [ts=2211s] [ts=2247s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.37,
+    0.67
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
+  }
+}

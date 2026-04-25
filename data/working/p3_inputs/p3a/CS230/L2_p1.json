@@ -1,0 +1,1442 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+    "lecture_title": "Supervised, Self-Supervised, & Weakly Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Recap: model components, learning loop, neurons, and embeddings",
+      "start_s": 5,
+      "end_s": 1130
+    },
+    {
+      "section_index": 2,
+      "title": "Supervised case study: Day & Night classification",
+      "start_s": 1132,
+      "end_s": 2065
+    },
+    {
+      "section_index": 3,
+      "title": "Supervised case study: Trigger word detection",
+      "start_s": 2065,
+      "end_s": 3325
+    },
+    {
+      "section_index": 4,
+      "title": "Supervised case study: Face verification, identification, and clustering",
+      "start_s": 3327,
+      "end_s": 4824
+    },
+    {
+      "section_index": 5,
+      "title": "Self-supervised and weakly supervised embeddings",
+      "start_s": 4824,
+      "end_s": 5979
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg1",
+      "course_id": "CS230",
+      "name": "Lecture goals and supervised-learning recap",
+      "description": "Frames the in-person lecture as industry-oriented decision-making, then recaps the supervised learning loop of inputs, outputs, architecture, parameters, loss, and gradient descent.",
+      "summary": "The lecture opens by positioning in-class sessions as industry-oriented case studies for making better AI project decisions [ts=53s]. The instructor outlines the lecture path: recap, supervised case studies, then self-supervised and weakly supervised learning with embeddings [ts=118s]. The recap defines a model as architecture plus trained parameters, using a cat classifier to separate the blueprint from the numerical weights [ts=234s]. Learning is described as repeated comparison of prediction to ground truth through a loss function, followed by gradient updates that calibrate parameters over batches of data [ts=303s]. The instructor also previews design axes that can change across projects: input modality, output type, architecture, loss, activations, optimizer, and hyperparameters [ts=375s].",
+      "key_points": [
+        {
+          "text": "In-class CS230 lectures emphasize industry case studies and decision-making in AI projects rather than only the academic video material.",
+          "timestamp_s": 53,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The lecture plan is recap, supervised learning projects, self-supervised and weakly supervised learning, with embeddings as a central theme.",
+          "timestamp_s": 118,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A neural network model can be decomposed into architecture, the blueprint, plus parameters, the trained numerical values.",
+          "timestamp_s": 234,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The loss function compares ground truth with model prediction and supplies the penalty used for gradient-descent updates.",
+          "timestamp_s": 311,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Important project design choices include input modality, output type, architecture, loss function, activation functions, optimizer, and hyperparameters.",
+          "timestamp_s": 375,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 5,
+        "end_s": 536
+      },
+      "difficulty": 0.25,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.8,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "course_id": "CS230",
+      "name": "Neurons, multi-class labels, capacity, and embeddings",
+      "description": "Extends logistic regression into neural-network notation, multi-class and multi-label outputs, hierarchical feature learning, model capacity, and the difference between encodings and embeddings.",
+      "summary": "The instructor connects a neuron to logistic regression: flatten image pixels, apply W transpose X plus B, then pass through sigmoid to obtain a probability [ts=536s]. For multiple animals, the output layer and labels both need to change; forgetting to change labels after changing the data is described as a common project mistake [ts=662s]. One-hot vectors represent a single true class, while multi-hot vectors allow multiple labels in the same image [ts=722s]. Deeper networks have more capacity, which can be necessary for complex data but can also overfit if capacity exceeds dataset complexity [ts=813s]. The face-network example shows early layers encoding edges, middle layers encoding parts like eyes or noses, and deeper layers encoding higher-level facial features; embeddings are encodings where distance carries semantic meaning [ts=900s].",
+      "key_points": [
+        {
+          "text": "A logistic-regression-style neuron computes a linear score W transpose X plus B and uses sigmoid to map it to a probability.",
+          "timestamp_s": 536,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "For multi-class or multi-label recognition, both the number of output neurons and the label representation must change.",
+          "timestamp_s": 662,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "One-hot labels encode exactly one true class; multi-hot labels encode multiple true classes in one vector.",
+          "timestamp_s": 722,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Higher-capacity networks can fit richer data but can also memorize the training set when capacity is too large relative to the dataset.",
+          "timestamp_s": 813,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Lower layers tend to encode simple features such as edges, while deeper layers encode higher-complexity features closer to the task.",
+          "timestamp_s": 900,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "An encoding is any vector representation; an embedding is an encoding whose distances have semantic meaning.",
+          "timestamp_s": 1103,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 536,
+        "end_s": 1130
+      },
+      "difficulty": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 9.9,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg3",
+      "course_id": "CS230",
+      "name": "Day & Night classification as a supervised design exercise",
+      "description": "Uses a toy image classification problem to teach task scoping, data diversity, resolution tradeoffs, human proxy experiments, output design, and a simple supervised loss.",
+      "summary": "The first case study asks students to classify images as day or night, then quickly exposes how task definition controls difficulty: one fixed camera is much easier than images from anywhere in the world [ts=1141s]. Edge cases such as indoor scenes, cloudy weather, dawn and dusk, polar regions, and clocks show why apparent toy problems can become semantically ambiguous [ts=1337s]. The instructor recommends human proxy experiments to choose practical inputs, such as printing images at different resolutions and asking friends when they can still tell day from night [ts=1634s]. The selected target resolution is about 64 by 64 by 3 because color helps and high resolution increases compute, training cost, and iteration time [ts=1664s]. The output is a binary 0/1 label with sigmoid as last activation, a shallow CNN as a likely architecture, and binary cross-entropy as the appropriate supervised loss [ts=1822s].",
+      "key_points": [
+        {
+          "text": "The same day/night task can be easy for one fixed location or much harder when the camera can be anywhere in the world.",
+          "timestamp_s": 1337,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Indoor images, cloudy weather, dawn/dusk, polar regions, and clocks complicate the semantic definition of day versus night.",
+          "timestamp_s": 1366,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A quick human proxy experiment can estimate the minimum useful image resolution without running a full model experiment.",
+          "timestamp_s": 1634,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Too-low resolution loses task-relevant information, while too-high resolution increases compute, weights, cost, and iteration time.",
+          "timestamp_s": 1572,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The case study uses binary output with sigmoid activation and a shallow convolutional model for a simple supervised image task.",
+          "timestamp_s": 1822,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Day/night classification is a proxy project that students can reuse mentally to make faster decisions in later AI projects.",
+          "timestamp_s": 2033,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 1132,
+        "end_s": 2065
+      },
+      "difficulty": 0.32,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 15.6,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "course_id": "CS230",
+      "name": "Trigger word detection: cascaded systems and sequential labels",
+      "description": "Introduces trigger word detection inside a voice-assistant cascade, then develops the data, input, output, and labeling scheme for detecting a keyword in 10-second audio.",
+      "summary": "Trigger word detection is framed as the second model in a voice-assistant cascade: a lightweight activity detector notices sound, a trigger model listens for a keyword, and a heavier downstream model handles the command [ts=2083s]. The task is to detect the word activate in a 10-second audio clip, with attention to preprocessing such as Fourier transforms, sequence length, positive words, negative words, and background noise [ts=2170s]. The instructor emphasizes data distribution: accents, age, cadence, gender-linked frequency distributions, and subway-like background noise can all break a campus-only dataset [ts=2328s]. A human experiment shows that a coarse 0/1 clip label is much harder than a time-localized sequence label; the better label can reduce the amount of data needed by orders of magnitude [ts=2636s]. Because all-zero labels can dominate a sparse sequence target, the design uses a more balanced sequential labeling scheme, sigmoid at each time step, and binary cross-entropy at each step [ts=2813s].",
+      "key_points": [
+        {
+          "text": "Voice assistants often use cascaded models so cheap activity detection runs before trigger-word and heavier command-understanding models.",
+          "timestamp_s": 2083,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The trigger-word task is to detect the keyword activate inside a 10-second audio clip.",
+          "timestamp_s": 2170,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Audio data distribution must cover accents, age, cadence, gender-linked frequency differences, and background noise.",
+          "timestamp_s": 2328,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A time-localized labeling scheme can make the trigger-word task much easier for both humans and models than a single clip-level label.",
+          "timestamp_s": 2636,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A sparse sequence target can let a model predict all zeros with high apparent accuracy, so a more balanced positive-label strategy is needed.",
+          "timestamp_s": 2813,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 2065,
+        "end_s": 2813
+      },
+      "difficulty": 0.5,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 12.5,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "course_id": "CS230",
+      "name": "Trigger word detection: automated labeling and architecture search",
+      "description": "Shows how to synthesize large training sets from positive words, negative words, and background noise, while keeping a realistic manually labeled test set and seeking expert guidance on architecture.",
+      "summary": "The practical trigger-word solution uses three databases: positive examples of activate, negative words including confusing near-matches, and background noise, which is relatively easy to obtain online [ts=2983s]. A Python script inserts non-overlapping positive and negative words into background clips and automatically knows the correct label positions, producing large synthetic training sets [ts=3074s]. With around 1,000 positive clips, 10,000 other words, and abundant background noise, millions of training examples can be generated in hours, especially with augmentation such as changing frequency or speed [ts=3114s]. The instructor distinguishes synthetic training data from the test set, which should be manually labeled and as real as possible [ts=3151s]. Architecture search remains important for speech problems, and the key process lesson is to ask experts or TAs early to avoid wasting weeks on architectures that are known to fail [ts=3167s].",
+      "key_points": [
+        {
+          "text": "For sequential trigger detection, a sigmoid prediction and binary cross-entropy loss are applied at every time step.",
+          "timestamp_s": 2863,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A strong trigger-word training set can be built from separate positive-word, negative-word, and background-noise databases.",
+          "timestamp_s": 2983,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Synthetic audio composition enables automatic labels because the script knows exactly where each inserted trigger word occurs.",
+          "timestamp_s": 3074,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Data augmentation can alter frequency and speed to create more variation in the synthetic training set.",
+          "timestamp_s": 3131,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The test set should be manually labeled and as real as possible rather than relying on synthetic composition.",
+          "timestamp_s": 3151,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Expert advice can save substantial time in architecture search for speech tasks where certain model families are known to work or fail.",
+          "timestamp_s": 3167,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Modern practice often starts from foundation models, then modifies them for latency, memory, hardware, or browser constraints.",
+          "timestamp_s": 3263,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 2813,
+        "end_s": 3325
+      },
+      "difficulty": 0.46,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 8.5,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg6",
+      "course_id": "CS230",
+      "name": "Face verification: data, pixel-comparison failure, and encoder idea",
+      "description": "Frames face verification for student IDs, explains why naive pixel comparison is brittle, and introduces deep encoders as a semantically meaningful comparison space.",
+      "summary": "The face verification case asks whether a live camera picture matches the student ID picture when someone swipes into a facility [ts=3327s]. Compared with day/night classification, the input resolution needs to be much higher, around 412 by 412 by 3, because small facial details such as eye color can matter [ts=3521s]. Naive pixel comparison fails because lighting, background, translation, rotation, scale, glasses, hats, hairstyle, beard, and ID age can change pixels without changing identity [ts=3603s]. The proposed solution is to run both the database image and camera image through the same deep network and compare their vectors rather than comparing pixels [ts=3730s]. A distance threshold controls the verification decision, and the acceptable threshold should depend on the application’s false-positive and false-negative costs [ts=3788s].",
+      "key_points": [
+        {
+          "text": "Face verification checks whether the live camera image matches the student ID image for a claimed person.",
+          "timestamp_s": 3327,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Face verification needs higher resolution than the day/night toy task because small facial details can matter.",
+          "timestamp_s": 3521,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pixel-wise comparison is brittle under lighting, background, translation, rotation, scale, accessories, hairstyle, beard, and aging.",
+          "timestamp_s": 3603,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A trained face network can provide a vector representation that is more meaningful for identity comparison than raw pixels.",
+          "timestamp_s": 3730,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The distance threshold trades off true positives, false positives, and false negatives; stricter applications need stricter thresholds.",
+          "timestamp_s": 3788,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Individual dimensions of a learned 128-dimensional embedding are not directly interpretable without separate analysis.",
+          "timestamp_s": 3858,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 3327,
+        "end_s": 3900
+      },
+      "difficulty": 0.44,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 9.6,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg7",
+      "course_id": "CS230",
+      "name": "Triplet loss and embedding-based face tasks",
+      "description": "Develops triplet loss for training a face encoder, then shows how the same encoder supports verification, identification, and clustering through nearest-neighbor and clustering algorithms.",
+      "summary": "To train the encoder, the instructor asks for a loss that makes images of the same person close and images of different people far apart [ts=3901s]. Triplets contain an anchor, a positive image of the same person, and a negative image of a different person, and the objective minimizes anchor-positive distance while maximizing anchor-negative distance [ts=4027s]. The triplet-loss training loop sends all three images through the same network, computes the vector distances and margin-based loss, then updates parameters so the embedding geometry becomes identity-aware [ts=4270s]. At test time, the negative example is no longer needed; it is a training trick for shaping the representation [ts=4441s]. The same encoder supports face identification by storing vectors and using K-nearest neighbors, and face clustering by running K-means over embedded pictures [ts=4487s].",
+      "key_points": [
+        {
+          "text": "A useful face loss should make same-person embeddings close and different-person embeddings far apart.",
+          "timestamp_s": 3901,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A triplet consists of anchor, positive same-person image, and negative different-person image.",
+          "timestamp_s": 4027,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Triplet loss minimizes anchor-positive distance and maximizes anchor-negative distance, often with a margin term alpha.",
+          "timestamp_s": 4124,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The same network processes anchor, positive, and negative images in parallel and updates parameters from the triplet loss.",
+          "timestamp_s": 4270,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "At test time, a negative example is not needed; the trained encoder alone is used for comparison.",
+          "timestamp_s": 4441,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Face identification can use K-nearest neighbors over stored face vectors; face clustering can use K-means over embedded images.",
+          "timestamp_s": 4487,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 3901,
+        "end_s": 4824
+      },
+      "difficulty": 0.57,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 15.4,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg8",
+      "course_id": "CS230",
+      "name": "Self-supervised image embeddings and contrastive learning",
+      "description": "Transitions from supervised triplets to unlabeled image learning by using data augmentation to create positive pairs and contrastive objectives such as SimCLR.",
+      "summary": "The self-supervised section begins from the cost of labels and asks how to learn face or image embeddings from unlabeled images in the wild [ts=4853s]. The instructor contrasts older supervised triplets with an augmentation-based method: rotate, crop, patch, translate, or otherwise perturb the same image and train the network to map both views to nearby vectors [ts=5037s]. This creates labels from the data itself, because the pair identity is generated by the augmentation pipeline rather than by human annotation [ts=5100s]. SimCLR is presented as an example of this contrastive self-supervised approach, shifting from supervised triplets like FaceNet to self-supervised pairs [ts=5148s]. The reason this matters is scale: scripts can create augmented pairs from massive unlabeled datasets, leaving compute as a major bottleneck [ts=5164s].",
+      "key_points": [
+        {
+          "text": "Self-supervised learning asks how to learn useful embeddings without manually labeled identities or classes.",
+          "timestamp_s": 4853,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Augmentations such as rotation, cropping, patching, noise, and translation can create positive pairs from the same raw image.",
+          "timestamp_s": 5037,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The model is trained so augmented views of the same image produce close representations.",
+          "timestamp_s": 5072,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Self-supervision creates a learning environment where labels come from the structure of raw data rather than human labeling.",
+          "timestamp_s": 5131,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "SimCLR illustrates the shift from supervised triplets to contrastive self-supervised pairs.",
+          "timestamp_s": 5148,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Large-scale unlabeled pretraining becomes practical because augmentation scripts can auto-label image pairs at scale.",
+          "timestamp_s": 5164,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 4824,
+        "end_s": 5204
+      },
+      "difficulty": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 6.3,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg9",
+      "course_id": "CS230",
+      "name": "Next-token prediction, weak supervision, and multimodal embeddings",
+      "description": "Generalizes self-supervision to text, audio, video, biology, and multimodal data, distinguishing self-supervised prediction tasks from weakly supervised naturally paired modalities.",
+      "summary": "The instructor explains that GPT-style next-token prediction is self-supervised because raw text itself supplies the prediction target without manual labels [ts=5220s]. Examples such as predicting coffee or tea after poured myself a cup of, Paris after the capital of France is, and umbrella after rain show how simple objectives at scale can induce co-occurrence, facts, semantic understanding, uncertainty, and reasoning-like behavior [ts=5270s]. Self-supervised prediction tasks can also be built for audio by masking sound chunks, video by removing frames, and biology by hiding amino acids or protein/DNA structure elements [ts=5550s]. Multimodal alignment is different: image-caption pairs and other naturally paired modalities provide weak supervision rather than precise hand labeling [ts=5661s]. The lecture closes with ImageBind-style shared embedding spaces, where text, images, audio, thermal, depth, and other modalities can be connected through central pivots such as text or images [ts=5870s].",
+      "key_points": [
+        {
+          "text": "Next-token prediction is self-supervised because raw text provides the context and the next word target without manual labeling.",
+          "timestamp_s": 5220,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Predicting common sentence completions can force a model to learn co-occurrence patterns, facts, semantic relations, uncertainty, and conditional inference.",
+          "timestamp_s": 5270,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Self-supervised tasks can be defined for audio, video, and biology by masking or predicting withheld parts of the raw signal.",
+          "timestamp_s": 5550,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Multimodal image-caption training is weakly supervised because the pairing is naturally occurring rather than precise manual labeling.",
+          "timestamp_s": 5661,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Naturally paired data examples include audio-video, subtitles with video/audio, music with titles, genotype-phenotype, medical imaging pairs, and game footage with keyboard action.",
+          "timestamp_s": 5756,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Shared embedding spaces let different modalities be bound together, often using text or image as a central pivot.",
+          "timestamp_s": 5870,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+        "start_s": 5204,
+        "end_s": 5979
+      },
+      "difficulty": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 12.9,
+      "ordering_index": 9,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Foundational recap for the whole lecture, but some opening instructor/career framing is not highly quiz-worthy."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Core vocabulary and representation ideas recur throughout DL, CV, NLP, and retrieval systems."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Concrete supervised image case with data, resolution, sigmoid, CNN, and binary cross-entropy decisions."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": true,
+      "rationale": "Interactive audio experiment plus sequence-labeling and sequential BCE make this highly teachable and assessable."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Strong applied lesson on automatic labeling, synthetic data, test-set realism, and architecture search."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Face verification teaches why semantic embeddings are needed by contrasting them with brittle pixel baselines."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Triplet loss, KNN, and K-means over embeddings are central concepts with clear quiz targets."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Contrastive self-supervision and SimCLR are major bridge concepts from supervised losses to foundation-model pretraining."
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Next-token prediction, emergent behaviors, weak supervision, and multimodal shared spaces are important across DL, NLP, and CV."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg1",
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg1",
+      "global_kp_id": "kp_cs230_ai_project_design_axes",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_logistic_regression_neuron_with_sigmoid",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg3",
+      "global_kp_id": "kp_cs230_proxy_projects_and_human_experiments",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg3",
+      "global_kp_id": "kp_cs230_task_scoping_and_data_diversity",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg3",
+      "global_kp_id": "kp_cs230_input_resolution_and_preprocessing_tradeoffs",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg3",
+      "global_kp_id": "kp_cs230_binary_supervised_classifier_design",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "global_kp_id": "kp_cs230_cascaded_trigger_word_systems",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "global_kp_id": "kp_cs230_task_scoping_and_data_diversity",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "global_kp_id": "kp_cs230_synthetic_audio_data_generation_with_automatic_labels",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "global_kp_id": "kp_cs230_architecture_search_and_expert_guidance",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg6",
+      "global_kp_id": "kp_cs230_face_verification_and_pixel_comparison_failure",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg6",
+      "global_kp_id": "kp_cs230_face_encoder_representations_and_thresholds",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg6",
+      "global_kp_id": "kp_cs230_input_resolution_and_preprocessing_tradeoffs",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg7",
+      "global_kp_id": "kp_cs230_triplet_loss",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg7",
+      "global_kp_id": "kp_cs230_embedding_reuse_for_identification_and_clustering",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg7",
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg8",
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg8",
+      "global_kp_id": "kp_cs230_triplet_loss",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg8",
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg9",
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg9",
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg9",
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_data_driven_learning_pipeline",
+      "name": "Data-driven supervised learning pipeline",
+      "description": "Pre-deep-learning progress came from shifting from hand-coded rules to learnable statistical models trained from data. The collect-train-predict paradigm: gather labeled data, fit a model, and evaluate predictions on unseen examples.",
+      "track_tags": [
+        "deep_learning_basics",
+        "machine_learning",
+        "machine_learning_foundations",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "machine_learning",
+        "model_training",
+        "supervised_learning"
+      ],
+      "career_path_tags": [
+        "data_scientist",
+        "ml_engineer",
+        "ml_engineering",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because data-driven supervised learning pipeline formalizes how pre-deep-learning progress came from shifting from hand-coded rules to learnable statistical models trained from data, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_18_human_centered_ai::kp3",
+        "local::lecture_2_image_classification_with_linear_classifiers::kp3",
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_ai_project_design_axes",
+      "name": "AI project design axes",
+      "description": "Core project choices include input modality, output formulation, architecture, loss function, activations, optimizer, hyperparameters, and data assumptions.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "At [ts=375s] the instructor lists design variables that repeatedly reappear in all case studies as decision points.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_logistic_regression_neuron_with_sigmoid",
+      "name": "Logistic-regression neuron with sigmoid",
+      "description": "A neuron can be viewed as W transpose X plus B followed by an activation such as sigmoid to produce a probability.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Transcript uses the logistic-regression neuron as a recap bridge into neural networks; important, but not a standalone course gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "name": "One-hot and multi-hot label vectors",
+      "description": "One-hot vectors encode exactly one true class; multi-hot vectors encode multiple true labels simultaneously.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.3,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The multi-animal example at [ts=662s] and [ts=722s] teaches label design as a frequent failure point in projects.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+      "name": "Model capacity and hierarchical feature learning",
+      "description": "Deeper networks have more capacity and tend to learn increasingly complex features from edges to parts to task-level patterns.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Model capacity and hierarchy are recurring ideas, but this lecture treats them as support for representation design rather than a gate.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "name": "Encoding versus embedding",
+      "description": "An encoding is any vector representation; an embedding is an encoding whose closeness or distance carries semantic similarity.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly defines this distinction at [ts=1103s] and then uses it across face, image, text, and multimodal systems.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_proxy_projects_and_human_experiments",
+      "name": "Proxy projects and human experiments",
+      "description": "Small proxy tasks and human experiments can quickly estimate feasibility, data needs, resolution, or labeling choices before large-scale model training.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The day/night and trigger-word examples use human experiments at [ts=1634s] and [ts=2636s] to choose resolution and labeling strategy.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_task_scoping_and_data_diversity",
+      "name": "Task scoping and data diversity",
+      "description": "The problem definition and deployment distribution determine data requirements, model capacity, edge cases, and evaluation realism.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "At [ts=1337s] the instructor contrasts one-location day/night classification with global deployment, and at [ts=2328s] repeats the distribution issue for audio accents and noise.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_input_resolution_and_preprocessing_tradeoffs",
+      "name": "Input resolution and preprocessing tradeoffs",
+      "description": "Choosing target resolution balances information retention against compute, cost, model size, and iteration speed; preprocessing can normalize variable inputs.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The resolution discussion at [ts=1572s] explains information loss versus compute cost, and face verification later raises resolution needs at [ts=3521s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_binary_supervised_classifier_design",
+      "name": "Binary supervised classifier design",
+      "description": "A binary classifier commonly uses a 0/1 target, sigmoid last activation, and binary cross-entropy loss; image tasks may use convolutional architectures.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Binary classifier design is concrete and assessable inside the day/night case, but narrower than the lecture-level supervised learning loop.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_cascaded_trigger_word_systems",
+      "name": "Cascaded trigger-word systems",
+      "description": "Voice assistants can use cascaded models so cheaper detectors run continuously and heavier models activate only when needed.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The cascade explanation at [ts=2083s] motivates why trigger-word detection is a specific subproblem in deployed assistants.",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "name": "Sequential trigger-word labeling",
+      "description": "For trigger-word detection, a sequence of per-time-step labels can make learning easier than a single clip-level 0/1 label.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The human audio experiment at [ts=2636s] and label-imbalance discussion at [ts=2813s] show how label design directly controls learnability.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_synthetic_audio_data_generation_with_automatic_labels",
+      "name": "Synthetic audio data generation with automatic labels",
+      "description": "Positive words, negative words, and background noise can be synthetically mixed so the generation script automatically produces time-aligned labels.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "At [ts=2983s] through [ts=3114s], the instructor shows how strategic data collection and scripting create millions of training examples quickly.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_architecture_search_and_expert_guidance",
+      "name": "Architecture search and expert guidance",
+      "description": "Architecture choices and deployment constraints matter, and expert advice can prevent wasted iterations on known-bad approaches.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The trigger-word section at [ts=3167s] emphasizes asking experts or TAs, and [ts=3263s] connects architecture choices to latency, memory, and hardware constraints.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_face_verification_and_pixel_comparison_failure",
+      "name": "Face verification and pixel-comparison failure",
+      "description": "Face verification compares a claimed identity against a live image; raw pixel comparison fails under nuisance changes such as lighting, pose, scale, accessories, and aging.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The case at [ts=3327s] and [ts=3603s] grounds why learned representations are needed rather than pixel-wise distance.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_face_encoder_representations_and_thresholds",
+      "name": "Face encoder representations and thresholds",
+      "description": "A face encoder maps images to vectors whose distances can be thresholded for verification decisions.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Face encoders are a strong example of semantic embeddings, but the gateway concept is embedding distance itself.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_triplet_loss",
+      "name": "Triplet loss",
+      "description": "Triplet loss trains embeddings by minimizing anchor-positive distance while maximizing anchor-negative distance, typically with a margin.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Triplet loss is central to the face-verification case, but should support the embedding concept rather than dominate the course graph.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_embedding_reuse_for_identification_and_clustering",
+      "name": "Embedding reuse for identification and clustering",
+      "description": "A trained encoder can support verification, identification with K-nearest neighbors, and clustering with K-means over vectors.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor distinguishes verification, identification, and clustering at [ts=4380s] and maps them to KNN and K-means at [ts=4487s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp18"
+      ]
+    },
+    {
+      "global_kp_id": "kp_simclr_contrastive_representation_learning",
+      "name": "SimCLR contrastive representation learning",
+      "description": "A self-supervised objective that pulls together augmented views of the same image and pushes apart different images.",
+      "track_tags": [
+        "computer_vision",
+        "self_supervised_learning"
+      ],
+      "domain_tags": [
+        "contrastive_learning",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because simCLR contrastive representation learning clarifies a self-supervised objective that pulls together augmented views of the same image and pushes apart different images, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_16::kp3",
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp19"
+      ]
+    },
+    {
+      "global_kp_id": "kp_autoregressive_language_modeling",
+      "name": "Autoregressive language modeling",
+      "description": "Training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly. Autoregressive models make sequence modeling tractable by factoring p(x) into conditional next-part distributions over an ordered decomposition of x.",
+      "track_tags": [
+        "generative_models",
+        "language_modeling",
+        "language_models",
+        "nlp_foundations",
+        "self_supervision",
+        "sequence_modeling",
+        "sequence_models"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "generative_models",
+        "language_modeling",
+        "nlg",
+        "nlp",
+        "probability"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "ml_engineering",
+        "nlp_engineer",
+        "nlp_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.53,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because autoregressive language modeling formalizes how training a model to predict the next token from its prefix, used directly for decoder pretraining and as a baseline pretraining objective more broadly, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp7",
+        "local::lecture11-pretraining::kp4",
+        "local::lecture14-nlg::kp3",
+        "local::lecture13-generative-models-1::kp6",
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp20"
+      ]
+    },
+    {
+      "global_kp_id": "kp_clip_style_contrastive_vl_pretraining",
+      "name": "Contrastive vision-language pretraining",
+      "description": "The CLIP/ALIGN family of models that align independently encoded images and text with contrastive objectives and scale primarily through data and compute. CLIP trains an image encoder and text encoder so matching image-text pairs are close and mismatched pairs are far in a shared embedding space.",
+      "track_tags": [
+        "contrastive_learning",
+        "multimodal_ml",
+        "pretraining",
+        "vision_language"
+      ],
+      "domain_tags": [
+        "clip",
+        "computer_vision",
+        "foundation_models",
+        "nlp",
+        "representation_learning"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "foundation_model_engineering",
+        "ml_engineer",
+        "ml_research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.77,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because contrastive vision-language pretraining formalizes how the CLIP/ALIGN family of models that align independently encoded images and text with contrastive objectives and scale primarily through data and compute, which later units use as core machinery rather than background context.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture18-multimodal::kp5",
+        "local::lecture_16::kp4",
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp21"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
+  }
+}

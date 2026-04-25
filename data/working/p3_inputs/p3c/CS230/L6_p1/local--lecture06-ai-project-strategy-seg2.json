@@ -1,0 +1,152 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture06_ai_project_strategy",
+    "lecture_title": "AI Project Strategy",
+    "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho"
+  },
+  "unit": {
+    "unit_id": "local::lecture06_ai_project_strategy::seg2",
+    "course_id": "CS230",
+    "name": "Collecting initial wake-word data",
+    "description": "This segment covers how to obtain a first training set for a custom trigger phrase when no public dataset exists, emphasizing consent-driven collection of real data and a cautious stance toward early synthetic data generation.",
+    "summary": "After the literature search, the bottleneck becomes data: there is no internet-scale dataset of people saying the custom phrase \"Robert, turn on,\" so the team must collect examples itself [ts=1088s] [ts=1136s]. The instructor endorses walking around, clearly asking for permission, and recording willing participants because real data is fast to gather and removes uncertainty about realism [ts=1177s] [ts=1264s]. He treats text-to-speech and other synthetic generation as useful but not first-choice, because they introduce extra knobs such as voice diversity and distribution mismatch that can slow early progress [ts=1322s] [ts=1372s]. A self-driving car analogy reinforces the point: synthetic worlds often look sufficient to humans while still missing the diversity required by a model [ts=1445s] [ts=1500s].",
+    "key_points": [
+      {
+        "text": "Custom wake-word projects often require collecting a phrase-specific dataset because no public dataset matches the exact trigger phrase.",
+        "timestamp_s": 1088,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Collect real recordings with explicit permission before relying on synthetic speech generation.",
+        "timestamp_s": 1264,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Synthetic data is useful but can introduce hidden hyperparameters such as limited voice diversity.",
+        "timestamp_s": 1372,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Real data removes one major uncertainty because it already reflects the natural target distribution.",
+        "timestamp_s": 1500,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+      "start_s": 1037,
+      "end_s": 1644
+    },
+    "difficulty": 0.48,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "After the literature search, the bottleneck becomes data: there is no internet-scale dataset of people saying the custom phrase \"Robert, turn on,\" so the team must collect examples itself [ts=1088s] [ts=1136s]. The instructor endorses walking around, clearly asking for permission, and recording willing participants because real data is fast to gather and removes uncertainty about realism [ts=1177s] [ts=1264s]. He treats text-to-speech and other synthetic generation as useful but not first-choice, because they introduce extra knobs such as voice diversity and distribution mismatch that can slow early progress [ts=1322s] [ts=1372s]. A self-driving car analogy reinforces the point: synthetic worlds often look sufficient to humans while still missing the diversity required by a model [ts=1445s] [ts=1500s].",
+  "target_kp_ids": [
+    "kp_cs230_collect_real_data_with_explicit_user_consent",
+    "kp_cs230_synthetic_versus_real_data_trade_off"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+  "video_clip_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+  "transcript_slice": "00:17:19\nsometimes I call Dan Jurafsky, whatever.\n\n00:17:25\nconversation really accelerates what I've been able to do.\n\n00:17:32\nit takes you like 10 minutes to send an email,\n\n00:17:36\nI don't know.\n\n00:17:38\nBut sometimes that tends to be really high ROI.\n\n00:17:45\nthat if you do a literature search,\n\n00:17:52\nof the robust enterprise-grade smart speaker systems, all\n\n00:18:00\nor trigger word.\n\n00:18:03\nYou probably come up with some good neural network\n\n00:18:07\nAnd it turns out that there is no data set on the internet\n\n00:18:13\nThat's just not a thing.\n\n00:18:18\nand I don't know, Jeremy, and Alicia, or whatever.\n\n00:18:24\nIt was actually kind of weird when you chose people's names,\n\n00:18:28\nBut it turns out that there is no large data set\n\n00:18:34\nSo if you want to train a neural network\n\n00:18:38\nyou need to collect that data yourself.\n\n00:18:45\nSay you've done a literature search,\n\n00:18:49\nbut that has led you, say, to conclude\n\n00:18:57\nYou need a data set to train to distinguish between someone\n\n00:19:04\nturn on.\n\n00:19:09\nYeah.\n\n00:19:10\n[INAUDIBLE] text-to-speech.\n\n00:19:15\n[INAUDIBLE]\n\n00:19:18\nCool.\n\n00:19:18\nYep.\n\n00:19:22\nI'll come back to that later.\n\n00:19:24\nGo ahead.\n\n00:19:27\nSorry.\n\n00:19:34\nYeah.\n\n00:19:35\nYeah, I like that.\n\n00:19:36\nSo walk around and ask people.\n\n00:19:38\nGet the permission to record and use their voice.\n\n00:19:42\njust record their voices.\n\n00:19:45\nAnything else?\n\n00:19:49\nYeah.\n\n00:20:04\nStep where it triggers.\n\n00:20:09\n[INAUDIBLE] sample.\n\n00:20:14\nand there's [INAUDIBLE].\n\n00:20:18\n[INAUDIBLE]\n\n00:20:21\nCool.\n\n00:20:22\nSo samples of people saying not Robert or not people.\n\n00:20:27\nYeah.\n\n00:20:28\nGo ahead.\n\n00:20:45\nI see.\n\n00:20:51\nbut you don't want that to be mistaken.\n\n00:20:53\nI'll come back to that later.\n\n00:20:55\nDo you want to say something.\n\n00:20:57\nSame thing.\n\n00:20:58\nCool.\n\n00:20:59\nGreat.\n\n00:21:00\nSo one of the--\n\n00:21:08\npeople for permission to record their voices.\n\n00:21:13\nConsent is important.\n\n00:21:16\nJust tell people clearly what you're doing.\n\n00:21:20\nMake sure any permission is freely given.\n\n00:21:25\nMove on.\n\n00:21:27\nThat is really important.\n\n00:21:30\nare very nice.\n\n00:21:34\nseem very nice.\n\n00:21:37\nI know this because I've done this myself.\n\n00:21:45\nAnd then just one of the framing I encourage you to think about,\n\n00:21:49\nSo how long will it take you to wander around campus\n\n00:21:55\nAnd I think you actually get a lot done,\n\n00:21:59\nof samples, easily in a day.\n\n00:22:04\nAnd then let me share with you some things.\n\n00:22:10\nusing text-to-speech is an interesting tactic.\n\n00:22:18\nmainly because it turns out, it's\n\n00:22:27\ncompared to true natural data.\n\n00:22:33\nI've actually done a lot of synthetic data\n\n00:22:36\nOne thing you have to watch out for is\n\n00:22:44\nhow many voices, how many different voices does it\n\n00:22:47\nAnd is it going to be a pain to get enough diversity\n\n00:22:54\nSo it turns out, I don't know, for example, I often\n\n00:23:02\nBut the number of voices there is limited.\n\n00:23:07\nthere are now some services with a larger number of voices.\n\n00:23:11\nAnd it's all solvable.\n\n00:23:16\nBut it turns out that there often enough details\n\n00:23:23\nprocess that that ends up taking longer.\n\n00:23:30\nusing synthetic data is a good idea.\n\n00:23:35\nBut using synthetic data is usually\n\n00:23:40\nbecause usually, there are just too many hyperparameters and too\n\n00:23:46\nAnd then at the back of your head, you're wondering,\n\n00:23:52\nthat I've not thought of before?\n\n00:23:57\nit's just one less thing to worry about.\n\n00:24:05\nnot in speech, but self-driving cars.\n\n00:24:10\nyou want to detect other cars.\n\n00:24:15\nIt turns out that a lot of people\n\n00:24:20\nwith cars driving around.\n\n00:24:24\nof cars out of the video game?\n\n00:24:30\nis there could be 20 different cars in the entire video game,\n\n00:24:35\nBut it turns out that to have a realistic video game,\n\n00:24:40\nAnd there are tons of different cars designs on the road.\n\n00:24:45\nAnd so to a human, seeing the same 20 cars over and over,\n\n00:24:51\nThe video game plays fine.\n\n00:24:55\njust isn't rich enough to capture anywhere\n\n00:24:59\nWhereas in contrast, if you got real pictures,\n\n00:25:04\nSo I find that for synthetic data, it works.\n\n00:25:09\nbut I usually get to it only later in the process.\n\n00:25:14\nCool.\n\n00:25:17\nAnd then in the interest of building these things quickly,\n\n00:25:26\ndone to collect data for this.\n\n00:25:32\nyou take courses, often, you get a very clean view of data.\n\n00:25:42\nthat one of my teams has used to build,\n\n00:25:48\nAnd at least as part of the journey to do so, which is--\n\n00:26:01\nSo collected 100 training audio clips and 25 development\n\n00:26:16\nOne thing I'll often do if my main goal is to just build\n\n00:26:23\nis to not have a test set.\n\n00:26:27\nAnd if I want to publish a research paper,\n\n00:26:32\nBut if my goal is to just build something and have\n\n00:26:37\nI'm not going to bother to collect any test data,\n\n00:26:41\nAnd I'll just unapologetically to my system, to the dev set.\n\n00:26:58\nSo audio clips-- so audio is--\n\n00:27:04\nSo you may have seen the audio waveforms.\n\n00:27:07\nX-axis is time.\n\n00:27:14\nAnd sound is very rapid vibrations in the air\n\n00:27:21\nAnd what the microphone does is it",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg2",
+      "global_kp_id": "kp_cs230_collect_real_data_with_explicit_user_consent",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg2",
+      "global_kp_id": "kp_cs230_synthetic_versus_real_data_trade_off",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_collect_real_data_with_explicit_user_consent",
+      "name": "Collect real data with explicit user consent",
+      "description": "A data-collection principle that favors natural examples gathered transparently and with permission when bootstrapping a system.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "data_collection"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.3,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture explicitly centers permission, privacy, and real recordings as the fastest reliable way to bootstrap the trigger dataset [ts=1264s] [ts=1320s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture06_ai_project_strategy::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_synthetic_versus_real_data_trade_off",
+      "name": "Synthetic-versus-real data trade-off",
+      "description": "The idea that synthetic data can be powerful but adds realism and diversity risks that often make real data preferable early on.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "data_collection"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Synthetic-vs-real data is a concrete data strategy tradeoff, not a standalone gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture06_ai_project_strategy::kp5"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.33,
+    0.63
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L6_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture06-ai-project-strategy_transcript.txt"
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+    "lecture_title": "Lecture 4: Adversarial Robustness and Generative Models",
+    "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM"
+  },
+  "unit": {
+    "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+    "course_id": "CS230",
+    "name": "Sampling, conditioning, latent diffusion, and video generation",
+    "description": "Explains test-time diffusion sampling from random noise, prompt conditioning, latent diffusion for efficiency, and how video adds a temporal dimension.",
+    "summary": "At test time, a trained diffusion model can start from random Gaussian noise and progressively denoise it by repeatedly predicting and subtracting noise [ts=5641s]. The instructor notes that repeated diffusion calls make image generation computationally heavy, and conditioning is needed when the user wants a specific object or prompt-guided result rather than whatever the model would generate [ts=5769s]. Latent diffusion addresses cost by using an autoencoder to map images into a lower-dimensional latent space, run the noising and denoising process there, and decode back to pixels at the end [ts=5884s]. The latent representation should keep important patterns while dropping irrelevant detail, making the same diffusion idea faster and less expensive [ts=6049s]. Finally, video generation adds a temporal dimension, so the latent representation must preserve consistency across frames and can be divided into spatio-temporal patches or “cubes” used as tokens [ts=6199s].",
+    "key_points": [
+      {
+        "text": "Diffusion sampling starts from random Gaussian noise and progressively subtracts predicted noise until an image appears.",
+        "timestamp_s": 5641,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Vanilla diffusion has no guarantee of producing a requested object unless the generation is conditioned on a prompt or another modality.",
+        "timestamp_s": 5778,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Latent diffusion performs the same noising and denoising process in a lower-dimensional latent space produced by an encoder.",
+        "timestamp_s": 5884,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The decoder maps the recovered latent z0 back into a clean image after latent denoising.",
+        "timestamp_s": 6090,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Video generation adds a temporal dimension, so diffusion must model spatio-temporal consistency across frames.",
+        "timestamp_s": 6199,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+      "start_s": 5641,
+      "end_s": 6428
+    },
+    "difficulty": 0.82,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 13.1,
+    "ordering_index": 10,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "At test time, a trained diffusion model can start from random Gaussian noise and progressively denoise it by repeatedly predicting and subtracting noise [ts=5641s]. The instructor notes that repeated diffusion calls make image generation computationally heavy, and conditioning is needed when the user wants a specific object or prompt-guided result rather than whatever the model would generate [ts=5769s]. Latent diffusion addresses cost by using an autoencoder to map images into a lower-dimensional latent space, run the noising and denoising process there, and decode back to pixels at the end [ts=5884s]. The latent representation should keep important patterns while dropping irrelevant detail, making the same diffusion idea faster and less expensive [ts=6049s]. Finally, video generation adds a temporal dimension, so the latent representation must preserve consistency across frames and can be divided into spatio-temporal patches or “cubes” used as tokens [ts=6199s].",
+  "target_kp_ids": [
+    "kp_cs230_diffusion_sampling_and_conditioning",
+    "kp_latent_diffusion_models"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+  "video_clip_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+  "transcript_slice": "01:34:01\nSo now let's talk about sampling,\n\n01:34:05\nNow, we have trained our diffusion model.\n\n01:34:11\nSo this is exactly how you can think of Dall-E,\n\n01:34:17\nThey've already trained a diffusion model.\n\n01:34:21\nThere's an architecture.\n\n01:34:24\nAnd you're asking it via prompt to generate something.\n\n01:34:28\nYou start with an initialization.\n\n01:34:37\nYou are going to perform a progressive denoising.\n\n01:34:46\nand completely denoise it, which is a little bit\n\n01:34:49\nSo this image, we're giving it to the diffusion model,\n\n01:34:56\nThis is my predicted noise.\n\n01:34:59\nThe number of time step is arbitrary at that point.\n\n01:35:05\nIt denoises it.\n\n01:35:10\nfrom the original.\n\n01:35:13\ngoing at that point.\n\n01:35:18\nYou're going to again run diffusion on t time steps,\n\n01:35:24\nYou're going to subtract it again.\n\n01:35:28\nto start where the model is going.\n\n01:35:33\nSo now, you start seeing the shape of a dog.\n\n01:35:38\nYou subtract.\n\n01:35:42\nThe noise is easier to find.\n\n01:35:49\nAs you can see computationally, it's heavy.\n\n01:35:56\nYou have to call the diffusion model many times\n\n01:36:04\nBut the task becomes easier and easier,\n\n01:36:09\nIf you start with a random image,\n\n01:36:14\nis it that you get a dog as opposed\n\n01:36:17\nGreat question.\n\n01:36:21\nThe model will take you where it wants to take you.\n\n01:36:26\nIn practice, there is conditioning.\n\n01:36:33\nis, you might during training condition on a prompt, on a text\n\n01:36:40\nfrom a different modality that can\n\n01:36:44\nBut the vanilla generation is this one.\n\n01:36:47\nYou generate a high quality, good-looking image.\n\n01:36:50\nSame question?\n\n01:36:54\nSo this is what you'll find in the paper again.\n\n01:36:58\nand then you progressively denoise until you're\n\n01:37:06\nYes?\n\n01:37:12\nHow many times?\n\n01:37:14\nYou have to do it separately, yeah.\n\n01:37:18\none image with diffusion.\n\n01:37:23\nImagine the number of times you have to call the diffusion model\n\n01:37:27\nAnd if you remember in the early days of Midjourney--\n\n01:37:31\nPeople used Midjourney in the early days, or no?\n\n01:37:36\nappearing over time.\n\n01:37:42\nWell, that's analogous to the diffusion model,\n\n01:37:48\nfor the denoising to happen.\n\n01:37:53\nand then we'll wrap it up.\n\n01:38:00\nexpensive, we found another solution, latent diffusion.\n\n01:38:07\nBecause today, most diffusion models are latent,\n\n01:38:13\nour operation in the pixel space of images,\n\n01:38:21\nto project our original image in a lower-dimensional space,\n\n01:38:30\nThe important thing is we always have\n\n01:38:35\nwhen we need it.\n\n01:38:42\nbecause you don't actually need to do\n\n01:38:47\nin the pixel space.\n\n01:38:52\nYou use an encoder to encode it in a lower-dimensional space.\n\n01:39:01\nas we done with GANs in the prior weeks with embeddings.\n\n01:39:09\nprocess in the z space, which is a much smaller space.\n\n01:39:16\nthen you don't have a lot of flexibility.\n\n01:39:20\ncomputationally heavy.\n\n01:39:23\nWe add epsilons until we get to the t time step for z\n\n01:39:33\nThe diffusion process looks like the following.\n\n01:39:41\nto predict the cumulative noise that's\n\n01:39:47\nAnd then if you were to actually subtract,\n\n01:39:53\nAnd assuming you do that well, you\n\n01:39:58\nand generate a nice image.\n\n01:40:03\nversus the space of images.\n\n01:40:06\n[INAUDIBLE] talked about earlier where [INAUDIBLE] feature\n\n01:40:16\nWhat do you think is an image that\n\n01:40:21\n[INAUDIBLE]?\n\n01:40:25\nWell, you mean what we learned with adversarial examples\n\n01:40:30\nand then you realize you have an image of an iguana that\n\n01:40:34\nNo, you're not likely to see that here because you actually\n\n01:40:38\nSo the task has been created so that noise is being removed.\n\n01:40:45\na real image, or something that looks like it.\n\n01:40:54\nof the original data.\n\n01:41:00\nto capture the most important features of pattern of the image\n\n01:41:06\nAnd the compressed representation\n\n01:41:09\nIt should be big enough to encode enough information\n\n01:41:15\nto make it computationally more easier to manage.\n\n01:41:30\nSo during sampling time we just get back the z0.\n\n01:41:35\nAnd we get back a clean image.\n\n01:41:41\nthe diffusion process is conditioned on another modality.\n\n01:41:50\ntrain using a text prompt.\n\n01:41:54\nYou would vectorize it.\n\n01:42:00\nyou're denoising here.\n\n01:42:06\ntakes as input both an image of a beach\n\n01:42:15\nI want a dog sitting on the beach.\n\n01:42:20\nand will be concatenated with the process we've\n\n01:42:26\nbetween these modalities.\n\n01:42:31\nYou would start with a prompt or an image conditioning\n\n01:42:37\nDoes that make sense?\n\n01:42:43\nNow, let's talk about Veo and Sora and video models.\n\n01:42:52\nseen together?\n\n01:42:59\n[INAUDIBLE]\n\n01:43:05\nSo video-- if you use the network we trained for a video,\n\n01:43:10\nto do with each other, and it will not\n\n01:43:13\nYou might see super weird movements.\n\n01:43:16\nSo video has the time component that you need to think about.\n\n01:43:25\nIt is just that we are essentially vectorizing more\n\n01:43:32\nSo instead of thinking of one frame equals one z vector,\n\n01:43:40\nAnd you call that a token so that the diffusion\n\n01:43:49\nbetween those different frames.\n\n01:43:58\nof a 3D matrix, if you will, of size, height, width, channels,\n\n01:44:07\nAnd the model learns to denoise spatial noise\n\n01:44:13\nis treated independently.\n\n01:44:18\nalso has a time channel, a temporal dimension\n\n01:44:26\nSo the latent z is not only spatial, but it's also temporal.\n\n01:44:34\nBut before compressing it, you're\n\n01:44:40\nSo you're saying this is the order of frames.\n\n01:44:44\nThis is the first one.\n\n01:44:45\nThis is the third one.\n\n01:44:46\nThis is the fifth one.\n\n01:44:51\nYeah, essentially.\n\n01:44:53\nA lot of people will refer to a token or a cube.\n\n01:44:58\nor the card, you'll see that they\n\n01:45:04\nbut same idea as what we've seen together.\n\n01:45:09\n[INAUDIBLE]\n\n01:45:20\nSo in this case, you also--\n\n01:45:24\nLet's say we get a video.\n\n01:45:27\nWe patch it multiple frames at a time.\n\n01:45:30\nWe put in the latent space.\n\n01:45:36\nwas coming with that video.\n\n01:45:41\nSo you might say, a robot walking\n\n01:45:45\nThat is vectorized and connected to the patches.\n\n01:45:50\nbetween the video that was processed and that prompt,\n\n01:45:56\nSo let's see.\n\n01:46:00\nand generated a couple of videos.\n\n01:46:07\n[VIDEO PLAYBACK]\n\n01:46:10\n- Stop!\n\n01:46:12\nEach step predicts a little less noise until the--\n\n01:46:16\n- Hold on.\n\n01:46:17\n- Are you serious?\n\n01:46:18\nAnyway, I had some fun.\n\n01:46:22\n[VIDEO PLAYBACK]\n\n01:46:25\n- What?\n\n01:46:27\nWait.\n\n01:46:28\nI am an AI-generated instructor.\n\n01:46:31\n[END PLAYBACK]\n\n01:46:33\nSo if you haven't tried it, there's\n\n01:46:38\nquickly.\n\n01:46:41\nhappening behind the scenes.\n\n01:46:46\nwith the computational power that some of these companies\n\n01:46:51\nWhen I was in grad school, you couldn't\n\n01:46:58\nSo it's quite impressive how playing with the latent space,\n\n01:47:06\nthat we'll sort of touch in the next few weeks,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "global_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "global_kp_id": "kp_latent_diffusion_models",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "name": "Diffusion sampling and conditioning",
+      "description": "At inference, diffusion begins from noise and repeatedly denoises; prompt or modality conditioning guides the generation toward a desired output.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Sampling and conditioning are important extensions after students understand the denoising objective.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-adversarial-robustness-and-generative-models::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_latent_diffusion_models",
+      "name": "Latent diffusion models",
+      "description": "LDMs run diffusion in a compressed latent space rather than pixel space to make high-resolution generation tractable.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because latent diffusion models formalizes how lDMs run diffusion in a compressed latent space rather than pixel space to make high-resolution generation tractable, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp19",
+        "local::lecture04-adversarial-robustness-and-generative-models::kp17"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.67,
+    0.97
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
+  }
+}

@@ -1,0 +1,1335 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture05",
+    "lecture_title": "Deep Reinforcement Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Motivation for reinforcement learning and core RL vocabulary",
+      "start_s": 5,
+      "end_s": 1065
+    },
+    {
+      "section_index": 2,
+      "title": "Recycling example: discounted return, Q-table, policy, and Bellman equation",
+      "start_s": 1066,
+      "end_s": 2123
+    },
+    {
+      "section_index": 3,
+      "title": "Deep Q-learning: replacing the Q-table with a neural Q-function",
+      "start_s": 2129,
+      "end_s": 3214
+    },
+    {
+      "section_index": 4,
+      "title": "Applying DQN to Atari Breakout",
+      "start_s": 3215,
+      "end_s": 3670
+    },
+    {
+      "section_index": 5,
+      "title": "DQN training challenges: terminal states and experience replay",
+      "start_s": 3670,
+      "end_s": 4230
+    },
+    {
+      "section_index": 6,
+      "title": "Exploration versus exploitation and the complete DQN training loop",
+      "start_s": 4231,
+      "end_s": 4811
+    },
+    {
+      "section_index": 7,
+      "title": "Advanced reinforcement learning: human priors, PPO, self-play, and major game systems",
+      "start_s": 4818,
+      "end_s": 5430
+    },
+    {
+      "section_index": 8,
+      "title": "Language-model pretraining and supervised fine-tuning",
+      "start_s": 5433,
+      "end_s": 5822
+    },
+    {
+      "section_index": 9,
+      "title": "Reward models and reinforcement learning from human feedback",
+      "start_s": 5822,
+      "end_s": 6260
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture05::seg1",
+      "course_id": "CS230",
+      "name": "Why reinforcement learning is needed",
+      "description": "Contrasts classic supervised learning with reinforcement learning for sequential decision problems and introduces the agent-environment vocabulary.",
+      "summary": "Deep reinforcement learning is framed as the combination of deep learning with reinforcement learning, with RLHF previewed as a later application for aligning language models [ts=57s] [ts=121s]. The Go example shows why classic supervised learning from professional moves is limited: the data cannot cover the state space, may copy suboptimal human moves, and lacks the player's long-term strategy [ts=639s] [ts=842s]. RL is summarized as automatically learning good sequences of decisions and as teaching by experience rather than by examples [ts=649s] [ts=677s]. The agent-environment loop defines actions, states, observations, rewards, and transitions, with partial observability illustrated by fog-of-war games where observation contains less information than the true state [ts=867s] [ts=977s].",
+      "key_points": [
+        {
+          "text": "Classic supervised learning for Go would use board state as input and the professional player's next move as label, but this can copy imperfect human decisions rather than an optimal target.",
+          "timestamp_s": 606,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A key limitation of supervised Go data is that historical games cannot cover the enormous set of possible board states.",
+          "timestamp_s": 651,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Reinforcement learning is described as making good sequences of decisions automatically and learning from experience rather than examples.",
+          "timestamp_s": 649,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In RL, an agent takes action a_t, the environment changes from state s_t to s_{t+1}, and the agent observes an observation o_t and reward r_t.",
+          "timestamp_s": 842,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Observation can differ from state when the environment is partially observable, such as StarCraft or League of Legends fog-of-war.",
+          "timestamp_s": 953,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 5,
+        "end_s": 1065
+      },
+      "difficulty": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 17.7,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg2",
+      "course_id": "CS230",
+      "name": "Tabular reinforcement learning with the recycling example",
+      "description": "Builds a simple five-state RL problem and uses it to introduce returns, discount factors, Q-tables, policies, and the Bellman optimality equation.",
+      "summary": "The recycling example defines a five-state environment with terminal states, left/right actions, and rewards for throwing garbage away, picking up packaging, and reaching a recycle bin [ts=1081s] [ts=1156s]. Long-term return is introduced as a discounted sum of rewards, with gamma between 0 and 1 encoding how much future reward is devalued [ts=1261s] [ts=1325s]. A Q-table is defined as a states-by-actions matrix whose entries estimate how good it is to take an action in a state, which would solve the decision problem if known [ts=1452s] [ts=1499s]. Backtracking through immediate rewards produces discounted returns in the toy tree, and the Bellman optimality equation formalizes that an optimal Q value equals immediate reward plus discounted best future Q value [ts=1642s] [ts=1871s].",
+      "key_points": [
+        {
+          "text": "The toy recycling environment has five states, an initial state, terminal states, and actions left/right.",
+          "timestamp_s": 1081,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The return is defined as the discounted sum of rewards R = r_0 + gamma r_1 + gamma^2 r_2 + ... .",
+          "timestamp_s": 1261,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The discount factor gamma stays between 0 and 1 and represents time, energy, or other costs of delayed rewards.",
+          "timestamp_s": 1325,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A Q-table has one row per state and one column per action, with each entry representing the value of taking that action in that state.",
+          "timestamp_s": 1452,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The policy can be obtained by choosing the action with maximal optimal Q value for the current state.",
+          "timestamp_s": 2032,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "The Bellman optimality equation states that Q*(s,a) equals immediate reward plus gamma times the maximum future Q* over next-state actions.",
+          "timestamp_s": 1871,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 1066,
+        "end_s": 2123
+      },
+      "difficulty": 0.5,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 17.6,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "course_id": "CS230",
+      "name": "Deep Q-learning and bootstrapped targets",
+      "description": "Explains how a neural network approximates Q-values, how targets are computed from the network itself, and how Q-learning updates the network.",
+      "summary": "Deep Q-learning replaces a memory-heavy Q-table with a neural Q-function, using a forward pass to estimate action values from a state [ts=2136s] [ts=2161s]. For the toy example, a one-hot encoded state is fed to a network whose output layer has one Q-value per action; more actions would require more output neurons [ts=2187s] [ts=2216s]. The training target is bootstrapped from immediate reward plus discounted maximum Q-value at the next state, while that target is held fixed for the current backpropagation step [ts=2476s] [ts=2524s]. The vanilla DQN loop initializes the Q-network, loops through episodes and time steps, selects the action with maximum Q-value, observes reward and next state, computes the target/loss, and updates parameters with gradient descent [ts=3107s] [ts=3163s].",
+      "key_points": [
+        {
+          "text": "Deep Q-learning uses a neural network as a Q-function so it can approximate action values without storing every state-action entry in a table.",
+          "timestamp_s": 2136,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The Q-network can map an encoded state to multiple outputs, one per available action, such as Q(s,right) and Q(s,left).",
+          "timestamp_s": 2187,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "For DQN training, the target value y is computed as immediate reward plus gamma times the maximum Q-value at the next state.",
+          "timestamp_s": 2476,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "During backpropagation, the bootstrapped target is held fixed so the update changes the current Q estimate toward that target.",
+          "timestamp_s": 2524,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The DQN training loop uses episodes, time steps, forward propagation, greedy action choice, observed reward/next state, target computation, loss, and gradient descent.",
+          "timestamp_s": 3107,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 2129,
+        "end_s": 3214
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 18.1,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg4",
+      "course_id": "CS230",
+      "name": "DQN on Atari Breakout",
+      "description": "Applies the DQN formulation to Breakout, including image-based states, action-value outputs, preprocessing, and convolutional architecture.",
+      "summary": "Breakout is introduced as an Atari task where the agent controls a paddle, wins by destroying bricks, and loses if the ball passes the paddle [ts=3215s] [ts=3221s]. The Q-network input is the game screen and its outputs are Q-values for possible actions such as left, right, and no-op [ts=3307s] [ts=3331s]. Preprocessing reduces the visual state by cropping irrelevant regions, converting to grayscale, reducing image dimensions, and stacking four frames to encode motion [ts=3404s] [ts=3461s] [ts=3562s]. The architecture shown for DQN uses convolutional layers with ReLU followed by fully connected layers and a linear output layer that emits Q-values for each action [ts=3621s] [ts=3647s].",
+      "key_points": [
+        {
+          "text": "In Breakout, the goal is to destroy all bricks; the paddle controls the ball and losing occurs when the ball passes the paddle.",
+          "timestamp_s": 3215,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The DQN output for Breakout is a vector of Q-values, one for each discrete action such as left, right, or idle.",
+          "timestamp_s": 3307,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Preprocessing can remove irrelevant pixels such as the score or bottom area when they do not affect the strategy for Breakout.",
+          "timestamp_s": 3404,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Grayscale conversion and dimension reduction make the screen input cheaper while preserving task-relevant visual information.",
+          "timestamp_s": 3461,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Stacking a history of four frames lets the Q-network infer motion, such as where the ball is going.",
+          "timestamp_s": 3562,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The DQN architecture for image inputs uses convolutional layers, ReLU activations, fully connected layers, and a linear Q-value output.",
+          "timestamp_s": 3621,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 3215,
+        "end_s": 3670
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7.6,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg5",
+      "course_id": "CS230",
+      "name": "DQN training stabilization: terminal states and replay memory",
+      "description": "Introduces implementation issues that arise when training DQNs and the methods used to handle terminal steps and correlated experience.",
+      "summary": "The training section revisits DQN implementation and highlights that terminal states must be handled specially because there is no next-state future reward after the episode ends [ts=3670s] [ts=3714s]. The instructor modifies the loop by creating a terminal-state boolean and checking whether s' is terminal before computing the target [ts=3846s] [ts=3872s]. Experience replay stores transitions of the form phi(s), action, reward, and phi(s') in a memory buffer rather than training only on the most recent transition [ts=3915s] [ts=3972s]. Sampling mini-batches from replay memory exposes the model to older useful experiences, supports mini-batch gradient descent, and reduces the problem of consecutive samples being highly correlated [ts=4032s] [ts=4170s].",
+      "key_points": [
+        {
+          "text": "Terminal states require special handling because the target should not include discounted future reward after the episode has ended.",
+          "timestamp_s": 3714,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A DQN implementation can maintain a terminal boolean and check whether s' is terminal before computing the Bellman target.",
+          "timestamp_s": 3846,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Experience replay stores transitions such as phi(s), action, reward, and phi(s') in replay memory D.",
+          "timestamp_s": 3915,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Replay memory allows random mini-batch sampling from past experiences rather than updating only from the newest transition.",
+          "timestamp_s": 4032,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "One advantage of experience replay is breaking strong correlation between consecutive experiences in a game trajectory.",
+          "timestamp_s": 4170,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 3670,
+        "end_s": 4230
+      },
+      "difficulty": 0.65,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 9.3,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg6",
+      "course_id": "CS230",
+      "name": "Exploration, epsilon-greedy choice, and DQN results",
+      "description": "Explains why greedy DQN can get stuck, introduces epsilon-greedy exploration, and recaps the final DQN training loop and empirical outcome.",
+      "summary": "A small three-action example shows that a randomly initialized Q-network can become stuck exploiting a modest reward and never visit the best action with reward 1000 [ts=4246s] [ts=4365s]. This motivates the exploration versus exploitation tradeoff: agents must sometimes try actions that do not currently look best to discover better rewards [ts=4384s] [ts=4446s]. Epsilon-greedy action choice adds randomness by taking a random action with probability epsilon and otherwise choosing the action with maximum predicted Q-value [ts=4571s] [ts=4602s]. The final DQN loop includes replay memory, terminal-state tracking, epsilon-greedy action selection, Bellman target estimation, and gradient-descent updates, after which the Breakout agent discovers the tunnel strategy behind the bricks [ts=4589s] [ts=4665s].",
+      "key_points": [
+        {
+          "text": "A greedy Q-network can get stuck if it never explores an action whose initial Q-value is lower but whose true reward is much higher.",
+          "timestamp_s": 4246,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The exploration-exploitation tradeoff is the need to balance trying new actions against using the currently best-known action.",
+          "timestamp_s": 4384,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Epsilon-greedy action selection takes a random action with probability epsilon and otherwise follows the greedy Q-network action.",
+          "timestamp_s": 4571,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The complete DQN loop combines Q-network initialization, replay memory, terminal-state tracking, epsilon-greedy choice, sampling from memory, and Bellman target training.",
+          "timestamp_s": 4589,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The trained Breakout agent discovers that tunneling the ball behind the bricks can finish the game more easily.",
+          "timestamp_s": 4665,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A practical way to evaluate RL improvement is to monitor rewards and, for competitive agents, compare models through self-play.",
+          "timestamp_s": 4691,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 4231,
+        "end_s": 4811
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 9.7,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg7",
+      "course_id": "CS230",
+      "name": "Advanced RL topics beyond DQN",
+      "description": "Surveys sparse-reward challenges, imitation learning, PPO and policy-gradient methods, competitive self-play, and high-profile game-playing systems.",
+      "summary": "Montezuma's Revenge illustrates sparse delayed reward: a random network is unlikely to discover the long sequence of moves needed to reach a key, while humans use priors such as recognizing ladders, ropes, and enemies [ts=4823s] [ts=4919s]. Imitation learning is presented as a way to use human knowledge to initialize or guide agents before RL improves them through reward [ts=4960s] [ts=4973s]. PPO is contrasted with Q-learning: DQN learns Q-values then takes an argmax policy, whereas PPO learns a policy directly and works better for continuous action spaces such as steering angles [ts=5048s] [ts=5060s] [ts=5073s]. The lecture then surveys competitive self-play, OpenAI Five, AlphaStar, and AlphaGo to emphasize multi-agent collaboration, partial observability, and agents optimized for winning rather than human-intuitive margins [ts=5219s] [ts=5323s] [ts=5392s].",
+      "key_points": [
+        {
+          "text": "Montezuma's Revenge is difficult for DQN because the useful reward is very delayed and requires a long sequence of correct actions.",
+          "timestamp_s": 4823,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Humans use prior knowledge, such as recognizing ladders and enemies, to solve environments that are hard for a randomly initialized RL agent.",
+          "timestamp_s": 4919,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Imitation learning asks whether human demonstrations or priors can provide a better starting point than random initialization.",
+          "timestamp_s": 4960,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "PPO is not value-based like Q-learning; it learns the policy directly.",
+          "timestamp_s": 5048,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "PPO is more suitable for continuous action spaces such as autonomous-driving steering angles than a DQN with one output per discrete action.",
+          "timestamp_s": 5073,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Competitive self-play can copy the best model to other agents and repeat training so agents improve against one another.",
+          "timestamp_s": 5255,
+          "evidence_type": "example"
+        },
+        {
+          "text": "AlphaStar illustrates partial observability because the agent's observation is not the entire state due to fog.",
+          "timestamp_s": 5323,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 4818,
+        "end_s": 5430
+      },
+      "difficulty": 0.57,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 10.2,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg8",
+      "course_id": "CS230",
+      "name": "Language model pretraining and supervised fine-tuning",
+      "description": "Connects reinforcement learning to LLM alignment by explaining next-token pretraining, the helpfulness gap, and supervised fine-tuning.",
+      "summary": "The RLHF section begins by recapping that language models are pretrained with next-token prediction over text, producing a model that can continue prompts but is not necessarily helpful [ts=5433s] [ts=5451s]. The lecture identifies two alignment problems: online pretraining data does not reflect users asking for help, and the pretrained model has no direct concept of good, polite, or helpful behavior [ts=5537s] [ts=5573s]. Supervised fine-tuning addresses this by collecting human prompt-response pairs and continuing supervised training on demonstrations of helpful behavior [ts=5628s] [ts=5662s]. SFT is still limited because human-written responses are expensive, the initial InstructGPT-style dataset was small, and imitation of examples is not the same as preference optimization [ts=5753s] [ts=5801s].",
+      "key_points": [
+        {
+          "text": "Language-model pretraining uses next-token prediction: given preceding text, the model predicts the next token and is updated by gradient descent.",
+          "timestamp_s": 5451,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A pretrained language model is trained to continue text, not necessarily to answer user questions helpfully.",
+          "timestamp_s": 5537,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Another alignment gap is that a pretrained model has no direct concept of being good, polite, or helpful.",
+          "timestamp_s": 5573,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Supervised fine-tuning builds a dataset of human prompt-response pairs and fine-tunes the pretrained model on those pairs.",
+          "timestamp_s": 5662,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "SFT teaches imitation of human-written helpful behavior, but not direct optimization of human preferences.",
+          "timestamp_s": 5801,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 5433,
+        "end_s": 5822
+      },
+      "difficulty": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 6.5,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture05::seg9",
+      "course_id": "CS230",
+      "name": "Reward models and RLHF over text generation",
+      "description": "Explains how pairwise preference data trains a reward model and how RLHF maps text generation into an RL problem with sparse terminal reward.",
+      "summary": "A reward model is introduced as a separate model trained to predict which responses humans prefer, moving alignment from imitating responses to modeling preferences [ts=5822s] [ts=5831s]. Labelers compare two or more SFT-generated responses to the same prompt, and the resulting preference data trains a scalar reward head initialized from the SFT model [ts=5853s] [ts=5914s] [ts=5922s]. The loss encourages higher predicted rewards for preferred answers, making the reward model a scalable proxy critic for human preferences during RLHF [ts=5995s] [ts=6013s] [ts=6058s]. In RLHF, the language model is the agent/policy, the state is the prompt plus generated tokens, the action is the next token, the reward comes from the reward model, and an episode is a full generated answer whose reward is usually observed only at the end [ts=6074s] [ts=6114s] [ts=6143s] [ts=6202s].",
+      "key_points": [
+        {
+          "text": "The reward model is a separate model trained to predict which responses humans prefer.",
+          "timestamp_s": 5831,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Reward-model data comes from labelers comparing multiple SFT-generated responses to the same prompt.",
+          "timestamp_s": 5853,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The reward model is initialized from the SFT model but replaces the language-model softmax output with a scalar reward head.",
+          "timestamp_s": 5922,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The reward-model loss encourages higher predicted reward for the human-preferred response than for the less preferred response.",
+          "timestamp_s": 5995,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "After training, the reward model replaces humans as the evaluator during RLHF.",
+          "timestamp_s": 6058,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "In RLHF, the language model is the agent, the state is prompt plus generated tokens so far, the action is the next token, and the reward is estimated by the reward model.",
+          "timestamp_s": 6114,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "RLHF over text generation is a sparse-reward episodic task because the reward is typically observed after the full completion rather than at every token.",
+          "timestamp_s": 6202,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+        "start_s": 5822,
+        "end_s": 6260
+      },
+      "difficulty": 0.72,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7.3,
+      "ordering_index": 9,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture05::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Defines why RL is needed and introduces core vocabulary used throughout DQN and RLHF; grounded in Go and agent-environment examples [ts=606s] [ts=842s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Contains the return formula, Q-table/policy, and Bellman optimality equation, all central to later DQN reasoning [ts=1261s] [ts=1871s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Core technical section for DQN: neural Q-function, bootstrapped target, loss, and gradient updates [ts=2136s] [ts=2476s] [ts=3086s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg4",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Concrete Breakout application with preprocessing and CNN architecture; useful for applied questions but less foundational than Bellman/DQN updates [ts=3215s] [ts=3562s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Training-stability techniques terminal-state checks and experience replay are implementation-critical for DQN [ts=3714s] [ts=3915s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Exploration/exploitation and epsilon-greedy are central RL training concepts, with Breakout results and self-play evaluation examples [ts=4384s] [ts=4571s] [ts=4665s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg7",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "Surveys advanced topics and examples; important for breadth and bridge concepts but less deeply derived than DQN/RLHF core [ts=4823s] [ts=5048s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Motivates RLHF by explaining next-token LM training, the helpfulness gap, and SFT limitations [ts=5451s] [ts=5801s]."
+    },
+    {
+      "unit_id": "local::lecture05::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Central RLHF section with reward-model training, preference optimization, RL mapping for text generation, and sparse terminal rewards [ts=5831s] [ts=6114s] [ts=6202s]."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture05::seg1",
+      "global_kp_id": "kp_cs230_rl_motivation_for_sequential_decision_tasks",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg1",
+      "global_kp_id": "kp_cs230_agent_environment_transition_vocabulary",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg2",
+      "global_kp_id": "kp_cs230_discounted_return_and_discount_factor",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg2",
+      "global_kp_id": "kp_cs230_q_table_and_policy_from_action_values",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg2",
+      "global_kp_id": "kp_cs230_bellman_optimality_equation",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "global_kp_id": "kp_cs230_bellman_optimality_equation",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg4",
+      "global_kp_id": "kp_cs230_atari_breakout_state_preprocessing_and_dqn_architecture",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg4",
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05::seg5",
+      "global_kp_id": "kp_cs230_terminal_state_handling_in_dqn",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg5",
+      "global_kp_id": "kp_cs230_experience_replay",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg5",
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05::seg6",
+      "global_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg6",
+      "global_kp_id": "kp_cs230_dqn_empirical_behavior_and_evaluation",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg6",
+      "global_kp_id": "kp_cs230_experience_replay",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05::seg7",
+      "global_kp_id": "kp_cs230_imitation_learning_and_human_priors",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg7",
+      "global_kp_id": "kp_cs230_ppo_and_policy_gradient_methods",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg7",
+      "global_kp_id": "kp_cs230_dqn_empirical_behavior_and_evaluation",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05::seg8",
+      "global_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg8",
+      "global_kp_id": "kp_cs230_supervised_fine_tuning_for_llm_helpfulness",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg9",
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture05::seg9",
+      "global_kp_id": "kp_reinforcement_learning_and_rlhf_for_nlg",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg9",
+      "global_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "planner_role": "prereq",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_rl_motivation_for_sequential_decision_tasks",
+      "name": "RL motivation for sequential decision tasks",
+      "description": "Why RL is useful when labels are delayed, strategies span many decisions, and supervised labels may be imperfect or incomplete.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "RL motivation frames the lecture, but the prerequisite content begins with agent/environment, returns, and value functions.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_agent_environment_transition_vocabulary",
+      "name": "Agent-environment transition vocabulary",
+      "description": "Core RL terms: agent, environment, state, action, observation, reward, and transition.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly defines the action-state-observation-reward loop before later Q-learning and RLHF mappings [ts=842s] [ts=985s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_discounted_return_and_discount_factor",
+      "name": "Discounted return and discount factor",
+      "description": "The long-term return in RL is a discounted sum of rewards, controlled by gamma between 0 and 1.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Discounted return is the objective in the recycling example and underlies later Bellman and DQN target computations [ts=1261s] [ts=1325s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_q_table_and_policy_from_action_values",
+      "name": "Q-table and policy from action values",
+      "description": "A tabular representation of action values whose argmax over actions defines a policy for choosing actions.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Q-tables are a useful stepping stone to Q-functions and DQN, not a separate course gateway.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_bellman_optimality_equation",
+      "name": "Bellman optimality equation",
+      "description": "The recursive condition relating optimal Q-value to immediate reward plus discounted best future Q-value.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Bellman optimality is the core prerequisite relation behind DQN targets and value-based RL.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "name": "Neural Q-function approximation",
+      "description": "Using a neural network to approximate Q(s,a) when tabular Q-learning is infeasible for large state/action spaces.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "neural_networks"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Neural Q-function approximation supports DQN after Bellman targets are established.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "name": "DQN target, loss, and gradient update",
+      "description": "Bootstrapped training of a Q-network using y = r + gamma max Q(s',a') as a target and regression loss against Q(s,a).",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The DQN target, loss, and update rule are the main technical bridge from tabular RL to deep RL.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_atari_breakout_state_preprocessing_and_dqn_architecture",
+      "name": "Atari Breakout state preprocessing and DQN architecture",
+      "description": "Converting raw game frames into compact state representations and using convolutional networks to output action Q-values.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "computer_vision"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer",
+        "computer_vision_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The Breakout example links image preprocessing, motion history, CNN architecture, and Q-value action outputs [ts=3404s] [ts=3621s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_terminal_state_handling_in_dqn",
+      "name": "Terminal-state handling in DQN",
+      "description": "Detecting terminal states so target computation does not include future Q-values after an episode ends.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly adds a terminal boolean to the DQN loop and says terminal transitions cannot be handled the same way as non-terminal ones [ts=3714s] [ts=3846s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_experience_replay",
+      "name": "Experience replay",
+      "description": "A memory buffer of past transitions sampled randomly for mini-batch updates to improve data reuse and reduce correlation.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Experience replay is presented as a training challenge solution and incorporated into the DQN algorithm [ts=3915s] [ts=4032s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "name": "Exploration-exploitation and epsilon-greedy",
+      "description": "Balancing random exploration with greedy exploitation by taking random actions with probability epsilon.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Exploration-exploitation is essential implementation context, but less central than return/Bellman/DQN mechanics.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_dqn_empirical_behavior_and_evaluation",
+      "name": "DQN empirical behavior and evaluation",
+      "description": "Assessing learned RL agents via reward improvement, Bellman consistency, self-play, and observed strategies such as Breakout tunneling.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The instructor discusses monitoring rewards, Bellman equation respect, and self-play comparison, while noting the Breakout tunnel strategy [ts=4665s] [ts=4691s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_imitation_learning_and_human_priors",
+      "name": "Imitation learning and human priors",
+      "description": "Using expert behavior or prior human knowledge to help agents in environments where sparse rewards make random exploration inefficient.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Montezuma's Revenge is used to motivate why prior knowledge and imitation can help with sparse delayed rewards [ts=4823s] [ts=4960s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_ppo_and_policy_gradient_methods",
+      "name": "PPO and policy-gradient methods",
+      "description": "Policy-based RL methods that learn a policy directly and handle continuous action spaces better than one-output-per-action DQN.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "PPO is contrasted with Q-learning as a direct policy-learning method suited for continuous control [ts=5048s] [ts=5073s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "name": "Language-model pretraining alignment gap",
+      "description": "Next-token prediction creates capable text continuation models but not necessarily models that answer helpfully, politely, or safely.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "natural_language_processing",
+        "language_models"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The LM helpfulness gap motivates RLHF, but it is not itself an RL prerequisite.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_supervised_fine_tuning_for_llm_helpfulness",
+      "name": "Supervised fine-tuning for LLM helpfulness",
+      "description": "Fine-tuning a pretrained LM on human prompt-response demonstrations to imitate helpful responses.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "natural_language_processing",
+        "language_models"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer",
+        "nlp_engineer"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "SFT is described as learning from human-written demonstrations but only imitation, not preference optimization [ts=5628s] [ts=5801s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_rlhf_preference_optimization",
+      "name": "RLHF preference optimization",
+      "description": "The RLHF reward-maximization objective with KL regularization and Bradley-Terry-style pairwise rewards. Optimizing language models for learned human preference rewards over model-generated outputs.",
+      "track_tags": [
+        "bradley_terry",
+        "kl",
+        "llm",
+        "nlp",
+        "rlhf"
+      ],
+      "domain_tags": [
+        "llm_alignment",
+        "preference_optimization",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "ai_safety_researcher",
+        "llm_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.79,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because rLHF preference optimization formalizes how the RLHF reward-maximization objective with KL regularization and Bradley-Terry-style pairwise rewards, which later units use as core machinery rather than background context.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp7",
+        "local::lecture21-after-dpo::kp3",
+        "local::lecture05::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_reinforcement_learning_and_rlhf_for_nlg",
+      "name": "Reinforcement learning and RLHF for NLG",
+      "description": "Training text generators with reward functions, including human-preference reward models layered on top of pretrained systems.",
+      "track_tags": [
+        "alignment",
+        "training"
+      ],
+      "domain_tags": [
+        "alignment",
+        "nlg",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "alignment_research",
+        "nlp_research"
+      ],
+      "difficulty_level": 0.78,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because reinforcement learning and RLHF for NLG synthesizes training text generators with reward functions, including human-preference reward models layered on top of pretrained systems into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture14-nlg::kp10",
+        "local::lecture05::kp18"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L5_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture05-deep-reinforcement-learning_transcript.txt"
+  }
+}

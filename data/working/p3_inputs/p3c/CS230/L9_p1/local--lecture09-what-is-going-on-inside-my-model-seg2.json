@@ -1,0 +1,167 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+    "lecture_title": "What’s Going On Inside My Model?",
+    "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU"
+  },
+  "unit": {
+    "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+    "course_id": "CS230",
+    "name": "CNN saliency maps and integrated gradients",
+    "description": "Explains pixel-level gradient attribution for CNN image classifiers and extends it with integrated gradients along a baseline-to-image path.",
+    "summary": "For the zoo classifier case, the lecture first motivates explanations that show whether a model is looking at the relevant image region rather than merely outputting a class probability [ts=891s] [ts=1053s]. A saliency map is built by differentiating a class score such as dog with respect to the input pixels, so bright pixels are the ones whose perturbation most affects the score [ts=1212s] [ts=1259s]. The instructor emphasizes using the pre-softmax class score rather than the post-softmax probability because post-softmax depends on all competing class scores [ts=1280s] [ts=1315s]. Integrated gradients are presented as a more common extension that accumulates gradients along a path from a black baseline image to the actual image, with a retina-lesion example showing attribution concentrated near the annotated lesion [ts=1416s] [ts=1467s].",
+    "key_points": [
+      {
+        "text": "Saliency maps compute the derivative of a chosen pre-softmax class score with respect to the input image.",
+        "timestamp_s": 1212,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "High-gradient pixels indicate where pixel changes would most change the selected class score.",
+        "timestamp_s": 1259,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Pre-softmax scores are preferred for saliency because post-softmax probabilities also change when other class scores change.",
+        "timestamp_s": 1315,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A saliency map whose bright pixels are scattered away from the object suggests the model may be getting lucky rather than looking at the right place.",
+        "timestamp_s": 1361,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Integrated gradients interpolate from a baseline image to the actual image and accumulates gradients along that path.",
+        "timestamp_s": 1416,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "In the retina example, integrated gradients highlight the lesion regions used for the prediction.",
+        "timestamp_s": 1467,
+        "evidence_type": "example"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+      "start_s": 891,
+      "end_s": 1493
+    },
+    "difficulty": 0.62,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 10.0,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "For the zoo classifier case, the lecture first motivates explanations that show whether a model is looking at the relevant image region rather than merely outputting a class probability [ts=891s] [ts=1053s]. A saliency map is built by differentiating a class score such as dog with respect to the input pixels, so bright pixels are the ones whose perturbation most affects the score [ts=1212s] [ts=1259s]. The instructor emphasizes using the pre-softmax class score rather than the post-softmax probability because post-softmax depends on all competing class scores [ts=1280s] [ts=1315s]. Integrated gradients are presented as a more common extension that accumulates gradients along a path from a black baseline image to the actual image, with a retina-lesion example showing attribution concentrated near the annotated lesion [ts=1416s] [ts=1467s].",
+  "target_kp_ids": [
+    "kp_saliency_via_input_gradients"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "video_clip_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "transcript_slice": "00:14:51\nSo first case study for convolutions.\n\n00:15:02\nAnd they are very reluctant to use your model\n\n00:15:08\ndon't understand the decision making process of the model.\n\n00:15:14\nHow can you give them intuition about the decision making\n\n00:15:19\nfeel like the models doing things\n\n00:15:30\nJust to simplify, let's say you have\n\n00:15:36\nand it's supposed to identify animals.\n\n00:15:41\nYeah.\n\n00:15:57\ncode to give them some intuition, how would you do it?\n\n00:16:01\nThanks very much.\n\n00:16:05\ngoing to eventually get at the end result,\n\n00:16:10\nAnd then the next thing I will explain is how with the CNN,\n\n00:16:18\nI guess, features of the image of the animals are showing.\n\n00:16:29\nand try to figure out what each layer [INAUDIBLE]\n\n00:16:35\nGood.\n\n00:16:39\nSo you have to explain certain things.\n\n00:16:42\nSo we're going to have a probability for each animal\n\n00:16:46\nThat's how it works.\n\n00:16:48\nyou might talk about convolutions\n\n00:16:53\nhere is how a filter scans through the image.\n\n00:16:58\nSo you're going to educate them first.\n\n00:17:00\nThe second thing you mentioned is maybe\n\n00:17:04\nSo you can try to build their intuition\n\n00:17:08\nthat the model is doing well.\n\n00:17:12\nWe're going to see how to do a proper data set\n\n00:17:17\nBut what else can you do that's going to give a little bit\n\n00:17:21\nBecause this is explanation, but it's not proof\n\n00:17:27\nYeah.\n\n00:17:36\nand show all the small features that [INAUDIBLE].\n\n00:17:43\nintuition at a filter level.\n\n00:17:49\nthe legs of an animal.\n\n00:17:51\nSo how would you do that?\n\n00:17:57\nto bring out the [INAUDIBLE]\n\n00:18:04\nYou're asking, is it as simple as just printing out\n\n00:18:10\nthat results of that filter?\n\n00:18:15\nmight be true for the first layer.\n\n00:18:20\nso much that if you were just to print the filter,\n\n00:18:27\nPretty much.\n\n00:18:31\nSo your intuition is right.\n\n00:18:33\nSomething simpler, input/output relationship.\n\n00:18:42\nrelated to the right portions of the inputs for this dog,\n\n00:18:48\nYeah.\n\n00:18:52\n[INAUDIBLE]\n\n00:18:58\nYou would find true positives, false, et cetera.\n\n00:19:01\nCorrect.\n\n00:19:03\nYou have a critical layer of your network\n\n00:19:17\nto show how from the first layer is taken.\n\n00:19:24\nSo similar to what he said, you want\n\n00:19:30\nAnd you're saying, how about we mask\n\n00:19:34\ntreat every intermediary layer as an output,\n\n00:19:39\nYeah, we're going to look at that actually.\n\n00:19:43\nWhat I was looking for is even much more basic.\n\n00:19:50\nand an output of a CNN or any vision model,\n\n00:19:59\nAnd what is exactly this quantity?\n\n00:20:12\nIf you take the derivative of the score of an animal class\n\n00:20:25\nyeah.\n\n00:20:30\nyou change things around some?\n\n00:20:37\nWhich is what you want.\n\n00:20:41\nthat which are the pixels of the image that if we change them,\n\n00:20:47\nIf you can print that, then you would\n\n00:20:51\nat when it's predicting a dog.\n\n00:20:59\nyou would get something like that where some of the pixels\n\n00:21:05\nand some of the pixels are going to be darker,\n\n00:21:09\nmodify the score of dog at all.\n\n00:21:16\nwere relevant for the score of dog.\n\n00:21:25\nversus post-softmax?\n\n00:21:34\nYeah.\n\n00:21:41\nSo what's the issue with the scaled version?\n\n00:21:50\nClass of dog.\n\n00:21:55\nis not only dependent on dog; it's also\n\n00:21:59\nSo you could actually take a pixel, move it,\n\n00:22:06\nbecause there's a panda in the background or something.\n\n00:22:11\nBut you're only looking at dog.\n\n00:22:15\nSo that's why in this method called saliency maps,\n\n00:22:21\nis only representative of the class at hand\n\n00:22:26\nOK.\n\n00:22:27\nAnd actually if you were to, in the past, not anymore,\n\n00:22:34\nbecause the pixels that are brighter,\n\n00:22:37\nrepresentatives of the pixels that\n\n00:22:41\nAnd in fact, if you do the saliency maps\n\n00:22:46\nthat gradient are all over the place,\n\n00:22:49\nlooking at the right place.\n\n00:22:52\nOK.\n\n00:22:56\nnow have that in your toolkit.\n\n00:23:00\nYou just write a Python script.\n\n00:23:04\nYou print it.\n\n00:23:08\nand you're done.\n\n00:23:13\nis that it's looking at just a pixel level, which\n\n00:23:19\nwant to interpret semantically where the model is looking at.\n\n00:23:25\nwith one pixel being different than the rest.\n\n00:23:30\nSo instead, there's another method,\n\n00:23:33\nbut I linked the paper, which is way more common,\n\n00:23:38\nAnd integrated gradients, the idea\n\n00:23:45\nover dx, we're going to take an image of the animal,\n\n00:23:54\nare taking a dark, completely black zero's pixel all the way\n\n00:24:03\nAnd then we're going to look at the path of gradients\n\n00:24:08\nAnd it's going to be way more interpretive.\n\n00:24:12\nBut integrated gradients is just an extension of saliency maps\n\n00:24:19\nand is way more common.\n\n00:24:22\nis an example from the medical field.\n\n00:24:27\nAnd if you perform the integrated gradients,\n\n00:24:37\nfor the lesions are exactly where the model is looking\n\n00:24:43\nthat there is a lesion.\n\n00:24:50\nLet's push it a little further.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "global_kp_id": "kp_cs230_integrated_gradients",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "name": "Saliency via input gradients",
+      "description": "Saliency maps identify input pixels that most affect a chosen class score by differentiating the score with respect to the input image.",
+      "track_tags": [
+        "cnn",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "gradients",
+        "saliency_maps"
+      ],
+      "career_path_tags": [
+        "medical_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because saliency via input gradients clarifies saliency maps identify input pixels that most affect a chosen class score by differentiating the score with respect to the input image, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp12",
+        "local::lecture09_what_is_going_on_inside_my_model::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_integrated_gradients",
+      "name": "Integrated gradients",
+      "description": "An attribution method that accumulates gradients along an interpolation path from a baseline input to the actual input.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "interpretability",
+        "attribution"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture presents integrated gradients as a more common extension of saliency maps, but does not go deeply into the derivation [ts=1416s] [ts=1452s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp5"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.47,
+    0.77
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L9_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
+  }
+}

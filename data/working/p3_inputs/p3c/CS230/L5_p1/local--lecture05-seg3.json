@@ -1,0 +1,197 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture05",
+    "lecture_title": "Deep Reinforcement Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A"
+  },
+  "unit": {
+    "unit_id": "local::lecture05::seg3",
+    "course_id": "CS230",
+    "name": "Deep Q-learning and bootstrapped targets",
+    "description": "Explains how a neural network approximates Q-values, how targets are computed from the network itself, and how Q-learning updates the network.",
+    "summary": "Deep Q-learning replaces a memory-heavy Q-table with a neural Q-function, using a forward pass to estimate action values from a state [ts=2136s] [ts=2161s]. For the toy example, a one-hot encoded state is fed to a network whose output layer has one Q-value per action; more actions would require more output neurons [ts=2187s] [ts=2216s]. The training target is bootstrapped from immediate reward plus discounted maximum Q-value at the next state, while that target is held fixed for the current backpropagation step [ts=2476s] [ts=2524s]. The vanilla DQN loop initializes the Q-network, loops through episodes and time steps, selects the action with maximum Q-value, observes reward and next state, computes the target/loss, and updates parameters with gradient descent [ts=3107s] [ts=3163s].",
+    "key_points": [
+      {
+        "text": "Deep Q-learning uses a neural network as a Q-function so it can approximate action values without storing every state-action entry in a table.",
+        "timestamp_s": 2136,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The Q-network can map an encoded state to multiple outputs, one per available action, such as Q(s,right) and Q(s,left).",
+        "timestamp_s": 2187,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "For DQN training, the target value y is computed as immediate reward plus gamma times the maximum Q-value at the next state.",
+        "timestamp_s": 2476,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "During backpropagation, the bootstrapped target is held fixed so the update changes the current Q estimate toward that target.",
+        "timestamp_s": 2524,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "The DQN training loop uses episodes, time steps, forward propagation, greedy action choice, observed reward/next state, target computation, loss, and gradient descent.",
+        "timestamp_s": 3107,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+      "start_s": 2129,
+      "end_s": 3214
+    },
+    "difficulty": 0.68,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 18.1,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Deep Q-learning replaces a memory-heavy Q-table with a neural Q-function, using a forward pass to estimate action values from a state [ts=2136s] [ts=2161s]. For the toy example, a one-hot encoded state is fed to a network whose output layer has one Q-value per action; more actions would require more output neurons [ts=2187s] [ts=2216s]. The training target is bootstrapped from immediate reward plus discounted maximum Q-value at the next state, while that target is held fixed for the current backpropagation step [ts=2476s] [ts=2524s]. The vanilla DQN loop initializes the Q-network, loops through episodes and time steps, selects the action with maximum Q-value, observes reward and next state, computes the target/loss, and updates parameters with gradient descent [ts=3107s] [ts=3163s].",
+  "target_kp_ids": [
+    "kp_cs230_neural_q_function_approximation",
+    "kp_cs230_dqn_target_loss_and_gradient_update"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+  "video_clip_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
+  "transcript_slice": "00:35:29\nSo let's get to deep Q-learning, which\n\n00:35:33\nare going to frame the problem slightly differently.\n\n00:35:39\ngoing to use the fact that neural networks are\n\n00:35:44\nAnd we're going to define a Q function that's essentially\n\n00:35:50\ntake a state s and an action a and tell you how\n\n00:35:59\nSo instead of a lookup in a matrix,\n\n00:36:04\nand it gives you the answer.\n\n00:36:08\nwhere there's a lot of states and a lot of actions.\n\n00:36:17\nIn the past, we looked for a Q-table.\n\n00:36:22\nOne of the things we're going to do\n\n00:36:27\nSo given a certain state as input,\n\n00:36:33\nSo this one is the example of state 2, 01000.\n\n00:36:42\nit will give you two outputs, one output that corresponds\n\n00:36:53\nleft, because it's the two actions.\n\n00:36:58\nwould just increase the output layer,\n\n00:37:07\nSo the big question is, how the hell\n\n00:37:13\nBecause we're not in classic supervised learning.\n\n00:37:20\nSo this one is a hard question, but what would you\n\n00:37:29\nHow are you going to train these neural network?\n\n00:37:37\nthis neural network will give you garbage.\n\n00:37:42\nor to the right, but it's completely random.\n\n00:37:46\nwhere it makes really good decisions?\n\n00:37:54\nWe assume based on prior knowledge.\n\n00:38:01\nTell me more.\n\n00:38:06\nif you have some idea [INAUDIBLE].\n\n00:38:12\nWhat are the rules of the game that we could use in order to--\n\n00:38:20\nYou say we could estimate what good looks like,\n\n00:38:27\nWe reduce [INAUDIBLE].\n\n00:38:34\nYou're saying that's one thing we have in every game.\n\n00:38:38\nThat definitely should be used in order\n\n00:38:44\nYeah, the problem is not in every state\n\n00:38:48\nAnd if you look at many games like Go,\n\n00:38:56\nSo what do you do in this case?\n\n00:39:00\nCan we run through a bunch of actions\n\n00:39:07\nto train the neural net?\n\n00:39:09\nSo you could.\n\n00:39:15\nYou go down the tree, you do every possible action,\n\n00:39:19\nNot every possible action.\n\n00:39:23\nTrying to spread it out.\n\n00:39:26\nThat's-- we're getting there.\n\n00:39:30\nIn the game of Go, you could put your stone everywhere.\n\n00:39:36\nAnd then it's exponentially grows.\n\n00:39:40\nIt's intractable.\n\n00:39:43\nare more likely than others?\n\n00:39:47\nWhat's this?\n\n00:39:50\nHow do you determine what action might\n\n00:39:53\nExpected return.\n\n00:39:56\nWe're getting close.\n\n00:39:58\nBut how do you know the expected return\n\n00:40:03\nYou can estimate [INAUDIBLE].\n\n00:40:08\nIs it an equation?\n\n00:40:13\nSo that's exactly what we're going to do actually,\n\n00:40:19\nBecause there are two things we know about this problem.\n\n00:40:24\nAnd we also know that the perfect Q function will\n\n00:40:29\nThat we know as well.\n\n00:40:33\nMeaning for every state, if you want\n\n00:40:41\nyou will get that is you will look at the immediate reward\n\n00:40:48\nacross all actions.\n\n00:40:53\nSo those are the only information\n\n00:40:57\nto define our labels and mimic a classic supervised learning\n\n00:41:02\nSo here's what we have.\n\n00:41:04\nWe have Qs to the left and Qs to the right that\n\n00:41:10\nin that state versus the right.\n\n00:41:15\non top right of the screen.\n\n00:41:19\nSo let's say for the sake of simplicity\n\n00:41:23\nuse L2 loss, quadratic loss, that compares a certain label\n\n00:41:37\nSo what we would like is to minimize this loss function,\n\n00:41:44\nis as close as possible to each other.\n\n00:41:51\nSo let's do two things.\n\n00:41:55\nSo in supervised learning, you will have a picture of a cat.\n\n00:42:00\nHere, we don't have a y.\n\n00:42:06\nbetter than random.\n\n00:42:11\nwhen I send a state s in the network,\n\n00:42:17\nis higher than Q of going to the right, which means that today,\n\n00:42:24\nit's better to go to the left than to go to the right.\n\n00:42:29\nIt's completely random.\n\n00:42:33\nto use as my target value y the immediate reward that I observe\n\n00:42:48\nSo the best action that I could take in the next step\n\n00:42:57\nThat's very important.\n\n00:43:01\nIt's not a perfect target, but it's better than nothing.\n\n00:43:09\nis a good reward to the left.\n\n00:43:13\nthat might be a good move because we're\n\n00:43:17\nBut on top of that, we also know that at the end of training,\n\n00:43:23\nSo why don't we set the target as the Bellman equation?\n\n00:43:30\nwhen you are in the next state.\n\n00:43:33\nYou go to the left.\n\n00:43:37\nAnd you look again at your Q values,\n\n00:43:42\nThen you add that number here.\n\n00:43:52\nThere's one forward path where you send the state s in Q.\n\n00:43:59\nAnd you're like, OK, I'm going to the left.\n\n00:44:03\nto a target y.\n\n00:44:08\nSo I take my action left.\n\n00:44:11\nI get an s prime state, s next.\n\n00:44:17\nI look at the two options I have.\n\n00:44:25\nSo fundamentally, what's happening is the following,\n\n00:44:33\nIt has never observed the rewards.\n\n00:44:39\nit will get to a perfect policy.\n\n00:44:45\nBut the best we can do right now is to say as a guide\n\n00:44:53\nand we will look at the Bellman equation, which\n\n00:44:59\nAnd we will try to catch up to that estimate.\n\n00:45:04\nSo remember, every time your Q gets better,\n\n00:45:09\nSo the Bellman equation tells you estimated\n\n00:45:14\nAnd you just keep getting better and better as you're\n\n00:45:20\nCan I just go into a loop in which\n\n00:45:35\nHow would you describe the loop?\n\n00:45:41\nlike the next, state going to the right.\n\n00:45:44\nFor going to the right, you again need the target.\n\n00:45:49\nSo what-- yeah, that's a good question.\n\n00:45:53\nbut you do only one step.\n\n00:45:59\nAnd it tells you go to the left.\n\n00:46:03\nSo what you do is you put left and you look at your next state.\n\n00:46:09\nYou look at the two options.\n\n00:46:11\nYou don't go further.\n\n00:46:14\nYou look one step ahead essentially.\n\n00:46:17\nYou could, but it would be more computationally heavy to do\n\n00:46:24\nYeah?\n\n00:46:29\nSome [INAUDIBLE] information about the reward\n\n00:46:36\nSo if people know how fast that [INAUDIBLE] is, the [INAUDIBLE].\n\n00:46:47\nspace, how long it will take to converge.\n\n00:46:56\nthe estimate y also gets better.\n\n00:47:00\nbecause the y is based on the Q function.\n\n00:47:05\nyou might have a very difficult time training this model.\n\n00:47:13\nYeah.\n\n00:47:15\nThere was a question there.\n\n00:47:19\n[INAUDIBLE]\n\n00:47:23\nSo here I'm just saying-- let's say when you send state s in Q,\n\n00:47:29\nBut the same happens on the other side.\n\n00:47:34\nThen what you will do is you will define your target\n\n00:47:41\nPlus, from the next state of having\n\n00:47:46\nthe Q value for that pair?\n\n00:47:55\nSo one complication with this training\n\n00:48:01\nso you want to perform a backup propagation,\n\n00:48:05\nwith respect to the parameters of the network,\n\n00:48:09\nBecause in supervised learning, y is not differentiable.\n\n00:48:15\nSo here, we're going to simplify.\n\n00:48:19\nis dependent on the Q network.\n\n00:48:23\nSo if you actually differentiate it, it will give you a value.\n\n00:48:29\nSo we say, we do use our Q network\n\n00:48:35\ndifferentiate it.\n\n00:48:37\nit's fixed.\n\n00:48:39\nIs that why we discount this [INAUDIBLE]?\n\n00:48:47\nit's like the value of time.\n\n00:48:50\nif you can win the game in 10 moves,\n\n00:48:56\nOr if you can get $1 today, get $1 today\n\n00:49:00\nAll of that is why we have a discount here.\n\n00:49:05\nthat you would define as well, that would influence\n\n00:49:10\nCan you show once more how the 4 pass the [INAUDIBLE]?\n\n00:49:15\nI'm going to do a concrete example, because it's\n\n00:49:18\nYeah?\n\n00:49:20\nQo s to the y?\n\n00:49:24\nIt's a good point.\n\n00:49:26\nIt's just of Q of--\n\n00:49:30\nIt's a 1 by 2.\n\n00:49:32\nI was just going down the first case.\n\n00:49:35\nYeah?\n\n00:49:44\nWhat if the rewards are not fixed?\n\n00:49:48\nthe rewards are going to be fixed\n\n00:49:53\nIn practice, you could have a separate function that actually\n\n00:49:59\nWe're going to see an example later\n\n00:50:02\nbe different in different scenarios.\n\n00:50:06\ncalled a critic that determines what's\n\n00:50:12\nOK, this is the-- one last question.\n\n00:50:15\nto see a concrete example.\n\n00:50:18\nSo when we like hold it fixed for backprop,\n\n00:50:25\nof the possible [INAUDIBLE]?\n\n00:50:29\nSo instead of doing the backtracking down the tree\n\n00:50:35\nwe're going to limit ourselves to just picking the best\n\n00:50:42\nYou see, my network is kind of intelligent, not great.\n\n00:50:47\nIt says that I should go to the left.\n\n00:50:52\nit says, I should go to the right.\n\n00:50:56\nbest estimate I have, but I will discount that.\n\n00:51:00\nit turns out that not only your estimate gets better,\n\n00:51:06\nget to an optimality equation.\n\n00:51:13\nBut you get it.\n\n00:51:18\nOK.\n\n00:51:22\nequation to estimate your targets,\n\n00:51:29\nAnd you update the parameters of the network,\n\n00:51:38\nHere is-- concretely, if you were to code it in pseudocode,\n\n00:51:46\nQ-learning.\n\n00:51:51\nSo initialization.\n\n00:51:55\nThen we will loop over episodes.\n\n00:51:59\nto terminal state.\n\n00:52:06\ns and we're going to loop over time steps\n\n00:52:11\nSo within one time step, here is what we will do.\n\n00:52:19\nWe will execute the action a that has the maximum Q value.\n\n00:52:28\nobserve a next state s prime.\n\n00:52:35\npropagating s prime in the Q-network\n\n00:52:40\nAnd based on that, we will use gradient descent\n\n00:52:48\nIt should be simpler looked at like that, right?\n\n00:52:52\nSo this is the vanilla Q-learning.\n\n00:52:59\nthe main difference is that we don't have a target.\n\n00:53:04\nAnd the rewards are what's going to help us get better over time.\n\n00:53:15\nThis is an entire class at Stanford, an entire quarter\n\n00:53:20\nSo we're trying to get the basics within an hour\n\n00:53:26\nOK, let's go a little further now together\n\n00:53:34\nSo here's the game.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture05::seg3",
+      "global_kp_id": "kp_cs230_bellman_optimality_equation",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture05::seg3",
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_bellman_optimality_equation",
+      "name": "Bellman optimality equation",
+      "description": "The recursive condition relating optimal Q-value to immediate reward plus discounted best future Q-value.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Bellman optimality is the core prerequisite relation behind DQN targets and value-based RL.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "name": "Neural Q-function approximation",
+      "description": "Using a neural network to approximate Q(s,a) when tabular Q-learning is infeasible for large state/action spaces.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "neural_networks"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.6,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Neural Q-function approximation supports DQN after Bellman targets are established.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "name": "DQN target, loss, and gradient update",
+      "description": "Bootstrapped training of a Q-network using y = r + gamma max Q(s',a') as a target and regression loss against Q(s,a).",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "reinforcement_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The DQN target, loss, and update rule are the main technical bridge from tabular RL to deep RL.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture05::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.53,
+    0.83
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L5_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture05-deep-reinforcement-learning_transcript.txt"
+  }
+}

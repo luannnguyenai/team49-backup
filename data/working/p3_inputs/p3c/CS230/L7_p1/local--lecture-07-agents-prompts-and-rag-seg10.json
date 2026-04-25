@@ -1,0 +1,130 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-07-agents-prompts-and-rag",
+    "lecture_title": "Agents, Prompts, and RAG",
+    "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw"
+  },
+  "unit": {
+    "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+    "course_id": "CS230",
+    "name": "Multi-agent workflow patterns and smart-home example",
+    "description": "Introduces why multi-agent workflows are useful, especially for parallelism, reuse, fault isolation, and hierarchical orchestration, illustrated through a smart-home automation exercise.",
+    "summary": "The final technical section asks why multi-agent workflows are needed when a single workflow already has multiple steps, model calls, and tools [ts=5665s]. The main answer is parallelism: multi-agent systems are useful when independent specialized tasks should run in parallel, with the additional advantage that agents can be reused across teams or products [ts=5692s]. Students design smart-home agents for biometrics/location, temperature, energy, security, groceries, and orchestration [ts=5743s]. The instructor identifies a hierarchical pattern where the user mainly talks to an orchestrator, which delegates to specialized agents [ts=5863s]. The slide list includes climate control, lighting, security, energy management, entertainment, notification, and orchestrator agents [ts=6081s]. The segment closes with organization patterns such as flat and hierarchical systems, and advantages such as easier debugging and parallelization [ts=6101s].",
+    "key_points": [
+      {
+        "text": "Multi-agent workflows are most useful when parts of the task can run in parallel.",
+        "timestamp_s": 5692,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Reusable specialized agents can serve multiple teams or workflows within a company.",
+        "timestamp_s": 5712,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A smart-home system can be decomposed into specialized agents such as biometric/location tracking, temperature, and energy agents.",
+        "timestamp_s": 5822,
+        "evidence_type": "example"
+      },
+      {
+        "text": "An orchestrator agent can serve as the main user communication point and delegate to other agents.",
+        "timestamp_s": 5863,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Smart-home agents can include climate control, lighting, security, energy management, entertainment, notifications, and orchestration.",
+        "timestamp_s": 6081,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Multi-agent systems may be organized as flat or hierarchical interaction patterns.",
+        "timestamp_s": 6101,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Multi-agent workflows can improve debugging and parallelization compared with a monolithic single agent.",
+        "timestamp_s": 6160,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+      "start_s": 5665,
+      "end_s": 6185
+    },
+    "difficulty": 0.53,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 8.7,
+    "ordering_index": 10,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The final technical section asks why multi-agent workflows are needed when a single workflow already has multiple steps, model calls, and tools [ts=5665s]. The main answer is parallelism: multi-agent systems are useful when independent specialized tasks should run in parallel, with the additional advantage that agents can be reused across teams or products [ts=5692s]. Students design smart-home agents for biometrics/location, temperature, energy, security, groceries, and orchestration [ts=5743s]. The instructor identifies a hierarchical pattern where the user mainly talks to an orchestrator, which delegates to specialized agents [ts=5863s]. The slide list includes climate control, lighting, security, energy management, entertainment, notification, and orchestrator agents [ts=6081s]. The segment closes with organization patterns such as flat and hierarchical systems, and advantages such as easier debugging and parallelization [ts=6101s].",
+  "target_kp_ids": [
+    "kp_cs230_multi_agent_workflow_patterns"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "video_clip_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "transcript_slice": "01:34:25\nLast section on multi-agent workflows.\n\n01:34:36\nthe workflow already has multiple steps,\n\n01:34:42\nWhy do we need multiple agents?\n\n01:34:47\nIt's not even a new thing, frankly.\n\n01:34:52\nThe main advantage of a multi-agent system\n\n01:34:57\nIt's like is there something that I\n\n01:35:04\nbut maybe there are some things in the middle?\n\n01:35:09\nIt's when it's parallel.\n\n01:35:14\nhave with multi-agent systems is an agent can be reused.\n\n01:35:21\nbeen built for design.\n\n01:35:25\nand it can be used in the product team.\n\n01:35:30\nwhich has multiple stakeholders that can communicate with it\n\n01:35:38\nActually I'm going to ask you a question\n\n01:35:43\nLet's say you were building smart home\n\n01:35:50\nWhat agents would you want to build?\n\n01:35:53\nWrite it down.\n\n01:35:57\nto share some of the agents that you will build.\n\n01:36:03\na hierarchy between these agents,\n\n01:36:06\nshould communicate with who.\n\n01:36:08\nOK.\n\n01:36:12\nBe creative also because I'm going to ask all of your agents,\n\n01:36:21\nOK.\n\n01:36:24\nWho wants to give me a set of agents\n\n01:36:29\nYes.\n\n01:37:00\nOK.\n\n01:37:02\nYou have four agents, I think, roughly.\n\n01:37:09\nWhere are you moving?\n\n01:37:12\nThat sort of knows your location.\n\n01:37:21\nand has the ability to change it.\n\n01:37:26\nand might give feedback on energy and energy usage.\n\n01:37:32\nit has the control over the temperature as well.\n\n01:37:35\nOr the gas or the water, might cut your water at some point.\n\n01:37:44\nWhat is exactly the orchestrator doing?\n\n01:37:53\nOK.\n\n01:37:55\nSo is that the agent that communicates mainly\n\n01:38:00\nSo if I'm coming back home and I'm\n\n01:38:05\nI communicate with the orchestrator,\n\n01:38:09\nOK.\n\n01:38:11\nYeah.\n\n01:38:14\na hierarchical agentic multi-agent system.\n\n01:38:21\nAny other ideas?\n\n01:38:24\nYeah.\n\n01:38:55\nOh, I like that.\n\n01:38:57\nSo let me summarize.\n\n01:39:02\nor not.\n\n01:39:06\nAnd then it gives you certain sets\n\n01:39:11\nof if you're a parent or a kid.\n\n01:39:17\nOr your kid cannot open the fridge, or I don't know.\n\n01:39:21\nYeah.\n\n01:39:23\nThat's a good one.\n\n01:39:28\nyou want a specific workflow tied to that.\n\n01:39:34\nWhat else?\n\n01:39:41\n[INAUDIBLE] So you can get more complicated.\n\n01:39:50\nor someone else can be blind to those in the house or also\n\n01:39:57\nYeah So another thought I have as well is much harder\n\n01:40:06\nBut understanding what's in your fridge.\n\n01:40:12\nWell, that's really good actually.\n\n01:40:16\nOne is maybe an agent that has access to external APIs that\n\n01:40:24\nand then has control over certain devices at home.\n\n01:40:31\nyour preferences for it.\n\n01:40:36\nthat to the orchestrator, but it might lose itself\n\n01:40:41\nAnd also, these problems are tied together,\n\n01:40:45\nmight influence the temperature inside,\n\n01:40:50\nAnd then the second one, which I also like,\n\n01:40:55\nand what's inside.\n\n01:40:58\nto the camera in the fridge, for example,\n\n01:41:03\naccess to the e-commerce API to order\n\n01:41:09\nI agree.\n\n01:41:12\nwith the user, but it might communicate with that agent\n\n01:41:17\nYeah.\n\n01:41:19\nSo those are all really good examples.\n\n01:41:25\nSo climate control, lighting security, energy management,\n\n01:41:32\nalerts about the system updates, energy saving, and orchestrator.\n\n01:41:38\nAnd then we didn't talk about the different interaction\n\n01:41:45\na multi-agent system.\n\n01:41:48\nIt sounds like this would be hierarchical.\n\n01:41:52\nAnd the reason is UI/UX, is I would rather\n\n01:41:57\nrather than have to go to a specialized application\n\n01:42:01\nLike it feels like the orchestrator\n\n01:42:04\nAnd so I agree, I would probably go for a hierarchical setup\n\n01:42:08\nBut maybe you might also add some connections\n\n01:42:13\nwhere it's all to all.\n\n01:42:17\nif you want to connect those two,\n\n01:42:21\nWhen you allow agents to speak with each other,\n\n01:42:26\nSo you treat the agent like a tool, exactly like a tool.\n\n01:42:32\nHere is what it can tell you.\n\n01:42:37\nOK super.\n\n01:42:40\nthere are advantages to multi-agent workflows\n\n01:42:47\nIt's easier to debug a specialized agent\n\n01:42:52\nParallelization as well.\n\n01:42:56\nand you can earn time.\n\n01:43:01\nand I'll leave you with this slide if you want to go deeper.\n\n01:43:05\nSo we've learned so many techniques to optimize LLMs,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+      "global_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "name": "Multi-agent workflow patterns",
+      "description": "Using multiple specialized agents for parallelism, reuse, modularity, fault isolation, debugging, and hierarchical or flat orchestration.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "multi_agent_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Multi-agent systems are the final workflow architecture after single-agent and eval sections, with parallelism named as the main reason to use them [ts=5692s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp23"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.38,
+    0.68
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L7_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
+  }
+}

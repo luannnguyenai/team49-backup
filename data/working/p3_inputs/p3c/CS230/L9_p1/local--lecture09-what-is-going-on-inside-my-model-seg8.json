@@ -1,0 +1,182 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+    "lecture_title": "What’s Going On Inside My Model?",
+    "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU"
+  },
+  "unit": {
+    "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+    "course_id": "CS230",
+    "name": "Training telemetry, loss curves, and scaling laws",
+    "description": "Explains how frontier labs use loss curves, telemetry, and scaling laws to detect instability and decide whether to invest in compute, data, or model capacity.",
+    "summary": "The training-diagnostics section starts with smooth training and validation loss curves as a basic health check; sudden jumps, plateaus, exploding gradients, vanishing gradients, or corrupted batches can appear through these signals [ts=4704s] [ts=4715s] [ts=4743s]. The instructor broadens telemetry to gradient norms, learning-rate schedules, checkpoint tracking, and hardware efficiency, noting that full dashboards are rarely published because they reveal IP [ts=4781s] [ts=4806s]. Scaling laws are presented as public evidence for relating performance to model size, compute, and data set size [ts=4842s] [ts=4860s]. The Chinchilla example is used to explain undertraining: GPT-3 is described as underutilized because a smaller 70B-parameter Chinchilla model could outperform the 175B-parameter GPT-3 when trained more compute-optimally [ts=4877s] [ts=4912s] [ts=4978s].",
+    "key_points": [
+      {
+        "text": "Smooth training and validation loss curves are a first signal that a model is training normally.",
+        "timestamp_s": 4715,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Sudden jumps in loss can indicate corrupted batches, bugs, exploding gradients, or vanishing gradients.",
+        "timestamp_s": 4743,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Training telemetry includes gradient norms, learning-rate schedules, and hardware-efficiency metrics.",
+        "timestamp_s": 4781,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Scaling laws relate model performance to capacity, compute, and data-set size.",
+        "timestamp_s": 4842,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Chinchilla is used as an example that a smaller model trained longer can outperform a larger undertrained one.",
+        "timestamp_s": 4978,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Scaling laws guide expensive decisions about whether to train longer, collect more data, or increase model capacity.",
+        "timestamp_s": 5080,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+      "start_s": 4701,
+      "end_s": 5125
+    },
+    "difficulty": 0.66,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 7.1,
+    "ordering_index": 8,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The training-diagnostics section starts with smooth training and validation loss curves as a basic health check; sudden jumps, plateaus, exploding gradients, vanishing gradients, or corrupted batches can appear through these signals [ts=4704s] [ts=4715s] [ts=4743s]. The instructor broadens telemetry to gradient norms, learning-rate schedules, checkpoint tracking, and hardware efficiency, noting that full dashboards are rarely published because they reveal IP [ts=4781s] [ts=4806s]. Scaling laws are presented as public evidence for relating performance to model size, compute, and data set size [ts=4842s] [ts=4860s]. The Chinchilla example is used to explain undertraining: GPT-3 is described as underutilized because a smaller 70B-parameter Chinchilla model could outperform the 175B-parameter GPT-3 when trained more compute-optimally [ts=4877s] [ts=4912s] [ts=4978s].",
+  "target_kp_ids": [
+    "kp_cs230_loss_curves_and_training_telemetry",
+    "kp_pretraining_scaling_and_compute_data_tradeoffs"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "video_clip_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "transcript_slice": "01:18:21\nLet's get to some fun stuff.\n\n01:18:27\nSo how do frontier labs check if a model is training?\n\n01:18:35\nBut one very natural way is to look at the loss curves.\n\n01:18:42\nand make sure that they follow a smooth trajectory.\n\n01:18:48\nsomething that went wrong.\n\n01:18:52\nwhere some loss functions look very funky.\n\n01:18:56\nwhere people would post their ugliest loss functions,\n\n01:19:03\nYou might find sudden jumps on the loss.\n\n01:19:09\nhas been corrupted.\n\n01:19:12\nwhen you should actually not do that well.\n\n01:19:19\nYou might find bugs in your code because of that.\n\n01:19:24\ngradients that are vanishing.\n\n01:19:30\nNow, note that loss functions can be run at a global level\n\n01:19:38\nWe're going to talk about it in data diagnostics.\n\n01:19:44\nsometimes referred to in the community as a training\n\n01:19:54\nlook at your learning rate schedule,\n\n01:20:00\nto feel if you've underutilized compute, which we talked about\n\n01:20:06\nSo imagine that if you're working at a major frontier lab,\n\n01:20:13\nfunction for different subsets of the data, your checkpoints,\n\n01:20:18\nYou would have all of that.\n\n01:20:22\npublished because they're IP.\n\n01:20:29\nwill leak essential information about their architecture,\n\n01:20:34\nAnd that's why you find very few information on these.\n\n01:20:42\nreally helpful is scaling laws.\n\n01:20:47\nabout in a previous lecture, is essentially\n\n01:20:54\nperformance and some other, call it, hyperparameters\n\n01:21:03\nof the model, the amount of compute that's being used\n\n01:21:08\nDeepMind has done amazing work, I\n\n01:21:17\nThis chart is borrowed from the Chinchilla paper, where\n\n01:21:25\nis they're comparing the Chinchilla\n\n01:21:30\nincluding GPT-3, which came up a little before.\n\n01:21:40\nslightly different than what OpenAI thought.\n\n01:21:45\nAnd said GPT-3 is actually not performing well enough\n\n01:21:52\nAnd it was found that GPT-3 was not trained for long enough.\n\n01:21:59\nfor longer, you would have had way better performance.\n\n01:22:05\nIn fact, the model was underutilized.\n\n01:22:10\nSo the dotted line is what probably we\n\n01:22:18\nAnd they showed that it's actually not exactly that\n\n01:22:26\nand they say this is our analysis of the scaling law.\n\n01:22:33\nprobably that your model should be trained longer.\n\n01:22:41\nthat they're finding.\n\n01:22:45\nYeah.\n\n01:22:50\nSo that's after the GPT-3 paper, Chinchilla\n\n01:22:57\nYou would have done better.\n\n01:23:01\nhas less parameters than GPT-3, so 70 billion\n\n01:23:08\nAnd that is performing better.\n\n01:23:14\nTo go deeper, I also pulled a few charts\n\n01:23:26\nSo on the vertical axis, you have the test loss\n\n01:23:33\nAnd then on the horizontal axis, on the x-axis,\n\n01:23:39\nSo how are those scaling laws established?\n\n01:23:42\nand they vary the third one.\n\n01:23:47\nLet's say you're keeping the same compute,\n\n01:23:57\nis twice as big in logarithms, what\n\n01:24:05\nAre those scaling laws respected?\n\n01:24:08\na precedent for scaling laws.\n\n01:24:14\nyou would compare to the scaling laws\n\n01:24:19\nRemember, another reason these are important\n\n01:24:25\nIt wasn't shared publicly, but we\n\n01:24:33\nAnd so you want to know, should I train that model\n\n01:24:37\nBecause that's a big financial decision.\n\n01:24:42\nshould I invest in compute, should I\n\n01:24:48\nor should I invest in model capacity,\n\n01:25:02\nTogether these forms a health dashboard for the model.\n\n01:25:12\net cetera.\n\n01:25:17\nare things that researchers might\n\n01:25:23\nin terms of improving their model.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "name": "Loss curves and training telemetry",
+      "description": "Using training loss, validation loss, gradient norms, learning-rate schedules, checkpoint trends, and hardware metrics to assess whether model training is stable.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization",
+        "model_diagnostics"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor returns to loss curves both in the opening case and the training-diagnostics section as the natural first health check for a failing model [ts=302s] [ts=4715s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "name": "Pretraining scaling and compute-data tradeoffs",
+      "description": "Large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale. This scaling view also appears in vision-language systems such as CLIP, where larger models and more image-text data improve performance.",
+      "track_tags": [
+        "foundation_models",
+        "llm",
+        "model_efficiency",
+        "nlp",
+        "scaling",
+        "scaling_laws"
+      ],
+      "domain_tags": [
+        "data_scale",
+        "large_language_models",
+        "model_scale",
+        "nlp",
+        "pretraining",
+        "scaling_laws"
+      ],
+      "career_path_tags": [
+        "llm_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_engineering",
+        "research_scientist",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because pretraining scaling and compute-data tradeoffs clarifies large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale, sharpening later modeling, analysis, or evaluation choices while importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp1",
+        "local::lecture11-pretraining::kp11",
+        "local::lecture_16::kp10",
+        "local::lecture09_what_is_going_on_inside_my_model::kp13"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.51,
+    0.81
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L9_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
+  }
+}

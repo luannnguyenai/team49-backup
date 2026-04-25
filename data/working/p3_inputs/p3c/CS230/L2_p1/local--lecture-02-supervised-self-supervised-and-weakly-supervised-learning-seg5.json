@@ -1,0 +1,203 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+    "lecture_title": "Supervised, Self-Supervised, & Weakly Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY"
+  },
+  "unit": {
+    "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+    "course_id": "CS230",
+    "name": "Trigger word detection: automated labeling and architecture search",
+    "description": "Shows how to synthesize large training sets from positive words, negative words, and background noise, while keeping a realistic manually labeled test set and seeking expert guidance on architecture.",
+    "summary": "The practical trigger-word solution uses three databases: positive examples of activate, negative words including confusing near-matches, and background noise, which is relatively easy to obtain online [ts=2983s]. A Python script inserts non-overlapping positive and negative words into background clips and automatically knows the correct label positions, producing large synthetic training sets [ts=3074s]. With around 1,000 positive clips, 10,000 other words, and abundant background noise, millions of training examples can be generated in hours, especially with augmentation such as changing frequency or speed [ts=3114s]. The instructor distinguishes synthetic training data from the test set, which should be manually labeled and as real as possible [ts=3151s]. Architecture search remains important for speech problems, and the key process lesson is to ask experts or TAs early to avoid wasting weeks on architectures that are known to fail [ts=3167s].",
+    "key_points": [
+      {
+        "text": "For sequential trigger detection, a sigmoid prediction and binary cross-entropy loss are applied at every time step.",
+        "timestamp_s": 2863,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "A strong trigger-word training set can be built from separate positive-word, negative-word, and background-noise databases.",
+        "timestamp_s": 2983,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Synthetic audio composition enables automatic labels because the script knows exactly where each inserted trigger word occurs.",
+        "timestamp_s": 3074,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Data augmentation can alter frequency and speed to create more variation in the synthetic training set.",
+        "timestamp_s": 3131,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The test set should be manually labeled and as real as possible rather than relying on synthetic composition.",
+        "timestamp_s": 3151,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Expert advice can save substantial time in architecture search for speech tasks where certain model families are known to work or fail.",
+        "timestamp_s": 3167,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Modern practice often starts from foundation models, then modifies them for latency, memory, hardware, or browser constraints.",
+        "timestamp_s": 3263,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+      "start_s": 2813,
+      "end_s": 3325
+    },
+    "difficulty": 0.46,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 8.5,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The practical trigger-word solution uses three databases: positive examples of activate, negative words including confusing near-matches, and background noise, which is relatively easy to obtain online [ts=2983s]. A Python script inserts non-overlapping positive and negative words into background clips and automatically knows the correct label positions, producing large synthetic training sets [ts=3074s]. With around 1,000 positive clips, 10,000 other words, and abundant background noise, millions of training examples can be generated in hours, especially with augmentation such as changing frequency or speed [ts=3114s]. The instructor distinguishes synthetic training data from the test set, which should be manually labeled and as real as possible [ts=3151s]. Architecture search remains important for speech problems, and the key process lesson is to ask experts or TAs early to avoid wasting weeks on architectures that are known to fail [ts=3167s].",
+  "target_kp_ids": [
+    "kp_cs230_synthetic_audio_data_generation_with_automatic_labels"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+  "video_clip_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+  "transcript_slice": "00:46:53\nOK, let me talk a little bit about the labeling scheme.\n\n00:46:57\nlabeling scheme.\n\n00:47:04\nthe risk is you can, actually, have a model that\n\n00:47:12\nall the time.\n\n00:47:14\nBut the thing is there's just one one to find,\n\n00:47:18\nAnd so the network is going to lean toward zeros.\n\n00:47:26\nthat it's going to be hard to find any signal in it.\n\n00:47:31\nuse generally is can we actually do\n\n00:47:37\nand the negative labels.\n\n00:47:41\nNot much science behind it.\n\n00:47:45\nBut because it's a sequential problem,\n\n00:47:48\nAt every time step, there's going\n\n00:47:52\nAnd then the architecture, we're going\n\n00:47:56\nThis would be likely an RNN.\n\n00:48:00\nAnd then the loss function-- can someone\n\n00:48:06\nYes yeah.\n\n00:48:12\nMeaning at every step, we're going\n\n00:48:17\nYes.\n\n00:48:18\nOn the output.\n\n00:48:23\nCorrect.\n\n00:48:27\nYou look at where the positive word activate is\n\n00:48:34\nAnd you force the model to predict, hey, activate\n\n00:48:38\nThere is a lot of nuances you see,\n\n00:48:42\nwith do we want the ones to start\n\n00:48:45\nDo we want to have a delay?\n\n00:48:49\nYeah.\n\n00:48:50\nI was wondering what do you mean by steps.\n\n00:48:54\nWhat I mean by steps is audio is sequence data.\n\n00:49:02\nAnd so what I mean is that at every time step, whatever\n\n00:49:07\nto have a prediction at every step.\n\n00:49:15\nis really the labeling strategy.\n\n00:49:21\nAnd you just have to it or not know it.\n\n00:49:28\nAnd so thankfully, when I was a grad student,\n\n00:49:35\nand he was able to guide me and saved me probably a month\n\n00:49:41\nSo here's what we did.\n\n00:49:45\nWe created three databases, one that would have positive words.\n\n00:49:51\nrecord people for the word activate.\n\n00:49:57\ndeactivate, but also kitchen and lion and dog and whatever.\n\n00:50:05\nTurns out background noise in audio data is almost free.\n\n00:50:11\nYou can go on many platforms, online video platforms.\n\n00:50:15\nIt will be background noise.\n\n00:50:18\nYou don't need to go and collect it, most likely.\n\n00:50:23\nYeah question.\n\n00:50:26\nYeah.\n\n00:50:28\nSo I'll tell you--\n\n00:50:31\nBut yes, we recorded everything manually.\n\n00:50:37\nWe scraped free license data.\n\n00:50:42\nYou're going to learn that in the project mentorship\n\n00:50:46\nWhat licensing allows you to do what with data\n\n00:50:50\nYou learn it once and then you know.\n\n00:50:56\nthe Apache license, et cetera.\n\n00:51:00\nWe CLIP the background noise.\n\n00:51:04\nrecorded people saying activate and other words.\n\n00:51:10\nSo the word was contained exactly to the amount\n\n00:51:14\nThen we created a Python script that randomly inserts words,\n\n00:51:18\nNon-overlapping words.\n\n00:51:23\nI would have tens of background noise.\n\n00:51:27\nand I would insert one positive word, OK.\n\n00:51:33\ndid that, the Python script knows where activate was put\n\n00:51:40\nAnd so it turns out that we went around campus,\n\n00:51:45\nSo we hired a couple of people to come with us.\n\n00:51:49\naround campus recording people to say\n\n00:51:52\nAnd we created those data sets.\n\n00:51:59\nBecause think about it.\n\n00:52:06\n10,000 other words, infinite background noise.\n\n00:52:11\nWhen you actually write the Python script,\n\n00:52:15\nYou can reduce some frequencies.\n\n00:52:18\nyou can accelerate it, you can decelerate it.\n\n00:52:23\nfor this problem in three hours.\n\n00:52:31\nbecause you don't want to use that data for test sets.\n\n00:52:37\nYou're familiar with the concept of train and test set.\n\n00:52:42\nbut it was a much smaller set than the training set.\n\n00:52:47\nThe second important part was architecture search.\n\n00:52:53\nbut there are architectures that just work better\n\n00:52:58\nAnd this is an example of an architecture,\n\n00:53:04\nAnd my learning from that project\n\n00:53:10\nand try to learn from their mistakes.\n\n00:53:14\nwhich was in the first level at the gates computer science\n\n00:53:21\nAnd he knew why, because he's done so many speech projects,\n\n00:53:27\nSo that's why your TAs are here for actually in your projects.\n\n00:53:33\nhey, is what I'm doing good or give me\n\n00:53:41\nOK.\n\n00:53:44\nData collection strategy is extremely important,\n\n00:53:49\nusing human experiments matters as well,\n\n00:53:55\nThat's the type of thing you want to do in a project.\n\n00:54:03\nis built now at a high level?\n\n00:54:06\nYeah question.\n\n00:54:10\ndo you have to create your own architecture?\n\n00:54:17\nSo how often do you need to do an architecture search nowadays?\n\n00:54:24\nBut this class is all about understanding\n\n00:54:27\nSo we're going to walk you through that.\n\n00:54:33\nI'll give you in the industry you\n\n00:54:38\nto be running on the browser.\n\n00:54:41\npush you to create your own architecture,\n\n00:54:46\nFor many startups out there and companies out there,\n\n00:54:52\nYou're going to start from a foundation model,\n\n00:54:56\nor prune it or modify it to meet your needs in terms of latency,\n\n00:55:03\nAnd knowing what's going on we did is important in those cases.\n\n00:55:08\nOK.\n\n00:55:10\nSo we're one hour in.\n\n00:55:15\nand I have a few more case studies to cover with you.\n\n00:55:24\nto work with.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "global_kp_id": "kp_cs230_synthetic_audio_data_generation_with_automatic_labels",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "global_kp_id": "kp_cs230_architecture_search_and_expert_guidance",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg5",
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_synthetic_audio_data_generation_with_automatic_labels",
+      "name": "Synthetic audio data generation with automatic labels",
+      "description": "Positive words, negative words, and background noise can be synthetically mixed so the generation script automatically produces time-aligned labels.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "At [ts=2983s] through [ts=3114s], the instructor shows how strategic data collection and scripting create millions of training examples quickly.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_architecture_search_and_expert_guidance",
+      "name": "Architecture search and expert guidance",
+      "description": "Architecture choices and deployment constraints matter, and expert advice can prevent wasted iterations on known-bad approaches.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The trigger-word section at [ts=3167s] emphasizes asking experts or TAs, and [ts=3263s] connects architecture choices to latency, memory, and hardware constraints.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "name": "Sequential trigger-word labeling",
+      "description": "For trigger-word detection, a sequence of per-time-step labels can make learning easier than a single clip-level 0/1 label.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The human audio experiment at [ts=2636s] and label-imbalance discussion at [ts=2813s] show how label design directly controls learnability.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp12"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.31,
+    0.61
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
+  }
+}

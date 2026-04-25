@@ -1,0 +1,162 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+    "lecture_title": "Lecture 4: Adversarial Robustness and Generative Models",
+    "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM"
+  },
+  "unit": {
+    "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+    "course_id": "CS230",
+    "name": "Diffusion denoising objective and self-supervised training set",
+    "description": "Defines the reverse denoising task, the reconstruction loss on predicted noise, and the construction of training triplets from forward diffusion.",
+    "summary": "The reverse process trains a diffusion model to predict the cumulative noise epsilon-hat that was added between x0 and a noisy image xt [ts=5064s]. If the predicted noise can be subtracted from xt, the model can recover the original clean image, so denoising becomes the core generative skill [ts=5097s]. The reconstruction loss compares the true stored noise with the model’s predicted cumulative noise, and this is self-supervised because the forward process created the labels [ts=5161s]. The training database is built from noisy images, a time-step index t, and the cumulative noise epsilon; the index tells the model how much denoising is being requested [ts=5232s]. Before inference, the instructor summarizes the training loop as sampling triplets, computing reconstruction loss, and using gradients to teach the model to predict noise given a noisy picture [ts=5435s].",
+    "key_points": [
+      {
+        "text": "The denoising model predicts cumulative noise epsilon-hat added from x0 to xt.",
+        "timestamp_s": 5064,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Subtracting the predicted noise from xt should recover the original clean image x0.",
+        "timestamp_s": 5097,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "The reconstruction loss is the L2 distance between true noise epsilon and predicted noise epsilon-hat.",
+        "timestamp_s": 5161,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "Forward diffusion creates self-supervised labels because the training process stores the exact noise it added.",
+        "timestamp_s": 5178,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Training samples are triplets containing a noisy image, time-step index, and cumulative noise.",
+        "timestamp_s": 5435,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+      "start_s": 5064,
+      "end_s": 5641
+    },
+    "difficulty": 0.76,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 9.6,
+    "ordering_index": 9,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The reverse process trains a diffusion model to predict the cumulative noise epsilon-hat that was added between x0 and a noisy image xt [ts=5064s]. If the predicted noise can be subtracted from xt, the model can recover the original clean image, so denoising becomes the core generative skill [ts=5097s]. The reconstruction loss compares the true stored noise with the model’s predicted cumulative noise, and this is self-supervised because the forward process created the labels [ts=5161s]. The training database is built from noisy images, a time-step index t, and the cumulative noise epsilon; the index tells the model how much denoising is being requested [ts=5232s]. Before inference, the instructor summarizes the training loop as sampling triplets, computing reconstruction loss, and using gradients to teach the model to predict noise given a noisy picture [ts=5435s].",
+  "target_kp_ids": [
+    "kp_diffusion_denoising_intuition"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+  "video_clip_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+  "transcript_slice": "01:24:27\nHere's how denoising works.\n\n01:24:34\nAnd what we're going to do is we're going to take xt,\n\n01:24:43\nmodel that will predict epsilon hat.\n\n01:24:50\nthat was added from x0 to xt.\n\n01:24:57\nBecause you can actually subtract epsilon hat from xt.\n\n01:25:06\nYou get the original cat picture, x0.\n\n01:25:14\ncan predict the noise added to an image,\n\n01:25:20\nand get images back.\n\n01:25:30\nsingle model.\n\n01:25:34\nWe are able to train on different levels of difficulty.\n\n01:25:41\nWe can end with higher time steps, which\n\n01:25:47\nso that it learns step by step.\n\n01:25:51\nwhich is an easier distribution to model for a network.\n\n01:26:01\nOur loss function is our L2 loss--\n\n01:26:08\nwhich is comparing the true noise\n\n01:26:14\nthe predicted cumulative noise.\n\n01:26:19\nBecause we already did our forward diffusion,\n\n01:26:23\nSo we have a ground truth.\n\n01:26:26\nWe made up a label out of our data process.\n\n01:26:35\nbetween the clear and noisy image at time step t,\n\n01:26:40\nof the noise added to the clean image after t steps.\n\n01:26:48\nSo are you clear on that process?\n\n01:26:52\nand now we're trying to learn the denoising process.\n\n01:26:56\n[INAUDIBLE]\n\n01:27:03\nYeah, so the forward diffusion process gives us the data.\n\n01:27:09\nable to train a denoising process.\n\n01:27:17\nby performing a forward diffusion.\n\n01:27:22\nWe have one data point, which is a cat\n\n01:27:26\nAnd we kept the noise in memory.\n\n01:27:30\nAnother data point might be noisy image.\n\n01:27:36\nhow much noise has been added, how many time steps essentially\n\n01:27:41\nBecause at test time, you might actually try to tell the model,\n\n01:27:47\nand that denoising might be more aggressive or less aggressive,\n\n01:27:52\nHere's another example.\n\n01:27:57\nbut very noisy, way more noisy.\n\n01:28:05\nThat is the cumulative noise.\n\n01:28:09\nI just used this for explanation.\n\n01:28:14\nIt's equivalent to the noise that\n\n01:28:18\nIn this case.\n\n01:28:21\nthat you build with three steps of noise.\n\n01:28:26\nAnd you can also do another one with 19 steps.\n\n01:28:34\nour data sets for training?\n\n01:28:39\nYes?\n\n01:28:43\nwould there be a benefit to choosing\n\n01:28:49\nThere would.\n\n01:28:51\nI'm just saying what the Berkeley researchers came up\n\n01:28:58\nknow it's easy to model.\n\n01:29:03\nthat tried multiple different noise types.\n\n01:29:08\nis the noise schedule.\n\n01:29:13\nat every step.\n\n01:29:16\ndepending on the step, just so that you teach your model\n\n01:29:22\nYeah?\n\n01:29:30\nor how do you differentiate how the images\n\n01:29:38\nYeah, yeah.\n\n01:29:42\nnoisy image per original image or multiple, and in what order?\n\n01:29:48\nYeah.\n\n01:29:53\nYeah.\n\n01:29:59\nYeah, you would typically sample.\n\n01:30:04\nand 15 steps and 24 steps.\n\n01:30:09\nyou have now a way to create as much data as you want,\n\n01:30:12\nYou might actually add different noises\n\n01:30:18\nAll that matters is you kept the noise\n\n01:30:21\ncan serve as your label for your loss function.\n\n01:30:31\ngo to the test time inference, the training process\n\n01:30:40\nthe index of the time step, how many times noise was added,\n\n01:30:45\nwas added to the clean image.\n\n01:30:50\nyou compute the reconstruction loss\n\n01:30:56\nand you also know the ground truth from that triplet.\n\n01:31:01\nmodel to predict noise very well, given a noisy picture.\n\n01:31:14\nas the one I presented.\n\n01:31:17\nI'm not going to go into the details for the sake of time,\n\n01:31:21\nIt's not that much more complicated.\n\n01:31:25\ntweaks to fit into a certain noise\n\n01:31:34\nAny question on the training process,\n\n01:31:40\nYeah?\n\n01:31:46\nGood question, what's the order of magnitude of how much images\n\n01:31:51\nWell, remember, the core idea of generative modeling\n\n01:31:58\nSo if your model is a 10-billion parameter model,\n\n01:32:04\nIf you're training a micro diffusion model,\n\n01:32:10\nGenerally, if you ask foundation model provider,\n\n01:32:15\nand we'll just keep feeding it over time,\n\n01:32:20\nAnd as soon as the loss starts capping,\n\n01:32:23\nAnd we might need to find a variation to the core algorithm,\n\n01:32:30\na denoising schedule or so on.\n\n01:32:34\nYeah, good question.\n\n01:32:42\nwe're going to move to the test time process.\n\n01:32:49\nseminal paper is slightly different.\n\n01:32:54\nrelationship I gave you between x t plus 1 and xt,\n\n01:33:00\nwhere the noise is scheduled.\n\n01:33:04\ncontrols the noise added at each time step.\n\n01:33:12\nnoise towards the end to make the task\n\n01:33:16\nOn top of that, it's not really true that you just take xt\n\n01:33:23\nThe reality is, you actually erase or shrink certain pixels\n\n01:33:32\nnoise only to certain selected pixels that\n\n01:33:37\nagain, not a big deal, same idea,\n\n01:33:42\nIf you now extend that with our recurrence,\n\n01:33:46\nThe relationship between xt and x0\n\n01:33:52\ntoo complicated for you all.\n\n01:34:01\nSo now let's talk about sampling,",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "planner_role": "prereq",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "name": "Forward diffusion process",
+      "description": "A noising process that transforms clean data into increasingly noisy states by adding Gaussian noise over time, creating the supervised signal for denoising.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Forward diffusion is foundational within diffusion models, but should support the broader diffusion-denoising gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture04-adversarial-robustness-and-generative-models::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "name": "Diffusion denoising intuition",
+      "description": "Diffusion generates by starting from noise and repeatedly removing small amounts of noise.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because diffusion denoising intuition formalizes how diffusion generates by starting from noise and repeatedly removing small amounts of noise, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp13",
+        "local::lecture04-adversarial-robustness-and-generative-models::kp15"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.61,
+    0.91
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
+  }
+}

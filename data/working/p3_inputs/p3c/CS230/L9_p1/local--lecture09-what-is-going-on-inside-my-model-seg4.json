@@ -1,0 +1,172 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+    "lecture_title": "What’s Going On Inside My Model?",
+    "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU"
+  },
+  "unit": {
+    "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+    "course_id": "CS230",
+    "name": "Gradient-ascent class visualization and activation/data-set search",
+    "description": "Uses optimization and nearest high-activation examples to probe what classes, neurons, filters, and feature maps represent inside a CNN.",
+    "summary": "After localization methods, the lecture asks whether the zoo classifier actually understands the concept of a dog, motivating class model visualization [ts=2212s] [ts=2247s]. The method keeps network weights fixed, maximizes a pre-softmax class score with regularization, backpropagates to the input pixels, and repeatedly updates a random image by gradient ascent [ts=2327s] [ts=2360s]. Generated images reveal model biases, such as a Dalmatian being represented as black dots on a white background and geese/flamingos appearing as groups rather than single animals [ts=2392s] [ts=2444s]. The lecture then extends the idea from output classes to intermediate activations and presents data-set search: find validation examples that most activate a filter or feature map, then use the top examples to infer whether it detects shirts, edges, or another pattern [ts=2531s] [ts=2598s] [ts=2654s].",
+    "key_points": [
+      {
+        "text": "Class model visualization asks for the input image that maximizes a selected class score according to the trained ConvNet.",
+        "timestamp_s": 2247,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The optimization uses a pre-softmax score plus regularization rather than a softmax probability, because softmax can be increased by suppressing other classes.",
+        "timestamp_s": 2302,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Gradient ascent updates input pixels after backpropagating the objective to the image.",
+        "timestamp_s": 2360,
+        "evidence_type": "formula"
+      },
+      {
+        "text": "A generated Dalmatian-like image can reveal that the model associates the class with black dots on a white background.",
+        "timestamp_s": 2392,
+        "evidence_type": "example"
+      },
+      {
+        "text": "The same activation-maximization idea can be applied to any intermediate neuron or activation, not only to an output class.",
+        "timestamp_s": 2531,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Data-set search interprets a filter by finding examples whose feature maps produce the strongest activations.",
+        "timestamp_s": 2598,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A deeper activation sees more of the input image, so high-activation image patches are cropped by tracing the activation back to its receptive field.",
+        "timestamp_s": 2907,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+      "start_s": 2142,
+      "end_s": 2931
+    },
+    "difficulty": 0.7,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 13.2,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "After localization methods, the lecture asks whether the zoo classifier actually understands the concept of a dog, motivating class model visualization [ts=2212s] [ts=2247s]. The method keeps network weights fixed, maximizes a pre-softmax class score with regularization, backpropagates to the input pixels, and repeatedly updates a random image by gradient ascent [ts=2327s] [ts=2360s]. Generated images reveal model biases, such as a Dalmatian being represented as black dots on a white background and geese/flamingos appearing as groups rather than single animals [ts=2392s] [ts=2444s]. The lecture then extends the idea from output classes to intermediate activations and presents data-set search: find validation examples that most activate a filter or feature map, then use the top examples to infer whether it detects shirts, edges, or another pattern [ts=2531s] [ts=2598s] [ts=2654s].",
+  "target_kp_ids": [
+    "kp_cs230_gradient_ascent_class_model_visualization",
+    "kp_cs230_activation_based_data_set_search"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "video_clip_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "transcript_slice": "00:35:45\nSo we're getting to know convolutions a little better.\n\n00:35:48\nI have a question.\n\n00:35:52\non unrelated things all the time,\n\n00:35:56\nYeah.\n\n00:35:58\nseems like the model sometimes is looking\n\n00:36:02\nYeah.\n\n00:36:04\nThis is the previous generation of models.\n\n00:36:10\nThe model is a classification network.\n\n00:36:15\nthat are not even labeled.\n\n00:36:19\nIt might not make sense at all.\n\n00:36:23\nto visualize and understand the network\n\n00:36:31\nBut maybe on the main objects that you actually want\n\n00:36:36\nand dogs, you can verify that when a cat is moving, even\n\n00:36:44\nSuper.\n\n00:36:47\ngoing to build our intuition for frontier models.\n\n00:36:55\nIt trusts that the model correctly locates animals,\n\n00:37:03\nwhat a dog is.\n\n00:37:08\nor is it just like pattern matching random things?\n\n00:37:21\nthe model thinks the dog is?\n\n00:37:27\nHow could you ask the model, what's your best\n\n00:37:44\nYou are trying to reverse-engineer or get\n\n00:37:55\nOK.\n\n00:37:56\nYou did say two things.\n\n00:38:02\nthe probability of dog.\n\n00:38:04\nAnd then on your second point about reverse engineering,\n\n00:38:12\nBut, yeah, I agree you could.\n\n00:38:16\nWhat would you maximize?\n\n00:38:21\nOK.\n\n00:38:24\nthink you came right after that is we would not take the softmax\n\n00:38:30\ndependent on other classes.\n\n00:38:35\nAnd so you could actually maximize the softmax output\n\n00:38:40\nbut by minimizing the other classes, which is\n\n00:38:45\nSo here's what we'll do.\n\n00:38:48\nwe take the pre-softmax score of dog,\n\n00:38:53\nis only dependent on that specific class.\n\n00:38:59\nThe reason we want the regularization term\n\n00:39:06\nAnd so you don't want to run an optimization\n\n00:39:12\nthat go all over the place.\n\n00:39:18\nAnd so we're going to do that.\n\n00:39:22\nSo similar to what we've seen in some of the previous classes\n\n00:39:29\nimage, a completely random input image\n\n00:39:36\nSo we forward propagated the random image,\n\n00:39:41\nback to the pixels, and then we update the pixels\n\n00:39:46\nAnd we do that many times until we end up with something\n\n00:39:52\nSo let's say we take the score of a Dalmatian.\n\n00:40:06\nshows that you can start seeing the model.\n\n00:40:13\nit will tell you it's something with black dots\n\n00:40:20\nSo actually it might not understand fully\n\n00:40:26\nSo we just unpacked it a little bit and query that.\n\n00:40:34\nso here, the top left label goose for the model\n\n00:40:44\nWhat does that mean?\n\n00:40:48\nall the time together and has rarely seen a single one.\n\n00:40:56\nwhen it was geese.\n\n00:40:59\nthat it's a single one.\n\n00:41:03\nDoes that make sense?\n\n00:41:08\nSuper.\n\n00:41:10\nYou can actually-- oh, sorry, I wasn't showing\n\n00:41:14\nNo, I was showing.\n\n00:41:20\nis just to change some of the regularization methods.\n\n00:41:26\nadd more color by regularizing better so it looks better\n\n00:41:30\nAnd then it becomes easier to query\n\n00:41:34\nto make sure that it understood those classes.\n\n00:41:42\nto the model feels like many flamingos,\n\n00:41:51\nAny questions on class model visualization?\n\n00:42:01\nIt turns out you can apply the same type of method\n\n00:42:08\nBut instead of doing it at the class level,\n\n00:42:15\nSo you could actually do the same exercise,\n\n00:42:19\nwith the masking of the later layer\n\n00:42:23\nYou could pick an activation in the network,\n\n00:42:29\nand say, hey, show me the input picture\n\n00:42:35\nAnd that should tell you what is the input that maximizes\n\n00:42:47\nSo that's class model visualization\n\n00:42:53\nanywhere inside the network at any neuron.\n\n00:42:59\nto look at the neuron level and say, hey,\n\n00:43:04\nthat theoretically you could generate\n\n00:43:10\nThe next method is actually the most commonly used today\n\n00:43:18\nIt's a data set search.\n\n00:43:24\nYou just pick one filter, you pick its feature map among--\n\n00:43:32\nat some point in the network, such as at after this max\n\n00:43:38\nAnd so let's say you have 256 filters in that convolution\n\n00:43:43\nSo you have 256 feature maps of size 5 by 5.\n\n00:43:54\nyour validation set the top five image\n\n00:44:03\nSo you just track the activations in that feature map.\n\n00:44:10\nand you find the top five images.\n\n00:44:14\nAgain, you would say, this seems that the filter that produced\n\n00:44:22\nbecause if you find the top five images that activated\n\n00:44:28\nit's all images of shirts.\n\n00:44:35\nIt seems that the filter has learned to detect edges.\n\n00:44:41\nto interpret your filters.\n\n00:44:53\nyou to interpret if a filter is reacting to something\n\n00:45:01\nSo if you look at these pictures that I\n\n00:45:07\nSo why are they cropped?\n\n00:45:15\nprobably bigger than that.\n\n00:45:28\nThe what?\n\n00:45:31\nLike [INAUDIBLE] on the bottom, [INAUDIBLE]\n\n00:45:41\nWe send it through the conv ReLU blocks.\n\n00:45:49\nlet's say, what is this feature map looking at?\n\n00:45:55\nSorry.\n\n00:45:58\nAnd in that feature map, we find the activation\n\n00:46:02\nSo let's say the activation is the row number\n\n00:46:10\ndoes it have access to the entire input image or not?\n\n00:46:16\nBut it is more focused on what is actually--\n\n00:46:23\nSo you're closer to actually getting to the right answer.\n\n00:46:33\nitself is.\n\n00:46:35\nYeah.\n\n00:46:38\nThe best way to visualize it is that the first layer.\n\n00:46:43\nyou take a filter, and you run it through.\n\n00:46:50\nis only going to see what the filter sees.\n\n00:46:55\ndo you see more or less on average of the image?\n\n00:47:03\nto more or less parts of the image?\n\n00:47:16\nYeah, it's more.\n\n00:47:18\nSo here's a picture 64 by 64 by 3, let's say.\n\n00:47:26\nAnd after five layers, the last conv has 13 filters\n\n00:47:33\nIt has 256 filters.\n\n00:47:41\nIf I look at this feature map, let's\n\n00:47:50\nIt will have access to this part of the image, let's say.\n\n00:47:58\nand I was looking at a feature map,\n\n00:48:03\nof these squares.\n\n00:48:06\nfrom the input image.\n\n00:48:10\nSo that's how you would think about it.\n\n00:48:16\nthe last output has access to the entire image\n\n00:48:27\nSo the deeper the activation, the more it sees from the image.\n\n00:48:33\nThey were just cropped based on tracing back\n\n00:48:38\nyou can do very simply computationally.\n\n00:48:47\nfor convs, which has to do with reverse engineering conv.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "global_kp_id": "kp_cs230_gradient_ascent_class_model_visualization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "global_kp_id": "kp_cs230_activation_based_data_set_search",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_gradient_ascent_class_model_visualization",
+      "name": "Gradient-ascent class model visualization",
+      "description": "Optimizing an input image to maximize a chosen class score or internal activation while the network weights remain fixed.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "interpretability",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture uses this method to ask what image the model thinks represents a class and to reveal learned biases or class prototypes [ts=2247s] [ts=2392s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_activation_based_data_set_search",
+      "name": "Activation-based data-set search",
+      "description": "Interpreting filters or feature maps by retrieving validation examples or patches that most strongly activate them.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor calls data-set search one of the most commonly used methods because it is simple and intuitive, and later it reappears in the DeconvNet toolkit summary [ts=2590s] [ts=3978s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.55,
+    0.85
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L9_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
+  }
+}

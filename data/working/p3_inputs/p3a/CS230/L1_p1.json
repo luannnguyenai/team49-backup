@@ -1,0 +1,813 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-01",
+    "lecture_title": "Lecture 1: Introduction to Deep Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Why deep learning won: scaling, GPUs, and the CS -> ML -> DL -> GenAI stack",
+      "start_s": 0,
+      "end_s": 721
+    },
+    {
+      "section_index": 2,
+      "title": "Prerequisites, course positioning, and when deep learning beats prompting",
+      "start_s": 722,
+      "end_s": 1400
+    },
+    {
+      "section_index": 3,
+      "title": "Course roadmap: tuning, project diagnostics, and data strategy",
+      "start_s": 1401,
+      "end_s": 2111
+    },
+    {
+      "section_index": 4,
+      "title": "AI-assisted coding, fast prototyping, and moving fast responsibly",
+      "start_s": 2114,
+      "end_s": 3190
+    },
+    {
+      "section_index": 5,
+      "title": "Career signals, CS fundamentals, and the emerging GenAI tool stack",
+      "start_s": 3193,
+      "end_s": 3609
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture-01::seg1",
+      "course_id": "CS230",
+      "name": "Why deep learning won and where CS230 fits",
+      "description": "Introduces the flipped course format, motivates deep learning through scaling, and places deep learning inside a broader CS, ML, and GenAI stack.",
+      "summary": "Ng opens by explaining the flipped format and asks students to use live class time for richer questioning rather than passive replay of recorded content [ts=35s] [ts=88s]. He motivates the subject by contrasting older ML methods that plateau with more data against neural networks that continue improving as size, data, and compute scale [ts=198s] [ts=276s]. He ties this to early GPU/CUDA work, later scaling-law predictability, and the investment logic behind modern large models [ts=301s] [ts=402s]. He then situates the course inside a CS fundamentals -> machine learning -> deep learning -> generative AI stack, noting that in practice neural networks and deep learning are nearly interchangeable and that transformers are the GenAI architecture students will later study [ts=450s] [ts=617s].",
+      "key_points": [
+        {
+          "text": "CS230 uses a flipped classroom format so in-person time can focus on richer discussion.",
+          "timestamp_s": 35,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Traditional ML methods often plateau as data grows, while larger neural networks keep improving with more data and compute.",
+          "timestamp_s": 228,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scaling laws make deep learning performance more predictable as compute and data increase.",
+          "timestamp_s": 378,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Deep learning sits on top of machine learning and CS fundamentals, and modern GenAI sits on top of deep learning through transformers.",
+          "timestamp_s": 608,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+        "start_s": 0,
+        "end_s": 721
+      },
+      "difficulty": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 12,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-01::seg2",
+      "course_id": "CS230",
+      "name": "Entry points, prerequisites, and when deep learning matters in products",
+      "description": "Clarifies how CS230 differs from nearby courses and explains why applied builders often need more than prompting to ship useful AI systems.",
+      "summary": "The first question block clarifies that machine learning is not a hard prerequisite, though students without prior ML may feel the first weeks move quickly [ts=742s] [ts=763s]. Ng compares CS129, CS229, and CS230 as different on-ramps, positioning CS230 as the most applied deep-learning-focused option and CS229 as the more mathematical and broader ML theory course [ts=779s] [ts=858s]. He also says the class is intentionally practical rather than beauty-through-proof math, with emphasis on building software that works [ts=1068s] [ts=1121s]. That practical lens continues into product advice: prompting is strong for text, but many real systems still need direct deep learning for audio, vision, video, and structured data, and fine-tuning smaller models matters when prompt iteration stalls or inference bills explode [ts=1199s] [ts=1364s].",
+      "key_points": [
+        {
+          "text": "Machine learning is not a hard prerequisite; CS129, CS229, and CS230 are different entry points with different tradeoffs.",
+          "timestamp_s": 742,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "CS230 is relatively applied and math-light compared with CS229.",
+          "timestamp_s": 838,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "For many industry roles, fine-tuning pretrained transformers is more relevant than training frontier LLMs from scratch.",
+          "timestamp_s": 983,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Prompting works well for text, but direct deep learning is often needed for audio, images, video, and structured data.",
+          "timestamp_s": 1199,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "When prompt tuning plateaus or LLM serving costs explode, fine-tuning smaller models becomes valuable.",
+          "timestamp_s": 1334,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+        "start_s": 722,
+        "end_s": 1400
+      },
+      "difficulty": 0.44,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 11,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-01::seg3",
+      "course_id": "CS230",
+      "name": "What the course teaches: modules, tuning, project strategy, and data",
+      "description": "Surveys the five-module roadmap and emphasizes tuning, diagnostics, and early experimentation as the core engineering habits of strong deep-learning teams.",
+      "summary": "Ng lays out the quarter as five modules covering neural-network basics, tuning, ML project strategy, CNNs, and sequence models, and stresses that students will build core models from raw Python to understand what frameworks usually hide [ts=1401s] [ts=1436s]. He highlights hyperparameter tuning as a real productivity lever, using learning rate and model size as examples and arguing that practical skill here materially changes how quickly models start working [ts=1451s] [ts=1533s]. He then broadens from training to project leadership, arguing that strong teams make disciplined diagnostic decisions instead of blindly collecting data or buying GPUs because hype said to do so [ts=1554s] [ts=1749s]. The unit closes with application breadth and a concrete heuristic for greenfield tasks: get some data, train an initial model, and let that first result calibrate how much more data you need [ts=1787s] [ts=2061s].",
+      "key_points": [
+        {
+          "text": "The course is organized around five modules: NN basics, tuning, ML project strategy, CNNs, and sequence models.",
+          "timestamp_s": 1406,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Hyperparameters like learning rate and model size are high-leverage knobs in training neural networks.",
+          "timestamp_s": 1454,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Experienced teams use diagnostics to decide whether to collect data, buy GPUs, or change system components.",
+          "timestamp_s": 1560,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "For greenfield problems, get a small amount of data and train a first model to estimate how much more data is needed.",
+          "timestamp_s": 2049,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+        "start_s": 1401,
+        "end_s": 2111
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 12,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-01::seg4",
+      "course_id": "CS230",
+      "name": "AI-assisted coding, rapid prototyping, and responsible iteration",
+      "description": "Defines generative AI more carefully, then uses software-building examples to argue for faster prototyping, stronger feedback loops, and responsible use of AI coding tools.",
+      "summary": "In the AI-trends section, Ng sharpens the term generative AI into a family of deep-learning systems, mostly transformer-based, that generate text and increasingly images and audio [ts=2141s] [ts=2168s]. He then argues that AI-assisted coding has changed software development most dramatically on quick prototypes, while production systems still need tighter control around databases, security, reliability, and sandboxing [ts=2288s] [ts=2400s]. A deeper point is that rapid prototyping shortens feedback loops for both ML data surprises and ordinary product discovery, so speed helps teams learn what is actually in the data and what users truly want [ts=2464s] [ts=2580s]. He explicitly reframes the old slogan into move fast and be responsible, treating fast execution as a way to discover and fix problems sooner rather than as the opposite of safety [ts=2590s] [ts=2648s].",
+      "key_points": [
+        {
+          "text": "Generative AI mainly refers to text, image, and audio generation systems built with deep learning, especially transformer networks.",
+          "timestamp_s": 2141,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "AI-assisted coding is especially powerful for quick-and-dirty prototypes, but production use requires more care.",
+          "timestamp_s": 2288,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Teams should move fast and be responsible, using sandboxing to control security and reliability risks.",
+          "timestamp_s": 2397,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Fast prototyping helps discover surprises in both data and user behavior, which speeds ML and product iteration.",
+          "timestamp_s": 2473,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "As coding gets easier, more people should learn it, not fewer.",
+          "timestamp_s": 2699,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+        "start_s": 2114,
+        "end_s": 3190
+      },
+      "difficulty": 0.43,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 18,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "course_id": "CS230",
+      "name": "Hiring signals, foundational skills, and the modern GenAI builder stack",
+      "description": "Closes with advice on hiring, experience, fundamentals, AI fluency, and the application-layer tools now expected in many GenAI roles.",
+      "summary": "The final Q&A turns from course intro to hiring and builder skills: Ng says experience still matters, but employers increasingly need people who can pair experience or strong fundamentals with modern AI tool use [ts=3230s] [ts=3296s]. He uses an art-history analogy to argue that AI tools work best when the user knows the underlying field well enough to specify what they want precisely, and extends that claim to CS fundamentals, ML, and deep learning [ts=2997s] [ts=3096s]. He also endorses foundational systems courses such as CS107 and CS111 while listing GenAI-specific skills, including RAG, vector databases, evals, guardrails, knowledge graphs, multimodal systems, fine-tuning, and agentic workflows, as an emerging application stack [ts=3337s] [ts=3449s]. The lecture closes by contrasting CS230 with CS229: one is a practical deep dive into deep learning, the other a broader and more theoretical survey of machine learning [ts=3540s] [ts=3609s].",
+      "key_points": [
+        {
+          "text": "Experience and AI fluency both matter, but the best developers combine deep experience with strong use of modern AI tools.",
+          "timestamp_s": 3230,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "CS fundamentals remain necessary because they let builders communicate precise intent to AI systems.",
+          "timestamp_s": 3340,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Useful GenAI builder skills include RAG, vector databases, evals, guardrails, knowledge graphs, multimodal systems, fine-tuning, and agentic workflows.",
+          "timestamp_s": 3426,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "CS229 covers a broader theoretical ML survey, while CS230 goes deep on practical deep learning.",
+          "timestamp_s": 3540,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+        "start_s": 3193,
+        "end_s": 3609
+      },
+      "difficulty": 0.49,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 5,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture-01::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This unit contains the lecture's main motivation for deep learning and the CS -> ML -> DL -> GenAI map that frames the rest of the course."
+    },
+    {
+      "unit_id": "local::lecture-01::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Students need this unit to understand course expectations, neighboring course choices, and the practical boundary between prompting and deeper model work."
+    },
+    {
+      "unit_id": "local::lecture-01::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This segment is rich in reusable engineering heuristics: course roadmap, hyperparameter tuning, project diagnostics, and first-pass data strategy."
+    },
+    {
+      "unit_id": "local::lecture-01::seg4",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Strategically useful for modern builder workflows, but less canonical than the earlier deep-learning foundations; the uploaded slides pivot to project visuals here, so transcript and live video cues were prioritized over slides."
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "This closing Q&A mixes concrete hiring signals and GenAI tool categories with broader career advice, so it is worth retaining but less central than the course-core methodology units."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture-01::seg1",
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg1",
+      "global_kp_id": "kp_cs230_deep_learning_as_neural_network_based_machine_learning_in_the_cs_ml_dl_g",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg1",
+      "global_kp_id": "kp_transformers_as_a_cross_domain_backbone",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture-01::seg2",
+      "global_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg2",
+      "global_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg2",
+      "global_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg2",
+      "global_kp_id": "kp_transformers_as_a_cross_domain_backbone",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg3",
+      "global_kp_id": "kp_cs230_hyperparameter_tuning_as_a_high_leverage_optimization_skill",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg3",
+      "global_kp_id": "kp_cs230_disciplined_ml_project_diagnostics",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg3",
+      "global_kp_id": "kp_cs230_empirical_data_sufficiency_via_small_pilot_experiments",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg4",
+      "global_kp_id": "kp_cs230_responsible_rapid_prototyping_with_ai_assisted_coding",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg4",
+      "global_kp_id": "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg4",
+      "global_kp_id": "kp_transformers_as_a_cross_domain_backbone",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "global_kp_id": "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "global_kp_id": "kp_cs230_modern_genai_application_stack",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "global_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_deep_learning_resurgence",
+      "name": "Deep learning resurgence from data, compute, and scale",
+      "description": "Why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty. Large-scale datasets, GPU computation, and neural architectures converged to unlock modern deep learning for vision.",
+      "track_tags": [
+        "deep_learning",
+        "deep_learning_fundamentals",
+        "history",
+        "systems",
+        "vision_history"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "deep_learning",
+        "history_of_deep_learning",
+        "neural_nlp"
+      ],
+      "career_path_tags": [
+        "industry",
+        "ml_engineer",
+        "ml_engineering",
+        "ml_systems",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because deep learning resurgence from data, compute, and scale formalizes how why modern neural NLP depends on a set of training and modeling ideas that made deep networks workable after years of difficulty, which later units use as core machinery rather than background context while roles split between gateway and supporting and importance labels split between critical and high.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture07-rnns::kp1",
+        "local::lecture_18_human_centered_ai::kp4",
+        "local::lecture_1_introduction::kp7",
+        "local::lecture-01::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_deep_learning_as_neural_network_based_machine_learning_in_the_cs_ml_dl_g",
+      "name": "Deep learning as neural-network-based machine learning in the CS -> ML -> DL -> GenAI stack",
+      "description": "The lecture places deep learning inside a hierarchy built on CS fundamentals and machine learning, and treats deep learning and neural networks as nearly interchangeable in practice.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "machine_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The CS -> ML -> DL -> GenAI stack is the lecture's organizing map and is used to position the rest of the course, later transformer content, and the need for CS fundamentals [ts=419s]-[ts=700s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_transformers_as_a_cross_domain_backbone",
+      "name": "Transformers as a cross-domain backbone",
+      "description": "The same transformer architecture supports next-token language models and vision transformers over image patches, and the lecture frames it as the dominant backbone for large AI models.",
+      "track_tags": [
+        "llms",
+        "transformers",
+        "vision_transformers"
+      ],
+      "domain_tags": [
+        "computer_vision",
+        "multimodal_ai",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "applied_ai_engineer",
+        "ml_engineer",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because transformers as a cross-domain backbone clarifies the same transformer architecture supports next-token language models and vision transformers over image patches, and the lecture frames it as the dominant backbone for large AI models, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_8::kp14",
+        "local::lecture-01::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "name": "CS230 as an applied, practical deep learning course",
+      "description": "CS230 is framed as a practical course focused on building and shipping deep-learning systems, contrasted with easier ML on-ramps and more theoretical alternatives such as CS229.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "education"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.24,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "A large Q&A block distinguishes CS230 from CS129 and CS229 and repeatedly frames the class as practical, relatively math-light, and application-oriented [ts=742s]-[ts=1121s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "name": "Choosing between prompting and direct deep learning by data modality",
+      "description": "The lecture distinguishes cases where prompting large language models works well from cases where practitioners still need direct deep-learning methods, especially outside pure text.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "genai",
+        "multimodal"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This distinction grounds the course in real product choices, with text-heavy prompting contrasted against direct deep-learning work on audio, images, video, and structured data [ts=1199s]-[ts=1260s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "name": "Practical fine-tuning decision flowchart",
+      "description": "Operational decision rule for choosing mixed precision, ZeRO stage 2 or 3, checkpointing, and LoRA based on hardware and memory constraints.",
+      "track_tags": [
+        "applied_workflows",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "project_practice"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "student_researcher"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because practical fine-tuning decision flowchart synthesizes operational decision rule for choosing mixed precision, ZeRO stage 2 or 3, checkpointing, and LoRA based on hardware and memory constraints into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16-efficient-training::kp12",
+        "local::lecture-01::kp6",
+        "local::lecture-07-agents-prompts-and-rag::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_hyperparameter_tuning_as_a_high_leverage_optimization_skill",
+      "name": "Hyperparameter tuning as a high-leverage optimization skill",
+      "description": "The course treats hyperparameter tuning, including choices such as learning rate and model size, as a practical craft that materially affects how well and how quickly neural networks train.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "A full portion of the roadmap is devoted to tuning, and the lecture repeatedly emphasizes that tuning skill directly affects training success and engineering productivity [ts=1451s]-[ts=1533s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_disciplined_ml_project_diagnostics",
+      "name": "Disciplined ML project diagnostics",
+      "description": "Strong teams use structured diagnostics to decide what to change in a machine-learning system instead of chasing generic hype such as always collecting more data or always buying more GPUs.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "evaluation",
+        "machine_learning_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.72,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Ng explicitly says disciplined development processes create order-of-magnitude speed differences in real projects and contrasts them with wasteful, hype-driven choices [ts=1554s]-[ts=1749s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_empirical_data_sufficiency_via_small_pilot_experiments",
+      "name": "Empirical data sufficiency via small pilot experiments",
+      "description": "For new tasks, the amount of data needed is often unknowable in advance, so the recommended strategy is to gather some data, train an initial model, and let the result calibrate the next data decision.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "data_strategy"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture presents data sufficiency as an empirical question, not a formula, and recommends pilot modeling as the most reliable way to reduce uncertainty on greenfield problems [ts=1992s]-[ts=2061s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_responsible_rapid_prototyping_with_ai_assisted_coding",
+      "name": "Responsible rapid prototyping with AI-assisted coding",
+      "description": "AI-assisted coding is framed as a force multiplier for rapid experimentation, especially in sandboxed prototype settings where teams can learn quickly without exposing users or data to unnecessary risk.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "software_engineering",
+        "genai"
+      ],
+      "career_path_tags": [
+        "software_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.43,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "high",
+      "importance_rationale": "This is a prominent lecture theme about how modern teams work, but it is more of an applied practice pattern than a core deep-learning theorem or algorithm [ts=2288s]-[ts=2648s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+      "name": "CS fundamentals plus AI tool fluency",
+      "description": "The lecture argues that AI tools are most powerful when paired with strong CS, ML, and DL fundamentals, because fundamentals let builders specify problems and next steps precisely.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "computer_science",
+        "deep_learning",
+        "genai"
+      ],
+      "career_path_tags": [
+        "software_engineer",
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "CS fundamentals are invoked early in the lecture and revisited late as the reason skilled builders get more from AI-assisted tools than users who only prompt superficially [ts=450s]-[ts=477s] and [ts=2997s]-[ts=3096s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_modern_genai_application_stack",
+      "name": "Modern GenAI application stack",
+      "description": "A practical GenAI role now includes more than prompting: the lecture names retrieval, data infrastructure, evaluation, safety, multimodality, fine-tuning, and agentic workflows as emerging tool categories.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "genai",
+        "machine_learning_systems"
+      ],
+      "career_path_tags": [
+        "ai_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture closes with an explicit list of GenAI application-building tools that Ng says he looks for in candidates, making it a practical job-facing skill cluster rather than a core theorem [ts=3392s]-[ts=3449s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp12"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L1_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture01-introduction-to-deep-learning_transcript.txt"
+  }
+}

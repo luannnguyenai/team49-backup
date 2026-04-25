@@ -1,0 +1,1419 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+    "lecture_title": "What’s Going On Inside My Model?",
+    "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Lecture overview and frontier-model failure case study",
+      "start_s": 5,
+      "end_s": 891
+    },
+    {
+      "section_index": 2,
+      "title": "CNN interpretation with saliency maps and integrated gradients",
+      "start_s": 891,
+      "end_s": 1493
+    },
+    {
+      "section_index": 3,
+      "title": "CNN interpretation with occlusion sensitivity and class activation maps",
+      "start_s": 1493,
+      "end_s": 2142
+    },
+    {
+      "section_index": 4,
+      "title": "CNN internal visualization with gradient ascent and data-set search",
+      "start_s": 2142,
+      "end_s": 2931
+    },
+    {
+      "section_index": 5,
+      "title": "Deconvolution foundations for reversing convolutional computations",
+      "start_s": 2931,
+      "end_s": 3586
+    },
+    {
+      "section_index": 6,
+      "title": "DeconvNet visualization and summary of CNN interpretation methods",
+      "start_s": 3586,
+      "end_s": 4371
+    },
+    {
+      "section_index": 7,
+      "title": "Modern representation analysis for transformers",
+      "start_s": 4371,
+      "end_s": 4701
+    },
+    {
+      "section_index": 8,
+      "title": "Training and scaling diagnostics",
+      "start_s": 4701,
+      "end_s": 5125
+    },
+    {
+      "section_index": 9,
+      "title": "Capabilities, benchmark contamination, and safety dashboards",
+      "start_s": 5125,
+      "end_s": 5555
+    },
+    {
+      "section_index": 10,
+      "title": "Data diagnostics, MoE router monitoring, and closing Q&A",
+      "start_s": 5555,
+      "end_s": 6406
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "course_id": "CS230",
+      "name": "Frontier-model diagnostic case study and four evidence lenses",
+      "description": "Introduces the lecture goal and uses a failing 200B-parameter checkpoint scenario to organize evidence for understanding large-model behavior before retraining or editing code.",
+      "summary": "The lecture frames model understanding as a spectrum from older CNN interpretability tools to open research questions for frontier models [ts=14s]. In the checkpoint case study, the instructor asks what evidence to inspect when reasoning benchmarks regress, safety evals fail, and tool-use latency spikes [ts=157s]. Student answers are organized around error analysis, training/validation loss curves, recent training data, checkpoint comparisons, hardware/latency signals, attention maps, embeddings, sensitivity analysis, scaling laws, and MoE routing [ts=231s] [ts=629s]. The instructor consolidates the answers into four buckets: training and scaling, representations and internals, data and distribution, and capabilities and safety [ts=769s].",
+      "key_points": [
+        {
+          "text": "A failing frontier checkpoint should be investigated with error analysis on reasoning and safety failures before changing code or retraining.",
+          "timestamp_s": 231,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Training loss should converge smoothly, and validation loss should follow a similar but usually slightly higher curve.",
+          "timestamp_s": 302,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A recent batch or round of data can introduce poison, bias, or distribution changes that explain new failures.",
+          "timestamp_s": 362,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Attention maps can be inspected in language models as relationships between tokens, but they may reveal unintuitive or suspicious token dependencies.",
+          "timestamp_s": 542,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Scaling-law style sensitivity analysis compares compute, data, and model size to decide whether a model is undertrained, too small, or otherwise mismatched.",
+          "timestamp_s": 642,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Mixture-of-experts models can fail if routing repeatedly selects the same expert, reducing effective capacity.",
+          "timestamp_s": 708,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 5,
+        "end_s": 891
+      },
+      "difficulty": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 14.8,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "course_id": "CS230",
+      "name": "CNN saliency maps and integrated gradients",
+      "description": "Explains pixel-level gradient attribution for CNN image classifiers and extends it with integrated gradients along a baseline-to-image path.",
+      "summary": "For the zoo classifier case, the lecture first motivates explanations that show whether a model is looking at the relevant image region rather than merely outputting a class probability [ts=891s] [ts=1053s]. A saliency map is built by differentiating a class score such as dog with respect to the input pixels, so bright pixels are the ones whose perturbation most affects the score [ts=1212s] [ts=1259s]. The instructor emphasizes using the pre-softmax class score rather than the post-softmax probability because post-softmax depends on all competing class scores [ts=1280s] [ts=1315s]. Integrated gradients are presented as a more common extension that accumulates gradients along a path from a black baseline image to the actual image, with a retina-lesion example showing attribution concentrated near the annotated lesion [ts=1416s] [ts=1467s].",
+      "key_points": [
+        {
+          "text": "Saliency maps compute the derivative of a chosen pre-softmax class score with respect to the input image.",
+          "timestamp_s": 1212,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "High-gradient pixels indicate where pixel changes would most change the selected class score.",
+          "timestamp_s": 1259,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Pre-softmax scores are preferred for saliency because post-softmax probabilities also change when other class scores change.",
+          "timestamp_s": 1315,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A saliency map whose bright pixels are scattered away from the object suggests the model may be getting lucky rather than looking at the right place.",
+          "timestamp_s": 1361,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Integrated gradients interpolate from a baseline image to the actual image and accumulates gradients along that path.",
+          "timestamp_s": 1416,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "In the retina example, integrated gradients highlight the lesion regions used for the prediction.",
+          "timestamp_s": 1467,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 891,
+        "end_s": 1493
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10.0,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg3",
+      "course_id": "CS230",
+      "name": "Occlusion sensitivity and class activation maps",
+      "description": "Shows two localization-oriented CNN interpretation methods: perturbing input regions and restructuring the classifier with global average pooling to produce class activation maps.",
+      "summary": "Occlusion sensitivity replaces a moving region of the image with a gray or dark square and measures how the true-class score changes as the square moves [ts=1524s] [ts=1557s]. If occluding the dog face drops the Pomeranian probability, or occluding a wheel drops the car-wheel probability, the method supports the claim that the model is relying on semantically relevant regions [ts=1608s] [ts=1657s]. The class activation map section targets real-time visualization: the lecture identifies fully connected layers after flattening as the part that mixes away localization, then replaces most of that head with global average pooling plus a final fully connected layer [ts=1725s] [ts=1834s] [ts=1893s]. A CAM is then formed as a weighted combination of last-convolution feature maps for a selected class, producing a heatmap that can be overlaid on the input [ts=1973s] [ts=2054s].",
+      "key_points": [
+        {
+          "text": "Occlusion sensitivity scans a mask over the image and records how the true-class score changes at each mask position.",
+          "timestamp_s": 1557,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A score drop when the square covers the object of interest suggests the model is using that region for the class decision.",
+          "timestamp_s": 1589,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Occluding a human face increased the Afghan-hound score in the example, implying the human face was distracting rather than helpful evidence.",
+          "timestamp_s": 1672,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Flattening followed by multiple fully connected layers mixes spatial information and makes localization harder.",
+          "timestamp_s": 1834,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Replacing flatten-plus-many-FC layers with global average pooling preserves a link between last convolutional maps and class scores.",
+          "timestamp_s": 1893,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A class activation map is a class-specific weighted combination of last-convolution feature maps.",
+          "timestamp_s": 2054,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 1493,
+        "end_s": 2142
+      },
+      "difficulty": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10.8,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "course_id": "CS230",
+      "name": "Gradient-ascent class visualization and activation/data-set search",
+      "description": "Uses optimization and nearest high-activation examples to probe what classes, neurons, filters, and feature maps represent inside a CNN.",
+      "summary": "After localization methods, the lecture asks whether the zoo classifier actually understands the concept of a dog, motivating class model visualization [ts=2212s] [ts=2247s]. The method keeps network weights fixed, maximizes a pre-softmax class score with regularization, backpropagates to the input pixels, and repeatedly updates a random image by gradient ascent [ts=2327s] [ts=2360s]. Generated images reveal model biases, such as a Dalmatian being represented as black dots on a white background and geese/flamingos appearing as groups rather than single animals [ts=2392s] [ts=2444s]. The lecture then extends the idea from output classes to intermediate activations and presents data-set search: find validation examples that most activate a filter or feature map, then use the top examples to infer whether it detects shirts, edges, or another pattern [ts=2531s] [ts=2598s] [ts=2654s].",
+      "key_points": [
+        {
+          "text": "Class model visualization asks for the input image that maximizes a selected class score according to the trained ConvNet.",
+          "timestamp_s": 2247,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The optimization uses a pre-softmax score plus regularization rather than a softmax probability, because softmax can be increased by suppressing other classes.",
+          "timestamp_s": 2302,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Gradient ascent updates input pixels after backpropagating the objective to the image.",
+          "timestamp_s": 2360,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A generated Dalmatian-like image can reveal that the model associates the class with black dots on a white background.",
+          "timestamp_s": 2392,
+          "evidence_type": "example"
+        },
+        {
+          "text": "The same activation-maximization idea can be applied to any intermediate neuron or activation, not only to an output class.",
+          "timestamp_s": 2531,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Data-set search interprets a filter by finding examples whose feature maps produce the strongest activations.",
+          "timestamp_s": 2598,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A deeper activation sees more of the input image, so high-activation image patches are cropped by tracing the activation back to its receptive field.",
+          "timestamp_s": 2907,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 2142,
+        "end_s": 2931
+      },
+      "difficulty": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 13.2,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+      "course_id": "CS230",
+      "name": "Deconvolution foundations: upsampling and transposed convolution",
+      "description": "Motivates deconvolution from GANs and segmentation, then derives a 1D convolution as matrix multiplication to explain why deconvolution is commonly implemented as transposed convolution.",
+      "summary": "The final CNN method begins by motivating deconvolution through generative models and dense prediction: generators need to grow a low-dimensional code into an image, and segmentation networks downsample then upsample so each pixel receives a class [ts=2935s] [ts=3007s]. The instructor states that this matters for interpretability because a deconvolutional module can reverse-engineer the trace of a high activation back toward the input [ts=3051s]. A 1D convolution with padding, filter size, and stride is rewritten as a matrix-vector multiplication y = Wx [ts=3096s] [ts=3273s]. From that view, deconvolution is approximated in practice as a transposed convolution, with the implementation intuition of inserting zeros/sub-pixels, flipping filters, and reducing stride [ts=3351s] [ts=3513s].",
+      "key_points": [
+        {
+          "text": "GAN generators use deconvolution or upsampling to turn a random code into an image-shaped output.",
+          "timestamp_s": 2935,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Segmentation architectures downsample with convolutions and then upsample so the output has per-pixel predictions.",
+          "timestamp_s": 3007,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A deconvolutional module can be used to reverse-engineer why a specific activation was high.",
+          "timestamp_s": 3051,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A 1D convolution can be written as a matrix-vector product y = Wx.",
+          "timestamp_s": 3273,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "Deconvolution is treated as a transposed convolution when the inverse is approximated by W transpose.",
+          "timestamp_s": 3391,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A sub-pixel deconvolution implementation inserts zeros/padding, flips the filters, and divides the stride.",
+          "timestamp_s": 3513,
+          "evidence_type": "formula"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 2931,
+        "end_s": 3586
+      },
+      "difficulty": 0.74,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 10.9,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+      "course_id": "CS230",
+      "name": "DeconvNet visualization, unpooling switches, and CNN interpretation summary",
+      "description": "Applies deconvolution, ReLU reversal, and unpooling switches to reconstruct the input-space evidence for CNN activations and summarizes the overall CNN interpretation toolkit.",
+      "summary": "The DeconvNet section reconstructs the zone of influence for a chosen activation: keep the maximum activation in a feature map, set other activations to zero, and pass backward through unpool, ReLU, and deconvolution steps [ts=3617s] [ts=3661s]. Unpooling is explained using max-pool switches that remember where maxima came from, so the reverse pass can place the activation back in the corresponding input location [ts=3718s] [ts=3783s]. On validation images, first-layer patches and raw filters often reveal edge detectors, while deeper layers show larger receptive fields and more complex features such as circles, shapes, faces, and objects [ts=3961s] [ts=4087s] [ts=4106s]. The summary distinguishes methods for input-output responsibility, neuron/filter/layer roles, focus on a given input, and generated views of what the network has learned [ts=4327s] [ts=4352s].",
+      "key_points": [
+        {
+          "text": "A DeconvNet keeps the max activation in a feature map, zeros out the rest, and reverses the network path to reconstruct its input-space cause.",
+          "timestamp_s": 3617,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Max-pooling switches record where the maximum came from and are required for unpooling during reconstruction.",
+          "timestamp_s": 3718,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "First-layer filters can often be interpreted directly as edge detectors, but raw filters become less interpretable in deeper layers.",
+          "timestamp_s": 3961,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Second-layer deconvolution results can reveal filters that detect circles, odd shapes, or other more complex patterns.",
+          "timestamp_s": 4087,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Deeper layers capture increasingly abstract information, supporting the claim that features grow more complex with depth.",
+          "timestamp_s": 4106,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Occlusion sensitivity and CAMs answer what input part is responsible for an output, while deconvolution, data-set search, and gradient ascent answer what a neuron or filter does.",
+          "timestamp_s": 4327,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 3586,
+        "end_s": 4371
+      },
+      "difficulty": 0.76,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 13.1,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+      "course_id": "CS230",
+      "name": "Modern transformer representation analysis",
+      "description": "Compares CNN visualization to transformer interpretation through attention, embeddings, and the current limits of transformer-circuits research.",
+      "summary": "The lecture transitions from CNNs to frontier models by saying CNNs visualize localized edges, textures, and shapes, while LLMs require visualizing relationships and meanings between tokens or concepts [ts=4388s] [ts=4400s]. Attention is framed as a transformer mechanism for relating a token to relevant surrounding tokens, with different heads potentially learning patterns such as pronoun-to-noun links or ordering constraints [ts=4469s] [ts=4494s]. Embeddings are introduced as the model’s internal map of meaning, where semantically similar tokens should lie close together and can be sanity-checked with dimensionality-reduction visualizations [ts=4551s] [ts=4596s]. The instructor cautions that modern transformers remain hard to interpret and points to transformer circuits and induction heads as frontier research rather than settled tooling [ts=4639s] [ts=4660s] [ts=4678s].",
+      "key_points": [
+        {
+          "text": "CNN interpretability focuses on localized visual features, whereas LLM interpretability focuses on relationships and meanings between tokens or concepts.",
+          "timestamp_s": 4400,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Attention maps visualize how a token relates to other tokens, functioning as a transformer analog to CNN saliency maps.",
+          "timestamp_s": 4469,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Different attention heads can learn different relational patterns, such as pronoun links, structure tracking, or ordering.",
+          "timestamp_s": 4494,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Embeddings encode tokens as vectors, and semantically similar tokens are expected to be nearby in embedding space.",
+          "timestamp_s": 4551,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Attention and embeddings together let language models track relationships and meanings.",
+          "timestamp_s": 4621,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Transformer circuits and induction heads are described as current research tools for interpreting transformer internals.",
+          "timestamp_s": 4660,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 4371,
+        "end_s": 4701
+      },
+      "difficulty": 0.64,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 5.5,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "course_id": "CS230",
+      "name": "Training telemetry, loss curves, and scaling laws",
+      "description": "Explains how frontier labs use loss curves, telemetry, and scaling laws to detect instability and decide whether to invest in compute, data, or model capacity.",
+      "summary": "The training-diagnostics section starts with smooth training and validation loss curves as a basic health check; sudden jumps, plateaus, exploding gradients, vanishing gradients, or corrupted batches can appear through these signals [ts=4704s] [ts=4715s] [ts=4743s]. The instructor broadens telemetry to gradient norms, learning-rate schedules, checkpoint tracking, and hardware efficiency, noting that full dashboards are rarely published because they reveal IP [ts=4781s] [ts=4806s]. Scaling laws are presented as public evidence for relating performance to model size, compute, and data set size [ts=4842s] [ts=4860s]. The Chinchilla example is used to explain undertraining: GPT-3 is described as underutilized because a smaller 70B-parameter Chinchilla model could outperform the 175B-parameter GPT-3 when trained more compute-optimally [ts=4877s] [ts=4912s] [ts=4978s].",
+      "key_points": [
+        {
+          "text": "Smooth training and validation loss curves are a first signal that a model is training normally.",
+          "timestamp_s": 4715,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Sudden jumps in loss can indicate corrupted batches, bugs, exploding gradients, or vanishing gradients.",
+          "timestamp_s": 4743,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Training telemetry includes gradient norms, learning-rate schedules, and hardware-efficiency metrics.",
+          "timestamp_s": 4781,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Scaling laws relate model performance to capacity, compute, and data-set size.",
+          "timestamp_s": 4842,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Chinchilla is used as an example that a smaller model trained longer can outperform a larger undertrained one.",
+          "timestamp_s": 4978,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Scaling laws guide expensive decisions about whether to train longer, collect more data, or increase model capacity.",
+          "timestamp_s": 5080,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 4701,
+        "end_s": 5125
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7.1,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+      "course_id": "CS230",
+      "name": "Capability benchmarks, contamination, and safety dashboards",
+      "description": "Covers benchmark-based capability evaluation, benchmark contamination checks, and safety/agentic-workflow evaluation dashboards for release and RLHF decisions.",
+      "summary": "Capability dashboards evaluate model checkpoints across tasks such as reasoning, coding, math, and multilingual performance, and they can expose clusters of errors in a specific checkpoint [ts=5125s] [ts=5161s]. The lecture warns that public benchmarks can be contaminated when test examples or related explanations appear in training data, so benchmark numbers are more useful comparatively than as absolute truth [ts=5211s] [ts=5270s]. Detection methods include n-gram searches, hashes, and semantic embedding searches between test and training examples, followed by removing exposed examples and replacing them with held-out offline ones [ts=5321s] [ts=5343s] [ts=5367s] [ts=5391s]. Safety evaluations stress-test models for jailbreaks, social engineering, misuse, harmful content, hallucinations, privacy leakage, and behavior inside agentic workflows; these dashboards help release decisions and target expensive SFT/RLHF work to failing areas [ts=5412s] [ts=5440s] [ts=5500s].",
+      "key_points": [
+        {
+          "text": "Capability benchmarks evaluate model skills such as reasoning, coding, math, multilingual tasks, and instruction following across checkpoints.",
+          "timestamp_s": 5134,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Error clusters can show that one checkpoint regressed on a particular capability such as reasoning.",
+          "timestamp_s": 5161,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Benchmark contamination occurs when held-out test content or close variants appear in the training data.",
+          "timestamp_s": 5211,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Contamination can be detected with n-gram search, hashes, or embedding-based semantic search.",
+          "timestamp_s": 5343,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "When a test set is exposed, the suggested response is to remove exposed examples and replace them with newly held-out offline items.",
+          "timestamp_s": 5391,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Safety evaluations include jailbreaks, social engineering, misuse, harmful content, hallucination, privacy leakage, and agentic-workflow behavior.",
+          "timestamp_s": 5412,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Evaluation dashboards can inform go/no-go release decisions and focus RLHF on the evals that are actually failing.",
+          "timestamp_s": 5500,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 5125,
+        "end_s": 5555
+      },
+      "difficulty": 0.6,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7.2,
+      "ordering_index": 9,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg10",
+      "course_id": "CS230",
+      "name": "Data diagnostics, MoE routing metrics, and closing Q&A",
+      "description": "Explains data-distribution checks, token statistics, contamination checks, MoE router monitoring, and Q&A on domain mixtures and synthetic data.",
+      "summary": "Data diagnostics are presented as a final frontier-model lens, with distribution checks over domains such as law, Wikipedia, Stack Exchange, and GitHub used to understand where loss or performance may shift [ts=5555s] [ts=5596s]. The instructor connects underrepresented domains to likely performance drops and suggests sampling methods, analogous to experience replay, to maintain stable domain frequencies through training [ts=5623s] [ts=5640s] [ts=5696s]. Token statistics are another signal: changes in important tokens, such as math symbols or non-English tokens, can explain regressions or distribution shifts [ts=5723s] [ts=5801s]. The summary dashboard includes global/domain losses, scaling alignment, MoE router use and load balancing, gradient norms, learning rates, checkpoint-to-checkpoint evals, benchmark behavior, token distribution, and tokenizer statistics [ts=5826s] [ts=5850s] [ts=5905s]. Q&A revisits domain mixtures and synthetic data, emphasizing that neighboring domains can help but too much cheap synthetic data can distort token frequencies and hurt other domains [ts=5945s] [ts=6120s].",
+      "key_points": [
+        {
+          "text": "Distribution checks track domain proportions in the training data and can reveal domain-specific performance shifts.",
+          "timestamp_s": 5623,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "If a domain is underrepresented in the data, performance on that domain is likely to drop relative to others.",
+          "timestamp_s": 5640,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Sampling methods can help maintain stable domain frequencies across different portions of training.",
+          "timestamp_s": 5696,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Token statistics monitor frequency changes for key tokens, such as math symbols, that can affect task performance.",
+          "timestamp_s": 5723,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "MoE router metrics help detect whether routing collapses onto the same experts or underuses specialized experts.",
+          "timestamp_s": 5850,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Frontier-lab dashboards often include losses, scaling alignment, router metrics, gradient norms, learning rates, benchmark results, token distribution, and tokenizer statistics.",
+          "timestamp_s": 5826,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Synthetic data can be useful for augmentation, but overusing cheap synthetic data in one domain can distort token frequencies and harm performance elsewhere.",
+          "timestamp_s": 6120,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+        "start_s": 5555,
+        "end_s": 6406
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 14.2,
+      "ordering_index": 10,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "High-level diagnostic framework is central to the lecture but partly motivational and discussion-based; quiz-worthy as categorization and diagnostic reasoning [ts=769s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Contains concrete formulas and misconceptions for saliency maps and integrated gradients, including pre-softmax attribution [ts=1212s] [ts=1416s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Contains concrete procedures for occlusion sensitivity and CAM/GAP with visual localization examples [ts=1557s] [ts=2054s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "Contains an optimization loop, regularization, activation objectives, and data-set search retrieval; strong assessment targets [ts=2360s] [ts=2598s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": true,
+      "demo_heavy": false,
+      "rationale": "The matrix derivation of deconvolution is mathematically teachable but narrower and supporting for interpretability [ts=3273s] [ts=3391s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": true,
+      "rationale": "DeconvNet reconstruction and the external visualization-tool excerpt are useful for conceptual questions, but details are complex and partly visual/demo-oriented [ts=3617s] [ts=4160s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Transformer representation analysis is globally important, though treated at a high level rather than with derivations [ts=4400s] [ts=4660s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Loss curves, telemetry, and scaling laws are concrete diagnostics with clear decision implications [ts=4715s] [ts=5080s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Capability, contamination, safety, and release/RLHF dashboard decisions are directly assessable and central to applied model evaluation [ts=5134s] [ts=5500s]."
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg10",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Data diagnostics and token drift are concrete, while the final Q&A and closing remarks lower item-generation density near the end [ts=5555s] [ts=6120s]."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_attention_map_and_embedding_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_mixture_of_experts_routing_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "global_kp_id": "kp_cs230_integrated_gradients",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg3",
+      "global_kp_id": "kp_cs230_occlusion_sensitivity",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg3",
+      "global_kp_id": "kp_cs230_class_activation_maps_with_global_average_pooling",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "global_kp_id": "kp_cs230_gradient_ascent_class_model_visualization",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "global_kp_id": "kp_cs230_activation_based_data_set_search",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+      "global_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+      "global_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+      "global_kp_id": "kp_cs230_activation_based_data_set_search",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+      "global_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+      "global_kp_id": "kp_cs230_transformer_representation_analysis",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+      "global_kp_id": "kp_cs230_attention_map_and_embedding_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+      "global_kp_id": "kp_benchmark_contamination",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+      "global_kp_id": "kp_cs230_safety_evaluations_and_agentic_workflow_evaluation",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg10",
+      "global_kp_id": "kp_cs230_data_distribution_and_token_drift_diagnostics",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg10",
+      "global_kp_id": "kp_cs230_mixture_of_experts_routing_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg10",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "name": "Frontier-model diagnostic evidence lenses",
+      "description": "A framework for diagnosing a large-model regression using training/scaling, representations/internals, data/distribution, and capabilities/safety evidence before touching code or restarting training.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "model_diagnostics",
+        "foundation_models"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture uses the 200B checkpoint case to motivate the entire frontier-model half and organizes the answers into four diagnostic buckets [ts=157s] [ts=769s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "name": "Loss curves and training telemetry",
+      "description": "Using training loss, validation loss, gradient norms, learning-rate schedules, checkpoint trends, and hardware metrics to assess whether model training is stable.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization",
+        "model_diagnostics"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor returns to loss curves both in the opening case and the training-diagnostics section as the natural first health check for a failing model [ts=302s] [ts=4715s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_attention_map_and_embedding_diagnostics",
+      "name": "Attention-map and embedding diagnostics",
+      "description": "Inspecting attention relationships and embedding neighborhoods to sanity-check internal representations in language models.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "transformers",
+        "representation_analysis"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Attention maps are suggested in the opening case, and later the lecture identifies attention plus embeddings as the two visualizable ideas behind transformer representations [ts=542s] [ts=4621s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_mixture_of_experts_routing_diagnostics",
+      "name": "Mixture-of-experts routing diagnostics",
+      "description": "Monitoring expert routing and load balancing to detect underused or overused experts in MoE-style models.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "foundation_models",
+        "model_diagnostics"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "MoE routing appears in the opening case as a possible capacity failure mode and later in the final dashboard summary as a metric to monitor [ts=708s] [ts=5850s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_saliency_via_input_gradients",
+      "name": "Saliency via input gradients",
+      "description": "Saliency maps identify input pixels that most affect a chosen class score by differentiating the score with respect to the input image.",
+      "track_tags": [
+        "cnn",
+        "interpretability"
+      ],
+      "domain_tags": [
+        "gradients",
+        "saliency_maps"
+      ],
+      "career_path_tags": [
+        "medical_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because saliency via input gradients clarifies saliency maps identify input pixels that most affect a chosen class score by differentiating the score with respect to the input image, sharpening later modeling, analysis, or evaluation choices.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_9::kp12",
+        "local::lecture09_what_is_going_on_inside_my_model::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_integrated_gradients",
+      "name": "Integrated gradients",
+      "description": "An attribution method that accumulates gradients along an interpolation path from a baseline input to the actual input.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "interpretability",
+        "attribution"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture presents integrated gradients as a more common extension of saliency maps, but does not go deeply into the derivation [ts=1416s] [ts=1452s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_occlusion_sensitivity",
+      "name": "Occlusion sensitivity",
+      "description": "A perturbation-based CNN interpretation method that masks regions of the input and records changes in the class score.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The method is presented as intuitive and simple, with several examples showing whether true-class probability drops when key object regions are masked [ts=1524s] [ts=1608s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_class_activation_maps_with_global_average_pooling",
+      "name": "Class activation maps with global average pooling",
+      "description": "A CNN localization method that preserves spatial information by using global average pooling and class-specific weights over last-convolution feature maps.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "CAM is taught as a practical way to provide real-time localization by modifying the network architecture rather than running an expensive post-hoc scan [ts=1725s] [ts=1893s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_gradient_ascent_class_model_visualization",
+      "name": "Gradient-ascent class model visualization",
+      "description": "Optimizing an input image to maximize a chosen class score or internal activation while the network weights remain fixed.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "interpretability",
+        "optimization"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.7,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture uses this method to ask what image the model thinks represents a class and to reveal learned biases or class prototypes [ts=2247s] [ts=2392s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_activation_based_data_set_search",
+      "name": "Activation-based data-set search",
+      "description": "Interpreting filters or feature maps by retrieving validation examples or patches that most strongly activate them.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor calls data-set search one of the most commonly used methods because it is simple and intuitive, and later it reappears in the DeconvNet toolkit summary [ts=2590s] [ts=3978s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "name": "Deconvolution as transposed convolution",
+      "description": "Viewing convolution as matrix multiplication and implementing a reverse/upsampling operation using transposed convolution.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision",
+        "convolutional_networks"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.74,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The deconvolution derivation is taught to support reverse-engineering CNN activations, but the instructor frames it as the last CNN method rather than the main lecture theme [ts=3051s] [ts=3273s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "name": "DeconvNet reconstruction and unpooling switches",
+      "description": "Reconstructing the input-space evidence for a selected CNN activation by reversing pooling, ReLU, and convolutional operations.",
+      "track_tags": [
+        "DL",
+        "CV"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "computer_vision",
+        "interpretability"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.76,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "DeconvNet reconstruction provides the detailed mechanism for tracing feature-map activations back to the pixels responsible for them [ts=3617s] [ts=3718s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_transformer_representation_analysis",
+      "name": "Transformer representation analysis",
+      "description": "Analyzing how transformers encode relationships and meanings using attention, embeddings, and circuit-level abstractions.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "transformers",
+        "representation_analysis"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Transformer representation analysis is important but treated at high level; keep it supporting rather than prerequisite-gating.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "name": "Pretraining scaling and compute-data tradeoffs",
+      "description": "Large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale. This scaling view also appears in vision-language systems such as CLIP, where larger models and more image-text data improve performance.",
+      "track_tags": [
+        "foundation_models",
+        "llm",
+        "model_efficiency",
+        "nlp",
+        "scaling",
+        "scaling_laws"
+      ],
+      "domain_tags": [
+        "data_scale",
+        "large_language_models",
+        "model_scale",
+        "nlp",
+        "pretraining",
+        "scaling_laws"
+      ],
+      "career_path_tags": [
+        "llm_engineer",
+        "ml_engineer",
+        "nlp_researcher",
+        "research_engineering",
+        "research_scientist",
+        "systems_ml"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "low",
+      "importance_rationale": "Important because pretraining scaling and compute-data tradeoffs clarifies large-scale pretraining quality depends jointly on model size, training data, and compute budget, with capabilities improving as those resources scale, sharpening later modeling, analysis, or evaluation choices while importance labels split between high and medium.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp1",
+        "local::lecture11-pretraining::kp11",
+        "local::lecture_16::kp10",
+        "local::lecture09_what_is_going_on_inside_my_model::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_benchmark_contamination",
+      "name": "Benchmark contamination and overfitting",
+      "description": "Benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests. The problem that benchmark examples may leak into pretraining data, undermining claims of true generalization.",
+      "track_tags": [
+        "benchmark_validity",
+        "benchmarks",
+        "evaluation",
+        "llms",
+        "robustness"
+      ],
+      "domain_tags": [
+        "evaluation",
+        "language_models",
+        "machine_learning",
+        "natural_language_processing"
+      ],
+      "career_path_tags": [
+        "applied_llm",
+        "benchmark_design",
+        "evaluation_engineer",
+        "research",
+        "research_scientist"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because benchmark contamination and overfitting clarifies benchmark scores can shift because of formatting, implementation differences, train-test leakage, or repeated tuning on public tests, sharpening later modeling, analysis, or evaluation choices though importance labels split between critical and high.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture15-benchmarking::kp15",
+        "local::lecture22-nlp-linguistics::kp6",
+        "local::lecture09_what_is_going_on_inside_my_model::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_safety_evaluations_and_agentic_workflow_evaluation",
+      "name": "Safety evaluations and agentic workflow evaluation",
+      "description": "Stress-testing models for harmful or risky behaviors and evaluating behavior both in one-shot settings and within agentic workflows.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "safety",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Safety evals are part of the opening failure case and later become a separate dashboard area that informs release and RLHF decisions [ts=157s] [ts=5412s] [ts=5500s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_data_distribution_and_token_drift_diagnostics",
+      "name": "Data distribution and token-drift diagnostics",
+      "description": "Monitoring domain proportions, domain-specific loss, token frequencies, tokenizer statistics, contamination, and corrupt-data anomalies to diagnose model regressions.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "data_diagnostics",
+        "model_diagnostics"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.61,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Data diagnostics close the frontier-model section and are tied to domain-level loss, token statistics, contamination, and online-training distribution shifts [ts=5555s] [ts=5723s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp16"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L9_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
+  }
+}

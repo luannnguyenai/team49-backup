@@ -1,0 +1,235 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+    "lecture_title": "Supervised, Self-Supervised, & Weakly Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY"
+  },
+  "unit": {
+    "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+    "course_id": "CS230",
+    "name": "Neurons, multi-class labels, capacity, and embeddings",
+    "description": "Extends logistic regression into neural-network notation, multi-class and multi-label outputs, hierarchical feature learning, model capacity, and the difference between encodings and embeddings.",
+    "summary": "The instructor connects a neuron to logistic regression: flatten image pixels, apply W transpose X plus B, then pass through sigmoid to obtain a probability [ts=536s]. For multiple animals, the output layer and labels both need to change; forgetting to change labels after changing the data is described as a common project mistake [ts=662s]. One-hot vectors represent a single true class, while multi-hot vectors allow multiple labels in the same image [ts=722s]. Deeper networks have more capacity, which can be necessary for complex data but can also overfit if capacity exceeds dataset complexity [ts=813s]. The face-network example shows early layers encoding edges, middle layers encoding parts like eyes or noses, and deeper layers encoding higher-level facial features; embeddings are encodings where distance carries semantic meaning [ts=900s].",
+    "key_points": [
+      {
+        "text": "A logistic-regression-style neuron computes a linear score W transpose X plus B and uses sigmoid to map it to a probability.",
+        "timestamp_s": 536,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "For multi-class or multi-label recognition, both the number of output neurons and the label representation must change.",
+        "timestamp_s": 662,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "One-hot labels encode exactly one true class; multi-hot labels encode multiple true classes in one vector.",
+        "timestamp_s": 722,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Higher-capacity networks can fit richer data but can also memorize the training set when capacity is too large relative to the dataset.",
+        "timestamp_s": 813,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Lower layers tend to encode simple features such as edges, while deeper layers encode higher-complexity features closer to the task.",
+        "timestamp_s": 900,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "An encoding is any vector representation; an embedding is an encoding whose distances have semantic meaning.",
+        "timestamp_s": 1103,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+      "start_s": 536,
+      "end_s": 1130
+    },
+    "difficulty": 0.35,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 9.9,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The instructor connects a neuron to logistic regression: flatten image pixels, apply W transpose X plus B, then pass through sigmoid to obtain a probability [ts=536s]. For multiple animals, the output layer and labels both need to change; forgetting to change labels after changing the data is described as a common project mistake [ts=662s]. One-hot vectors represent a single true class, while multi-hot vectors allow multiple labels in the same image [ts=722s]. Deeper networks have more capacity, which can be necessary for complex data but can also overfit if capacity exceeds dataset complexity [ts=813s]. The face-network example shows early layers encoding edges, middle layers encoding parts like eyes or noses, and deeper layers encoding higher-level facial features; embeddings are encodings where distance carries semantic meaning [ts=900s].",
+  "target_kp_ids": [
+    "kp_cs230_logistic_regression_neuron_with_sigmoid",
+    "kp_cs230_one_hot_and_multi_hot_label_vectors",
+    "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+    "kp_cs230_encoding_versus_embedding"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+  "video_clip_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+  "transcript_slice": "00:08:59\nThe easiest way to think about a neuron\n\n00:09:05\nWhere I'm taking the image of the cat.\n\n00:09:11\nit is three channels.\n\n00:09:16\nAnd we take all these numbers.\n\n00:09:20\nThe vector is then fed into a neuron.\n\n00:09:25\nW transpose X plus B. W being the weights\n\n00:09:29\nAnd then an activation function, in this case,\n\n00:09:36\nany number, and it puts it between 0 and 1\n\n00:09:42\nClassic setup.\n\n00:09:49\nWhich tells me the model thinks there's a cat on the picture\n\n00:09:55\nSo question for you to get started.\n\n00:10:02\nthat detects cats in an algorithm that\n\n00:10:07\nsuch as a cat, a dog, and a giraffe?\n\n00:10:14\nYeah.\n\n00:10:24\nto match to the number of animals you want to detect.\n\n00:10:29\nAnyone wants to add anything else?\n\n00:10:31\nThe data that goes in there.\n\n00:10:33\nHow would you change the data?\n\n00:10:37\nOK very good.\n\n00:10:41\nand also maybe nature in general.\n\n00:10:47\nYeah.\n\n00:10:51\nand then your prediction would be whichever\n\n00:10:54\nYeah, OK.\n\n00:10:56\nThose neurons will be independent from each other.\n\n00:11:01\nYeah good point.\n\n00:11:04\nSo yes, I think your suggestions were the right one.\n\n00:11:09\nto have three neurons instead of one.\n\n00:11:14\nsee the entire pixels flattened in the vector.\n\n00:11:21\nThe number one mistake that we see in projects\n\n00:11:29\nSo how do the labels need to be adjusted here?\n\n00:11:34\nWhat type of labels do we need to train this?\n\n00:11:49\nThe number of the number of range.\n\n00:11:53\nOr no.\n\n00:11:56\nSo yeah.\n\n00:11:58\nUse vectors.\n\n00:12:00\nI think you're seeing the same thing, but.\n\n00:12:07\nOne hot means you'll have a vector of size 3.\n\n00:12:15\nthe label is going to be 0, 1 0 because the second neuron is\n\n00:12:21\nIn fact, that would be called a one hot vector.\n\n00:12:27\nbecause cats and dogs can appear together.\n\n00:12:30\nAnd dogs and giraffes, I've never\n\n00:12:34\nYou'll have a multi-hot vector if you\n\n00:12:38\nyou'll probably label it as 110.\n\n00:12:42\nmay sound silly, but in a lot of projects people\n\n00:12:45\nThey forget to change their labels,\n\n00:12:50\nOK, cool.\n\n00:12:54\nwith a superscript and subscript.\n\n00:13:02\nthe superscript in square brackets\n\n00:13:08\nSo you're in the first layer.\n\n00:13:15\nAnd a is for activation.\n\n00:13:23\nis the output of the third neuron of the first layer, OK.\n\n00:13:32\nAnd then you'll get your probability.\n\n00:13:38\nThis is the word we use, capacity.\n\n00:13:45\nand a million pictures of non cats to a shallow network,\n\n00:13:52\nIt's just not flexible enough.\n\n00:13:56\nSo in fact, the network that is super deep.\n\n00:14:01\nwith one million pictures of cat and non-cat,\n\n00:14:06\nMeaning it's not going to learn what a cat is,\n\n00:14:10\npictures because its capacity is way bigger than the data set\n\n00:14:14\nSo it's very important to understand the amount\n\n00:14:18\nAnd the complexity, diversity of that data\n\n00:14:23\nof the models you need to use.\n\n00:14:30\nhappens inside those neural networks.\n\n00:14:34\nbut call it three layers.\n\n00:14:42\nIgnore the task.\n\n00:14:47\nYou could do a face verification,\n\n00:14:54\nthings like that.\n\n00:14:56\nBut let's say it's been trained really\n\n00:15:00\nIf you now unpack this network and you query each neuron\n\n00:15:08\nis that the first layers are going\n\n00:15:15\nwhile the deeper networks are going to be better at encoding\n\n00:15:21\nSo here's how it goes.\n\n00:15:25\nThe neuron in the first layers, they're\n\n00:15:30\ndirectly the pixels.\n\n00:15:34\nAnd maybe the first neuron will be\n\n00:15:40\nwill be good at vertical edges, and the third one\n\n00:15:46\nand trying to make sense out of them.\n\n00:15:51\nThose are not seeing pixels, they're\n\n00:15:55\nslightly more complex.\n\n00:15:59\nin the middle of the network to give you\n\n00:16:04\nlike an eye or a nose or an ear.\n\n00:16:09\nyou can start detecting circles.\n\n00:16:13\nis really good at detecting circles, eyes.\n\n00:16:18\nthe more you get closer to the task itself, which in this case,\n\n00:16:24\nLet's say you would see the last few neurons,\n\n00:16:29\nBecause again, they're seeing higher complexity information.\n\n00:16:34\nThis concept we call it encoding,\n\n00:16:39\nIt's very important because when you train neural networks,\n\n00:16:45\nunderstanding what they're doing and that's one way to see it.\n\n00:16:51\nneural networks later this quarter.\n\n00:16:58\nmake use of some of those encodings and embeddings.\n\n00:17:03\nBut why in the vector space the distances between those concepts\n\n00:17:09\nYou can already imagine that for tasks like search searching\n\n00:17:16\ninformation in a very meaningful way,\n\n00:17:20\nare close to each other and associate them with each other,\n\n00:17:25\nand dissociate them from each other.\n\n00:17:29\nSo this was the warm up for today.\n\n00:17:33\nOK, 15 minutes in the warm up.\n\n00:17:35\nSo we learned a few new words.\n\n00:17:40\nI didn't talk about it, but feature engineering\n\n00:17:46\nin deep learning is feature engineering\n\n00:17:49\nWhich is you might actually build an algorithm that\n\n00:17:54\nIt's just a good at scanning eyes.\n\n00:17:57\nAnd then you build another one that\n\n00:18:02\nAnd then you put them together to detect faces.\n\n00:18:06\nWe do end-to-end learning.\n\n00:18:10\nThis is called feature learning.\n\n00:18:15\nlearns those features without you needing to tell it eyes\n\n00:18:20\nYou don't need to do that.\n\n00:18:25\nThe real difference is encoding is any vector representation\n\n00:18:31\nit should have been-- an embedding is\n\n00:18:35\nmeaning The distance between two encodings has meaning.\n\n00:18:42\nand it tells you something.\n\n00:18:46\nAnd then we talked about one hot and multi-hot vectors.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_logistic_regression_neuron_with_sigmoid",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_logistic_regression_neuron_with_sigmoid",
+      "name": "Logistic-regression neuron with sigmoid",
+      "description": "A neuron can be viewed as W transpose X plus B followed by an activation such as sigmoid to produce a probability.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Transcript uses the logistic-regression neuron as a recap bridge into neural networks; important, but not a standalone course gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "name": "One-hot and multi-hot label vectors",
+      "description": "One-hot vectors encode exactly one true class; multi-hot vectors encode multiple true labels simultaneously.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.3,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The multi-animal example at [ts=662s] and [ts=722s] teaches label design as a frequent failure point in projects.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+      "name": "Model capacity and hierarchical feature learning",
+      "description": "Deeper networks have more capacity and tend to learn increasingly complex features from edges to parts to task-level patterns.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Model capacity and hierarchy are recurring ideas, but this lecture treats them as support for representation design rather than a gate.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "name": "Encoding versus embedding",
+      "description": "An encoding is any vector representation; an embedding is an encoding whose closeness or distance carries semantic similarity.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly defines this distinction at [ts=1103s] and then uses it across face, image, text, and multimodal systems.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp6"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.2,
+    0.5
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
+  }
+}

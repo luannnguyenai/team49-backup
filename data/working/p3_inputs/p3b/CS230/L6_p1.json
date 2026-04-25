@@ -1,0 +1,299 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture06_ai_project_strategy",
+    "lecture_title": "AI Project Strategy",
+    "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg1",
+      "course_id": "CS230",
+      "name": "Project framing: speed first, then architecture choices",
+      "description": "The lecture frames AI project strategy with a wake-word lamp example and argues that fast iteration, broad literature search, open-source baselines, and expert conversations usually matter more than prematurely optimizing architecture details.",
+      "summary": "The lecture opens by arguing that AI teams can differ by 10x or more in productivity because stronger teams make better next-step decisions, not just better algorithmic choices [ts=64s] [ts=103s]. Using an offline voice-controlled lamp that responds to \"Robert, turn on\" as the running example, the instructor advises building something quickly instead of over-deliberating among plausible designs [ts=691s] [ts=704s]. He notes that general-purpose speech recognition is often too heavy for a cheap on-device product, whereas a specialized wake-word detector can be much smaller [ts=722s] [ts=755s]. The recommended first moves are a broad literature/open-source search and respectful outreach to experts, because both compress the time needed to converge on workable approaches [ts=842s] [ts=960s].",
+      "key_points": [
+        {
+          "text": "Project execution speed can create order-of-magnitude productivity differences in AI teams.",
+          "timestamp_s": 64,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A lightweight wake-word model is often more practical on-device than full speech-to-text.",
+          "timestamp_s": 722,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Skim broadly across papers and repos before deeply reading a few high-value resources.",
+          "timestamp_s": 903,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Contacting experts after doing your own homework can sharply accelerate learning.",
+          "timestamp_s": 960,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 5,
+        "end_s": 1037
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 17,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg2",
+      "course_id": "CS230",
+      "name": "Collecting initial wake-word data",
+      "description": "This segment covers how to obtain a first training set for a custom trigger phrase when no public dataset exists, emphasizing consent-driven collection of real data and a cautious stance toward early synthetic data generation.",
+      "summary": "After the literature search, the bottleneck becomes data: there is no internet-scale dataset of people saying the custom phrase \"Robert, turn on,\" so the team must collect examples itself [ts=1088s] [ts=1136s]. The instructor endorses walking around, clearly asking for permission, and recording willing participants because real data is fast to gather and removes uncertainty about realism [ts=1177s] [ts=1264s]. He treats text-to-speech and other synthetic generation as useful but not first-choice, because they introduce extra knobs such as voice diversity and distribution mismatch that can slow early progress [ts=1322s] [ts=1372s]. A self-driving car analogy reinforces the point: synthetic worlds often look sufficient to humans while still missing the diversity required by a model [ts=1445s] [ts=1500s].",
+      "key_points": [
+        {
+          "text": "Custom wake-word projects often require collecting a phrase-specific dataset because no public dataset matches the exact trigger phrase.",
+          "timestamp_s": 1088,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Collect real recordings with explicit permission before relying on synthetic speech generation.",
+          "timestamp_s": 1264,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Synthetic data is useful but can introduce hidden hyperparameters such as limited voice diversity.",
+          "timestamp_s": 1372,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Real data removes one major uncertainty because it already reflects the natural target distribution.",
+          "timestamp_s": 1500,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 1037,
+        "end_s": 1644
+      },
+      "difficulty": 0.48,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg3",
+      "course_id": "CS230",
+      "name": "From long recordings to windowed labels",
+      "description": "The instructor shows how to transform a small number of long annotated clips into many binary training examples and uses the resulting failure mode to teach class imbalance in event detection.",
+      "summary": "The proposed labeling scheme turns each long recording into multiple short windows and marks a window positive only when it ends right after the speaker finishes \"Robert, turn on\" [ts=1661s] [ts=1776s]. This turns roughly 100 long clips into around 3,000 binary examples, which is operationally convenient for training a classifier [ts=1775s] [ts=1798s]. The first model then reports 97% accuracy while producing zero detections, revealing that the dataset is so skewed that always predicting the negative class looks strong under the naive metric [ts=1813s] [ts=1860s]. The segment uses this to motivate rebalancing strategies rather than trusting headline accuracy alone [ts=1914s] [ts=1978s].",
+      "key_points": [
+        {
+          "text": "Use sliding windows over longer audio clips and label a window positive when the trigger phrase has just finished.",
+          "timestamp_s": 1661,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Windowing can expand about 100 long clips into about 3,000 binary examples.",
+          "timestamp_s": 1775,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A 97% accurate classifier can still be useless if it always predicts the majority class.",
+          "timestamp_s": 1813,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Severe class imbalance is a common source of misleading metrics in trigger detection.",
+          "timestamp_s": 1914,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 1644,
+        "end_s": 2260
+      },
+      "difficulty": 0.63,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10.3,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg4",
+      "course_id": "CS230",
+      "name": "Balancing data, fighting overfitting, and building robustness",
+      "description": "This unit covers practical fixes for imbalance and overfitting, then introduces a concrete synthetic-data recipe that mixes clean speech with background noise and hard negatives.",
+      "summary": "After the imbalance fix, the next observed failure is a train/dev gap: the model does well on train but only about 50% on the dev set, which the lecture interprets as overfitting and a cue to try regularization or more data [ts=2260s] [ts=2411s]. The instructor then describes a synthetic augmentation trick that works in speech: add clean trigger utterances to background-noise recordings so the summed waveform simulates speech in realistic environments [ts=2495s] [ts=2583s]. He warns that using only trigger phrases would teach voice activity detection rather than phrase recognition, so negative examples must also include other spoken content [ts=2608s] [ts=2664s]. The segment closes with a rule of thumb that richer and more diverse training data usually wins, provided the model has enough capacity to absorb that diversity [ts=2803s] [ts=2858s].",
+      "key_points": [
+        {
+          "text": "A strong train score and weak dev score is evidence of overfitting and suggests regularization or more data.",
+          "timestamp_s": 2260,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Synthetic speech augmentation can be done by adding clean speech waveforms to background-noise waveforms.",
+          "timestamp_s": 2495,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Include non-trigger speech as hard negatives so the model does not collapse into generic voice activity detection.",
+          "timestamp_s": 2608,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "More diverse data usually helps unless model capacity is too small to represent it.",
+          "timestamp_s": 2803,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 2260,
+        "end_s": 2870
+      },
+      "difficulty": 0.69,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10.2,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg5",
+      "course_id": "CS230",
+      "name": "Machine learning work feels like debugging",
+      "description": "The lecture generalizes from the speech example to a process lesson: ML progress depends on disciplined debugging loops whose shape is constrained by training time, and that speed turns directly into product competitiveness.",
+      "summary": "The instructor argues that ML work feels more like debugging than classical software construction because you do not know in advance which data, bias-variance, or mismatch issue will surface next [ts=2892s] [ts=2963s]. He describes a daily rhythm of launching training runs, inspecting results the next morning, performing error analysis, coding a fix, and relaunching overnight so the team removes roughly one blocker per day [ts=3006s] [ts=3070s]. The exact operating cadence depends on whether training takes minutes, hours, or weeks, but the meta-principle is unchanged: shorten the loop between evidence and the next experiment [ts=3156s] [ts=3302s]. He closes by showing that a team that is merely 2x slower in iteration can be dramatically less competitive because performance compounds over calendar time [ts=3358s] [ts=3423s].",
+      "key_points": [
+        {
+          "text": "Machine learning development is best treated as iterative debugging rather than one-shot implementation.",
+          "timestamp_s": 2892,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A healthy team cadence is train, inspect, analyze, fix, and relaunch on a regular schedule.",
+          "timestamp_s": 3006,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Training-job duration should shape how the team plans experiments and analysis work.",
+          "timestamp_s": 3156,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Iteration speed compounds into market advantage because faster teams reach stronger models earlier.",
+          "timestamp_s": 3358,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 2870,
+        "end_s": 3470
+      },
+      "difficulty": 0.44,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 10,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg6",
+      "course_id": "CS230",
+      "name": "Decomposing deep research into pipeline stages",
+      "description": "The lecture moves from an end-to-end wake-word model to a multi-stage LLM system and shows why pipeline decomposition changes how engineers reason about failure and prioritization.",
+      "summary": "The second case study shifts to a deep-research assistant that answers broad queries by combining several steps rather than a single model [ts=3470s] [ts=3537s]. A baseline pipeline is sketched as query to LLM-generated search terms, then web search, then page selection/fetching, and finally LLM-based writing [ts=3603s] [ts=3680s]. The instructor notes that newer systems are more agentic and can decide to loop back for more search, but the simple linear version is already enough to expose the core project-management challenge [ts=3696s] [ts=3734s]. Once a system is decomposed this way, the key question is no longer only how to improve a model, but which pipeline stage deserves attention first [ts=3750s] [ts=3870s].",
+      "key_points": [
+        {
+          "text": "Many practical AI systems are pipelines rather than single end-to-end models.",
+          "timestamp_s": 3500,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A simple deep-research pipeline can be modeled as query generation, search, fetch, and writing stages.",
+          "timestamp_s": 3603,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Modern agentic variants add loops that decide when to gather more evidence.",
+          "timestamp_s": 3696,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The central engineering decision is choosing which pipeline component to optimize next.",
+          "timestamp_s": 3750,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 3470,
+        "end_s": 3880
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg7",
+      "course_id": "CS230",
+      "name": "Manual error analysis for AI pipelines",
+      "description": "This final unit shows how to inspect intermediate outputs across many bad queries, log component-level failures in a spreadsheet, and use hotspot counts to decide where engineering effort will matter most.",
+      "summary": "For the deep-research pipeline, the instructor enumerates several plausible failure points: weak search terms, stale or low-quality web search results, bad URL selection, or poor final writing [ts=3882s] [ts=3978s]. The remedy is explicit manual error analysis: run 10 to 100 problematic queries, inspect intermediate outputs stage by stage, and record judgments in a spreadsheet rather than guessing about bottlenecks [ts=4024s] [ts=4200s]. By tallying which columns fail most often, the team can see whether dissatisfaction is dominated by retrieval, fetching, or synthesis and then focus on the real hotspot [ts=4313s] [ts=4386s]. The payoff is strategic: a few hours of analysis can prevent weeks or months of optimization on the wrong subsystem [ts=4423s] [ts=4469s].",
+      "key_points": [
+        {
+          "text": "Pipeline failures can originate in query generation, search, fetch selection, or final writing.",
+          "timestamp_s": 3882,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Inspect intermediate outputs on a sample of bad queries instead of guessing where the bottleneck is.",
+          "timestamp_s": 4024,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A spreadsheet that marks failure modes per stage helps reveal which component is the true hotspot.",
+          "timestamp_s": 4134,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Hours spent on disciplined error analysis can save weeks of misdirected engineering work.",
+          "timestamp_s": 4423,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+        "start_s": 3880,
+        "end_s": 4509
+      },
+      "difficulty": 0.71,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L6_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture06-ai-project-strategy_transcript.txt"
+  }
+}

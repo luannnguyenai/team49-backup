@@ -1,0 +1,114 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-08",
+    "lecture_title": "Career Advice in AI",
+    "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s"
+  },
+  "unit": {
+    "unit_id": "local::lecture-08::seg3",
+    "course_id": "CS230",
+    "name": "Networks, teams, and day-to-day environment",
+    "description": "Andrew emphasizes that peers, faculty, research networks, and team assignments shape learning speed and project direction more than logos alone.",
+    "summary": "Andrew argues that the people around a student are a strong predictor of learning speed and success, even when the causal evidence is framed informally [ts=563s]. He highlights Stanford's connective tissue to frontier labs and former students as a way that useful, not-yet-public knowledge can circulate through trusted relationships [ts=622s]. He then shifts from university networks to job selection, warning that a famous company brand is less useful if the day-to-day team does not support the student's AI goals [ts=749s]. The practical criterion is to learn who one will work with and whether that team is doing inspiring, relevant work [ts=861s].",
+    "key_points": [
+      {
+        "text": "The people one surrounds oneself with are presented as a strong predictor of learning speed and career success.",
+        "timestamp_s": 563,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Stanford's connections to frontier AI labs are described as a source of tacit and early knowledge.",
+        "timestamp_s": 622,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A job offer from a hot AI brand can still lead to irrelevant work if the team assignment is unclear.",
+        "timestamp_s": 787,
+        "evidence_type": "example"
+      },
+      {
+        "text": "Choosing a strong day-to-day team is emphasized over company-logo excitement.",
+        "timestamp_s": 889,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+      "start_s": 553,
+      "end_s": 921
+    },
+    "difficulty": 0.35,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 6.1,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Andrew argues that the people around a student are a strong predictor of learning speed and success, even when the causal evidence is framed informally [ts=563s]. He highlights Stanford's connective tissue to frontier labs and former students as a way that useful, not-yet-public knowledge can circulate through trusted relationships [ts=622s]. He then shifts from university networks to job selection, warning that a famous company brand is less useful if the day-to-day team does not support the student's AI goals [ts=749s]. The practical criterion is to learn who one will work with and whether that team is doing inspiring, relevant work [ts=861s].",
+  "target_kp_ids": [
+    "kp_cs230_career_network_and_team_quality"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+  "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+  "transcript_slice": "00:09:13\nAnd then before I hand over to Laurence, just one last thing\n\n00:09:23\nI think one of the most strong predictors\n\n00:09:30\nis the people you surround yourself with.\n\n00:09:33\nWe all learn from people around us.\n\n00:09:40\nshow that if your five closest friends are smokers,\n\n00:09:46\nPlease don't smoke.\n\n00:09:51\nI don't know of any study showing\n\n00:09:55\nhard working, determined people, learning quickly, trying\n\n00:10:02\nthat you are more likely to do that too.\n\n00:10:05\nthink is almost certainly true.\n\n00:10:10\nand we're able to find a good group of people to work with,\n\n00:10:15\nIn fact, here at Stanford, I feel very fortunate--\n\n00:10:22\nAnd then the other thing that I think\n\n00:10:26\nis our connective tissue.\n\n00:10:32\nand a lot of the cutting edge AI labs, the frontier labs,\n\n00:10:39\nfaculty.\n\n00:10:43\nmeans that at Stanford, we often find out\n\n00:10:47\nknown because of the relationships, the friendships.\n\n00:10:52\none of my friends and the faculty\n\n00:10:56\nDoes this really work?\n\n00:11:02\njust as we try to pull our friends forward,\n\n00:11:06\nand the connective tissue and this know-how of bleeding edge\n\n00:11:12\npublished on the internet at this moment in time.\n\n00:11:18\nform that rich connective tissue.\n\n00:11:22\nwhere, frankly, I was thinking of going\n\n00:11:26\nI'd have one or two phone calls with someone\n\n00:11:33\nin the frontier lab.\n\n00:11:37\nAnd that changes the way I choose\n\n00:11:41\nSo I find that group of friends you surround yourself\n\n00:11:46\nDon't do that-- that's just hype.\n\n00:11:49\nDon't actually try that thing.\n\n00:11:53\nin your ability to steer the direction of your projects.\n\n00:11:59\nThis connective tissue that Stanford has,\n\n00:12:02\nThere are lots of great universities in the world,\n\n00:12:08\nI don't want to sound like I'm doing PR for Stanford now,\n\n00:12:13\nis as privileged as Stanford at this moment in time,\n\n00:12:19\nof the leading AI groups.\n\n00:12:25\nto have a wonderful community of people\n\n00:12:30\nAnd for you too.\n\n00:12:35\nimportant for your career success would\n\n00:12:40\nyou work with day to day.\n\n00:12:49\nrepeat, which is there's a Stanford student that I knew\n\n00:12:54\nand they did really good work at Stanford.\n\n00:12:58\nAnd they applied for a job at a company,\n\n00:13:03\nwith a hot AI brand.\n\n00:13:10\nThey said, oh, come sign up for a job.\n\n00:13:16\nSign on the dotted line first.\n\n00:13:21\nPartly because it was a good company.\n\n00:13:26\nat this company.\n\n00:13:29\nto work on exciting AI project.\n\n00:13:33\nhe was assigned to work on the back end\n\n00:13:39\nNothing against anyone that wants to do Java\n\n00:13:42\nI think they're great, but this is an AI student that did not\n\n00:13:47\nAnd so for about a year, he was really frustrated,\n\n00:13:53\nThe unfortunate thing is, I told this story\n\n00:14:00\nAnd then after I was already telling\n\n00:14:08\nanother student in CS230 went through the same experience\n\n00:14:16\nbut different project.\n\n00:14:21\nwho you'll be actually working with day to day\n\n00:14:25\ninspire you and work on exciting projects,\n\n00:14:28\nAnd even completely candid, if a company\n\n00:14:34\nthat does raise a question in my mind of\n\n00:14:39\nAnd I think that instead of working\n\n00:14:44\nsometimes if you find a really good team with really\n\n00:14:50\nwith AI, but the company logo just isn't as hot,\n\n00:14:56\nlearn faster and progress your career better because it\n\n00:15:03\nof the company logo when you walk through the door,\n\n00:15:08\nSo I just urge you to use that as a huge criteria\n\n00:15:21\nBut I think number one on my advice",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-08::seg3",
+      "global_kp_id": "kp_cs230_career_network_and_team_quality",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_career_network_and_team_quality",
+      "name": "Career network and team quality",
+      "description": "Surrounding oneself with driven peers and choosing strong day-to-day teams can accelerate learning more than company brand alone.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "ai_career"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Andrew stresses that friends, faculty, and day-to-day teammates shape learning speed, project direction, and career success [ts=563s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-08::kp5"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.2,
+    0.5
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L8_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture08-career-advice-in-ai_transcript.txt"
+  }
+}

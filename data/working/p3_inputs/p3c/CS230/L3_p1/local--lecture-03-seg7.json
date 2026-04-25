@@ -1,0 +1,210 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-03",
+    "lecture_title": "Lecture 3: Full Cycle of a Deep Learning Project",
+    "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk"
+  },
+  "unit": {
+    "unit_id": "local::lecture-03::seg7",
+    "course_id": "CS230",
+    "name": "Benchmarks, drift, monitoring, and maintenance after deployment",
+    "description": "Closes the lifecycle by explaining reference performance, data/concept drift, operational monitoring, dashboard pruning, alarms, and model maintenance.",
+    "summary": "For model quality, the instructor introduces reference performance, often human-level performance, as an aspirational benchmark that helps diagnose whether a system is underperforming [ts=3263s]. After deployment, strong train/test performance is not enough because the world can change through data drift or concept drift: seasonal clothing, scarves, sunglasses, rain, geography, and user behavior can alter the distribution or the target mapping [ts=3310s]. Simple non-ML systems can sometimes be less susceptible to drift than high-capacity learned models because they tune fewer parameters and have fewer ways to overfit a narrow distribution [ts=3601s]. Production teams should gather privacy-respecting telemetry when possible, brainstorm possible failure modes, plot many metrics initially, prune uninformative dashboards, set alarms for abnormal ranges, and maintain the model by collecting new data and updating the system [ts=3735s].",
+    "key_points": [
+      {
+        "text": "Human-level performance can serve as a reference or aspirational benchmark for diagnosing model accuracy.",
+        "timestamp_s": 3263,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Data drift means the distribution of future inputs changes relative to the training set.",
+        "timestamp_s": 3310,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Concept drift means the input-output mapping changes relative to the training set.",
+        "timestamp_s": 3310,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Doing well on a test set is not the same as building a product that works in the real world.",
+        "timestamp_s": 3418,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Very simple non-ML systems may be less susceptible to drift because they tune fewer parameters than neural networks.",
+        "timestamp_s": 3601,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Production teams should use privacy-respecting telemetry, dashboards, pruning, and alarms to detect changing conditions.",
+        "timestamp_s": 3735,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Maintaining a deployed model means monitoring, collecting new data, and updating the system when new failures arise.",
+        "timestamp_s": 3996,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+      "start_s": 3195,
+      "end_s": 4017
+    },
+    "difficulty": 0.55,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 13.7,
+    "ordering_index": 7,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "For model quality, the instructor introduces reference performance, often human-level performance, as an aspirational benchmark that helps diagnose whether a system is underperforming [ts=3263s]. After deployment, strong train/test performance is not enough because the world can change through data drift or concept drift: seasonal clothing, scarves, sunglasses, rain, geography, and user behavior can alter the distribution or the target mapping [ts=3310s]. Simple non-ML systems can sometimes be less susceptible to drift than high-capacity learned models because they tune fewer parameters and have fewer ways to overfit a narrow distribution [ts=3601s]. Production teams should gather privacy-respecting telemetry when possible, brainstorm possible failure modes, plot many metrics initially, prune uninformative dashboards, set alarms for abnormal ranges, and maintain the model by collecting new data and updating the system [ts=3735s].",
+  "target_kp_ids": [
+    "kp_cs230_reference_performance_and_human_level_benchmark",
+    "kp_cs230_data_drift_and_concept_drift",
+    "kp_cs230_production_monitoring_and_model_maintenance"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+  "video_clip_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+  "transcript_slice": "00:53:19\nAnd so it turns out that the way you diagnose\n\n00:53:27\nshould talk about later in this course,\n\n00:53:31\nAnd very often, we'll use what a human expert\n\n00:53:38\nAnd then in the case of face recognition, definitely\n\n00:53:44\nSo, definitely.\n\n00:53:47\nthey're way better than I am at recognizing human faces.\n\n00:53:53\nprobably the vast majority of humans,\n\n00:53:57\npictures are the same.\n\n00:54:01\nThen it actually gets more difficult [INAUDIBLE]\n\n00:54:05\nBut, yeah.\n\n00:54:11\nusing a human level performance is often a good benchmark.\n\n00:54:16\nhumans can't do well--\n\n00:54:20\nor movies or whatever.\n\n00:54:23\nI think most of us would have a hard time recommending\n\n00:54:28\nAI actually probably does it even better than many of us\n\n00:54:32\nThen those things is harder to establish a baseline.\n\n00:54:41\nNow, one final aspect I want to touch on\n\n00:54:54\nthe model, one thing that often happens\n\n00:55:01\nWorks great.\n\n00:55:03\nDoes well on your test set.\n\n00:55:05\nAnd then you deploy it.\n\n00:55:11\nno longer works.\n\n00:55:16\nwhere the distribution of data, the world\n\n00:55:21\nor concept drift, which is the input output mapping.\n\n00:55:27\nset.\n\n00:55:32\nsystem now in--\n\n00:55:39\nyou get faces of a certain distribution.\n\n00:55:45\nto rain more, people are wearing scarves, rain jackets,\n\n00:55:51\nOr maybe we approach the summer.\n\n00:55:56\nThen the data distribution changes.\n\n00:56:04\nbut we then decide to deploy it in a different country\n\n00:56:10\ntheir appearance is different.\n\n00:56:16\nAnd so one of the jobs of I think us\n\n00:56:25\nmonitor this type of concept drift or data drift, and fix\n\n00:56:30\nWhen you're out building machine learning systems,\n\n00:56:36\nthat think their job is to do well on a test set.\n\n00:56:41\nwhere the machine learning person would say, look,\n\n00:56:45\nMy job is done.\n\n00:56:49\nwill say, no, your system doesn't work.\n\n00:56:53\nAnd then if the machine learning person says,\n\n00:56:57\nI do well on the test set.\n\n00:57:01\nto move it forward.\n\n00:57:04\nIf you're building a machine learning system,\n\n00:57:09\nAnd that can be different than building something\n\n00:57:13\nSo if ever you're working on a product, and someone says,\n\n00:57:19\nbut your system doesn't work.\n\n00:57:23\nBut my job is to do one to test it.\n\n00:57:28\ndoesn't translate to doing well on the application\n\n00:57:34\nthat.\n\n00:57:38\ndoesn't translate to doing well in real life\n\n00:57:44\nyou may need to update the distribution of data you're\n\n00:57:49\nhas changed in the world.\n\n00:57:55\nI feel like the world gives us new data all the time.\n\n00:58:05\nsometimes, a new politician is elected\n\n00:58:10\ngoes viral or Taylor Swift releases a new album, whatever.\n\n00:58:17\nI thought I'd get a laugh from that.\n\n00:58:19\nNo Swifties here.\n\n00:58:22\n[CHUCKLES]\n\n00:58:28\nare searching for a brand new thing.\n\n00:58:33\nis different because the world has changed.\n\n00:58:38\nThere's actually a reasonable chance\n\n00:58:41\nmay have been inspected by software that my teams wrote.\n\n00:58:47\nOr there's a new machine installed in the manufacturing\n\n00:58:50\nAnd this machine makes a new type of scratch\n\n00:58:53\nSo data changes in inspection lines as well.\n\n00:58:58\nwhen I work on self-driving cars, one of the things\n\n00:59:04\nAnd then when we took the cars to Texas, you and I as people,\n\n00:59:11\nBut it turns out that traffic lights look really different\n\n00:59:15\nSo traffic lights, horizontal, vertical.\n\n00:59:20\nin some parts of Texas.\n\n00:59:25\nto be robust to high winds.\n\n00:59:28\nSo the models we train in California, they\n\n00:59:33\nRefresh the data.\n\n00:59:39\nthe model, even when something in the world changes.\n\n00:59:49\nand maintaining it, one interesting difference\n\n00:59:56\nis option one is very simple model.\n\n01:00:04\nis epsilon, the fraction of pixels that change.\n\n01:00:11\nis actually very robust to changes in distribution.\n\n01:00:17\nare wearing sunglasses.\n\n01:00:22\neven when people are wearing sunglasses,\n\n01:00:26\nMaybe if it's Halloween and people\n\n01:00:29\nmaybe that would change.\n\n01:00:33\nbecause it's so simple.\n\n01:00:37\nwith no one wearing sunglasses because the sun's\n\n01:00:43\nThen with everyone starts to wear sunglasses,\n\n01:00:48\nSo one of the advantages, very simple\n\n01:00:51\nis they may be less susceptible to data drift.\n\n01:00:59\nto limit the data set.\n\n01:01:05\nBut if I train a neural network with, say, thousands\n\n01:01:10\nthen I'm more likely to overfit to people without sunglasses.\n\n01:01:17\nyou're more likely to have to update this model.\n\n01:01:30\nsorry.\n\n01:01:43\nBoy.\n\n01:01:56\nto be incredibly helpful if you can get user permission\n\n01:02:02\nhosted service.\n\n01:02:07\ntransparent privacy practices--\n\n01:02:11\nSo do be transparent.\n\n01:02:14\nAnd if you're able to do that and get a little bit of data\n\n01:02:23\nand maybe one practice that I've seen\n\n01:02:30\none good practice would be to gather your team together\n\n01:02:36\non all the things you could change,\n\n01:02:40\nAnd I've built quite a few machine learning systems.\n\n01:02:46\nall the things that could go wrong, including the data\n\n01:02:53\ngo wrong in real life that we did not\n\n01:02:59\nI might be wrong.\n\n01:03:02\nwe really brainstorm all the things to go wrong.\n\n01:03:05\ngo wrong that was not on the list of stuff\n\n01:03:10\nAnd so if you brainstorm-- and this\n\n01:03:15\nIt turns out creative teams, you can actually\n\n01:03:19\nor things that could go wrong.\n\n01:03:25\nor metrics to put in place to monitor whether or not\n\n01:03:31\nactually do go wrong.\n\n01:03:38\nit turns out re-authentication is a common thing.\n\n01:03:43\nbefore they let through?\n\n01:03:46\nSo let's build a dashboard to do that.\n\n01:03:50\nBecause it probably means something\n\n01:03:53\nHow often do you accept versus reject the user?\n\n01:03:59\nAnd I find that just as it's difficult to know in advance\n\n01:04:05\ndifficult to know in advance what dashboard\n\n01:04:09\nAnd so the best practice I tend to recommend\n\n01:04:15\nbrainstorm a lot of metrics, and then just create\n\n01:04:23\nlatency, re-authentication.\n\n01:04:34\nAnd then draw plots over time to see how these rates trend over\n\n01:04:43\nAnd if you're able to have a lot of dashboards and sample\n\n01:04:49\nfor where you suspect it may be making a mistake,\n\n01:04:54\nto have a higher chance of spotting\n\n01:05:00\nAnd in the times that built large dashboards\n\n01:05:09\nto know in advance which dashboards\n\n01:05:13\nI think in exploratory data analysis, in data science,\n\n01:05:19\nor what the data will give us in the future,\n\n01:05:24\nand then go and figure out from there what is interesting.\n\n01:05:30\nis fairly low.\n\n01:05:33\nAnd if you end up with, 30, 50, 100 dashboards tracking\n\n01:05:41\nin a few days or a few weeks, you\n\n01:05:45\nSo we figure out that, well, latency is just not a thing\n\n01:05:50\nvery constant.\n\n01:05:53\njust a very boring plot.\n\n01:05:55\nAnd so often, plot a lot of things\n\n01:06:00\nand we track and monitor for the long term.\n\n01:06:06\na sense of just being the normal range for some metric,\n\n01:06:17\nSo that if it ever goes above or below certain bounds,\n\n01:06:23\nto take a look to figure out if something's gone wrong.\n\n01:06:28\nAnd so unfortunately, just because you train a model a lot\n\n01:06:34\nit doesn't mean you're done.\n\n01:06:38\nwill give you surprising data.\n\n01:06:44\nas well as to maintain the model,\n\n01:06:49\nto fix problems as they arise, that\n\n01:06:57\na machine learning system as well.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-03::seg7",
+      "global_kp_id": "kp_cs230_reference_performance_and_human_level_benchmark",
+      "planner_role": "main",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-03::seg7",
+      "global_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-03::seg7",
+      "global_kp_id": "kp_cs230_production_monitoring_and_model_maintenance",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_reference_performance_and_human_level_benchmark",
+      "name": "Reference performance and human-level benchmark",
+      "description": "Reference performance, often human-level performance, is used as an aspirational or diagnostic benchmark for judging whether a model is underperforming.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "model_evaluation",
+        "benchmarking"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer",
+        "ml_product_engineer"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture uses reference performance to connect evaluation to deployment readiness and to diagnose whether a model has room to improve [ts=3263s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "name": "Data drift and concept drift",
+      "description": "Data drift changes the distribution of future inputs, while concept drift changes the input-output mapping the model should learn.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "ml_ops",
+        "monitoring",
+        "data_drift"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_platform_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Drift is production-critical, but here it is one monitoring concern within the broader project lifecycle.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_production_monitoring_and_model_maintenance",
+      "name": "Production monitoring and model maintenance",
+      "description": "Production ML teams monitor telemetry and dashboards, set alarms, collect new data, and update deployed systems when new failure modes appear.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "ml_ops",
+        "monitoring",
+        "maintenance"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ml_platform_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Maintenance is important production practice, but it supports the full lifecycle gateway rather than acting as a separate gate.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp14"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.4,
+    0.7
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
+  }
+}

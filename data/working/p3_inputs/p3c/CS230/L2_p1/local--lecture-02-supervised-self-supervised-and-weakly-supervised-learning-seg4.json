@@ -1,0 +1,193 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+    "lecture_title": "Supervised, Self-Supervised, & Weakly Supervised Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY"
+  },
+  "unit": {
+    "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+    "course_id": "CS230",
+    "name": "Trigger word detection: cascaded systems and sequential labels",
+    "description": "Introduces trigger word detection inside a voice-assistant cascade, then develops the data, input, output, and labeling scheme for detecting a keyword in 10-second audio.",
+    "summary": "Trigger word detection is framed as the second model in a voice-assistant cascade: a lightweight activity detector notices sound, a trigger model listens for a keyword, and a heavier downstream model handles the command [ts=2083s]. The task is to detect the word activate in a 10-second audio clip, with attention to preprocessing such as Fourier transforms, sequence length, positive words, negative words, and background noise [ts=2170s]. The instructor emphasizes data distribution: accents, age, cadence, gender-linked frequency distributions, and subway-like background noise can all break a campus-only dataset [ts=2328s]. A human experiment shows that a coarse 0/1 clip label is much harder than a time-localized sequence label; the better label can reduce the amount of data needed by orders of magnitude [ts=2636s]. Because all-zero labels can dominate a sparse sequence target, the design uses a more balanced sequential labeling scheme, sigmoid at each time step, and binary cross-entropy at each step [ts=2813s].",
+    "key_points": [
+      {
+        "text": "Voice assistants often use cascaded models so cheap activity detection runs before trigger-word and heavier command-understanding models.",
+        "timestamp_s": 2083,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The trigger-word task is to detect the keyword activate inside a 10-second audio clip.",
+        "timestamp_s": 2170,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Audio data distribution must cover accents, age, cadence, gender-linked frequency differences, and background noise.",
+        "timestamp_s": 2328,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A time-localized labeling scheme can make the trigger-word task much easier for both humans and models than a single clip-level label.",
+        "timestamp_s": 2636,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A sparse sequence target can let a model predict all zeros with high apparent accuracy, so a more balanced positive-label strategy is needed.",
+        "timestamp_s": 2813,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+      "start_s": 2065,
+      "end_s": 2813
+    },
+    "difficulty": 0.5,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 12.5,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Trigger word detection is framed as the second model in a voice-assistant cascade: a lightweight activity detector notices sound, a trigger model listens for a keyword, and a heavier downstream model handles the command [ts=2083s]. The task is to detect the word activate in a 10-second audio clip, with attention to preprocessing such as Fourier transforms, sequence length, positive words, negative words, and background noise [ts=2170s]. The instructor emphasizes data distribution: accents, age, cadence, gender-linked frequency distributions, and subway-like background noise can all break a campus-only dataset [ts=2328s]. A human experiment shows that a coarse 0/1 clip label is much harder than a time-localized sequence label; the better label can reduce the amount of data needed by orders of magnitude [ts=2636s]. Because all-zero labels can dominate a sparse sequence target, the design uses a more balanced sequential labeling scheme, sigmoid at each time step, and binary cross-entropy at each step [ts=2813s].",
+  "target_kp_ids": [
+    "kp_cs230_cascaded_trigger_word_systems",
+    "kp_cs230_sequential_trigger_word_labeling"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+  "video_clip_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
+  "transcript_slice": "00:34:27\nLet me give some context on this.\n\n00:34:32\nOK, you're familiar with Alexa and all these--\n\n00:34:40\nmight have in your kitchen listening to you.\n\n00:34:43\nSo the way these networks typically\n\n00:34:49\nit's a cascade of models for energy and efficiency purposes.\n\n00:34:58\nin your kitchen, the first model is activity detection.\n\n00:35:04\nBecause you don't want to listen with the heavy model\n\n00:35:09\nYou want a very lightweight model\n\n00:35:13\nAnd so let's say this network detects volume,\n\n00:35:20\nword the trigger word.\n\n00:35:26\nThat's usually the second layer.\n\n00:35:31\nIf the keyword comes in, it would typically\n\n00:35:37\nthat might be heavier and more energy consumption,\n\n00:35:45\nAnd then I'm not going to go into the details,\n\n00:35:51\nBack in the day, some of these companies\n\n00:35:57\nto buy something online.\n\n00:36:01\nToday it's slightly simpler and more end to end\n\n00:36:05\nthat are being called because this case\n\n00:36:10\nSo here's my problem for you.\n\n00:36:17\nHow would you build that off the shelf like that starting from 0.\n\n00:36:30\nYep.\n\n00:36:35\nAnd from those frequency we want to figure out what was the word.\n\n00:36:44\nOK.\n\n00:36:49\nwe will run some kind of algorithm\n\n00:36:53\nLike a Fourier transform, or--\n\n00:36:59\nor plus the preprocessing.\n\n00:37:01\nSo you're saying audio is a bunch of frequencies\n\n00:37:06\nAnd we want to first pre-process that, then\n\n00:37:11\nAnd the length of the sequence matters as well.\n\n00:37:15\nactivate you know that the length needs to be--\n\n00:37:19\nYou can't say activate in less than 10 milliseconds.\n\n00:37:23\nThat's good insight.\n\n00:37:25\nWhat data?\n\n00:37:29\nYes.\n\n00:37:33\nOK.\n\n00:37:36\nHow would you-- what would you ask them to say?\n\n00:37:41\nYou would ask-- you would record a bunch of people\n\n00:37:44\nYou would ask them anything else?\n\n00:37:48\nState--\n\n00:37:50\nYeah.\n\n00:37:51\nSay a sentence.\n\n00:37:53\nIt turns out you have websites that are random generators,\n\n00:37:58\nand you record everything.\n\n00:38:00\nSay the word deactivate.\n\n00:38:02\nSo you're saying you want to find negative words that\n\n00:38:08\nthat the model learns that.\n\n00:38:09\nYeah.\n\n00:38:14\nThe reason Alexa, and actually, there\n\n00:38:19\nback in the days around what would the word be.\n\n00:38:23\nbecause you want to choose a word that is not\n\n00:38:28\nis always turning on.\n\n00:38:32\nIt's not bad, but it's not ideal either.\n\n00:38:37\nLet's say we've gone around campus,\n\n00:38:48\nDo we need to think about the distribution of the data?\n\n00:38:52\nWhy campus only might be limited, let's say?\n\n00:38:57\nMaybe [? I'd ?] get a lot of accents.\n\n00:39:00\nTurns out the first version of this model\n\n00:39:08\ncould not make it work.\n\n00:39:11\nAnd we had to collect more data from--\n\n00:39:15\nso we had to collect more data from them,\n\n00:39:22\nOK good insight.\n\n00:39:26\nYes.\n\n00:39:29\nGood point.\n\n00:39:32\nyounger than if you actually cross campus and go\n\n00:39:37\nAnd in fact, the frequencies are going to be different\n\n00:39:40\nThat's correct.\n\n00:39:43\nThere is also the cadence.\n\n00:39:46\nHow fast-- some people speak fast,\n\n00:39:50\nSome people just speak faster.\n\n00:39:53\nAnd look at this.\n\n00:39:58\nversus someone who speaks slow, it doesn't make a big difference\n\n00:40:04\nBut if you actually just had access\n\n00:40:08\nit would look completely different.\n\n00:40:13\nYeah.\n\n00:40:18\nto female voice.\n\n00:40:19\nRatio of male to female.\n\n00:40:23\nAnd on average, yes, there's different frequencies\n\n00:40:27\nYeah.\n\n00:40:29\nBackground noise.\n\n00:40:31\nTurns out on Stanford campus, you don't hear the metro.\n\n00:40:39\nwork for people in New York that are taking the subway all\n\n00:40:44\nYeah OK.\n\n00:40:48\nof the task ahead of us.\n\n00:40:54\nI'm going to call X. And this audio CLIP\n\n00:41:00\nSo one of the things is a negative words\n\n00:41:08\nand then the background is in orange.\n\n00:41:13\nactivate yourself, whatever.\n\n00:41:17\nActivate is the positive word.\n\n00:41:22\nOK I'm not going to ask you this question\n\n00:41:26\nknow it.\n\n00:41:30\nis to go on GitHub and find another speech project,\n\n00:41:37\nAnd if you're using human audio, you'll\n\n00:41:42\nOK.\n\n00:41:46\nfind that there is just a certain sample rate that\n\n00:41:53\nWhat's the output?\n\n00:42:00\nOK, let's try something.\n\n00:42:03\n0 meaning there is no positive word.\n\n00:42:06\nOne meaning there is a positive word in that 10-second audio\n\n00:42:10\nSo we're going to do a little human experiment.\n\n00:42:18\nI've selected three audio samples of around 10 seconds.\n\n00:42:26\nI'm not going to tell you what the language is,\n\n00:42:31\nwhen we start training it.\n\n00:42:34\nThat's the experiment.\n\n00:42:38\nAnd the third sample have the word that we're looking for.\n\n00:42:44\nbecause the model doesn't what the word is\n\n00:42:47\nSo now up to you to guess what the word is.\n\n00:42:53\nOK let's try it.\n\n00:43:02\nTo loud.\n\n00:43:06\nWait let me see if I can put the microphone here.\n\n00:43:18\nAnybody has it or.\n\n00:43:20\nNo way.\n\n00:43:23\nThird one.\n\n00:43:31\nOK.\n\n00:43:35\n[NON-ENGLISH SPEECH]\n\n00:43:38\nThat's not it, but maybe.\n\n00:43:42\nSounds like [NON-ENGLISH SPEECH]\n\n00:43:46\nYou speak-- OK.\n\n00:43:50\nNobody finds it usually in the first try, but you did find it.\n\n00:43:56\nOK, let's try again and do it with a different labeling scheme\n\n00:44:02\nOK, let's try again, I'm going to play it again,\n\n00:44:09\n[NON-ENGLISH SPEECH]\n\n00:44:17\n[NON-ENGLISH SPEECH]\n\n00:44:24\n[NON-ENGLISH SPEECH]\n\n00:44:33\nSomeone who's not Italian speaker.\n\n00:44:45\nYeah, you've heard it.\n\n00:44:47\nOK not far promojo, it's pomeriggio But you're close.\n\n00:44:54\nThe second.\n\n00:44:56\nWay easier.\n\n00:45:01\nAnd so what is the question I'm posing here\n\n00:45:08\neasier for us to label frankly.\n\n00:45:14\nBut how much more data do you think\n\n00:45:20\nIt's probably 1,000x data.\n\n00:45:27\ntimes harder for us to label than the first one\n\n00:45:32\nSo the answer is very clear.\n\n00:45:36\nand your model is going to learn way\n\n00:45:41\nSo that's the type of human experiment you can do.\n\n00:45:46\nYeah question.\n\n00:45:48\nThis is Marvin, right?\n\n00:45:51\nQuestion is it manual labeling or not?\n\n00:45:54\nexplain some tricks we can use.\n\n00:45:57\nIs there a tradeoff where you spend a lot more time\n\n00:46:04\nBut then it does do better on the model.\n\n00:46:08\nYeah how do you pick the trade-off\n\n00:46:12\nIn fact, today you could have a pre-training\n\n00:46:20\nThe question is for pre-training.\n\n00:46:26\nand you don't want to-- you want to avoid a cold start problem.\n\n00:46:33\nmaybe even with 1,000 data points that you collect\n\n00:46:38\nanything.\n\n00:46:42\nscheme can be a great way to work around the cold starts.\n\n00:46:48\nwhat you mean and then the rest of the data\n\n00:46:53\nOK, let me talk a little bit about the labeling scheme.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "global_kp_id": "kp_cs230_cascaded_trigger_word_systems",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg4",
+      "global_kp_id": "kp_cs230_task_scoping_and_data_diversity",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_cascaded_trigger_word_systems",
+      "name": "Cascaded trigger-word systems",
+      "description": "Voice assistants can use cascaded models so cheaper detectors run continuously and heavier models activate only when needed.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The cascade explanation at [ts=2083s] motivates why trigger-word detection is a specific subproblem in deployed assistants.",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_sequential_trigger_word_labeling",
+      "name": "Sequential trigger-word labeling",
+      "description": "For trigger-word detection, a sequence of per-time-step labels can make learning easier than a single clip-level 0/1 label.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "speech"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.5,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The human audio experiment at [ts=2636s] and label-imbalance discussion at [ts=2813s] show how label design directly controls learnability.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_task_scoping_and_data_diversity",
+      "name": "Task scoping and data diversity",
+      "description": "The problem definition and deployment distribution determine data requirements, model capacity, edge cases, and evaluation realism.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "At [ts=1337s] the instructor contrasts one-location day/night classification with global deployment, and at [ts=2328s] repeats the distribution issue for audio accents and noise.",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::kp8"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.35,
+    0.65
+  ],
+  "allow_code_mcq": false,
+  "allowed_item_types": [
+    "concept_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L2_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+    "lecture_title": "Lecture 4: Adversarial Robustness and Generative Models",
+    "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM"
+  },
+  "unit": {
+    "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+    "course_id": "CS230",
+    "name": "The GAN generator-discriminator game",
+    "description": "Explains the original GAN setup with a generator that maps random code to images and a discriminator trained to classify real versus generated images.",
+    "summary": "GANs are introduced as a two-model adversarial training method: the generator is the model ultimately used, while the discriminator is used to train it [ts=3373s]. The generator maps a small random code z into a larger image, so its architecture must upsample from a low-dimensional input to a high-dimensional output [ts=3406s]. The discriminator alternates between generated images and real database images and learns binary labels, predicting fake as 0 and real as 1 [ts=3511s]. Training succeeds when the generator becomes realistic enough that a strong discriminator can no longer reliably distinguish real from fake [ts=3562s]. Gradients flow through the discriminator and back into the generator, making the simultaneous optimization of two networks a stability challenge [ts=3586s].",
+    "key_points": [
+      {
+        "text": "A GAN contains a generator G and discriminator D that compete during training.",
+        "timestamp_s": 3373,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The generator takes a random code z and upsamples it into an image.",
+        "timestamp_s": 3406,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The discriminator is a binary classifier that predicts fake generated images as 0 and real database images as 1.",
+        "timestamp_s": 3511,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Successful GAN training means G fools D so well that D cannot reliably tell generated and real images apart.",
+        "timestamp_s": 3562,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Gradient signals pass through D to update G, so training two networks simultaneously can be unstable.",
+        "timestamp_s": 3586,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+      "start_s": 3370,
+      "end_s": 3817
+    },
+    "difficulty": 0.7,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 7.5,
+    "ordering_index": 6,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "GANs are introduced as a two-model adversarial training method: the generator is the model ultimately used, while the discriminator is used to train it [ts=3373s]. The generator maps a small random code z into a larger image, so its architecture must upsample from a low-dimensional input to a high-dimensional output [ts=3406s]. The discriminator alternates between generated images and real database images and learns binary labels, predicting fake as 0 and real as 1 [ts=3511s]. Training succeeds when the generator becomes realistic enough that a strong discriminator can no longer reliably distinguish real from fake [ts=3562s]. Gradients flow through the discriminator and back into the generator, making the simultaneous optimization of two networks a stability challenge [ts=3586s].",
+  "target_kp_ids": [
+    "kp_gan_latent_generator_distribution"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+  "video_clip_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
+  "transcript_slice": "00:56:10\nSo let's start with GANs.\n\n00:56:18\nmethod that's probably new to you,\n\n00:56:25\nThat is why it's called adversarial.\n\n00:56:29\nOne model is called G, the generator,\n\n00:56:35\nAnd the second model is called the discriminator,\n\n00:56:44\nSo here's how it goes.\n\n00:56:47\nYou give it a random code of size, let's say, 100.\n\n00:56:54\nyou're trying to get an image out of it.\n\n00:56:59\nis new to this class.\n\n00:57:04\nsmaller than the output.\n\n00:57:09\nwe're going to talk about deconvolutions, which\n\n00:57:16\nyou to go from a smaller-dimensional input\n\n00:57:20\nAnd I'll explain how that works.\n\n00:57:24\nYou can think of it as the last layer\n\n00:57:28\nallow us to upsample the input.\n\n00:57:36\nAnd it's not looking like real at all\n\n00:57:42\nif you give a random code to G, of course, it's not trained.\n\n00:57:49\nlooks like noise.\n\n00:57:53\nto use a discriminator in order to force the generator\n\n00:58:02\nHere's how it goes.\n\n00:58:07\nAnd fortunately, there's a lot of those online.\n\n00:58:10\nBe careful of model backdoor attacks.\n\n00:58:18\nAnd if you were to plot the distribution,\n\n00:58:23\nis the one we want to target, we want to match.\n\n00:58:29\nAnd we're going to try to match those the distribution.\n\n00:58:37\nfake and real images.\n\n00:58:47\nThat image would be x or G of Z. x is G of Z.\n\n00:58:54\npull from the real database and get x a real image.\n\n00:59:05\nmeaning we want you to say 0 if you think that this image is\n\n00:59:14\nif you think that the image comes from the bottom,\n\n00:59:21\nSo what are we doing?\n\n00:59:26\nAnd we're training a generator to fool the discriminator.\n\n00:59:34\nsee an amazing discriminator that's\n\n00:59:38\nBut the generator is so good that the discriminator\n\n00:59:42\nThat would be a successful training of a GAN.\n\n00:59:49\nusing gradient descent on mini batches, the flow of gradient\n\n00:59:57\nSo we're going to take a derivative of our cost function,\n\n01:00:05\nto update the parameters of D. So for example,\n\n01:00:12\nThis was a fake image.\n\n01:00:19\nAnd we will go all the way back to G and say, hey G, good job.\n\n01:00:24\nYou fooled D. Good stuff.\n\n01:00:30\nYou were not compelling enough.\n\n01:00:33\nPush your parameters to the right\n\n01:00:38\nSo the gradients, they go this direction.\n\n01:00:43\nSo we're training two networks at a time,\n\n01:00:51\nYou run gradient descent on mini batches\n\n01:00:57\nHow can you tell?\n\n01:01:01\nfooled or the generator to start outputting\n\n01:01:05\n[INAUDIBLE] giving false images because it doesn't [INAUDIBLE].\n\n01:01:20\nbecause we have the weights from the start [INAUDIBLE].\n\n01:01:29\nActually, at the beginning of training,\n\n01:01:37\nto get better quickly than it is for the generator\n\n01:01:42\nBecause binary classification of fake to real\n\n01:01:47\nto go from a random image to make it look super real, so\n\n01:01:52\nG is generally the weakest.\n\n01:02:01\nYeah, question.\n\n01:02:20\nTry to figure out which one is the generative one.\n\n01:02:30\nYeah, there's hundreds variations of GANs.\n\n01:02:35\nSo you might see stuff like the ones you've seen in the past.\n\n01:02:42\nThis is the first Ian Goodfellow's GANs setup,\n\n01:02:47\nBut you're right.\n\n01:02:50\nYou can change the loss function.\n\n01:02:52\nYou can add different connections.\n\n01:02:56\nThere's a lot of things you can do with GANs.\n\n01:03:06\nsometimes called minimax game?\n\n01:03:13\nWe've seen the setup.\n\n01:03:17\nWell, what would you choose for a loss\n\n01:03:31\nNobody wants to give it a try?\n\n01:03:37\nLog loss, binary cross-entropy, or-- yeah, correct.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "global_kp_id": "kp_gan_minimax_objective",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "name": "GAN latent generator distribution",
+      "description": "Sampling z from a simple prior and mapping through G(z) induces pG, which should match pdata.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.64,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN latent generator distribution formalizes how sampling z from a simple prior and mapping through G(z) induces pG, which should match pdata, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp4",
+        "local::lecture04-adversarial-robustness-and-generative-models::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_gan_minimax_objective",
+      "name": "GAN minimax objective",
+      "description": "The objective min_G max_D E_x log D(x)+E_z log(1-D(G(z))) defines the adversarial game.",
+      "track_tags": [
+        "computer_vision",
+        "deep_learning",
+        "generative_models"
+      ],
+      "domain_tags": [
+        "image_generation",
+        "neural_networks",
+        "probabilistic_modeling"
+      ],
+      "career_path_tags": [
+        "computer_vision_engineer",
+        "generative_ai_engineer",
+        "ml_researcher"
+      ],
+      "difficulty_level": 0.8,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because gAN minimax objective formalizes how the objective min_G max_D E_x log D(x)+E_z log(1-D(G(z))) defines the adversarial game, which later units use as core machinery rather than background context.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS231n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture_14::kp6",
+        "local::lecture04-adversarial-robustness-and-generative-models::kp12"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.55,
+    0.85
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L4_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
+  }
+}

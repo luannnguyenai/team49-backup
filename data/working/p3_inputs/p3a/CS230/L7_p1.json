@@ -1,0 +1,1711 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-07-agents-prompts-and-rag",
+    "lecture_title": "Agents, Prompts, and RAG",
+    "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw"
+  },
+  "table_of_contents": [
+    {
+      "section_index": 1,
+      "title": "Lecture scope and augmenting LLMs",
+      "start_s": 5,
+      "end_s": 1088
+    },
+    {
+      "section_index": 2,
+      "title": "Prompt engineering: prompt design, examples, chains, and judges",
+      "start_s": 1091,
+      "end_s": 2475
+    },
+    {
+      "section_index": 3,
+      "title": "Fine-tuning: proceed with caution",
+      "start_s": 2479,
+      "end_s": 2687
+    },
+    {
+      "section_index": 4,
+      "title": "Retrieval-Augmented Generation (RAG)",
+      "start_s": 2691,
+      "end_s": 3181
+    },
+    {
+      "section_index": 5,
+      "title": "Agentic AI workflows and the engineering paradigm shift",
+      "start_s": 3210,
+      "end_s": 4657
+    },
+    {
+      "section_index": 6,
+      "title": "Evals for agentic workflows and customer support case study",
+      "start_s": 4659,
+      "end_s": 5656
+    },
+    {
+      "section_index": 7,
+      "title": "Multi-agent workflows",
+      "start_s": 5665,
+      "end_s": 6185
+    },
+    {
+      "section_index": 8,
+      "title": "What is next in AI",
+      "start_s": 6185,
+      "end_s": 6585
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg1",
+      "course_id": "CS230",
+      "name": "Why base LLMs need augmentation",
+      "description": "Motivation for augmenting pre-trained LLMs: limitations of control, domain coverage, freshness, task specificity, context handling, and the two optimization axes.",
+      "summary": "The lecture frames the session as a practical tour of techniques for building LLM applications beyond the base model, including prompting, RAG, agentic workflows, evals, and multi-agent systems [ts=5s]. Students identify base-model limitations such as missing domain knowledge, distribution shift, lack of current information, and poor fit for narrow enterprise tasks [ts=228s]. The instructor adds control failures, style/format inconsistency, task-specific understanding, limited context windows, and source requirements as recurring reasons a vanilla LLM underperforms [ts=475s]. RAG is previewed as a way to retrieve compressed document representations and attach relevant evidence to the prompt, but the lecture also notes latency and future-proofing debates [ts=856s]. The segment closes with a two-axis mental model: improve the foundation model itself, or improve how context and tools wrap around it through better prompts, RAG, agents, and multi-agent systems [ts=1001s].",
+      "key_points": [
+        {
+          "text": "The lecture goal is breadth over end-to-end product building: prompting techniques, agentic workflows, multi-agent systems, and evals.",
+          "timestamp_s": 62,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Base models can lack domain knowledge or fail on domain-specific data not represented in public training sets.",
+          "timestamp_s": 228,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Pre-trained models can be stale because retraining from scratch for every new trend is impractical.",
+          "timestamp_s": 326,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "LLMs are difficult to control, and even large teams struggle to prevent unwanted or biased outputs.",
+          "timestamp_s": 475,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Limited context handling prevents standalone LLMs from reading thousands of enterprise documents directly.",
+          "timestamp_s": 681,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "RAG embeds documents, retrieves relevant representations, adds them as context, and supports sourcing.",
+          "timestamp_s": 869,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "LLM performance can improve either by using a stronger foundation model or by improving context, tools, prompts, RAG, and workflows around the model.",
+          "timestamp_s": 1001,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 5,
+        "end_s": 1088
+      },
+      "difficulty": 0.34,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 18.1,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "course_id": "CS230",
+      "name": "Prompt design, templates, and in-context examples",
+      "description": "Introduces prompt engineering as the first line of optimization, covering the jagged frontier, centaur/cyborg collaboration styles, specificity, prompt templates, and zero-shot versus few-shot prompting.",
+      "summary": "Prompt engineering is motivated by a study of consultants where trained AI users performed best within the AI capability frontier, while over-reliance outside the frontier made performance worse [ts=1091s]. The instructor distinguishes centaurs, who divide and delegate tasks to AI, from cyborgs, who integrate AI into continuous back-and-forth work [ts=1204s]. Basic prompt quality improves when the prompt specifies document type, length, audience, focus, and a step-by-step task breakdown [ts=1329s]. Prompt templates are defined as reusable structures with dynamic placeholders that can be embedded in code and personalized from metadata such as role, country, or language [ts=1505s]. The unit then contrasts zero-shot prompting with few-shot prompting, showing how examples can align ambiguous labels such as product-review sentiment without changing model weights [ts=1668s].",
+      "key_points": [
+        {
+          "text": "AI assistance has a jagged frontier: useful on some tasks, harmful on others when users stop reviewing outputs.",
+          "timestamp_s": 1142,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Centaurs divide and delegate between themselves and AI; cyborgs continuously integrate AI into the task flow.",
+          "timestamp_s": 1204,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A stronger prompt specifies document type, audience, format, and focus areas instead of asking for a generic summary.",
+          "timestamp_s": 1329,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Chain-of-thought style task decomposition asks the model to approach a task step by step and not skip steps.",
+          "timestamp_s": 1443,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A prompt template is a predefined structure with placeholders for dynamic inputs.",
+          "timestamp_s": 1584,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Few-shot prompting gives examples to align the model to desired style, structure, or task-specific labels.",
+          "timestamp_s": 1733,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A prompt can become too long; one engineering workaround is to summarize earlier conversation chapters before continuing.",
+          "timestamp_s": 1860,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 1091,
+        "end_s": 1924
+      },
+      "difficulty": 0.42,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 13.9,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "course_id": "CS230",
+      "name": "Prompt chaining, prompt tests, and LLM judges",
+      "description": "Explains how to decompose complex prompts into chains, why intermediate outputs aid debugging, and how prompt tests and LLM-as-judge rubrics scale evaluation.",
+      "summary": "Chaining is separated from chain-of-thought: instead of only asking for step-by-step reasoning, it splits a complex workflow into multiple prompts whose outputs feed later prompts [ts=1933s]. The instructor uses a customer-review response example to show that a single prompt can work but hides failure modes across extraction, outline creation, and final response writing [ts=1957s]. Chaining improves control because intermediate outputs reveal which prompt should be optimized, though longer chains add latency [ts=2007s]. Prompt testing starts with human review of generated outputs across test cases, then can be scaled using tools or LLM judges [ts=2286s]. LLM judges can perform pairwise comparison, single-answer grading, reference-guided comparison, or rubric-based scoring, and rubrics themselves can be few-shot calibrated [ts=2386s].",
+      "key_points": [
+        {
+          "text": "Prompt chaining means splitting a workflow into multiple prompt calls whose outputs become inputs for later calls.",
+          "timestamp_s": 1933,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Separating prompts allows each intermediate step to be debugged and optimized independently.",
+          "timestamp_s": 2007,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A chain can be evaluated both end-to-end and at intermediate outputs such as an outline or extraction result.",
+          "timestamp_s": 2188,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Long chains can be undesirable in latency-sensitive applications.",
+          "timestamp_s": 2233,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Prompt testing can compare a baseline prompt, a refined prompt, and their generated outputs on representative test cases.",
+          "timestamp_s": 2286,
+          "evidence_type": "example"
+        },
+        {
+          "text": "LLM judges can compare two candidate outputs, grade a single answer, or apply a rubric to assess quality.",
+          "timestamp_s": 2386,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 1933,
+        "end_s": 2475
+      },
+      "difficulty": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 9.0,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg4",
+      "course_id": "CS230",
+      "name": "When fine-tuning is and is not worth it",
+      "description": "Summarizes the instructor's caution against fine-tuning, including data, cost, overfitting, model-update risks, and narrow cases where fine-tuning can still make sense.",
+      "summary": "After exhausting prompt engineering, fine-tuning is framed as modifying model weights rather than changing the prompt context [ts=2479s]. The instructor argues against routine fine-tuning because it often requires substantial labeled data, can overfit to specific data, and may reduce general-purpose utility [ts=2497s]. The main practical objection is that fine-tuning is time- and cost-intensive, while the next foundation model may outperform the fine-tuned older model by the time work is complete [ts=2535s]. Fine-tuning can still make sense for repeated high-precision outputs or when a general model consistently fails at domain-specific language [ts=2570s]. A Slack fine-tuning example illustrates the risk: a model trained on company Slack behavior copied workplace conversational habits instead of following a request to write a blog post [ts=2592s].",
+      "key_points": [
+        {
+          "text": "Fine-tuning modifies model weights, whereas prompting and few-shot examples do not.",
+          "timestamp_s": 2514,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Fine-tuning typically requires substantial labeled data for the target task.",
+          "timestamp_s": 2497,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Fine-tuned models can overfit and lose general-purpose utility.",
+          "timestamp_s": 2517,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A new base model may outperform a fine-tuned older model before the fine-tuning effort pays off.",
+          "timestamp_s": 2546,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Fine-tuning remains plausible for repeated high-precision outputs or persistent domain-language failures.",
+          "timestamp_s": 2570,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The Slack example shows a model learning to behave like company messages rather than satisfying the requested task.",
+          "timestamp_s": 2661,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 2479,
+        "end_s": 2687
+      },
+      "difficulty": 0.47,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 3.5,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg5",
+      "course_id": "CS230",
+      "name": "RAG pipeline and common retrieval improvements",
+      "description": "Defines RAG, walks through the query-answering pipeline with embeddings and vector databases, and introduces chunking and HyDE as improvements over vanilla retrieval.",
+      "summary": "RAG is introduced as a response to standalone LLM problems: limited context, difficulty finding facts in long contexts, knowledge cutoffs, hallucinations, and lack of sources [ts=2709s]. The core idea is to integrate external knowledge sources such as databases, documents, or APIs so answers can be more accurate, up to date, grounded, and developer-controllable without retraining the model [ts=2783s]. In the medical QA example, documents are embedded into lower-dimensional representations, stored in a vector database, and retrieved by comparing the embedded user query against document embeddings [ts=2831s]. The retrieved documents are added to the prompt with instructions such as answering only from the documents and saying \"I don't know\" when the answer is absent [ts=2955s]. The unit then covers chunking for large documents and HyDE, where the query is first expanded into a hypothetical document whose embedding may be closer to target documents [ts=3049s].",
+      "key_points": [
+        {
+          "text": "RAG addresses limited context, stale knowledge, hallucinations, and missing sources in standalone LLM use.",
+          "timestamp_s": 2709,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "RAG integrates external knowledge sources such as databases, documents, and APIs without touching model weights.",
+          "timestamp_s": 2783,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A RAG pipeline embeds knowledge-base documents into vector representations and stores them for retrieval.",
+          "timestamp_s": 2866,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Retrieval compares the embedded user query to vector-database items using an embedding distance metric.",
+          "timestamp_s": 2932,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The retrieved documents are added to the user query through a prompt template to ground generation.",
+          "timestamp_s": 2955,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Chunking stores document-level and chapter-level vectors to improve precision and sourcing for large documents.",
+          "timestamp_s": 3049,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "HyDE generates a hypothetical answer document from the query, embeds it, and retrieves documents using that embedding.",
+          "timestamp_s": 3071,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 2691,
+        "end_s": 3181
+      },
+      "difficulty": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.2,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+      "course_id": "CS230",
+      "name": "Agentic workflows and fuzzy engineering",
+      "description": "Defines agentic workflows, distinguishes them from reinforcement-learning agents, and explains the shift from deterministic software to fuzzy AI workflows and enterprise redesign.",
+      "summary": "Agentic AI workflows are introduced to avoid the overloaded term \"agent\": different companies may call a single prompt or a complex multi-agent system an agent [ts=3251s]. The instructor defines agentic workflows as multi-step processes built from prompts, tools, resources, API calls, and workflow logic, while distinguishing this from the reinforcement-learning definition of an agent [ts=3289s]. A refund-policy example shows the jump from a one-step RAG answer to a multi-step workflow that retrieves policy, asks for an order number, queries an API, and confirms eligibility [ts=3332s]. The segment then reframes software engineering as a movement from deterministic structured-data pipelines toward fuzzy systems that interpret free-form text, images, and open-ended user intent [ts=3456s]. Workera's deterministic item types and fuzzy voice/coding assessments motivate human-in-the-loop guardrails [ts=3724s]. A credit-risk memo example illustrates how enterprise workflows can be redesigned around specialist agents while keeping human reviewers in the loop [ts=3832s].",
+      "key_points": [
+        {
+          "text": "Agentic workflow is preferred over the overloaded word agent because products use agent to mean very different systems.",
+          "timestamp_s": 3251,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "An agentic workflow is a multi-step process combining prompts, tools, resources, API calls, and workflow logic.",
+          "timestamp_s": 3289,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The same word agent has a separate reinforcement-learning definition involving environment, state, reward, and observation.",
+          "timestamp_s": 3311,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A refund agent can retrieve policy, ask for missing order data, query an API, and confirm refund qualification.",
+          "timestamp_s": 3364,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Agentic AI software handles free-form text, images, and dynamic interpretation more than traditional structured data only.",
+          "timestamp_s": 3487,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Fuzzy engineering needs guardrails and sometimes human-in-the-loop correction because scoring or generation may be wrong.",
+          "timestamp_s": 3765,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "GenAI agents can reduce workflow time by decomposing tasks, assigning specialist agents, drafting outputs, and asking humans to review.",
+          "timestamp_s": 3886,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 3210,
+        "end_s": 4020
+      },
+      "difficulty": 0.59,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 13.5,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+      "course_id": "CS230",
+      "name": "Agent architecture: memory, tools, resources, autonomy, and MCP",
+      "description": "Breaks down a travel-booking agent into prompts, context management, memory, tools, resources, autonomy levels, APIs, and Model Context Protocol.",
+      "summary": "A travel booking agent is used to explain core components: prompts, context management, memory, tools, and resources [ts=4020s]. Memory is split into working memory for frequently needed facts and archival memory for less frequently accessed facts, because retrieving memory on every model call can add latency [ts=4054s]. Tools include APIs such as flight search, hotel booking, car rental, weather, and payment, while resources are data sources such as CRM records that an agent may read through lookup tools [ts=4148s]. Autonomy ranges from hard-coded steps, to fixed tools with flexible steps, to systems that decide steps and create tools or code [ts=4216s]. The instructor then contrasts one-off API integrations with MCP, which places a protocol layer between the agent and endpoints to make tool/resource access more scalable through agent-to-agent communication [ts=4339s]. The Q&A also notes that MCP security and memory design remain active, unsolved engineering concerns [ts=4519s].",
+      "key_points": [
+        {
+          "text": "A travel agent can be decomposed into prompts, a context management system, memory, tools, and resources.",
+          "timestamp_s": 4020,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Working memory stores frequently needed user facts; archival memory stores less frequently accessed facts.",
+          "timestamp_s": 4060,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Tool APIs can include flight search, hotel booking, car rental, weather, and payment processing.",
+          "timestamp_s": 4148,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Resources are data stores an agent can read, such as a CRM used for lookup.",
+          "timestamp_s": 4191,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Least autonomous systems hard-code steps; semi-autonomous systems hard-code tools but not steps; more autonomous systems decide steps and may create tools.",
+          "timestamp_s": 4216,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "MCP provides a middle layer so the agent can communicate with tools or data endpoints without hard-coding every API integration.",
+          "timestamp_s": 4339,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "MCP may introduce security requirements depending on the sensitivity of exposed data and authentication boundaries.",
+          "timestamp_s": 4519,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 4020,
+        "end_s": 4657
+      },
+      "difficulty": 0.66,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 10.6,
+      "ordering_index": 7,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+      "course_id": "CS230",
+      "name": "Travel-agent workflow and early eval design",
+      "description": "Applies agent design to a trip-planning workflow, then introduces end-to-end ratings, objective versus subjective failures, and LLM judges for quality dimensions such as politeness.",
+      "summary": "The travel-agent example starts from a user request to plan a Paris trip with flights, hotels near the Eiffel Tower, and an itinerary [ts=4659s]. The agent first plans steps such as finding flights, searching hotels, generating recommendations, validating preferences, and booking with payment tools [ts=4684s]. Execution then uses tools, combines results, interacts with the user for validation, and may update memory with preferences such as direct flights or hotel budgets [ts=4705s]. The instructor asks how to know whether such a system works and first surfaces end-to-end user ratings as one signal [ts=4751s]. The class then separates deterministic issues from LLM-related ones, objective errors from subjective preferences, and uses LLM judges with rubrics for dimensions such as politeness [ts=4829s].",
+      "key_points": [
+        {
+          "text": "A travel agent begins by planning task steps before executing tools.",
+          "timestamp_s": 4684,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Execution combines tool outputs and may loop through user validation before booking.",
+          "timestamp_s": 4705,
+          "evidence_type": "example"
+        },
+        {
+          "text": "An agent can update memory from interaction, such as learning a preference for direct flights.",
+          "timestamp_s": 4722,
+          "evidence_type": "example"
+        },
+        {
+          "text": "End-to-end user ratings measure the overall user experience across the workflow.",
+          "timestamp_s": 4773,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Deterministic failures can often be fixed more objectively than LLM behavior or preference tradeoffs.",
+          "timestamp_s": 4829,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Objective evals can capture issues such as choosing a more expensive flight when an equivalent cheaper option exists.",
+          "timestamp_s": 4886,
+          "evidence_type": "example"
+        },
+        {
+          "text": "LLM judges can score subjective qualities such as politeness against a rubric and compare models or prompts.",
+          "timestamp_s": 5033,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 4659,
+        "end_s": 5126
+      },
+      "difficulty": 0.57,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 7.8,
+      "ordering_index": 8,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+      "course_id": "CS230",
+      "name": "Customer support case study: decomposition, workflow mapping, and eval taxonomy",
+      "description": "Shows how to build and evaluate a customer-support agent by decomposing human work, mapping steps to LLMs/tools/RAG/memory, using traces, and designing objective, subjective, component, end-to-end, quantitative, and qualitative evals.",
+      "summary": "The case study begins with a product-manager request to build a customer support agent for changing a shipping address [ts=5126s]. The recommended starting point is task decomposition with support agents, identifying what steps are fuzzy, deterministic, slow, or difficult [ts=5195s]. The simplified workflow extracts key information, retrieves a customer record, checks policy, drafts a response email, and sends the email [ts=5236s]. Mapping that workflow requires deciding which steps need a vanilla LLM, a tool, RAG, MCP/resource access, memory, or deterministic code [ts=5298s]. The instructor emphasizes LLM traces as essential for debugging because they expose which prompts and tools were called when failures happen [ts=5427s]. The eval taxonomy combines component-based and end-to-end views with objective/subjective and quantitative/qualitative measurements [ts=5475s].",
+      "key_points": [
+        {
+          "text": "A practical agent project should start by decomposing the human task and identifying difficult or fuzzy steps.",
+          "timestamp_s": 5195,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "The shipping-address workflow includes extraction, customer record retrieval, policy check, response drafting, and email sending.",
+          "timestamp_s": 5236,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Workflow design maps each decomposed step to LLM, RAG, tool, MCP/resource access, memory, or deterministic logic.",
+          "timestamp_s": 5298,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "LLM extraction is likely enough for identifying the intent, order number, and new address.",
+          "timestamp_s": 5332,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Database lookup and address update require a tool or resource/MCP access rather than just text generation.",
+          "timestamp_s": 5351,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "LLM traces are foundational for debugging because they show the chain of prompts and where bugs occur.",
+          "timestamp_s": 5427,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Component-based evals inspect each step separately, while end-to-end evals measure overall user experience.",
+          "timestamp_s": 5475,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Objective issues can be programmatically checked; subjective ones may need human ratings or LLM-as-judge rubrics.",
+          "timestamp_s": 5525,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Quantitative evals include success rates and latency; qualitative evals inspect hallucinations, tone mismatches, and user confusion.",
+          "timestamp_s": 5571,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 5126,
+        "end_s": 5656
+      },
+      "difficulty": 0.61,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.8,
+      "ordering_index": 9,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+      "course_id": "CS230",
+      "name": "Multi-agent workflow patterns and smart-home example",
+      "description": "Introduces why multi-agent workflows are useful, especially for parallelism, reuse, fault isolation, and hierarchical orchestration, illustrated through a smart-home automation exercise.",
+      "summary": "The final technical section asks why multi-agent workflows are needed when a single workflow already has multiple steps, model calls, and tools [ts=5665s]. The main answer is parallelism: multi-agent systems are useful when independent specialized tasks should run in parallel, with the additional advantage that agents can be reused across teams or products [ts=5692s]. Students design smart-home agents for biometrics/location, temperature, energy, security, groceries, and orchestration [ts=5743s]. The instructor identifies a hierarchical pattern where the user mainly talks to an orchestrator, which delegates to specialized agents [ts=5863s]. The slide list includes climate control, lighting, security, energy management, entertainment, notification, and orchestrator agents [ts=6081s]. The segment closes with organization patterns such as flat and hierarchical systems, and advantages such as easier debugging and parallelization [ts=6101s].",
+      "key_points": [
+        {
+          "text": "Multi-agent workflows are most useful when parts of the task can run in parallel.",
+          "timestamp_s": 5692,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Reusable specialized agents can serve multiple teams or workflows within a company.",
+          "timestamp_s": 5712,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A smart-home system can be decomposed into specialized agents such as biometric/location tracking, temperature, and energy agents.",
+          "timestamp_s": 5822,
+          "evidence_type": "example"
+        },
+        {
+          "text": "An orchestrator agent can serve as the main user communication point and delegate to other agents.",
+          "timestamp_s": 5863,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Smart-home agents can include climate control, lighting, security, energy management, entertainment, notifications, and orchestration.",
+          "timestamp_s": 6081,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Multi-agent systems may be organized as flat or hierarchical interaction patterns.",
+          "timestamp_s": 6101,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Multi-agent workflows can improve debugging and parallelization compared with a monolithic single agent.",
+          "timestamp_s": 6160,
+          "evidence_type": "claim"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 5665,
+        "end_s": 6185
+      },
+      "difficulty": 0.53,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.7,
+      "ordering_index": 10,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg11",
+      "course_id": "CS230",
+      "name": "Trends after LLM application engineering",
+      "description": "Wraps up the lecture with a recap and forward-looking discussion of scaling plateaus, architecture search, multimodality, hybrid learning methods, human-inspired versus non-human-inspired approaches, and skill half-life.",
+      "summary": "The recap lists the major LLM optimization levers covered in the lecture: better prompts, chains, fine-tuning, retrieval, and multi-agent systems [ts=6185s]. The instructor then raises the open question of whether LLMs are plateauing, noting that scaling laws suggest improvement from more compute and energy but that new architectures may be needed for the next step [ts=6220s]. Architecture search is positioned as a possible path to a next-transformer-style breakthrough that reduces compute or energy needs [ts=6272s]. Multimodality is presented as another trend: adding vision, audio, and video can improve the whole model, not only the added modality [ts=6356s]. The lecture also argues that future systems may combine supervised, unsupervised, self-supervised, reinforcement learning, prompt engineering, and RAG in harmony, while research explores both human-inspired and non-human-inspired approaches [ts=6413s]. The final lesson is breadth-first learning because individual RAG or agent techniques change quickly and the half-life of specific skills is short [ts=6542s].",
+      "key_points": [
+        {
+          "text": "The lecture recaps prompts, chains, fine-tuning, retrieval, and multi-agent systems as LLM optimization techniques.",
+          "timestamp_s": 6185,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The plateau question asks whether future LLMs will improve as quickly as past generations.",
+          "timestamp_s": 6220,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Scaling laws imply more compute and energy can continue to improve LLMs, but eventual plateaus motivate architecture search.",
+          "timestamp_s": 6261,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Architecture search could produce a next-transformer-style breakthrough that reduces compute or energy by an order of magnitude.",
+          "timestamp_s": 6272,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Adding modalities such as images, audio, and video can improve the model's overall understanding across modalities.",
+          "timestamp_s": 6356,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Future systems may combine supervised, unsupervised, self-supervised, reinforcement learning, prompt engineering, and RAG.",
+          "timestamp_s": 6413,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Because AI techniques change fast, the course prioritizes breadth and the ability to go deep when needed.",
+          "timestamp_s": 6542,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+        "start_s": 6185,
+        "end_s": 6585
+      },
+      "difficulty": 0.43,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 6.7,
+      "ordering_index": 11,
+      "is_template": false
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg1",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Foundational motivation for the rest of the lecture; strong item value around LLM limitations, context windows, and augmentation axes."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Core practical prompt-engineering segment with definitions and examples suitable for assessment."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Teaches prompt chaining and evaluation, both central to building reliable LLM applications."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg4",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Short but concrete cautionary segment; worth quizzing on tradeoffs rather than implementation details."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg5",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "RAG is a major technical concept with a clear pipeline and common improvements."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Defines agentic workflows and the deterministic-to-fuzzy engineering shift, a central application-design concept."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Covers agent implementation components, autonomy, and MCP/tool/resource integration."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Application-heavy but concrete; useful for questions on planning, execution, memory updates, and eval setup."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+      "importance_flag": "high",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Case study directly operationalizes decomposition, workflow mapping, traces, and eval taxonomy."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+      "importance_flag": "medium",
+      "review_worthiness": "high",
+      "item_generation_worthiness": "medium",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Important architectural overview of multi-agent workflows, though some examples are interactive and exploratory."
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg11",
+      "importance_flag": "medium",
+      "review_worthiness": "medium",
+      "item_generation_worthiness": "low",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Closing trends are useful for orientation but less suitable for factual item generation than technical sections."
+    }
+  ],
+  "unit_kp_map": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg1",
+      "global_kp_id": "kp_cs230_llm_augmentation_motivation",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg1",
+      "global_kp_id": "kp_cs230_context_window_and_attention_limits",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg1",
+      "global_kp_id": "kp_cs230_model_versus_context_optimization",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_cs230_jagged_ai_frontier_and_centaur_cyborg_work_styles",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_cs230_prompt_templates",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_in_context_learning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "global_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg4",
+      "global_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg5",
+      "global_kp_id": "kp_cs230_rag_retrieval_pipeline",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg5",
+      "global_kp_id": "kp_cs230_rag_chunking_and_hyde",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+      "global_kp_id": "kp_cs230_agentic_workflow_definition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+      "global_kp_id": "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+      "global_kp_id": "kp_cs230_enterprise_workflow_redesign_with_agents",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+      "global_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+      "global_kp_id": "kp_cs230_agent_autonomy_levels",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+      "global_kp_id": "kp_cs230_model_context_protocol_mcp",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+      "global_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+      "global_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+      "global_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+      "global_kp_id": "kp_cs230_llm_traces_for_debugging",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+      "global_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+      "global_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg11",
+      "global_kp_id": "kp_cs230_future_ai_trends_and_skill_half_life",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg11",
+      "global_kp_id": "kp_cs230_model_versus_context_optimization",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_llm_augmentation_motivation",
+      "name": "LLM augmentation motivation",
+      "description": "Reasons a base LLM may need augmentation: control, domain gaps, freshness, style constraints, task-specific understanding, context limits, and sourcing needs.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "large_language_models"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "LLM augmentation motivates the lecture but is not itself a prerequisite gate.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_context_window_and_attention_limits",
+      "name": "Context-window and attention limits",
+      "description": "The limitation that long contexts are finite and attention may miss relevant facts inside large corpora, motivating chunking, retrieval, and RAG-style systems.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "large_language_models",
+        "information_retrieval"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.45,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly says enterprise knowledge management cannot be solved by a standalone LLM because context windows are limited [ts=681s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_model_versus_context_optimization",
+      "name": "Model versus context optimization",
+      "description": "A two-axis mental model for improving LLM applications: better base models versus better prompts, tools, RAG, workflows, and multi-agent systems around the model.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "large_language_models"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.38,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "This model organizes the lecture's vertical axis of context/tool optimization after distinguishing it from foundation model improvements [ts=1001s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_jagged_ai_frontier_and_centaur_cyborg_work_styles",
+      "name": "Jagged AI frontier and centaur/cyborg work styles",
+      "description": "The idea that AI helps within a capability frontier but can hurt outside it, and that people collaborate with AI by either delegating chunks or blending AI continuously into work.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "human_ai_collaboration"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The study motivates why prompt-engineering training matters and why users must know when AI is or is not reliable [ts=1142s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
+      "name": "Prompt specificity and stepwise task decomposition",
+      "description": "Prompt design principle: specify input type, audience, output format, focus, and task steps to improve controllability and output relevance.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "prompt_engineering"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor uses prompt specificity and step-by-step task decomposition as the first practical optimization method before fine-tuning or RAG [ts=1329s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_templates",
+      "name": "Prompt templates",
+      "description": "Reusable prompt structures with placeholders for dynamic variables that can be embedded in software and personalized at scale.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "prompt_engineering"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.37,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Prompt templates are tied directly to production scalability and personalization using user metadata [ts=1556s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_in_context_learning",
+      "name": "In-context learning",
+      "description": "Solving a task from examples placed directly in the prompt, without updating model parameters. Task behavior induced by prompts and examples without parameter updates.",
+      "track_tags": [
+        "few_shot_learning",
+        "llm",
+        "nlp",
+        "prompting"
+      ],
+      "domain_tags": [
+        "in_context_learning",
+        "large_language_models",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "llm_engineer",
+        "product_ml"
+      ],
+      "difficulty_level": 0.65,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because in-context learning clarifies solving a task from examples placed directly in the prompt, without updating model parameters, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp2",
+        "local::lecture11-pretraining::kp10",
+        "local::lecture-07-agents-prompts-and-rag::kp7"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "name": "Prompt chaining",
+      "description": "A workflow pattern where a complex task is decomposed into multiple prompt calls and intermediate outputs are inspected, reused, and optimized.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "prompt_engineering",
+        "workflow_design"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Prompt chaining supports reliable LLM workflows after prompt design is understood.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "name": "Prompt testing and LLM-as-judge",
+      "description": "Methods for evaluating prompt outputs with test cases, human review, automated platforms, pairwise comparison, single-answer grading, references, and rubrics.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture connects prompt improvement to systematic evals and later reuses LLM judges in agentic workflow assessment [ts=2386s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp9"
+      ]
+    },
+    {
+      "global_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "name": "Practical fine-tuning decision flowchart",
+      "description": "Operational decision rule for choosing mixed precision, ZeRO stage 2 or 3, checkpointing, and LoRA based on hardware and memory constraints.",
+      "track_tags": [
+        "applied_workflows",
+        "training_efficiency"
+      ],
+      "domain_tags": [
+        "deep_learning_systems",
+        "project_practice"
+      ],
+      "career_path_tags": [
+        "ml_engineer",
+        "student_researcher"
+      ],
+      "difficulty_level": 0.28,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "capstone",
+      "importance_confidence": "high",
+      "importance_rationale": "Important because practical fine-tuning decision flowchart synthesizes operational decision rule for choosing mixed precision, ZeRO stage 2 or 3, checkpointing, and LoRA based on hardware and memory constraints into an end-to-end method or integrated recipe.",
+      "importance_scope": "lecture_local",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture16-efficient-training::kp12",
+        "local::lecture-01::kp6",
+        "local::lecture-07-agents-prompts-and-rag::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_rag_retrieval_pipeline",
+      "name": "RAG retrieval pipeline",
+      "description": "End-to-end retrieval-augmented generation workflow: embed documents, store vectors, embed query, retrieve relevant documents, augment the prompt, and generate grounded output.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "retrieval_augmented_generation",
+        "information_retrieval"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "RAG is presented as a common interview topic and a major method for adding up-to-date, source-grounded context without retraining [ts=2694s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_rag_chunking_and_hyde",
+      "name": "RAG chunking and HyDE",
+      "description": "Advanced retrieval improvements: storing smaller document chunks and generating hypothetical documents to improve query-document embedding match.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "retrieval_augmented_generation",
+        "information_retrieval"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.66,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The instructor presents chunking and HyDE as examples of active RAG research rather than exhaustive methods, so they are important but not the whole RAG topic [ts=3049s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_agentic_workflow_definition",
+      "name": "Agentic workflow definition",
+      "description": "A multi-step LLM application workflow that combines prompts, tools, resources, API calls, and orchestration to complete tasks more autonomously.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "workflow_design"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "Agentic workflows are a central section of the lecture and extend LLMs beyond single-task prompting or retrieval [ts=3210s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp13"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+      "name": "Deterministic versus fuzzy AI engineering",
+      "description": "Engineering distinction between deterministic software with structured inputs/outputs and fuzzy AI software that interprets open-ended free-form data and needs guardrails.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "software_engineering",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.57,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor highlights this mindset shift as especially important for students planning to be software engineers [ts=3456s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp14"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_enterprise_workflow_redesign_with_agents",
+      "name": "Enterprise workflow redesign with agents",
+      "description": "Using GenAI agents to restructure business processes by decomposing human workflows, assigning specialist agents, and keeping humans in review loops.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "business_process_automation"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The credit-risk memo example grounds agentic workflows in enterprise transformation rather than only toy chatbot tasks [ts=3832s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp15"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "name": "Agent memory, tools, and resources",
+      "description": "Core components of an agentic system, including prompt logic, memory layers, API tools, and readable data resources.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "tool_use"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.63,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Memory/tools/resources are concrete agent components supporting the agentic-workflow concept.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp16"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_agent_autonomy_levels",
+      "name": "Agent autonomy levels",
+      "description": "A spectrum from hard-coded steps, to fixed tools with flexible planning, to more autonomous systems that choose steps and create tools or code.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The autonomy spectrum helps students reason about safety, control, and product design decisions in agent systems [ts=4216s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp17"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_model_context_protocol_mcp",
+      "name": "Model Context Protocol (MCP)",
+      "description": "A standardized interface layer that lets agents communicate with tools or data providers more efficiently than bespoke API-by-API integrations.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "tool_use",
+        "protocols"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "MCP is introduced as an emerging practical standard for connecting agents to tools and resources but the instructor notes security and maturity concerns [ts=4339s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp18"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "name": "Agent workflow planning and memory update",
+      "description": "A practical agent execution loop: plan steps, use tools, combine results, interact with the user, book actions, and update memory from preferences.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "workflow_design"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The travel-booking example translates abstract agent components into an execution sequence students can apply to other products [ts=4659s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp19"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "name": "Agent eval taxonomy",
+      "description": "Evaluation dimensions for LLM agents: objective versus subjective, component-based versus end-to-end, and quantitative versus qualitative.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "evaluation",
+        "agents"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.61,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Agent evaluation is important for implementation quality, but supports the agentic workflow gateway.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp20"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "name": "Customer support task decomposition",
+      "description": "Breaking a support-agent workflow into information extraction, record lookup, policy check, response drafting, email sending, and selecting the right technology for each step.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "workflow_design"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.56,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The customer-support case study is the concrete worked example used to teach task decomposition and workflow mapping [ts=5236s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp21"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_llm_traces_for_debugging",
+      "name": "LLM traces for debugging",
+      "description": "Recorded traces of prompts, tool calls, and intermediate outputs that make it possible to locate failures inside an LLM workflow.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "evaluation",
+        "observability"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.54,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor explicitly calls traces a basic part of an AI startup stack and recommends asking about them during interviews [ts=5427s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp22"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "name": "Multi-agent workflow patterns",
+      "description": "Using multiple specialized agents for parallelism, reuse, modularity, fault isolation, debugging, and hierarchical or flat orchestration.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "agents",
+        "multi_agent_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Multi-agent systems are the final workflow architecture after single-agent and eval sections, with parallelism named as the main reason to use them [ts=5692s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp23"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_future_ai_trends_and_skill_half_life",
+      "name": "Future AI trends and skill half-life",
+      "description": "Forward-looking themes: scaling plateaus, architecture search, multimodality, combinations of learning paradigms, human-inspired and non-human-inspired research, and fast-changing skills.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "large_language_models",
+        "ai_research_trends"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.44,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "optional",
+      "importance_confidence": "medium",
+      "importance_rationale": "This closing section is conceptual and career-oriented; it is useful for orientation but less central to downstream technical mastery than prompt/RAG/agent/eval concepts [ts=6220s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp24"
+      ]
+    }
+  ],
+  "course_config": {
+    "included_content_types": [
+      "core_theory",
+      "worked_example",
+      "application_case",
+      "motivation"
+    ]
+  },
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L7_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
+  }
+}

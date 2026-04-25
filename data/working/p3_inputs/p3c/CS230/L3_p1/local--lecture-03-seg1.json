@@ -1,0 +1,153 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-03",
+    "lecture_title": "Lecture 3: Full Cycle of a Deep Learning Project",
+    "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk"
+  },
+  "unit": {
+    "unit_id": "local::lecture-03::seg1",
+    "course_id": "CS230",
+    "name": "AI project lifecycle is driven by code plus uncertain data",
+    "description": "Frames the lecture as a practical walk-through of a full deep-learning project, emphasizing why data makes AI development more empirical than traditional software.",
+    "summary": "AI projects differ from traditional software because engineers control the code but do not fully know what is in past or future data [ts=78s]. The face-recognition example makes the uncertainty concrete: lighting, hair, glasses, expressions, scarves, and future real-world inputs can all affect behavior [ts=103s]. The lecture expands the project cycle beyond model training to problem specification, data collection, model design, training, deployment, monitoring, and maintenance [ts=347s]. Because surprising data properties appear only after trying a system, ML development is an empirical loop of design, train, analyze, and update [ts=539s].",
+    "key_points": [
+      {
+        "text": "AI projects combine code with data, and the data is hard to predict or control.",
+        "timestamp_s": 78,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Unknown data properties such as lighting, glasses, hair, facial expression, or winter scarves can determine system behavior.",
+        "timestamp_s": 103,
+        "evidence_type": "example"
+      },
+      {
+        "text": "A full ML system includes specifying the problem, getting data, designing and training a model, deploying, monitoring, and maintaining it.",
+        "timestamp_s": 347,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "The core development loop is design the model, train it, analyze results, then update the model or data.",
+        "timestamp_s": 539,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+      "start_s": 5,
+      "end_s": 583
+    },
+    "difficulty": 0.36,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 9.63,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "AI projects differ from traditional software because engineers control the code but do not fully know what is in past or future data [ts=78s]. The face-recognition example makes the uncertainty concrete: lighting, hair, glasses, expressions, scarves, and future real-world inputs can all affect behavior [ts=103s]. The lecture expands the project cycle beyond model training to problem specification, data collection, model design, training, deployment, monitoring, and maintenance [ts=347s]. Because surprising data properties appear only after trying a system, ML development is an empirical loop of design, train, analyze, and update [ts=539s].",
+  "target_kp_ids": [
+    "kp_cs230_ai_projects_as_empirical_systems",
+    "kp_cs230_full_machine_learning_project_lifecycle"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+  "video_clip_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+  "transcript_slice": "00:00:05\nSo what I'd like to do today is chat with you\n\n00:00:13\nAnd as I promised in the first lecture,\n\n00:00:19\nor whatever, we'd love for this to be much more interactive.\n\n00:00:26\nbut also ask you a bunch of questions\n\n00:00:32\nthe one working on the project.\n\n00:00:36\nSo plan for this to be quite interactive\n\n00:00:40\nSince I think that's why I want to do this in person\n\n00:00:47\nSo one of the reasons why developing machine\n\n00:00:53\nof AI projects, including AI projects using large language\n\n00:01:01\nare different than traditional software engineering projects.\n\n00:01:08\nof the many different flavors--\n\n00:01:13\nAI based is that in traditional software projects,\n\n00:01:21\nWrite whatever code you want.\n\n00:01:23\nYour code does what you tell it to.\n\n00:01:34\nthat you train your algorithm on.\n\n00:01:41\nthere are in your data.\n\n00:01:45\napplication-- that's a running example I'm going to use today--\n\n00:01:51\nit's really difficult to in advance\n\n00:01:56\nIs the lighting of the face good?\n\n00:02:01\nwith short hair?\n\n00:02:04\nmake your system struggle?\n\n00:02:08\nSo data is so rich that a lot of time,\n\n00:02:15\nsystem is going to do, not because you\n\n00:02:18\nYou can write whatever neural network\n\n00:02:21\nBut you don't what's in the data.\n\n00:02:26\nengineering, machine learning development\n\n00:02:32\nhave to build something, see how it works, and then\n\n00:02:38\nwhat is in the data, and therefore\n\n00:02:43\nyour overall system perform.\n\n00:02:48\nis true not just for deep learning based systems.\n\n00:02:54\nThere's been a lot of hype buzz about how LLMs, Large Language\n\n00:02:59\nI think there's a lot of excessive hype about that kind\n\n00:03:03\nThere's a little bit of that.\n\n00:03:06\nknow in advance what LLMs do is because it\n\n00:03:11\nthan any human could possibly look at.\n\n00:03:16\nwhat is in all that data that the arm was trained on.\n\n00:03:21\ncan't really look at all the massive tens\n\n00:03:26\nIt's hard to know exactly how large language model will\n\n00:03:34\nor building large language models based applications\n\n00:03:40\nMeaning you just have to build something,\n\n00:03:44\nand then use that to fix problems.\n\n00:03:48\nThat makes sense?\n\n00:03:52\nIt's hard to control the data.\n\n00:03:56\nyou have stored in your hard disk,\n\n00:04:00\nI don't really know what's in my hard disk.\n\n00:04:06\nwill give you in the future.\n\n00:04:09\nsay, face recognition, which we should talk about.\n\n00:04:14\nthat covers part of their face when it's winter?\n\n00:04:16\nThere are all these things in data that will surprise you.\n\n00:04:22\nthat's already a hard disk.\n\n00:04:28\nSo it turns out that a lot of machine learning classes\n\n00:04:36\nAnd you learn a lot from the online videos\n\n00:04:43\nBut it turns out that building the overall machine learning\n\n00:04:52\nthan just training models.\n\n00:04:57\nactually a very strong focus on modeling\n\n00:05:02\nWe can train models, evaluate models,\n\n00:05:06\nAnd so you find that a lot of causes\n\n00:05:11\nAnd that is absolutely important.\n\n00:05:16\ndifferent research groups can benchmark different models.\n\n00:05:20\nThat's reflected a lot of causes.\n\n00:05:23\nyou need to do if you want to build an effective deep learning\n\n00:05:27\nAnd what I want to do today is go\n\n00:05:33\na broader view of what it feels like to develop a deep learning\n\n00:05:40\nAnd this is what it often--\n\n00:05:47\nwould be like, which is, first, specify the problem,\n\n00:06:02\nThe running example I want to use today\n\n00:06:08\nsystem for security, for deciding when to unlock a door.\n\n00:06:15\nwhich I abbreviate face rec architectures,\n\n00:06:19\nBut specific application I want to talk about\n\n00:06:22\nActually, I built one of the commercial systems that--\n\n00:06:35\nyou or a friend or maybe someone that you don't want to let\n\n00:06:41\nsorry, bad drawing-- take a picture\n\n00:06:45\nand decide whether or not to unlock the door.\n\n00:06:49\nis authorized to enter a restricted location,\n\n00:06:56\nAnd actually, one common use case that one of my teams built\n\n00:07:02\nSo sometimes, key cards get stolen.\n\n00:07:08\ncomplexes was if you swipe a key card,\n\n00:07:14\ndiscarded to make sure that the key card is\n\n00:07:20\nSo it makes it harder if someone to steal\n\n00:07:26\nSo I'm going to use this as the motivating example for today.\n\n00:07:45\nsometimes, the open source model can download.\n\n00:07:49\ngood enough.\n\n00:07:51\nThe typical process, we get data, design the model,\n\n00:08:07\nAnd then we will iterate through these steps\n\n00:08:14\nperforming well enough.\n\n00:08:36\nand maintain the model.\n\n00:08:41\nof these steps today because I want you to come away\n\n00:08:46\non a real machine learning application,\n\n00:08:53\nAnd so as I alluded, machine learning development\n\n00:09:00\nSo for these three steps, we often drive a rapid development\n\n00:09:16\noops, sorry-- design the model, train it, analyze the results,\n\n00:09:33\nor something and iterate around this loop\n\n00:09:40\nAnd just one more detail.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_full_machine_learning_project_lifecycle",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "name": "AI projects as empirical systems",
+      "description": "AI systems are developed empirically because performance depends on code plus data whose contents and future distribution are not fully known.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "machine_learning_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "This idea frames the whole lecture: unlike ordinary software, ML projects require build-test-analyze loops because data creates unpredictable behavior [ts=78s] [ts=146s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_full_machine_learning_project_lifecycle",
+      "name": "Full machine-learning project lifecycle",
+      "description": "A practical ML system requires problem specification, data, model design, training, deployment, monitoring, and maintenance, not only model training.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "ml_ops",
+        "machine_learning_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The lifecycle list is the lecture's organizing scaffold and is revisited through data collection, deployment, monitoring, and maintenance [ts=347s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-03::kp2"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.21,
+    0.51
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-03",
+    "lecture_title": "Lecture 3: Full Cycle of a Deep Learning Project",
+    "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk"
+  },
+  "units": [
+    {
+      "unit_id": "local::lecture-03::seg1",
+      "course_id": "CS230",
+      "name": "AI project lifecycle is driven by code plus uncertain data",
+      "description": "Frames the lecture as a practical walk-through of a full deep-learning project, emphasizing why data makes AI development more empirical than traditional software.",
+      "summary": "AI projects differ from traditional software because engineers control the code but do not fully know what is in past or future data [ts=78s]. The face-recognition example makes the uncertainty concrete: lighting, hair, glasses, expressions, scarves, and future real-world inputs can all affect behavior [ts=103s]. The lecture expands the project cycle beyond model training to problem specification, data collection, model design, training, deployment, monitoring, and maintenance [ts=347s]. Because surprising data properties appear only after trying a system, ML development is an empirical loop of design, train, analyze, and update [ts=539s].",
+      "key_points": [
+        {
+          "text": "AI projects combine code with data, and the data is hard to predict or control.",
+          "timestamp_s": 78,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Unknown data properties such as lighting, glasses, hair, facial expression, or winter scarves can determine system behavior.",
+          "timestamp_s": 103,
+          "evidence_type": "example"
+        },
+        {
+          "text": "A full ML system includes specifying the problem, getting data, designing and training a model, deploying, monitoring, and maintaining it.",
+          "timestamp_s": 347,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "The core development loop is design the model, train it, analyze results, then update the model or data.",
+          "timestamp_s": 539,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 5,
+        "end_s": 583
+      },
+      "difficulty": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 9.63,
+      "ordering_index": 1,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-03::seg2",
+      "course_id": "CS230",
+      "name": "Face-recognition system setup and Siamese-network architecture",
+      "description": "Introduces the concrete face-recognition security application and the two-image Siamese-network formulation used throughout the lecture.",
+      "summary": "A common face-recognition architecture is a Siamese network that takes two pictures and predicts whether they show the same person [ts=590s]. Registration photos are compared against a live or recent photo when someone approaches or swipes a card, avoiding the need to retrain a classifier for every home or office [ts=637s]. The instructor then turns the example into a startup design scenario: if internet data cannot be downloaded, the team must decide how to collect face data and how soon to start training [ts=681s]. Student suggestions include video-streaming sources, opt-in camera collection, friends or users, and institutional email outreach, but the instructor leaves the problem open to emphasize real resource constraints [ts=842s].",
+      "key_points": [
+        {
+          "text": "A Siamese face-recognition network takes two pictures as input and predicts same person versus different person.",
+          "timestamp_s": 590,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Registration images allow a deployed system to compare an arriving person with authorized identities without retraining per site.",
+          "timestamp_s": 637,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The data-collection problem is constrained by law, startup resources, and time, not only by model architecture.",
+          "timestamp_s": 681,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Candidate data sources discussed include opt-in camera collection, friends, user submissions, video calls, and institutional outreach.",
+          "timestamp_s": 842,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 583,
+        "end_s": 976
+      },
+      "difficulty": 0.43,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 6.55,
+      "ordering_index": 2,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-03::seg3",
+      "course_id": "CS230",
+      "name": "Speed-first data collection and empirical iteration",
+      "description": "Presents speed of execution as a core tactic for early ML development and distinguishes fast iteration from large upfront data acquisition.",
+      "summary": "The instructor identifies speed as the guiding principle for early data collection, especially in startups and small innovative teams [ts=979s]. A fast, possibly imperfect dataset collected in one or two days can be more valuable than waiting months because it enables a first model run and exposes concrete failure modes [ts=1033s]. The recommended framing is to set a short deadline such as 48 hours, collect data responsibly and creatively, train quickly, inspect errors, and revise the collection process [ts=1207s]. The advice is conditional: if prior experience or literature shows that a task needs a large threshold such as tens of thousands of images, more upfront data investment may be justified [ts=1393s].",
+      "key_points": [
+        {
+          "text": "Speed of execution is presented as a strong predictor of success for startups and small innovative teams.",
+          "timestamp_s": 1001,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "A small, lower-quality dataset collected quickly can reveal what is wrong with the system sooner.",
+          "timestamp_s": 1033,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Data collection time should be commensurate with model training time; if training takes hours or days, avoid waiting months for the first run.",
+          "timestamp_s": 1271,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Machine learning is empirical: teams run experiments, observe outcomes, and use disciplined analysis rather than random trial-and-error.",
+          "timestamp_s": 1342,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Prior experience or academic evidence can justify a larger initial dataset investment, such as knowing a face-recognition system needs about 50,000 images.",
+          "timestamp_s": 1417,
+          "evidence_type": "example"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 976,
+        "end_s": 1459
+      },
+      "difficulty": 0.39,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 8.05,
+      "ordering_index": 3,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-03::seg4",
+      "course_id": "CS230",
+      "name": "Sandboxing, error analysis, and data-centric improvement",
+      "description": "Connects empirical development to LLM prompting, responsible AI testing, error analysis, and targeted data improvement.",
+      "summary": "LLM applications follow the same empirical pattern because prompt behavior cannot be predicted fully from training data that no developer has inspected exhaustively [ts=1459s]. For responsible AI, the instructor recommends building and probing systems in sandbox environments before exposing users or third parties to possible harmful behavior [ts=1511s]. Error analysis connects model failures to next actions: teams can change architecture, change data, or add focused data for subsets where the system fails, such as face images with hats [ts=1667s]. Data-centric AI is defined as systematically engineering data to build a successful AI system, and the lecture warns against blindly collecting more data without identifying which subcategories matter [ts=1728s].",
+      "key_points": [
+        {
+          "text": "Prompting LLMs is empirical because model behavior cannot be predicted fully from enormous unseen training data.",
+          "timestamp_s": 1459,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Responsible AI testing should occur in a sandbox before the system affects innocent users or third parties.",
+          "timestamp_s": 1511,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Error analysis means examining where the model fails and using those failures to decide the next improvement.",
+          "timestamp_s": 1646,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Data-centric AI systematically engineers the data, not only the model, to improve the AI system.",
+          "timestamp_s": 1728,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "More data is useful only when targeted to valuable subcategories rather than collected indiscriminately.",
+          "timestamp_s": 1781,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 1459,
+        "end_s": 1782
+      },
+      "difficulty": 0.47,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 5.38,
+      "ordering_index": 4,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-03::seg5",
+      "course_id": "CS230",
+      "name": "Data quality, distribution mismatch, and model capacity",
+      "description": "Explains why data quality matters, why training data need not perfectly match the test distribution, and how large model capacity changes the tradeoff.",
+      "summary": "Data quality matters because low-quality examples, such as blurry face images, can be less useful than sharp in-focus examples when they do not match the desired recognition setting [ts=1925s]. The instructor then addresses distribution mismatch: training data should be relevant, but it does not always need to come from exactly the same distribution as the test set [ts=1981s]. Larger neural networks can often absorb somewhat irrelevant but non-incorrect data without hurting the core task as much as smaller models would [ts=2034s]. This section bridges data choices to deployment by returning to the trained face-recognition model as software that must run inference in a real system [ts=2211s].",
+      "key_points": [
+        {
+          "text": "Data quality matters; for face recognition, sharp in-focus images are generally higher quality than blurry images.",
+          "timestamp_s": 1925,
+          "evidence_type": "example"
+        },
+        {
+          "text": "Training data should be close to the target task, but exact train-test distribution matching is less absolute with modern large neural networks.",
+          "timestamp_s": 1981,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Large neural networks can often use somewhat irrelevant but non-incorrect data without much degradation on the core task.",
+          "timestamp_s": 2034,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Incorrect data is still harmful even if irrelevant data may hurt less for high-capacity neural networks.",
+          "timestamp_s": 2109,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "A trained model becomes a deployed software component that accepts inputs and returns a recognition decision.",
+          "timestamp_s": 2211,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 1782,
+        "end_s": 2211
+      },
+      "difficulty": 0.52,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "duration_min": 7.15,
+      "ordering_index": 5,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-03::seg6",
+      "course_id": "CS230",
+      "name": "Deployment tradeoffs: VAD, edge/cloud cost, and frame quality",
+      "description": "Uses visual activity detection to show how deployment constraints create engineering choices beyond the main face-recognition model.",
+      "summary": "A deployed face-recognition system cannot usually stream video 24/7 to the cloud and classify every frame because the cost and latency would be too high [ts=2247s]. Visual Activity Detection is introduced as a low-cost, low-power step that decides whether an image is worth sending to the larger recognition model [ts=2319s]. The lecture compares a quick non-ML pixel-change threshold with a smaller neural network for detecting whether a human is present, arguing that the fast baseline is often a good first step because it can be implemented and tested quickly [ts=2416s]. Real deployment exposes additional discoveries, such as selecting several high-resolution, in-focus frames from a video sequence to improve recognition accuracy [ts=3036s].",
+      "key_points": [
+        {
+          "text": "Streaming video continuously to the cloud for every-frame recognition is often too expensive or too slow.",
+          "timestamp_s": 2247,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Visual Activity Detection is a low-cost prefilter that decides whether to invoke the more expensive face-recognition system.",
+          "timestamp_s": 2319,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "A simple VAD baseline can count how many pixels changed compared with a previous frame and threshold that fraction.",
+          "timestamp_s": 2416,
+          "evidence_type": "formula"
+        },
+        {
+          "text": "A lightweight neural network can be trained to detect whether a human is present, but it requires more implementation effort than the quick baseline.",
+          "timestamp_s": 2536,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "The fastest implementation can reveal real deployment failure modes such as trees, cars, cats, or blurry frames.",
+          "timestamp_s": 2962,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Selecting clear, high-resolution, in-focus frames can significantly improve downstream face-recognition quality.",
+          "timestamp_s": 3036,
+          "evidence_type": "diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 2211,
+        "end_s": 3195
+      },
+      "difficulty": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 16.4,
+      "ordering_index": 6,
+      "is_template": false
+    },
+    {
+      "unit_id": "local::lecture-03::seg7",
+      "course_id": "CS230",
+      "name": "Benchmarks, drift, monitoring, and maintenance after deployment",
+      "description": "Closes the lifecycle by explaining reference performance, data/concept drift, operational monitoring, dashboard pruning, alarms, and model maintenance.",
+      "summary": "For model quality, the instructor introduces reference performance, often human-level performance, as an aspirational benchmark that helps diagnose whether a system is underperforming [ts=3263s]. After deployment, strong train/test performance is not enough because the world can change through data drift or concept drift: seasonal clothing, scarves, sunglasses, rain, geography, and user behavior can alter the distribution or the target mapping [ts=3310s]. Simple non-ML systems can sometimes be less susceptible to drift than high-capacity learned models because they tune fewer parameters and have fewer ways to overfit a narrow distribution [ts=3601s]. Production teams should gather privacy-respecting telemetry when possible, brainstorm possible failure modes, plot many metrics initially, prune uninformative dashboards, set alarms for abnormal ranges, and maintain the model by collecting new data and updating the system [ts=3735s].",
+      "key_points": [
+        {
+          "text": "Human-level performance can serve as a reference or aspirational benchmark for diagnosing model accuracy.",
+          "timestamp_s": 3263,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Data drift means the distribution of future inputs changes relative to the training set.",
+          "timestamp_s": 3310,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Concept drift means the input-output mapping changes relative to the training set.",
+          "timestamp_s": 3310,
+          "evidence_type": "definition"
+        },
+        {
+          "text": "Doing well on a test set is not the same as building a product that works in the real world.",
+          "timestamp_s": 3418,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Very simple non-ML systems may be less susceptible to drift because they tune fewer parameters than neural networks.",
+          "timestamp_s": 3601,
+          "evidence_type": "claim"
+        },
+        {
+          "text": "Production teams should use privacy-respecting telemetry, dashboards, pruning, and alarms to detect changing conditions.",
+          "timestamp_s": 3735,
+          "evidence_type": "diagnostic_tip"
+        },
+        {
+          "text": "Maintaining a deployed model means monitoring, collecting new data, and updating the system when new failures arise.",
+          "timestamp_s": 3996,
+          "evidence_type": "definition"
+        }
+      ],
+      "content_ref": {
+        "video_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
+        "start_s": 3195,
+        "end_s": 4017
+      },
+      "difficulty": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "duration_min": 13.7,
+      "ordering_index": 7,
+      "is_template": false
+    }
+  ],
+  "learning_salience": null,
+  "buffer_s": 3,
+  "storage_bucket": "ingestion-clips",
+  "storage_path_template": "clips/<course_id>/<lecture_id>/<unit_id>.mp4",
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L3_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
+  }
+}

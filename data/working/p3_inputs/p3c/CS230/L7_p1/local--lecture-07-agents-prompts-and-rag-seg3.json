@@ -1,0 +1,164 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-07-agents-prompts-and-rag",
+    "lecture_title": "Agents, Prompts, and RAG",
+    "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw"
+  },
+  "unit": {
+    "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+    "course_id": "CS230",
+    "name": "Prompt chaining, prompt tests, and LLM judges",
+    "description": "Explains how to decompose complex prompts into chains, why intermediate outputs aid debugging, and how prompt tests and LLM-as-judge rubrics scale evaluation.",
+    "summary": "Chaining is separated from chain-of-thought: instead of only asking for step-by-step reasoning, it splits a complex workflow into multiple prompts whose outputs feed later prompts [ts=1933s]. The instructor uses a customer-review response example to show that a single prompt can work but hides failure modes across extraction, outline creation, and final response writing [ts=1957s]. Chaining improves control because intermediate outputs reveal which prompt should be optimized, though longer chains add latency [ts=2007s]. Prompt testing starts with human review of generated outputs across test cases, then can be scaled using tools or LLM judges [ts=2286s]. LLM judges can perform pairwise comparison, single-answer grading, reference-guided comparison, or rubric-based scoring, and rubrics themselves can be few-shot calibrated [ts=2386s].",
+    "key_points": [
+      {
+        "text": "Prompt chaining means splitting a workflow into multiple prompt calls whose outputs become inputs for later calls.",
+        "timestamp_s": 1933,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Separating prompts allows each intermediate step to be debugged and optimized independently.",
+        "timestamp_s": 2007,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A chain can be evaluated both end-to-end and at intermediate outputs such as an outline or extraction result.",
+        "timestamp_s": 2188,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Long chains can be undesirable in latency-sensitive applications.",
+        "timestamp_s": 2233,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Prompt testing can compare a baseline prompt, a refined prompt, and their generated outputs on representative test cases.",
+        "timestamp_s": 2286,
+        "evidence_type": "example"
+      },
+      {
+        "text": "LLM judges can compare two candidate outputs, grade a single answer, or apply a rubric to assess quality.",
+        "timestamp_s": 2386,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+      "start_s": 1933,
+      "end_s": 2475
+    },
+    "difficulty": 0.55,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 9.0,
+    "ordering_index": 3,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Chaining is separated from chain-of-thought: instead of only asking for step-by-step reasoning, it splits a complex workflow into multiple prompts whose outputs feed later prompts [ts=1933s]. The instructor uses a customer-review response example to show that a single prompt can work but hides failure modes across extraction, outline creation, and final response writing [ts=1957s]. Chaining improves control because intermediate outputs reveal which prompt should be optimized, though longer chains add latency [ts=2007s]. Prompt testing starts with human review of generated outputs across test cases, then can be scaled using tools or LLM judges [ts=2286s]. LLM judges can perform pairwise comparison, single-answer grading, reference-guided comparison, or rubric-based scoring, and rubrics themselves can be few-shot calibrated [ts=2386s].",
+  "target_kp_ids": [
+    "kp_cs230_prompt_chaining",
+    "kp_cs230_prompt_testing_and_llm_as_judge"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "video_clip_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "transcript_slice": "00:32:15\nChaining is the most popular technique out of everything\n\n00:32:22\nIt's not chain of thought.\n\n00:32:26\nstep 1, step 2, step 3.\n\n00:32:28\nThis is different.\n\n00:32:34\nand this is what it looks like.\n\n00:32:40\nreview and write a professional response that\n\n00:32:46\noffers a resolution, and then you\n\n00:32:51\nIt arrived three days late.\n\n00:32:54\nVery disappointing.\n\n00:32:59\nAnd then the output is an email that\n\n00:33:04\nafter it reads the prompt.\n\n00:33:14\nBecause think about it.\n\n00:33:18\nand everything is embedded in the same prompt.\n\n00:33:24\nweaker, you couldn't.\n\n00:33:27\nSo one advantage of chaining is you would separate the prompts,\n\n00:33:35\nAnd it will also lead to an easier manner\n\n00:33:41\nLet's say a first prompt is extract the key issues.\n\n00:33:46\nin this customer review.\n\n00:33:49\nSecond prompt.\n\n00:33:54\ndraft an outline for a professional response that\n\n00:34:00\nand offer a resolution.\n\n00:34:06\nPrompt number 3, write the full response.\n\n00:34:14\nAnd then you get your final output.\n\n00:34:22\nis better than the first one at first.\n\n00:34:27\ntest those three prompts separately from each other\n\n00:34:35\nthe first prompt, optimizing it, or the second one,\n\n00:34:39\nWe now have three prompts that are independent from each other.\n\n00:34:47\nthe performance of the email, how much the open rate will be\n\n00:34:55\nwill actually get higher.\n\n00:35:00\nbut most importantly, helps you control your workflow\n\n00:35:07\nYes.\n\n00:35:15\nif we combine them into one prompt,\n\n00:35:21\ndoes on average, we get a [INAUDIBLE] by itself,\n\n00:35:28\nSo let me try to rephrase.\n\n00:35:32\nhas all three tasks built in that prompt.\n\n00:35:39\nYou mean like if we evaluate the output\n\n00:35:43\net cetera?\n\n00:35:49\nit improves user satisfaction?\n\n00:35:51\n[INAUDIBLE]\n\n00:35:55\nSo why do we need the three steps?\n\n00:35:59\nThe intermediate output is what you want to see.\n\n00:36:06\nthe way I would do it is I would capture user insights.\n\n00:36:10\nHow good was the response?\n\n00:36:13\nWas your issue resolved?\n\n00:36:17\nThose would tell me how good is my prompt.\n\n00:36:21\nand I would probably drive some gains.\n\n00:36:26\nto what the problem was.\n\n00:36:30\ncan use the end to end metrics to improve my process.\n\n00:36:35\nFor example, if I look at prompt 2 and I look at the outline\n\n00:36:41\nthen I think I can get a lot of gains out of the outline.\n\n00:36:47\nbut the last prompt doesn't do a good job at translating it\n\n00:36:51\nSo the outline is exactly what I want the LLM to do,\n\n00:36:57\nis not good.\n\n00:37:01\nThen I knew the third prompt is where\n\n00:37:06\nSo that's what it allows me to do,\n\n00:37:10\nAre there any latency [INAUDIBLE]\n\n00:37:14\nAre there any latency concerns?\n\n00:37:17\nIn certain applications, you don't want to use a chain\n\n00:37:26\nWe'll talk about that later.\n\n00:37:28\nSo practically, this is what chaining complex\n\n00:37:33\nYou have your first prompt with your first task.\n\n00:37:36\nThe output is pasted in the second prompt\n\n00:37:41\nThe output is then pasted into the third prompt\n\n00:37:46\nThat's what it looks like in practice.\n\n00:37:55\nWe'll talk more later about testing your prompts,\n\n00:38:00\nand we'll see later in this lecture with our case study\n\n00:38:06\nBut here is an example of how you might do it.\n\n00:38:18\nthat is the baseline.\n\n00:38:21\nYou might have a refined summarization\n\n00:38:26\nor a workflow with a chain.\n\n00:38:34\nthat you want to summarize, let's say.\n\n00:38:38\nAnd you can have humans go and rate these outputs.\n\n00:38:46\nthan the refined prompt.\n\n00:38:51\nbut it's a good way to start.\n\n00:38:56\nbecause you would quickly notice some issues,\n\n00:39:01\ncan lead to better performance.\n\n00:39:05\nacross many products, many parts of your code base,\n\n00:39:10\nwithout asking humans to review and grade summaries.\n\n00:39:19\nlike at Workera, our team uses a platform called Prompt Food that\n\n00:39:26\nIn a nutshell, what it does is it\n\n00:39:35\nimmediately, put everything in a table.\n\n00:39:40\nOr alternatively, it might allow you to define LLM judges.\n\n00:39:50\nFor example, I can have an LLM judge that\n\n00:39:54\nSo what the LLM is asked to do is here are two summaries.\n\n00:40:01\nThat's what the LLM does.\n\n00:40:04\nthe summarization baseline versus the refined version is.\n\n00:40:11\nif you do it for a single answer grading,\n\n00:40:18\nAnd then you can go even deeper and do\n\n00:40:24\nOr you add also a rubric.\n\n00:40:30\nI'm just making up.\n\n00:40:33\nMentions at least three key points\n\n00:40:38\ndisplays the overview and then goes into the detail.\n\n00:40:42\n0 is the LLM failed to summarize and actually was very verbose,\n\n00:40:49\nAnd so you put a Rubrik behind it,\n\n00:40:55\nOf course, you can now pair different techniques.\n\n00:40:58\nYou can actually give examples of a 5 out of 5s, 4 out of 4s,\n\n00:41:06\nDoes that make sense?\n\n00:41:11\nOK.\n\n00:41:15\nor the first line of optimization.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "global_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "name": "Prompt chaining",
+      "description": "A workflow pattern where a complex task is decomposed into multiple prompt calls and intermediate outputs are inspected, reused, and optimized.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "prompt_engineering",
+        "workflow_design"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Prompt chaining supports reliable LLM workflows after prompt design is understood.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp8"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "name": "Prompt testing and LLM-as-judge",
+      "description": "Methods for evaluating prompt outputs with test cases, human review, automated platforms, pairwise comparison, single-answer grading, references, and rubrics.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "evaluation"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture connects prompt improvement to systematic evals and later reuses LLM judges in agentic workflow assessment [ts=2386s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp9"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.4,
+    0.7
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L7_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
+  }
+}

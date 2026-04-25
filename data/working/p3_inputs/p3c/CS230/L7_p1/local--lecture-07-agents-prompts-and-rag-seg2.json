@@ -1,0 +1,252 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-07-agents-prompts-and-rag",
+    "lecture_title": "Agents, Prompts, and RAG",
+    "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw"
+  },
+  "unit": {
+    "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+    "course_id": "CS230",
+    "name": "Prompt design, templates, and in-context examples",
+    "description": "Introduces prompt engineering as the first line of optimization, covering the jagged frontier, centaur/cyborg collaboration styles, specificity, prompt templates, and zero-shot versus few-shot prompting.",
+    "summary": "Prompt engineering is motivated by a study of consultants where trained AI users performed best within the AI capability frontier, while over-reliance outside the frontier made performance worse [ts=1091s]. The instructor distinguishes centaurs, who divide and delegate tasks to AI, from cyborgs, who integrate AI into continuous back-and-forth work [ts=1204s]. Basic prompt quality improves when the prompt specifies document type, length, audience, focus, and a step-by-step task breakdown [ts=1329s]. Prompt templates are defined as reusable structures with dynamic placeholders that can be embedded in code and personalized from metadata such as role, country, or language [ts=1505s]. The unit then contrasts zero-shot prompting with few-shot prompting, showing how examples can align ambiguous labels such as product-review sentiment without changing model weights [ts=1668s].",
+    "key_points": [
+      {
+        "text": "AI assistance has a jagged frontier: useful on some tasks, harmful on others when users stop reviewing outputs.",
+        "timestamp_s": 1142,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Centaurs divide and delegate between themselves and AI; cyborgs continuously integrate AI into the task flow.",
+        "timestamp_s": 1204,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A stronger prompt specifies document type, audience, format, and focus areas instead of asking for a generic summary.",
+        "timestamp_s": 1329,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Chain-of-thought style task decomposition asks the model to approach a task step by step and not skip steps.",
+        "timestamp_s": 1443,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A prompt template is a predefined structure with placeholders for dynamic inputs.",
+        "timestamp_s": 1584,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "Few-shot prompting gives examples to align the model to desired style, structure, or task-specific labels.",
+        "timestamp_s": 1733,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "A prompt can become too long; one engineering workaround is to summarize earlier conversation chapters before continuing.",
+        "timestamp_s": 1860,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+      "start_s": 1091,
+      "end_s": 1924
+    },
+    "difficulty": 0.42,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "high",
+    "duration_min": 13.9,
+    "ordering_index": 2,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Prompt engineering is motivated by a study of consultants where trained AI users performed best within the AI capability frontier, while over-reliance outside the frontier made performance worse [ts=1091s]. The instructor distinguishes centaurs, who divide and delegate tasks to AI, from cyborgs, who integrate AI into continuous back-and-forth work [ts=1204s]. Basic prompt quality improves when the prompt specifies document type, length, audience, focus, and a step-by-step task breakdown [ts=1329s]. Prompt templates are defined as reusable structures with dynamic placeholders that can be embedded in code and personalized from metadata such as role, country, or language [ts=1505s]. The unit then contrasts zero-shot prompting with few-shot prompting, showing how examples can align ambiguous labels such as product-review sentiment without changing model weights [ts=1668s].",
+  "target_kp_ids": [
+    "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
+    "kp_cs230_prompt_templates",
+    "kp_in_context_learning"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "video_clip_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
+  "transcript_slice": "00:18:11\nSo let's move to prompt engineering.\n\n00:18:17\nto motivate why prompt engineering matters.\n\n00:18:26\nas well as Harvard Business School, and--\n\n00:18:31\nthat took a subset of BCG consultants,\n\n00:18:37\nOne group had no access to AI.\n\n00:18:41\nI think it was GPT 4.\n\n00:18:46\nbut also a training on how to prompt better.\n\n00:18:53\nacross a wide variety of tasks.\n\n00:18:57\nthat I thought was interesting.\n\n00:19:02\nmeaning that certain tasks that consultants are doing fall\n\n00:19:14\nIt's not improving human performance.\n\n00:19:20\nAnd some tasks are within the frontier,\n\n00:19:27\nthe performance, the speed, the quality of the consultant.\n\n00:19:35\nand they shared their insights.\n\n00:19:39\nthere is a frontier within which AI is absolutely helping\n\n00:19:47\nat the wheel, where people relied on AI on a task that\n\n00:19:52\nAnd in fact, it ended up going worse\n\n00:19:58\nenough.\n\n00:20:04\nwas the best, better than the group that was not trained\n\n00:20:10\nthis lecture matters, so that you're within that group\n\n00:20:15\nOne other insights were the centaurs and the cyborgs.\n\n00:20:22\nto work with AI in one of two ways,\n\n00:20:29\nThe centaurs are mythical creatures\n\n00:20:35\nI think, half, what, horses?\n\n00:20:39\nHorses?\n\n00:20:42\nAnd those were individuals that would divide and delegate.\n\n00:20:48\nSo imagine you're working on a PowerPoint, which consultants\n\n00:20:52\nYou might actually write a very long prompt on how\n\n00:20:57\nwork for some time and then come back\n\n00:21:02\nCyborgs are fully blended, bionic human robots,\n\n00:21:10\nAnd those individuals will not delegate fully a task.\n\n00:21:16\nback and forth.\n\n00:21:20\nlike cyborgs than centaurs, but while maybe in the enterprise,\n\n00:21:26\nyou're thinking more like a centaur.\n\n00:21:31\nAlso, a lot of companies will tell you, oh, we're\n\n00:21:34\nIt's [? a cure. ?] I don't buy that.\n\n00:21:39\nYou're not going to make a [? cure ?] out\n\n00:21:42\ngoing to use it as a very powerful skill in your career.\n\n00:21:52\nI'm giving you a very simple prompt here.\n\n00:21:58\nis uploaded alongside it.\n\n00:22:04\nwhat should be the summary?\n\n00:22:07\nWhat should it talk about, et cetera?\n\n00:22:14\nsummarize this 10-page scientific paper on renewable\n\n00:22:22\nand implications for policymakers.\n\n00:22:26\nYou're sharing the audience, and it's\n\n00:22:30\nYou're saying that you want five bullet points,\n\n00:22:35\nThat's a better prompt, you would argue.\n\n00:22:41\nWhat are other techniques that you've\n\n00:22:47\nbetter?\n\n00:22:53\n[INAUDIBLE]\n\n00:22:58\nRight example.\n\n00:23:02\nYeah.\n\n00:23:03\nThat's a good idea.\n\n00:23:08\nVery popular technique.\n\n00:23:15\nat Davos, let's say, yeah.\n\n00:23:18\nSomeone-- yeah.\n\n00:23:22\nYeah.\n\n00:23:25\nExplain.\n\n00:23:26\nActually, I mean, these things work.\n\n00:23:32\nIt's a very popular prompt template.\n\n00:23:36\nWhat else could you do?\n\n00:23:41\nOf course, you'd like to critique your own model.\n\n00:23:47\nSo you're using reflection.\n\n00:23:50\nand then ask it to critique it and then give it back.\n\n00:23:53\nWe see that.\n\n00:23:54\nThat's the one that probably works best\n\n00:23:59\nWhat else?\n\n00:24:01\nBreak the task down into steps.\n\n00:24:03\nBreak the task down into steps.\n\n00:24:06\nNo.\n\n00:24:08\nChain of thoughts.\n\n00:24:12\nthat's been shown in research that it improves.\n\n00:24:17\nand also encourage the model to think step\n\n00:24:22\nand do not skip any step.\n\n00:24:26\nidentify the three most important findings.\n\n00:24:31\nimpact renewable energy policy.\n\n00:24:36\nwith each point addressing a finding, et cetera.\n\n00:24:45\npopularized chain of thoughts.\n\n00:24:48\nright now, especially in AI startups\n\n00:24:55\nOK.\n\n00:25:01\nI like to do, Andrew Ng also talks about that,\n\n00:25:06\nAnd in fact, in online, you have a lot of prompt repositories\n\n00:25:11\nIn fact, I linked the awesome prompt template repo on GitHub,\n\n00:25:19\nthat engineers have built. They said it works great for us,\n\n00:25:23\nAnd a lot of them start with act as.\n\n00:25:29\nAct as an English translator.\n\n00:25:37\nThe advantage of a prompt template\n\n00:25:42\nand scale it for many user requests.\n\n00:25:48\nWorkera evaluates skill.\n\n00:25:52\nAnd tries to personalize it to the user.\n\n00:25:59\nin an enterprise, in the HR system,\n\n00:26:06\nand she is in the US, and her preferred language is English.\n\n00:26:13\ninserted in a prompt templates that will personalize\n\n00:26:16\nAnd similarly for Joe, whose is preferred language is Spanish,\n\n00:26:24\nAnd that's called a prompt template.\n\n00:26:34\nSo the question is do the foundation models\n\n00:26:41\nhave to integrate it yourself?\n\n00:26:45\nuse a system prompt that you don't see.\n\n00:26:50\nit is possible, it's not public, that OpenAI behind the scenes\n\n00:26:59\nAnd by the way, here is your memories about the user\n\n00:27:05\nYou can actually check your memories.\n\n00:27:10\nSo probably, they're using something like that.\n\n00:27:15\nSo in fact, if you think about a prompt template for the Workera\n\n00:27:22\nwhen you call OpenAI by act like a helpful assistant.\n\n00:27:29\nhelps people in their career.\n\n00:27:33\nhas follow the instruction from the creator\n\n00:27:37\nIt's possible.\n\n00:27:42\nAgain, I would encourage you to go and read examples of prompts.\n\n00:27:48\nLet's talk about zero shot versus few shot prompting.\n\n00:27:53\nHere's an example.\n\n00:27:57\nreviews, let's say that we're working on a task\n\n00:28:05\nas positive, negative, or neutral.\n\n00:28:12\nbut I was expecting more.\n\n00:28:19\nwould say it's negative.\n\n00:28:23\nBecause you actually have a first part\n\n00:28:27\nIt's fine.\n\n00:28:30\nwhich is relatively negative.\n\n00:28:33\nThis can be a subjective question.\n\n00:28:37\nAnd another one, it would be considered really bad\n\n00:28:44\nAnd so the way you can actually align the model to your task\n\n00:28:49\nZero shot refers to the fact that it's not\n\n00:28:53\nInto a few short prompts, where the model\n\n00:29:00\nyou want it to do.\n\n00:29:03\npaste the same prompt as before with the user review.\n\n00:29:08\nof tone classifications.\n\n00:29:12\nPositive.\n\n00:29:17\nNegative.\n\n00:29:20\nNeither good nor bad.\n\n00:29:23\nNow classify the tone of this sentence\n\n00:29:28\nand the model then says negative.\n\n00:29:33\nis likely because of the second example, which was it's OK,\n\n00:29:42\nwas negative.\n\n00:29:45\nwith your expectations.\n\n00:29:50\nAnd in fact, for AI startups that\n\n00:29:54\nmight see them keep a prompt up to date.\n\n00:30:00\nmight have a human label it and then\n\n00:30:05\nprompts in their code base.\n\n00:30:10\nBut instead of actually building a separate data set\n\n00:30:15\nand then fine tuning the model on it,\n\n00:30:19\nIt turns out it's probably faster\n\n00:30:23\nbecause you don't touch the model parameters.\n\n00:30:27\nAnd if it's text examples, you can actually\n\n00:30:34\nAt some point, it will be too long,\n\n00:30:39\nBut it's a pretty strong approach\n\n00:30:48\nOK?\n\n00:30:50\n[INAUDIBLE]\n\n00:31:00\nthe prompt can be before the model essentially loses\n\n00:31:06\nThere is.\n\n00:31:11\nbecause models get better.\n\n00:31:16\nYou can probably find it online on benchmarks\n\n00:31:20\nI give you an example.\n\n00:31:27\nfor some of you that have tried it,\n\n00:31:30\nAnd then you explain, and then there's\n\n00:31:33\nWe know that after eight turns, the model loses itself.\n\n00:31:40\npaste the previous user response,\n\n00:31:44\nAnd so the techniques we use in the background\n\n00:31:49\nMaybe one chapter is the first eight prompt.\n\n00:31:53\nYou can summarize the first part of the conversation,\n\n00:31:59\nThose are engineering hacks that engineers might have figured out\n\n00:32:04\nBecause eight turns makes a prompt quite long actually.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_cs230_jagged_ai_frontier_and_centaur_cyborg_work_styles",
+      "planner_role": "support",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_cs230_prompt_templates",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "global_kp_id": "kp_in_context_learning",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_jagged_ai_frontier_and_centaur_cyborg_work_styles",
+      "name": "Jagged AI frontier and centaur/cyborg work styles",
+      "description": "The idea that AI helps within a capability frontier but can hurt outside it, and that people collaborate with AI by either delegating chunks or blending AI continuously into work.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "human_ai_collaboration"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.36,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The study motivates why prompt-engineering training matters and why users must know when AI is or is not reliable [ts=1142s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp4"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
+      "name": "Prompt specificity and stepwise task decomposition",
+      "description": "Prompt design principle: specify input type, audience, output format, focus, and task steps to improve controllability and output relevance.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "prompt_engineering"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.4,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor uses prompt specificity and step-by-step task decomposition as the first practical optimization method before fine-tuning or RAG [ts=1329s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp5"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_prompt_templates",
+      "name": "Prompt templates",
+      "description": "Reusable prompt structures with placeholders for dynamic variables that can be embedded in software and personalized at scale.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "large_language_models",
+        "prompt_engineering"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.37,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Prompt templates are tied directly to production scalability and personalization using user metadata [ts=1556s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-07-agents-prompts-and-rag::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_in_context_learning",
+      "name": "In-context learning",
+      "description": "Solving a task from examples placed directly in the prompt, without updating model parameters. Task behavior induced by prompts and examples without parameter updates.",
+      "track_tags": [
+        "few_shot_learning",
+        "llm",
+        "nlp",
+        "prompting"
+      ],
+      "domain_tags": [
+        "in_context_learning",
+        "large_language_models",
+        "nlp"
+      ],
+      "career_path_tags": [
+        "ai_product_engineer",
+        "applied_science",
+        "llm_engineer",
+        "product_ml"
+      ],
+      "difficulty_level": 0.65,
+      "difficulty_source": "llm_single_pass",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Important because in-context learning clarifies solving a task from examples placed directly in the prompt, without updating model parameters, sharpening later modeling, analysis, or evaluation choices though roles split between capstone and supporting.",
+      "importance_scope": "course_global",
+      "importance_source": "llm_single_pass",
+      "source_course_ids": [
+        "CS224n",
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture13-posttraining::kp2",
+        "local::lecture11-pretraining::kp10",
+        "local::lecture-07-agents-prompts-and-rag::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.27,
+    0.57
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L7_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
+  }
+}

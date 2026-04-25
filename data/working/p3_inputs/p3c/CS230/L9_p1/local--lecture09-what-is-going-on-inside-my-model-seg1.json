@@ -1,0 +1,241 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+    "lecture_title": "What’s Going On Inside My Model?",
+    "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU"
+  },
+  "unit": {
+    "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+    "course_id": "CS230",
+    "name": "Frontier-model diagnostic case study and four evidence lenses",
+    "description": "Introduces the lecture goal and uses a failing 200B-parameter checkpoint scenario to organize evidence for understanding large-model behavior before retraining or editing code.",
+    "summary": "The lecture frames model understanding as a spectrum from older CNN interpretability tools to open research questions for frontier models [ts=14s]. In the checkpoint case study, the instructor asks what evidence to inspect when reasoning benchmarks regress, safety evals fail, and tool-use latency spikes [ts=157s]. Student answers are organized around error analysis, training/validation loss curves, recent training data, checkpoint comparisons, hardware/latency signals, attention maps, embeddings, sensitivity analysis, scaling laws, and MoE routing [ts=231s] [ts=629s]. The instructor consolidates the answers into four buckets: training and scaling, representations and internals, data and distribution, and capabilities and safety [ts=769s].",
+    "key_points": [
+      {
+        "text": "A failing frontier checkpoint should be investigated with error analysis on reasoning and safety failures before changing code or retraining.",
+        "timestamp_s": 231,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Training loss should converge smoothly, and validation loss should follow a similar but usually slightly higher curve.",
+        "timestamp_s": 302,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "A recent batch or round of data can introduce poison, bias, or distribution changes that explain new failures.",
+        "timestamp_s": 362,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Attention maps can be inspected in language models as relationships between tokens, but they may reveal unintuitive or suspicious token dependencies.",
+        "timestamp_s": 542,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Scaling-law style sensitivity analysis compares compute, data, and model size to decide whether a model is undertrained, too small, or otherwise mismatched.",
+        "timestamp_s": 642,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Mixture-of-experts models can fail if routing repeatedly selects the same expert, reducing effective capacity.",
+        "timestamp_s": 708,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+      "start_s": 5,
+      "end_s": 891
+    },
+    "difficulty": 0.55,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 14.8,
+    "ordering_index": 1,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The lecture frames model understanding as a spectrum from older CNN interpretability tools to open research questions for frontier models [ts=14s]. In the checkpoint case study, the instructor asks what evidence to inspect when reasoning benchmarks regress, safety evals fail, and tool-use latency spikes [ts=157s]. Student answers are organized around error analysis, training/validation loss curves, recent training data, checkpoint comparisons, hardware/latency signals, attention maps, embeddings, sensitivity analysis, scaling laws, and MoE routing [ts=231s] [ts=629s]. The instructor consolidates the answers into four buckets: training and scaling, representations and internals, data and distribution, and capabilities and safety [ts=769s].",
+  "target_kp_ids": [
+    "kp_cs230_frontier_model_diagnostic_evidence_lenses"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "video_clip_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
+  "transcript_slice": "00:00:05\nWelcome to lecture 9 already.\n\n00:00:14\nToday, we're going to talk about neural networks,\n\n00:00:23\nAnd we're going to unpack it to see what's going on inside.\n\n00:00:32\nbut I've broadened the scope because there is a section now\n\n00:00:39\nAnd the interpretability or visualization methods\n\n00:00:46\nthat you play with out there.\n\n00:00:52\nwhat we know from convolutions, and what\n\n00:00:58\nWe're going to start with a very packed agenda with a case\n\n00:01:05\nand let you brainstorm a little bit all together\n\n00:01:15\ninside of a frontier model.\n\n00:01:21\nto look at the example of convolutions\n\n00:01:27\npossible about convolution.\n\n00:01:33\nWe're going to look at a specific neuron\n\n00:01:37\nWe're going to look also at a specific feature maps\n\n00:01:43\nI will present many methods to do that.\n\n00:01:47\nbeen used for convolutions.\n\n00:01:51\nthat you might see frontier labs use for today's language\n\n00:02:00\nHowever, they're going to bring you\n\n00:02:04\nthe methods for frontier models as researchers\n\n00:02:09\nThe second half of the lecture is\n\n00:02:16\nWe're going to talk about scaling laws, capability\n\n00:02:23\nend on a few closing remarks.\n\n00:02:29\nLots of visualizations in this lecture.\n\n00:02:37\nLet's say the case study is, you are a model trainer,\n\n00:02:48\nat a frontier lab.\n\n00:02:54\nbut a few issues arise.\n\n00:03:03\nsome safety evals are failing, and there's\n\n00:03:11\nwhen you actually use this model for an agentic workflow.\n\n00:03:18\nwhat is going on?\n\n00:03:22\nSo what I want you to discuss for a minute\n\n00:03:29\nis what are the type of evidences that you would look,\n\n00:03:38\nor retraining the model?\n\n00:03:45\nJumping.\n\n00:03:48\nSo I want to everything you're going to look at OK.\n\n00:03:54\nYou said, I will look at the reasoning benchmarks\n\n00:04:01\nSpecifically, try to find patterns\n\n00:04:05\nAnd then same thing on the safety\n\n00:04:11\nare arising.\n\n00:04:12\nIs it specific to something?\n\n00:04:16\nError analysis in general.\n\n00:04:33\nRemember you're the model trainer.\n\n00:04:37\nYou're supposed to be watching certain things when\n\n00:04:41\nWhat can be interesting?\n\n00:04:49\nWith sanity checks, you mean the loss in frequency.\n\n00:04:56\nYeah.\n\n00:04:58\nbut those are great examples.\n\n00:05:02\nyou would be watching the training loss.\n\n00:05:05\nWhat are you going to look for in that training loss?\n\n00:05:10\nOK.\n\n00:05:11\nYou probably want to make sure that it's smooth.\n\n00:05:18\nHow about the validation loss?\n\n00:05:25\nShould go up.\n\n00:05:30\nbut is likely slightly higher because you're probably\n\n00:05:36\nthan on the training set.\n\n00:05:41\nmean there are some issues.\n\n00:05:53\nYeah.\n\n00:05:56\nsee how it's performing.\n\n00:05:59\nYeah, so you're looking at this round of training data,\n\n00:06:07\nthere were some issues in that data.\n\n00:06:15\ntoward a certain category of data that we're failing on.\n\n00:06:20\nYeah.\n\n00:06:24\nto the previous checkpoint.\n\n00:06:28\nduring the training.\n\n00:06:43\nYeah.\n\n00:06:46\nIt's pretty fast.\n\n00:06:49\nOK.\n\n00:06:52\neverything was good up to yesterday\n\n00:06:55\nsaying there's a hardware issue.\n\n00:07:00\nyeah, latency has been pointed out.\n\n00:07:06\nYeah, you're right.\n\n00:07:19\nSo a lot of the answers are global answers.\n\n00:07:24\nYou're not looking at specific portions of the model.\n\n00:07:31\nfrom the inside?\n\n00:07:39\nSo you can think about the fact that it's a language model.\n\n00:07:47\nI mean, it's something I would do is just recently\n\n00:07:54\nover the past 10 points before this one\n\n00:08:02\nit not, just to see if there was hardware issue\n\n00:08:07\nYeah, you're right.\n\n00:08:10\nand see where did we fail and might\n\n00:08:16\nand figure out what the issue was?\n\n00:08:21\npretty good and the first checkpoints were doing well,\n\n00:08:29\nsaturated in a certain way.\n\n00:08:33\ngradients in certain moments, and you want to pinpoint that.\n\n00:08:38\nWhat else?\n\n00:08:42\nbut I want to hear what else you have for language models.\n\n00:08:49\nfor language models that might mean something's going wrong?\n\n00:09:00\nAnd if you really want to go deep into it,\n\n00:09:05\nThe attention maps.\n\n00:09:09\nFair enough.\n\n00:09:11\nin the online videos, the attention maps, which\n\n00:09:18\nbetween different tokens.\n\n00:09:21\nYou might actually be plotting certain attention maps\n\n00:09:27\nbut the model seems to think it has.\n\n00:09:33\nwith the attention maps.\n\n00:09:42\nWhat?\n\n00:09:44\nI don't know myself, but running a sensitivity analysis\n\n00:09:52\nparameters are [INAUDIBLE]\n\n00:09:59\nWhat would you fix, for example, and what would you change?\n\n00:10:07\nHonestly, right now I don't what parameters to touch\n\n00:10:15\nso you realize what is happening.\n\n00:10:27\nOK.\n\n00:10:28\nBut I like the idea of sensitivity analysis.\n\n00:10:32\nhyper parameter went wrong.\n\n00:10:37\nIs our learning rate schedule poorly tuned?\n\n00:10:43\nThat we can play with compute.\n\n00:10:47\nWe can play with model size.\n\n00:10:51\nMaybe an analysis would allow us to identify the model is fine.\n\n00:10:57\nor the model is actually too small for the amount\n\n00:11:01\nThat type of stuff would come with either doing a sensitivity\n\n00:11:08\nthat we from other models.\n\n00:11:13\nOK.\n\n00:11:15\nI have a question.\n\n00:11:22\nProbably these parameters, we don't need them.\n\n00:11:26\nSo you're saying I gave you 200 billion parameters, which\n\n00:11:32\nIt might be overparameterized.\n\n00:11:35\ndepends on what it's been trained on, how much data\n\n00:11:39\nIt's all relative to each other.\n\n00:11:42\nSo I would expect a lot of compute\n\n00:11:46\nIn fact, a lot of these models might be\n\n00:11:49\nYou've heard about mixture of experts.\n\n00:11:55\nare failing, and you might be inspecting if experts\n\n00:12:04\nselecting the same expert because it's just\n\n00:12:09\nand the other experts are not being used.\n\n00:12:14\nthat might be related to the model capacity.\n\n00:12:20\nit's probably not actually operating as a 200 billion\n\n00:12:24\nIt's operating as a smaller model.\n\n00:12:31\nWe're going to look into all of these together today.\n\n00:12:36\nbecause they're very visual.\n\n00:12:42\nBut then for the frontier models,\n\n00:12:45\nthe areas of research.\n\n00:12:49\nwould fall under four buckets, every solution\n\n00:12:53\nOne is training and scaling.\n\n00:13:00\nlearning rates, mixture of experts, routing, scaling laws.\n\n00:13:06\nThe second category is representation\n\n00:13:11\nYou mentioned. attention heads and maps, embeddings,\n\n00:13:16\nvisualize embeddings and see, does it\n\n00:13:22\nas you would expect?\n\n00:13:27\nis correct.\n\n00:13:32\nAlthough that's really hard with a large model.\n\n00:13:38\nAnd then the other category might be data and distribution.\n\n00:13:48\nhas been contaminated.\n\n00:13:54\nor it doesn't mean anything, or it's\n\n00:13:58\nbecause the data distribution used in the test set\n\n00:14:05\nAnd then it might be failing at different levels.\n\n00:14:11\nYou can run benchmarks on the agentic workflow that\n\n00:14:16\nAnd because you want the language model\n\n00:14:19\nare two levels that you need to inspect.\n\n00:14:24\nsays our model is doing really well for tool use,\n\n00:14:30\nhas been tested on upstream tasks in a workflow,\n\n00:14:37\nSo those are different levels of capability analysis.\n\n00:14:45\nWe're going to dive deep inside convolutions.\n\n00:14:51\nSo first case study for convolutions.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_attention_map_and_embedding_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "global_kp_id": "kp_cs230_mixture_of_experts_routing_diagnostics",
+      "planner_role": "support",
+      "coverage_level": "mention"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "name": "Frontier-model diagnostic evidence lenses",
+      "description": "A framework for diagnosing a large-model regression using training/scaling, representations/internals, data/distribution, and capabilities/safety evidence before touching code or restarting training.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "model_diagnostics",
+        "foundation_models"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.55,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "critical",
+      "structural_role": "gateway",
+      "importance_confidence": "high",
+      "importance_rationale": "The lecture uses the 200B checkpoint case to motivate the entire frontier-model half and organizes the answers into four diagnostic buckets [ts=157s] [ts=769s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp1"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "name": "Loss curves and training telemetry",
+      "description": "Using training loss, validation loss, gradient norms, learning-rate schedules, checkpoint trends, and hardware metrics to assess whether model training is stable.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "optimization",
+        "model_diagnostics"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.58,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "The instructor returns to loss curves both in the opening case and the training-diagnostics section as the natural first health check for a failing model [ts=302s] [ts=4715s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp2"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_attention_map_and_embedding_diagnostics",
+      "name": "Attention-map and embedding diagnostics",
+      "description": "Inspecting attention relationships and embedding neighborhoods to sanity-check internal representations in language models.",
+      "track_tags": [
+        "DL",
+        "NLP"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "transformers",
+        "representation_analysis"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.62,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Attention maps are suggested in the opening case, and later the lecture identifies attention plus embeddings as the two visualizable ideas behind transformer representations [ts=542s] [ts=4621s].",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp3"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_mixture_of_experts_routing_diagnostics",
+      "name": "Mixture-of-experts routing diagnostics",
+      "description": "Monitoring expert routing and load balancing to detect underused or overused experts in MoE-style models.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "foundation_models",
+        "model_diagnostics"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.67,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "MoE routing appears in the opening case as a possible capacity failure mode and later in the final dashboard summary as a metric to monitor [ts=708s] [ts=5850s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture09_what_is_going_on_inside_my_model::kp17"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.4,
+    0.7
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L9_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
+  }
+}

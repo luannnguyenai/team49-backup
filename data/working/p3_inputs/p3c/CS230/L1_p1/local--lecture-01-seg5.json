@@ -1,0 +1,192 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-01",
+    "lecture_title": "Lecture 1: Introduction to Deep Learning",
+    "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg"
+  },
+  "unit": {
+    "unit_id": "local::lecture-01::seg5",
+    "course_id": "CS230",
+    "name": "Hiring signals, foundational skills, and the modern GenAI builder stack",
+    "description": "Closes with advice on hiring, experience, fundamentals, AI fluency, and the application-layer tools now expected in many GenAI roles.",
+    "summary": "The final Q&A turns from course intro to hiring and builder skills: Ng says experience still matters, but employers increasingly need people who can pair experience or strong fundamentals with modern AI tool use [ts=3230s] [ts=3296s]. He uses an art-history analogy to argue that AI tools work best when the user knows the underlying field well enough to specify what they want precisely, and extends that claim to CS fundamentals, ML, and deep learning [ts=2997s] [ts=3096s]. He also endorses foundational systems courses such as CS107 and CS111 while listing GenAI-specific skills, including RAG, vector databases, evals, guardrails, knowledge graphs, multimodal systems, fine-tuning, and agentic workflows, as an emerging application stack [ts=3337s] [ts=3449s]. The lecture closes by contrasting CS230 with CS229: one is a practical deep dive into deep learning, the other a broader and more theoretical survey of machine learning [ts=3540s] [ts=3609s].",
+    "key_points": [
+      {
+        "text": "Experience and AI fluency both matter, but the best developers combine deep experience with strong use of modern AI tools.",
+        "timestamp_s": 3230,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "CS fundamentals remain necessary because they let builders communicate precise intent to AI systems.",
+        "timestamp_s": 3340,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Useful GenAI builder skills include RAG, vector databases, evals, guardrails, knowledge graphs, multimodal systems, fine-tuning, and agentic workflows.",
+        "timestamp_s": 3426,
+        "evidence_type": "definition"
+      },
+      {
+        "text": "CS229 covers a broader theoretical ML survey, while CS230 goes deep on practical deep learning.",
+        "timestamp_s": 3540,
+        "evidence_type": "definition"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://youtu.be/_NLHFoVNlbg?si=LDVu5aFHJBYdDwoO",
+      "start_s": 3193,
+      "end_s": 3609
+    },
+    "difficulty": 0.49,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 7,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The final Q&A turns from course intro to hiring and builder skills: Ng says experience still matters, but employers increasingly need people who can pair experience or strong fundamentals with modern AI tool use [ts=3230s] [ts=3296s]. He uses an art-history analogy to argue that AI tools work best when the user knows the underlying field well enough to specify what they want precisely, and extends that claim to CS fundamentals, ML, and deep learning [ts=2997s] [ts=3096s]. He also endorses foundational systems courses such as CS107 and CS111 while listing GenAI-specific skills, including RAG, vector databases, evals, guardrails, knowledge graphs, multimodal systems, fine-tuning, and agentic workflows, as an emerging application stack [ts=3337s] [ts=3449s]. The lecture closes by contrasting CS230 with CS229: one is a practical deep dive into deep learning, the other a broader and more theoretical survey of machine learning [ts=3540s] [ts=3609s].",
+  "target_kp_ids": [
+    "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+    "kp_cs230_modern_genai_application_stack"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+  "video_clip_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
+  "transcript_slice": "00:53:15\nWhat do you say about the trend of someone\n\n00:53:21\nI've had a lot of industry folks talking\n\n00:53:28\nwith 10 years of experience who knows just generative AI as is,\n\n00:53:37\ndoes have that deep understanding of deep learning,\n\n00:53:44\nbecause they have more experience building.\n\n00:53:49\nYeah.\n\n00:53:53\nI think-- and again, and I say this\n\n00:53:56\nSo if I talk about productivity, it's\n\n00:54:01\nor for their work.\n\n00:54:06\nand don't know AI.\n\n00:54:13\nbut on a--\n\n00:54:17\npeople with, say, a decade of experience but\n\n00:54:23\nOn top of that, I would rather take a fresh college grad that\n\n00:54:29\nis someone with a decade of experience\n\n00:54:34\nSo I think between the two factors,\n\n00:54:39\nbut experience is also important.\n\n00:54:46\nship code like no one's ever done,\n\n00:54:51\nare very experienced developers.\n\n00:54:56\ntechnologies.\n\n00:55:00\nOh, sorry.\n\n00:55:02\nI find that a lot of employers have not yet figured out\n\n00:55:06\nThis has contributed-- frankly, a lot of employers,\n\n00:55:11\nhow to interview appropriately?\n\n00:55:15\nGo ahead.\n\n00:55:20\nsuper into programming and--\n\n00:55:25\nlike C2107, 111 where we're not encouraged to use tools\n\n00:55:32\nIs that to build the fundamentals,\n\n00:55:36\nYeah, boy.\n\n00:55:42\nif you're considering them.\n\n00:55:49\nHow do I put it?\n\n00:55:53\nI think honestly, Stanford we're known for--\n\n00:56:00\nI know I'm biased, but I want to say probably the best entry\n\n00:56:05\nI'm pretty biased, so maybe I shouldn't say that,\n\n00:56:09\nwant to learn the fundamentals and really solid way,\n\n00:56:14\nthinking about how to update the curriculum\n\n00:56:17\nSo I think they do an excellent job with that mix.\n\n00:56:23\n[INAUDIBLE] use GenAI compared to just [INAUDIBLE] Cursor\n\n00:56:32\nYeah.\n\n00:56:34\ncompared to someone that just use a tool and types of prompts.\n\n00:56:40\nAnd again, by the way, deep learning is not GenAI.\n\n00:56:44\nbut this is about GenAI.\n\n00:56:46\nOne is I find it really useful to know how\n\n00:56:51\nThat's really valuable.\n\n00:56:58\nAnd then the other thing is in GenAI,\n\n00:57:01\nI'm going to toss out some buzzwords.\n\n00:57:03\nSo if you don't know what any of these words mean,\n\n00:57:06\nBut I think there are emerging tools, like RAG, Retrieval\n\n00:57:14\nhow to do evals and error analysis,\n\n00:57:19\nand interface that with LLM, maybe how to do multimodal LLMs,\n\n00:57:25\nWhat else?\n\n00:57:27\nOh, how to build agentic workflows.\n\n00:57:32\nbuilt on top of GenAI that are like a useful bag of tools\n\n00:57:40\nWell, frankly, when I'm interviewing candidates,\n\n00:57:44\nvery GenAI role, is these skills I tend to look for,\n\n00:57:51\nAnd then-- yeah.\n\n00:57:55\nI don't know if this question is best close to you\n\n00:58:02\nboth of those classes are final projects.\n\n00:58:09\nYeah.\n\n00:58:12\nin general, not just 229 and CS230, which\n\n00:58:21\nlike Pokemon.\n\n00:58:26\nBut in all seriousness, I think taking more CS courses in AI,\n\n00:58:31\nDefinitely encourage you to take multiple courses.\n\n00:58:36\nwhere the standard is higher expectations for sure,\n\n00:58:44\nYeah.\n\n00:58:45\nGo for it.\n\n00:58:50\nbut what is the difference pedagogically between 229\n\n00:58:54\nAnd what are the projects that can be overlapped?\n\n00:59:00\n229 and 230 are very different courses.\n\n00:59:08\ndoing the lectures in-person rather than online content.\n\n00:59:12\nSo in CS230, we have most of the materials\n\n00:59:19\nAnd then I think the other biggest difference\n\n00:59:27\nbut it's important math, whereas CS230 is more practical.\n\n00:59:35\nmaybe we do one proof somewhere in the lectures,\n\n00:59:40\nAnd it's very-- a lot of machine learning is very empirical.\n\n00:59:46\nfor exploring what works.\n\n00:59:50\nAnd oh, and 229 covers a lot more techniques.\n\n00:59:56\nlearning, unsupervised learning, decision trees, boosting,\n\n01:00:02\nSo CS229 covers a much broader survey\n\n01:00:07\nwhereas CS230 is just one thing.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "global_kp_id": "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "global_kp_id": "kp_cs230_modern_genai_application_stack",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture-01::seg5",
+      "global_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "planner_role": "support",
+      "coverage_level": "partial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+      "name": "CS fundamentals plus AI tool fluency",
+      "description": "The lecture argues that AI tools are most powerful when paired with strong CS, ML, and DL fundamentals, because fundamentals let builders specify problems and next steps precisely.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "computer_science",
+        "deep_learning",
+        "genai"
+      ],
+      "career_path_tags": [
+        "software_engineer",
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.39,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "CS fundamentals are invoked early in the lecture and revisited late as the reason skilled builders get more from AI-assisted tools than users who only prompt superficially [ts=450s]-[ts=477s] and [ts=2997s]-[ts=3096s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp11"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_modern_genai_application_stack",
+      "name": "Modern GenAI application stack",
+      "description": "A practical GenAI role now includes more than prompting: the lecture names retrieval, data infrastructure, evaluation, safety, multimodality, fine-tuning, and agentic workflows as emerging tool categories.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "genai",
+        "machine_learning_systems"
+      ],
+      "career_path_tags": [
+        "ai_engineer",
+        "machine_learning_engineer"
+      ],
+      "difficulty_level": 0.68,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "The lecture closes with an explicit list of GenAI application-building tools that Ng says he looks for in candidates, making it a practical job-facing skill cluster rather than a core theorem [ts=3392s]-[ts=3449s].",
+      "importance_scope": "course_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp12"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "name": "CS230 as an applied, practical deep learning course",
+      "description": "CS230 is framed as a practical course focused on building and shipping deep-learning systems, contrasted with easier ML on-ramps and more theoretical alternatives such as CS229.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "education"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.24,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "A large Q&A block distinguishes CS230 from CS129 and CS229 and repeatedly frames the class as practical, relatively math-light, and application-oriented [ts=742s]-[ts=1121s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-01::kp3"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.34,
+    0.64
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L1_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture01-introduction-to-deep-learning_transcript.txt"
+  }
+}

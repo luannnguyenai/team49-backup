@@ -1,0 +1,158 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture-08",
+    "lecture_title": "Career Advice in AI",
+    "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s"
+  },
+  "unit": {
+    "unit_id": "local::lecture-08::seg4",
+    "course_id": "CS230",
+    "name": "Responsible building, effort, and collaboration signals",
+    "description": "Andrew closes his opening advice with responsibility and effort, and Laurence begins with an interview story about how collaborative behavior affects hiring outcomes.",
+    "summary": "Andrew says powerful, faster software building should be paired with responsibility: do not build software that harms others, but do try many ideas because failure costs less than before [ts=921s]. He encourages hard work while explicitly respecting people who are not in a position to do so, framing output and learning as the motivation [ts=1003s]. Laurence then reinforces the team-selection theme from the employer side: companies are also choosing whether a candidate is someone they want to work with [ts=1151s]. His mentoring story shows that even an excellent coder can fail interviews if challenge responses sound hostile rather than collaborative [ts=1278s].",
+    "key_points": [
+      {
+        "text": "Students are encouraged to build many things responsibly because the number of ideas exceeds the number of skilled builders.",
+        "timestamp_s": 931,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "The cost of failed prototypes is lower when a weekend of work still produces learning.",
+        "timestamp_s": 971,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Hard work is recommended, while people unable to work hard at a given life stage should still be respected and supported.",
+        "timestamp_s": 1003,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A technically strong interview candidate can be rejected if challenge responses appear hostile to the team.",
+        "timestamp_s": 1278,
+        "evidence_type": "example"
+      },
+      {
+        "text": "'Stand your ground' in interviews should not mean behaving like a jerk.",
+        "timestamp_s": 1353,
+        "evidence_type": "diagnostic_tip"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+      "start_s": 921,
+      "end_s": 1419
+    },
+    "difficulty": 0.36,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 8.3,
+    "ordering_index": 4,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "Andrew says powerful, faster software building should be paired with responsibility: do not build software that harms others, but do try many ideas because failure costs less than before [ts=921s]. He encourages hard work while explicitly respecting people who are not in a position to do so, framing output and learning as the motivation [ts=1003s]. Laurence then reinforces the team-selection theme from the employer side: companies are also choosing whether a candidate is someone they want to work with [ts=1151s]. His mentoring story shows that even an excellent coder can fail interviews if challenge responses sound hostile rather than collaborative [ts=1278s].",
+  "target_kp_ids": [
+    "kp_cs230_responsible_building_and_deliberate_effort",
+    "kp_cs230_collaborative_interview_signal"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+  "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
+  "transcript_slice": "00:15:21\nBut I think number one on my advice\n\n00:15:27\nbefore to build powerful software faster.\n\n00:15:33\nDon't build software that hurts others.\n\n00:15:39\ncan build.\n\n00:15:42\nis much greater than the number of people with the skill\n\n00:15:45\nSo I know that finding jobs has gotten tougher for fresh college\n\n00:15:49\nAt the same time, a lot of teams just\n\n00:15:53\nAnd so there are a lot of projects\n\n00:15:58\nI think no one else will build it either.\n\n00:16:04\nbe responsible, there are a lot of things that you don't\n\n00:16:07\nYou don't need to wait for someone else to do it first\n\n00:16:11\nThe cost of a failure is much lower than before\n\n00:16:17\nThat seems fine to me.\n\n00:16:21\ngoing for trying things out and building lots of things\n\n00:16:27\nthink would help your careers.\n\n00:16:35\nis considered not politically correct in some circles,\n\n00:16:43\nit has become considered not politically correct\n\n00:16:50\nI'm going to encourage you to work hard.\n\n00:16:55\nlike that is because there are some people that\n\n00:16:59\nin a position to work hard.\n\n00:17:03\nI was not working hard for a short period of time.\n\n00:17:10\nwhatever very valid reasons, they're\n\n00:17:14\nAnd we should respect them, support them,\n\n00:17:18\nthough they're not working hard.\n\n00:17:22\nPhD students have become very successful,\n\n00:17:27\nI mean, the 2:00 AM sitting up, hyperparameter tuning,\n\n00:17:31\nStill doing it some days.\n\n00:17:36\nwhere you can work really hard, there\n\n00:17:44\nIf you get excited, as I do, spending evenings and weekends\n\n00:17:50\nif you lean in and do those things,\n\n00:17:54\nSo I don't know.\n\n00:17:57\nencouraging me to work hard, but I\n\n00:18:02\nget a lot more done.\n\n00:18:05\naren't in a position to do so.\n\n00:18:10\nshow versus firing your agentic coder on a weekend\n\n00:18:16\nthe latter almost every time.\n\n00:18:20\nBut you mean--\n\n00:18:26\nAll right, so those are the main things I wanted to say.\n\n00:18:33\nLaurence Moroney, who share a lot more about career\n\n00:18:39\nLet me just quick intro.\n\n00:18:42\nHe's done a lot of online education work, sometimes\n\n00:18:46\nTensorflow, taught a lot of people PyTorch.\n\n00:18:52\nruns a group at Arm.\n\n00:18:55\nThis is one of them.\n\n00:18:59\nThis is an excellent book, Introduction to PyTorch.\n\n00:19:06\nso I was very grateful when he agreed to come speak to us.\n\n00:19:11\nI just want to reinforce something\n\n00:19:14\non about choosing the people that you\n\n00:19:17\nBut I also want to show that from the other way around that\n\n00:19:22\nare also choosing you.\n\n00:19:25\nto choose the people that they work with also.\n\n00:19:30\nover the last, particularly over the last 18\n\n00:19:36\nAnd I want to tell the story of one young man and this guy,\n\n00:19:46\nHe could do every challenge that was in front of him,\n\n00:19:51\nHe worked in medical software, and medical software business\n\n00:19:56\nFunding has been cut by the Federal government\n\n00:20:01\nAnd with his experience, with his ability,\n\n00:20:05\nhe thought that it would be very easy\n\n00:20:07\nAnd the poor young guy had a really terrible April.\n\n00:20:12\nImmediately before that, his girlfriend\n\n00:20:15\nlater, his dog died.\n\n00:20:19\nAnd so I sat down with him after a couple of months\n\n00:20:23\nAnd he had a spreadsheet of jobs that he was applying to,\n\n00:20:31\nAnd in a number of these jobs, he actually\n\n00:20:35\nwent very deep in the interview process\n\n00:20:40\nWho else?\n\n00:20:42\nIt was Meta.\n\n00:20:43\nThere was one of the other large tech\n\n00:20:48\nAnd every time towards the end of the loop,\n\n00:20:52\nHe solved all the coding.\n\n00:20:56\nor at least he thought he had.\n\n00:20:59\nthe recruiter would call him and say, no, you didn't get the job.\n\n00:21:06\nAnd like I said, 300 plus jobs he had been tracking.\n\n00:21:13\nand to do some fine tuning.\n\n00:21:17\nThat was one of the other big tech company\n\n00:21:21\nAnd I started working through him\n\n00:21:25\nwith him.\n\n00:21:27\nwhat was going wrong until I decided to try and do\n\n00:21:33\na really tough interview.\n\n00:21:38\nI gave him some really obscure corner cases in his coding.\n\n00:21:46\nAnd how he reacted was the advice\n\n00:21:50\nAnd a lot of these recruiting pamphlets\n\n00:21:57\nto share an opinion, and you've got to stand your ground.\n\n00:22:01\nDon't bend.\n\n00:22:07\nSo I would pick corners.\n\n00:22:11\nI'd pick corner cases where things may not work,\n\n00:22:15\nAnd this advice that he'd been given to stand his ground\n\n00:22:23\nAnd I was looking at this then from the point\n\n00:22:28\nwhere it's a case of hey, good people, good teams, people\n\n00:22:33\nAnd from the interviewer perspective,\n\n00:22:38\nengineer, but I don't want him anywhere near my team\n\n00:22:44\nWe worked on that.\n\n00:22:45\nAnd the strange part is he's a really, really nice guy.\n\n00:22:52\nand he followed that advice, and he failed so many interviews\n\n00:22:56\nSo when I gave him the next job that he was interviewing at\n\n00:23:03\nAnd the good news is he got the job at that company.\n\n00:23:07\nHe doubled his salary from the job he was laid off from,\n\n00:23:12\nand he had six months of fun employment.\n\n00:23:16\nit was a very, very difficult time for him.\n\n00:23:21\nand looking at the paper you'd be working with\n\n00:23:24\nBut also realize they are looking at you in the same way.\n\n00:23:31\nand they gave you that advice to stand your ground\n\n00:23:36\nBut don't be a jerk while you're doing so.\n\n00:23:39\nOK.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture-08::seg4",
+      "global_kp_id": "kp_cs230_responsible_building_and_deliberate_effort",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    },
+    {
+      "unit_id": "local::lecture-08::seg4",
+      "global_kp_id": "kp_cs230_collaborative_interview_signal",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_responsible_building_and_deliberate_effort",
+      "name": "Responsible building and deliberate effort",
+      "description": "Building many things is valuable when paired with responsibility, low-cost experimentation, and sustained productive effort.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "ai_career"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.34,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Andrew encourages students to build without waiting for permission while avoiding harm, and separately encourages hard work when one's life circumstances permit it [ts=931s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-08::kp6"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_collaborative_interview_signal",
+      "name": "Collaborative interview signal",
+      "description": "Technical interview behavior should show problem-solving ability without becoming hostile when challenged.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "ai_career"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.32,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "medium",
+      "structural_role": "supporting",
+      "importance_confidence": "medium",
+      "importance_rationale": "Laurence's candidate story shows that strong coding skill can be undermined when 'stand your ground' is interpreted as hostile behavior [ts=1318s].",
+      "importance_scope": "lecture_local",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture-08::kp7"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.21,
+    0.51
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L8_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture08-career-advice-in-ai_transcript.txt"
+  }
+}

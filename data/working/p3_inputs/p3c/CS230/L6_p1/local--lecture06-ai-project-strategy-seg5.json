@@ -1,0 +1,153 @@
+{
+  "lecture_context": {
+    "course_id": "CS230",
+    "lecture_id": "lecture06_ai_project_strategy",
+    "lecture_title": "AI Project Strategy",
+    "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho"
+  },
+  "unit": {
+    "unit_id": "local::lecture06_ai_project_strategy::seg5",
+    "course_id": "CS230",
+    "name": "Machine learning work feels like debugging",
+    "description": "The lecture generalizes from the speech example to a process lesson: ML progress depends on disciplined debugging loops whose shape is constrained by training time, and that speed turns directly into product competitiveness.",
+    "summary": "The instructor argues that ML work feels more like debugging than classical software construction because you do not know in advance which data, bias-variance, or mismatch issue will surface next [ts=2892s] [ts=2963s]. He describes a daily rhythm of launching training runs, inspecting results the next morning, performing error analysis, coding a fix, and relaunching overnight so the team removes roughly one blocker per day [ts=3006s] [ts=3070s]. The exact operating cadence depends on whether training takes minutes, hours, or weeks, but the meta-principle is unchanged: shorten the loop between evidence and the next experiment [ts=3156s] [ts=3302s]. He closes by showing that a team that is merely 2x slower in iteration can be dramatically less competitive because performance compounds over calendar time [ts=3358s] [ts=3423s].",
+    "key_points": [
+      {
+        "text": "Machine learning development is best treated as iterative debugging rather than one-shot implementation.",
+        "timestamp_s": 2892,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "A healthy team cadence is train, inspect, analyze, fix, and relaunch on a regular schedule.",
+        "timestamp_s": 3006,
+        "evidence_type": "diagnostic_tip"
+      },
+      {
+        "text": "Training-job duration should shape how the team plans experiments and analysis work.",
+        "timestamp_s": 3156,
+        "evidence_type": "claim"
+      },
+      {
+        "text": "Iteration speed compounds into market advantage because faster teams reach stronger models earlier.",
+        "timestamp_s": 3358,
+        "evidence_type": "claim"
+      }
+    ],
+    "content_ref": {
+      "video_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+      "start_s": 2870,
+      "end_s": 3470
+    },
+    "difficulty": 0.44,
+    "difficulty_source": "vlm_estimate",
+    "difficulty_confidence": "medium",
+    "duration_min": 10,
+    "ordering_index": 5,
+    "is_template": false
+  },
+  "unit_summary_for_generation": "The instructor argues that ML work feels more like debugging than classical software construction because you do not know in advance which data, bias-variance, or mismatch issue will surface next [ts=2892s] [ts=2963s]. He describes a daily rhythm of launching training runs, inspecting results the next morning, performing error analysis, coding a fix, and relaunching overnight so the team removes roughly one blocker per day [ts=3006s] [ts=3070s]. The exact operating cadence depends on whether training takes minutes, hours, or weeks, but the meta-principle is unchanged: shorten the loop between evidence and the next experiment [ts=3156s] [ts=3302s]. He closes by showing that a team that is merely 2x slower in iteration can be dramatically less competitive because performance compounds over calendar time [ts=3358s] [ts=3423s].",
+  "target_kp_ids": [
+    "kp_cs230_debugging_cadence_should_match_training_time_constraints",
+    "kp_cs230_iteration_speed_as_a_core_ai_project_lever"
+  ],
+  "assessment_purpose": "lecture_reinforcement",
+  "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+  "video_clip_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
+  "transcript_slice": "00:47:55\nThat makes sense?\n\n00:47:58\nCool.\n\n00:48:04\nNow I want to share with you--\n\n00:48:13\nsystem, very common experience is you try something\n\n00:48:20\nAnd then you have to figure out all the wonderful ways\n\n00:48:26\nwhatever is not working.\n\n00:48:32\nis the training data too skew?\n\n00:48:34\nSo you need [INAUDIBLE] regularization or more data,\n\n00:48:37\nOr the synthetic data distribution not\n\n00:48:41\nIt turns out that when you're training a neural network, when\n\n00:48:46\nit's really difficult to know in advance\n\n00:48:51\nI find that in software development,\n\n00:48:57\nyou kind of control all the code.\n\n00:49:05\nand then it kind of works as soon as you debug it.\n\n00:49:10\nIn contrast, when you're building a machine\n\n00:49:15\ngoing to happen next.\n\n00:49:18\nhow to predict, how the algorithm will perform.\n\n00:49:23\nfeels much more like debugging than development.\n\n00:49:29\nwhere you build a system and you just repeatedly trying\n\n00:49:35\nIf you're trying to do a task that humans can do,\n\n00:49:40\nis often, whatever a human can clearly do,\n\n00:49:46\nSo for many machine learning teams that have led or worked\n\n00:49:56\ncycle, you can make really rapid progress.\n\n00:50:03\nI've been on teams where we would do the following.\n\n00:50:14\nSo we run our training jobs at night.\n\n00:50:23\nwe're training for speech recognition.\n\n00:50:27\nSo the training job takes about four hours\n\n00:50:31\nSo training at night.\n\n00:50:44\nYou look at the results, do error analysis,\n\n00:50:49\nAnd the afternoon, we write code to figure out\n\n00:50:57\nthe day before.\n\n00:51:01\nwe launch the training job.\n\n00:51:06\nAnd the next morning, we do it again and again and again.\n\n00:51:14\nthat's actually pretty good.\n\n00:51:20\nWhen I built this for real, there are slightly\n\n00:51:23\nBut I find that if you can get a team into a cadence\n\n00:51:30\nis this bias variance data mismatch--\n\n00:51:37\nFix it.\n\n00:51:41\nMaybe if you have time evening, just maybe\n\n00:51:46\ncome back in the next morning to see how it did.\n\n00:51:50\nAnd you can make really rapid progress.\n\n00:51:55\nthat lets you make progress.\n\n00:52:00\nand they go, what do we do next?\n\n00:52:03\nWait, where's the data?\n\n00:52:04\nI guess we'll meet tomorrow to look at the data.\n\n00:52:09\nAnd teams like that move much slower\n\n00:52:12\njust keep on rolling forward.\n\n00:52:18\nIt turns out that iteration cycle sometimes\n\n00:52:24\nSo I've worked on machine learning jobs\n\n00:52:28\nAnd for us, it's long enough.\n\n00:52:31\nBut running overnight is just fine.\n\n00:52:37\nabout three weeks on average.\n\n00:52:42\nfor a particular type of model we're working on,\n\n00:52:47\nSo how long it takes to train a neural network really\n\n00:52:51\nWhere sometimes we would launch a training job and then\n\n00:52:56\nWe would monitor it during those two weeks.\n\n00:53:00\nbut you just got to launch the training job.\n\n00:53:05\nBut we take three weeks.\n\n00:53:09\nwhatever work that would take us one to two weeks\n\n00:53:14\nThey're going to take us another three weeks to get a result.\n\n00:53:19\nWhile launching this job, we're analyzing the result\n\n00:53:23\nasynchronously.\n\n00:53:26\nthis is a huge driver for how you do this.\n\n00:53:32\ntakes 10 minutes to train a neural network,\n\n00:53:36\nYou just train it, get a result, train it, get a coffee,\n\n00:53:41\nAnd then the bottleneck is how quickly can you analyze the data\n\n00:53:45\nSo this really drives the design of this process.\n\n00:53:50\nis for a lot of projects, you start off\n\n00:53:54\nBut then as you get more and more data, then you're bigger,\n\n00:54:00\nThen it takes two weeks to train.\n\n00:54:03\nto train.\n\n00:54:05\nwhere unfortunately, as a performance climb,\n\n00:54:10\nwith more and more data.\n\n00:54:14\niterations to these month long iterations.\n\n00:54:19\nbigger and bigger networks.\n\n00:54:21\n[INAUDIBLE] as you get into the model, you see a problem,\n\n00:54:36\nWe probably didn't stop the model that much.\n\n00:54:42\nAnd if you see that for some reason--\n\n00:54:48\nyou expect the performance to be at a certain level\n\n00:54:52\nAnd if it's way off, then before burning another two weeks,\n\n00:54:58\nOr maybe this new data set we try is clearly wrong.\n\n00:55:04\non the checkpoints.\n\n00:55:08\nI would say that happened very rarely.\n\n00:55:13\nOK.\n\n00:55:21\nYes.\n\n00:55:23\nthe online videos is transfer learning.\n\n00:55:27\nfine tune on just a much smaller data set.\n\n00:55:32\ntakes half an hour, then that's great.\n\n00:55:37\nbased on that half hour, the limiting factor for the training\n\n00:55:43\nCool.\n\n00:55:48\nOne reason I obsess about speed is because.\n\n00:55:58\nimagine you're building a startup to launch this product.\n\n00:56:14\nthey're just much less competitive in the marketplace.\n\n00:56:18\nSo if this is error and this is months,\n\n00:56:24\nthat we work on for months to keep on trying to improve it.\n\n00:56:33\nAnd if a competitor, say, it takes twice as long\n\n00:56:38\nSo instead of taking this long to get here,\n\n00:56:43\nInstead of taking this long to get here,\n\n00:56:47\nSo if a competitor kind of does that.\n\n00:56:51\nThey take two days instead of one day to do something.\n\n00:56:55\nyou would take one day to do.\n\n00:57:03\nAnd what the customer cares about is\n\n00:57:08\nSo these two differences in speed\n\n00:57:13\nin the performance of your system versus someone else's\n\n00:57:19\nAnd I find that the fast moving teams are just so much more\n\n00:57:24\nAnd you might think, yeah, I took two days.\n\n00:57:27\nWhat's the big deal?\n\n00:57:30\nThe big deal is you're two times slower.\n\n00:57:35\nit's just not competitive if you take twice as long\n\n00:57:43\nOK.\n\n00:57:47\nThere's one other example I want to cover.",
+  "unit_kp_map_rows": [
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg5",
+      "global_kp_id": "kp_cs230_debugging_cadence_should_match_training_time_constraints",
+      "planner_role": "main",
+      "coverage_level": "dominant"
+    },
+    {
+      "unit_id": "local::lecture06_ai_project_strategy::seg5",
+      "global_kp_id": "kp_cs230_iteration_speed_as_a_core_ai_project_lever",
+      "planner_role": "main",
+      "coverage_level": "substantial"
+    }
+  ],
+  "kp_catalog": [
+    {
+      "global_kp_id": "kp_cs230_debugging_cadence_should_match_training_time_constraints",
+      "name": "Debugging cadence should match training-time constraints",
+      "description": "An operational principle for structuring evaluation and engineering work around the runtime of experiments.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "ml_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.43,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "medium",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Debugging cadence is important process guidance, but supports the broader diagnostic loop.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture06_ai_project_strategy::kp10"
+      ]
+    },
+    {
+      "global_kp_id": "kp_cs230_iteration_speed_as_a_core_ai_project_lever",
+      "name": "Iteration speed as a core AI project lever",
+      "description": "The idea that faster experiment-selection and execution loops matter more than small local modeling choices because they compound over time.",
+      "track_tags": [
+        "DL"
+      ],
+      "domain_tags": [
+        "deep_learning",
+        "ml_systems"
+      ],
+      "career_path_tags": [
+        "machine_learning_engineer",
+        "ai_engineer"
+      ],
+      "difficulty_level": 0.35,
+      "difficulty_source": "vlm_estimate",
+      "difficulty_confidence": "high",
+      "importance_level": "high",
+      "structural_role": "supporting",
+      "importance_confidence": "high",
+      "importance_rationale": "Iteration speed frames the project-strategy mindset but is not a technical prerequisite gate.",
+      "importance_scope": "curriculum_global",
+      "importance_source": "manual_append_from_p1",
+      "source_course_ids": [
+        "CS230"
+      ],
+      "merged_from_local_ids": [
+        "local::lecture06_ai_project_strategy::kp1"
+      ]
+    }
+  ],
+  "question_intent": null,
+  "target_item_count": null,
+  "target_difficulty_range": [
+    0.29,
+    0.59
+  ],
+  "allow_code_mcq": true,
+  "allowed_item_types": [
+    "concept_mcq",
+    "code_mcq"
+  ],
+  "forbidden_question_patterns": [],
+  "code_evidence": [],
+  "source_trace": {
+    "p1_artifact": "data/courses/CS230/processed_sanitized/L6_p1.json",
+    "p2_output": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "transcript_file": "data/courses/CS230/transcripts/cs230-2025-lecture06-ai-project-strategy_transcript.txt"
+  }
+}
