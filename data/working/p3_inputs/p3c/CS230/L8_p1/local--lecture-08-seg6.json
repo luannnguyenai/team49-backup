@@ -51,9 +51,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Laurence says candidates can no longer rely on simply listing AI on a resume; they must show evidence of three success pillars [ts=1753s]. The first pillar is understanding in depth: knowing machine learning, architectures, papers, and how to put research to work, while tracking trends with a good signal-to-noise ratio [ts=1835s]. The second is business focus, where hard work is measured by output rather than hours and output should be aligned with the job one wants [ts=1875s]. The third is bias toward delivery: ideas are cheap, execution matters, and grounded half-baked ideas can outperform fluffy unimplemented ones [ts=2126s].",
-  "target_kp_ids": [
-    "kp_cs230_three_pillars_for_ai_career_success"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -99,8 +97,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.37,
     0.67

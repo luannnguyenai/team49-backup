@@ -47,7 +47,8 @@
   },
   "unit_summary_for_generation": "The second case study shifts to a deep-research assistant that answers broad queries by combining several steps rather than a single model [ts=3470s] [ts=3537s]. A baseline pipeline is sketched as query to LLM-generated search terms, then web search, then page selection/fetching, and finally LLM-based writing [ts=3603s] [ts=3680s]. The instructor notes that newer systems are more agentic and can decide to loop back for more search, but the simple linear version is already enough to expose the core project-management challenge [ts=3696s] [ts=3734s]. Once a system is decomposed this way, the key question is no longer only how to improve a model, but which pipeline stage deserves attention first [ts=3750s] [ts=3870s].",
   "target_kp_ids": [
-    "kp_cs230_pipeline_decomposition_for_ai_systems"
+    "kp_cs230_pipeline_decomposition_for_ai_systems",
+    "kp_cs230_manual_error_analysis_to_locate_system_bottlenecks"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
@@ -133,8 +134,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.43,
     0.73

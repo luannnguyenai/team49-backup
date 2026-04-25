@@ -149,8 +149,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.42,
     0.72

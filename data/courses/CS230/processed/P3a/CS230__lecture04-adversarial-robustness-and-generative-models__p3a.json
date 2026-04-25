@@ -1,0 +1,180 @@
+{
+  "output_filename": "p3a__CS230__lecture04-adversarial-robustness-and-generative-models.json",
+  "run_id": "unknown_run_id",
+  "stage_id": "p3a",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "dominant coverage of kp_cs230_ai_attack_taxonomy; the unit gives the lecture's organizing attack taxonomy and concretely broadens attack surfaces from raw inputs to instructions, context, and retrieval pipelines.",
+      "target_kp_ids": [
+        "kp_cs230_ai_attack_taxonomy"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "substantial coverage of gateway KP kp_cs230_input_space_optimization_for_adversarial_examples plus substantial coverage of kp_cs230_perceptual_constraints_for_adversarial_examples; this is a formula-heavy construction segment where gradients are taken with respect to pixels, then modified with closeness constraints and physical-patch objectives.",
+      "target_kp_ids": [
+        "kp_cs230_input_space_optimization_for_adversarial_examples",
+        "kp_cs230_perceptual_constraints_for_adversarial_examples",
+        "kp_cs230_physical_adversarial_patches_and_transferability"
+      ],
+      "question_intent": "procedural",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "substantial coverage of gateway KP kp_cs230_high_dimensional_compounding_vulnerability with substantial coverage of critical/high KPs kp_cs230_fast_gradient_sign_method and kp_cs230_adversarial_defense_strategies; the segment is derivation-heavy and common-error-prone around compounding effects, gradient-sign perturbations, attacker assumptions, and defense tradeoffs.",
+      "target_kp_ids": [
+        "kp_cs230_high_dimensional_compounding_vulnerability",
+        "kp_cs230_fast_gradient_sign_method",
+        "kp_cs230_adversarial_defense_strategies"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "substantial coverage of kp_cs230_backdoor_and_data_poisoning_attacks and kp_cs230_prompt_injection; the cat/dog trigger example and direct-versus-indirect prompt injection cases support scenario-based application questions, but the unit is more mechanism survey than derivation.",
+      "target_kp_ids": [
+        "kp_cs230_backdoor_and_data_poisoning_attacks",
+        "kp_cs230_prompt_injection",
+        "kp_cs230_adversarial_defense_strategies"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway KP kp_cs230_generative_modeling_as_distribution_learning; the segment explicitly contrasts discriminative versus generative learning and states the central distribution-matching objective that the GAN and diffusion units build on.",
+      "target_kp_ids": [
+        "kp_cs230_generative_modeling_as_distribution_learning"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway KP kp_gan_latent_generator_distribution with partial support from gateway KP kp_gan_minimax_objective; the generator-discriminator game, latent-code mapping, and gradient flow through D to G are core GAN mechanics.",
+      "target_kp_ids": [
+        "kp_gan_latent_generator_distribution",
+        "kp_gan_minimax_objective"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "substantial coverage of gateway KP kp_gan_minimax_objective and substantial coverage of kp_gan_instability_diagnostics; the unit derives discriminator and generator losses, explains saturating versus non-saturating updates, and directly treats mode collapse and training instability.",
+      "target_kp_ids": [
+        "kp_gan_minimax_objective",
+        "kp_gan_instability_diagnostics"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of kp_cs230_forward_diffusion_process, with GAN instability used as explicit motivation for diffusion; the forward noising recurrence and the contrast with GAN mode collapse make this a foundational bridge into diffusion.",
+      "target_kp_ids": [
+        "kp_gan_instability_diagnostics",
+        "kp_cs230_forward_diffusion_process"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway KP kp_diffusion_denoising_intuition with prerequisite support from kp_cs230_forward_diffusion_process; the reconstruction loss, self-supervised triplets, and denoising target are central training mechanics for diffusion.",
+      "target_kp_ids": [
+        "kp_cs230_forward_diffusion_process",
+        "kp_diffusion_denoising_intuition"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "substantial coverage of kp_cs230_diffusion_sampling_and_conditioning and gateway KP kp_latent_diffusion_models; the unit connects denoising mechanics to inference-time sampling, prompt conditioning, latent-space efficiency, and video extensions, but it is broader and less derivational than the preceding objectives.",
+      "target_kp_ids": [
+        "kp_cs230_diffusion_sampling_and_conditioning",
+        "kp_latent_diffusion_models"
+      ],
+      "question_intent": "application",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

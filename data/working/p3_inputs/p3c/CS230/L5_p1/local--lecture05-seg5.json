@@ -53,7 +53,8 @@
   "unit_summary_for_generation": "The training section revisits DQN implementation and highlights that terminal states must be handled specially because there is no next-state future reward after the episode ends [ts=3670s] [ts=3714s]. The instructor modifies the loop by creating a terminal-state boolean and checking whether s' is terminal before computing the target [ts=3846s] [ts=3872s]. Experience replay stores transitions of the form phi(s), action, reward, and phi(s') in a memory buffer rather than training only on the most recent transition [ts=3915s] [ts=3972s]. Sampling mini-batches from replay memory exposes the model to older useful experiences, supports mini-batch gradient descent, and reduces the problem of consecutive samples being highly correlated [ts=4032s] [ts=4170s].",
   "target_kp_ids": [
     "kp_cs230_terminal_state_handling_in_dqn",
-    "kp_cs230_experience_replay"
+    "kp_cs230_experience_replay",
+    "kp_cs230_dqn_target_loss_and_gradient_update"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
@@ -176,8 +177,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.5,
     0.8

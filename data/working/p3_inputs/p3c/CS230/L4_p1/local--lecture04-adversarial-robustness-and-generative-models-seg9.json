@@ -52,6 +52,7 @@
   },
   "unit_summary_for_generation": "The reverse process trains a diffusion model to predict the cumulative noise epsilon-hat that was added between x0 and a noisy image xt [ts=5064s]. If the predicted noise can be subtracted from xt, the model can recover the original clean image, so denoising becomes the core generative skill [ts=5097s]. The reconstruction loss compares the true stored noise with the model’s predicted cumulative noise, and this is self-supervised because the forward process created the labels [ts=5161s]. The training database is built from noisy images, a time-step index t, and the cumulative noise epsilon; the index tells the model how much denoising is being requested [ts=5232s]. Before inference, the instructor summarizes the training loop as sampling triplets, computing reconstruction loss, and using gradients to teach the model to predict noise given a noisy picture [ts=5435s].",
   "target_kp_ids": [
+    "kp_cs230_forward_diffusion_process",
     "kp_diffusion_denoising_intuition"
   ],
   "assessment_purpose": "lecture_reinforcement",
@@ -141,8 +142,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.61,
     0.91

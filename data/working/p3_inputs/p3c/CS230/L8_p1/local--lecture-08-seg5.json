@@ -51,9 +51,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Laurence begins by telling students to use the networks and prestige available to them because the current job landscape is difficult [ts=1440s]. He names signals such as junior hiring slowdown, high-profile layoffs, scarce-feeling entry-level positions, and fierce competition, but answers that students should not simply worry [ts=1512s]. His explanation links the current market to pandemic-era slowdown, 2022-2023 overhiring, and a 2024-2025 correction in which companies became more cautious about AI claims [ts=1604s]. The actionable message is that opportunity remains large for people who understand the changing industry and approach job search strategically [ts=1739s].",
-  "target_kp_ids": [
-    "kp_cs230_ai_hiring_reset_and_strategic_job_search"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -99,8 +97,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.3,
     0.6

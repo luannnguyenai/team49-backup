@@ -1,0 +1,197 @@
+{
+  "output_filename": "p3a__CS230__lecture-07-agents-prompts-and-rag.json",
+  "run_id": "cs230_lecture07_p3a",
+  "stage_id": "p3a",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_llm_augmentation_motivation plus substantial coverage of kp_cs230_context_window_and_attention_limits; concrete signals include base-model limits around domain gaps, stale knowledge, control/style failures, limited context windows, sourcing needs, and the two-axis model-versus-context optimization frame.",
+      "target_kp_ids": [
+        "kp_cs230_llm_augmentation_motivation",
+        "kp_cs230_context_window_and_attention_limits",
+        "kp_cs230_model_versus_context_optimization"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "motivation",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "substantial coverage of critical gateway KP kp_cs230_prompt_specificity_and_stepwise_task_decomposition with substantial prompt-template and in-context-learning coverage; section_flags mark item_generation_worthiness high, and concrete signals include prompt specificity, stepwise task decomposition, reusable placeholders, and zero-shot versus few-shot examples.",
+      "target_kp_ids": [
+        "kp_cs230_jagged_ai_frontier_and_centaur_cyborg_work_styles",
+        "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
+        "kp_cs230_prompt_templates",
+        "kp_in_context_learning"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_prompt_chaining plus substantial coverage of critical KP kp_cs230_prompt_testing_and_llm_as_judge; concrete signals include debugging intermediate prompt outputs, end-to-end versus component evaluation, latency tradeoffs, and rubric-based LLM judges.",
+      "target_kp_ids": [
+        "kp_cs230_prompt_chaining",
+        "kp_cs230_prompt_testing_and_llm_as_judge"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of a high-importance capstone KP mapped to the fine-tuning decision segment; concrete lecture signals include the distinction between prompt-context methods and weight modification, labeled-data cost, overfitting/general-utility risks, new-base-model risk, and narrow cases where fine-tuning may still be justified. Confidence is medium because the segment is short and the catalog description is broader than this lecture's cautionary treatment.",
+      "target_kp_ids": [
+        "kp_practical_fine_tuning_decision_flowchart"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of critical gateway KP kp_cs230_rag_retrieval_pipeline plus substantial coverage of high-importance KP kp_cs230_rag_chunking_and_hyde; concrete signals include embedding documents, vector database storage, query embedding, retrieval by distance, prompt augmentation, chunking, and HyDE.",
+      "target_kp_ids": [
+        "kp_cs230_rag_retrieval_pipeline",
+        "kp_cs230_rag_chunking_and_hyde"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of critical gateway KP kp_cs230_agentic_workflow_definition plus substantial coverage of high-importance KP kp_cs230_deterministic_versus_fuzzy_ai_engineering; concrete signals include prompts, tools, resources, API calls, workflow logic, the RL-agent terminology contrast, free-form fuzzy inputs, guardrails, and human-in-the-loop review.",
+      "target_kp_ids": [
+        "kp_cs230_agentic_workflow_definition",
+        "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+        "kp_cs230_enterprise_workflow_redesign_with_agents"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_agent_memory_tools_and_resources with substantial support from autonomy levels and MCP; concrete signals include working versus archival memory, API tools, readable resources, hard-coded versus flexible/autonomous steps, MCP as an integration layer, and security concerns.",
+      "target_kp_ids": [
+        "kp_cs230_agent_memory_tools_and_resources",
+        "kp_cs230_agent_autonomy_levels",
+        "kp_cs230_model_context_protocol_mcp"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "substantial coverage of high-importance KPs kp_cs230_agent_workflow_planning_and_memory_update and kp_cs230_agent_eval_taxonomy in a concrete travel-agent application; signals include planning flights/hotels/itinerary steps, tool execution, user validation loops, memory updates, end-to-end ratings, objective errors, subjective preferences, and LLM-judge rubrics.",
+      "target_kp_ids": [
+        "kp_cs230_agent_workflow_planning_and_memory_update",
+        "kp_cs230_agent_eval_taxonomy"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_customer_support_task_decomposition and dominant coverage of kp_cs230_agent_eval_taxonomy; concrete signals include mapping extraction, customer-record retrieval, policy check, response drafting, email sending, LLM traces for debugging, component versus end-to-end evals, and objective/subjective/quantitative/qualitative eval dimensions.",
+      "target_kp_ids": [
+        "kp_cs230_customer_support_task_decomposition",
+        "kp_cs230_llm_traces_for_debugging",
+        "kp_cs230_agent_eval_taxonomy"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_multi_agent_workflow_patterns; concrete signals include parallelism as the main reason for multi-agent workflows, reusable specialized agents, smart-home decomposition, orchestrator delegation, flat versus hierarchical patterns, and debugging/parallelization benefits.",
+      "target_kp_ids": [
+        "kp_cs230_multi_agent_workflow_patterns"
+      ],
+      "question_intent": "application",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-07-agents-prompts-and-rag::seg11",
+      "is_worth_learning": false,
+      "salience_score": "low",
+      "rationale": "content_type recap is not in course_config.included_content_types and section_flags mark item_generation_worthiness low; concrete signals show a closing recap and forward-looking trends around scaling plateaus, architecture search, multimodality, hybrid methods, and skill half-life rather than new gateway or capstone technical content.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "recap",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

@@ -132,8 +132,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.21,
     0.51

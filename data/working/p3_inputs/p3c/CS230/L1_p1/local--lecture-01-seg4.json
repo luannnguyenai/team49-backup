@@ -52,7 +52,9 @@
   },
   "unit_summary_for_generation": "In the AI-trends section, Ng sharpens the term generative AI into a family of deep-learning systems, mostly transformer-based, that generate text and increasingly images and audio [ts=2141s] [ts=2168s]. He then argues that AI-assisted coding has changed software development most dramatically on quick prototypes, while production systems still need tighter control around databases, security, reliability, and sandboxing [ts=2288s] [ts=2400s]. A deeper point is that rapid prototyping shortens feedback loops for both ML data surprises and ordinary product discovery, so speed helps teams learn what is actually in the data and what users truly want [ts=2464s] [ts=2580s]. He explicitly reframes the old slogan into move fast and be responsible, treating fast execution as a way to discover and fix problems sooner rather than as the opposite of safety [ts=2590s] [ts=2648s].",
   "target_kp_ids": [
-    "kp_cs230_responsible_rapid_prototyping_with_ai_assisted_coding"
+    "kp_cs230_responsible_rapid_prototyping_with_ai_assisted_coding",
+    "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+    "kp_transformers_as_a_cross_domain_backbone"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
@@ -181,8 +183,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 1,
   "target_difficulty_range": [
     0.28,
     0.58

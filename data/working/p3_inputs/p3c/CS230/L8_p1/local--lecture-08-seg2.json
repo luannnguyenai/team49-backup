@@ -52,7 +52,8 @@
   },
   "unit_summary_for_generation": "Andrew's immediate advice is to build more things because AI has made implementation cheaper and faster [ts=303s]. Once a clear software spec can be converted into code more easily, the bottleneck shifts toward deciding what to build and writing that spec [ts=337s]. He describes a loop of building, getting user feedback, revising product judgment, and iterating toward something users love [ts=357s]. This shift may reduce the traditional engineer-to-PM ratio, and engineers who can talk with users and shape product can move unusually fast [ts=438s].",
   "target_kp_ids": [
-    "kp_cs230_product_management_bottleneck_in_ai_assisted_development"
+    "kp_cs230_product_management_bottleneck_in_ai_assisted_development",
+    "kp_cs230_engineer_product_empathy"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -136,8 +137,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 1,
   "target_difficulty_range": [
     0.33,
     0.63

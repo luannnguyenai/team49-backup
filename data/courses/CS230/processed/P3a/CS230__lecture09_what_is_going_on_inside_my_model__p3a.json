@@ -1,0 +1,182 @@
+{
+  "output_filename": "p3a__CS230__lecture09_what_is_going_on_inside_my_model.json",
+  "run_id": "cs230_2025_l9",
+  "stage_id": "p3a",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of gateway KP kp_cs230_frontier_model_diagnostic_evidence_lenses; concrete signal is the 200B checkpoint failure case organized into training/scaling, representations/internals, data/distribution, and capabilities/safety evidence lenses.",
+      "target_kp_ids": [
+        "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+        "kp_cs230_loss_curves_and_training_telemetry",
+        "kp_cs230_attention_map_and_embedding_diagnostics",
+        "kp_cs230_mixture_of_experts_routing_diagnostics"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of kp_saliency_via_input_gradients plus substantial kp_cs230_integrated_gradients; formula-heavy attribution segment teaches pre-softmax gradient saliency, baseline-to-image integrated gradients, and common misinterpretation signals.",
+      "target_kp_ids": [
+        "kp_saliency_via_input_gradients",
+        "kp_cs230_integrated_gradients"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg3",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Substantial coverage of two high-importance interpretability KPs, kp_cs230_occlusion_sensitivity and kp_cs230_class_activation_maps_with_global_average_pooling; concrete signals include scan-mask score drops, global average pooling, and class-specific weighted feature-map localization.",
+      "target_kp_ids": [
+        "kp_cs230_occlusion_sensitivity",
+        "kp_cs230_class_activation_maps_with_global_average_pooling"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Substantial coverage of activation optimization and data-set search KPs; formula-heavy signal includes fixed-weight gradient ascent on input pixels, pre-softmax objectives, regularization, and retrieval of high-activation validation examples.",
+      "target_kp_ids": [
+        "kp_cs230_gradient_ascent_class_model_visualization",
+        "kp_cs230_activation_based_data_set_search"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of supporting medium-importance KP kp_cs230_deconvolution_as_transposed_convolution; concrete signal is the y=Wx convolution-as-matrix derivation and W-transpose intuition, but it is narrower support for interpretability rather than a gateway concept.",
+      "target_kp_ids": [
+        "kp_cs230_deconvolution_as_transposed_convolution"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "Dominant coverage of supporting medium-importance KP kp_cs230_deconvnet_reconstruction_and_unpooling_switches with demo-heavy visual reconstruction; concrete signal is the reverse path through unpooling switches, ReLU, and deconvolution, plus a toolkit summary, but details are partly visual and narrower.",
+      "target_kp_ids": [
+        "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+        "kp_cs230_activation_based_data_set_search",
+        "kp_cs230_deconvolution_as_transposed_convolution"
+      ],
+      "question_intent": "procedural",
+      "content_type": "worked_example",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of high-importance KP kp_cs230_transformer_representation_analysis plus substantial support from kp_cs230_attention_map_and_embedding_diagnostics; concrete signal is the comparison between CNN localized features and transformer attention/embedding relationships, though the segment is high-level.",
+      "target_kp_ids": [
+        "kp_cs230_transformer_representation_analysis",
+        "kp_cs230_attention_map_and_embedding_diagnostics"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Substantial coverage of high-importance KPs kp_cs230_loss_curves_and_training_telemetry and kp_pretraining_scaling_and_compute_data_tradeoffs; concrete signals include loss jumps, gradient norms, learning-rate schedules, hardware telemetry, and Chinchilla-style undertraining diagnosis.",
+      "target_kp_ids": [
+        "kp_cs230_loss_curves_and_training_telemetry",
+        "kp_pretraining_scaling_and_compute_data_tradeoffs"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Substantial coverage of benchmark contamination and safety-evaluation KPs, including critical KP kp_benchmark_contamination; concrete signals include n-gram/hash/embedding contamination checks, held-out replacement, release dashboards, and RLHF targeting based on failing evals.",
+      "target_kp_ids": [
+        "kp_benchmark_contamination",
+        "kp_cs230_safety_evaluations_and_agentic_workflow_evaluation"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg10",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "Dominant coverage of high-importance KP kp_cs230_data_distribution_and_token_drift_diagnostics; concrete signal is domain proportion tracking, token-frequency drift, tokenizer statistics, and MoE router metrics, with item density lowered by the closing Q&A.",
+      "target_kp_ids": [
+        "kp_cs230_data_distribution_and_token_drift_diagnostics",
+        "kp_cs230_mixture_of_experts_routing_diagnostics",
+        "kp_pretraining_scaling_and_compute_data_tradeoffs"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

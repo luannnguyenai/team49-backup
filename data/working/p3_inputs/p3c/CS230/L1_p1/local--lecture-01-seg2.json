@@ -53,7 +53,8 @@
   "unit_summary_for_generation": "The first question block clarifies that machine learning is not a hard prerequisite, though students without prior ML may feel the first weeks move quickly [ts=742s] [ts=763s]. Ng compares CS129, CS229, and CS230 as different on-ramps, positioning CS230 as the most applied deep-learning-focused option and CS229 as the more mathematical and broader ML theory course [ts=779s] [ts=858s]. He also says the class is intentionally practical rather than beauty-through-proof math, with emphasis on building software that works [ts=1068s] [ts=1121s]. That practical lens continues into product advice: prompting is strong for text, but many real systems still need direct deep learning for audio, vision, video, and structured data, and fine-tuning smaller models matters when prompt iteration stalls or inference bills explode [ts=1199s] [ts=1364s].",
   "target_kp_ids": [
     "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
-    "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality"
+    "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+    "kp_practical_fine_tuning_decision_flowchart"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
@@ -222,8 +223,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 3,
   "target_difficulty_range": [
     0.29,
     0.59

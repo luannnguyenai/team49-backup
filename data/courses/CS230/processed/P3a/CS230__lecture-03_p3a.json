@@ -1,0 +1,130 @@
+{
+  "output_filename": "p3a__CS230__lecture-03.json",
+  "run_id": "cs230_lecture03_p3a",
+  "stage_id": "p3a",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture-03::seg1",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of gateway KP kp_cs230_ai_projects_as_empirical_systems plus substantial coverage of critical gateway KP kp_cs230_full_machine_learning_project_lifecycle; section_flags mark item_generation_worthiness high and the unit defines the full empirical ML lifecycle rather than admin or recap.",
+      "target_kp_ids": [
+        "kp_cs230_ai_projects_as_empirical_systems",
+        "kp_cs230_full_machine_learning_project_lifecycle"
+      ],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-03::seg2",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_siamese_network_formulation_for_face_recognition in the face-recognition running example; concrete signals include the two-image same/different-person setup and registration-image comparison use case.",
+      "target_kp_ids": [
+        "kp_cs230_siamese_network_formulation_for_face_recognition"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-03::seg3",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "dominant coverage of supporting KP kp_cs230_speed_first_data_collection with substantial support for empirical iteration; section_flags mark item_generation_worthiness medium, and the unit teaches a concrete procedure of short data-collection sprints, fast training, inspection, and revision.",
+      "target_kp_ids": [
+        "kp_cs230_speed_first_data_collection",
+        "kp_cs230_ai_projects_as_empirical_systems"
+      ],
+      "question_intent": "procedural",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 3,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-03::seg4",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "substantial coverage of critical gateway KP kp_cs230_error_analysis plus substantial coverage of data-centric AI and responsible sandbox testing; concrete signals include using observed failures to choose targeted model/data interventions and avoiding blind more-data collection.",
+      "target_kp_ids": [
+        "kp_cs230_responsible_ai_sandbox_testing",
+        "kp_cs230_error_analysis",
+        "kp_cs230_data_centric_ai"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-03::seg5",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_data_quality_and_distribution_mismatch with diagnostic contrast between blurry vs sharp data, close vs exact train-test distribution matching, and irrelevant-but-not-incorrect vs incorrect data; confidence kept medium because the source marks this unit difficulty_confidence medium.",
+      "target_kp_ids": [
+        "kp_cs230_data_quality_and_distribution_mismatch",
+        "kp_cs230_deployment_as_model_serving_software"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 4,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-03::seg6",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of KP kp_cs230_visual_activity_detection_prefilter plus substantial coverage of deployment as model-serving software; concrete signals include edge/cloud cost constraints, pixel-change threshold baseline, lightweight neural prefilter, and frame-quality selection in a production vision system.",
+      "target_kp_ids": [
+        "kp_cs230_deployment_as_model_serving_software",
+        "kp_cs230_visual_activity_detection_prefilter",
+        "kp_cs230_frame_quality_selection_for_vision_systems"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-03::seg7",
+      "is_worth_learning": true,
+      "salience_score": "high",
+      "rationale": "dominant coverage of high-importance KP kp_cs230_production_monitoring_and_model_maintenance plus substantial coverage of high-importance KP kp_cs230_data_drift_and_concept_drift; concrete signals include human-level reference performance, data/concept drift, dashboards, alarms, telemetry, and model updates after deployment.",
+      "target_kp_ids": [
+        "kp_cs230_reference_performance_and_human_level_benchmark",
+        "kp_cs230_data_drift_and_concept_drift",
+        "kp_cs230_production_monitoring_and_model_maintenance"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 5,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

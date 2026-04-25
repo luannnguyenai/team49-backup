@@ -57,7 +57,10 @@
   },
   "unit_summary_for_generation": "The lecture frames model understanding as a spectrum from older CNN interpretability tools to open research questions for frontier models [ts=14s]. In the checkpoint case study, the instructor asks what evidence to inspect when reasoning benchmarks regress, safety evals fail, and tool-use latency spikes [ts=157s]. Student answers are organized around error analysis, training/validation loss curves, recent training data, checkpoint comparisons, hardware/latency signals, attention maps, embeddings, sensitivity analysis, scaling laws, and MoE routing [ts=231s] [ts=629s]. The instructor consolidates the answers into four buckets: training and scaling, representations and internals, data and distribution, and capabilities and safety [ts=769s].",
   "target_kp_ids": [
-    "kp_cs230_frontier_model_diagnostic_evidence_lenses"
+    "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+    "kp_cs230_loss_curves_and_training_telemetry",
+    "kp_cs230_attention_map_and_embedding_diagnostics",
+    "kp_cs230_mixture_of_experts_routing_diagnostics"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
@@ -220,8 +223,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.4,
     0.7

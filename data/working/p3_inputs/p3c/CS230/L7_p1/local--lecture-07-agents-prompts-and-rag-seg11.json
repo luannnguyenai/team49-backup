@@ -61,9 +61,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "The recap lists the major LLM optimization levers covered in the lecture: better prompts, chains, fine-tuning, retrieval, and multi-agent systems [ts=6185s]. The instructor then raises the open question of whether LLMs are plateauing, noting that scaling laws suggest improvement from more compute and energy but that new architectures may be needed for the next step [ts=6220s]. Architecture search is positioned as a possible path to a next-transformer-style breakthrough that reduces compute or energy needs [ts=6272s]. Multimodality is presented as another trend: adding vision, audio, and video can improve the whole model, not only the added modality [ts=6356s]. The lecture also argues that future systems may combine supervised, unsupervised, self-supervised, reinforcement learning, prompt engineering, and RAG in harmony, while research explores both human-inspired and non-human-inspired approaches [ts=6413s]. The final lesson is breadth-first learning because individual RAG or agent techniques change quickly and the half-life of specific skills is short [ts=6542s].",
-  "target_kp_ids": [
-    "kp_cs230_future_ai_trends_and_skill_half_life"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
   "video_clip_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
@@ -147,8 +145,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.28,
     0.58

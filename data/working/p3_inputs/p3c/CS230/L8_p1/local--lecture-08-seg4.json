@@ -51,10 +51,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Andrew says powerful, faster software building should be paired with responsibility: do not build software that harms others, but do try many ideas because failure costs less than before [ts=921s]. He encourages hard work while explicitly respecting people who are not in a position to do so, framing output and learning as the motivation [ts=1003s]. Laurence then reinforces the team-selection theme from the employer side: companies are also choosing whether a candidate is someone they want to work with [ts=1151s]. His mentoring story shows that even an excellent coder can fail interviews if challenge responses sound hostile rather than collaborative [ts=1278s].",
-  "target_kp_ids": [
-    "kp_cs230_responsible_building_and_deliberate_effort",
-    "kp_cs230_collaborative_interview_signal"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -137,8 +134,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.21,
     0.51

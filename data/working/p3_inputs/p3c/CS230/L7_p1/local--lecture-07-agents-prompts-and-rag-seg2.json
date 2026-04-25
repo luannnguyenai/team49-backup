@@ -62,6 +62,7 @@
   },
   "unit_summary_for_generation": "Prompt engineering is motivated by a study of consultants where trained AI users performed best within the AI capability frontier, while over-reliance outside the frontier made performance worse [ts=1091s]. The instructor distinguishes centaurs, who divide and delegate tasks to AI, from cyborgs, who integrate AI into continuous back-and-forth work [ts=1204s]. Basic prompt quality improves when the prompt specifies document type, length, audience, focus, and a step-by-step task breakdown [ts=1329s]. Prompt templates are defined as reusable structures with dynamic placeholders that can be embedded in code and personalized from metadata such as role, country, or language [ts=1505s]. The unit then contrasts zero-shot prompting with few-shot prompting, showing how examples can align ambiguous labels such as product-review sentiment without changing model weights [ts=1668s].",
   "target_kp_ids": [
+    "kp_cs230_jagged_ai_frontier_and_centaur_cyborg_work_styles",
     "kp_cs230_prompt_specificity_and_stepwise_task_decomposition",
     "kp_cs230_prompt_templates",
     "kp_in_context_learning"
@@ -231,8 +232,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.27,
     0.57

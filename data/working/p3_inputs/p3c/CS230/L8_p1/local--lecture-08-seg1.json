@@ -46,10 +46,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Andrew frames the lecture around why it is a strong time to build a career in AI, contrasting benchmark saturation with task-length progress as a more useful signal [ts=79s]. He cites the estimate that AI task length is doubling every seven months and that AI-coding task length may double in roughly seventy days [ts=123s]. The core career implication is that students can build more powerful software using AI building blocks such as LLMs, agentic workflows, voice AI, and deep learning [ts=177s]. He also warns that coding tools change rapidly, so being even half a generation behind can reduce productivity [ts=249s].",
-  "target_kp_ids": [
-    "kp_cs230_ai_capability_horizon_and_task_length_scaling",
-    "kp_cs230_ai_coding_as_a_speed_and_power_multiplier"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -132,8 +129,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.29,
     0.59

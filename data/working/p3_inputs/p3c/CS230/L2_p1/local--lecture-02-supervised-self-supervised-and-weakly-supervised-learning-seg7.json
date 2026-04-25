@@ -58,7 +58,8 @@
   "unit_summary_for_generation": "To train the encoder, the instructor asks for a loss that makes images of the same person close and images of different people far apart [ts=3901s]. Triplets contain an anchor, a positive image of the same person, and a negative image of a different person, and the objective minimizes anchor-positive distance while maximizing anchor-negative distance [ts=4027s]. The triplet-loss training loop sends all three images through the same network, computes the vector distances and margin-based loss, then updates parameters so the embedding geometry becomes identity-aware [ts=4270s]. At test time, the negative example is no longer needed; it is a training trick for shaping the representation [ts=4441s]. The same encoder supports face identification by storing vectors and using K-nearest neighbors, and face clustering by running K-means over embedded pictures [ts=4487s].",
   "target_kp_ids": [
     "kp_cs230_triplet_loss",
-    "kp_cs230_embedding_reuse_for_identification_and_clustering"
+    "kp_cs230_embedding_reuse_for_identification_and_clustering",
+    "kp_cs230_encoding_versus_embedding"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
@@ -178,8 +179,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.42,
     0.72

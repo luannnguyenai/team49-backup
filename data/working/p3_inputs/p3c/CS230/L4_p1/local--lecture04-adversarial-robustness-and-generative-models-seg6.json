@@ -52,7 +52,8 @@
   },
   "unit_summary_for_generation": "GANs are introduced as a two-model adversarial training method: the generator is the model ultimately used, while the discriminator is used to train it [ts=3373s]. The generator maps a small random code z into a larger image, so its architecture must upsample from a low-dimensional input to a high-dimensional output [ts=3406s]. The discriminator alternates between generated images and real database images and learns binary labels, predicting fake as 0 and real as 1 [ts=3511s]. Training succeeds when the generator becomes realistic enough that a strong discriminator can no longer reliably distinguish real from fake [ts=3562s]. Gradients flow through the discriminator and back into the generator, making the simultaneous optimization of two networks a stability challenge [ts=3586s].",
   "target_kp_ids": [
-    "kp_gan_latent_generator_distribution"
+    "kp_gan_latent_generator_distribution",
+    "kp_gan_minimax_objective"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
@@ -148,8 +149,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.55,
     0.85

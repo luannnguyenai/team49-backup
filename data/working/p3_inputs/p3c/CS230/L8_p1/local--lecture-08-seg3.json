@@ -46,9 +46,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Andrew argues that the people around a student are a strong predictor of learning speed and success, even when the causal evidence is framed informally [ts=563s]. He highlights Stanford's connective tissue to frontier labs and former students as a way that useful, not-yet-public knowledge can circulate through trusted relationships [ts=622s]. He then shifts from university networks to job selection, warning that a famous company brand is less useful if the day-to-day team does not support the student's AI goals [ts=749s]. The practical criterion is to learn who one will work with and whether that team is doing inspiring, relevant work [ts=861s].",
-  "target_kp_ids": [
-    "kp_cs230_career_network_and_team_quality"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -94,8 +92,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.2,
     0.5

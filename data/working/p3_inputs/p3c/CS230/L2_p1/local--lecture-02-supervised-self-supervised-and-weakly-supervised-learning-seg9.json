@@ -58,7 +58,8 @@
   "unit_summary_for_generation": "The instructor explains that GPT-style next-token prediction is self-supervised because raw text itself supplies the prediction target without manual labels [ts=5220s]. Examples such as predicting coffee or tea after poured myself a cup of, Paris after the capital of France is, and umbrella after rain show how simple objectives at scale can induce co-occurrence, facts, semantic understanding, uncertainty, and reasoning-like behavior [ts=5270s]. Self-supervised prediction tasks can also be built for audio by masking sound chunks, video by removing frames, and biology by hiding amino acids or protein/DNA structure elements [ts=5550s]. Multimodal alignment is different: image-caption pairs and other naturally paired modalities provide weak supervision rather than precise hand labeling [ts=5661s]. The lecture closes with ImageBind-style shared embedding spaces, where text, images, audio, thermal, depth, and other modalities can be connected through central pivots such as text or images [ts=5870s].",
   "target_kp_ids": [
     "kp_autoregressive_language_modeling",
-    "kp_clip_style_contrastive_vl_pretraining"
+    "kp_clip_style_contrastive_vl_pretraining",
+    "kp_simclr_contrastive_representation_learning"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
@@ -214,8 +215,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.4,
     0.7

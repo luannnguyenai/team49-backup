@@ -57,7 +57,9 @@
   },
   "unit_summary_for_generation": "A deployed face-recognition system cannot usually stream video 24/7 to the cloud and classify every frame because the cost and latency would be too high [ts=2247s]. Visual Activity Detection is introduced as a low-cost, low-power step that decides whether an image is worth sending to the larger recognition model [ts=2319s]. The lecture compares a quick non-ML pixel-change threshold with a smaller neural network for detecting whether a human is present, arguing that the fast baseline is often a good first step because it can be implemented and tested quickly [ts=2416s]. Real deployment exposes additional discoveries, such as selecting several high-resolution, in-focus frames from a video sequence to improve recognition accuracy [ts=3036s].",
   "target_kp_ids": [
-    "kp_cs230_visual_activity_detection_prefilter"
+    "kp_cs230_deployment_as_model_serving_software",
+    "kp_cs230_visual_activity_detection_prefilter",
+    "kp_cs230_frame_quality_selection_for_vision_systems"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
@@ -186,8 +188,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.43,
     0.73

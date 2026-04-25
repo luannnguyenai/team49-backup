@@ -52,7 +52,8 @@
   },
   "unit_summary_for_generation": "Data quality matters because low-quality examples, such as blurry face images, can be less useful than sharp in-focus examples when they do not match the desired recognition setting [ts=1925s]. The instructor then addresses distribution mismatch: training data should be relevant, but it does not always need to come from exactly the same distribution as the test set [ts=1981s]. Larger neural networks can often absorb somewhat irrelevant but non-incorrect data without hurting the core task as much as smaller models would [ts=2034s]. This section bridges data choices to deployment by returning to the trained face-recognition model as software that must run inference in a real system [ts=2211s].",
   "target_kp_ids": [
-    "kp_cs230_data_quality_and_distribution_mismatch"
+    "kp_cs230_data_quality_and_distribution_mismatch",
+    "kp_cs230_deployment_as_model_serving_software"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
@@ -139,8 +140,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.37,
     0.67

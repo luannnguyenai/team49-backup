@@ -57,7 +57,8 @@
   },
   "unit_summary_for_generation": "Breakout is introduced as an Atari task where the agent controls a paddle, wins by destroying bricks, and loses if the ball passes the paddle [ts=3215s] [ts=3221s]. The Q-network input is the game screen and its outputs are Q-values for possible actions such as left, right, and no-op [ts=3307s] [ts=3331s]. Preprocessing reduces the visual state by cropping irrelevant regions, converting to grayscale, reducing image dimensions, and stacking four frames to encode motion [ts=3404s] [ts=3461s] [ts=3562s]. The architecture shown for DQN uses convolutional layers with ReLU followed by fully connected layers and a linear output layer that emits Q-values for each action [ts=3621s] [ts=3647s].",
   "target_kp_ids": [
-    "kp_cs230_atari_breakout_state_preprocessing_and_dqn_architecture"
+    "kp_cs230_atari_breakout_state_preprocessing_and_dqn_architecture",
+    "kp_cs230_neural_q_function_approximation"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
@@ -145,8 +146,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.43,
     0.73

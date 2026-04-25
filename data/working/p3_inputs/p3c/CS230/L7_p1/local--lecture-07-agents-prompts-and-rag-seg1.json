@@ -63,7 +63,8 @@
   "unit_summary_for_generation": "The lecture frames the session as a practical tour of techniques for building LLM applications beyond the base model, including prompting, RAG, agentic workflows, evals, and multi-agent systems [ts=5s]. Students identify base-model limitations such as missing domain knowledge, distribution shift, lack of current information, and poor fit for narrow enterprise tasks [ts=228s]. The instructor adds control failures, style/format inconsistency, task-specific understanding, limited context windows, and source requirements as recurring reasons a vanilla LLM underperforms [ts=475s]. RAG is previewed as a way to retrieve compressed document representations and attach relevant evidence to the prompt, but the lecture also notes latency and future-proofing debates [ts=856s]. The segment closes with a two-axis mental model: improve the foundation model itself, or improve how context and tools wrap around it through better prompts, RAG, agents, and multi-agent systems [ts=1001s].",
   "target_kp_ids": [
     "kp_cs230_llm_augmentation_motivation",
-    "kp_cs230_context_window_and_attention_limits"
+    "kp_cs230_context_window_and_attention_limits",
+    "kp_cs230_model_versus_context_optimization"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
@@ -185,8 +186,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
   "target_difficulty_range": [
     0.19,
     0.49

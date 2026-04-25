@@ -62,7 +62,9 @@
   },
   "unit_summary_for_generation": "A travel booking agent is used to explain core components: prompts, context management, memory, tools, and resources [ts=4020s]. Memory is split into working memory for frequently needed facts and archival memory for less frequently accessed facts, because retrieving memory on every model call can add latency [ts=4054s]. Tools include APIs such as flight search, hotel booking, car rental, weather, and payment, while resources are data sources such as CRM records that an agent may read through lookup tools [ts=4148s]. Autonomy ranges from hard-coded steps, to fixed tools with flexible steps, to systems that decide steps and create tools or code [ts=4216s]. The instructor then contrasts one-off API integrations with MCP, which places a protocol layer between the agent and endpoints to make tool/resource access more scalable through agent-to-agent communication [ts=4339s]. The Q&A also notes that MCP security and memory design remain active, unsolved engineering concerns [ts=4519s].",
   "target_kp_ids": [
-    "kp_cs230_agent_memory_tools_and_resources"
+    "kp_cs230_agent_memory_tools_and_resources",
+    "kp_cs230_agent_autonomy_levels",
+    "kp_cs230_model_context_protocol_mcp"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
@@ -186,8 +188,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.51,
     0.81

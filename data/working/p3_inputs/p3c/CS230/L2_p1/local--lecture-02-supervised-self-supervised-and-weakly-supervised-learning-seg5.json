@@ -62,7 +62,9 @@
   },
   "unit_summary_for_generation": "The practical trigger-word solution uses three databases: positive examples of activate, negative words including confusing near-matches, and background noise, which is relatively easy to obtain online [ts=2983s]. A Python script inserts non-overlapping positive and negative words into background clips and automatically knows the correct label positions, producing large synthetic training sets [ts=3074s]. With around 1,000 positive clips, 10,000 other words, and abundant background noise, millions of training examples can be generated in hours, especially with augmentation such as changing frequency or speed [ts=3114s]. The instructor distinguishes synthetic training data from the test set, which should be manually labeled and as real as possible [ts=3151s]. Architecture search remains important for speech problems, and the key process lesson is to ask experts or TAs early to avoid wasting weeks on architectures that are known to fail [ts=3167s].",
   "target_kp_ids": [
-    "kp_cs230_synthetic_audio_data_generation_with_automatic_labels"
+    "kp_cs230_synthetic_audio_data_generation_with_automatic_labels",
+    "kp_cs230_architecture_search_and_expert_guidance",
+    "kp_cs230_sequential_trigger_word_labeling"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
@@ -182,8 +184,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.31,
     0.61

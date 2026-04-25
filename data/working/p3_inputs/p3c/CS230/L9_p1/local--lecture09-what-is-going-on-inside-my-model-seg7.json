@@ -57,7 +57,8 @@
   },
   "unit_summary_for_generation": "The lecture transitions from CNNs to frontier models by saying CNNs visualize localized edges, textures, and shapes, while LLMs require visualizing relationships and meanings between tokens or concepts [ts=4388s] [ts=4400s]. Attention is framed as a transformer mechanism for relating a token to relevant surrounding tokens, with different heads potentially learning patterns such as pronoun-to-noun links or ordering constraints [ts=4469s] [ts=4494s]. Embeddings are introduced as the model’s internal map of meaning, where semantically similar tokens should lie close together and can be sanity-checked with dimensionality-reduction visualizations [ts=4551s] [ts=4596s]. The instructor cautions that modern transformers remain hard to interpret and points to transformer circuits and induction heads as frontier research rather than settled tooling [ts=4639s] [ts=4660s] [ts=4678s].",
   "target_kp_ids": [
-    "kp_cs230_transformer_representation_analysis"
+    "kp_cs230_transformer_representation_analysis",
+    "kp_cs230_attention_map_and_embedding_diagnostics"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
@@ -145,8 +146,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.49,
     0.79

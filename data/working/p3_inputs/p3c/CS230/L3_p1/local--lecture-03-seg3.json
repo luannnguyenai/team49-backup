@@ -52,7 +52,8 @@
   },
   "unit_summary_for_generation": "The instructor identifies speed as the guiding principle for early data collection, especially in startups and small innovative teams [ts=979s]. A fast, possibly imperfect dataset collected in one or two days can be more valuable than waiting months because it enables a first model run and exposes concrete failure modes [ts=1033s]. The recommended framing is to set a short deadline such as 48 hours, collect data responsibly and creatively, train quickly, inspect errors, and revise the collection process [ts=1207s]. The advice is conditional: if prior experience or literature shows that a task needs a large threshold such as tens of thousands of images, more upfront data investment may be justified [ts=1393s].",
   "target_kp_ids": [
-    "kp_cs230_speed_first_data_collection"
+    "kp_cs230_speed_first_data_collection",
+    "kp_cs230_ai_projects_as_empirical_systems"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
@@ -137,8 +138,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 3,
   "target_difficulty_range": [
     0.24,
     0.54

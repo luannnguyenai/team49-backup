@@ -53,7 +53,8 @@
   "unit_summary_for_generation": "Trigger word detection is framed as the second model in a voice-assistant cascade: a lightweight activity detector notices sound, a trigger model listens for a keyword, and a heavier downstream model handles the command [ts=2083s]. The task is to detect the word activate in a 10-second audio clip, with attention to preprocessing such as Fourier transforms, sequence length, positive words, negative words, and background noise [ts=2170s]. The instructor emphasizes data distribution: accents, age, cadence, gender-linked frequency distributions, and subway-like background noise can all break a campus-only dataset [ts=2328s]. A human experiment shows that a coarse 0/1 clip label is much harder than a time-localized sequence label; the better label can reduce the amount of data needed by orders of magnitude [ts=2636s]. Because all-zero labels can dominate a sparse sequence target, the design uses a more balanced sequential labeling scheme, sigmoid at each time step, and binary cross-entropy at each step [ts=2813s].",
   "target_kp_ids": [
     "kp_cs230_cascaded_trigger_word_systems",
-    "kp_cs230_sequential_trigger_word_labeling"
+    "kp_cs230_sequential_trigger_word_labeling",
+    "kp_cs230_task_scoping_and_data_diversity"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
@@ -173,8 +174,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.35,
     0.65

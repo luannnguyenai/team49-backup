@@ -151,8 +151,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.55,
     0.85

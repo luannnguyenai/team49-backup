@@ -73,6 +73,7 @@
   "unit_summary_for_generation": "The case study begins with a product-manager request to build a customer support agent for changing a shipping address [ts=5126s]. The recommended starting point is task decomposition with support agents, identifying what steps are fuzzy, deterministic, slow, or difficult [ts=5195s]. The simplified workflow extracts key information, retrieves a customer record, checks policy, drafts a response email, and sends the email [ts=5236s]. Mapping that workflow requires deciding which steps need a vanilla LLM, a tool, RAG, MCP/resource access, memory, or deterministic code [ts=5298s]. The instructor emphasizes LLM traces as essential for debugging because they expose which prompts and tools were called when failures happen [ts=5427s]. The eval taxonomy combines component-based and end-to-end views with objective/subjective and quantitative/qualitative measurements [ts=5475s].",
   "target_kp_ids": [
     "kp_cs230_customer_support_task_decomposition",
+    "kp_cs230_llm_traces_for_debugging",
     "kp_cs230_agent_eval_taxonomy"
   ],
   "assessment_purpose": "lecture_reinforcement",
@@ -197,8 +198,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.46,
     0.76

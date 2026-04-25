@@ -53,7 +53,8 @@
   "unit_summary_for_generation": "Backdoor attacks are introduced as increasingly common because large models often train on scraped data, giving attackers a chance to plant triggers before deployment [ts=2344s]. In the cat/dog example, a small patch is inserted and mislabeled so that the trained model later treats the trigger as evidence for the attacker’s target class [ts=2370s]. The same pattern can generalize beyond images when scraped text contains malicious associations that may later activate a deployment-time behavior [ts=2468s]. Prompt injection is then defined through an LLM application where user input is concatenated with a prompt template and malicious text like “ignore previous instructions” changes the effective instruction seen by the model [ts=2694s]. The instructor distinguishes direct prompt injection from indirect attacks hidden in retrieved webpages or tool outputs, which can affect agents using search or retrieval [ts=2805s].",
   "target_kp_ids": [
     "kp_cs230_backdoor_and_data_poisoning_attacks",
-    "kp_cs230_prompt_injection"
+    "kp_cs230_prompt_injection",
+    "kp_cs230_adversarial_defense_strategies"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
@@ -171,8 +172,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 3,
   "target_difficulty_range": [
     0.47,
     0.77

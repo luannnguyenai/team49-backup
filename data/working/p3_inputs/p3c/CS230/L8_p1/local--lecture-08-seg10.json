@@ -51,10 +51,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Laurence says the AI landscape is full of opportunity but also has visible risks, comparing the industry to Titanic lookouts who lacked binoculars [ts=4212s]. He argues that bubbles do not erase real value; companies and people who understand fundamentals can survive and thrive after a hype crash, as Google and Amazon did after the dotcom period [ts=4291s]. He describes bubble anatomy as hype, VC investment, unrealistic valuations, copycat products, and a small kernel of real value [ts=4374s]. The future opportunity is framed as a split between big AI pursuing larger models and small self-hostable models where fine-tuning and privacy-sensitive deployment matter [ts=4476s].",
-  "target_kp_ids": [
-    "kp_cs230_ai_bubble_resilience_and_fundamentals",
-    "kp_cs230_small_ai_and_self_hosted_model_opportunity"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -137,8 +134,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.43,
     0.73

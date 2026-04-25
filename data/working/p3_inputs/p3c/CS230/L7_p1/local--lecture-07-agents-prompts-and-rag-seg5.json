@@ -62,7 +62,8 @@
   },
   "unit_summary_for_generation": "RAG is introduced as a response to standalone LLM problems: limited context, difficulty finding facts in long contexts, knowledge cutoffs, hallucinations, and lack of sources [ts=2709s]. The core idea is to integrate external knowledge sources such as databases, documents, or APIs so answers can be more accurate, up to date, grounded, and developer-controllable without retraining the model [ts=2783s]. In the medical QA example, documents are embedded into lower-dimensional representations, stored in a vector database, and retrieved by comparing the embedded user query against document embeddings [ts=2831s]. The retrieved documents are added to the prompt with instructions such as answering only from the documents and saying \"I don't know\" when the answer is absent [ts=2955s]. The unit then covers chunking for large documents and HyDE, where the query is first expanded into a hypothetical document whose embedding may be closer to target documents [ts=3049s].",
   "target_kp_ids": [
-    "kp_cs230_rag_retrieval_pipeline"
+    "kp_cs230_rag_retrieval_pipeline",
+    "kp_cs230_rag_chunking_and_hyde"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
@@ -147,8 +148,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.47,
     0.77

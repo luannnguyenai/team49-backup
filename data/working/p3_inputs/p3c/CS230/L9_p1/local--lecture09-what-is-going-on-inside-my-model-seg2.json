@@ -57,7 +57,8 @@
   },
   "unit_summary_for_generation": "For the zoo classifier case, the lecture first motivates explanations that show whether a model is looking at the relevant image region rather than merely outputting a class probability [ts=891s] [ts=1053s]. A saliency map is built by differentiating a class score such as dog with respect to the input pixels, so bright pixels are the ones whose perturbation most affects the score [ts=1212s] [ts=1259s]. The instructor emphasizes using the pre-softmax class score rather than the post-softmax probability because post-softmax depends on all competing class scores [ts=1280s] [ts=1315s]. Integrated gradients are presented as a more common extension that accumulates gradients along a path from a black baseline image to the actual image, with a retina-lesion example showing attribution concentrated near the annotated lesion [ts=1416s] [ts=1467s].",
   "target_kp_ids": [
-    "kp_saliency_via_input_gradients"
+    "kp_saliency_via_input_gradients",
+    "kp_cs230_integrated_gradients"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
@@ -146,8 +147,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.47,
     0.77

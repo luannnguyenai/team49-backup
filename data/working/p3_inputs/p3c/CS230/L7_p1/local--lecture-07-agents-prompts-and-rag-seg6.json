@@ -63,7 +63,8 @@
   "unit_summary_for_generation": "Agentic AI workflows are introduced to avoid the overloaded term \"agent\": different companies may call a single prompt or a complex multi-agent system an agent [ts=3251s]. The instructor defines agentic workflows as multi-step processes built from prompts, tools, resources, API calls, and workflow logic, while distinguishing this from the reinforcement-learning definition of an agent [ts=3289s]. A refund-policy example shows the jump from a one-step RAG answer to a multi-step workflow that retrieves policy, asks for an order number, queries an API, and confirms eligibility [ts=3332s]. The segment then reframes software engineering as a movement from deterministic structured-data pipelines toward fuzzy systems that interpret free-form text, images, and open-ended user intent [ts=3456s]. Workera's deterministic item types and fuzzy voice/coding assessments motivate human-in-the-loop guardrails [ts=3724s]. A credit-risk memo example illustrates how enterprise workflows can be redesigned around specialist agents while keeping human reviewers in the loop [ts=3832s].",
   "target_kp_ids": [
     "kp_cs230_agentic_workflow_definition",
-    "kp_cs230_deterministic_versus_fuzzy_ai_engineering"
+    "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+    "kp_cs230_enterprise_workflow_redesign_with_agents"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
@@ -187,8 +188,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.44,
     0.74

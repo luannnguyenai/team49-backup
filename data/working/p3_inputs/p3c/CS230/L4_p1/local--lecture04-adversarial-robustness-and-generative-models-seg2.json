@@ -53,7 +53,8 @@
   "unit_summary_for_generation": "A pretrained ImageNet classifier can be attacked by treating the input image itself as the optimization variable while keeping model weights fixed [ts=653s]. The first objective finds an image whose prediction is close to the iguana label, but because the input space is enormous, the result is unlikely to look like a real iguana to humans [ts=920s]. A stronger attack starts from or stays close to a real cat image while still pushing the model toward the iguana label, making the result visually plausible but misclassified [ts=1082s]. The segment then grounds the idea in physical examples, including images that change phone-model predictions and adversarial patches that can hide a person from a detector [ts=1195s]. The instructor highlights that patch objectives can include practical terms such as printable colors and smoothness, and that attacks can transfer in black-box settings when models learn similar salient features [ts=1322s].",
   "target_kp_ids": [
     "kp_cs230_input_space_optimization_for_adversarial_examples",
-    "kp_cs230_perceptual_constraints_for_adversarial_examples"
+    "kp_cs230_perceptual_constraints_for_adversarial_examples",
+    "kp_cs230_physical_adversarial_patches_and_transferability"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
@@ -171,8 +172,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.53,
     0.83

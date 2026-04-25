@@ -58,7 +58,8 @@
   "unit_summary_for_generation": "A small three-action example shows that a randomly initialized Q-network can become stuck exploiting a modest reward and never visit the best action with reward 1000 [ts=4246s] [ts=4365s]. This motivates the exploration versus exploitation tradeoff: agents must sometimes try actions that do not currently look best to discover better rewards [ts=4384s] [ts=4446s]. Epsilon-greedy action choice adds randomness by taking a random action with probability epsilon and otherwise choosing the action with maximum predicted Q-value [ts=4571s] [ts=4602s]. The final DQN loop includes replay memory, terminal-state tracking, epsilon-greedy action selection, Bellman target estimation, and gradient-descent updates, after which the Breakout agent discovers the tunnel strategy behind the bricks [ts=4589s] [ts=4665s].",
   "target_kp_ids": [
     "kp_cs230_exploration_exploitation_and_epsilon_greedy",
-    "kp_cs230_dqn_empirical_behavior_and_evaluation"
+    "kp_cs230_dqn_empirical_behavior_and_evaluation",
+    "kp_cs230_experience_replay"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
@@ -181,8 +182,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.47,
     0.77

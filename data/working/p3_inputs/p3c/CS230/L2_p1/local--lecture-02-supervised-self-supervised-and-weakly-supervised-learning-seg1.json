@@ -52,7 +52,8 @@
   },
   "unit_summary_for_generation": "The lecture opens by positioning in-class sessions as industry-oriented case studies for making better AI project decisions [ts=53s]. The instructor outlines the lecture path: recap, supervised case studies, then self-supervised and weakly supervised learning with embeddings [ts=118s]. The recap defines a model as architecture plus trained parameters, using a cat classifier to separate the blueprint from the numerical weights [ts=234s]. Learning is described as repeated comparison of prediction to ground truth through a loss function, followed by gradient updates that calibrate parameters over batches of data [ts=303s]. The instructor also previews design axes that can change across projects: input modality, output type, architecture, loss, activations, optimizer, and hyperparameters [ts=375s].",
   "target_kp_ids": [
-    "kp_data_driven_learning_pipeline"
+    "kp_data_driven_learning_pipeline",
+    "kp_cs230_ai_project_design_axes"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
@@ -146,8 +147,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.1,
     0.4

@@ -99,8 +99,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 1,
   "target_difficulty_range": [
     0.41,
     0.71

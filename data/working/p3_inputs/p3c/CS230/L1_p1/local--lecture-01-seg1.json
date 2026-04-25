@@ -48,7 +48,8 @@
   "unit_summary_for_generation": "Ng opens by explaining the flipped format and asks students to use live class time for richer questioning rather than passive replay of recorded content [ts=35s] [ts=88s]. He motivates the subject by contrasting older ML methods that plateau with more data against neural networks that continue improving as size, data, and compute scale [ts=198s] [ts=276s]. He ties this to early GPU/CUDA work, later scaling-law predictability, and the investment logic behind modern large models [ts=301s] [ts=402s]. He then situates the course inside a CS fundamentals -> machine learning -> deep learning -> generative AI stack, noting that in practice neural networks and deep learning are nearly interchangeable and that transformers are the GenAI architecture students will later study [ts=450s] [ts=617s].",
   "target_kp_ids": [
     "kp_deep_learning_resurgence",
-    "kp_cs230_deep_learning_as_neural_network_based_machine_learning_in_the_cs_ml_dl_g"
+    "kp_cs230_deep_learning_as_neural_network_based_machine_learning_in_the_cs_ml_dl_g",
+    "kp_transformers_as_a_cross_domain_backbone"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
@@ -190,8 +191,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 2,
   "target_difficulty_range": [
     0.23,
     0.53

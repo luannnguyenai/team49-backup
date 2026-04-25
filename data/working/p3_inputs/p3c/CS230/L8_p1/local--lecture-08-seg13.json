@@ -51,10 +51,7 @@
     "is_template": false
   },
   "unit_summary_for_generation": "Asked what surprised him about AI, Laurence says hype took over more than expected and that many decision makers pursued immediate profits over long-term gains [ts=5550s]. He illustrates the latter with the TensorFlow certificate program, which produced substantial goodwill and career impact but was cut after becoming a small annual cost [ts=5618s]. He then describes unexpected AI success by a former hockey player running a nonprofit who used AI around board-reporting data work, showing that practical adoption is not limited to conventional technologists [ts=5729s]. On AI for scientific research, he recommends using powerful tools and automation while checking results and expectations against grounded reality [ts=6000s].",
-  "target_kp_ids": [
-    "kp_cs230_ai_adoption_by_unexpected_users",
-    "kp_cs230_ai_for_research_with_validation"
-  ],
+  "target_kp_ids": [],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
   "video_clip_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
@@ -137,8 +134,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 0,
   "target_difficulty_range": [
     0.28,
     0.58

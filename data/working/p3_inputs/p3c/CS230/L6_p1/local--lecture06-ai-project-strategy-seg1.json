@@ -48,7 +48,8 @@
   "unit_summary_for_generation": "The lecture opens by arguing that AI teams can differ by 10x or more in productivity because stronger teams make better next-step decisions, not just better algorithmic choices [ts=64s] [ts=103s]. Using an offline voice-controlled lamp that responds to \"Robert, turn on\" as the running example, the instructor advises building something quickly instead of over-deliberating among plausible designs [ts=691s] [ts=704s]. He notes that general-purpose speech recognition is often too heavy for a cheap on-device product, whereas a specialized wake-word detector can be much smaller [ts=722s] [ts=755s]. The recommended first moves are a broad literature/open-source search and respectful outreach to experts, because both compress the time needed to converge on workable approaches [ts=842s] [ts=960s].",
   "target_kp_ids": [
     "kp_cs230_iteration_speed_as_a_core_ai_project_lever",
-    "kp_cs230_broad_literature_search_before_deep_implementation"
+    "kp_cs230_broad_literature_search_before_deep_implementation",
+    "kp_cs230_expert_outreach_as_a_learning_multiplier"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
@@ -169,8 +170,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 2,
   "target_difficulty_range": [
     0.27,
     0.57

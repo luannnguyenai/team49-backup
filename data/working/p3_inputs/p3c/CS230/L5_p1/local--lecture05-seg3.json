@@ -52,6 +52,7 @@
   },
   "unit_summary_for_generation": "Deep Q-learning replaces a memory-heavy Q-table with a neural Q-function, using a forward pass to estimate action values from a state [ts=2136s] [ts=2161s]. For the toy example, a one-hot encoded state is fed to a network whose output layer has one Q-value per action; more actions would require more output neurons [ts=2187s] [ts=2216s]. The training target is bootstrapped from immediate reward plus discounted maximum Q-value at the next state, while that target is held fixed for the current backpropagation step [ts=2476s] [ts=2524s]. The vanilla DQN loop initializes the Q-network, loops through episodes and time steps, selects the action with maximum Q-value, observes reward and next state, computes the target/loss, and updates parameters with gradient descent [ts=3107s] [ts=3163s].",
   "target_kp_ids": [
+    "kp_cs230_bellman_optimality_equation",
     "kp_cs230_neural_q_function_approximation",
     "kp_cs230_dqn_target_loss_and_gradient_update"
   ],
@@ -176,8 +177,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.53,
     0.83

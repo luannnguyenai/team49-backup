@@ -52,6 +52,7 @@
   },
   "unit_summary_for_generation": "Diffusion is motivated by two GAN limitations: mode collapse, where G covers only a narrow subset of outputs, and instability from training two coupled models simultaneously [ts=4597s]. The instructor uses diffusion-versus-GAN examples to argue that diffusion can produce more variety and better coverage of a real distribution, such as single and grouped flamingos or more varied burgers [ts=4650s]. A diffusion model avoids the minimax game by training one model on a denoising task designed to model the entire data distribution with more stable gradients [ts=4714s]. The forward diffusion process starts from a clean image x0 and progressively adds Gaussian noise until the picture is no longer recognizable [ts=4880s]. In the simplified recurrence, x_{t+1} is x_t plus Gaussian noise, and x_t can be viewed as x0 plus cumulative noise that must later be predicted [ts=4932s].",
   "target_kp_ids": [
+    "kp_gan_instability_diagnostics",
     "kp_cs230_forward_diffusion_process"
   ],
   "assessment_purpose": "lecture_reinforcement",
@@ -141,8 +142,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.57,
     0.87

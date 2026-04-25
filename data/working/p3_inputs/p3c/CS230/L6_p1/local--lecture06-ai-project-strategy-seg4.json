@@ -48,7 +48,8 @@
   "unit_summary_for_generation": "After the imbalance fix, the next observed failure is a train/dev gap: the model does well on train but only about 50% on the dev set, which the lecture interprets as overfitting and a cue to try regularization or more data [ts=2260s] [ts=2411s]. The instructor then describes a synthetic augmentation trick that works in speech: add clean trigger utterances to background-noise recordings so the summed waveform simulates speech in realistic environments [ts=2495s] [ts=2583s]. He warns that using only trigger phrases would teach voice activity detection rather than phrase recognition, so negative examples must also include other spoken content [ts=2608s] [ts=2664s]. The segment closes with a rule of thumb that richer and more diverse training data usually wins, provided the model has enough capacity to absorb that diversity [ts=2803s] [ts=2858s].",
   "target_kp_ids": [
     "kp_cs230_diagnosing_overfitting_and_train_dev_mismatch",
-    "kp_cs230_additive_audio_augmentation_with_hard_negatives"
+    "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+    "kp_cs230_synthetic_versus_real_data_trade_off"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
@@ -170,8 +171,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.54,
     0.84

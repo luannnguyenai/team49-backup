@@ -63,7 +63,8 @@
   "unit_summary_for_generation": "A reward model is introduced as a separate model trained to predict which responses humans prefer, moving alignment from imitating responses to modeling preferences [ts=5822s] [ts=5831s]. Labelers compare two or more SFT-generated responses to the same prompt, and the resulting preference data trains a scalar reward head initialized from the SFT model [ts=5853s] [ts=5914s] [ts=5922s]. The loss encourages higher predicted rewards for preferred answers, making the reward model a scalable proxy critic for human preferences during RLHF [ts=5995s] [ts=6013s] [ts=6058s]. In RLHF, the language model is the agent/policy, the state is the prompt plus generated tokens, the action is the next token, the reward comes from the reward model, and an episode is a full generated answer whose reward is usually observed only at the end [ts=6074s] [ts=6114s] [ts=6143s] [ts=6202s].",
   "target_kp_ids": [
     "kp_rlhf_preference_optimization",
-    "kp_reinforcement_learning_and_rlhf_for_nlg"
+    "kp_reinforcement_learning_and_rlhf_for_nlg",
+    "kp_cs230_language_model_pretraining_alignment_gap"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
@@ -200,8 +201,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.57,
     0.87

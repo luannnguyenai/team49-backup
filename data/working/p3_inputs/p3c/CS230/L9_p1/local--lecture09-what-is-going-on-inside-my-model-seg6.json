@@ -57,7 +57,9 @@
   },
   "unit_summary_for_generation": "The DeconvNet section reconstructs the zone of influence for a chosen activation: keep the maximum activation in a feature map, set other activations to zero, and pass backward through unpool, ReLU, and deconvolution steps [ts=3617s] [ts=3661s]. Unpooling is explained using max-pool switches that remember where maxima came from, so the reverse pass can place the activation back in the corresponding input location [ts=3718s] [ts=3783s]. On validation images, first-layer patches and raw filters often reveal edge detectors, while deeper layers show larger receptive fields and more complex features such as circles, shapes, faces, and objects [ts=3961s] [ts=4087s] [ts=4106s]. The summary distinguishes methods for input-output responsibility, neuron/filter/layer roles, focus on a given input, and generated views of what the network has learned [ts=4327s] [ts=4352s].",
   "target_kp_ids": [
-    "kp_cs230_deconvnet_reconstruction_and_unpooling_switches"
+    "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+    "kp_cs230_activation_based_data_set_search",
+    "kp_cs230_deconvolution_as_transposed_convolution"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
@@ -184,8 +186,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "procedural",
+  "target_item_count": 3,
   "target_difficulty_range": [
     0.61,
     0.91

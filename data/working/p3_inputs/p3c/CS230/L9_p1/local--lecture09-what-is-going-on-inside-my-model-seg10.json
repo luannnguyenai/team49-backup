@@ -62,7 +62,9 @@
   },
   "unit_summary_for_generation": "Data diagnostics are presented as a final frontier-model lens, with distribution checks over domains such as law, Wikipedia, Stack Exchange, and GitHub used to understand where loss or performance may shift [ts=5555s] [ts=5596s]. The instructor connects underrepresented domains to likely performance drops and suggests sampling methods, analogous to experience replay, to maintain stable domain frequencies through training [ts=5623s] [ts=5640s] [ts=5696s]. Token statistics are another signal: changes in important tokens, such as math symbols or non-English tokens, can explain regressions or distribution shifts [ts=5723s] [ts=5801s]. The summary dashboard includes global/domain losses, scaling alignment, MoE router use and load balancing, gradient norms, learning rates, checkpoint-to-checkpoint evals, benchmark behavior, token distribution, and tokenizer statistics [ts=5826s] [ts=5850s] [ts=5905s]. Q&A revisits domain mixtures and synthetic data, emphasizing that neighboring domains can help but too much cheap synthetic data can distort token frequencies and hurt other domains [ts=5945s] [ts=6120s].",
   "target_kp_ids": [
-    "kp_cs230_data_distribution_and_token_drift_diagnostics"
+    "kp_cs230_data_distribution_and_token_drift_diagnostics",
+    "kp_cs230_mixture_of_experts_routing_diagnostics",
+    "kp_pretraining_scaling_and_compute_data_tradeoffs"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
@@ -204,8 +206,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.46,
     0.76

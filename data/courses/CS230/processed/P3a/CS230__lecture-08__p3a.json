@@ -1,0 +1,207 @@
+{
+  "output_filename": "p3a__CS230__lecture-08.json",
+  "run_id": "unknown_run_id",
+  "stage_id": "p3a",
+  "course_id": "CS230",
+  "lecture_id": "lecture-08",
+  "learning_salience": [
+    {
+      "unit_id": "local::lecture-08::seg1",
+      "is_worth_learning": true,
+      "salience_score": "low",
+      "rationale": "motivation segment with substantial coverage of kp_cs230_ai_capability_horizon_and_task_length_scaling and kp_cs230_ai_coding_as_a_speed_and_power_multiplier; the task-length-doubling framing is conceptually assessable, but it remains trend-setting orientation rather than method-heavy course content.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "motivation",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg2",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "dominant coverage of kp_cs230_product_management_bottleneck_in_ai_assisted_development plus substantial support from kp_cs230_engineer_product_empathy; the build-feedback-revise loop gives concrete product scenarios for deciding what the real bottleneck is in AI-assisted development.",
+      "target_kp_ids": [
+        "kp_cs230_product_management_bottleneck_in_ai_assisted_development",
+        "kp_cs230_engineer_product_empathy"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "low",
+      "override_critical_kp": false,
+      "expected_item_count": 1,
+      "salience_confidence": "low",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg3",
+      "is_worth_learning": false,
+      "salience_score": "low",
+      "rationale": "career-environment guidance centered on peers, faculty connections, and team choice; despite dominant coverage of kp_cs230_career_network_and_team_quality, this is anecdotal/advisory content and not in course_config.included_content_types.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "anecdote",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg4",
+      "is_worth_learning": false,
+      "salience_score": "low",
+      "rationale": "interview-story and personal-advice segment built around collaboration signals and effort norms; the hostile-candidate story is concrete, but the unit is primarily anecdotal rather than conceptual, derivational, or workflow-heavy.",
+      "target_kp_ids": [],
+      "question_intent": "diagnostic",
+      "content_type": "anecdote",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg5",
+      "is_worth_learning": false,
+      "salience_score": "low",
+      "rationale": "market-reset discussion grounded in 2022-2025 hiring slowdown and overhiring correction; this is historical/job-market context, not included content under course_config.included_content_types.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "historical_context",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg6",
+      "is_worth_learning": true,
+      "salience_score": "low",
+      "rationale": "dominant coverage of the structured framework kp_cs230_three_pillars_for_ai_career_success; the depth-business-delivery triad is explicit enough to support conceptual comparison and classification items rather than pure advice recall.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg7",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "substantial coverage of kp_cs230_production_first_ai_mindset and kp_cs230_ai_risk_mitigation_and_evolving_responsibility; the production-vs-demo distinction and the concrete safety-filter failure example support diagnostic items about business value, risk, and responsibility tradeoffs.",
+      "target_kp_ids": [
+        "kp_cs230_production_first_ai_mindset",
+        "kp_cs230_ai_risk_mitigation_and_evolving_responsibility"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "application_case",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 1,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg8",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "dominant coverage of kp_cs230_technical_debt_in_generated_code; the unit defines technical debt and uses spaghetti-code and authority-over-merit examples to diagnose failure modes in generated-code workflows.",
+      "target_kp_ids": [
+        "kp_cs230_technical_debt_in_generated_code"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "core_theory",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 1,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg9",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "worked case built around the agent request and the repeated 'why?' decomposition; substantial coverage of kp_cs230_hype_filtering_and_trusted_advising and kp_cs230_problem_first_ai_solution_design supports diagnostic items about separating a technology request from the underlying business problem.",
+      "target_kp_ids": [
+        "kp_cs230_hype_filtering_and_trusted_advising",
+        "kp_cs230_problem_first_ai_solution_design"
+      ],
+      "question_intent": "diagnostic",
+      "content_type": "worked_example",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 1,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg10",
+      "is_worth_learning": false,
+      "salience_score": "low",
+      "rationale": "bubble-risk segment relies heavily on Titanic and dotcom analogies and market-history framing; although it names the big-AI vs small-self-hosted split, the dominant signal is historical context rather than included core/app/demo content.",
+      "target_kp_ids": [],
+      "question_intent": "conceptual",
+      "content_type": "historical_context",
+      "content_type_confidence": "medium",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "medium",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg11",
+      "is_worth_learning": true,
+      "salience_score": "low",
+      "rationale": "Q&A segment with substantial coverage of kp_cs230_on_device_and_embedded_ai and a concrete Alipay-style on-device photo-search example; privacy, latency, and backend-cost tradeoffs are assessable, but the surrounding diversification advice lowers salience one tier.",
+      "target_kp_ids": [
+        "kp_cs230_skill_diversification_around_ai_systems",
+        "kp_cs230_on_device_and_embedded_ai"
+      ],
+      "question_intent": "application",
+      "content_type": "application_case",
+      "content_type_confidence": "low",
+      "override_critical_kp": false,
+      "expected_item_count": 1,
+      "salience_confidence": "low",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg12",
+      "is_worth_learning": true,
+      "salience_score": "medium",
+      "rationale": "dominant coverage of kp_cs230_artificial_understanding_in_agentic_workflows in a demo-heavy segment; the failed direct hockey-video prompt versus the richer agentic planning workflow gives a concrete procedure for converting intent, constraints, and tool knowledge into better generations.",
+      "target_kp_ids": [
+        "kp_cs230_artificial_understanding_in_agentic_workflows"
+      ],
+      "question_intent": "procedural",
+      "content_type": "worked_example",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 2,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    },
+    {
+      "unit_id": "local::lecture-08::seg13",
+      "is_worth_learning": false,
+      "salience_score": "low",
+      "rationale": "closing Q&A mixes surprise stories, adoption anecdotes, and general research caution; despite a partial diagnostic theme around validation, the unit is diffuse and primarily anecdotal.",
+      "target_kp_ids": [],
+      "question_intent": "diagnostic",
+      "content_type": "anecdote",
+      "content_type_confidence": "high",
+      "override_critical_kp": false,
+      "expected_item_count": 0,
+      "salience_confidence": "high",
+      "provenance": "llm_single_pass"
+    }
+  ]
+}

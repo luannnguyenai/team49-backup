@@ -47,7 +47,9 @@
   },
   "unit_summary_for_generation": "For the deep-research pipeline, the instructor enumerates several plausible failure points: weak search terms, stale or low-quality web search results, bad URL selection, or poor final writing [ts=3882s] [ts=3978s]. The remedy is explicit manual error analysis: run 10 to 100 problematic queries, inspect intermediate outputs stage by stage, and record judgments in a spreadsheet rather than guessing about bottlenecks [ts=4024s] [ts=4200s]. By tallying which columns fail most often, the team can see whether dissatisfaction is dominated by retrieval, fetching, or synthesis and then focus on the real hotspot [ts=4313s] [ts=4386s]. The payoff is strategic: a few hours of analysis can prevent weeks or months of optimization on the wrong subsystem [ts=4423s] [ts=4469s].",
   "target_kp_ids": [
-    "kp_cs230_manual_error_analysis_to_locate_system_bottlenecks"
+    "kp_cs230_manual_error_analysis_to_locate_system_bottlenecks",
+    "kp_cs230_pipeline_decomposition_for_ai_systems",
+    "kp_cs230_iteration_speed_as_a_core_ai_project_lever"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
@@ -170,8 +172,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
   "target_difficulty_range": [
     0.56,
     0.86

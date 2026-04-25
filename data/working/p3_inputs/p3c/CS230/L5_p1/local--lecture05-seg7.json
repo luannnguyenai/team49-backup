@@ -63,7 +63,8 @@
   "unit_summary_for_generation": "Montezuma's Revenge illustrates sparse delayed reward: a random network is unlikely to discover the long sequence of moves needed to reach a key, while humans use priors such as recognizing ladders, ropes, and enemies [ts=4823s] [ts=4919s]. Imitation learning is presented as a way to use human knowledge to initialize or guide agents before RL improves them through reward [ts=4960s] [ts=4973s]. PPO is contrasted with Q-learning: DQN learns Q-values then takes an argmax policy, whereas PPO learns a policy directly and works better for continuous action spaces such as steering angles [ts=5048s] [ts=5060s] [ts=5073s]. The lecture then surveys competitive self-play, OpenAI Five, AlphaStar, and AlphaGo to emphasize multi-agent collaboration, partial observability, and agents optimized for winning rather than human-intuitive margins [ts=5219s] [ts=5323s] [ts=5392s].",
   "target_kp_ids": [
     "kp_cs230_imitation_learning_and_human_priors",
-    "kp_cs230_ppo_and_policy_gradient_methods"
+    "kp_cs230_ppo_and_policy_gradient_methods",
+    "kp_cs230_dqn_empirical_behavior_and_evaluation"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
@@ -186,8 +187,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "application",
+  "target_item_count": 3,
   "target_difficulty_range": [
     0.42,
     0.72

@@ -48,7 +48,8 @@
   "unit_summary_for_generation": "The final Q&A turns from course intro to hiring and builder skills: Ng says experience still matters, but employers increasingly need people who can pair experience or strong fundamentals with modern AI tool use [ts=3230s] [ts=3296s]. He uses an art-history analogy to argue that AI tools work best when the user knows the underlying field well enough to specify what they want precisely, and extends that claim to CS fundamentals, ML, and deep learning [ts=2997s] [ts=3096s]. He also endorses foundational systems courses such as CS107 and CS111 while listing GenAI-specific skills, including RAG, vector databases, evals, guardrails, knowledge graphs, multimodal systems, fine-tuning, and agentic workflows, as an emerging application stack [ts=3337s] [ts=3449s]. The lecture closes by contrasting CS230 with CS229: one is a practical deep dive into deep learning, the other a broader and more theoretical survey of machine learning [ts=3540s] [ts=3609s].",
   "target_kp_ids": [
     "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
-    "kp_cs230_modern_genai_application_stack"
+    "kp_cs230_modern_genai_application_stack",
+    "kp_cs230_cs230_as_an_applied_practical_deep_learning_course"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
@@ -171,8 +172,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "conceptual",
+  "target_item_count": 1,
   "target_difficulty_range": [
     0.34,
     0.64

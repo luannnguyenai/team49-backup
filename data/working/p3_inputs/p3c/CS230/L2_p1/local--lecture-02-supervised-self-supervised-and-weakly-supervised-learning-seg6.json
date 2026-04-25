@@ -58,7 +58,8 @@
   "unit_summary_for_generation": "The face verification case asks whether a live camera picture matches the student ID picture when someone swipes into a facility [ts=3327s]. Compared with day/night classification, the input resolution needs to be much higher, around 412 by 412 by 3, because small facial details such as eye color can matter [ts=3521s]. Naive pixel comparison fails because lighting, background, translation, rotation, scale, glasses, hats, hairstyle, beard, and ID age can change pixels without changing identity [ts=3603s]. The proposed solution is to run both the database image and camera image through the same deep network and compare their vectors rather than comparing pixels [ts=3730s]. A distance threshold controls the verification decision, and the acceptable threshold should depend on the application’s false-positive and false-negative costs [ts=3788s].",
   "target_kp_ids": [
     "kp_cs230_face_verification_and_pixel_comparison_failure",
-    "kp_cs230_face_encoder_representations_and_thresholds"
+    "kp_cs230_face_encoder_representations_and_thresholds",
+    "kp_cs230_input_resolution_and_preprocessing_tradeoffs"
   ],
   "assessment_purpose": "lecture_reinforcement",
   "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
@@ -178,8 +179,8 @@
       ]
     }
   ],
-  "question_intent": null,
-  "target_item_count": null,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
   "target_difficulty_range": [
     0.29,
     0.59
