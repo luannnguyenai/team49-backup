@@ -74,14 +74,17 @@ if [ -z "$GEMINI_KEY" ] || [[ "$GEMINI_KEY" == AIza... ]] || [[ "$GEMINI_KEY" ==
 fi
 log_ok "GEMINI_API_KEY đã cấu hình"
 
-# Kiểm tra data
-if [ -d "data/courses/CS231n" ]; then
-  VIDEO_COUNT=$(find data/courses/CS231n/videos -name "*.mp4" 2>/dev/null | wc -l)
-  TRANSCRIPT_COUNT=$(find data/courses/CS231n/transcripts -name "*.txt" -o -name "*.json" 2>/dev/null | wc -l)
-  log_ok "Data CS231n: ${VIDEO_COUNT} videos, ${TRANSCRIPT_COUNT} transcripts"
-else
-  log_warn "Không tìm thấy data/courses/CS231n/ — AI Tutor sẽ không có bài giảng để truy vấn"
-fi
+# Kiểm tra data course assets
+for COURSE_ID in CS230 CS231n CS224n; do
+  COURSE_DIR="data/courses/${COURSE_ID}"
+  if [ -d "$COURSE_DIR" ]; then
+    VIDEO_COUNT=$(find "$COURSE_DIR/videos" -name "*.mp4" 2>/dev/null | wc -l)
+    TRANSCRIPT_COUNT=$(find "$COURSE_DIR/transcripts" \( -name "*.txt" -o -name "*.json" \) 2>/dev/null | wc -l)
+    log_ok "Data ${COURSE_ID}: ${VIDEO_COUNT} videos, ${TRANSCRIPT_COUNT} transcripts"
+  else
+    log_warn "Không tìm thấy ${COURSE_DIR}/ — course này sẽ thiếu lecture assets"
+  fi
+done
 
 # =============================================================================
 # BƯỚC 1 — Khởi chạy services
@@ -238,19 +241,21 @@ docker compose exec -T backend python - <<'EOF'
 import os, json
 
 data_path = "/app/data"
-cs231n_path = "/app/data/courses/CS231n"
+course_ids = ["CS230", "CS231n", "CS224n"]
 
 print(f"  data/ exists: {os.path.exists(data_path)}")
 
-if os.path.exists(cs231n_path):
-    videos = [f for f in os.listdir(f"{cs231n_path}/videos") if f.endswith(".mp4")] if os.path.exists(f"{cs231n_path}/videos") else []
-    transcripts = os.listdir(f"{cs231n_path}/transcripts") if os.path.exists(f"{cs231n_path}/transcripts") else []
-    toc = os.listdir(f"{cs231n_path}/ToC_Summary") if os.path.exists(f"{cs231n_path}/ToC_Summary") else []
-    print(f"  CS231n/videos:      {len(videos)} files .mp4")
-    print(f"  CS231n/transcripts: {len(transcripts)} files")
-    print(f"  CS231n/ToC_Summary: {len(toc)} files")
-else:
-    print("  [WARN] courses/CS231n/ không tồn tại trong container")
+for course_id in course_ids:
+    course_path = f"{data_path}/courses/{course_id}"
+    if os.path.exists(course_path):
+        videos = [f for f in os.listdir(f"{course_path}/videos") if f.endswith(".mp4")] if os.path.exists(f"{course_path}/videos") else []
+        transcripts = os.listdir(f"{course_path}/transcripts") if os.path.exists(f"{course_path}/transcripts") else []
+        slides = os.listdir(f"{course_path}/slides") if os.path.exists(f"{course_path}/slides") else []
+        print(f"  {course_id}/videos:      {len(videos)} files .mp4")
+        print(f"  {course_id}/transcripts: {len(transcripts)} files")
+        print(f"  {course_id}/slides:      {len(slides)} files")
+    else:
+        print(f"  [WARN] courses/{course_id}/ không tồn tại trong container")
 
 for f in ["courses.json", "overviews.json", "units.json"]:
     path = f"{data_path}/bootstrap/{f}"
@@ -260,7 +265,7 @@ for f in ["courses.json", "overviews.json", "units.json"]:
     else:
         print(f"  [WARN] {f} không tồn tại")
 
-canonical_path = "/app/data/final_artifacts/cs224n_cs231n_v1/canonical"
+canonical_path = "/app/data/final_artifacts/cs224n_cs231n_cs230_v1/canonical"
 for f in ["question_bank.jsonl", "item_phase_map.jsonl", "item_kp_map.jsonl"]:
     path = f"{canonical_path}/{f}"
     if os.path.exists(path):
