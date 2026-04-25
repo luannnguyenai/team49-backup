@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.exceptions import NotFoundError, ValidationError
+from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.canonical import QuestionBankItem
 from src.models.course import LearningUnit
 from src.models.learning import Session, SessionType
@@ -54,8 +54,8 @@ def _bucket_select_5(
     selected += hard[:2]
 
     # Fill gaps if any bucket was thin
-    used_ids = {id(p) for p in selected}
-    remaining = [p for p in pairs if id(p) not in used_ids]
+    selected_ids = {p[0].item_id for p in selected}
+    remaining = [p for p in pairs if p[0].item_id not in selected_ids]
     while len(selected) < 5 and remaining:
         selected.append(remaining.pop(0))
 
@@ -155,6 +155,9 @@ async def submit_placement_assessment(
     if session is None or session.user_id != user_id:
         raise ValidationError("Session not found or does not belong to this user.")
 
+    if session.completed_at is not None:
+        raise ConflictError("Placement assessment session already submitted.")
+
     # 2. Load items
     item_ids = [a.item_id for a in answers]
     result = await db.execute(select(QuestionBankItem).where(QuestionBankItem.item_id.in_(item_ids)))
@@ -166,6 +169,7 @@ async def submit_placement_assessment(
 
     placement_repo = PlacementAssessmentRepository(db)
     topic_decisions: list[TopicDecision] = []
+    total_correct_sum = 0
 
     for topic_unit_id, unit_answers in by_unit.items():
         correct = sum(
@@ -174,7 +178,8 @@ async def submit_placement_assessment(
             if (item := items_by_id.get(ans.item_id)) is not None
             and _ANSWER_INDEX.get(ans.selected_answer, -1) == item.answer_index
         )
-        score_pct = (correct / len(unit_answers) * 100) if unit_answers else 0.0
+        total_correct_sum += correct
+        score_pct = round((correct / len(unit_answers) * 100) if unit_answers else 0.0, 1)
         decision = _classify_decision(score_pct)
         raw_answers = [
             {"item_id": a.item_id, "selected": a.selected_answer}
@@ -196,14 +201,10 @@ async def submit_placement_assessment(
         )
 
     # 3. Mark session complete (session already validated above)
-    total_correct = sum(
-        1
-        for a in answers
-        if (item := items_by_id.get(a.item_id)) is not None
-        and _ANSWER_INDEX.get(a.selected_answer, -1) == item.answer_index
+    session.correct_count = total_correct_sum
+    session.score_percent = round(
+        (total_correct_sum / len(answers) * 100) if answers else 0.0, 1
     )
-    session.correct_count = total_correct
-    session.score_percent = (total_correct / len(answers) * 100) if answers else 0.0
     session.completed_at = datetime.now(timezone.utc)
     db.add(session)
     await db.flush()
